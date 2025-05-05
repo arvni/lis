@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Reception;
 
-use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Notifications\WelcomeNotification;
 use App\Domains\Reception\Requests\StoreAcceptanceRequest;
@@ -169,7 +168,6 @@ class AcceptanceController extends Controller
         try {
             // Update the acceptance
             $updatedAcceptance = $this->acceptanceService->updateAcceptance($acceptance, $validatedData);
-
             // If this is the final step, update status to "completed"
             if ($isFinalStep) {
                 if (isset($acceptance->howReport["whatsapp"]) && $acceptance->howReport["whatsapp"] && ($acceptance->howReport["whatsappNumber"])){

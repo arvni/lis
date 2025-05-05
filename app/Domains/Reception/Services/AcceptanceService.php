@@ -15,6 +15,7 @@ use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Notifications\PatientReportPublished;
 use App\Domains\Reception\Repositories\AcceptanceRepository;
+use App\Domains\Setting\Repositories\SettingRepository;
 use App\Notifications\ReferrerReportPublished;
 use Carbon\Carbon;
 use Exception;
@@ -32,6 +33,7 @@ class AcceptanceService
         private readonly AcceptanceRepository  $acceptanceRepository,
         private readonly AcceptanceItemService $acceptanceItemService,
         private readonly LaboratoryAdapter     $laboratoryAdapter,
+        private readonly SettingRepository     $settingRepository,
     )
     {
     }
@@ -50,6 +52,25 @@ class AcceptanceService
     {
         $acceptance = $this->acceptanceRepository
             ->creatAcceptance(Arr::except($acceptanceDTO->toArray(), ["acceptance_items"]));
+
+        if ($acceptanceDTO->consultationId) {
+            $test = $this->settingRepository->getSettingsByClassAndKey("Acceptance", "defaultConsultationMethod");
+            if ($test && isset($test["id"])) {
+                $test = $this->laboratoryAdapter->getTestById($test["id"]);
+                if ($test) {
+                    $methodTest = $test->methodTests->first();
+                    $acceptanceDTO->acceptanceItems["tests"][] = [
+                        'method_test' => $methodTest,
+                        "price" => $methodTest->method->price,
+                        'discount' => 0,
+                        [],
+                        "patients" => [["id" => $acceptanceDTO->patientId]],
+                        "customParameters"=>[]
+                    ];
+                }
+            }
+        }
+
 
         $acceptanceItems = $this->prepareAcceptanceItems($acceptance, $acceptanceDTO->acceptanceItems);
         foreach ($acceptanceItems as $acceptanceItem) {
@@ -355,7 +376,7 @@ class AcceptanceService
                     $acceptance_item['method_test']['id'],
                     $acceptance_item["price"],
                     $acceptance_item['discount'],
-                    array_merge($acceptance_item["customParameters"], Arr::except($acceptance_item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters"])),
+                    array_merge(($acceptance_item["customParameters"]??[]), Arr::except($acceptance_item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters"])),
                     $acceptance_item["patients"],
                     $acceptance_item["timeLine"] ?? [
                     Carbon::now()->format("Y-m-d H:i:s") => "Created By " . auth()->user()->name,],

@@ -63,13 +63,13 @@ class LaboratoryAdapter
      */
     public function getTemplateUrl(Collection $reportTemplates): array
     {
-        $output=[];
+        $output = [];
         foreach ($reportTemplates as $reportTemplate) {
-            $reportTemplate->load(["parameters","template"]);
+            $reportTemplate->load(["parameters", "template"]);
             if ($reportTemplate->template) {
                 $reportTemplate->template = route("documents.show", $reportTemplate->template->hash);
             }
-            $output[]=$reportTemplate;
+            $output[] = $reportTemplate;
         }
 
 
@@ -79,6 +79,13 @@ class LaboratoryAdapter
     public function createOrGetDoctor(array $data): Doctor
     {
         return $this->doctorService->createOrGetDoctor($data);
+    }
+
+    public function getTestById(int $id)
+    {
+        $test = $this->testRepository->findTestById($id);
+        $test?->load(["methodTests"]);
+        return $test;
     }
 
 }
