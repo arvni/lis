@@ -67,6 +67,12 @@ class SettingsSeeder extends Seeder
                 "key" => "defaultReportTemplate",
                 "class" => "Report",
                 "value" => ["value" => "", "type" => "file",]
+            ],
+            [
+                "title" => "Consultation Service",
+                "key" => "defaultConsultationMethod",
+                "class" => "Acceptance",
+                "value" => ["value" => "", "type" => "selectSearch","url"=>route("api.tests.list")]
             ]
         ];
         foreach ($settings as $settingData) {

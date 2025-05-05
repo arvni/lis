@@ -73,6 +73,8 @@ const renderValue = (value) => {
                     <div dangerouslySetInnerHTML={{__html: value?.value}}/>
                 </Box>
             );
+        case "selectSearch":
+            return value?.value?.name;
         default:
             return (
                 <Chip

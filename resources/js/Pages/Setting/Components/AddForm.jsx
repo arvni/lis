@@ -27,8 +27,9 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CodeIcon from "@mui/icons-material/Code";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import SelectSearch from "@/Components/SelectSearch.jsx";
 
-const AddForm = ({ value, onChange, submit, open, setOpen, title, loading, reset, id }) => {
+const AddForm = ({value, onChange, submit, open, setOpen, title, loading, reset, id}) => {
     const handleChange = (e) => onChange(e.target.value);
 
     const handleClose = () => {
@@ -36,7 +37,7 @@ const AddForm = ({ value, onChange, submit, open, setOpen, title, loading, reset
         reset();
     };
 
-    const handleImageChange = ({ data }) => onChange(data);
+    const handleImageChange = ({data}) => onChange(data);
 
     const handleFileChange = (_, v) => onChange(v);
 
@@ -44,13 +45,13 @@ const AddForm = ({ value, onChange, submit, open, setOpen, title, loading, reset
     const getInputTypeIcon = () => {
         switch (value?.type) {
             case "image":
-                return <ImageIcon color="primary" />;
+                return <ImageIcon color="primary"/>;
             case "file":
-                return <AttachFileIcon color="primary" />;
+                return <AttachFileIcon color="primary"/>;
             case "html":
-                return <CodeIcon color="primary" />;
+                return <CodeIcon color="primary"/>;
             default:
-                return <TextFieldsIcon color="primary" />;
+                return <TextFieldsIcon color="primary"/>;
         }
     };
 
@@ -63,6 +64,8 @@ const AddForm = ({ value, onChange, submit, open, setOpen, title, loading, reset
                 return "Upload or select a file";
             case "html":
                 return "Edit HTML content";
+            case "selectSearch":
+                return "Select an option";
             default:
                 return "Enter text value";
         }
@@ -72,13 +75,13 @@ const AddForm = ({ value, onChange, submit, open, setOpen, title, loading, reset
         switch (value?.type) {
             case "image":
                 return (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                    <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2}}>
                         <Chip
-                            icon={<ImageIcon />}
+                            icon={<ImageIcon/>}
                             label="Image Upload"
                             color="primary"
                             variant="outlined"
-                            sx={{ mb: 2 }}
+                            sx={{mb: 2}}
                         />
                         <Paper
                             elevation={2}
@@ -114,13 +117,13 @@ const AddForm = ({ value, onChange, submit, open, setOpen, title, loading, reset
 
             case "file":
                 return (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                    <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2}}>
                         <Chip
-                            icon={<AttachFileIcon />}
+                            icon={<AttachFileIcon/>}
                             label="File Upload"
                             color="primary"
                             variant="outlined"
-                            sx={{ mb: 2 }}
+                            sx={{mb: 2}}
                         />
                         <Paper
                             elevation={2}
@@ -137,7 +140,7 @@ const AddForm = ({ value, onChange, submit, open, setOpen, title, loading, reset
                                 onChange={handleFileChange}
                                 editable
                                 required
-                                url={route("documents.store", { ownerClass: "Setting", id })}
+                                url={route("documents.store", {ownerClass: "Setting", id})}
                                 sx={{
                                     transition: 'transform 0.2s, box-shadow 0.2s',
                                     '&:hover': {
@@ -152,13 +155,13 @@ const AddForm = ({ value, onChange, submit, open, setOpen, title, loading, reset
 
             case "html":
                 return (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                         <Chip
-                            icon={<CodeIcon />}
+                            icon={<CodeIcon/>}
                             label="HTML Editor"
                             color="primary"
                             variant="outlined"
-                            sx={{ alignSelf: 'center', mb: 2 }}
+                            sx={{alignSelf: 'center', mb: 2}}
                         />
                         <Editor
                             style={{
@@ -176,15 +179,33 @@ const AddForm = ({ value, onChange, submit, open, setOpen, title, loading, reset
                     </Box>
                 );
 
+            case "selectSearch":
+                return (
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                        <Chip
+                            icon={<CodeIcon/>}
+                            label="Select"
+                            color="primary"
+                            variant="outlined"
+                            sx={{alignSelf: 'center', mb: 2}}
+                        />
+                        <SelectSearch value={value?.value}
+                                      onChange={handleChange}
+                                      fullWidth
+                                      label="Select "
+                                      url={value.url}/>
+                    </Box>
+                );
+
             default:
                 return (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
                         <Chip
-                            icon={<TextFieldsIcon />}
+                            icon={<TextFieldsIcon/>}
                             label="Text Input"
                             color="primary"
                             variant="outlined"
-                            sx={{ alignSelf: 'center', mb: 2 }}
+                            sx={{alignSelf: 'center', mb: 2}}
                         />
                         <TextField
                             fullWidth
@@ -233,9 +254,9 @@ const AddForm = ({ value, onChange, submit, open, setOpen, title, loading, reset
                 alignItems: 'center',
                 justifyContent: 'space-between'
             }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                     {getInputTypeIcon()}
-                    <Typography variant="h6" component="span" sx={{ fontWeight: 500 }}>
+                    <Typography variant="h6" component="span" sx={{fontWeight: 500}}>
                         {title}
                     </Typography>
                 </Box>
@@ -253,15 +274,15 @@ const AddForm = ({ value, onChange, submit, open, setOpen, title, loading, reset
                             }
                         }}
                     >
-                        <CloseIcon />
+                        <CloseIcon/>
                     </IconButton>
                 </Tooltip>
             </DialogTitle>
 
-            <DialogContent sx={{ p: 3, minHeight: '200px' }}>
+            <DialogContent sx={{p: 3, minHeight: '200px'}}>
                 <Container maxWidth="md">
                     <Grid container spacing={3}>
-                        <Grid size={{xs:12}}>
+                        <Grid size={{xs: 12}}>
                             {/* Helper text */}
                             <Box sx={{
                                 display: 'flex',
@@ -270,7 +291,7 @@ const AddForm = ({ value, onChange, submit, open, setOpen, title, loading, reset
                                 color: 'text.secondary',
                                 gap: 0.5
                             }}>
-                                <HelpOutlineIcon fontSize="small" />
+                                <HelpOutlineIcon fontSize="small"/>
                                 <Typography variant="body2">
                                     {getHelperText()}
                                 </Typography>
@@ -283,14 +304,14 @@ const AddForm = ({ value, onChange, submit, open, setOpen, title, loading, reset
                 </Container>
             </DialogContent>
 
-            <Divider />
+            <Divider/>
 
-            <DialogActions sx={{ p: 2, bgcolor: '#f8f8f8' }}>
+            <DialogActions sx={{p: 2, bgcolor: '#f8f8f8'}}>
                 <Button
                     onClick={handleClose}
                     disabled={loading}
                     variant="outlined"
-                    startIcon={<CloseIcon />}
+                    startIcon={<CloseIcon/>}
                     sx={{
                         borderRadius: 2,
                         textTransform: 'none',
@@ -304,7 +325,7 @@ const AddForm = ({ value, onChange, submit, open, setOpen, title, loading, reset
                     disabled={loading}
                     variant="contained"
                     color="primary"
-                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+                    startIcon={loading ? <CircularProgress size={20} color="inherit"/> : <SaveIcon/>}
                     sx={{
                         borderRadius: 2,
                         textTransform: 'none',
