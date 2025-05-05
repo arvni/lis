@@ -1,0 +1,56 @@
+import React, { useEffect, useState, useCallback } from "react";
+import UserForm from "@/Pages/User/Components/Form";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { router, useForm } from "@inertiajs/react";
+
+const Add = ({ errors: initialErrors }) => {
+    const { data, setData, post, processing } = useForm({
+        name: "",
+        mobile: "",
+        email: "",
+        avatar: "",
+        roles: null,
+        password: "",
+        password_confirmation: ""
+    });
+
+    const [errors, setErrors] = useState(initialErrors || {});
+
+    useEffect(() => {
+        if (initialErrors && Object.keys(initialErrors).length) {
+            setErrors(initialErrors);
+        }
+    }, [initialErrors]);
+
+    const handleSubmit = useCallback(() => {
+        post(route("users.store"));
+    }, [post]);
+
+    const handleCancel = useCallback(() => {
+        router.visit(route("users.index"));
+    }, []);
+
+    return (
+        <UserForm
+            values={data}
+            errors={errors}
+            setValues={setData}
+            loading={processing}
+            submit={handleSubmit}
+            cancel={handleCancel}
+        />
+    );
+};
+
+const breadCrumbs = [
+    { title: "Users", link: route("users.index") },
+    { title: "Add New User", link: null }
+];
+
+Add.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} breadcrumbs={breadCrumbs}>
+        {page}
+    </AuthenticatedLayout>
+);
+
+export default Add;

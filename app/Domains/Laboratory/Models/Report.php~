@@ -1,0 +1,126 @@
+<?php
+
+namespace App\Domain\Laboratory\Models;
+
+use App\Domain\Acceptance\Models\AcceptanceItem;
+use App\Domain\Document\Models\Document;
+use App\Domain\User\Models\User;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Report extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        "value",
+        "reporter_id",
+        "approver_id",
+        "publisher_id",
+        "acceptance_item_id",
+        "reportedAt",
+        "approvedAt",
+        "printedAt",
+        "status",
+        "comment",
+        "clinical_comment",
+        "published",
+        "published_at"
+    ];
+
+    protected $casts = [
+        "margins" => "json",
+    ];
+
+    protected $touches = [
+        "AcceptanceItem"
+    ];
+
+    protected $with=[
+        "PublishedDocument",
+        "ApprovedDocument",
+        "ReportedDocument",
+        "ClinicalCommentDocument"
+    ];
+
+
+    public function getPublishedAtAttribute()
+    {
+        return Carbon::parse($this->attributes["published_at"], "Asia/Muscat")->format("Y-m-d H:i:s");
+    }
+
+    public function getReportedAtAttribute()
+    {
+        return Carbon::parse($this->attributes["reportedAt"], "Asia/Muscat")->format("Y-m-d H:i:s");
+    }
+
+
+    public function getApprovedAtAttribute()
+    {
+        return Carbon::parse($this->attributes["approvedAt"], "Asia/Muscat")->format("Y-m-d H:i:s");
+    }
+
+
+    public function getPrintedAtAttribute()
+    {
+        return Carbon::parse($this->attributes["printedAt"], "Asia/Muscat")->format("Y-m-d H:i:s");
+    }
+
+
+    public function AcceptanceItem()
+    {
+        return $this->belongsTo(AcceptanceItem::class);
+    }
+
+    public function Reporter()
+    {
+        return $this->belongsTo(User::class, "reporter_id", "id");
+    }
+
+    public function Approver()
+    {
+        return $this->belongsTo(User::class, "approver_id", "id");
+    }
+
+    public function Publisher()
+    {
+        return $this->belongsTo(User::class, "publisher_id", "id");
+    }
+
+    public function Documents()
+    {
+        return $this->morphMany(Document::class, 'related');
+    }
+
+    public function PublishedDocument()
+    {
+        return $this->morphOne(Document::class, 'owner')
+            ->latest()
+            ->where("tag","published");
+    }
+
+    public function ApprovedDocument()
+    {
+        return $this->morphOne(Document::class, 'owner')->latest()->where("tag","approved");
+    }
+
+    public function ReportedDocument()
+    {
+        return $this->morphOne(Document::class, 'owner')->latest()->where("tag","reported");
+    }
+    public function ClinicalCommentDocument()
+    {
+        return $this->morphOne(Document::class, 'owner')->latest()->where("tag","clinical_comment");
+    }
+
+    public function Signers()
+    {
+        return $this->hasMany(Signer::class)->with(["User:id,name,signature"]);
+    }
+
+    public function scopePublished($query)
+    {
+        return $query->where("publish", true);
+    }
+}

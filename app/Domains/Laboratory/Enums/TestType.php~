@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Domains\Laboratory\Enums;
+
+use Kongulov\Traits\InteractWithEnum;
+
+enum TestType
+{
+    use InteractWithEnum;
+    case TEST;
+    case SERVICE;
+    case PANEL;
+}

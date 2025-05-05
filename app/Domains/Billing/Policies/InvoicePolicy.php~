@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Domains\Billing\Policies;
+
+use App\Domains\User\Models\User;
+
+class InvoicePolicy
+{
+        /**
+         * Determine whether the user can view any models.
+         */
+        public function viewAny(User $authUser): bool
+    {
+        return $authUser->can("Reception.Acceptances.List Acceptances");
+    }
+
+        /**
+         * Determine whether the user can create models.
+         */
+        public function create(User $authUser): bool
+    {
+        return $authUser->can("Reception.Acceptances.Create Acceptance");
+    }
+
+        /**
+         * Determine whether the user can view the model.
+         */
+        public function view(User $user): bool
+    {
+        return $user->can("Reception.Acceptances.View Acceptance");
+    }
+
+        /**
+         * Determine whether the user can update the model.
+         */
+        public function update(User $authUser): bool
+    {
+        return $authUser->can("Reception.Acceptances.Edit Acceptance");
+    }
+
+        /**
+         * Determine whether the user can update the model.
+         */
+        public function cancel(User $authUser): bool
+    {
+        return $authUser->can("Reception.Acceptances.Cancel Acceptance");
+    }
+
+        /**
+         * Determine whether the user can delete the model.
+         */
+        public function delete(User $authUser): bool
+    {
+        return $authUser->can("Reception.Acceptances.Delete Acceptance");
+    }
+}

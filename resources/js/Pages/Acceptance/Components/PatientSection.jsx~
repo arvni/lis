@@ -1,0 +1,24 @@
+import React from "react";
+import Grid from "@mui/material/Grid2";
+
+const PatientSection = ({ patient }) => (
+    <Grid container spacing={3}>
+        <Grid item>
+            <strong>Name:</strong> {patient.fullName}
+        </Grid>
+        <Grid item>
+            <strong>ID/Passport No.:</strong> {patient.idNo}
+        </Grid>
+        <Grid item>
+            <strong>Nationality:</strong> {patient.nationality}
+        </Grid>
+        <Grid item>
+            <strong>Date Of Birth:</strong> {patient.dateOfBirth}
+        </Grid>
+        <Grid item>
+            <strong>Gender:</strong> {patient.gender.toUpperCase()}
+        </Grid>
+    </Grid>
+);
+
+export default PatientSection;

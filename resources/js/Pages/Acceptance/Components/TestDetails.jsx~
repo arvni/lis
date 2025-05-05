@@ -1,0 +1,32 @@
+import React from 'react';
+import Grid from "@mui/material/Grid2";
+
+const TestDetails = ({ test }) => (
+    <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid item>
+            <strong>Full Name: </strong>{test?.fullName}
+        </Grid>
+        <Grid item>
+            <strong>Test Code: </strong>{test?.code}
+        </Grid>
+        <Grid item>
+            <strong>Test Category: </strong>{test?.testGroup?.name}
+        </Grid>
+        {test.type === '1' && (
+            <Grid item>
+                <strong>Acceptable Sample Types: </strong>
+                {test?.sampleTypes?.map(sampleType =>
+                    `${sampleType.sampleType.name} (${sampleType.description})`
+                ).join(", ")}
+            </Grid>
+        )}
+        {test.description && (
+            <Grid size={{ xs: 12 }}>
+                <strong>Description: </strong>
+                <div dangerouslySetInnerHTML={{ __html: test.description }} />
+            </Grid>
+        )}
+    </Grid>
+);
+
+export default TestDetails;

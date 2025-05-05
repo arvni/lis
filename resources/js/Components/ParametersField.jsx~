@@ -1,0 +1,135 @@
+import { useState } from "react";
+import {
+    List,
+    ListItem,
+    IconButton,
+    ListItemText,
+    TextField,
+    Typography,
+    Paper,
+    Tooltip,
+    Divider
+} from "@mui/material";
+import { Add, Delete, Help } from "@mui/icons-material";
+import { makeId } from "@/Services/helper";
+
+const ParametersField = ({ defaultValue = [], onChange, errors, name }) => {
+    const [parameters, setParameters] = useState(defaultValue.length > 0 ? defaultValue : []);
+
+    const handleAdd = () => {
+        let id = makeId(6);
+        const newParameter = { name: "", value: "", id };
+        setParameters(prevState => ([...prevState, newParameter]));
+        onChange({ target: { name, value: [...parameters, newParameter] } });
+    };
+
+    const handleDelete = (id) => () => {
+        const temp = [...parameters];
+        let index = temp.findIndex((item) => item.id === id);
+        temp.splice(index, 1);
+        setParameters(temp);
+        onChange({ target: { name, value: temp } });
+    };
+
+    const handleChange = (id) => (e) => {
+        const temp = [...parameters];
+        let index = temp.findIndex((item) => item.id === id);
+
+        // Use name as the field to update instead of just setting value
+        temp[index] = {
+            ...temp[index],
+            [e.target.name]: e.target.value
+        };
+
+        setParameters(temp);
+        onChange({ target: { name, value: temp } });
+    };
+
+    // Validate parameter name - ensure it's a valid identifier
+    const validateParameterName = (paramName) => {
+        // Check if it's a valid JavaScript identifier (starts with letter/underscore, contains only letters/numbers/underscores)
+        const validIdentifier = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+        return validIdentifier.test(paramName);
+    };
+
+    return (
+        <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
+            <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                Parameters
+                <Tooltip title="Add parameters that will be used in your price formula. For example: age, weight, etc.">
+                    <IconButton size="small" sx={{ ml: 1 }}>
+                        <Help fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+
+            <List dense disablePadding>
+                {parameters.length === 0 && (
+                    <ListItem sx={{ justifyContent: 'center' }}>
+                        <Typography variant="body2" color="text.secondary">
+                            No parameters added yet. Click the + button to add one.
+                        </Typography>
+                    </ListItem>
+                )}
+
+                {parameters.map(parameter => (
+                    <ListItem
+                        key={parameter.id}
+                        sx={{
+                            mb: 1,
+                            p: 1,
+                            border: '1px solid #e0e0e0',
+                            borderRadius: 1,
+                            '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.02)' }
+                        }}
+                    >
+                        <ListItemText>
+                            <TextField
+                                name="name"
+                                size="small"
+                                label="Parameter name"
+                                placeholder="e.g. age, weight"
+                                onChange={handleChange(parameter.id)}
+                                value={parameter.name || ""}
+                                fullWidth
+                                error={Boolean(errors?.[parameter.id]) || (parameter.name && !validateParameterName(parameter.name))}
+                                helperText={
+                                    errors?.[parameter.id] ||
+                                    (parameter.name && !validateParameterName(parameter.name) ?
+                                        "Parameter name must start with a letter or underscore and contain only letters, numbers, and underscores" :
+                                        "Use simple names like 'age' or 'weight' (no spaces or special characters)")
+                                }
+                            />
+                        </ListItemText>
+
+                        <Tooltip title="Delete parameter">
+                            <IconButton
+                                edge="end"
+                                onClick={handleDelete(parameter.id)}
+                                color="error"
+                                size="small"
+                            >
+                                <Delete fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </ListItem>
+                ))}
+
+                <ListItem sx={{ justifyContent: 'center' }}>
+                    <Tooltip title="Add new parameter">
+                        <IconButton
+                            onClick={handleAdd}
+                            color="primary"
+                            sx={{ border: '1px dashed', borderRadius: '50%' }}
+                        >
+                            <Add />
+                        </IconButton>
+                    </Tooltip>
+                </ListItem>
+            </List>
+        </Paper>
+    );
+};
+
+export default ParametersField;

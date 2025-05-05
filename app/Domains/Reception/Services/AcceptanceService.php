@@ -1,0 +1,538 @@
+<?php
+
+namespace App\Domains\Reception\Services;
+
+
+use App\Domains\Billing\Enums\InvoiceStatus;
+use App\Domains\Document\Enums\DocumentTag;
+use App\Domains\Laboratory\Enums\TestType;
+use App\Domains\Reception\Adapters\LaboratoryAdapter;
+use App\Domains\Reception\DTOs\AcceptanceDTO;
+use App\Domains\Reception\DTOs\AcceptanceItemDTO;
+use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
+use App\Domains\Reception\Enums\AcceptanceStatus;
+use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Reception\Models\Patient;
+use App\Domains\Reception\Notifications\PatientReportPublished;
+use App\Domains\Reception\Repositories\AcceptanceRepository;
+use App\Notifications\ReferrerReportPublished;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+
+class AcceptanceService
+{
+    protected string $phonePattern = "/^((\+|00)?968)?[279]\d{7}$/i";
+
+    public function __construct(
+        private readonly AcceptanceRepository  $acceptanceRepository,
+        private readonly AcceptanceItemService $acceptanceItemService,
+        private readonly LaboratoryAdapter     $laboratoryAdapter,
+    )
+    {
+    }
+
+    public function listAcceptances($queryData): LengthAwarePaginator
+    {
+        return $this->acceptanceRepository->ListAcceptances($queryData);
+    }
+
+    public function listSampleCollections($queryData): LengthAwarePaginator
+    {
+        return $this->acceptanceRepository->listSampleCollection($queryData);
+    }
+
+    public function storeAcceptance(AcceptanceDTO $acceptanceDTO): Acceptance
+    {
+        $acceptance = $this->acceptanceRepository
+            ->creatAcceptance(Arr::except($acceptanceDTO->toArray(), ["acceptance_items"]));
+
+        $acceptanceItems = $this->prepareAcceptanceItems($acceptance, $acceptanceDTO->acceptanceItems);
+        foreach ($acceptanceItems as $acceptanceItem) {
+            $this->acceptanceItemService->storeAcceptanceItem($acceptanceItem);
+        }
+        return $acceptance;
+    }
+
+    public function showAcceptance(Acceptance $acceptance): Acceptance
+    {
+        $acceptance->load([
+            "patient" => function ($query) {
+                $query->with(["ownedDocuments" => function ($q) {
+                    $q->where("Tag", DocumentTag::DOCUMENT);
+                }]);
+            },
+            "acceptanceItems.patients",
+            "acceptanceItems.methodTest.test.methodTests.method",
+            "acceptanceItems.methodTest.method.test.sampleTypes",
+            "acceptanceItems.patients",
+            "acceptanceItems.latestState",
+            "invoice.payments.cashier",
+            "invoice.payments.payer",
+            "invoice.owner",
+            "prescription",
+            "consultation.patient",
+            "consultation.consultant",
+            "doctor",
+            "referrer",
+            "acceptor"
+        ]);
+        return $acceptance;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function updateAcceptance(Acceptance $acceptance, array $data): Acceptance
+    {
+        // Convert the validated data to DTO
+        $acceptanceDTO = AcceptanceDTO::createFromRequestData(array_merge($acceptance->toArray(), $data));
+
+        // Process based on current step
+        $step = $data['step'] ?? 5;
+
+        try {
+            DB::beginTransaction();
+
+            switch ($step) {
+                case 0: // Patient Information
+                    // Update only step information
+                    $this->acceptanceRepository->updateAcceptance($acceptance, [
+                        'step' => min($acceptanceDTO->step + 1, 5)
+                    ]);
+                    break;
+
+                case 1: // Consultation
+                    // Update consultation and step
+                    $updateData = ['step' => min($acceptanceDTO->step + 1, 5)];
+
+                    if ($acceptanceDTO->consultationId) {
+                        $updateData['consultation_id'] = $acceptanceDTO->consultationId;
+                    }
+
+                    $this->acceptanceRepository->updateAcceptance($acceptance, $updateData);
+                    break;
+
+                case 2: // Doctor & Referral
+                    // Process data for doctor and referral only
+                    $this->processDoctorReferralData($acceptance, $acceptanceDTO);
+                    break;
+
+                case 3: // Tests Selection
+                    // Process data for tests only
+                    $this->processTestsData($acceptance, $acceptanceDTO);
+                    $this->acceptanceRepository->updateAcceptance($acceptance, [
+                        'step' => min($acceptanceDTO->step + 1, 5)
+                    ]);
+                    break;
+
+                case 4: // Sampling & Delivery
+                    // Process data for sampling and delivery only
+                    $this->processSamplingDeliveryData($acceptance, $acceptanceDTO);
+                    break;
+
+                case 5: // Final Review - process everything
+                default:
+                    // Process all data for final submission using original method
+                    if ($acceptance->status === AcceptanceStatus::PENDING)
+                        $acceptanceDTO->status = AcceptanceStatus::WAITING_FOR_PAYMENT;
+                    $acceptance = $this->update($acceptance, $acceptanceDTO);
+                    break;
+            }
+
+            DB::commit();
+            return $acceptance;
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Update acceptance (original method)
+     *
+     * @param Acceptance $acceptance
+     * @param AcceptanceDTO $acceptanceDTO
+     * @return Acceptance
+     */
+    public function update(Acceptance $acceptance, AcceptanceDTO $acceptanceDTO): Acceptance
+    {
+        if (!isset($acceptanceDTO->doctor["id"]) && isset($acceptanceDTO->doctor["name"]))
+            $acceptanceDTO->doctorId = $this->laboratoryAdapter->createOrGetDoctor($acceptanceDTO->doctor)->id;
+
+        $acceptance = $this->acceptanceRepository
+            ->updateAcceptance($acceptance, Arr::except($acceptanceDTO->toArray(), ["acceptance_items", "doctor"]));
+
+        $acceptanceItems = $this->prepareAcceptanceItems($acceptance, $acceptanceDTO->acceptanceItems);
+        $updatedAcceptanceItems = [];
+
+        foreach ($acceptanceItems as $acceptanceItemData) {
+            $acceptanceItem = $this->acceptanceItemService->findAcceptanceItemById($acceptanceItemData->id);
+            if ($acceptanceItem)
+                $updatedAcceptanceItems[] = $this->acceptanceItemService->updateAcceptanceItem($acceptanceItem, $acceptanceItemData);
+            else
+                $updatedAcceptanceItems[] = $this->acceptanceItemService->storeAcceptanceItem($acceptanceItemData);
+        }
+
+        $acceptance->acceptanceItems()->whereNotIn("id", collect($updatedAcceptanceItems)->pluck("id")->toArray())->delete();
+        return $acceptance;
+    }
+
+    /**
+     * Process and update doctor and referral information
+     *
+     * @param Acceptance $acceptance
+     * @param AcceptanceDTO $acceptanceDTO
+     * @return void
+     */
+    private function processDoctorReferralData(Acceptance $acceptance, AcceptanceDTO $acceptanceDTO): void
+    {
+        // Process doctor data
+        if (isset($acceptanceDTO->doctor) && !empty($acceptanceDTO->doctor["name"])) {
+            if (!isset($acceptanceDTO->doctor["id"])) {
+                // Create or get doctor and update the DTO
+                $doctor = $this->laboratoryAdapter->createOrGetDoctor($acceptanceDTO->doctor);
+                $acceptanceDTO->doctorId = $doctor->id;
+            } else {
+                $acceptanceDTO->doctorId = $acceptanceDTO->doctor["id"];
+            }
+        }
+
+        // Prepare only the relevant data for update
+        $updateData = [
+            'step' => $acceptanceDTO->step + 1,
+            'doctor_id' => $acceptanceDTO->doctorId,
+        ];
+
+        // Add referral info if present
+        if (isset($acceptanceDTO->referrerId)) {
+            $updateData['referrer_id'] = $acceptanceDTO->referrerId;
+            $updateData['reference_code'] = $acceptanceDTO->referenceCode;
+        }
+
+        // Update using repository - only doctor and referral fields
+        $this->acceptanceRepository->updateAcceptance($acceptance, $updateData);
+    }
+
+    /**
+     * Process and update tests and panels data
+     *
+     * @param Acceptance $acceptance
+     * @param AcceptanceDTO $acceptanceDTO
+     * @return void
+     */
+    private function processTestsData(Acceptance $acceptance, AcceptanceDTO $acceptanceDTO): void
+    {
+        // Update step first
+        $this->acceptanceRepository->updateAcceptance($acceptance, ['step' => $acceptanceDTO->step]);
+
+        // If no acceptance items, exit early
+        if (!isset($acceptanceDTO->acceptanceItems)) {
+            return;
+        }
+
+        // Process acceptance items using existing logic
+        $acceptanceItems = $this->prepareAcceptanceItems($acceptance, $acceptanceDTO->acceptanceItems);
+        $updatedAcceptanceItems = [];
+
+        foreach ($acceptanceItems as $acceptanceItemData) {
+            $acceptanceItem = $this->acceptanceItemService->findAcceptanceItemById($acceptanceItemData->id);
+            if ($acceptanceItem)
+                $updatedAcceptanceItems[] = $this->acceptanceItemService->updateAcceptanceItem($acceptanceItem, $acceptanceItemData);
+            else
+                $updatedAcceptanceItems[] = $this->acceptanceItemService->storeAcceptanceItem($acceptanceItemData);
+        }
+
+        // Remove items not in the update
+        $acceptance->acceptanceItems()->whereNotIn("id", collect($updatedAcceptanceItems)->pluck("id")->toArray())->delete();
+    }
+
+    /**
+     * Process and update sampling and delivery data
+     *
+     * @param Acceptance $acceptance
+     * @param AcceptanceDTO $acceptanceDTO
+     * @return void
+     */
+    /**
+     * Process and update sampling and delivery data
+     *
+     * @param Acceptance $acceptance
+     * @param AcceptanceDTO $acceptanceDTO
+     * @return void
+     */
+    private function processSamplingDeliveryData(Acceptance $acceptance, AcceptanceDTO $acceptanceDTO): void
+    {
+        // Prepare update data
+        $updateData = [
+            'step' => min($acceptanceDTO->step + 1, 5),
+            'samplerGender' => $acceptanceDTO->samplerGender,
+            'out_patient' => $acceptanceDTO->outPatient,
+        ];
+
+        // Process reporting method if it exists
+        if (isset($acceptanceDTO->howReport) && is_array($acceptanceDTO->howReport)) {
+            // Extract reporting method details
+            $updateData['howReport'] = $acceptanceDTO->howReport ?? null;
+        }
+
+        // Update acceptance using repository
+        $this->acceptanceRepository->updateAcceptance($acceptance, $updateData);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function deleteAcceptance(Acceptance $acceptance): void
+    {
+        if ($acceptance->status !== AcceptanceStatus::REPORTED || $acceptance->status !== AcceptanceStatus::PROCESSING) {
+            $this->acceptanceRepository->deleteAcceptance($acceptance);
+        } else
+            throw new Exception("There is some Method that use this Acceptance");
+    }
+
+    public function getAcceptanceById($id): ?Acceptance
+    {
+        return $this->acceptanceRepository->getAcceptanceById($id);
+    }
+
+    public function updateAcceptanceInvoice(Acceptance $acceptance, $invoiceId): void
+    {
+        $this->acceptanceRepository->updateAcceptance($acceptance, ["invoice_id" => $invoiceId]);
+    }
+
+    public function updateAcceptanceStatus(Acceptance $acceptance, AcceptanceStatus $status): void
+    {
+        $this->acceptanceRepository->updateAcceptance($acceptance, ["status" => $status]);
+    }
+
+    public function listBarcodes(Acceptance $acceptance)
+    {
+        $acceptance->load([
+            "acceptanceItems.method.barcodeGroup",
+            "acceptanceItems.method.test.sampleTypes",
+            "acceptanceItems.test",
+            "acceptanceItems.patient",
+            "patient"
+        ]);
+        $barcodes = $this->convertAcceptanceItems($acceptance->acceptanceItems);
+        return ["barcodes" => $barcodes, "patient" => $acceptance->patient];
+    }
+
+    public function checkAcceptanceReport(Acceptance $acceptance)
+    {
+        // Check if all tests are published and update acceptance status if needed
+        if ($this->areAllTestsPublished($acceptance)) {
+            $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+
+            // Send notifications
+            $this->sendPublishedNotifications($acceptance);
+        }
+
+    }
+
+    /**
+     * Prepare acceptance items for update
+     *
+     * @param Acceptance $acceptance
+     * @param array $acceptanceItems
+     * @return array
+     */
+
+    private function prepareAcceptanceItems(Acceptance $acceptance, array $acceptanceItems): array
+    {
+        $output = [];
+
+        if (isset($acceptanceItems['tests']) && $acceptanceItems['tests'] && is_array($acceptanceItems['tests']) && count($acceptanceItems["tests"])) {
+            foreach ($acceptanceItems["tests"] as $acceptance_item) {
+                $output[] = new AcceptanceItemDTO(
+                    $acceptance->id,
+                    $acceptance_item['method_test']['id'],
+                    $acceptance_item["price"],
+                    $acceptance_item['discount'],
+                    array_merge($acceptance_item["customParameters"], Arr::except($acceptance_item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters"])),
+                    $acceptance_item["patients"],
+                    $acceptance_item["timeLine"] ?? [
+                    Carbon::now()->format("Y-m-d H:i:s") => "Created By " . auth()->user()->name,],
+                    $acceptance_item["id"] ?? null
+                );
+            }
+        }
+        if (isset($acceptanceItems['panels']) && is_array($acceptanceItems['panels'])) {
+            foreach ($acceptanceItems['panels'] as $panelData) {
+                if (isset($panelData["acceptanceItems"]) && is_array($panelData["acceptanceItems"])) {
+                    foreach ($panelData["acceptanceItems"] as $item) {
+                        $output[] = new AcceptanceItemDTO(
+                            $acceptance->id,
+                            $item['method_test']['id'],
+                            $panelData['price'] / count($panelData['acceptanceItems']), // Distribute price among items
+                            $panelData['discount'] / count($panelData['acceptanceItems']), // Distribute discount among items
+                            array_merge($item["customParameters"], Arr::except($item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters"])),
+                            $item['patients'],
+                            !($item['timeLine'] ?? null) ? [
+                                Carbon::now()->format("Y-m-d H:i:s") => "Created By " . auth()->user()->name,
+                            ] : [
+                                ...$item['timeLine'],
+                                Carbon::now()->format("Y-m-d H:i:s") => "Edited By " . auth()->user()->name,
+                            ],
+                            $item["id"] ?? null
+                        );
+                    }
+                }
+            }
+        }
+        return $output;
+    }
+
+    private function convertAcceptanceItems(Collection $acceptanceItems)
+    {
+        return $acceptanceItems->groupBy(function ($item) {
+            // Get barcode group ID
+            $barcodeGroupId = $item->method->barcode_group_id ?? 'no_barcode_group';
+            // Return composite key
+            return $barcodeGroupId . '_' . $item->patient->id;
+        })
+            ->map(function ($item, $key) {
+                return [
+                    "id" => $key,
+                    "barcodeGroup" => $item->first()->method->barcodeGroup,
+                    "patient" => $item->first()->patient,
+                    "items" => $item,
+                    "sampleType" => $item->first()->method->test->sampleTypes
+                        ->where('id', $item->first()->customParameters['sampleType'] ?? $item->first()->method->test->sampleTypes->first()->id)
+                        ->first(),
+                    "collection_date" => Carbon::now("Asia/Muscat")->format("Y-m-d H:i:s"),
+                    "sampleLocation" => "In Lab"
+                ];
+            })
+            ->values();
+    }
+
+
+    /**
+     * Check if all tests for this acceptance are published
+     *
+     * @param Acceptance $acceptance
+     * @return bool
+     */
+    private function areAllTestsPublished(Acceptance $acceptance): bool
+    {
+        $publishedTestsCount = $this->countPublishedTests($acceptance);
+        $reportableTestsCount = $this->countReportableTests($acceptance);
+
+        return $publishedTestsCount == $reportableTestsCount;
+    }
+
+    /**
+     * Count published tests for an acceptance
+     *
+     * @param Acceptance $acceptance
+     * @return int
+     */
+    private function countPublishedTests(Acceptance $acceptance): int
+    {
+        return $this->acceptanceRepository->countPublishedTests($acceptance);
+    }
+
+    /**
+     * Count reportable tests for an acceptance
+     *
+     * @param Acceptance $acceptance
+     * @return int
+     */
+    private function countReportableTests(Acceptance $acceptance): int
+    {
+        return $this->acceptanceRepository->countReportableTests($acceptance);
+    }
+
+
+    /**
+     * Send notifications about published report
+     *
+     * @param Acceptance $acceptance
+     * @return void
+     */
+    private function sendPublishedNotifications(Acceptance $acceptance): void
+    {
+        $acceptance->load([
+            "patient",
+            "referrer"
+        ]);
+        $patient = $acceptance->patient;
+        $referrer = $acceptance->referrer;
+
+        if (!$referrer && $patient->phone && preg_match($this->phonePattern, $patient->phone)) {
+            // Send notification to patient
+            Notification::send($patient, new PatientReportPublished($acceptance));
+        }
+        if ($referrer) {
+            // Send notification to referrer
+            Notification::send($referrer, new ReferrerReportPublished($acceptance));
+
+            // @todo
+            // Update referrer order status
+//            $this->acceptanceRepository->updateReferrerOrderStatus($acceptance, 'reported');
+        }
+    }
+
+    public function getPendingAcceptance(Patient $patient): ?Acceptance
+    {
+        return $this->acceptanceRepository->getPendingAcceptance($patient);
+    }
+
+    public function cancelAcceptance(Acceptance $acceptance): void
+    {
+        $this->acceptanceRepository->updateAcceptance($acceptance, [
+            "status" => AcceptanceStatus::CANCELLED
+        ]);
+        $acceptance->acceptanceItemStates()->update(["status" => AcceptanceItemStateStatus::REJECTED]);
+        $acceptance->invoice()->update(["status" => InvoiceStatus::CANCELED]);
+    }
+
+    /**
+     * Prepare acceptance data for editing, including organized items
+     *
+     * @param Acceptance $acceptance
+     * @return array
+     */
+    public function prepareAcceptanceForEdit(Acceptance $acceptance): array
+    {
+        // Get base acceptance data
+        $acceptanceData = $this->showAcceptance($acceptance)->toArray();
+
+        // Process and organize acceptance items
+        $acceptanceData['acceptanceItems'] = $this->organizeAcceptanceItems(
+            $acceptanceData['acceptance_items']
+        );
+        return $acceptanceData;
+    }
+
+    /**
+     * Organize acceptance items by type for editing interface
+     *
+     * @param array $acceptanceItems
+     * @return array
+     */
+    private function organizeAcceptanceItems(array $acceptanceItems): array
+    {
+        $groupedItems = $this->acceptanceRepository->groupItemsByTestType($acceptanceItems);
+
+        // Get tests and services
+        $tests = $groupedItems->get(TestType::TEST->value, collect())->toArray();
+        $services = $groupedItems->get(TestType::SERVICE->value, collect())->toArray();
+
+
+        // Build final structure
+        return [
+            "tests" => [...$tests, ...$services],
+            "panels" => $groupedItems->get(TestType::PANEL->value, []),
+        ];
+    }
+
+
+}

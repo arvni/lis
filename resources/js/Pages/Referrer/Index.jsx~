@@ -1,0 +1,139 @@
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import {GridActionsCellItem} from "@mui/x-data-grid";
+import Filter from "./Components/Filter";
+import TableLayout from "@/Layouts/TableLayout";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteForm from "@/Components/DeleteForm";
+import {useState} from "react";
+import {RemoveRedEye} from "@mui/icons-material";
+import {router, usePage} from "@inertiajs/react";
+import PageHeader from "@/Components/PageHeader.jsx";
+import {Button} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+
+
+const Index = () => {
+    const columns = [
+        {
+            field: 'name',
+            headerName: 'Title',
+            type: "string",
+            width: 200
+        },
+        {
+            field: 'email',
+            headerName: 'Email',
+            type: "string",
+            width: 200
+        },
+        {
+            field: 'phoneNo',
+            headerName: 'Phone No',
+            type: "string",
+            width: 200
+        },
+        {
+            field: 'acceptances_count',
+            headerName: 'Acceptance No',
+            type: "number",
+        },
+        {
+            field: 'isActive',
+            headerName: 'Status',
+            type: "boolean",
+        },
+        {
+            field: 'id',
+            headerName: 'Action',
+            type: 'actions',
+            width: 100,
+            sortable: false,
+            getActions: (params) => {
+                let cols = [
+                    <GridActionsCellItem
+                        icon={<RemoveRedEye/>}
+                        label="Show"
+                        href={route('referrers.show', params.row.id)}
+                        onClick={showReferrer(params.row.id)}/>,
+                    <GridActionsCellItem
+                        icon={<EditIcon/>}
+                        label="Edit"
+                        href={route('referrers.edit', params.row.id)}
+                        onClick={editReferrer(params.row.id)}/>
+                ]
+                if (!params.row.acceptances_count)
+                    cols.push(<GridActionsCellItem icon={<DeleteIcon/>} label="Delete"
+                                                   onClick={deleteReferrer(params.row.id)}/>)
+                return cols;
+            }
+        }
+    ];
+    const {referrers, status, success, requestInputs} = usePage().props;
+    const [referrer, setReferrer] = useState(null);
+    const [openDeleteForm, setOpenDeleteForm] = useState(false);
+    const showReferrer = (id) => (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        router.visit(route('referrers.show', id));
+    }
+    const editReferrer = (id) => (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        router.visit(route('referrers.edit', id));
+    }
+    const deleteReferrer = (params) => () => {
+        setReferrer(params);
+        setOpenDeleteForm(true);
+    };
+    const pageReload = (page, filters, sort, pageSize) => router.visit('/referrers', {
+        data: {page, filters, sort, pageSize},
+        only: ["referrers", "status", "success", "requestInputs"],
+    });
+    const handleCloseDeleteForm = () => {
+        setReferrer(null);
+        setOpenDeleteForm(false);
+    };
+    const handleDestroy = async () => router.post(
+        route('referrers.destroy', referrer.id),
+        {_method: "delete"},
+        {onSuccess: handleCloseDeleteForm});
+    const addReferrer = () => {
+        e.preventDefault();
+        e.stopPropagation();
+        router.visit(route('referrers.create'));
+    }
+    return <>
+        <PageHeader title="Referrers List"
+                    actions={<Button color="success"
+                                     href={route("referrers.create")}
+                                     onClick={addReferrer}
+                                     variant="contained"
+                                     startIcon={<AddIcon/>}>Add Referrer</Button>}/>
+        <TableLayout defaultValues={requestInputs}
+                     columns={columns}
+                     data={referrers}
+                     reload={pageReload}
+                     Filter={Filter}
+                     success={success}
+                     status={status}>
+            <DeleteForm title={`${referrer?.name} Referrer`}
+                        agreeCB={handleDestroy}
+                        disAgreeCB={handleCloseDeleteForm}
+                        openDelete={openDeleteForm}/>
+        </TableLayout>
+    </>;
+}
+
+
+const breadCrumbs = [
+    {
+        title: "Referrers",
+        link: null,
+        icon: null
+    }
+]
+
+Index.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
+
+export default Index;

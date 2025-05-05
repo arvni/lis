@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Domains\Laboratory\Models;
+
+
+use Illuminate\Database\Eloquent\Relations\Pivot;
+
+class SampleTypeTest extends Pivot
+{
+    protected $table="sample_type_tests";
+    protected $fillable = [
+        "description",
+        "defaultType"
+    ];
+    protected $casts = [
+        "defaultType" => "boolean"
+    ];
+
+    public function sampleType()
+    {
+        return $this->belongsTo(SampleType::class);
+    }
+
+    public function test()
+    {
+        return $this->belongsTo(Test::class);
+    }
+}

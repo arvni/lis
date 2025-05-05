@@ -1,0 +1,76 @@
+<?php
+
+namespace App\Domain\Laboratory\Models;
+
+use App\Domain\Acceptance\Models\Acceptance;
+use App\Domain\Acceptance\Models\AcceptanceItem;
+use App\Domain\Patient\Models\Patient;
+use App\Domain\User\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Sample extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        "barcode",
+        "status",
+        "qc",
+        "storeAddress",
+        "sample_type_id",
+        "acceptance_id",
+        "patient_id",
+        "collection_date"
+    ];
+
+    protected $casts = [
+        "created_at" => "date:Y/m/d | H:i"
+    ];
+
+    public function AcceptanceItems()
+    {
+        return $this->belongsToMany(AcceptanceItem::class, "acceptance_item_sample")->withPivot("active");
+    }
+
+    public function Acceptance()
+    {
+        return $this->belongsTo(Acceptance::class);
+    }
+
+    public function ActiveAcceptanceItems()
+    {
+        return $this->belongsToMany(AcceptanceItem::class)->withPivot("active")->wherePivot("active", true);
+    }
+
+    public function DeactivateAcceptanceItems()
+    {
+        return $this->belongsToMany(AcceptanceItem::class)->withPivot("active")->wherePivot("active", false);
+    }
+
+
+    public function Patient()
+    {
+        return $this->belongsTo(Patient::class);
+    }
+
+    public function SampleType()
+    {
+        return $this->belongsTo(SampleType::class);
+    }
+
+    public function Sampler()
+    {
+        return $this->belongsTo(User::class, "sampler_id", );
+    }
+
+    public function QCPerson()
+    {
+        return $this->belongsTo(User::class, "qc_by_id");
+    }
+
+    public function scopeSearch($query, $search)
+    {
+        return $query->where("barcode", "like", "%$search%");
+    }
+}

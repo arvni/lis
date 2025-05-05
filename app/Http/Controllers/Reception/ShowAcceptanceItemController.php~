@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Http\Controllers\Reception;
+
+use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Reception\Models\AcceptanceItem;
+use App\Domains\Reception\Services\AcceptanceItemService;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class ShowAcceptanceItemController extends Controller
+{
+    public function __construct(private readonly AcceptanceItemService $acceptanceItemService)
+    {
+    }
+
+    /**
+     * Handle the incoming request.
+     */
+    public function __invoke(AcceptanceItem $acceptanceItem, Acceptance $acceptance)
+    {
+        $acceptanceItem=$this->acceptanceItemService->showAcceptanceItem($acceptanceItem);
+    }
+}

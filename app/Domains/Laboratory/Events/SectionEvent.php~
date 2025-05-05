@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Domains\Laboratory\Events;
+
+use App\Domains\Laboratory\Models\Section;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class SectionEvent
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+
+
+    /**
+     * Create a new event instance.
+     */
+    public function __construct(public Section $section, public $action,public array $data)
+    {
+    }
+
+}

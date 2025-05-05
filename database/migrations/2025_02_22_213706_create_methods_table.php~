@@ -1,0 +1,39 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('methods', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('workflow_id')->nullable();
+                $table->unsignedBigInteger('barcode_group_id')->nullable();
+                $table->string('name');
+                $table->unsignedInteger('turnaround_time')->nullable();
+                $table->double('price', 8, 2)->unsigned();
+                $table->enum('price_type', ['Fix', 'Formulate', 'Conditional'])->default('Fix');
+                $table->longText('requirements')->nullable();
+                $table->boolean('status')->default(true);
+                $table->longText('extra')->nullable();
+                $table->unsignedInteger('no_patient')->default(1);
+                $table->timestamps();
+            $table->foreign('workflow_id')->references('id')->on('workflows')->onDelete('restrict');
+            $table->foreign('barcode_group_id')->references('id')->on('barcode_groups')->onDelete('restrict');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('methods');
+    }
+};

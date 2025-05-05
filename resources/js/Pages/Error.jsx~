@@ -1,0 +1,214 @@
+import React from 'react';
+import {Head, Link as InertiaLink} from '@inertiajs/react';
+import {
+    Box,
+    Typography,
+    Button,
+    Paper,
+    Container,
+    Stack,
+    Divider,
+    Chip,
+    Fade,
+    useTheme,
+    alpha
+} from '@mui/material';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
+import HomeIcon from '@mui/icons-material/Home';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+
+export default function Error({ status, message }) {
+    const theme = useTheme();
+
+    const title = {
+        503: 'Service Unavailable',
+        500: 'Server Error',
+        404: 'Page Not Found',
+        403: 'Forbidden',
+        401: 'Unauthorized',
+    }[status] || 'Error';
+
+    const description = message || {
+        503: 'Sorry, we are doing some maintenance. Please check back soon.',
+        500: 'Whoops, something went wrong on our servers.',
+        404: 'Sorry, the page you are looking for could not be found.',
+        403: 'Sorry, you are forbidden from accessing this page.',
+        401: 'Sorry, you are not authorized to access this page.',
+    }[status] || 'An unexpected error occurred.';
+
+    // Determine the appropriate icon and color based on status code
+    const getErrorInfo = () => {
+        switch(status) {
+            case 404:
+                return {
+                    icon: <SentimentDissatisfiedIcon sx={{ fontSize: 80 }} />,
+                    color: 'info',
+                    suggestion: 'The page might have been moved or deleted. Please check the URL and try again.'
+                };
+            case 401:
+            case 403:
+                return {
+                    icon: <ErrorOutlineIcon sx={{ fontSize: 80 }} />,
+                    color: 'warning',
+                    suggestion: 'You may need to log in or request access to view this resource.'
+                };
+            case 500:
+            case 503:
+                return {
+                    icon: <ErrorOutlineIcon sx={{ fontSize: 80 }} />,
+                    color: 'error',
+                    suggestion: 'Our team has been notified. Please try again later or contact support if the issue persists.'
+                };
+            default:
+                return {
+                    icon: <ErrorOutlineIcon sx={{ fontSize: 80 }} />,
+                    color: 'error',
+                    suggestion: 'Please try again or contact support if the issue persists.'
+                };
+        }
+    };
+
+    const errorInfo = getErrorInfo();
+
+    return (
+        <>
+            <Head title={title} />
+            <Box
+                sx={{
+                    minHeight: '100vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: `linear-gradient(135deg, ${alpha(theme.palette.background.default, 0.95)}, ${alpha(theme.palette.background.default, 0.85)})`,
+                    backgroundSize: 'cover',
+                    py: 3
+                }}
+            >
+                <Fade in timeout={800}>
+                    <Container maxWidth="sm">
+                        <Paper
+                            elevation={4}
+                            sx={{
+                                p: 4,
+                                textAlign: 'center',
+                                width: '100%',
+                                borderRadius: 2,
+                                overflow: 'hidden',
+                                position: 'relative'
+                            }}
+                        >
+                            {/* Color accent bar at the top */}
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: 6,
+                                    bgcolor: errorInfo.color
+                                }}
+                            />
+
+                            <Box
+                                mb={2}
+                                mt={2}
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    color: errorInfo.color
+                                }}
+                            >
+                                {errorInfo.icon}
+                            </Box>
+
+                            <Chip
+                                label={`Error ${status}`}
+                                color={status === 404 ? "info" : status >= 500 ? "error" : "warning"}
+                                size="medium"
+                                sx={{ mb: 2 }}
+                            />
+
+                            <Typography
+                                variant="h4"
+                                component="h1"
+                                fontWeight="bold"
+                                color="text.primary"
+                                gutterBottom
+                            >
+                                {title}
+                            </Typography>
+
+                            <Typography
+                                variant="body1"
+                                color="text.secondary"
+                                sx={{ mb: 2 }}
+                            >
+                                {description}
+                            </Typography>
+
+                            <Box
+                                sx={{
+                                    bgcolor: alpha(errorInfo.color, 0.1),
+                                    p: 2,
+                                    borderRadius: 1,
+                                    mb: 3,
+                                    display: 'flex',
+                                    alignItems: 'flex-start',
+                                    gap: 1
+                                }}
+                            >
+                                <HelpOutlineIcon color="action" sx={{ mt: 0.5 }} />
+                                <Typography variant="body2" color="text.secondary" align="left">
+                                    {errorInfo.suggestion}
+                                </Typography>
+                            </Box>
+
+                            <Divider sx={{ my: 3 }}>
+                                <Chip label="What would you like to do?" size="small" />
+                            </Divider>
+
+                            <Stack spacing={2}>
+                                <Button
+                                    component={InertiaLink}
+                                    href="/"
+                                    variant="contained"
+                                    color="primary"
+                                    fullWidth
+                                    startIcon={<HomeIcon />}
+                                    sx={{
+                                        py: 1.2,
+                                        fontWeight: 'medium',
+                                        boxShadow: 2
+                                    }}
+                                >
+                                    Go to Dashboard
+                                </Button>
+
+                                <Button
+                                    onClick={() => window.history.back()}
+                                    variant="outlined"
+                                    color="inherit"
+                                    fullWidth
+                                    startIcon={<ArrowBackIcon />}
+                                    sx={{ py: 1.2 }}
+                                >
+                                    Go Back
+                                </Button>
+                            </Stack>
+                        </Paper>
+
+                        <Typography variant="caption" color="text.secondary" align="center" sx={{ mt: 3, display: 'block' }}>
+                            If you continue to experience issues, please contact support.
+                        </Typography>
+                    </Container>
+                </Fade>
+            </Box>
+        </>
+    );
+}
+
+// This page deliberately doesn't use the default layout
+Error.layout = page => page;

@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Domains\Patient\Services;
+
+use App\Domains\Patient\DTOs\RelativeDTO;
+use App\Domains\Patient\Models\Relative;
+
+class RelativeService
+{
+    public function makeRelative(RelativeDTO $relativeDTO): void
+    {
+
+        Relative::create($relativeDTO->toArray());
+    }
+
+    public function updateRelation(Relative $relative, RelativeDTO $relativeDTO): void
+    {
+        $relative->update($relativeDTO->toArray());
+    }
+
+    public function deleteRelation(Relative $relative): void
+    {
+        $relative->delete();
+    }
+
+}

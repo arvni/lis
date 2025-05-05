@@ -1,0 +1,76 @@
+<?php
+
+namespace App\Domains\Laboratory\Models;
+
+use App\Domains\Laboratory\Enums\MethodPriceType;
+use App\Domains\Reception\Models\AcceptanceItem;
+use App\Domains\Referrer\Models\ReferrerMethod;
+use Illuminate\Database\Eloquent\Model;
+
+class Method extends Model
+{
+    protected $fillable = [
+        "id",
+        "name",
+        "turnaround_time",
+        "status",
+        "price",
+        "requirements",
+        "price_type",
+        "extra",
+        "barcode_group_id",
+        "workflow_id",
+        "no_patient"
+    ];
+
+    protected $casts = [
+        "price" => "float",
+        "status" => "boolean",
+        "requirements" => "json",
+        "extra"=>"json",
+        "price_type" => MethodPriceType::class
+    ];
+
+    public function acceptanceItems()
+    {
+        return $this->hasManyThrough(AcceptanceItem::class,MethodTest::class,"method_id","method_test_id");
+    }
+
+    public function tests()
+    {
+        return $this->belongsToMany(Test::class, "method_tests")
+            ->withPivot(["is_default","status"]);
+    }
+
+    public function test()
+    {
+        return $this->hasOneThrough(Test::class, MethodTest::class, "method_id", "id", "id", "test_id")
+            ->where("is_default", true);
+    }
+
+    public function methodTests()
+    {
+        return $this->hasMany(MethodTest::class);
+    }
+
+    public function workflow()
+    {
+        return $this->belongsTo(Workflow::class);
+    }
+
+    public function barcodeGroup()
+    {
+        return $this->belongsTo(BarcodeGroup::class);
+    }
+
+
+    public function scopeActive($query)
+    {
+        return $query->where("status", true);
+    }
+
+    public function scopeSearch($query, $search)
+    {
+        return $query->where("name", "like", "%$search%");
+    }
+}

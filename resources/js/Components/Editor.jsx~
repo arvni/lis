@@ -1,0 +1,185 @@
+import React, { useEffect, useState, useRef } from "react";
+import SunEditor from 'suneditor-react';
+import 'suneditor/dist/css/suneditor.min.css';
+import { Box, Typography, Paper, CircularProgress } from "@mui/material";
+
+/**
+ * Enhanced WYSIWYG Editor Component with improved error handling
+ *
+ * @param {Object} props Component properties
+ * @param {string|null|undefined} props.value Initial editor content
+ * @param {Function} props.onChange Change handler
+ * @param {string} props.name Field name
+ * @param {string} props.label Optional label for the editor
+ * @param {string} props.height Height of the editor
+ * @param {Object} props.rest Additional SunEditor props
+ * @returns {JSX.Element} Editor component
+ */
+const Editor = (props) => {
+    // Destructure with defaults for all required properties
+    const {
+        value,
+        onChange,
+        name = "editor",
+        label = "Content Editor",
+        height = "calc(100vh - 400px)",
+        ...rest
+    } = props || {};
+
+    // State management
+    const [templates, setTemplates] = useState([]);
+    const [editorReady, setEditorReady] = useState(false);
+    const [editorInstance, setEditorInstance] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Refs
+    const sunEditorRef = useRef(null);
+
+    // Create a safe string value to prevent errors
+    // Empty string is safer than undefined or null for the editor
+    const safeValue = (value === undefined || value === null) ? "" : String(value);
+
+    // Simplified toolbar configuration
+    const toolbarConfig = [
+        ['undo', 'redo'],
+        ['bold', 'underline', 'italic', 'strike'],
+        ['fontSize', 'formatBlock', 'paragraphStyle'],
+        ['fontColor', 'hiliteColor'],
+        ['removeFormat'],
+        ['align', 'list', 'indent', 'outdent'],
+        ['link', 'image', 'table'],
+        ['fullScreen', 'codeView']
+    ];
+
+    // Mobile-friendly toolbar configuration
+    const mobileToolbarConfig = [
+        ['undo', 'redo'],
+        ['bold', 'italic'],
+        ['fontSize', 'fontColor'],
+        ['removeFormat'],
+        ['link', 'image'],
+        ['fullScreen']
+    ];
+
+    // Safe change handler
+    const handleChange = (content) => {
+        if (typeof onChange === 'function') {
+            try {
+                // Ensure we always pass a string
+                const safeContent = content || "";
+                onChange({
+                    target: {
+                        name,
+                        value: safeContent
+                    }
+                });
+            } catch (error) {
+                console.error("Error in Editor onChange handler:", error);
+            }
+        }
+    };
+
+    // Handle editor initialization
+    const handleEditorLoad = (sunEditor) => {
+        setEditorInstance(sunEditor);
+        setEditorReady(true);
+        setIsLoading(false);
+    };
+
+    // Update templates when they change
+    useEffect(() => {
+        if (rest.templates) {
+            setTemplates(Array.isArray(rest.templates) ? rest.templates : []);
+        }
+    }, [rest.templates]);
+
+    // Clean up editor on unmount
+    useEffect(() => {
+        return () => {
+            if (editorInstance) {
+                try {
+                    editorInstance.destroy();
+                } catch (e) {
+                    console.error("Error destroying SunEditor instance:", e);
+                }
+            }
+        };
+    }, [editorInstance]);
+
+    return (
+        <Box sx={{ width: '100%' }}>
+            {label && (
+                <Typography
+                    variant="subtitle1"
+                    sx={{ mb: 1, fontWeight: 500 }}
+                >
+                    {label}
+                </Typography>
+            )}
+
+            <Paper elevation={0} variant="outlined" sx={{ p: 1, mb: 2, position: 'relative' }}>
+                {isLoading && (
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: 'rgba(255,255,255,0.7)',
+                            zIndex: 1
+                        }}
+                    >
+                        <CircularProgress size={24} />
+                    </Box>
+                )}
+
+                <Box sx={{ width: '100%' }}>
+                    <SunEditor
+                        ref={sunEditorRef}
+                        {...rest}
+                        name={name}
+                        setContents={safeValue} /* Use setContents instead of defaultValue */
+                        width="100%"
+                        height={height}
+                        onChange={handleChange}
+                        onLoad={handleEditorLoad}
+                        setOptions={{
+                            templates: templates || [],
+                            imageAccept: "jpg,png,jpeg",
+                            imageUploadSizeLimit: "10000000",
+                            imageResizing: true,
+                            charCounter: true,
+                            charCounterLabel: 'Characters: ',
+                            buttonList: [
+                                // Default view (all screens)
+                                toolbarConfig,
+
+                                // Responsive breakpoints
+                                ['%992', toolbarConfig],
+                                ['%767', toolbarConfig],
+                                ['%480', mobileToolbarConfig]
+                            ],
+                            // Improved styling
+                            font: [
+                                'Arial',
+                                'Comic Sans MS',
+                                'Courier New',
+                                'Georgia',
+                                'Tahoma',
+                                'Times New Roman',
+                                'Verdana'
+                            ],
+                            placeholder: 'Start typing here...'
+                        }}
+                    />
+                </Box>
+            </Paper>
+        </Box>
+    );
+};
+
+export default Editor;

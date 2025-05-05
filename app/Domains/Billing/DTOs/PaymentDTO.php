@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Domains\Billing\DTOs;
+
+
+use App\Domains\Billing\Enums\PaymentMethod;
+
+class PaymentDTO
+{
+    public function __construct(
+        public int           $invoiceId,
+        public int           $cashierId,
+        public string        $payerType,
+        public int           $payerId,
+        public float         $price,
+        public PaymentMethod $paymentMethod,
+        public ?array         $information,
+    )
+    {
+    }
+
+    public static function fromRequest($request): self
+    {
+        return new self(
+            invoiceId: $request['invoice_id'],
+            cashierId: auth()->user()->id,
+            payerType: $request['payer']['type'],
+            payerId: $request['payer']['id'],
+            price: $request['price'],
+            paymentMethod: PaymentMethod::from($request['paymentMethod']),
+            information: $request['information']??null,
+        );
+    }
+
+    public function toArray(): array
+    {
+        return [
+            "invoice_id" => $this->invoiceId,
+            "cashier_id" => $this->cashierId,
+            "payer_type" => $this->payerType,
+            "payer_id" => $this->payerId,
+            "price" => $this->price,
+            "paymentMethod" => $this->paymentMethod,
+            "information" => $this->information
+        ];
+    }
+}

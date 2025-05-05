@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Domains\Laboratory\Models\Section;
+use App\Domains\Reception\DTOs\AcceptanceItemStateDTO;
+use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
+use App\Domains\Reception\Enums\AcceptanceStatus;
+use App\Domains\Reception\Services\AcceptanceItemService;
+use App\Domains\Reception\Services\AcceptanceItemStateService;
+use App\Domains\Reception\Services\AcceptanceService;
+use App\Http\Requests\EnterSectionSampleRequest;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\RedirectResponse;
+
+class EnterSectionSampleController extends Controller
+{
+    public function __construct(
+        private readonly AcceptanceItemStateService $acceptanceItemStateService,
+        private readonly AcceptanceItemService      $acceptanceItemService,
+        private readonly AcceptanceService          $acceptanceService
+    )
+    {
+
+    }
+
+    /**
+     * Handle the incoming request.
+     * @throws AuthorizationException
+     */
+    public function __invoke(Section $section, EnterSectionSampleRequest $request): RedirectResponse
+    {
+        $this->authorize("action", [$section, "Enter"]);
+        $this->authorize("action", [$section, "Enter"]);
+
+        $barcode = $request->get("barcode");
+        $userId = auth()->id();
+        $userName = auth()->user()->name;
+
+        try {
+            $this->sampleEntryService->processSampleEntry($barcode, $section, $userId, $userName);
+            return redirect()->back()->with([
+                "success" => true,
+                "status" => "Sample accepted successfully."
+            ]);
+        } catch (\Exception $e) {
+            return back()->withErrors(["barcode" => $e->getMessage()]);
+        }
+    }
+}

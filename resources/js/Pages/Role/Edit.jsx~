@@ -1,0 +1,36 @@
+import AddForm from './Components/Form';
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import {router, useForm} from "@inertiajs/react";
+
+const Edit = ({permissions, role}) => {
+    const {data, setData, post, processing} = useForm({...role, _method: "put"});
+    const handleSubmit = () => post(route('roles.update', role.id));
+    const handleCancel = () => router.visit(route('roles.index'));
+    return (
+        <>
+            <AddForm data={data} edit setData={setData} submit={handleSubmit} permissions={permissions}
+                     cancel={handleCancel}/>
+            <Backdrop sx={{color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1}} open={processing}>
+                <CircularProgress color="inherit"/>
+            </Backdrop>
+        </>
+    );
+}
+
+const breadCrumbs = [
+    {
+        title: "Roles",
+        link: "/roles",
+        icon: null,
+    },
+    {
+        title: "Edit Role",
+        link: "",
+        icon: null
+    }
+]
+
+Edit.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
+export default Edit;

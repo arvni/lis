@@ -1,0 +1,222 @@
+import React, {useEffect, useState} from "react";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText" ;
+import OutlinedInput from "@mui/material/OutlinedInput";
+import Select from "@mui/material/Select";
+import TextField from "@mui/material/TextField";
+import Grid from "@mui/material/Grid2";
+import List from "@mui/material/List";
+import IconButton from "@mui/material/IconButton";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import Button from "@mui/material/Button";
+import MenuItem from "@mui/material/MenuItem";
+import SaveIcon from "@mui/icons-material/Save";
+import Divider from "@mui/material/Divider";
+import SelectSearch from "@/Components/SelectSearch";
+import {FormControlLabel, FormHelperText, Switch} from "@mui/material";
+
+const AddSection = ({open, onClose, sectionWorkflow, onChange, setSectionWorkflow}) => {
+    const [parameter, setParameter] = useState({name: "", type: "", index: null, required: true});
+    const [sectionErrors, setSectionErrors] = useState({});
+    const [parameterErrors, setParameterErrors] = useState({});
+    useEffect(() => {
+        setParameter({name: "", type: "", index: null, required: true});
+        setSectionErrors({});
+        setParameterErrors({});
+    }, [open]);
+    const addParameter = () => {
+        if (checkParameter()) {
+            let parameters = sectionWorkflow.parameters;
+            let tmp = {...parameter};
+            delete tmp.index;
+            if (parameter.index != null)
+                parameters[parameter.index] = tmp;
+            else
+                parameters.push(tmp);
+            setSectionErrors({});
+            setSectionWorkflow(prevState => ({...prevState, parameters}));
+            setParameter({name: "", type: "", index: null, required: true})
+        }
+    }
+    const deleteParameter = (i) => () => {
+        let parameters = [...sectionWorkflow.parameters];
+        parameters.splice(i, 1);
+        setSectionWorkflow(prevState => ({...prevState, parameters}));
+    }
+    const editParameter = (i) => () => setParameter({...sectionWorkflow.parameters[i], index: i});
+    const changeParameter = (e) => setParameter(prevState => ({...prevState, [e.target.name]: e.target.value}));
+    const changeRequiredParameter = (e) => setParameter(prevState => ({
+        ...prevState,
+        [e.target.name]: e.target.checked
+    }));
+
+    const sectionChange = (e) => {
+        let tmp = {
+            ...sectionWorkflow.section,
+            ...e.target.value
+        }
+        setSectionWorkflow(prevState => ({
+            ...prevState,
+            section: tmp
+        }))
+    }
+
+    const checkParameter = () => {
+        let tmp = {};
+        if (parameter.type == null || parameter.type === "")
+            Object.assign(tmp, {type: "Please Select A Type"});
+        if (sectionWorkflow.parameters.filter((item, index) => (item.name === parameter.name) && (index !== parameter.index)).length)
+            Object.assign(tmp, {name: "Please Enter Different Parameter Title"});
+        if (parameter.name === "")
+            Object.assign(tmp, {name: "Please Enter Parameter Title"});
+
+        if (parameter.type === "options" && (parameter.options === "" || Array.from(new Set(parameter.options?.split(";").map(item => item.trim()))).length < 2))
+            Object.assign(tmp, {options: "Please Enter At Least Two Different Option"});
+        setParameterErrors(tmp);
+        return !Object.keys(tmp).length;
+    }
+    const checkForm = () => {
+        let tmp = {};
+        if (!sectionWorkflow.section.id)
+            Object.assign(tmp, {section: "Please Select A Section"});
+        if (!sectionWorkflow.parameters.length)
+            Object.assign(tmp, {parameters: "Please Add At Least One Parameter"});
+        setSectionErrors(tmp);
+        return !Object.keys(tmp).length;
+    }
+    const submit = () => {
+        if (checkForm())
+            onChange();
+    }
+
+    const sectionGroupChange = (e) => {
+        let tmp = {
+            sectionGroup: e.target.value,
+            name: "",
+            id: "",
+        }
+        setSectionWorkflow(prevState => ({
+            ...prevState,
+            section: tmp
+        }));
+    }
+    return <Dialog open={open}
+                   onClose={onClose}
+                   maxWidth="md"
+                   fullWidth>
+        <DialogTitle>Add New Section To WorkFlow</DialogTitle>
+        <DialogContent>
+            <Grid container sx={{py: "1em"}} spacing={2}>
+                <Grid size={{xs: 12, sm: 6}}>
+                    <SelectSearch value={sectionWorkflow?.section?.sectionGroup}
+                                  onChange={sectionGroupChange}
+                                  label="Section Group"
+                                  fullWidth
+                                  error={sectionErrors.hasOwnProperty("section")}
+                                  name="sectionGroup"
+                                  url={route('api.sectionGroups.list')}/>
+                </Grid>
+                {sectionWorkflow?.section?.sectionGroup && <Grid size={{xs: 12, sm: 6}}>
+                    <SelectSearch value={sectionWorkflow.section}
+                                  onChange={sectionChange}
+                                  fullWidth
+                                  label="Section" defaultData={{section_group_id: sectionWorkflow?.section?.sectionGroup?.id}}
+                                  error={sectionErrors.hasOwnProperty("section")}
+                                  name="section" url={route('api.sections.list')}/>
+                </Grid>}
+            </Grid>
+            <Divider>Parameters</Divider>
+
+            <List dense sx={{width:"100%"}}>
+                {sectionWorkflow.parameters.map((parameter, index) => (
+                    <React.Fragment key={index}>
+                        <ListItem
+                                  alignItems="center"
+                                  secondaryAction={<>
+                                      <IconButton onClick={deleteParameter(index)}>
+                                          <DeleteIcon/>
+                                      </IconButton>
+                                      <IconButton onClick={editParameter(index)}>
+                                          <EditIcon/>
+                                      </IconButton>
+                                  </>}>
+                            <ListItemText primary={`${parameter.name} : ${parameter.type}`}
+                                          secondary={`${parameter.type === "options" ? ` Options : ${parameter.options} | ` : ""} Required : ${parameter.required}`}/>
+                        </ListItem>
+                        <Divider variant="inset"
+                                 component="li"/>
+                    </React.Fragment>
+                ))}
+                <ListItem sx={{mt: "1em"}}>
+                    <Grid container spacing={1} sx={{width:"100%"}}>
+                        <Grid size={{xs: 12, sm: 6, md: 4, lg: 3}} >
+                            <TextField label="Parameter Title"
+                                       fullWidth
+                                       error={parameterErrors.hasOwnProperty("name") || sectionErrors.hasOwnProperty("parameters")}
+                                       name="name" onChange={changeParameter}
+                                       value={parameter.name}
+                                       helperText={parameterErrors.hasOwnProperty("name") ? parameterErrors.name : sectionErrors.hasOwnProperty("parameters") ? sectionErrors.parameters : ""}/>
+                        </Grid>
+                        <Grid size={{xs: 12, sm: 6, md: 4, lg: 3}}>
+                            <FormControl variant="outlined" fullWidth>
+                                <InputLabel id="parameter-type-label"
+                                            variant="outlined">Parameter Type</InputLabel>
+                                <Select labelId="parameter-type-label"
+                                        id="parameter-type"
+                                        input={<OutlinedInput
+                                            value={parameter.type}
+                                            label="Parameter Type"
+                                            error={parameterErrors.hasOwnProperty("type")}/>}
+                                        name="type"
+                                        onChange={changeParameter}
+                                        value={parameter.type}>
+                                    <MenuItem value="text">Text</MenuItem>
+                                    <MenuItem value="date">Date</MenuItem>
+                                    <MenuItem value="time">Time</MenuItem>
+                                    <MenuItem value="number">Number</MenuItem>
+                                    <MenuItem value="options">Options</MenuItem>
+                                    <MenuItem value="file">File</MenuItem>
+                                </Select>
+                                <FormHelperText
+                                    error={parameterErrors.hasOwnProperty("type")}>{parameterErrors.hasOwnProperty("type") ? parameterErrors.type : ""}</FormHelperText>
+                            </FormControl>
+                        </Grid>
+
+                        {parameter.type === "options" ? <Grid  size={{xs: 12, sm: 6, md: 4, lg: 3}}>
+                            <TextField label={<span>Please Enter Options</span>}
+                                       fullWidth
+                                       error={parameterErrors.hasOwnProperty("options") || sectionErrors.hasOwnProperty("parameters")}
+                                       name="options" onChange={changeParameter} value={parameter.options}
+                                       helperText={parameterErrors.hasOwnProperty("options") ? parameterErrors.options : sectionErrors.hasOwnProperty("parameters") ? sectionErrors.parameters : "separate options with ';'"}/>
+                        </Grid> : null}
+                        <Grid item>
+                            <FormControlLabel
+                                control={<Switch color="primary" checked={parameter.required}
+                                                 onChange={changeRequiredParameter} name={"required"}/>}
+                                label="Required"
+                                labelPlacement="start"
+                            />
+                        </Grid>
+                        <Grid item>
+                            <IconButton onClick={addParameter}>
+                                <SaveIcon/>
+                            </IconButton>
+                        </Grid>
+                    </Grid>
+                </ListItem>
+            </List>
+        </DialogContent>
+        <DialogActions>
+            <Button variant="contained" onClick={submit}>Submit</Button>
+            <Button onClick={onClose}>Cancel</Button>
+        </DialogActions>
+    </Dialog>
+}
+export default AddSection;

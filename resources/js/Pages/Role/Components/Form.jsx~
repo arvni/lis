@@ -1,0 +1,408 @@
+import Grid from "@mui/material/Grid2";
+import TextField from "@mui/material/TextField";
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary, Box,
+    Stack,
+    Switch, Tab,
+    Paper,
+    Tooltip,
+    Card,
+    Chip,
+    useTheme,
+    alpha
+} from "@mui/material";
+import Container from "@mui/material/Container";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import { ExpandMore, Settings, Help, Check, EditOutlined } from "@mui/icons-material";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
+import { useState, useMemo, memo } from "react";
+
+// Memoized Permission component to prevent unnecessary re-renders
+const Permission = memo(({ onChange, checked, permission, label, level }) => {
+    const theme = useTheme();
+    const handleChange = (event) => {
+        onChange(event);
+    };
+    return (
+        <Tooltip
+            title={`Permission ID: ${permission.id}`}
+            arrow
+            placement="top"
+        >
+            <Card
+                variant="outlined"
+                sx={{
+                    p: 1,
+                    mb: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderRadius: 2,
+                    borderColor: checked ? theme.palette.primary.main : theme.palette.divider,
+                    bgcolor: checked ? alpha(theme.palette.primary.main, 0.05) : 'transparent',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                        borderColor: checked ? theme.palette.primary.main : theme.palette.action.active
+                    }
+                }}
+            >
+                <Typography
+                    sx={{
+                        fontWeight: (700 - level * 100),
+                        fontSize: 20 - level,
+                        color: checked ? theme.palette.primary.main : 'text.primary',
+                        mx: 1
+                    }}
+                >
+                    {label}
+                </Typography>
+
+                <Stack direction="row" spacing={1} alignItems="center">
+                    {checked && (
+                        <Chip
+                            size="small"
+                            color="primary"
+                            label="Enabled"
+                            icon={<Check fontSize="small" />}
+                            sx={{ height: 24 }}
+                        />
+                    )}
+                    <Switch
+                        checked={checked}
+                        value={permission.id}
+                        onChange={handleChange}
+                        color="primary"
+                    />
+                </Stack>
+            </Card>
+        </Tooltip>
+    );
+});
+
+// Separate component for permission group to improve code organization
+const PermissionGroup = memo(({ permission, label, onChange, data, level = 0 }) => {
+    const theme = useTheme();
+    const variant = `h${level + 4}`;
+    const hasPermission = permission?.id && data.permissions.includes(permission.id);
+    const totalChildPermissions = useMemo(() => {
+        if (!permission?.children) return 0;
+        return Object.keys(permission.children).length;
+    }, [permission]);
+
+    return (
+        <Accordion
+            defaultExpanded={level < 2}
+            sx={{
+                mb: 2,
+                border: '1px solid',
+                borderColor: theme.palette.divider,
+                borderRadius: '8px !important',
+                '&:before': {
+                    display: 'none',
+                },
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+            }}
+        >
+            <AccordionSummary
+                expandIcon={<ExpandMore />}
+                aria-controls={`panel-${permission?.id || label}-content`}
+                id={`panel-${permission?.id || label}-header`}
+                sx={{
+                    bgcolor: hasPermission ? alpha(theme.palette.primary.main, 0.05) : null,
+                    borderBottom: '1px solid',
+                    borderColor: theme.palette.divider,
+                    '&:hover': {
+                        bgcolor: hasPermission
+                            ? alpha(theme.palette.primary.main, 0.08)
+                            : alpha(theme.palette.action.hover, 0.08)
+                    }
+                }}
+            >
+                <Stack direction="row" spacing={2} alignItems="center">
+                    <Settings
+                        fontSize="small"
+                        color={hasPermission ? "primary" : "action"}
+                    />
+                    <Typography
+                        variant={variant}
+                        color={hasPermission ? "primary" : "textPrimary"}
+                        sx={{ fontWeight: hasPermission ? 600 : 500 }}
+                    >
+                        {label}
+                    </Typography>
+
+                    {totalChildPermissions > 0 && (
+                        <Chip
+                            size="small"
+                            label={`${totalChildPermissions} permission${totalChildPermissions > 1 ? 's' : ''}`}
+                            color="default"
+                            variant="outlined"
+                            sx={{ height: 24 }}
+                        />
+                    )}
+                </Stack>
+            </AccordionSummary>
+            <AccordionDetails sx={{ pt: 3, pb: 2 }}>
+                {permission?.id && (
+                    <Box sx={{ mb: 3 }}>
+                        <Permission
+                            permission={permission}
+                            checked={hasPermission}
+                            label={`${label} (Group permission)`}
+                            level={level}
+                            onChange={onChange}
+                        />
+                    </Box>
+                )}
+                {permission?.children && (
+                    <PermissionChildren
+                        permissions={permission.children}
+                        onChange={onChange}
+                        data={data}
+                        level={level + 1}
+                        id={permission.id}
+                    />
+                )}
+            </AccordionDetails>
+        </Accordion>
+    );
+});
+
+// Separate component for permission children to improve code organization
+const PermissionChildren = memo(({ permissions, onChange, data, level, id = null }) => {
+    const { hasChildrenPermission, singlePermission } = useMemo(() => {
+        const hasChildren = [];
+        const single = [];
+
+        Object.keys(permissions).forEach(item => {
+            if (Object.keys(permissions[item]).includes("children")) {
+                hasChildren.push(item);
+            } else {
+                single.push(item);
+            }
+        });
+
+        return { hasChildrenPermission: hasChildren, singlePermission: single };
+    }, [permissions]);
+    return (
+        <Grid container spacing={2} key={`${id}-${level}`}>
+            <Grid item size={{xs:12}}>
+                <Stack direction="row" spacing={2} flexWrap="wrap">
+                    {singlePermission.map(item => (
+                        <Permission
+                            key={permissions[item].id}
+                            onChange={onChange}
+                            label={item}
+                            level={level}
+                            checked={data.permissions.includes(permissions[item].id)}
+                            permission={permissions[item]}
+                        />
+                    ))}
+                </Stack>
+            </Grid>
+            <Grid item size={{xs:12}}>
+                {hasChildrenPermission.map(item => (
+                    <PermissionGroup
+                        key={item}
+                        permission={permissions[item]}
+                        label={item}
+                        onChange={onChange}
+                        data={data}
+                        level={level}
+                    />
+                ))}
+            </Grid>
+        </Grid>
+    );
+});
+
+export default function RoleManager({ data, setData, submit, permissions, edit, cancel }) {
+    const theme = useTheme();
+    const [activeTab, setActiveTab] = useState(Object.keys(permissions)[0]);
+    const [saveDisabled, setSaveDisabled] = useState(data.name === '');
+
+    const permissionCount = useMemo(() => {
+        return data.permissions?.length || 0;
+    }, [data.permissions]);
+
+    const handlePermissionsChanged = (e) => {
+        const permissionId = Number(e.target.value);
+        setData(prevState => {
+            const updatedPermissions = [...prevState.permissions];
+            if (e.target.checked) {
+                if (!updatedPermissions.includes(permissionId)) {
+                    updatedPermissions.push(permissionId);
+                }
+            } else {
+                const index = updatedPermissions.findIndex(p => p == permissionId);
+                if (index > -1) {
+                    updatedPermissions.splice(index, 1);
+                }
+            }
+
+            return { ...prevState, permissions: updatedPermissions };
+        });
+    };
+
+    const handleTabChange = (event, newValue) => {
+        setActiveTab(newValue);
+    };
+
+    const handleNameChanged = (e) => {
+        const { name, value } = e.target;
+        setSaveDisabled(value === '');
+        setData(prevState => ({ ...prevState, [name]: value }));
+    };
+    return (
+        <Paper
+            elevation={2}
+            sx={{
+                borderRadius: 3,
+                overflow: 'hidden'
+            }}
+        >
+            <Box
+                sx={{
+                    bgcolor: theme.palette.primary.main,
+                    p: 3,
+                    color: 'white',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                }}
+            >
+                <Stack direction="row" spacing={1} alignItems="center">
+                    <EditOutlined />
+                    <Typography variant="h4">{`${edit ? "Edit" : "Add New"} Role`}</Typography>
+                </Stack>
+
+                {data.permissions?.length > 0 && (
+                    <Chip
+                        label={`${permissionCount} Permission${permissionCount > 1 ? 's' : ''} Selected`}
+                        color="secondary"
+                    />
+                )}
+            </Box>
+
+            <Container sx={{ p: 3 }}>
+                <Grid container spacing={3}>
+                    <Grid item xs={12} md={6}>
+                        <TextField
+                            value={data.name}
+                            name="name"
+                            label="Role Title"
+                            onChange={handleNameChanged}
+                            fullWidth
+                            variant="outlined"
+                            placeholder="Enter role title"
+                            required
+                            helperText={data.name === '' ? "Role title is required" : "This title will be displayed across the system"}
+                            InputProps={{
+                                sx: { borderRadius: 2 }
+                            }}
+                        />
+                    </Grid>
+                </Grid>
+
+                <Box
+                    sx={{
+                        mt: 5,
+                        mb: 3,
+                        p: 3,
+                        bgcolor: alpha(theme.palette.background.default, 0.5),
+                        borderRadius: 3,
+                        border: `1px solid ${theme.palette.divider}`
+                    }}
+                >
+                    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                        <Typography variant="h6">Role Permissions</Typography>
+                        <Tooltip title="Select the permissions this role should have">
+                            <Help fontSize="small" color="action" />
+                        </Tooltip>
+                    </Stack>
+
+                    <TabContext value={activeTab}>
+                        <Box
+                            sx={{
+                                borderRadius: 2,
+                                bgcolor: theme.palette.background.paper,
+                                mb: 2
+                            }}
+                        >
+                            <TabList
+                                onChange={handleTabChange}
+                                aria-label="permissions tabs"
+                                sx={{
+                                    '& .MuiTabs-indicator': {
+                                        height: 3,
+                                        borderRadius: '3px 3px 0 0'
+                                    }
+                                }}
+                            >
+                                {Object.keys(permissions).map(item => (
+                                    <Tab
+                                        label={item}
+                                        key={item}
+                                        value={item}
+                                        sx={{
+                                            textTransform: 'none',
+                                            fontWeight: 600,
+                                            px: 3
+                                        }}
+                                    />
+                                ))}
+                            </TabList>
+                        </Box>
+
+                        {Object.keys(permissions).map(item => (
+                            <TabPanel
+                                value={item}
+                                key={item}
+                                sx={{ width: '100%', p: 0 }}
+                            >
+                                <PermissionChildren
+                                    permissions={{ [item]: permissions[item] }}
+                                    onChange={handlePermissionsChanged}
+                                    data={data}
+                                    level={0}
+                                    id="start"
+                                />
+                            </TabPanel>
+                        ))}
+                    </TabContext>
+                </Box>
+
+                <Box
+                    sx={{
+                        mt: 5,
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        gap: 2,
+                        borderTop: `1px solid ${theme.palette.divider}`,
+                        pt: 3
+                    }}
+                >
+                    <Button
+                        onClick={cancel}
+                        variant="outlined"
+                        sx={{ borderRadius: 2, px: 3 }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={submit}
+                        disabled={saveDisabled}
+                        sx={{ borderRadius: 2, px: 4 }}
+                    >
+                        {edit ? "Save Changes" : "Create Role"}
+                    </Button>
+                </Box>
+            </Container>
+        </Paper>
+    );
+}

@@ -1,0 +1,21 @@
+import React from "react";
+import Stack from "@mui/material/Stack";
+
+const PrescriptionSection = ({ prescription }) => {
+    if (!prescription) return null;
+
+    return (
+        <Stack direction="row" spacing={5}>
+            <span>{prescription.originalName}</span>
+            <a
+                href={route("documents.show", prescription.hash)}
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                View
+            </a>
+        </Stack>
+    );
+};
+
+export default PrescriptionSection;

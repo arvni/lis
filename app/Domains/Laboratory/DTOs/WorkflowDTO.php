@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Domains\Laboratory\DTOs;
+
+class WorkflowDTO
+{
+    public function __construct(
+        public string $name,
+        public ?string $description,
+        public bool   $status,
+    )
+    {
+    }
+
+    public function toArray()
+    {
+        return [
+            "name" => $this->name,
+            "status" => $this->status,
+            "description" => $this->description,
+        ];
+    }
+}

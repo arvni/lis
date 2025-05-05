@@ -1,0 +1,70 @@
+import React from "react";
+import TestsTable from "./TestsTable";
+import AddTest from "../AddTest.jsx";
+import AddPanel from "../AddPanel.jsx";
+import DeleteForm from "@/Components/DeleteForm.jsx";
+
+const TestsSection = ({
+                          data,
+                          errors,
+                          testModalState,
+                          panelModalState,
+                          deleteConfirmState,
+                          handlers,
+                          maxDiscount
+                      }) => {
+    return (
+        <>
+            <TestsTable
+                tests={data?.acceptanceItems?.tests || []}
+                panels={data?.acceptanceItems?.panels || []}
+                onAddTest={handlers.openAddTestModal}
+                onAddPanel={handlers.openAddPanelModal}
+                onEditTest={handlers.handleEditTest}
+                onDeleteTest={handlers.handleDeleteTest}
+                onEditPanel={handlers.handleEditPanel}
+                onDeletePanel={handlers.handleDeletePanel}
+            />
+
+            {/* Test Modal */}
+            {testModalState.open && (
+                <AddTest
+                    open={testModalState.open}
+                    initialData={testModalState.item}
+                    onClose={handlers.closeTestModal}
+                    onSubmit={handlers.submitTest}
+                    referrer={data?.referrer}
+                    maxDiscount={maxDiscount}
+                    patient={data?.patient}
+                    onChange={handlers.handleTestChange}
+                />
+            )}
+
+            {/* Panel Modal */}
+            {panelModalState.open && (
+                <AddPanel
+                    open={panelModalState.open}
+                    data={panelModalState.panel}
+                    onClose={handlers.closePanelModal}
+                    onChange={handlers.handlePanelChange}
+                    onSubmit={handlers.submitPanel}
+                    referrer={data?.referrer}
+                    maxDiscount={maxDiscount}
+                    patient={data?.patient}
+                />
+            )}
+
+            {/* Delete Confirmation */}
+            {deleteConfirmState.open && (
+                <DeleteForm
+                    openDelete={deleteConfirmState.open}
+                    agreeCB={handlers.confirmDeleteTest}
+                    disAgreeCB={handlers.cancelDelete}
+                    title={`${deleteConfirmState.item?.method_test?.test?.name || ""} Test`}
+                />
+            )}
+        </>
+    );
+};
+
+export default TestsSection;
