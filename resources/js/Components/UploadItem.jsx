@@ -1,5 +1,5 @@
 import { LinearProgress, Stack, Typography, Tooltip, Card, Box, IconButton,
-    Menu, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
+    Menu, MenuItem, Select, FormControl } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloseIcon from "@mui/icons-material/Close";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -284,7 +284,6 @@ const UploadItem = ({
                                             value={selectedTag}
                                             onChange={handleTagSelect}
                                             size="small"
-                                            variant="outlined"
                                             variant="outlined"
                                             sx={{ height: 24, fontSize: '0.75rem' }}
                                             displayEmpty

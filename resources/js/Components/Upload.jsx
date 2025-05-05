@@ -18,7 +18,6 @@ import axios from "axios";
 // to potentially receive file objects with status/progress/error info.
 import UploadItem from "@/Components/UploadItem"; // Assuming this component can handle the file state object
 import DeleteForm from "@/Components/DeleteForm";
-import {router} from "@inertiajs/react";
 
 // --- Styled Components (Keep as before, minor tweak for focus) ---
 const UploadBox = styled(Box)(({theme, isDragOver, error}) => ({

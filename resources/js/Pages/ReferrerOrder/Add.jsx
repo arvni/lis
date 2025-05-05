@@ -1,9 +1,8 @@
 import AddForm from './Components/Form';
-import {useForm} from "@inertiajs/inertia-react";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
-import {Inertia} from "@inertiajs/inertia";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import {router, useForm} from "@inertiajs/react";
 
 const Add = () => {
     const {data, setData, post, processing, errors, setError, clearErrors} = useForm({
@@ -27,7 +26,7 @@ const Add = () => {
     const handleCancel = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        Inertia.visit(route('referrers.index'));
+        router.visit(route('referrers.index'));
     }
     return (
         <>
