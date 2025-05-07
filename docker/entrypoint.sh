@@ -34,7 +34,7 @@ fi
 case "$role" in
     app)
         echo "🚀 Starting PHP-FPM..."
-        exec php-fpm
+        exec php artisan serv --host=0.0.0.0
         ;;
     queue)
         echo "⚙️ Starting Laravel queue worker..."
