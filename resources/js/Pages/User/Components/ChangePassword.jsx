@@ -6,9 +6,10 @@ import {useForm} from '@inertiajs/react';
 import {enqueueSnackbar} from 'notistack';
 import Grid from "@mui/material/Grid2";
 
-const ChangePassword = ({open, onClose, currentNeeded = true}) => {
+const ChangePassword = ({open, onClose, currentNeeded = true,userId}) => {
     const {data, setData, setError, errors, reset, post} = useForm({
         current: '',
+        userId:currentNeeded?null:userId,
         password: '',
         password_confirmation: '',
         _method: 'put'
@@ -33,13 +34,13 @@ const ChangePassword = ({open, onClose, currentNeeded = true}) => {
     }, [post, reset, onClose]);
 
     return (
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
             <DialogTitle>Change Password</DialogTitle>
             <DialogContent>
                 <Container>
                     <Grid container spacing={2} sx={{pt: 2}}>
                         {currentNeeded && (
-                            <Grid item xs={12}>
+                            <Grid size={12}>
                                 <TextField
                                     fullWidth
                                     label="Current Password"
@@ -52,7 +53,7 @@ const ChangePassword = ({open, onClose, currentNeeded = true}) => {
                                 />
                             </Grid>
                         )}
-                        <Grid item xs={12}>
+                        <Grid size={12}>
                             <TextField
                                 fullWidth
                                 label="New Password"
@@ -64,7 +65,7 @@ const ChangePassword = ({open, onClose, currentNeeded = true}) => {
                                 helperText={errors.password || ''}
                             />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={12}>
                             <TextField
                                 fullWidth
                                 label="Confirm Password"

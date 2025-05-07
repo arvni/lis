@@ -503,6 +503,7 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
                     }
                 }}>
                     {filteredRoutes.map((item, index) => (
+
                         <MenuItem
                             key={`menu-item-${index}`}
                             item={item}

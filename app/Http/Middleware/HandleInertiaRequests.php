@@ -10,7 +10,7 @@ use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
-    public function __construct(private readonly SectionGroupService $sectionGroupService, )
+    public function __construct(private readonly SectionGroupService $sectionGroupService,)
     {
     }
 
@@ -36,13 +36,14 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $user=auth()->user();
+        $user = auth()->user();
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
+                'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
             ],
-            'sectionRoutes' =>$user? Cache::rememberForever("user-$user->id-section-routes",fn()=>$this->sectionGroupService->getTransformedSectionGroups()) :[],
+            'sectionRoutes' => $user ? Cache::rememberForever("user-$user->id-section-routes", fn() => $this->sectionGroupService->getTransformedSectionGroups()) : [],
         ];
     }
 }

@@ -69,7 +69,7 @@ const routes = (sections = []) => {
         },
         {
             title: "Consultations",
-            permission: 'Consultations',
+            permission: 'Consultation',
             icon: <InterpreterModeIcon/>,
             child: [
                 {

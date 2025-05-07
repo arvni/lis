@@ -35,10 +35,11 @@ import {usePage} from "@inertiajs/react";
  */
 const MenuItem = memo(({item, permissions, onNavigate, isNested = false}) => {
     const theme = useTheme();
+    console.log(permissions);
     const [open, setOpen] = useState(false);
     const {url} = usePage();
     const hasSubmenu = Array.isArray(item.child) && item.child.length > 0;
-    const isPermitted = true//item.permission || permissions.includes(item.permission);
+    const isPermitted = !Boolean(item.permission) || permissions.includes(item.permission);
 
 
     let itemRoute = refactorRoute(item.route);

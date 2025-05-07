@@ -77,19 +77,8 @@ const Index = ({users, status, errors, success, requestInputs}) => {
     }
 
     const editPassword = (id) => () => {
-        setData({
-            current: "",
-            password: "",
-            password_confirmation: "",
-            userId: id,
-            _method: "put"
-        })
+        setUser(users.data.find(item => item.id == id));
         setOpenChangePassword(true);
-    }
-    const changePassword = () => {
-        post(route("password.update"), {
-            onSuccess: cancel
-        });
     }
 
     const pageReload = (page, filters, sort, pageSize) => {
@@ -102,13 +91,13 @@ const Index = ({users, status, errors, success, requestInputs}) => {
     const handleAddNew = () => router.visit(route('users.create'));
     return (
         <>
-           <PageHeader title="Users" actions={<Button onClick={handleAddNew}
-                                                      size="small"
-                                                      startIcon={<AddIcon/>}
-                                                      variant="contained"
-                                                      color="success">
-               Add User
-           </Button>}/>
+            <PageHeader title="Users" actions={<Button onClick={handleAddNew}
+                                                       size="small"
+                                                       startIcon={<AddIcon/>}
+                                                       variant="contained"
+                                                       color="success">
+                Add User
+            </Button>}/>
             <TableLayout defaultValues={requestInputs}
                          loading={processing}
                          success={success}
@@ -123,9 +112,10 @@ const Index = ({users, status, errors, success, requestInputs}) => {
                          reload={pageReload}>
                 <DeleteForm title={`${user?.name} User`} openDelete={open} disAgreeCB={cancel}
                             agreeCB={deleteUser}/>
-                <ChangePassword onClose={cancel} onSubmit={changePassword} data={data} errors={errors}
-                                setError={setError} open={openChangePassword && !processing} userId={user}
-                                currentNeeded={false} setData={setData}/>
+                {user && openChangePassword && <ChangePassword onClose={cancel}
+                                                               open={openChangePassword && !processing}
+                                                               userId={user.id}
+                                                               currentNeeded={false}/>}
             </TableLayout>
         </>
     );
