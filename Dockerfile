@@ -85,7 +85,7 @@ COPY --chown=laravel:laravel . /app/
 RUN echo "open_basedir=" > /usr/local/etc/php/conf.d/open-basedir.ini
 
 # Install composer dependencies
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # Install npm dependencies and build assets (if necessary)
 RUN if [ -f "package.json" ]; then \
