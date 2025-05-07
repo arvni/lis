@@ -50,19 +50,19 @@ const routes = (sections = []) => {
                 {
                     title: "Patient List",
                     route: "patients.index",
-                    permission: 'Reception.Patient.Index',
+                    permission: 'Reception.Patients.List Patients',
                     icon: <GroupsIcon/>,
                 },
                 {
                     title: "Add Patient",
                     route: "patients.create",
-                    permission: 'Reception.Patient.Create',
+                    permission: 'Reception.Patient.Create Patient',
                     icon: <PersonAddIcon/>
                 },
                 {
                     title: "Acceptance List",
                     route: "acceptances.index",
-                    permission: 'Reception.Acceptance.Index',
+                    permission: 'Reception.Acceptances.List Acceptance',
                     icon: <GroupsIcon/>,
                 },
             ]
@@ -87,32 +87,32 @@ const routes = (sections = []) => {
                 {
                     title: "Consultants",
                     route: "consultants.index",
-                    permission: 'Consultations.Consultation.Index',
+                    permission: 'Consultation.Consultants.List Consultants',
                     icon: null,
                 },
                 {
                     title: "Reservations",
                     route: "times",
-                    permission: 'Consultations.Consultation.Index',
+                    permission: 'Consultation.Reservations.List Reservations',
                     icon: null,
                 },
             ]
         },
         {
             title: "Sampling",
-            permission: 'Sampling',
+            permission: 'Sample Collection',
             icon: <VaccinesIcon/>,
             child: [
                 {
                     title: "Sample Collection",
                     route: "sampleCollection",
-                    permission: 'Sampling.Sample.SampleCollection',
+                    permission: 'Sample Collection',
                     icon: null,
                 },
                 {
                     title: "Samples List",
                     route: "samples.index",
-                    permission: 'Sampling.Sample.Index',
+                    permission: 'Sample Collection.Samples.List Samples',
                     icon: null,
                 },
             ]
@@ -126,7 +126,7 @@ const routes = (sections = []) => {
                 {
                     title: "Waiting For Creating",
                     route: "reports.waitingList",
-                    permission: 'Report.WaitingList',
+                    permission: 'Report.Create Report',
                     icon: <PostAddIcon/>
                 },
                 //     {
@@ -137,7 +137,7 @@ const routes = (sections = []) => {
                 //     },
                 {
                     title: "List",
-                    permission: 'Report.Index',
+                    permission: 'Report.List Report',
                     route: "reports.index",
                     icon: <AutoAwesomeMotionIcon/>
                 }
@@ -147,7 +147,7 @@ const routes = (sections = []) => {
             title: "Invoices",
             icon: <ReceiptIcon/>,
             route: "invoices.index",
-            permission: 'Invoice.Index',
+            permission: 'Billing.Invoices.List Invoices',
         },
         // {
         //     title: "Payments",
@@ -163,73 +163,73 @@ const routes = (sections = []) => {
         },
         {
             title: "Advance Settings",
-            permission: 'AdvanceSettings',
+            permission: 'Advance Settings',
             icon: <TuneIcon/>,
             child: [
                 {
                     title: "Section Groups",
                     route: "sectionGroups.index",
-                    permission: 'Advance Settings.Section Groups.Index',
+                    permission: 'Advance Settings.Section Groups.ListSection Groups',
                     icon: <BusinessIcon/>
                 },
                 {
                     title: "Sections",
                     route: "sections.index",
-                    permission: 'Advance Settings.Section.Index',
+                    permission: 'Advance Settings.Sections.List Sections',
                     icon: <AccountTreeIcon/>
                 },
                 {
                     title: "Workflows",
                     route: "workflows.index",
-                    permission: 'Advance Settings.Workflow.Index',
+                    permission: 'Advance Settings.Workflows.List Workflows',
                     icon: <FlipCameraAndroidIcon/>
                 },
                 {
                     title: "SampleTypes",
                     route: "sampleTypes.index",
-                    permission: 'Advance Settings.Sample Type.Index',
+                    permission: 'Advance Settings.Sample Type.List Sample Types',
                     icon: <VaccinesIcon/>
                 },
                 {
                     title: "Barcode Groups",
                     route: "barcodeGroups.index",
-                    permission: 'Advance Settings.Barcode Group.Index',
+                    permission: 'Advance Settings.Barcode Groups.List Barcode Groups',
                     icon: <HorizontalSplitIcon/>
                 },
                 {
                     title: "Test Groups",
                     route: "testGroups.index",
-                    permission: 'Advance Settings.Test Group.Index',
+                    permission: 'Advance Settings.Test Group.List Test Groups',
                     icon: <WorkspacesIcon/>
                 },
                 {
                     title: "Report Templates",
                     route: "reportTemplates.index",
-                    permission: 'AdvanceSettings.ReportTemplate.Index',
+                    permission: 'Advance Settings.Report Templates.List Report Templates',
                     icon: <SummarizeIcon/>
                 },
                 {
                     title: "Tests",
                     route: "tests.index",
-                    permission: 'AdvanceSettings.Test.Index',
+                    permission: 'Advance Settings.Test.List Tests',
                     icon: <BiotechIcon/>
                 },
                 {
                     title: "Doctors",
                     route: "doctors.index",
-                    permission: 'AdvanceSettings.Doctors.Index',
+                    permission: 'Advance Settings.Doctors.List Doctors',
                     icon: <Doctor/>
                 },
                 {
                     title: "Offers List",
                     route: "offers.index",
-                    permission: 'AdvanceSettings.Offers.Index',
+                    permission: 'Advance Settings.Offers.List Offers',
                     icon: <PercentDiamond/>,
                 },
                 {
                     title: "Setting List",
                     route: "settings.index",
-                    permission: 'AdvanceSettings.Setting.Index',
+                    permission: 'Advance Settings.Settings.List Settings',
                     icon: <SettingsIcon/>,
                 },
             ]
@@ -237,38 +237,38 @@ const routes = (sections = []) => {
         {
             title: "Referrers",
             route: "referrers.index",
-            permission: 'AdvanceSettings.Referrer.Index',
+            permission: 'Referrer.List Referrer',
             icon: <Hospital/>,
             child: [
                 {
                     title: "Referrer Orders",
                     icon: <ReceiptIcon/>,
                     route: "referrer-orders.index",
-                    permission: 'ReferrerOrder.Index',
+                    permission: 'Referrer.Referrer Orders.List Referrer Orders',
                 },
             ]
         },
         {
             title: "User Management",
-            permission: 'UserManagement',
+            permission: 'User Management',
             icon: <ManageAccountsIcon/>,
             child: [
                 {
                     title: "Users List",
                     route: "users.index",
-                    permission: 'UserManagement.User.Index',
+                    permission: 'User Management.Users.List Users',
                     icon: <GroupsIcon/>,
                 },
                 {
                     title: "Add New User",
                     route: "users.create",
-                    permission: 'UserManagement.User.Create',
+                    permission: 'User Management.Users.Create User',
                     icon: <PersonAddIcon/>
                 },
                 {
                     title: "Roles",
                     route: "roles.index",
-                    permission: 'UserManagement.Role.Index',
+                    permission: 'User Management.Roles.List Roles',
                     icon: <AdminPanelSettingsIcon/>
                 },
             ]

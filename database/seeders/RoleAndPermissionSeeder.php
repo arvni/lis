@@ -36,7 +36,6 @@ class RoleAndPermissionSeeder extends Seeder
                     "List Referrer Orders",
                 ]
             ],
-
             "Consultation" => [
                "Consultations"=>[
                    "View Consultation",
@@ -54,6 +53,13 @@ class RoleAndPermissionSeeder extends Seeder
                    "Delete Consultant",
                    "List Consultants",
                ],
+                "Reservations"=>[
+                    "View Reservation",
+                    "Create Reservation",
+                    "Edit Reservation",
+                    "Delete Reservation",
+                    "List Reservations",
+                ]
             ],
             "Report" => [
                 "View Report",
@@ -188,7 +194,8 @@ class RoleAndPermissionSeeder extends Seeder
                     "Delete Test",
                     "List Tests",
                 ],
-            ]
+            ],
+            "Statistics"
         ];
 
         $sectionPermissions = $this->getSectionsPermissions();
