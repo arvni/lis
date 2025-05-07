@@ -1,6 +1,6 @@
 import {Stack, Table, TableBody, TableCell, TableFooter, TableHead, TableRow} from "@mui/material";
 import Typography from "@mui/material/Typography";
-import countries from "@/Data/countries";
+import countries from "@/Data/Countries";
 import Box from "@mui/material/Box";
 
 const Print = ({invoice}) => {
