@@ -45,7 +45,7 @@ RUN apk --no-cache add \
         exif && \
     pecl install redis && \
     docker-php-ext-enable redis opcache && \
-    # Configure PHP
+    # Configure PHP - REMOVED the open_basedir restriction
     echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini && \
     echo "opcache.enable_cli=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini && \
     echo "opcache.jit_buffer_size=256M" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini && \
@@ -92,7 +92,11 @@ RUN mkdir -p /app && chown -R laravel:laravel /app
 
 # Only copy the composer files first to leverage Docker cache
 COPY --chown=laravel:laravel composer.* /app/
-RUN composer install --prefer-dist --no-scripts --no-dev --no-autoloader || \
+
+# IMPORTANT CHANGE: Run composer before switching to non-root user
+# Remove open_basedir restriction for composer
+RUN echo "open_basedir=" > /usr/local/etc/php/conf.d/open-basedir.ini && \
+    composer install --prefer-dist --no-scripts --no-dev --no-autoloader || \
     composer update --prefer-dist --no-scripts --no-dev --no-autoloader
 
 # Copy package.json files
