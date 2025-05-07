@@ -34,7 +34,7 @@ class StoreTimeRequest extends FormRequest
             "time" => ["required"],
             "customer" => "required|array",
             "customer.id" => "nullable|exists:customers,id",
-            "customer.phone" => [Rule::excludeIf(fn() => $this->input("consultant.id")), "required", "unique:customers,phone"],
+            "customer.phone" => ["required", "unique:customers,phone"],
             "customer.name" => "required",
             "customer.email" => "nullable|email",
         ];
