@@ -31,6 +31,7 @@ RUN apk --no-cache add \
         bash \
         git \
         supervisor \
+        shadow \
         nodejs \
         npm \
         $PHPIZE_DEPS && \
@@ -54,18 +55,28 @@ RUN apk --no-cache add \
     echo "upload_max_filesize=${UPLOAD_MAX_FILESIZE}" > /usr/local/etc/php/conf.d/uploads.ini && \
     echo "post_max_size=${POST_MAX_SIZE}" >> /usr/local/etc/php/conf.d/uploads.ini
 
-# Install latest npm and node
+# Install npm and node
 RUN npm install -g npm@latest
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Create non-root user
+# Create Laravel user with the same UID/GID as the host user
+# This helps with shared volume permissions
 RUN addgroup -g 1000 laravel && \
-    adduser -u 1000 -G laravel -h /home/laravel -D laravel
+    adduser -u 1000 -G laravel -h /home/laravel -D laravel && \
+    # Add laravel user to the www-data group (if it exists)
+    addgroup -g 82 -S www-data || true && \
+    adduser laravel www-data || true
 
-# Set up supervisor for Laravel's artisan serve
+# Set up directories with proper permissions
+RUN mkdir -p /app && \
+    chown -R laravel:laravel /app && \
+    chmod -R 755 /app
+
+# Set up supervisor
 COPY docker/supervisord/supervisord.conf /etc/supervisor.d/supervisord.ini
+RUN chmod 644 /etc/supervisor.d/supervisord.ini
 
 # Set up entrypoint
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint
@@ -75,9 +86,6 @@ RUN chmod +x /usr/local/bin/entrypoint
 EXPOSE 8000
 WORKDIR /app
 
-# Set appropriate work directory permissions
-RUN mkdir -p /app && chown -R laravel:laravel /app
-
 # Copy application code
 COPY --chown=laravel:laravel . /app/
 
@@ -85,31 +93,35 @@ COPY --chown=laravel:laravel . /app/
 RUN echo "open_basedir=" > /usr/local/etc/php/conf.d/open-basedir.ini
 
 # Install composer dependencies
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+RUN su laravel -c "composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev"
 
 # Install npm dependencies and build assets (if necessary)
 RUN if [ -f "package.json" ]; then \
-        npm ci && \
-        npm run build || echo "Frontend build failed, continuing anyway"; \
+        su laravel -c "npm ci && npm run build || echo 'Frontend build failed, continuing anyway'"; \
     fi
 
-# Laravel optimization for production
-RUN php artisan storage:link || true && \
+# Create all required storage directories with proper permissions
+RUN mkdir -p /app/storage/app/private/App/Models/Patient/946 && \
     mkdir -p /app/storage/app/public && \
     mkdir -p /app/storage/framework/cache && \
     mkdir -p /app/storage/framework/sessions && \
     mkdir -p /app/storage/framework/views && \
     mkdir -p /app/bootstrap/cache && \
-    chown -R laravel:laravel /app/storage /app/bootstrap/cache && \
-    chmod -R 775 /app/storage /app/bootstrap/cache
+    chown -R laravel:laravel /app/storage /app/bootstrap && \
+    chmod -R 775 /app/storage /app/bootstrap
+
+# Laravel optimization for production
+RUN su laravel -c "php artisan storage:link || true"
 
 # Clean up
 RUN apk del $PHPIZE_DEPS && \
     rm -rf /var/cache/apk/* /tmp/*
 
-# Switch to non-root user
+# Switch to laravel user
 USER laravel
 
 # Set entrypoint
 ENTRYPOINT ["entrypoint"]
 
+# Default command - start Laravel's built-in server
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

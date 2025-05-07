@@ -8,6 +8,12 @@ port=${PORT:-8000}
 
 cd /app
 
+# Fix permissions on startup
+echo "🔧 Ensuring proper storage permissions..."
+mkdir -p /app/storage/app/private/App/Models/Patient/946
+find /app/storage -type d -exec chmod 775 {} \;
+find /app/storage -type f -exec chmod 664 {} \;
+
 # Run Laravel optimization if not in local environment
 if [ "$env" != "local" ]; then
     echo "🔄 Running Laravel optimizations..."
