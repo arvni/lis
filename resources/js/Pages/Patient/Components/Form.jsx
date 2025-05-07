@@ -7,7 +7,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import PatientIdForm from "@/Pages/Patient/Components/PatientIdForm";
 import React, {useEffect, useState} from "react";
-import countries from "@/Data/countries";
+import countries from "@/Data/Countries";
 import {router} from "@inertiajs/react";
 
 export const getPatientByIdNo = async (idNo, callback) => {
