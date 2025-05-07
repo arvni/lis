@@ -83,7 +83,7 @@ class Patient extends Model
 
     public function patientMeta()
     {
-        return $this->hasOne(patientMeta::class);
+        return $this->hasOne(PatientMeta::class);
     }
 
     public function registrar()
