@@ -8,7 +8,7 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
     POST_MAX_SIZE=128M \
     CONTAINER_ROLE=app \
     APP_ENV=production \
-    PORT=9000
+    PORT=8000
 
 # Install necessary system packages and PHP extensions
 RUN apk --no-cache add \
@@ -50,39 +50,29 @@ RUN apk --no-cache add \
     # Configure PHP
     echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini && \
     echo "opcache.enable_cli=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini && \
-    echo "opcache.jit_buffer_size=256M" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini && \
-    echo "opcache.jit=1255" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini && \
     echo "memory_limit=${PHP_MEMORY_LIMIT}" > /usr/local/etc/php/conf.d/memory-limit.ini && \
     echo "upload_max_filesize=${UPLOAD_MAX_FILESIZE}" > /usr/local/etc/php/conf.d/uploads.ini && \
     echo "post_max_size=${POST_MAX_SIZE}" >> /usr/local/etc/php/conf.d/uploads.ini
 
 # Install latest npm and node
-RUN npm install -g npm@latest && \
-    npm install -g vite
+RUN npm install -g npm@latest
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Create non-root user
 RUN addgroup -g 1000 laravel && \
-    adduser -u 1000 -G laravel -h /home/laravel -D laravel && \
-    mkdir -p /var/run/php-fpm && \
-    chown -R laravel:laravel /var/run/php-fpm
+    adduser -u 1000 -G laravel -h /home/laravel -D laravel
 
-# Configure PHP-FPM
-RUN mkdir -p /usr/local/etc/php-fpm.d/
-COPY docker/php/fpm-pool.conf /usr/local/etc/php-fpm.d/www.conf
-COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
-
-# Set up supervisor
+# Set up supervisor for Laravel's artisan serve
 COPY docker/supervisord/supervisord.conf /etc/supervisor.d/supervisord.ini
 
 # Set up entrypoint
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint
 RUN chmod +x /usr/local/bin/entrypoint
 
-# Expose PHP-FPM port (to be connected to Nginx container)
-EXPOSE 9000
+# Expose Laravel's built-in server port
+EXPOSE 8000
 WORKDIR /app
 
 # Set appropriate work directory permissions
@@ -97,24 +87,10 @@ RUN echo "open_basedir=" > /usr/local/etc/php/conf.d/open-basedir.ini
 # Install composer dependencies
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
-# Build frontend assets with detailed error handling
-RUN if [ -f "vite.config.js" ] || [ -f "vite.config.ts" ]; then \
-        echo "Building assets with Vite..." && \
+# Install npm dependencies and build assets (if necessary)
+RUN if [ -f "package.json" ]; then \
         npm ci && \
-        npm run build && \
-        # Verify that manifest file was created
-        if [ -f "public/build/manifest.json" ]; then \
-            echo "Vite build successful, manifest file created." && \
-            # Set proper permissions
-            chown -R laravel:laravel /app/public/build; \
-        else \
-            echo "Vite build completed but manifest.json not found. Creating fallback..." && \
-            mkdir -p public/build && \
-            echo '{"resources/js/app.js":{"file":"assets/app.js","isEntry":true}}' > public/build/manifest.json && \
-            chown -R laravel:laravel /app/public/build; \
-        fi \
-    else \
-        echo "No Vite configuration found, skipping frontend build."; \
+        npm run build || echo "Frontend build failed, continuing anyway"; \
     fi
 
 # Laravel optimization for production
@@ -137,5 +113,3 @@ USER laravel
 # Set entrypoint
 ENTRYPOINT ["entrypoint"]
 
-# Default command - start PHP-FPM
-CMD ["php-fpm"]

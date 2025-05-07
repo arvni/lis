@@ -4,6 +4,7 @@ set -e
 # Define default values
 role=${CONTAINER_ROLE:-app}
 env=${APP_ENV:-production}
+port=${PORT:-8000}
 
 cd /app
 
@@ -30,11 +31,17 @@ if [ "$CLEAR_CACHES_ON_STARTUP" = "true" ]; then
     php artisan route:clear
 fi
 
+# Check for the Vite manifest
+if [ ! -f "/app/public/build/manifest.json" ] && [ -d "/app/public/build" ]; then
+    echo "⚠️ Vite manifest not found, creating a fallback manifest..."
+    echo '{"resources/js/app.js":{"file":"assets/app.js","isEntry":true}}' > /app/public/build/manifest.json
+fi
+
 # Start appropriate service based on container role
 case "$role" in
     app)
-        echo "🚀 Starting PHP-FPM..."
-        exec php artisan serv --host=0.0.0.0
+        echo "🚀 Starting Laravel application server on port $port..."
+        exec php artisan serve --host=0.0.0.0 --port=$port
         ;;
     queue)
         echo "⚙️ Starting Laravel queue worker..."
