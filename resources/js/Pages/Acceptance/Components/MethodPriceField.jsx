@@ -18,7 +18,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {
     calcPrice,
     getCondition
-} from '@/services/pricing-utils';
+} from '@/services/pricing-utils.js';
 
 const MethodPriceField = ({
                               method,
