@@ -9,7 +9,9 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
     CONTAINER_ROLE=app \
     APP_ENV=production \
     PORT=8000 \
-    XDG_CONFIG_HOME=/tmp/.config
+    PSYSH_HISTORY_FILE=/dev/null \
+    PSYSH_CONFIG_FILE=/dev/null \
+    PSYSH_MANUAL_DB_FILE=/dev/null
 
 # Install necessary system packages and PHP extensions
 RUN apk --no-cache add \
@@ -32,7 +34,6 @@ RUN apk --no-cache add \
         bash \
         git \
         supervisor \
-        shadow \
         nodejs \
         npm \
         $PHPIZE_DEPS && \
@@ -62,13 +63,8 @@ RUN npm install -g npm@latest
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set up directories for PsySH
-RUN mkdir -p /tmp/.config/psysh && \
-    chmod -R 777 /tmp/.config
-
-# Set up app directories
-RUN mkdir -p /app && \
-    chmod -R 777 /app
+# Set up directories
+RUN mkdir -p /app
 
 # Set up supervisor
 COPY docker/supervisord/supervisord.conf /etc/supervisor.d/supervisord.ini
@@ -84,13 +80,12 @@ WORKDIR /app
 
 # Copy application code
 COPY . /app/
-RUN chmod -R 777 /app
 
 # Remove open_basedir restriction for composer
 RUN echo "open_basedir=" > /usr/local/etc/php/conf.d/open-basedir.ini
 
 # Install composer dependencies
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # Install npm dependencies and build assets (if necessary)
 RUN if [ -f "package.json" ]; then \
@@ -114,9 +109,7 @@ RUN php artisan storage:link || true
 
 # Clean up
 RUN apk del $PHPIZE_DEPS && \
-    rm -rf /var/cache/apk/* /tmp/* && \
-    mkdir -p /tmp/.config/psysh && \
-    chmod -R 777 /tmp/.config
+    rm -rf /var/cache/apk/* /tmp/*
 
 # Default command - start Laravel's built-in server
 ENTRYPOINT ["entrypoint"]

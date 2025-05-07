@@ -8,10 +8,6 @@ port=${PORT:-8000}
 
 cd /app
 
-# Ensure PsySH directory exists and has correct permissions
-mkdir -p /tmp/.config/psysh
-chmod -R 777 /tmp/.config
-
 # Create all necessary directories with very permissive permissions
 echo "🔧 Setting up storage directories with appropriate permissions..."
 mkdir -p /app/storage/app/private/App/Models/Patient/946
@@ -21,9 +17,9 @@ mkdir -p /app/storage/framework/sessions
 mkdir -p /app/storage/framework/views
 mkdir -p /app/bootstrap/cache
 
-# Make all storage directories world-writable
-chmod -R 777 /app/storage
-chmod -R 777 /app/bootstrap/cache
+# Make storage directories writable
+chmod -R 777 /app/storage || true
+chmod -R 777 /app/bootstrap/cache || true
 
 # Run Laravel optimization if not in local environment
 if [ "$env" != "local" ]; then
