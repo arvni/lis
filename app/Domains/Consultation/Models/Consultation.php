@@ -4,7 +4,6 @@ namespace App\Domains\Consultation\Models;
 
 use App\Domains\Consultation\Enums\ConsultationStatus;
 use App\Domains\Reception\Models\Patient;
-use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class Consultation extends Model
@@ -39,7 +38,12 @@ class Consultation extends Model
      */
     public function consultant()
     {
-        return $this->belongsTo(User::class, 'consultant_id');
+        return $this->belongsTo(Consultant::class);
+    }
+
+    public function time()
+    {
+        return $this->morphOne(Time::class,"reservable");
     }
 
 }

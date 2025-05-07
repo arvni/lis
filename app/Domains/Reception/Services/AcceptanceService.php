@@ -65,7 +65,7 @@ class AcceptanceService
                         'discount' => 0,
                         [],
                         "patients" => [["id" => $acceptanceDTO->patientId]],
-                        "customParameters"=>[]
+                        "customParameters" => []
                     ];
                 }
             }
@@ -341,7 +341,7 @@ class AcceptanceService
             "acceptanceItems.patient",
             "patient"
         ]);
-        $barcodes = $this->convertAcceptanceItems($acceptance->acceptanceItems);
+        $barcodes = $this->convertAcceptanceItems($acceptance->acceptanceItems->where("test.type","!=", TestType::SERVICE));
         return ["barcodes" => $barcodes, "patient" => $acceptance->patient];
     }
 
@@ -376,7 +376,7 @@ class AcceptanceService
                     $acceptance_item['method_test']['id'],
                     $acceptance_item["price"],
                     $acceptance_item['discount'],
-                    array_merge(($acceptance_item["customParameters"]??[]), Arr::except($acceptance_item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters"])),
+                    array_merge(($acceptance_item["customParameters"] ?? []), Arr::except($acceptance_item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters"])),
                     $acceptance_item["patients"],
                     $acceptance_item["timeLine"] ?? [
                     Carbon::now()->format("Y-m-d H:i:s") => "Created By " . auth()->user()->name,],
@@ -425,7 +425,7 @@ class AcceptanceService
                     "patient" => $item->first()->patient,
                     "items" => $item,
                     "sampleType" => $item->first()->method->test->sampleTypes
-                        ->where('id', $item->first()->customParameters['sampleType'] ?? $item->first()->method->test->sampleTypes->first()->id)
+                        ->where('id', $item->first()->customParameters['sampleType'] ?? $item?->first()?->method?->test?->sampleTypes?->first()?->id)
                         ->first(),
                     "collection_date" => Carbon::now("Asia/Muscat")->format("Y-m-d H:i:s"),
                     "sampleLocation" => "In Lab"

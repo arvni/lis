@@ -38,13 +38,22 @@ class RoleAndPermissionSeeder extends Seeder
             ],
 
             "Consultation" => [
-                "View Consultation",
-                "Done Consultation",
-                "Create Consultation",
-                "Edit Consultation",
-                "Delete Consultation",
-                "List Consultations",
-                "Waiting List Consultations",
+               "Consultations"=>[
+                   "View Consultation",
+                   "Done Consultation",
+                   "Create Consultation",
+                   "Edit Consultation",
+                   "Delete Consultation",
+                   "List Consultations",
+                   "Waiting List Consultations",
+               ],
+               "Consultants"=>[
+                   "View Consultant",
+                   "Create Consultant",
+                   "Edit Consultant",
+                   "Delete Consultant",
+                   "List Consultants",
+               ],
             ],
             "Report" => [
                 "View Report",

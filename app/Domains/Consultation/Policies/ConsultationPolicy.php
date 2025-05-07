@@ -12,7 +12,7 @@ class ConsultationPolicy
      */
     public function waiting(User $authUser): bool
     {
-        return $authUser->can("Consultation.Waiting List Consultations");
+        return $authUser->can("Consultation.Consultations.Waiting List Consultations");
     }
 
     /**
@@ -20,7 +20,7 @@ class ConsultationPolicy
      */
     public function viewAny(User $authUser): bool
     {
-        return $authUser->can("Consultation.List Consultations");
+        return $authUser->can("Consultation.Consultations.List Consultations");
     }
 
     /**
@@ -28,7 +28,7 @@ class ConsultationPolicy
      */
     public function create(User $authUser): bool
     {
-        return $authUser->can("Consultation.Create Consultation");
+        return $authUser->can("Consultation.Consultations.Create Consultation");
     }
 
     /**
@@ -36,7 +36,7 @@ class ConsultationPolicy
      */
     public function view(User $user, Consultation $consultation): bool
     {
-        return $user->can("Consultation.View Consultation");
+        return $user->can("Consultation.Consultations.View Consultation");
     }
 
     /**
@@ -44,7 +44,7 @@ class ConsultationPolicy
      */
     public function update(User $authUser, Consultation $consultation): bool
     {
-        return $authUser->can("Consultation.Edit Consultation");
+        return $authUser->can("Consultation.Consultations.Edit Consultation");
     }
 
     /**
@@ -52,7 +52,7 @@ class ConsultationPolicy
      */
     public function done(User $authUser, Consultation $consultation): bool
     {
-        return $authUser->can("Consultation.Done Consultation");
+        return $authUser->can("Consultation.Consultations.Done Consultation");
     }
 
     /**
@@ -60,6 +60,6 @@ class ConsultationPolicy
      */
     public function delete(User $authUser, Consultation $consultation): bool
     {
-        return $authUser->can("Consultation.Delete Consultation");
+        return $authUser->can("Consultation.Consultations.Delete Consultation");
     }
 }

@@ -21,6 +21,7 @@ class AcceptanceItemRepository
                     "StartedBy:name,id"
                 ]);
             },
+            "invoice.owner",
         ])
             ->withAggregate("activeSample", "created_at")
             ->withAggregate("method", "name")
@@ -43,7 +44,7 @@ class AcceptanceItemRepository
                 ]);
             },
         ])
-            ->withAggregate("activeSample", "created_at")
+            ->withAggregate("activeSample", "collection_date")
             ->withAggregate("method", "name")
             ->withAggregate("test", "tests.name")
             ->withAggregate("patient", "fullName")

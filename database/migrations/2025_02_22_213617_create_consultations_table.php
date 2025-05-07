@@ -1,8 +1,8 @@
 <?php
 
 use App\Domains\Consultation\Enums\ConsultationStatus;
+use App\Domains\Consultation\Models\Consultant;
 use App\Domains\Reception\Models\Patient;
-use App\Domains\User\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,7 +17,7 @@ return new class extends Migration
         Schema::create('consultations', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Patient::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(User::class,"consultant_id")->constrained()->restrictOnDelete();
+            $table->foreignIdFor(Consultant::class)->constrained()->restrictOnDelete();
             $table->timestamp('dueDate');
             $table->json('information')->nullable();
             $table->enum('status', ConsultationStatus::values());

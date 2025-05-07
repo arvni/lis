@@ -16,12 +16,15 @@ const Document = ({document, onClose}) => {
     }, [document]);
     const handleClose = () => {
         setOpen(false);
-        onClose();
+        if (onClose)
+            onClose();
+        else
+            window.close();
     }
 
     return (
-        <Dialog open={open} sx={{p:0}}>
-            <DialogContent sx={{p:0}}>
+        <Dialog open={open} sx={{p: 0}}>
+            <DialogContent sx={{p: 0}}>
                 <SingleDocumentViewer
                     document={document}
                     onClose={handleClose}

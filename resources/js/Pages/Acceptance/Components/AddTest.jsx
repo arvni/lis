@@ -252,7 +252,7 @@ const AddTest = ({
 
         try {
             const response = await axios.get(route("api.tests.show", testId), {
-                params: {referrer: {id: referrer.id}},
+                params: referrer?{referrer: {id: referrer.id}}:{},
             });
             const discounts = response?.data?.data?.offers.map(offer => ({
                 id: Date.now(),

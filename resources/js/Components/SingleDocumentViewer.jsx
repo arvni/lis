@@ -353,6 +353,12 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
         setNotification({...notification, open: false});
     };
 
+    const handleClose=()=>{
+        setInfoDialogOpen(false)
+        if(onClose)
+            onClose();
+    }
+
     return (
         <Box
             sx={{
@@ -527,7 +533,7 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
             {/* File information dialog */}
             <Dialog
                 open={infoDialogOpen}
-                onClose={() => setInfoDialogOpen(false)}
+                onClose={handleClose}
                 aria-labelledby="file-info-dialog-title"
             >
                 <DialogTitle id="file-info-dialog-title">File Information</DialogTitle>

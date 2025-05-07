@@ -3,6 +3,7 @@
 namespace App\Domains\User\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Domains\Consultation\Models\Consultant;
 use App\Domains\Consultation\Models\Consultation;
 use App\Traits\Searchable;
 use Database\Factories\Domains\User\Models\UserFactory;
@@ -15,7 +16,8 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasPermissions,HasRoles,Searchable;
+    use HasFactory, Notifiable, HasPermissions, HasRoles, Searchable;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -59,6 +61,11 @@ class User extends Authenticatable
 
     public function consultations()
     {
-        return $this->hasMany(Consultation::class,"consultant_id");
+        return $this->hasManyThrough(Consultation::class, Consultant::class);
+    }
+
+    public function consultant()
+    {
+        return $this->hasOne(Consultant::class);
     }
 }

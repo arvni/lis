@@ -4,7 +4,11 @@ namespace App\Providers;
 
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Policies\InvoicePolicy;
+use App\Domains\Consultation\Models\Consultant;
 use App\Domains\Consultation\Models\Consultation;
+use App\Domains\Consultation\Models\Customer;
+use App\Domains\Consultation\Policies\ConsultantPolicy;
+use App\Domains\Consultation\Policies\ConsultationPolicy;
 use App\Domains\Document\Models\Document;
 use App\Domains\Laboratory\Models\BarcodeGroup;
 use App\Domains\Laboratory\Models\ReportTemplate;
@@ -74,7 +78,9 @@ class AppServiceProvider extends ServiceProvider
             "report" => Report::class,
             "referrer" => Referrer::class,
             "invoice" => Invoice::class,
-            "consultation" => Consultation::class
+            "consultation" => Consultation::class,
+            "consultant" => Consultant::class,
+            "customer" => Customer::class,
         ]);
 
         Gate::policy(User::class, UserPolicy::class);
@@ -92,5 +98,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(Sample::class, SamplePolicy::class);
         Gate::policy(Report::class, ReportPolicy::class);
+        Gate::policy(Consultation::class, ConsultationPolicy::class);
+        Gate::policy(Consultant::class, ConsultantPolicy::class);
     }
 }

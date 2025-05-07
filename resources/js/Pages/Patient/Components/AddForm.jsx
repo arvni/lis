@@ -94,9 +94,9 @@ const AddForm = ({ open, onClose, patientId }) => {
             post(route("consultations.store"), {
                 onSuccess: () => {
                     setShowSuccess(true);
-                    setTimeout(() => {
-                        onClose();
-                    }, 1500);
+                    reset();
+                    setTimes([]);
+                    onClose();
                 }
             });
         }
@@ -237,6 +237,7 @@ const AddForm = ({ open, onClose, patientId }) => {
                                                             key={index}
                                                             value={item.value}
                                                             label={item.label}
+                                                            disabled={item.disabled}
                                                             control={
                                                                 <Radio
                                                                     color="primary"

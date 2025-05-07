@@ -18,10 +18,9 @@ import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import InterpreterModeIcon from '@mui/icons-material/InterpreterMode';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BusinessIcon from '@mui/icons-material/Business';
-import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import {Analytics} from "@mui/icons-material";
-import {PercentDiamond} from "lucide-react";
+import {PercentDiamond, Stethoscope as Doctor, Hospital} from "lucide-react";
 
 export const refactorRoute = (addr) => {
     if (!addr)
@@ -76,12 +75,24 @@ const routes = (sections = []) => {
                 {
                     title: "Waiting Consultations",
                     route: "consultations.waiting-list",
-                    permission: 'Consultation.Waiting List Consultations',
+                    permission: 'Consultation.Consultations.Waiting List Consultations',
                     icon: null,
                 },
                 {
-                    title: "List",
+                    title: "Consultations List",
                     route: "consultations.index",
+                    permission: 'Consultation.Consultations.List Consultations',
+                    icon: null,
+                },
+                {
+                    title: "Consultants",
+                    route: "consultants.index",
+                    permission: 'Consultations.Consultation.Index',
+                    icon: null,
+                },
+                {
+                    title: "Reservations",
+                    route: "times",
                     permission: 'Consultations.Consultation.Index',
                     icon: null,
                 },
@@ -207,7 +218,7 @@ const routes = (sections = []) => {
                     title: "Doctors",
                     route: "doctors.index",
                     permission: 'AdvanceSettings.Doctors.Index',
-                    icon: <BiotechIcon/>
+                    icon: <Doctor/>
                 },
                 {
                     title: "Offers List",
@@ -227,7 +238,7 @@ const routes = (sections = []) => {
             title: "Referrers",
             route: "referrers.index",
             permission: 'AdvanceSettings.Referrer.Index',
-            icon: <PersonSearchIcon/>,
+            icon: <Hospital/>,
             child: [
                 {
                     title: "Referrer Orders",

@@ -16,11 +16,15 @@ use App\Http\Controllers\Api\Referrer\ListReferrersController;
 use App\Http\Controllers\Billing\ExportInvoicesController;
 use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentController;
+use App\Http\Controllers\Consultation\ConsultantController;
 use App\Http\Controllers\Consultation\ConsultationController;
 use App\Http\Controllers\Consultation\ListConsultantsController;
+use App\Http\Controllers\Consultation\ListCustomersController;
 use App\Http\Controllers\Consultation\ListReservationTimesController;
 use App\Http\Controllers\Consultation\ListWaitingConsultationsController;
+use App\Http\Controllers\Consultation\ShowTimesController;
 use App\Http\Controllers\Consultation\StartConsultationController;
+use App\Http\Controllers\Consultation\StoreTimeController;
 use App\Http\Controllers\Document\DocumentController;
 use App\Http\Controllers\Document\DownloadReportController;
 use App\Http\Controllers\Document\UpdateBatchDocumentsController;
@@ -140,9 +144,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::group(["prefix" => "consultation"], function () {
         Route::get("waiting-list", ListWaitingConsultationsController::class)->name("consultations.waiting-list");
         Route::resource("consultations", ConsultationController::class);
+        Route::resource("consultants", ConsultantController::class);
         Route::put("consultations/{consultation}/start", StartConsultationController::class)->name("consultations.start");
-        Route::get("consultants", ListConsultantsController::class)->name("list-consultants");
+        Route::get("consultants-list", ListConsultantsController::class)->name("list-consultants");
         Route::get("reservation-times", ListReservationTimesController::class)->name("list-reservation-times");
+        Route::get("times", ShowTimesController::class)->name("times");
+        Route::post("times", StoreTimeController::class)->name("times.store");
     });
 
     Route::resource("settings", SettingController::class)->only("index", "update");
@@ -171,6 +178,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
         Route::group(["prefix" => "referrer"], function () {
             Route::get("referrers", ListReferrersController::class)->name("referrers.list");
+        });
+        Route::group(["prefix" => "consultation"], function () {
+            Route::get("customers", ListCustomersController::class)->name("customers.list");
         });
 
         Route::get("documents/{document}", [DocumentController::class, "download"])->name("api.documents.show");
@@ -203,6 +213,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post("upload-public", UploadPublicDocumentController::class)->name("upload-public");
 
 });
-
-
 require __DIR__ . '/auth.php';

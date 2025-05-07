@@ -20,11 +20,11 @@ import {
 } from "@mui/icons-material";
 import Filter from "./Components/Filter";
 import Excel from "@/../images/excel.svg";
-import { Head, router, usePage } from "@inertiajs/react";
-import { useState, useCallback, useEffect } from "react";
+import {Head, router, usePage} from "@inertiajs/react";
+import {useState, useCallback, useEffect} from "react";
 
 const StatisticsIndex = () => {
-    const { acceptanceItems, requestInputs } = usePage().props;
+    const {acceptanceItems, requestInputs} = usePage().props;
     const [loading, setLoading] = useState(false);
     const [visibleColumns, setVisibleColumns] = useState([]);
     const [columnMenuAnchor, setColumnMenuAnchor] = useState(null);
@@ -52,10 +52,10 @@ const StatisticsIndex = () => {
     };
 
     // Status indicator component
-    const StatusChip = ({ status }) => {
+    const StatusChip = ({status}) => {
         let color = "default";
 
-        switch(status?.toLowerCase()) {
+        switch (status?.toLowerCase()) {
             case "completed":
                 color = "success";
                 break;
@@ -74,13 +74,14 @@ const StatisticsIndex = () => {
                 color = "default";
         }
 
-        return <Chip label={status || "Unknown"} color={color} size="small" />;
+        return <Chip label={status || "Unknown"} color={color} size="small"/>;
     };
 
     // Navigate to item details
-    const showAcceptanceItem = useCallback((id) => {
+    const showAcceptanceItem = useCallback((row) => (e) => {
+        e.preventDefault();
         setLoading(true);
-        router.visit(route("acceptanceItems.show", id), {
+        router.visit(route("acceptanceItems.show", {acceptanceItem: row.id, acceptance: row.acceptance_id}), {
             onFinish: () => setLoading(false)
         });
     }, []);
@@ -93,6 +94,14 @@ const StatisticsIndex = () => {
             type: "number",
             flex: 0.2,
             hidden: true,
+        },
+        {
+            field: 'invoice.owner.fullName',
+            headerName: 'Client',
+            type: "string",
+            flex: 0.7,
+            sortable: false,
+            renderCell: ({row}) => row?.invoice?.owner?.fullName || "—",
         },
         {
             field: 'patient_fullname',
@@ -144,12 +153,12 @@ const StatisticsIndex = () => {
             renderCell: ({value}) => formatCurrency(value)
         },
         {
-            field: 'active_sample_created_at',
+            field: 'active_sample_collection_date',
             headerName: 'Sample Date',
             type: "date",
             valueGetter: (value) => value ? new Date(value) : null,
             flex: 0.3,
-            renderCell: ({value}) => formatDate(value)
+            renderCell: ({value}) => value ? formatDate(value) : "-"
         },
         {
             field: 'status',
@@ -157,7 +166,7 @@ const StatisticsIndex = () => {
             type: "string",
             flex: 0.3,
             sortable: false,
-            renderCell: ({value}) => <StatusChip status={value} />
+            renderCell: ({value}) => <StatusChip status={value}/>
         },
         {
             field: 'updated_at',
@@ -176,11 +185,15 @@ const StatisticsIndex = () => {
                 <Stack spacing={1} direction="row">
                     <Tooltip title="View Details">
                         <IconButton
-                            onClick={() => showAcceptanceItem(row.id)}
+                            onClick={showAcceptanceItem(row)}
+                            href={route("acceptanceItems.show", {
+                                acceptanceItem: row.id,
+                                acceptance: row.acceptance_id
+                            })}
                             size="small"
                             color="info"
                         >
-                            <RemoveRedEyeIcon />
+                            <RemoveRedEyeIcon/>
                         </IconButton>
                     </Tooltip>
                 </Stack>
@@ -240,7 +253,7 @@ const StatisticsIndex = () => {
     // Page reload function
     const pageReload = useCallback((page, filters, sort, pageSize) => {
         router.visit(route('acceptanceItems.index'), {
-            data: { page, filters, pageSize, sort },
+            data: {page, filters, pageSize, sort},
             only: ["acceptanceItems", "requestInputs"],
             preserveState: true
         });
@@ -248,12 +261,12 @@ const StatisticsIndex = () => {
 
     return (
         <>
-            <Head title="Test Statistics" />
+            <Head title="Test Statistics"/>
 
-            <Box sx={{ mb: 3 }}>
-                <Paper sx={{ padding: 2, mb: 2 }}>
+            <Box sx={{mb: 3}}>
+                <Paper sx={{padding: 2, mb: 2}}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
+                        <Typography variant="h5" component="h1" sx={{fontWeight: 'bold'}}>
                             Test Statistics
                         </Typography>
 
@@ -270,8 +283,8 @@ const StatisticsIndex = () => {
                                     }}
                                 >
                                     <Stack direction="row" spacing={1} alignItems="center">
-                                        <ViewColumnIcon />
-                                        <Typography variant="button" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                                        <ViewColumnIcon/>
+                                        <Typography variant="button" sx={{display: {xs: 'none', sm: 'block'}}}>
                                             Columns
                                         </Typography>
                                     </Stack>
@@ -280,7 +293,7 @@ const StatisticsIndex = () => {
 
                             <Tooltip title="Export to Excel">
                                 <IconButton
-                                    href={route("acceptanceItems.export", requestInputs)}
+                                    href={route("acceptanceItems.export", {...requestInputs, visibleColumns})}
                                     color="success"
                                     sx={{
                                         border: '1px solid #e0e0e0',
@@ -289,8 +302,8 @@ const StatisticsIndex = () => {
                                     }}
                                 >
                                     <Stack direction="row" spacing={1} alignItems="center">
-                                        <img src={Excel} alt="Excel" width="24px" />
-                                        <Typography variant="button" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                                        <img src={Excel} alt="Excel" width="24px"/>
+                                        <Typography variant="button" sx={{display: {xs: 'none', sm: 'block'}}}>
                                             Export
                                         </Typography>
                                     </Stack>
@@ -307,14 +320,15 @@ const StatisticsIndex = () => {
                 open={Boolean(columnMenuAnchor)}
                 onClose={handleColumnMenuClose}
                 slotProps={{
-                    paper:{style: {
-                        maxHeight: 300,
-                        width: 250,
-                    },
-                        }
+                    paper: {
+                        style: {
+                            maxHeight: 300,
+                            width: 250,
+                        },
+                    }
                 }}
             >
-                <Box sx={{ px: 2, py: 1 }}>
+                <Box sx={{px: 2, py: 1}}>
                     <Stack direction="row" spacing={1}>
                         <Button
                             size="small"
@@ -345,7 +359,7 @@ const StatisticsIndex = () => {
                                 color="primary"
                                 size="small"
                             />
-                            <ListItemText primary={column.headerName} />
+                            <ListItemText primary={column.headerName}/>
                         </MenuItem>
                     ))}
             </Menu>

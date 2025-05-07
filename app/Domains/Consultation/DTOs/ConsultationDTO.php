@@ -35,7 +35,7 @@ class ConsultationDTO
         return new self(
             $request->patient_id,
             $request->consultant["id"],
-            Carbon::createFromFormat("Y-m-d H:i:s", $request->dueDate. " ". $request->time),
+            Carbon::createFromFormat("Y-m-d H:i", $request->dueDate. " ". $request->time),
             ConsultationStatus::BOOKED,
             $request->information ?? [],
             $request->startedAt ?? null,
