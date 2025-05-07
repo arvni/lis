@@ -8,7 +8,8 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
     POST_MAX_SIZE=128M \
     CONTAINER_ROLE=app \
     APP_ENV=production \
-    PORT=8000
+    PORT=8000 \
+    XDG_CONFIG_HOME=/tmp/.config
 
 # Install necessary system packages and PHP extensions
 RUN apk --no-cache add \
@@ -61,14 +62,13 @@ RUN npm install -g npm@latest
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Important: The container will run as root but the files will be owned by www-data (for better volume mounts)
-RUN addgroup -g 82 -S www-data || true && \
-    adduser -u 82 -S -D -G www-data www-data || true
+# Set up directories for PsySH
+RUN mkdir -p /tmp/.config/psysh && \
+    chmod -R 777 /tmp/.config
 
-# Set up directories with proper permissions
+# Set up app directories
 RUN mkdir -p /app && \
-    chown -R www-data:www-data /app && \
-    chmod -R 755 /app
+    chmod -R 777 /app
 
 # Set up supervisor
 COPY docker/supervisord/supervisord.conf /etc/supervisor.d/supervisord.ini
@@ -83,7 +83,8 @@ EXPOSE 8000
 WORKDIR /app
 
 # Copy application code
-COPY --chown=www-data:www-data . /app/
+COPY . /app/
+RUN chmod -R 777 /app
 
 # Remove open_basedir restriction for composer
 RUN echo "open_basedir=" > /usr/local/etc/php/conf.d/open-basedir.ini
@@ -99,21 +100,24 @@ RUN if [ -f "package.json" ]; then \
 
 # Create all Laravel directories with proper permissions
 RUN mkdir -p /app/storage/app/public && \
+    mkdir -p /app/storage/app/private/App/Models/Patient/946 && \
+    mkdir -p /app/storage/app/private/App/Models/ReferrerOrder && \
     mkdir -p /app/storage/framework/cache && \
     mkdir -p /app/storage/framework/sessions && \
     mkdir -p /app/storage/framework/views && \
-    mkdir -p /app/bootstrap/cache
-
-# Important: we keep these as root-owned initially
-# This allows the entrypoint script to modify permissions at runtime
-RUN chmod -R 777 /app/storage /app/bootstrap/cache
+    mkdir -p /app/bootstrap/cache && \
+    chmod -R 777 /app/storage && \
+    chmod -R 777 /app/bootstrap/cache
 
 # Laravel optimization for production
 RUN php artisan storage:link || true
 
 # Clean up
 RUN apk del $PHPIZE_DEPS && \
-    rm -rf /var/cache/apk/* /tmp/*
+    rm -rf /var/cache/apk/* /tmp/* && \
+    mkdir -p /tmp/.config/psysh && \
+    chmod -R 777 /tmp/.config
 
 # Default command - start Laravel's built-in server
+ENTRYPOINT ["entrypoint"]
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

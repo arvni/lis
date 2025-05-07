@@ -8,8 +8,11 @@ port=${PORT:-8000}
 
 cd /app
 
+# Ensure PsySH directory exists and has correct permissions
+mkdir -p /tmp/.config/psysh
+chmod -R 777 /tmp/.config
+
 # Create all necessary directories with very permissive permissions
-# This approach allows the container to work with host-mounted volumes
 echo "🔧 Setting up storage directories with appropriate permissions..."
 mkdir -p /app/storage/app/private/App/Models/Patient/946
 mkdir -p /app/storage/app/private/App/Models/ReferrerOrder
@@ -18,7 +21,7 @@ mkdir -p /app/storage/framework/sessions
 mkdir -p /app/storage/framework/views
 mkdir -p /app/bootstrap/cache
 
-# Make all storage directories world-writable (needed for volume mounts)
+# Make all storage directories world-writable
 chmod -R 777 /app/storage
 chmod -R 777 /app/bootstrap/cache
 
@@ -34,15 +37,6 @@ fi
 if [ "$MIGRATE_ON_STARTUP" = "true" ]; then
     echo "🔄 Running database migrations..."
     php artisan migrate --force || echo "⚠️ Migration failed, will continue startup"
-fi
-
-# Clear caches if requested (useful for redeployments)
-if [ "$CLEAR_CACHES_ON_STARTUP" = "true" ]; then
-    echo "🧹 Clearing caches..."
-    php artisan cache:clear
-    php artisan config:clear
-    php artisan view:clear
-    php artisan route:clear
 fi
 
 # Start appropriate service based on container role
