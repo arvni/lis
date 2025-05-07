@@ -104,7 +104,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put("/patients/{patient}/patient-metas", UpdatePatientMetaController::class)
             ->name("patients.updateMetas");
         Route::resource("relatives", RelativeController::class)->only(["store", "update", "destroy"]);
-        Route::resource("acceptances", AcceptanceController::class)->except("create,store");
+        Route::resource("acceptances", AcceptanceController::class)->except("create","store");
         Route::get("acceptances/{acceptance}/print", PrintAcceptanceController::class)->name("acceptances.print");
         Route::get("acceptances/{acceptance}/barcodes", PrintAcceptanceBarcodeController::class)->name("acceptances.barcodes");
         Route::put("acceptances/{acceptance}/cancel", CancelAcceptanceController::class)->name("acceptances.cancel");
