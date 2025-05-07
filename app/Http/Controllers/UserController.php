@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Domains\User\DTOs\UserDTO;
 use App\Domains\User\Models\User;
-use App\Domains\User\Requests\StoreConsultantRequest;
-use App\Domains\User\Requests\UpdateConsultantRequest;
+use App\Domains\User\Requests\StoreUserRequest;
+use App\Domains\User\Requests\UpdateUserRequest;
 use App\Domains\User\Services\UserService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -34,7 +34,7 @@ class UserController extends Controller
         return Inertia::render('User/Add',);
     }
 
-    public function store(StoreConsultantRequest $request)
+    public function store(StoreUserRequest $request)
     {
         $validated = $request->validated();
 
@@ -62,7 +62,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(UpdateConsultantRequest $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
         $validated = $request->validated();
         $userDto = new UserDTO(
