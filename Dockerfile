@@ -61,17 +61,13 @@ RUN npm install -g npm@latest
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Create Laravel user with the same UID/GID as the host user
-# This helps with shared volume permissions
-RUN addgroup -g 1000 laravel && \
-    adduser -u 1000 -G laravel -h /home/laravel -D laravel && \
-    # Add laravel user to the www-data group (if it exists)
-    addgroup -g 82 -S www-data || true && \
-    adduser laravel www-data || true
+# Important: The container will run as root but the files will be owned by www-data (for better volume mounts)
+RUN addgroup -g 82 -S www-data || true && \
+    adduser -u 82 -S -D -G www-data www-data || true
 
 # Set up directories with proper permissions
 RUN mkdir -p /app && \
-    chown -R laravel:laravel /app && \
+    chown -R www-data:www-data /app && \
     chmod -R 755 /app
 
 # Set up supervisor
@@ -87,41 +83,37 @@ EXPOSE 8000
 WORKDIR /app
 
 # Copy application code
-COPY --chown=laravel:laravel . /app/
+COPY --chown=www-data:www-data . /app/
 
 # Remove open_basedir restriction for composer
 RUN echo "open_basedir=" > /usr/local/etc/php/conf.d/open-basedir.ini
 
 # Install composer dependencies
-RUN su laravel -c "composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev"
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
 # Install npm dependencies and build assets (if necessary)
 RUN if [ -f "package.json" ]; then \
-        su laravel -c "npm ci && npm run build || echo 'Frontend build failed, continuing anyway'"; \
+        npm ci && \
+        npm run build || echo 'Frontend build failed, continuing anyway'; \
     fi
 
-# Create all required storage directories with proper permissions
-RUN mkdir -p /app/storage/app/private/App/Models/Patient/946 && \
-    mkdir -p /app/storage/app/public && \
+# Create all Laravel directories with proper permissions
+RUN mkdir -p /app/storage/app/public && \
     mkdir -p /app/storage/framework/cache && \
     mkdir -p /app/storage/framework/sessions && \
     mkdir -p /app/storage/framework/views && \
-    mkdir -p /app/bootstrap/cache && \
-    chown -R laravel:laravel /app/storage /app/bootstrap && \
-    chmod -R 775 /app/storage /app/bootstrap
+    mkdir -p /app/bootstrap/cache
+
+# Important: we keep these as root-owned initially
+# This allows the entrypoint script to modify permissions at runtime
+RUN chmod -R 777 /app/storage /app/bootstrap/cache
 
 # Laravel optimization for production
-RUN su laravel -c "php artisan storage:link || true"
+RUN php artisan storage:link || true
 
 # Clean up
 RUN apk del $PHPIZE_DEPS && \
     rm -rf /var/cache/apk/* /tmp/*
-
-# Switch to laravel user
-USER laravel
-
-# Set entrypoint
-ENTRYPOINT ["entrypoint"]
 
 # Default command - start Laravel's built-in server
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

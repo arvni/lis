@@ -8,11 +8,19 @@ port=${PORT:-8000}
 
 cd /app
 
-# Fix permissions on startup
-echo "🔧 Ensuring proper storage permissions..."
+# Create all necessary directories with very permissive permissions
+# This approach allows the container to work with host-mounted volumes
+echo "🔧 Setting up storage directories with appropriate permissions..."
 mkdir -p /app/storage/app/private/App/Models/Patient/946
-find /app/storage -type d -exec chmod 775 {} \;
-find /app/storage -type f -exec chmod 664 {} \;
+mkdir -p /app/storage/app/private/App/Models/ReferrerOrder
+mkdir -p /app/storage/framework/cache
+mkdir -p /app/storage/framework/sessions
+mkdir -p /app/storage/framework/views
+mkdir -p /app/bootstrap/cache
+
+# Make all storage directories world-writable (needed for volume mounts)
+chmod -R 777 /app/storage
+chmod -R 777 /app/bootstrap/cache
 
 # Run Laravel optimization if not in local environment
 if [ "$env" != "local" ]; then
@@ -35,12 +43,6 @@ if [ "$CLEAR_CACHES_ON_STARTUP" = "true" ]; then
     php artisan config:clear
     php artisan view:clear
     php artisan route:clear
-fi
-
-# Check for the Vite manifest
-if [ ! -f "/app/public/build/manifest.json" ] && [ -d "/app/public/build" ]; then
-    echo "⚠️ Vite manifest not found, creating a fallback manifest..."
-    echo '{"resources/js/app.js":{"file":"assets/app.js","isEntry":true}}' > /app/public/build/manifest.json
 fi
 
 # Start appropriate service based on container role
