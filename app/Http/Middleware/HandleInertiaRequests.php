@@ -41,7 +41,7 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $user,
-                'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
+                'permissions' => $user?$user->getAllPermissions()->pluck('name')->toArray():[],
             ],
             'sectionRoutes' => $user ? Cache::rememberForever("user-$user->id-section-routes", fn() => $this->sectionGroupService->getTransformedSectionGroups()) : [],
         ];
