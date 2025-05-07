@@ -19,12 +19,10 @@ import {
     Brightness7 as LightModeIcon,
     Notifications as NotificationsIcon,
     Settings as SettingsIcon,
-    Help as HelpIcon,
-    Search as SearchIcon
+    Help as HelpIcon
 } from '@mui/icons-material';
 import {Link, router, useRemember, Head, usePage} from '@inertiajs/react';
 import {InertiaProgress} from '@inertiajs/progress';
-import {debounce} from 'lodash';
 
 import routesFunction from '@/routes';
 import ChangePassword from '@/Pages/User/Components/ChangePassword';
@@ -226,11 +224,9 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
     const [drawerOpen, setDrawerOpen] = useRemember(true, "drawer-open");
     const [changePasswordOpen, setChangePasswordOpen] = useRemember(false, "change-password-open");
     const [routes, setRoutes] = useState([]);
-    const [filteredRoutes, setFilteredRoutes] = useState([]);
     const [loading, setLoading] = useState(false);
     const sections = usePage().props.sectionRoutes;
     const currentRoute = usePage().url;
-    const [searchQuery, setSearchQuery] = useState('');
     const [mobileOpen, setMobileOpen] = useState(false);
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -249,64 +245,7 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
     const fetchRoutes = useCallback(() => {
         const fetchedRoutes = routesFunction(sections);
         setRoutes(fetchedRoutes);
-        setFilteredRoutes(fetchedRoutes);
     }, [sections]);
-
-    // Recursively filter routes based on search query (handles nested children)
-    const filterRoutes = useCallback((routes, query) => {
-        if (!query || query.trim() === '') {
-            return routes;
-        }
-
-        const searchLower = query.toLowerCase();
-
-        // Recursive function to search through all levels of nesting
-        const searchNestedRoutes = (routeItems) => {
-            return routeItems.map(route => {
-                // Check if the current route name matches
-                const nameMatches = route.title && route.title.toLowerCase().includes(searchLower);
-
-                // Recursively search children if they exist
-                let matchingChildren = [];
-                if (route.child && route.child.length > 0) {
-                    matchingChildren = searchNestedRoutes(route.child);
-                }
-
-                // If this route matches or has matching children, include it
-                if (nameMatches || matchingChildren.length > 0) {
-                    return {
-                        ...route,
-                        // Only include matching children in search results
-                        child: matchingChildren
-                    };
-                }
-
-                // No match found for this route or its children
-                return null;
-            }).filter(Boolean); // Remove null entries
-        };
-
-        // Start the recursive search from the top level
-        return searchNestedRoutes(routes);
-    }, []);
-
-    // Handle search
-    const handleSearch = useCallback(debounce((value) => {
-        const filtered = filterRoutes(routes, value);
-        setFilteredRoutes(filtered);
-    }, 300), [routes, filterRoutes]);
-
-    // Handle search input
-    const handleSearchInput = (e) => {
-        const value = e.target.value;
-        setSearchQuery(value);
-        handleSearch(value);
-    };
-
-    // Update filtered routes when routes change
-    useEffect(() => {
-        setFilteredRoutes(routes);
-    }, [routes]);
 
     // Lifecycle: Fetch routes and manage loading state
     useEffect(() => {
@@ -321,7 +260,7 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
             document.removeEventListener('inertia:start', handleStart);
             document.removeEventListener('inertia:finish', handleFinish);
         };
-    }, [fetchRoutes]);
+    }, []);
 
     // Handle drawer based on screen size
     useEffect(() => {
@@ -450,44 +389,10 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
 
             <Divider/>
 
-            {/* Search Box */}
-            <Box sx={{mt: 1, px: 2}}>
-                <Box
-                    component="div"
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        backgroundColor: alpha(theme.palette.primary.main, 0.05),
-                        borderRadius: '8px',
-                        p: 1,
-                        mb: 1.5,
-                        mx: 0.5,
-                        opacity: drawerOpen ? 1 : 0,
-                        visibility: drawerOpen ? 'visible' : 'hidden',
-                        transition: 'all 0.3s ease'
-                    }}
-                >
-                    <SearchIcon sx={{ml: 1, color: 'text.secondary'}}/>
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        value={searchQuery}
-                        onChange={handleSearchInput}
-                        style={{
-                            border: 'none',
-                            backgroundColor: 'transparent',
-                            outline: 'none',
-                            padding: '8px',
-                            width: '100%',
-                            fontSize: '0.875rem',
-                            color: theme.palette.text.primary
-                        }}
-                    />
-                </Box>
-            </Box>
+            {/* Removed search box */}
 
             {/* Scrollable routes list - using flex-grow to take available space */}
-            <Box sx={{flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column'}}>
+            <Box sx={{flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', mt: 2}}>
                 <List sx={{
                     flex: 1,
                     overflow: 'auto',
@@ -502,8 +407,7 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
                         backgroundColor: 'transparent',
                     }
                 }}>
-                    {filteredRoutes.map((item, index) => (
-
+                    {routes.map((item, index) => (
                         <MenuItem
                             key={`menu-item-${index}`}
                             item={item}
@@ -511,15 +415,6 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
                             onNavigate={handleVisit}
                         />
                     ))}
-
-                    {/* Show a message when no routes are found */}
-                    {filteredRoutes.length === 0 && (
-                        <Box sx={{textAlign: 'center', py: 4, px: 2}}>
-                            <Typography variant="body2" color="text.secondary">
-                                No menu items match your search
-                            </Typography>
-                        </Box>
-                    )}
                 </List>
             </Box>
 

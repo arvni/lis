@@ -1,3 +1,5 @@
+// MenuItem.jsx - Fixed Version
+
 import React, {useState, useCallback, memo, useEffect} from "react";
 import PropTypes from "prop-types";
 import {
@@ -18,55 +20,64 @@ import {
 import {refactorRoute} from "@/routes";
 import {usePage} from "@inertiajs/react";
 
+// Safely parse URL without throwing errors
+const safeParseURL = (url) => {
+    if (!url) return null;
+    try {
+        if (URL.canParse(url)) {
+            return URL.parse(url).pathname;
+        }
+    } catch (e) {
+        console.error("URL parsing error:", e);
+    }
+    return null;
+};
+
 /**
  * Enhanced MenuItem Component - Renders a navigation menu item with optional submenu
- *
- * Features:
- * - Theme-aware styling that works with both light and dark modes
- * - Improved animations and transitions
- * - Better accessibility support
- * - Optimized performance with memo and useCallback
- * - Support for various icon types (components, strings, etc)
- *
- * @param {Object} item - The menu item data
- * @param {Array} permissions - User permissions array
- * @param {Function} onNavigate - Navigation handler function
- * @param {Boolean} isNested - Whether this item is a nested submenu item
  */
 const MenuItem = memo(({item, permissions, onNavigate, isNested = false}) => {
+    // Always call hooks at the top level
     const theme = useTheme();
-    console.log(permissions);
     const [open, setOpen] = useState(false);
     const {url} = usePage();
-    const hasSubmenu = Array.isArray(item.child) && item.child.length > 0;
-    const isPermitted = !Boolean(item.permission) || permissions.includes(item.permission);
 
+    // Safely get current item URL
+    const itemRoute = item?.route ? refactorRoute(item.route) : '';
+    const itemURL = safeParseURL(itemRoute);
 
-    let itemRoute = refactorRoute(item.route);
-    let itemURL = null;
-    if (URL.canParse(itemRoute))
-        itemURL = URL.parse(itemRoute).pathname;
+    // Ensure item has required properties
+    const safeItem = {
+        title: item?.title || "Untitled",
+        route: itemRoute,
+        icon: item?.icon || null,
+        permission: item?.permission || null,
+        child: Array.isArray(item?.child) ? item.child : [],
+        selected: item?.selected || false
+    };
+
+    // Check permissions - but after hooks have been called
+    const isPermitted = !Boolean(safeItem.permission) || permissions.includes(safeItem.permission);
+
+    // Determine if this menu item has child items
+    const hasSubmenu = safeItem.child.length > 0;
 
     // Check if current route matches this menu item's route
-    const isCurrentRoute = item.route && url.startsWith(itemURL);
+    const isCurrentRoute = itemURL && url.startsWith(itemURL);
 
-    // Check if any child route is current (for parent expansion)
-    const hasActiveChild = hasSubmenu && item.child.some(child => {
-            let childRoute = refactorRoute(child.route);
-            let childURL = null;
-            if (URL.canParse(childRoute))
-                childURL = URL.parse(childRoute);
-            return childURL && url.startsWith(childURL.pathname);
-        }
-    );
+    // Check if any child route is current
+    const hasActiveChild = hasSubmenu && safeItem.child.some(child => {
+        const childRoute = child?.route ? refactorRoute(child.route) : '';
+        const childURL = safeParseURL(childRoute);
+        return childURL && url.startsWith(childURL);
+    });
 
-
-    // Auto-expand parent items with active children
+    // Auto-expand menu items with active children or if they match current route
     useEffect(() => {
-        if (hasActiveChild) {
+        if (hasActiveChild || isCurrentRoute) {
             setOpen(true);
         }
-    }, [hasActiveChild, url]);
+    }, [hasActiveChild, isCurrentRoute]);
 
     // Skip rendering if user doesn't have permission
     if (!isPermitted) return null;
@@ -135,12 +146,12 @@ const MenuItem = memo(({item, permissions, onNavigate, isNested = false}) => {
             transition: "opacity 0.2s ease",
         },
         itemText: {
-            fontWeight: open || isCurrentRoute || item.selected ? 500 : 400,
+            fontWeight: open || isCurrentRoute || safeItem.selected ? 500 : 400,
             fontSize: isNested ? "0.875rem" : "0.9375rem",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
-            color: isCurrentRoute || item.selected
+            color: isCurrentRoute || safeItem.selected
                 ? theme.palette.primary.main
                 : theme.palette.text.primary,
             transition: "color 0.2s ease, font-weight 0.2s ease",
@@ -167,22 +178,22 @@ const MenuItem = memo(({item, permissions, onNavigate, isNested = false}) => {
     }, [onNavigate, handleToggle, hasSubmenu]);
 
     const renderIcon = () => {
-        if (item.icon && React.isValidElement(item.icon)) {
-            return React.cloneElement(item.icon, {
+        if (safeItem.icon && React.isValidElement(safeItem.icon)) {
+            return React.cloneElement(safeItem.icon, {
                 fontSize: isNested ? "small" : "medium",
                 style: {
-                    color: isCurrentRoute || item.selected
+                    color: isCurrentRoute || safeItem.selected
                         ? theme.palette.primary.main
                         : 'inherit'
                 }
             });
-        } else if (item.icon && typeof item.icon === "string") {
+        } else if (safeItem.icon && typeof safeItem.icon === "string") {
             return (
                 <Avatar
                     variant="rounded"
-                    src={item.icon}
+                    src={safeItem.icon}
                     sx={styles.avatarIcon}
-                    alt={`${item.title} icon`}
+                    alt={`${safeItem.title} icon`}
                 />
             );
         } else {
@@ -191,7 +202,7 @@ const MenuItem = memo(({item, permissions, onNavigate, isNested = false}) => {
                     variant="rounded"
                     sx={styles.avatarIcon}
                 >
-                    {item.title?.charAt(0).toUpperCase()}
+                    {safeItem.title.charAt(0).toUpperCase()}
                 </Avatar>
             );
         }
@@ -210,23 +221,23 @@ const MenuItem = memo(({item, permissions, onNavigate, isNested = false}) => {
                     height: "60%",
                     borderRadius: "0 4px 4px 0",
                     backgroundColor: theme.palette.primary.main,
-                    opacity: isCurrentRoute || item.selected ? 1 : 0,
+                    opacity: isCurrentRoute || safeItem.selected ? 1 : 0,
                     transition: "opacity 0.2s ease",
                 } : {},
                 "&:hover::before": isNested ? {
                     opacity: 0.5,
                 } : {},
             }}
-            onClick={handleClick(item.route ? refactorRoute(item.route) : null)}
-            href={item?.route ? refactorRoute(item.route) : undefined}
-            selected={isCurrentRoute || item.selected}
+            onClick={handleClick(safeItem.route)}
+            href={safeItem.route || undefined}
+            selected={isCurrentRoute || safeItem.selected}
             disableRipple
         >
             <ListItemIcon sx={styles.icon}>
                 {renderIcon()}
             </ListItemIcon>
             <ListItemText
-                primary={item.title}
+                primary={safeItem.title}
                 primaryTypographyProps={{
                     sx: styles.itemText,
                     noWrap: true
@@ -245,7 +256,7 @@ const MenuItem = memo(({item, permissions, onNavigate, isNested = false}) => {
         menuItemContent
     ) : (
         <Tooltip
-            title={item.title}
+            title={safeItem.title}
             placement="right"
             arrow
             disableHoverListener={open}
@@ -262,9 +273,9 @@ const MenuItem = memo(({item, permissions, onNavigate, isNested = false}) => {
             {hasSubmenu && (
                 <Collapse in={open} timeout={300} unmountOnExit>
                     <List component="div" disablePadding sx={styles.childList}>
-                        {item.child.map((child, index) => (
+                        {safeItem.child.map((child, index) => (
                             <MenuItem
-                                key={`${child.title}-${index}`}
+                                key={`${child?.title || 'item'}-${index}`}
                                 item={child}
                                 permissions={permissions}
                                 onNavigate={onNavigate}
@@ -282,7 +293,7 @@ MenuItem.displayName = 'MenuItem';
 
 MenuItem.propTypes = {
     item: PropTypes.shape({
-        title: PropTypes.string.isRequired,
+        title: PropTypes.string,
         route: PropTypes.string,
         icon: PropTypes.oneOfType([PropTypes.node, PropTypes.string, PropTypes.element]),
         permission: PropTypes.string,
