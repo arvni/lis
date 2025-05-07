@@ -77,7 +77,7 @@ COPY docker/php/fpm-pool.conf /usr/local/etc/php-fpm.d/www.conf
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
 
 # Set up supervisor
-COPY docker/supervisord.conf /etc/supervisor.d/supervisord.ini
+COPY docker/supervisord/supervisord.conf /etc/supervisor.d/supervisord.ini
 
 # Set up entrypoint
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint
