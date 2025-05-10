@@ -266,7 +266,11 @@ const Show = ({consultant, times, recentConsultations}) => {
                             </Box>
                         </Box>
 
-                        <TimeCalendar times={times} onChange={pageReload} onSelectDate={handleSelectDate}/>
+                        <TimeCalendar times={times}
+                                      onChange={pageReload}
+                                      onSelectDate={handleSelectDate}
+                                      canCheckConsultation
+                                      canCheckPatient/>
                     </Paper>
 
                     {/* Recent Consultations */}

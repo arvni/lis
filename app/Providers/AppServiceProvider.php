@@ -43,7 +43,9 @@ use App\Domains\User\Policies\RolePolicy;
 use App\Domains\User\Policies\UserPolicy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -62,6 +64,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
+        DB::listen(function ($query) {
+            if ($query->time > 1000) {
+                Log::warning('🚨 Slow Query Detected: ' . $query->sql, [
+                    'bindings' => $query->bindings,
+                    'time' => $query->time
+                ]);
+            }
+        });
+
         Vite::prefetch(concurrency: 3);
 
         Model::preventLazyLoading();

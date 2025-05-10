@@ -128,9 +128,9 @@ const TimeSlotCard = ({
                                     </Typography>
                                 )}
                             </Box>
-                            <Button onClick={handleConversion} variant="outlined">
+                            {canConversion && <Button onClick={handleConversion} variant="outlined">
                                 Convert to Patient Appointment
-                            </Button>
+                            </Button>}
                         </Box>
                     )}
 
