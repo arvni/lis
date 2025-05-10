@@ -3,6 +3,7 @@
 namespace App\Domains\Consultation\Models;
 
 use App\Domains\Consultation\Enums\ConsultationStatus;
+use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use Illuminate\Database\Eloquent\Model;
 
@@ -43,7 +44,12 @@ class Consultation extends Model
 
     public function time()
     {
-        return $this->morphOne(Time::class,"reservable");
+        return $this->morphOne(Time::class, "reservable");
+    }
+
+    public function acceptance()
+    {
+        return $this->hasOne(Acceptance::class);
     }
 
 }

@@ -49,4 +49,9 @@ class CustomerRepository
         return Customer::query()->where("phone", $phone)->first();
     }
 
+    public function findById($id)
+    {
+        return Customer::query()->findOrFail($id);
+    }
+
 }

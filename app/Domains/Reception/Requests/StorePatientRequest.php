@@ -24,7 +24,9 @@ class StorePatientRequest extends FormRequest
      */
     public function rules(): array
     {
+        $id=$this->input("id");
         return [
+            "id"=>["nullable","exists:patients,id"],
             "avatar" => [
                 "required",
             ],
@@ -44,7 +46,7 @@ class StorePatientRequest extends FormRequest
             "idNo" => [
                 "required",
                 "string",
-                "unique:patients,idNo",
+                "unique:patients,idNo".($id ? ",$id" : ''),
                 "max:255"
             ],
             "nationality" => [
@@ -54,7 +56,7 @@ class StorePatientRequest extends FormRequest
                 "required",
                 "string",
                 "max:255",
-                "unique:patients,phone"
+                "unique:patients,phone".($id ? ",$id" : ''),
             ],
             "tribe" => [
                 "nullable",

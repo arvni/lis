@@ -49,18 +49,7 @@ class ConsultationService
 
     public function createConsultation(ConsultationDTO $consultationDTO): Consultation
     {
-        $consultation = $this->consultationRepository->createConsultation($consultationDTO->toArray());
-        $dueDate = Carbon::parse($consultationDTO->dueDate, "Asia/Muscat");
-        $this->timeRepository->createTime([
-            "consultant_id" => $consultationDTO->consultantId,
-            "reservable_type" => "consultation",
-            "reservable_id" => $consultation->id,
-            "title" => $dueDate->format("H:i"),
-            "started_at" => $dueDate,
-            "ended_at" => $dueDate->copy()->addMinutes(30),
-            "active" => true,
-        ]);
-        return $consultation;
+        return $this->consultationRepository->createConsultation($consultationDTO->toArray());
     }
 
     public function updateConsultation(Consultation $consultation, ConsultationDTO $newConsultationDTO): Consultation

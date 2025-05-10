@@ -5,7 +5,6 @@ namespace App\Domains\Consultation\DTOs;
 use App\Domains\Consultation\Enums\ConsultationStatus;
 use App\Domains\Consultation\Models\Consultation;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 
 class ConsultationDTO
 {
@@ -14,8 +13,9 @@ class ConsultationDTO
         public int                $consultantId,
         public string             $dueDate,
         public ConsultationStatus $status,
-        public array              $information = [],
+        public ?array              $information = [],
         public ?string            $startedAt = null,
+        public ?int $timeID=null
     )
     {
     }
@@ -30,15 +30,15 @@ class ConsultationDTO
             $consultation->started_at,
         );
     }
-    public static function fromRequest(Request $request): self
+    public static function fromRequest(array $request): self
     {
         return new self(
-            $request->patient_id,
-            $request->consultant["id"],
-            Carbon::createFromFormat("Y-m-d H:i", $request->dueDate. " ". $request->time),
+            $request['patient_id'],
+            $request['consultant']["id"],
+            Carbon::createFromFormat("Y-m-d H:i", $request['dueDate']. " ". $request['time'],"Asia/Muscat"),
             ConsultationStatus::BOOKED,
-            $request->information ?? [],
-            $request->startedAt ?? null,
+            $request['information'] ?? [],
+            $request['startedAt'] ?? null,
         );
     }
 
@@ -51,6 +51,7 @@ class ConsultationDTO
             'information' => $this->information,
             'status' => $this->status,
             'started_at' => $this->startedAt,
+            "time_id" => $this->timeID,
         ];
     }
 }

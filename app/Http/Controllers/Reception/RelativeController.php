@@ -13,7 +13,8 @@ use Illuminate\Http\Request;
 
 class RelativeController extends Controller
 {
-    public function __construct(private PatientService $patientService, private RelativeService $relativeService)
+    public function __construct(private readonly PatientService $patientService,
+                                private readonly RelativeService $relativeService)
     {
     }
 
@@ -22,18 +23,7 @@ class RelativeController extends Controller
         $validatedData = $request->validated();
         if ($validatedData['patient_id'] == $validatedData['relative_id'])
             return back()->with(["success" => false, "status" => "You can't add yourself as a relative"]);
-        $patientDTO = new PatientDTO(
-            $validatedData['fullName'],
-            $validatedData['idNo'],
-            is_array($validatedData['nationality']) ? $validatedData["nationality"]["code"] : $validatedData['nationality'],
-            $validatedData['dateOfBirth'],
-            $validatedData['gender'],
-            $validatedData['avatar'],
-            $validatedData['phone'],
-            $validatedData['tribe']??null,
-            $validatedData['wilayat']??null,
-            $validatedData['village']??null
-        );
+        $patientDTO = PatientDTO::fromRequest($validatedData);
         $relative = null;
         if (!$patientDTO->id)
             $relative = $this->patientService->createPatient($patientDTO);

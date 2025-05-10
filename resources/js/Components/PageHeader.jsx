@@ -1,9 +1,9 @@
-import React, {memo} from "react";
-import {Card, Paper, Stack, Divider, Box} from "@mui/material";
+import React from "react";
+import {Card, Paper, Stack, Box} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {Head} from "@inertiajs/react";
 
-const PageHeader = memo(({title, actions, subtitle, icon}) => {
+const PageHeader = ({title, actions, subtitle, icon}) => {
     return (
         <Card
             elevation={2}
@@ -83,6 +83,6 @@ const PageHeader = memo(({title, actions, subtitle, icon}) => {
             </Paper>
         </Card>
     );
-}, (prevProps, nextProps) => prevProps.title === nextProps.title && prevProps.subtitle === nextProps.subtitle && prevProps.icon === nextProps.icon);
+};
 
 export default PageHeader;

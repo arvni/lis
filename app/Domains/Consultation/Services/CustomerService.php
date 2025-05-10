@@ -29,6 +29,11 @@ class CustomerService
         return $this->customerRepository->updateCustomer($customer, $customerDTO->toArray());
     }
 
+    public function findById($id)
+    {
+        return $this->customerRepository->findById($id);
+    }
+
     /**
      * @throws Exception
      */

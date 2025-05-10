@@ -16,10 +16,13 @@ import TimeCalendar from "./Components/TimeCalendar.jsx";
 import Button from "@mui/material/Button";
 import AddForm from "./Components/AddForm.jsx"
 import {useState} from "react";
+import ConvertCustomerToPatientForm from "@/Pages/Consultation/Components/ConvertCustomerToPatientForm.jsx";
 
 
 const Reservations = ({times}) => {
-    const [openAdd, setOpenAdd] = useState(false)
+    const [openAdd, setOpenAdd] = useState(false);
+    const [openConversion, setOpenConversion] = useState(false);
+    const [selectedTime, setSelectedTime] = useState(null);
     const pageReload = (startDate, endDate) => {
         router.visit(route('times.index'), {
             data: {
@@ -32,7 +35,15 @@ const Reservations = ({times}) => {
 
     const handleAddNew = () => setOpenAdd(true);
     const handleCloseAddNew = () => setOpenAdd(false);
+    const handleCloseConvert = () => {
+        setOpenAdd(false);
+        setSelectedTime(null);
+    }
 
+    const handleTimeSelection=(time)=>{
+        setSelectedTime(time);
+        setOpenConversion(true);
+    }
 
     return (
         <Box sx={{position: 'relative'}}>
@@ -51,9 +62,18 @@ const Reservations = ({times}) => {
                     mb: 4
                 }}
             >
-                <TimeCalendar times={times} onChange={pageReload}/>
+                <TimeCalendar times={times}
+                              onChange={pageReload}
+                              canCheckConsultation
+                              canCheckPatient
+                              canConversion
+                              onTimeSelection={handleTimeSelection}/>
             </Paper>
-            <AddForm openAdd={openAdd} onClose={handleCloseAddNew}/>
+            <AddForm openAdd={openAdd}
+                     onClose={handleCloseAddNew}/>
+            {openConversion && selectedTime && <ConvertCustomerToPatientForm onClose={handleCloseConvert}
+                                                                             time={selectedTime}
+                                                                             open={openConversion}/>}
         </Box>
     );
 };

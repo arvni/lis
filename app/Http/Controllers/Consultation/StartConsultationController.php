@@ -22,6 +22,6 @@ class StartConsultationController extends Controller
     {
         $this->authorize("done", $consultation);
         $this->consultationService->startConsultation($consultation);
-        return redirect()->route("consultations.show", $consultation);
+        return redirect()->back()->with(["consultation" => $consultation]);
     }
 }

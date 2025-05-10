@@ -42,16 +42,11 @@ import {
 } from "@mui/icons-material";
 import AvatarUpload from "@/Components/AvatarUpload";
 import MenuItem from "@mui/material/MenuItem";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import Typography from "@mui/material/Typography";
 import {omanWilayats} from "@/Data/omanWilayats.js";
 
 const PatientForm = ({onChange, data, errors, editable = true, withRelative = false}) => {
-
-    useEffect(() => {
-        console.log(data);
-    }, [data]);
-
     const [unknownAvatar, setUnknownAvatar] = useState(null);
     const [expandedSection, setExpandedSection] = useState('personal');
     const [age, setAge] = useState(calculateAge(data?.dateOfBirth));

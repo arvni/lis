@@ -18,6 +18,8 @@ class Time extends Model
     ];
     protected $casts=[
         "active"=>"boolean",
+        "started_at"=>"datetime",
+        "ended_at"=>"datetime"
     ];
 
     public function consultant()

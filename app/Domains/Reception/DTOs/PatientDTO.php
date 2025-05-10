@@ -20,6 +20,22 @@ class PatientDTO
     {
     }
 
+    public static function fromRequest($validatedRequest): self
+    {
+        return new self(
+            $validatedRequest['fullName'],
+            $validatedRequest['idNo'],
+            is_array($validatedRequest['nationality']) ? $validatedRequest["nationality"]["code"] : $validatedRequest['nationality'],
+            $validatedRequest['dateOfBirth'],
+            $validatedRequest['gender'],
+            $validatedRequest['avatar'],
+            $validatedRequest['phone'],
+            $validatedRequest['tribe'] ?? null,
+            $validatedRequest['wilayat'] ?? null,
+            $validatedRequest['village'] ?? null
+        );
+    }
+
     public function toArray(): array
     {
         $data = [

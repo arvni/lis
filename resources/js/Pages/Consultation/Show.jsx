@@ -8,7 +8,6 @@ import {useSnackbar} from "notistack";
 
 // Material UI components
 import {
-    Container,
     Typography,
     Divider,
     Button,
@@ -304,7 +303,7 @@ const Show = ({
                     Back to List
                 </Button>
                 <StatusBadge status={consultation.status}/>
-                    {/*{consultation.status === "done" && (*/}
+                    {consultation.status === "done" && (
                         <Button
                             variant="contained"
                             color="secondary"
@@ -318,7 +317,7 @@ const Show = ({
                         >
                             Add Acceptance
                         </Button>
-                    {/*)}*/}
+                    )}
             </Stack>}/>
 
             <Grid container spacing={3}>

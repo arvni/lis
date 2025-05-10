@@ -74,6 +74,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ShowSectionController;
 use App\Http\Controllers\TimeController;
+use App\Http\Controllers\UpdateCustomerToPatientWithConsultationController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -150,6 +151,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("reservation-times", ListReservationTimesController::class)->name("list-reservation-times");
         Route::resource("times", TimeController::class)->except("create","edit","show",);
         Route::post("book-an-appointment", BookAnAppointmentController::class)->name("book-an-appointment");
+        Route::put('convert-customer-to-patient/{time}', UpdateCustomerToPatientWithConsultationController::class)->name("update-customer-to-patient");
     });
 
     Route::resource("settings", SettingController::class)->only("index", "update");

@@ -20,7 +20,7 @@ use Inertia\Response;
 
 class PatientController extends Controller
 {
-    public function __construct(private PatientService $patientService)
+    public function __construct(private readonly PatientService $patientService)
     {
         $this->middleware("indexProvider")->only("index");
     }
@@ -33,8 +33,8 @@ class PatientController extends Controller
         $this->authorize("viewAny", Patient::class);
         $requestInputs = $request->all();
         $patients = $this->patientService->listPatients($requestInputs);
-        $stats=$this->patientService->getPatientStats();
-        return Inertia::render('Patient/Index', compact("patients", "requestInputs","stats"));
+        $stats = $this->patientService->getPatientStats();
+        return Inertia::render('Patient/Index', compact("patients", "requestInputs", "stats"));
     }
 
     /**
@@ -53,18 +53,7 @@ class PatientController extends Controller
     public function store(StorePatientRequest $request): RedirectResponse
     {
         $validatedData = $request->validated();
-        $patientDTO = new PatientDTO(
-            $validatedData['fullName'],
-            $validatedData['idNo'],
-            is_array($validatedData['nationality']) ? $validatedData["nationality"]["code"] : $validatedData['nationality'],
-            $validatedData['dateOfBirth'],
-            $validatedData['gender'],
-            $validatedData['avatar'],
-            $validatedData['phone'],
-            $validatedData['tribe'] ?? null,
-            $validatedData['wilayat'] ?? null,
-            $validatedData['village'] ?? null
-        );
+        $patientDTO = PatientDTO::fromRequest($validatedData);
         $patient = $this->patientService->createPatient($patientDTO);
         return redirect()->route("patients.show", $patient->id);
     }
@@ -87,18 +76,7 @@ class PatientController extends Controller
     public function update(UpdatePatientRequest $request, Patient $patient): RedirectResponse
     {
         $validatedData = $request->validated();
-        $patientDTO = new PatientDTO(
-            $validatedData['fullName'],
-            $validatedData['idNo'],
-            is_array($validatedData['nationality']) ? $validatedData["nationality"]["code"] : $validatedData['nationality'],
-            $validatedData['dateOfBirth'],
-            $validatedData['gender'],
-            $validatedData['avatar'],
-            $validatedData['phone'],
-            $validatedData['tribe'] ?? null,
-            $validatedData['wilayat'] ?? null,
-            $validatedData['village'] ?? null
-        );
+        $patientDTO = PatientDTO::fromRequest($validatedData);
         $this->patientService->updatePatient($patient, $patientDTO);
         return redirect()->route("patients.show", $patient->id)
             ->with(['status' => "$patient->fullName Successfully Updated", "success" => true]);

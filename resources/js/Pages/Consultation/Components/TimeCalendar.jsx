@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {
     Box,
     Paper,
@@ -33,7 +33,14 @@ const formatTime = (dateString) => {
     return `${hours}:${minutes} ${ampm}`;
 };
 
-const TimeSlotCard = ({timeSlot, onClick, canCheckConsultation = false, canCheckPatient = false,}) => {
+const TimeSlotCard = ({
+                          timeSlot,
+                          onClick,
+                          canCheckConsultation = false,
+                          canCheckPatient = false,
+                          canConversion = false
+                      }) => {
+    const handleConversion = () => canConversion && onClick(timeSlot)
     return <Card
         variant="outlined"
         sx={{
@@ -121,6 +128,9 @@ const TimeSlotCard = ({timeSlot, onClick, canCheckConsultation = false, canCheck
                                     </Typography>
                                 )}
                             </Box>
+                            <Button onClick={handleConversion} variant="outlined">
+                                Convert to Patient Appointment
+                            </Button>
                         </Box>
                     )}
 
@@ -239,7 +249,9 @@ const ModifiedTimeCalendar = ({
                                   onChange,
                                   canCheckPatient = false,
                                   canCheckConsultation = false,
-                                  onSelectDate = () => null
+                                  canConversion = false,
+                                  onSelectDate = () => null,
+                                  onTimeSelection
                               }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -431,8 +443,8 @@ const ModifiedTimeCalendar = ({
             date.getFullYear() === selectedDate.getFullYear();
     };
 
-    const handleTimeSlotClick = () => {
-
+    const handleTimeSlotClick = (time) => {
+        onTimeSelection(time)
     }
 
     return (
@@ -565,6 +577,7 @@ const ModifiedTimeCalendar = ({
                                         <TimeSlotCard timeSlot={timeSlot}
                                                       onClick={handleTimeSlotClick}
                                                       canCheckPatient={canCheckPatient}
+                                                      canConversion={canConversion}
                                                       canCheckConsultation={canCheckConsultation}/>
                                     </Grid>
                                 ))}
