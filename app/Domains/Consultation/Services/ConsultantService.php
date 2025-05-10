@@ -58,4 +58,18 @@ class ConsultantService
         if ($consultant->isDirty())
             $consultant->save();
     }
+
+    public function loadConsultantRelation(Consultant $consultant): Consultant
+    {
+        return $consultant->load([
+            'user',
+            'consultations',
+            'consultations.patient'
+        ])
+            ->loadCount([
+                'consultations',
+                'upcomingTimes',
+                'upcomingConsultations',
+            ]);
+    }
 }

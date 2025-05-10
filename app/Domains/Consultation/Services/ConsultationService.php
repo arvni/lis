@@ -12,6 +12,7 @@ use App\Domains\Consultation\Repositories\TimeRepository;
 use App\Domains\Setting\Repositories\SettingRepository;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use InvalidArgumentException;
 use Log;
@@ -41,6 +42,11 @@ class ConsultationService
         return $this->consultationRepository->listConsultation($filters);
     }
 
+    public function getRecentConsultations(array $array): Collection
+    {
+        return $this->consultationRepository->getAll($array);
+    }
+
     public function createConsultation(ConsultationDTO $consultationDTO): Consultation
     {
         $consultation = $this->consultationRepository->createConsultation($consultationDTO->toArray());
@@ -52,7 +58,7 @@ class ConsultationService
             "title" => $dueDate->format("H:i"),
             "started_at" => $dueDate,
             "ended_at" => $dueDate->copy()->addMinutes(30),
-            "active" => false,
+            "active" => true,
         ]);
         return $consultation;
     }
@@ -227,5 +233,6 @@ class ConsultationService
 
         return $timeSlots;
     }
+
 
 }

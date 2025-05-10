@@ -7,13 +7,12 @@ use Illuminate\Database\Eloquent\Collection;
 
 class TimeRepository
 {
-    public function listTime(array $queryData): Collection
+    public function listTimes(array $queryData): Collection
     {
         $query = Time::query()
-            ->with(["reservable.patient","consultant"]);
-        if (isset($queryData["filters"])) {
+            ->with(["reservable.patient", "consultant"]);
+        if (isset($queryData["filters"]))
             $this->applyFilters($query, $queryData["filters"]);
-        }
         return $query->get();
     }
 
@@ -39,11 +38,14 @@ class TimeRepository
     {
         if (isset($filters["consultant_id"]))
             $query->where("consultant_id", $filters["consultant_id"]);
-        if (isset($filters["startDate"])){
+        if (isset($filters["startDate"])) {
             $query->whereDate("started_at", ">=", $filters["startDate"]);
         }
-        if (isset($filters["endDate"])){
+        if (isset($filters["endDate"])) {
             $query->whereDate("started_at", "<=", $filters["endDate"]);
+        if (isset($filters["betweenDate"]))
+            $query->whereBetween("started_at", $filters["betweenDate"]);
         }
     }
+
 }

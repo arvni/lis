@@ -92,7 +92,7 @@ const routes = (sections = []) => {
                 },
                 {
                     title: "Reservations",
-                    route: "times",
+                    route: "times.index",
                     permission: 'Consultation.Reservations.List Reservations',
                     icon: null,
                 },

@@ -22,7 +22,7 @@ class Customer extends Model
     ];
 
 
-    public function time()
+    public function times()
     {
         return $this->morphMany(Time::class, "reservable");
     }

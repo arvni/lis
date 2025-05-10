@@ -10,6 +10,7 @@ import {router, useForm} from "@inertiajs/react";
 import {Button} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import PageHeader from "@/Components/PageHeader.jsx";
+import Link from "@mui/material/Link";
 
 const breadCrumbs = [
     {
@@ -23,7 +24,14 @@ const Index = ({consultants, status, errors, success, requestInputs}) => {
     const {setData, data, post, processing, reset, setError} = useForm();
     const [open, setOpen] = useState(false);
     const columns = [
-        {field: 'name', headerName: 'Name', type: "string", width: 150, display: "flex"},
+        {
+            field: 'name',
+            headerName: 'Name',
+            type: "string",
+            width: 150,
+            display: "flex",
+            renderCell: ({row, value}) => <Link href={route("consultants.show", row.id)}>{value}</Link>
+        },
         {field: 'title', headerName: 'Title', width: 150, display: "flex"},
         {field: 'speciality', headerName: 'Expertise', width: 150, display: "flex"},
         {

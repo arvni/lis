@@ -3,6 +3,7 @@
 namespace App\Domains\Consultation\Requests;
 
 use App\Domains\Consultation\Models\Consultation;
+use App\Rules\TimeSlotAvailable;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
@@ -14,7 +15,7 @@ class StoreConsultationRequest extends FormRequest
      */
     public function authorize()
     {
-        return Gate::allows("create",Consultation::class);
+        return Gate::allows("create", Consultation::class);
     }
 
     /**
@@ -27,12 +28,19 @@ class StoreConsultationRequest extends FormRequest
     {
         return [
             "consultant.id" => "required|exists:users,id",
-            "dueDate" => ["required", function ($attribute, $value, $fail) {
-                $date = Carbon::createFromFormat("Y-m-d", $value);
-                if ($date->lessThanOrEqualTo(Carbon::now()->startOfDay()))
-                    $fail("Due Date Must Be Grater Than Now");
-            }],
-            "time" => ["required"],
+            "dueDate" => [
+                "required",
+                function ($attribute, $value, $fail) {
+                    $date = Carbon::createFromFormat("Y-m-d", $value);
+                    if ($date->lessThanOrEqualTo(Carbon::now()->startOfDay()))
+                        $fail("Due Date Must Be Grater Than Now");
+                }
+            ],
+            "time" => [
+                "required",
+                "date_format:H:i",
+                new TimeSlotAvailable($this->input('consultant.id'), $this->input('dueDate')),
+            ],
             "patient_id" => "required|exists:patients,id"
         ];
     }

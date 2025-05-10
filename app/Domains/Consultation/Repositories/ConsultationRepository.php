@@ -3,10 +3,8 @@
 namespace App\Domains\Consultation\Repositories;
 
 use App\Domains\Consultation\Models\Consultation;
-use App\Domains\User\Models\User;
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Ramsey\Collection\Collection;
 
 class ConsultationRepository
 {
@@ -26,14 +24,34 @@ class ConsultationRepository
 
     public function listConsultation(array $queryData): LengthAwarePaginator
     {
-        $query = Consultation::query()->selectRaw('*, ' . $this->durationStatement)
-            ->withAggregate("consultant", "name")
-            ->withAggregate("Patient", "fullName");
+        $query = $this->getQuery();
         if (isset($queryData["filters"])) {
             $this->applyFilters($query, $queryData["filters"]);
         }
         $query->orderBy($queryData['sort']['field'] ?? 'id', $queryData['sort']['sort'] ?? 'asc');
         return $query->paginate($queryData["pageSize"]);
+    }
+
+    public function getAll(array $queryData): Collection
+    {
+        $query = $this->getQuery();
+        if (isset($queryData["filters"])) {
+            $this->applyFilters($query, $queryData["filters"]);
+        }
+        $query->orderBy($queryData['sort']['field'] ?? 'id', $queryData['sort']['sort'] ?? 'asc');
+
+        if (isset($queryData["limit"]))
+            $query->take($queryData["limit"]);
+
+        return $query->get();
+    }
+
+    public function getQuery()
+    {
+        return Consultation::query()->selectRaw('*, ' . $this->durationStatement)
+            ->withAggregate("consultant", "name")
+            ->withAggregate("patient", "fullName")
+            ->withAggregate("patient", "phone");
     }
 
     public function createConsultation(array $data): Consultation
@@ -54,27 +72,16 @@ class ConsultationRepository
         $consultation->delete();
     }
 
-
-    public function findLatestConsultation($patientId): ?Consultation
-    {
-        return Consultation::where("patient_id", $patientId)->latest()->first();
-    }
-
-    private function applyFilters($query, array $filters)
+    private function applyFilters($query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search($filters["search"]);
         if (isset($filters["status"]))
             $query->whereIn("status", $filters["status"]);
+        if (isset($filters["from_date"]))
+            $query->whereDate("dueDate", ">=", $filters["from_date"]);
+        if (isset($filters["consultant_id"]))
+            $query->where("consultant_id", $filters["consultant_id"]);
     }
 
-
-    public function isTimeSlotBooked(User $user, Carbon $startTime, Carbon $endTime): bool
-    {
-
-        return (bool)$user->consultations()
-            ->whereBetween("dueDate", [$startTime, $endTime])
-            ->whereNot("status", "done")
-            ->count();
-    }
 }

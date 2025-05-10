@@ -103,7 +103,7 @@ const AddForm = ({openAdd, onClose}) => {
 
     const handleSubmit = () => {
         if (check()) {
-            post(route("times.store"), {
+            post(route("book-an-appointment"), {
                 onSuccess: () => {
                     setShowSuccess(true);
                         onClose();

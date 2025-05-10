@@ -21,7 +21,7 @@ import {useState} from "react";
 const Reservations = ({times}) => {
     const [openAdd, setOpenAdd] = useState(false)
     const pageReload = (startDate, endDate) => {
-        router.visit(route('times'), {
+        router.visit(route('times.index'), {
             data: {
                 startDate,
                 endDate,

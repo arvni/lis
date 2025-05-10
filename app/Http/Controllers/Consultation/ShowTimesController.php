@@ -19,6 +19,6 @@ class ShowTimesController extends Controller
      */
     public function __invoke(Request $request)
     {
-        return Inertia::render('Consultation/Reservations', ["times"=>$this->timeRepository->listTime($request->all())]);
+        return Inertia::render('Consultation/Reservations', ["times"=>$this->timeRepository->listTimes($request->all())]);
     }
 }

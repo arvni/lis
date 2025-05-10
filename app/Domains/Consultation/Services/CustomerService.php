@@ -34,10 +34,10 @@ class CustomerService
      */
     public function deleteCustomer(Customer $customer): void
     {
-        if (!$customer->methods()->exists()) {
+        if (!$customer->times()->exists()) {
             $this->customerRepository->deleteCustomer($customer);
         } else
-            throw new Exception("This Customer has some Acceptances");
+            throw new Exception("This Customer has some Reserved Times");
     }
 
     public function createOrGetCustomer(array $data): Customer
