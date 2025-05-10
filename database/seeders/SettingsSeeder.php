@@ -72,7 +72,7 @@ class SettingsSeeder extends Seeder
                 "title" => "Consultation Service",
                 "key" => "defaultConsultationMethod",
                 "class" => "Acceptance",
-                "value" => ["value" => "", "type" => "selectSearch","url"=>route("api.tests.list")]
+                "value" => ["value" => "", "type" => "selectSearch", "url" => relative_route("api.tests.list")]
             ]
         ];
         foreach ($settings as $settingData) {
