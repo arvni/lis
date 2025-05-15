@@ -23,13 +23,16 @@ class RelativeController extends Controller
         $validatedData = $request->validated();
         if ($validatedData['patient_id'] == $validatedData['relative_id'])
             return back()->with(["success" => false, "status" => "You can't add yourself as a relative"]);
+        $relative=$this->patientService->getPatientByIdNo($validatedData["idNo"]);
+
         $patientDTO = PatientDTO::fromRequest($validatedData);
-        $relative = null;
-        if (!$patientDTO->id)
-            $relative = $this->patientService->createPatient($patientDTO);
-        else {
-            $relative = $this->patientService->getPatientById($patientDTO->id);
-            $relative = $this->patientService->updatePatient($relative, $patientDTO);
+        if (!$relative) {
+            if (!$patientDTO->id)
+                $relative = $this->patientService->createPatient($patientDTO);
+            else {
+                $relative = $this->patientService->getPatientById($patientDTO->id);
+                $relative = $this->patientService->updatePatient($relative, $patientDTO);
+            }
         }
         $relativeDto = new RelativeDTO(
             $request->get("patient_id"),

@@ -16,9 +16,9 @@ import {
 } from "@mui/material";
 import PatientIdForm from "@/Pages/Patient/Components/PatientIdForm";
 import PatientForm from "@/Pages/Patient/Components/PatientForm";
-import { useEffect, useState, forwardRef } from "react";
+import {useEffect, useState, forwardRef} from "react";
 import Button from "@mui/material/Button";
-import { getPatientByIdNo } from "@/Pages/Patient/Components/Form.jsx";
+import {getPatientByIdNo} from "@/Pages/Patient/Components/Form.jsx";
 import countries from "@/Data/Countries.js";
 import {
     Close as CloseIcon,
@@ -69,18 +69,17 @@ const AddRelative = ({
                 break;
             case 1:
                 OnSubmit();
-                setStep(0);
                 break;
         }
     };
 
-    const findPatientCallBack = ({data={}}) => {
-        const {id = null, nationality = null, ...res}=data
+    const findPatientCallBack = ({data = {}}) => {
+        const {id = null, nationality = null, ...res} = data
         setRelative(prevRelative => ({
             ...prevRelative,
             relative_id: id,
             ...res,
-            nationality: countries.filter((item) => item.code === nationality)[0] ?? null,
+            nationality: countries.find((item) => item.code === nationality) ?? null,
         }));
         setLoading(false);
         setStep(step + 1);
@@ -91,13 +90,13 @@ const AddRelative = ({
     // Get step title and icon based on current step
     const getStepInfo = () => {
         const steps = [
-            { title: "Enter ID/Passport Number", icon: <BadgeIcon color="primary" /> },
-            { title: "Complete Relative Information", icon: <PersonIcon color="primary" /> }
+            {title: "Enter ID/Passport Number", icon: <BadgeIcon color="primary"/>},
+            {title: "Complete Relative Information", icon: <PersonIcon color="primary"/>}
         ];
         return steps[step] || steps[0];
     };
 
-    const { title, icon } = getStepInfo();
+    const {title, icon} = getStepInfo();
 
     return (
         <Dialog
@@ -125,8 +124,8 @@ const AddRelative = ({
                     px: 3
                 }}
             >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <PersonAddIcon sx={{ mr: 1.5 }} />
+                <Box sx={{display: 'flex', alignItems: 'center'}}>
+                    <PersonAddIcon sx={{mr: 1.5}}/>
                     <Typography variant="h6">
                         {relative.id ? "Edit Family Member" : "Add Family Member"}
                     </Typography>
@@ -142,18 +141,18 @@ const AddRelative = ({
                         color: 'primary.contrastText',
                     }}
                 >
-                    <CloseIcon />
+                    <CloseIcon/>
                 </IconButton>
             </Paper>
 
-            <DialogContent sx={{ px: 3, py: 3 }}>
+            <DialogContent sx={{px: 3, py: 3}}>
                 {!loading ? (
                     <>
                         {/* Step indicator with title */}
-                        <Box sx={{ mb: 3 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <Box sx={{mb: 3}}>
+                            <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
                                 {icon}
-                                <Typography variant="subtitle1" sx={{ ml: 1, fontWeight: 'medium' }}>
+                                <Typography variant="subtitle1" sx={{ml: 1, fontWeight: 'medium'}}>
                                     {title}
                                 </Typography>
                             </Box>
@@ -161,7 +160,7 @@ const AddRelative = ({
                             <Stepper
                                 activeStep={step}
                                 alternativeLabel
-                                sx={{ mb: 2 }}
+                                sx={{mb: 2}}
                             >
                                 <Step key={0}>
                                     <StepLabel>ID/Passport Number</StepLabel>
@@ -171,16 +170,18 @@ const AddRelative = ({
                                 </Step>
                             </Stepper>
 
-                            <Divider />
+                            <Divider/>
                         </Box>
 
                         {/* Form content based on current step */}
-                        <Box sx={{ minHeight: '300px' }}>
+                        <Box sx={{minHeight: '300px'}}>
                             {step === 0 && (
-                                <Box sx={{ maxWidth: '600px', mx: 'auto', py: 2 }}>
-                                    <PatientIdForm data={relative} onChange={handleChange} />
-                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
-                                        Enter the ID number or passport number to search for an existing patient record or create a new one.
+                                <Box sx={{maxWidth: '600px', mx: 'auto', py: 2}}>
+                                    <PatientIdForm data={relative} onChange={handleChange}/>
+                                    <Typography variant="body2" color="text.secondary"
+                                                sx={{mt: 2, textAlign: 'center'}}>
+                                        Enter the ID number or passport number to search for an existing patient record
+                                        or create a new one.
                                     </Typography>
                                 </Box>
                             )}
@@ -205,36 +206,36 @@ const AddRelative = ({
                             minHeight: '300px'
                         }}
                     >
-                        <CircularProgress size={60} thickness={4} />
-                        <Typography variant="body1" sx={{ mt: 3 }}>
+                        <CircularProgress size={60} thickness={4}/>
+                        <Typography variant="body1" sx={{mt: 3}}>
                             Searching for patient records...
                         </Typography>
                     </Box>
                 )}
             </DialogContent>
 
-            <Divider />
+            <Divider/>
 
-            <DialogActions sx={{ px: 3, py: 2 }}>
+            <DialogActions sx={{px: 3, py: 2}}>
                 <Button
                     onClick={onClose}
                     disabled={loading}
                     variant="outlined"
                     color="inherit"
-                    startIcon={<CloseIcon />}
+                    startIcon={<CloseIcon/>}
                 >
                     Cancel
                 </Button>
 
-                <Box sx={{ flex: '1 1 auto' }} />
+                <Box sx={{flex: '1 1 auto'}}/>
 
                 {step > 0 && (
                     <Button
                         onClick={back}
                         disabled={loading}
                         variant="outlined"
-                        startIcon={<ArrowBackIcon />}
-                        sx={{ mr: 1 }}
+                        startIcon={<ArrowBackIcon/>}
+                        sx={{mr: 1}}
                     >
                         Back
                     </Button>
@@ -245,7 +246,7 @@ const AddRelative = ({
                     disabled={loading || processing}
                     variant="contained"
                     color={step === 1 ? "success" : "primary"}
-                    endIcon={step === 0 ? <ArrowForwardIcon /> : <PersonAddIcon />}
+                    endIcon={step === 0 ? <ArrowForwardIcon/> : <PersonAddIcon/>}
                 >
                     {step === 0 ? "Next" : (relative.id ? "Update" : "Add")}
                 </Button>

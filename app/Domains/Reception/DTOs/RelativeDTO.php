@@ -7,7 +7,7 @@ class RelativeDTO
     public function __construct(
         public int    $patientId,
         public int    $relativeId,
-        public array $relationship,
+        public array|string $relationship,
     )
     {
     }

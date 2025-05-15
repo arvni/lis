@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\Referrer\ListReferrersController;
 use App\Http\Controllers\Billing\ExportInvoicesController;
 use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentController;
+use App\Http\Controllers\Consultation\BookAnAppointmentController;
 use App\Http\Controllers\Consultation\ConsultantController;
 use App\Http\Controllers\Consultation\ConsultationController;
 use App\Http\Controllers\Consultation\ListConsultantsController;
@@ -23,7 +24,7 @@ use App\Http\Controllers\Consultation\ListCustomersController;
 use App\Http\Controllers\Consultation\ListReservationTimesController;
 use App\Http\Controllers\Consultation\ListWaitingConsultationsController;
 use App\Http\Controllers\Consultation\StartConsultationController;
-use App\Http\Controllers\Consultation\BookAnAppointmentController;
+use App\Http\Controllers\Consultation\UpdateCustomerToPatientWithConsultationController;
 use App\Http\Controllers\Document\DocumentController;
 use App\Http\Controllers\Document\DownloadReportController;
 use App\Http\Controllers\Document\UpdateBatchDocumentsController;
@@ -41,6 +42,9 @@ use App\Http\Controllers\Laboratory\TestController;
 use App\Http\Controllers\Laboratory\TestGroupController;
 use App\Http\Controllers\Laboratory\WorkflowController;
 use App\Http\Controllers\ListUsersController;
+use App\Http\Controllers\Notification\GetUnreadNotificationsController;
+use App\Http\Controllers\Notification\ListNotificationController;
+use App\Http\Controllers\Notification\ShowNotificationPageController;
 use App\Http\Controllers\Reception\AcceptanceController;
 use App\Http\Controllers\Reception\AcceptanceItemStateController;
 use App\Http\Controllers\Reception\AcceptancePrescriptionController;
@@ -74,7 +78,6 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ShowSectionController;
 use App\Http\Controllers\TimeController;
-use App\Http\Controllers\UpdateCustomerToPatientWithConsultationController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -105,7 +108,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put("/patients/{patient}/patient-metas", UpdatePatientMetaController::class)
             ->name("patients.updateMetas");
         Route::resource("relatives", RelativeController::class)->only(["store", "update", "destroy"]);
-        Route::resource("acceptances", AcceptanceController::class)->except("create","store");
+        Route::resource("acceptances", AcceptanceController::class)->except("create", "store");
         Route::get("acceptances/{acceptance}/print", PrintAcceptanceController::class)->name("acceptances.print");
         Route::get("acceptances/{acceptance}/barcodes", PrintAcceptanceBarcodeController::class)->name("acceptances.barcodes");
         Route::put("acceptances/{acceptance}/cancel", CancelAcceptanceController::class)->name("acceptances.cancel");
@@ -149,7 +152,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put("consultations/{consultation}/start", StartConsultationController::class)->name("consultations.start");
         Route::get("consultants-list", ListConsultantsController::class)->name("list-consultants");
         Route::get("reservation-times", ListReservationTimesController::class)->name("list-reservation-times");
-        Route::resource("times", TimeController::class)->except("create","edit","show",);
+        Route::resource("times", TimeController::class)->except("create", "edit", "show",);
         Route::post("book-an-appointment", BookAnAppointmentController::class)->name("book-an-appointment");
         Route::put('convert-customer-to-patient/{time}', UpdateCustomerToPatientWithConsultationController::class)->name("update-customer-to-patient");
     });
@@ -184,8 +187,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::group(["prefix" => "consultation"], function () {
             Route::get("customers", ListCustomersController::class)->name("customers.list");
         });
-
         Route::get("documents/{document}", [DocumentController::class, "download"])->name("api.documents.show");
+
+        Route::group(["prefix" => "notifications"], function () {
+            Route::get("/", ListNotificationController::class)->name("notifications.index");
+            Route::get("/unread", GetUnreadNotificationsController::class)->name("notifications.unread");
+        });
 
     });
     Route::group(["prefix" => "billing"], function () {
@@ -213,6 +220,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource("referrer-orders", ReferrerOrderController::class);
     });
     Route::post("upload-public", UploadPublicDocumentController::class)->name("upload-public");
+    Route::get("/notifications", ShowNotificationPageController::class)->name("notifications");
 
 });
 require __DIR__ . '/auth.php';

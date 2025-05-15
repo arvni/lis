@@ -8,7 +8,6 @@ import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid2';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {LoadingButton} from "@mui/lab";
@@ -123,7 +122,7 @@ export default function Welcome(props) {
     const {enqueueSnackbar} = useSnackbar();
 
     useEffect(() => {
-        if (props.auth.user)
+        if (props?.auth?.user)
             router.visit('/dashboard');
 
         // Display flash messages if they exist
@@ -239,7 +238,7 @@ export default function Welcome(props) {
                                 padding: {xs: 2, sm: 4},
                             }}
                         >
-                            <Avatar sx={{m: 1, bgcolor: 'secondary.main', width: 56,height:80}}
+                            <Avatar sx={{m: 1, bgcolor: 'secondary.main', width: 56, height: 80}}
                                     variant="square"
                                     src="/images/logo.png"/>
                             <Typography component="h1" variant="h4" gutterBottom>
@@ -261,93 +260,93 @@ export default function Welcome(props) {
                                 </Fade>
                             )}
                             <Container maxWidth="xs">
-                            <Box component="form" noValidate onSubmit={handleSubmit} sx={{mt: 2, width: '100%'}}>
-                                <TextField
-                                    margin="normal"
-                                    required
-                                    fullWidth
-                                    id="email"
-                                    label="Email or Username"
-                                    name="email"
-                                    autoComplete="email"
-                                    autoFocus
-                                    value={data.email}
-                                    onChange={onHandleChange}
-                                    error={!!errors.email}
-                                    helperText={errors.email}
-                                    slotProps={{
-                                        input: {
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <EmailIcon color="action"/>
-                                                </InputAdornment>
-                                            ),
-                                        }
-                                    }}
-                                    placeholder="Email or username"
-                                />
-                                <TextField
-                                    margin="normal"
-                                    required
-                                    fullWidth
-                                    name="password"
-                                    label="Password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    id="password"
-                                    autoComplete="current-password"
-                                    value={data.password}
-                                    onChange={onHandleChange}
-                                    error={!!errors.password}
-                                    helperText={errors.password}
-                                    slotProps={{
-                                        input: {
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <IconButton
-                                                        aria-label="toggle password visibility"
-                                                        onClick={handleClickShowPassword}
-                                                        onMouseDown={handleMouseDownPassword}
-                                                        edge="end"
-                                                    >
-                                                        {showPassword ? <VisibilityOff/> : <Visibility/>}
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            ),
-                                        }
-                                    }}
-                                />
-                                <Box sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    mt: 1
-                                }}>
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                color="primary"
-                                                name="remember"
-                                                checked={data.remember}
-                                                onChange={onHandleChange}
-                                            />
-                                        }
-                                        label="Remember me"
+                                <Box component="form" noValidate onSubmit={handleSubmit} sx={{mt: 2, width: '100%'}}>
+                                    <TextField
+                                        margin="normal"
+                                        required
+                                        fullWidth
+                                        id="email"
+                                        label="Email or Username"
+                                        name="email"
+                                        autoComplete="email"
+                                        autoFocus
+                                        value={data.email}
+                                        onChange={onHandleChange}
+                                        error={!!errors.email}
+                                        helperText={errors.email}
+                                        slotProps={{
+                                            input: {
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <EmailIcon color="action"/>
+                                                    </InputAdornment>
+                                                ),
+                                            }
+                                        }}
+                                        placeholder="Email or username"
                                     />
-                                    <Link href={route('password.request')} variant="body2" underline="hover">
-                                        Forgot password?
-                                    </Link>
+                                    <TextField
+                                        margin="normal"
+                                        required
+                                        fullWidth
+                                        name="password"
+                                        label="Password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        id="password"
+                                        autoComplete="current-password"
+                                        value={data.password}
+                                        onChange={onHandleChange}
+                                        error={!!errors.password}
+                                        helperText={errors.password}
+                                        slotProps={{
+                                            input: {
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <IconButton
+                                                            aria-label="toggle password visibility"
+                                                            onClick={handleClickShowPassword}
+                                                            onMouseDown={handleMouseDownPassword}
+                                                            edge="end"
+                                                        >
+                                                            {showPassword ? <VisibilityOff/> : <Visibility/>}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                ),
+                                            }
+                                        }}
+                                    />
+                                    <Box sx={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        mt: 1
+                                    }}>
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    color="primary"
+                                                    name="remember"
+                                                    checked={data.remember}
+                                                    onChange={onHandleChange}
+                                                />
+                                            }
+                                            label="Remember me"
+                                        />
+                                        <Link href={route('password.request')} variant="body2" underline="hover">
+                                            Forgot password?
+                                        </Link>
+                                    </Box>
+                                    <LoadingButton
+                                        loading={processing}
+                                        type="submit"
+                                        fullWidth
+                                        variant="contained"
+                                        sx={{mt: 3, mb: 2, py: 1.5}}
+                                        size="large"
+                                    >
+                                        Sign In
+                                    </LoadingButton>
                                 </Box>
-                                <LoadingButton
-                                    loading={processing}
-                                    type="submit"
-                                    fullWidth
-                                    variant="contained"
-                                    sx={{mt: 3, mb: 2, py: 1.5}}
-                                    size="large"
-                                >
-                                    Sign In
-                                </LoadingButton>
-                            </Box>
                             </Container>
                         </Box>
                         <Copyright sx={{mt: 4, mb: 4}}/>

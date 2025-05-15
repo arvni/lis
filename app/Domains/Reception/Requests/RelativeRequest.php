@@ -6,6 +6,7 @@ use App\Domains\Reception\Models\Patient;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 
 class RelativeRequest extends FormRequest
 {
@@ -24,7 +25,11 @@ class RelativeRequest extends FormRequest
      */
     public function rules(): array
     {
+        $id=$this->input("id");
         return [
+            "id"=>[
+                "nullable","exists:patients,id",
+            ],
             "avatar" => [
                 "required",
             ],
@@ -44,7 +49,6 @@ class RelativeRequest extends FormRequest
             "idNo" => [
                 "required",
                 "string",
-                "unique:patients,idNo," . $this->get("relative_id"),
                 "max:255"
             ],
             "nationality" => [
@@ -54,7 +58,6 @@ class RelativeRequest extends FormRequest
                 "required",
                 "string",
                 "max:255",
-                "unique:patients,phone," . $this->get("relative_id")
             ],
             "relationship" => [
                 "required",

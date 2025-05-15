@@ -58,6 +58,7 @@
         "reactflow": "^11.11.4",
         "suneditor": "^2.47.5",
         "suneditor-react": "^3.6.1",
+        "swr": "^2.3.3",
         "use-image": "^1.1.1",
         "uuid": "^11.1.0",
         "uuidv4": "^6.2.13",

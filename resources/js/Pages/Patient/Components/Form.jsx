@@ -12,8 +12,7 @@ import {router} from "@inertiajs/react";
 
 export const getPatientByIdNo = async (idNo, callback) => {
     axios.get(route('api.patients.getByIdNo', {idNo}))
-        .then(res => callback(res.data))
-        .finally(() => callback({data:{}}));
+        .then(res => callback(res.data));
 }
 
 export default function ({data, setData, back, edit, next, step, ...rest}) {

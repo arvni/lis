@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Consultation;
 
 use App\Domains\Consultation\DTOs\ConsultationDTO;
 use App\Domains\Consultation\DTOs\CustomerDTO;
@@ -15,6 +15,7 @@ use App\Domains\Reception\DTOs\PatientDTO;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Requests\StorePatientRequest;
 use App\Domains\Reception\Services\PatientService;
+use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 

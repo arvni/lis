@@ -5,7 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import {
     Box, Toolbar, List, Typography, Divider, IconButton, Container,
     Menu, MenuItem as MuiMenuItem, Paper, Backdrop, CircularProgress,
-    Avatar, Tooltip, Switch, Button, Badge, ListItemIcon, ListItemText,
+    Avatar, Tooltip, Switch, ListItemIcon, ListItemText,
     useMediaQuery, Drawer as MuiDrawer, Fade
 } from '@mui/material';
 import {
@@ -17,7 +17,6 @@ import {
     Person as PersonIcon,
     Brightness4 as DarkModeIcon,
     Brightness7 as LightModeIcon,
-    Notifications as NotificationsIcon,
     Settings as SettingsIcon,
     Help as HelpIcon
 } from '@mui/icons-material';
@@ -31,6 +30,7 @@ import AppBar from './Components/AppBar';
 import Drawer from './Components/Drawer';
 import Copyright from './Components/Copyright';
 import Header from './Components/Header';
+import Notification from './Components/Notification';
 
 // Initialize Inertia Progress Bar
 InertiaProgress.init({
@@ -220,7 +220,6 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
 
     // State Management
     const [anchorEl, setAnchorEl] = useState(null);
-    const [notificationsAnchor, setNotificationsAnchor] = useState(null);
     const [drawerOpen, setDrawerOpen] = useRemember(true, "drawer-open");
     const [changePasswordOpen, setChangePasswordOpen] = useRemember(false, "change-password-open");
     const [routes, setRoutes] = useState([]);
@@ -229,14 +228,6 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
     const currentRoute = usePage().url;
     const [mobileOpen, setMobileOpen] = useState(false);
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
-    // Sample notifications (remove or replace with your actual notifications)
-    const [notifications, setNotifications] = useState([
-        {id: 1, text: 'New report is available', read: false, time: '10m ago'},
-        {id: 2, text: 'Your task was completed', read: false, time: '1h ago'},
-        {id: 3, text: 'Welcome to the dashboard', read: true, time: '1d ago'},
-    ]);
-    const unreadCount = notifications.filter(n => !n.read).length;
 
     // User permissions (for MenuItem)
     const userPermissions = useMemo(() => auth.permissions || [], [auth.permissions]);
@@ -274,8 +265,6 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
     // Menu Handlers
     const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
     const handleMenuClose = () => setAnchorEl(null);
-    const handleNotificationsOpen = (event) => setNotificationsAnchor(event.currentTarget);
-    const handleNotificationsClose = () => setNotificationsAnchor(null);
     const toggleDrawer = () => setDrawerOpen(!drawerOpen);
     const toggleMobileDrawer = () => setMobileOpen(!mobileOpen);
     const handleVisit = (addr) => () => {
@@ -289,11 +278,6 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
 
     const toggleDarkMode = () => {
         setDarkMode(!darkMode);
-    };
-
-    const markAllAsRead = () => {
-        setNotifications(notifications.map(n => ({...n, read: true})));
-        handleNotificationsClose();
     };
 
     // User menu items with icons
@@ -491,92 +475,7 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
                             <Header breadcrumbs={breadcrumbs}/>
                         </Typography>
 
-                        {/* Notifications Icon */}
-                        <Tooltip title="Notifications">
-                            <IconButton
-                                color="inherit"
-                                onClick={handleNotificationsOpen}
-                                sx={{mr: 1}}
-                            >
-                                <Badge badgeContent={unreadCount} color="error">
-                                    <NotificationsIcon/>
-                                </Badge>
-                            </IconButton>
-                        </Tooltip>
-
-                        {/* Notifications Menu */}
-                        <Menu
-                            anchorEl={notificationsAnchor}
-                            open={Boolean(notificationsAnchor)}
-                            onClose={handleNotificationsClose}
-                            slotProps={{
-                                Paper: {
-                                    elevation: 3,
-                                    sx: {
-                                        width: 320,
-                                        maxHeight: 400,
-                                        mt: 1.5,
-                                        borderRadius: 2,
-                                        overflow: 'hidden',
-                                    }
-                                }
-                            }}
-                            transformOrigin={{horizontal: 'right', vertical: 'top'}}
-                            anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
-                        >
-                            <Box sx={{p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                                <Typography variant="subtitle1" sx={{fontWeight: 600}}>
-                                    Notifications
-                                </Typography>
-                                {unreadCount > 0 && (
-                                    <Button size="small" onClick={markAllAsRead}>
-                                        Mark all as read
-                                    </Button>
-                                )}
-                            </Box>
-                            <Divider/>
-                            {notifications.length > 0 ? (
-                                <Box sx={{maxHeight: 320, overflow: 'auto'}}>
-                                    {notifications.map((notification) => (
-                                        <MuiMenuItem
-                                            key={notification.id}
-                                            onClick={handleNotificationsClose}
-                                            sx={{
-                                                py: 1.5,
-                                                px: 2,
-                                                borderLeft: notification.read ? 'none' : '3px solid',
-                                                borderColor: 'primary.main',
-                                                backgroundColor: notification.read ? 'transparent' : alpha(theme.palette.primary.main, 0.04),
-                                            }}
-                                        >
-                                            <Box sx={{width: '100%'}}>
-                                                <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
-                                                    <Typography variant="body2"
-                                                                sx={{fontWeight: notification.read ? 400 : 500}}>
-                                                        {notification.text}
-                                                    </Typography>
-                                                </Box>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    {notification.time}
-                                                </Typography>
-                                            </Box>
-                                        </MuiMenuItem>
-                                    ))}
-                                </Box>
-                            ) : (
-                                <Box sx={{p: 4, textAlign: 'center'}}>
-                                    <Typography variant="body2" color="text.secondary">
-                                        No notifications yet
-                                    </Typography>
-                                </Box>
-                            )}
-                            <Divider/>
-                            <Box sx={{p: 1}}>
-                                <Button fullWidth size="small" onClick={handleNotificationsClose}>
-                                    View all notifications
-                                </Button>
-                            </Box>
-                        </Menu>
+                        <Notification/>
 
                         {/* Dark Mode Toggle (visible only on desktop) */}
                         {!isMobile && (

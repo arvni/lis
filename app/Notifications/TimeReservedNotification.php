@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Domains\Reception\Notifications;
+namespace App\Notifications;
 
-use App\Domains\Reception\Models\Acceptance;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class PatientReportPublished extends Notification
+class TimeReservedNotification extends Notification
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Acceptance $acceptance)
+    public function __construct()
     {
         //
     }
@@ -26,7 +26,7 @@ class PatientReportPublished extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database',];
+        return ['mail'];
     }
 
     /**
@@ -48,7 +48,7 @@ class PatientReportPublished extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-
+            //
         ];
     }
 }

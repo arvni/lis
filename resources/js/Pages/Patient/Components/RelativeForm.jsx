@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import {
     Box,
     Divider,
@@ -23,7 +23,7 @@ import {
 import Grid from "@mui/material/Grid2";
 import AddRelative from "./AddRelative";
 import DeleteForm from "@/Components/DeleteForm";
-import { useForm } from "@inertiajs/react";
+import {useForm} from "@inertiajs/react";
 
 // Utility function to get the relationship color
 const getRelationshipColor = (relationship) => {
@@ -45,7 +45,7 @@ const getRelationshipColor = (relationship) => {
 const getRelationshipIcon = (relationship, gender) => {
     // This would be better with actual icons for each relationship type
     // For simplicity, we're just returning a person icon for now
-    return <PersonIcon fontSize="small" />;
+    return <PersonIcon fontSize="small"/>;
 };
 
 const RelativeForm = ({
@@ -54,7 +54,7 @@ const RelativeForm = ({
                           edit = false,
                           canEdit = false
                       }) => {
-    const { data, setData, post, processing, reset, errors, setError } = useForm({
+    const {data, setData, post, processing, reset, errors, setError} = useForm({
         avatar: "",
         fullName: "",
         idNo: "",
@@ -124,10 +124,10 @@ const RelativeForm = ({
         <Box>
             {/* Add Family Member Button - Prominently displayed if in edit mode */}
             {edit && (
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 2}}>
                     <Button
                         variant="contained"
-                        startIcon={<PersonAddIcon />}
+                        startIcon={<PersonAddIcon/>}
                         onClick={add}
                         color="primary"
                     >
@@ -138,7 +138,7 @@ const RelativeForm = ({
 
             {/* Family Members List */}
             {relatives.length > 0 ? (
-                <Card variant="outlined" sx={{ mb: 3 }}>
+                <Card variant="outlined" sx={{mb: 3}}>
                     <Box sx={{
                         bgcolor: 'background.paper',
                         borderBottom: '1px solid',
@@ -147,22 +147,22 @@ const RelativeForm = ({
                         py: 1.5
                     }}>
                         <Grid container alignItems="center" spacing={2}>
-                            <Grid size={{ xs:4}}>
+                            <Grid size={{xs: 4}}>
                                 <Typography variant="subtitle2" color="text.secondary">
                                     Full Name
                                 </Typography>
                             </Grid>
-                            <Grid size={{ xs:3}}>
+                            <Grid size={{xs: 3}}>
                                 <Typography variant="subtitle2" color="text.secondary">
                                     ID Number
                                 </Typography>
                             </Grid>
-                            <Grid size={{ xs:3}}>
+                            <Grid size={{xs: 3}}>
                                 <Typography variant="subtitle2" color="text.secondary">
                                     Relationship
                                 </Typography>
                             </Grid>
-                            <Grid  size={{ xs:2}} sx={{ textAlign: 'right' }}>
+                            <Grid size={{xs: 2}} sx={{textAlign: 'right'}}>
                                 <Typography variant="subtitle2" color="text.secondary">
                                     Actions
                                 </Typography>
@@ -179,12 +179,12 @@ const RelativeForm = ({
                                         ':hover': {
                                             bgcolor: alpha('#000', 0.03)
                                         },
-                                        width:"100%"
+                                        width: "100%"
                                     }}
                                 >
-                                    <Grid container alignItems="center" spacing={2} sx={{width:"100%"}}>
-                                        <Grid size={{xs:4}}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <Grid container alignItems="center" spacing={2} sx={{width: "100%"}}>
+                                        <Grid size={{xs: 4}}>
+                                            <Box sx={{display: 'flex', alignItems: 'center'}}>
                                                 <Avatar
                                                     src={item.avatar}
                                                     alt={item.fullName}
@@ -200,10 +200,10 @@ const RelativeForm = ({
                                                 <Typography variant="body1">{item.fullName}</Typography>
                                             </Box>
                                         </Grid>
-                                        <Grid size={{xs:3}}>
+                                        <Grid size={{xs: 3}}>
                                             <Typography variant="body2">{item.idNo}</Typography>
                                         </Grid>
-                                        <Grid size={{xs:3}}>
+                                        <Grid size={{xs: 3}}>
                                             <Chip
                                                 icon={getRelationshipIcon(item.relationship, item.gender)}
                                                 label={item.relationship ? item.relationship.charAt(0).toUpperCase() + item.relationship.slice(1) : ''}
@@ -212,17 +212,17 @@ const RelativeForm = ({
                                                 variant="outlined"
                                             />
                                         </Grid>
-                                        <Grid size={{xs:2}}>
-                                            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                        <Grid size={{xs: 2}}>
+                                            <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
                                                 <Tooltip title="View Details">
                                                     <IconButton
                                                         href={route("patients.show", item.id)}
                                                         target="_blank"
                                                         size="small"
                                                         color="primary"
-                                                        sx={{ mr: 0.5 }}
+                                                        sx={{mr: 0.5}}
                                                     >
-                                                        <VisibilityIcon fontSize="small" />
+                                                        <VisibilityIcon fontSize="small"/>
                                                     </IconButton>
                                                 </Tooltip>
 
@@ -233,9 +233,9 @@ const RelativeForm = ({
                                                                 onClick={editRelative(index)}
                                                                 size="small"
                                                                 color="info"
-                                                                sx={{ mr: 0.5 }}
+                                                                sx={{mr: 0.5}}
                                                             >
-                                                                <EditIcon fontSize="small" />
+                                                                <EditIcon fontSize="small"/>
                                                             </IconButton>
                                                         </Tooltip>
                                                         <Tooltip title="Remove">
@@ -244,7 +244,7 @@ const RelativeForm = ({
                                                                 size="small"
                                                                 color="error"
                                                             >
-                                                                <DeleteIcon fontSize="small" />
+                                                                <DeleteIcon fontSize="small"/>
                                                             </IconButton>
                                                         </Tooltip>
                                                     </>
@@ -253,7 +253,7 @@ const RelativeForm = ({
                                         </Grid>
                                     </Grid>
                                 </ListItem>
-                                {index < relatives.length - 1 && <Divider />}
+                                {index < relatives.length - 1 && <Divider/>}
                             </React.Fragment>
                         ))}
                     </List>
@@ -277,7 +277,7 @@ const RelativeForm = ({
                     {edit && (
                         <Button
                             variant="outlined"
-                            startIcon={<PersonAddIcon />}
+                            startIcon={<PersonAddIcon/>}
                             onClick={add}
                         >
                             Add Family Member
@@ -287,7 +287,7 @@ const RelativeForm = ({
             )}
 
             {/* Dialogs */}
-            <AddRelative
+            {open && <AddRelative
                 onClose={close}
                 setRelative={setData}
                 errors={errors}
@@ -296,7 +296,7 @@ const RelativeForm = ({
                 OnSubmit={submit}
                 relative={data}
                 processing={processing}
-            />
+            />}
 
             <DeleteForm
                 title={`Remove ${data.fullName}${data.relationship ? ` (${data.relationship})` : ''}`}

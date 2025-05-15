@@ -3,14 +3,17 @@
 namespace App\Http\Middleware;
 
 use App\Domains\Laboratory\Services\SectionGroupService;
-use App\Domains\Laboratory\Services\SectionService;
+use App\Domains\Notification\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
-    public function __construct(private readonly SectionGroupService $sectionGroupService,)
+    public function __construct(
+        private readonly SectionGroupService $sectionGroupService,
+        private readonly NotificationService $notificationService,
+    )
     {
     }
 
@@ -37,13 +40,25 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = auth()->user();
-        return [
-            ...parent::share($request),
-            'auth' => [
-                'user' => $user,
-                'permissions' => $user?$user->getAllPermissions()->pluck('name')->toArray():[],
-            ],
-            'sectionRoutes' => $user ? Cache::rememberForever("user-$user->id-section-routes", fn() => $this->sectionGroupService->getTransformedSectionGroups()) : [],
-        ];
+
+        $data = parent::share($request);
+
+        if ($user) {
+            $data = [
+                ...$data,
+                'auth' => [
+                    'user' => [
+                        "id" => $user->id,
+                        "name" => $user->name,
+                        "email" => $user->email,
+                        "username" => $user->username
+                    ],
+                    'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
+                ],
+                'sectionRoutes' => Cache::rememberForever("user-$user->id-section-routes", fn() => $this->sectionGroupService->getTransformedSectionGroups()),
+
+            ];
+        }
+        return $data;
     }
 }

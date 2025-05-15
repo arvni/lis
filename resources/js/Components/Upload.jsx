@@ -228,13 +228,7 @@ const Upload = ({
             });
 
             // Notify parent of the change
-            setManagedFiles(current => {
-                const successfulFiles = current
-                    .filter(f => f.status === 'success' && f.serverData)
-                    .map(f => f.serverData);
-                onChange(name, multiple ? successfulFiles : successfulFiles[0] || null);
-                return current;
-            });
+            notifyParentOfChange();
 
         } catch (error) {
             console.error("Tag update error:", error);
@@ -245,10 +239,24 @@ const Upload = ({
             });
             setGeneralError(errorMsg);
         }
-    }, [managedFiles, url, onChange, name, multiple]);
+    }, [managedFiles, url]);
+
+    // Centralized function to notify parent of changes
+    const notifyParentOfChange = useCallback((results = []) => {
+        let successfulFiles = managedFiles
+            .filter(f => f.status === 'success' && f.serverData)
+            .map(f => f.serverData);
+        if (results.length > 0) {
+            successfulFiles = [
+                ...successfulFiles,
+                ...results
+            ];
+        }
+        onChange(name, multiple ? successfulFiles : successfulFiles[0] || null);
+    }, [managedFiles, multiple, name, onChange]);
 
     // --- Upload Logic ---
-    const performUpload = useCallback(async (file, tempId, tag) => {
+    const performSingleUpload = useCallback(async (file, tempId, tag) => {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("tag", tag || "TEMP"); // Use selected tag or default to TEMP
@@ -276,28 +284,13 @@ const Upload = ({
                 error: undefined
             });
 
-            // Notify parent AFTER successful upload
-            setManagedFiles(current => {
-                const successfulFiles = current
-                    .filter(f => f.status === 'success' && f.serverData)
-                    .map(f => f.serverData);
-                onChange(name, multiple ? successfulFiles : successfulFiles[0] || null);
-                return current; // Return current state for setManagedFiles
-            });
+            return response.data.data;
 
         } catch (error) {
             if (axios.isCancel(error)) {
                 console.log('Upload canceled:', file.name);
                 setManagedFiles(current => current.filter(f => f.tempId !== tempId)); // Remove from internal state
-                // Also update parent state if this cancel affects it
-                setManagedFiles(current => {
-                    const successfulFiles = current
-                        .filter(f => f.status === 'success' && f.serverData)
-                        .map(f => f.serverData);
-                    onChange(name, multiple ? successfulFiles : successfulFiles[0] || null);
-                    return current;
-                });
-
+                return null;
             } else {
                 console.error("Upload error:", error);
                 const errorMsg = error.response?.data?.message || error.message || "Upload failed";
@@ -308,9 +301,36 @@ const Upload = ({
                     cancelSource: undefined
                 });
                 setGeneralError("An upload failed. Please check individual files.");
+                throw error; // Propagate the error for Promise.all to catch
             }
         }
-    }, [url, name, multiple, onChange]);
+    }, [url]);
+
+    // New function to handle multiple uploads with Promise.all
+    const performMultipleUploads = useCallback(async (filesToUpload, tag) => {
+        if (filesToUpload.length === 0) return;
+
+        try {
+            // Create an array of upload promises
+            const uploadPromises = filesToUpload.map(fileObj =>
+                performSingleUpload(fileObj.file, fileObj.tempId, tag)
+            );
+
+            // Wait for all uploads to complete
+            const results = await Promise.all(uploadPromises);
+
+            // Filter out any null results (from canceled uploads)
+            const successfulUploads = results.filter(Boolean);
+
+            // Only notify parent once after all uploads are done
+            if (successfulUploads.length > 0) {
+                notifyParentOfChange(results);
+            }
+        } catch (error) {
+            // Individual file errors are already handled in performSingleUpload
+            console.error("One or more uploads failed:", error);
+        }
+    }, [performSingleUpload, notifyParentOfChange]);
 
     // --- Event Handlers ---
     const stopDefaults = useCallback((e) => {
@@ -325,7 +345,12 @@ const Upload = ({
             setShowTagSelector(true);
         } else {
             // No tags provided, use default "TEMP" tag
-            validatedFiles.forEach(f => performUpload(f.file, f.tempId, "TEMP"));
+            if (multiple) {
+                performMultipleUploads(validatedFiles, "TEMP");
+            } else {
+                // For single file, still use the new method
+                performMultipleUploads([validatedFiles[0]], "TEMP");
+            }
         }
     };
 
@@ -380,13 +405,17 @@ const Upload = ({
             processFilesForUpload(filesToUpload);
         }
 
-    }, [managedFiles, multiple, maxFiles, validateFile, performUpload]);
+    }, [managedFiles, multiple, maxFiles, validateFile]);
 
     // Handle tag selection confirmation
     const handleTagConfirm = () => {
         if (filesForTagging.length > 0) {
             // Proceed with upload using the selected tag
-            filesForTagging.forEach(f => performUpload(f.file, f.tempId, selectedTag));
+            if (multiple) {
+                performMultipleUploads(filesForTagging, selectedTag);
+            } else {
+                performMultipleUploads([filesForTagging[0]], selectedTag);
+            }
             setFilesForTagging([]);
             setShowTagSelector(false);
         }
@@ -480,31 +509,22 @@ const Upload = ({
         closeDeleteForm(); // Close dialog immediately
 
         try {
-            axios.post(route("documents.destroy", serverData.id), {_method: "delete",})
-                .then(r => {
-                // Remove from internal state on success
-                setManagedFiles(current => current.filter(f => f.tempId !== tempId));
+            await axios.post(route("documents.destroy", serverData.id), {_method: "delete"});
 
-                // Notify parent of the change
-                setManagedFiles(current => {
-                    const successfulFiles = current
-                        .filter(f => f.status === 'success' && f.serverData)
-                        .map(f => f.serverData);
-                    onChange(name, multiple ? successfulFiles : successfulFiles[0] || null);
-                    return current;
-                });
-            })
+            // Remove from internal state on success
+            setManagedFiles(current => current.filter(f => f.tempId !== tempId));
 
+            // Notify parent of the change
+            notifyParentOfChange();
         } catch (error) {
             console.error("Delete error:", error);
             const errorMsg = error.response?.data?.message || error.message || "Failed to delete file";
-            updateFileState(tempId, {status: 'success', error: errorMsg}); // Revert status to allow retry? Or keep 'deleting' and show error? Let's revert.
+            updateFileState(tempId, {status: 'success', error: errorMsg}); // Revert status to allow retry
             setGeneralError(errorMsg);
         } finally {
-            // No need to set loading false as we use 'deleting' status
             setFileToDelete(null); // Clear the file marked for deletion
         }
-    }, [fileToDelete, multiple, name, onChange]);
+    }, [fileToDelete, notifyParentOfChange]);
 
     // Calculate remaining slots accurately
     const remainingSlots = multiple ? Math.max(0, maxFiles - currentFileCount) : (currentFileCount === 0 ? 1 : 0);
