@@ -217,18 +217,20 @@ const Upload = ({
             const response = await axios.patch(`${url}/${fileToUpdate.serverData.id}`, {
                 tag: newTag
             });
-
-            // Update the file state with the new tag
-            updateFileState(tempId, {
+            let newFiles = managedFiles.map(f => f.tempId === tempId ? {
+                ...f,
                 status: 'success',
                 serverData: {
                     ...fileToUpdate.serverData,
                     tag: newTag
                 }
-            });
-
+            } : f)
+            // Update the file state with the new tag
+            setManagedFiles(newFiles);
             // Notify parent of the change
-            notifyParentOfChange();
+
+            const updatedFiles = newFiles.map(item => item.serverData);
+            onChange(name, multiple ? updatedFiles : updatedFiles[0] || null);
 
         } catch (error) {
             console.error("Tag update error:", error);
@@ -510,12 +512,11 @@ const Upload = ({
 
         try {
             await axios.post(route("documents.destroy", serverData.id), {_method: "delete"});
-
+            let newFiles = managedFiles.filter(f => f.tempId !== tempId)
             // Remove from internal state on success
-            setManagedFiles(current => current.filter(f => f.tempId !== tempId));
+            setManagedFiles(newFiles);
 
-            // Notify parent of the change
-            notifyParentOfChange();
+            onChange(name, multiple ? newFiles.map(item => item.serverData) : null);
         } catch (error) {
             console.error("Delete error:", error);
             const errorMsg = error.response?.data?.message || error.message || "Failed to delete file";
