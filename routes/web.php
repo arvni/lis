@@ -25,6 +25,7 @@ use App\Http\Controllers\Consultation\ListReservationTimesController;
 use App\Http\Controllers\Consultation\ListWaitingConsultationsController;
 use App\Http\Controllers\Consultation\StartConsultationController;
 use App\Http\Controllers\Consultation\UpdateCustomerToPatientWithConsultationController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Document\DocumentController;
 use App\Http\Controllers\Document\DownloadReportController;
 use App\Http\Controllers\Document\UpdateBatchDocumentsController;
@@ -93,11 +94,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::get('dashboard', function () {
-        return Inertia::render('Dashboard');
-    })
-        ->middleware(['auth', 'verified'])
-        ->name('dashboard');
+    Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::group(["prefix" => "user-management"], function () {
         Route::resource("users", UserController::class);
         Route::resource("roles", RoleController::class);

@@ -131,4 +131,9 @@ class ReportRepository
         return $report;
     }
 
+    public function getTotalReportsWaitingForApproving(): int
+    {
+        return Report::query()->whereNull("approver_id")->count();
+    }
+
 }

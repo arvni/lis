@@ -3,8 +3,10 @@
 namespace App\Domains\Reception\Repositories;
 
 use App\Domains\Document\Enums\DocumentTag;
+use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Report;
+use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 
@@ -166,6 +168,16 @@ class AcceptanceItemRepository
                     $q->search($filters["search"]);
                 });
         }
+    }
+
+    public function getTotalTestsForDateRange($dateRange): int
+    {
+        return AcceptanceItem::query()
+            ->whereBetween("created_at", $dateRange)
+            ->whereHAs("test", function ($q) {
+                $q->whereNot("type", TestType::SERVICE);
+            })
+            ->count();
     }
 
 }

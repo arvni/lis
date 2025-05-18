@@ -324,7 +324,10 @@ class AcceptanceService
 
     public function updateAcceptanceInvoice(Acceptance $acceptance, $invoiceId): void
     {
-        $this->acceptanceRepository->updateAcceptance($acceptance, ["invoice_id" => $invoiceId]);
+        $this->acceptanceRepository->updateAcceptance($acceptance, [
+            "invoice_id" => $invoiceId,
+            "status" => $acceptance->status == AcceptanceStatus::PENDING ? AcceptanceStatus::WAITING_FOR_PAYMENT : $acceptance->status
+        ]);
     }
 
     public function updateAcceptanceStatus(Acceptance $acceptance, AcceptanceStatus $status): void
@@ -341,7 +344,7 @@ class AcceptanceService
             "acceptanceItems.patient",
             "patient"
         ]);
-        $barcodes = $this->convertAcceptanceItems($acceptance->acceptanceItems->where("test.type","!=", TestType::SERVICE));
+        $barcodes = $this->convertAcceptanceItems($acceptance->acceptanceItems->where("test.type", "!=", TestType::SERVICE));
         return ["barcodes" => $barcodes, "patient" => $acceptance->patient];
     }
 

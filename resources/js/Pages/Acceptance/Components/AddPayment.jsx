@@ -25,7 +25,9 @@ import {
     Alert,
     RadioGroup,
     FormControlLabel,
-    Radio
+    Radio,
+    Tooltip,
+    Zoom
 } from "@mui/material";
 import {
     AttachMoney,
@@ -36,12 +38,17 @@ import {
     Business,
     Save,
     Info,
+    ErrorOutline,
+    Receipt,
+    SwapHoriz
 } from "@mui/icons-material";
-import { useForm } from "@inertiajs/react";
-import React, {useEffect, useState} from "react";
+import {useForm} from "@inertiajs/react";
+import React, {useEffect, useState, useMemo} from "react";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
 
 /**
- * Improved AddPayment Component
+ * Enhanced AddPayment Component
  *
  * @param {Object} props - Component props
  * @param {boolean} props.open - Controls dialog visibility
@@ -60,8 +67,9 @@ const AddPayment = ({
                         onSuccess
                     }) => {
     const theme = useTheme();
+
     // Initialize form with default values if not provided
-    const defaultValues = {
+    const defaultValues = useMemo(() => ({
         price: initialData?.price || 0,
         paymentMethod: initialData?.paymentMethod || "",
         information: initialData?.information || {},
@@ -69,7 +77,7 @@ const AddPayment = ({
         _method: initialData?._method || "post",
         id: initialData?.id || null,
         invoice_id: initialData?.invoice?.id || initialData?.invoice_id || null
-    };
+    }), [initialData, payers]);
 
     const {
         data,
@@ -77,21 +85,36 @@ const AddPayment = ({
         post,
         clearErrors,
         errors,
-        processing: loading
+        processing: loading,
+        reset
     } = useForm(defaultValues);
 
     // Form validation errors separate from form data
     const [validationErrors, setValidationErrors] = useState({});
+    const [formTouched, setFormTouched] = useState(false);
 
+    // Reset form when dialog opens with new data
     useEffect(() => {
-        setData(defaultValues);
-    }, [initialData]);
+        if (open) {
+            setData(defaultValues);
+            setValidationErrors({});
+            setFormTouched(false);
+        }
+    }, [open, initialData, setData, defaultValues]);
 
+    // Auto-focus amount field when payment method changes
+    const [shouldFocusAmount, setShouldFocusAmount] = useState(false);
+    useEffect(() => {
+        if (data.paymentMethod && !data.id) {
+            setShouldFocusAmount(true);
+        }
+    }, [data.paymentMethod, data.id]);
 
     /**
      * Handle form submission
      */
     const handleSubmit = () => {
+        setFormTouched(true);
         clearErrors();
         if (validateForm()) {
             const url = data.id
@@ -103,6 +126,7 @@ const AddPayment = ({
                     if (typeof onSuccess === 'function') {
                         onSuccess();
                     }
+                    reset();
                     onClose();
                 }
             });
@@ -118,13 +142,16 @@ const AddPayment = ({
         let isValid = true;
 
         // Validate price
-        if (!(data.price >= 0) || (data.price > max)) {
-            newErrors.price = `Amount must be greater than or equal to 0 and less than ${max}`;
+        if (!(data.price > 0)) {
+            newErrors.price = "Amount must be greater than 0";
+            isValid = false;
+        } else if (data.price > max) {
+            newErrors.price = `Amount exceeds the maximum allowed (${max.toFixed(2)} OMR)`;
             isValid = false;
         }
 
         // Validate payment method
-        if (!["cash", "card", "credit"].includes(data.paymentMethod)) {
+        if (!["cash", "card", "credit", "transfer"].includes(data.paymentMethod)) {
             newErrors.paymentMethod = "Please select a payment method";
             isValid = false;
         }
@@ -141,24 +168,41 @@ const AddPayment = ({
             isValid = false;
         }
 
+        // Transfer payment validation
+        if (data.paymentMethod === "transfer" && (!data.information?.transferReference)) {
+            newErrors["information.transferReference"] = "Transaction reference is required for bank transfers";
+            isValid = false;
+        }
+
         setValidationErrors(newErrors);
         return isValid;
     };
 
     /**
-     * Handle price input change
+     * Handle price input change with smarter formatting
      */
     const handlePriceChange = (e) => {
-        const value = parseFloat(e.target.value);
-        setData("price", isNaN(value) ? 0 : value);
+        const rawValue = e.target.value;
+        const value = parseFloat(rawValue);
 
-        // Clear error if value is now valid
-        if (value >= 0 && value <= max) {
-            setValidationErrors(prev => {
-                const newErrors = {...prev};
-                delete newErrors.price;
-                return newErrors;
-            });
+        // Allow empty input (will be validated on submission)
+        if (rawValue === "") {
+            setData("price", "");
+            return;
+        }
+
+        // Handle valid numbers with up to 2 decimal places
+        if (!isNaN(value)) {
+            setData("price", Math.min(value, max));
+
+            // Clear error if value is now valid
+            if (value > 0 && value <= max) {
+                setValidationErrors(prev => {
+                    const newErrors = {...prev};
+                    delete newErrors.price;
+                    return newErrors;
+                });
+            }
         }
     };
 
@@ -166,14 +210,17 @@ const AddPayment = ({
      * Handle payment method change
      */
     const handlePaymentMethodChange = (e) => {
+        const newMethod = e.target.value;
+
         setData(prevData => ({
             ...prevData,
-            paymentMethod: e.target.value,
-            information: {} // Reset additional information when method changes
+            paymentMethod: newMethod,
+            // Only reset information if changing methods
+            information: prevData.paymentMethod !== newMethod ? {} : prevData.information
         }));
 
         // Clear error if a valid method is selected
-        if (["cash", "card", "credit"].includes(e.target.value)) {
+        if (["cash", "card", "credit", "transfer"].includes(newMethod)) {
             setValidationErrors(prev => {
                 const newErrors = {...prev};
                 delete newErrors.paymentMethod;
@@ -183,19 +230,24 @@ const AddPayment = ({
     };
 
     /**
-     * Handle payer selection change
+     * Handle payer selection change with confirmation if changing
      */
     const handlePayerChange = (e) => {
         const selectedValue = e.target.value;
         const payer = payers.find(item => `${item.type}-${item.id}` === selectedValue);
 
         if (payer) {
+            // Only reset payment method if payer type changes
+            const shouldResetPayment = data.payer?.type !== payer.type;
+
             setData(prevData => ({
                 ...prevData,
                 payer,
-                // Reset payment method when payer changes
-                paymentMethod: "",
-                information: {}
+                // Reset payment method only if payer type changes
+                ...(shouldResetPayment ? {
+                    paymentMethod: "",
+                    information: {}
+                } : {})
             }));
 
             // Clear payer error
@@ -211,7 +263,7 @@ const AddPayment = ({
      * Handle additional information field changes
      */
     const handleInformationChange = (e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
 
         setData(prevData => ({
             ...prevData,
@@ -231,37 +283,61 @@ const AddPayment = ({
         }
     };
 
-    // Payment methods configuration
-    const paymentMethods = [
+    // Payment methods configuration with enhanced visual cues
+    const paymentMethods = useMemo(() => [
         {
             value: "cash",
             label: "Cash",
-            icon: <AttachMoney />,
+            icon: <AttachMoney/>,
             color: "success",
-            description: "Pay with physical currency"
+            description: "Pay with physical currency",
+            disabled: false
         },
         {
             value: "card",
             label: "Card",
-            icon: <CreditCard />,
+            icon: <CreditCard/>,
             color: "primary",
-            description: "Pay with credit/debit card"
-        }
-    ];
-
-    // Only show credit for referrers
-    if (data.payer?.type === "referrer") {
-        paymentMethods.push({
+            description: "Pay with credit/debit card",
+            disabled: false
+        },
+        {
+            value: "transfer",
+            label: "Bank Transfer",
+            icon: <SwapHoriz/>,
+            color: "info",
+            description: "Pay via bank transfer",
+            disabled: false
+        },
+        {
             value: "credit",
             label: "Credit",
-            icon: <AccountBalance />,
+            icon: <AccountBalance/>,
             color: "warning",
-            description: "Add to referrer's credit"
-        });
-    }
+            description: "Add to referrer's credit balance",
+            disabled: data.payer?.type !== "referrer"
+        }
+    ], [data.payer?.type]);
 
     // Combine backend errors with frontend validation errors
     const allErrors = {...errors, ...validationErrors};
+
+    // Determine if form has been modified
+    const isFormModified = data.price !== defaultValues.price ||
+        data.paymentMethod !== defaultValues.paymentMethod ||
+        data.payer?.id !== defaultValues.payer?.id;
+
+    // Check if form can be submitted
+    const canSubmit = !loading && (isFormModified || formTouched);
+
+    // Handle keyboard shortcuts
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && e.ctrlKey) {
+            handleSubmit();
+        } else if (e.key === 'Escape' && !loading) {
+            onClose();
+        }
+    };
 
     return (
         <Dialog
@@ -277,6 +353,7 @@ const AddPayment = ({
                     }
                 }
             }}
+            onKeyDown={handleKeyDown}
         >
             <DialogTitle
                 sx={{
@@ -287,27 +364,40 @@ const AddPayment = ({
                     justifyContent: 'space-between'
                 }}
             >
-                <Typography variant="h6">
-                    {data.id ? "Edit Payment" : "Add New Payment"}
+                <Typography variant="h6" sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                    {data.id ? (
+                        <>
+                            <EditIcon fontSize="small"/>
+                            Edit Payment
+                        </>
+                    ) : (
+                        <>
+                            <AddIcon fontSize="small"/>
+                            Add New Payment
+                        </>
+                    )}
+                    {loading && <CircularProgress size={20} sx={{ml: 1}}/>}
                 </Typography>
                 {!loading && (
-                    <IconButton
-                        onClick={onClose}
-                        aria-label="close"
-                        size="small"
-                    >
-                        <Close />
-                    </IconButton>
+                    <Tooltip title="Cancel (Esc)">
+                        <IconButton
+                            onClick={onClose}
+                            aria-label="close"
+                            size="small"
+                        >
+                            <Close/>
+                        </IconButton>
+                    </Tooltip>
                 )}
             </DialogTitle>
 
-            <Divider />
+            <Divider/>
 
-            <DialogContent sx={{ p: 3 }}>
+            <DialogContent sx={{p: 3}}>
                 {loading ? (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 5 }}>
-                        <CircularProgress size={50} thickness={4} />
-                        <Typography sx={{ mt: 2 }}>
+                    <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', py: 5}}>
+                        <CircularProgress size={50} thickness={4}/>
+                        <Typography sx={{mt: 2}}>
                             {data.id ? "Updating payment..." : "Processing payment..."}
                         </Typography>
                     </Box>
@@ -315,18 +405,35 @@ const AddPayment = ({
                     <>
                         <Alert
                             severity="info"
-                            sx={{ mb: 3, borderRadius: 1 }}
-                            icon={<Info />}
+                            icon={<Info/>}
+                            sx={{
+                                mb: 3,
+                                borderRadius: 1,
+                                display: 'flex',
+                                alignItems: 'center'
+                            }}
                         >
                             <Typography>
                                 Maximum payment amount: <strong>{max.toFixed(2)} OMR</strong>
+                                <Typography component="span" variant="body2" sx={{ml: 1, color: 'text.secondary'}}>
+                                    (Ctrl+Enter to save quickly)
+                                </Typography>
                             </Typography>
                         </Alert>
 
-                        <Box component={Paper} variant="outlined" sx={{ p: 3, mb: 4, borderRadius: 2 }}>
+                        <Box component={Paper}
+                             variant="outlined"
+                             sx={{
+                                 p: 3,
+                                 mb: 4,
+                                 borderRadius: 2,
+                                 transition: 'all 0.2s',
+                                 borderColor: Object.keys(allErrors).length > 0 ? 'error.light' : 'divider'
+                             }}
+                        >
                             <Grid container spacing={3}>
                                 {/* Payer Selection */}
-                                <Grid  size={{xs:12,sm:6}}>
+                                <Grid size={{xs: 12, sm: 6}}>
                                     <FormControl fullWidth error={!!allErrors.payer}>
                                         <InputLabel
                                             id="payer-select-label"
@@ -341,27 +448,34 @@ const AddPayment = ({
                                             required
                                             value={data.payer ? `${data.payer.type}-${data.payer.id}` : ""}
                                             onChange={handlePayerChange}
+                                            startAdornment={
+                                                data.payer && (
+                                                    <InputAdornment position="start">
+                                                        {data.payer.type === 'patient' ?
+                                                            <Person color="primary"/> :
+                                                            <Business color="secondary"/>
+                                                        }
+                                                    </InputAdornment>
+                                                )
+                                            }
                                         >
-                                            {payers.map(payer => (
+                                            {payers.length === 0 ? (
+                                                <MenuItem disabled>
+                                                    <Typography color="text.secondary">
+                                                        No payers available
+                                                    </Typography>
+                                                </MenuItem>
+                                            ) : payers.map(payer => (
                                                 <MenuItem
                                                     key={`${payer.type}-${payer.id}`}
                                                     value={`${payer.type}-${payer.id}`}
                                                 >
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        {payer.type === 'patient' ?
-                                                            <Person color="primary" sx={{ mr: 1 }} /> :
-                                                            <Business color="secondary" sx={{ mr: 1 }} />
-                                                        }
+                                                    <Box sx={{display: 'flex', alignItems: 'center'}}>
                                                         <span>{payer.name}</span>
-                                                        <Chip
-                                                            label={payer.type}
-                                                            size="small"
-                                                            color={payer.type === 'patient' ? "primary" : "secondary"}
-                                                            sx={{ ml: 1 }}
-                                                        />
                                                     </Box>
                                                 </MenuItem>
-                                            ))}
+                                            ))
+                                            }
                                         </Select>
                                         {allErrors.payer && (
                                             <FormHelperText error>{allErrors.payer}</FormHelperText>
@@ -370,7 +484,7 @@ const AddPayment = ({
                                 </Grid>
 
                                 {/* Payment Amount */}
-                                <Grid item  size={{xs:12,sm:6}}>
+                                <Grid size={{xs: 12, sm: 6}}>
                                     <FormControl fullWidth error={!!allErrors.price}>
                                         <InputLabel
                                             id="amount-input-label"
@@ -385,20 +499,30 @@ const AddPayment = ({
                                             label="Payment Amount"
                                             value={data.price}
                                             required
+                                            autoFocus={shouldFocusAmount}
                                             inputProps={{
                                                 min: 0,
                                                 max: max,
                                                 step: 0.01
                                             }}
                                             onChange={handlePriceChange}
+                                            startAdornment={
+                                                <InputAdornment position="start">
+                                                    <AttachMoney color={data.price > 0 ? "success" : "action"}/>
+                                                </InputAdornment>
+                                            }
                                             endAdornment={
                                                 <InputAdornment position="end">
                                                     OMR
                                                 </InputAdornment>
                                             }
                                         />
-                                        {allErrors.price && (
+                                        {allErrors.price ? (
                                             <FormHelperText error>{allErrors.price}</FormHelperText>
+                                        ) : (
+                                            <FormHelperText>
+                                                Enter amount up to {max.toFixed(2)} OMR
+                                            </FormHelperText>
                                         )}
                                     </FormControl>
                                 </Grid>
@@ -406,12 +530,24 @@ const AddPayment = ({
                         </Box>
 
                         {/* Payment Method Selection */}
-                        <Typography
-                            variant="subtitle1"
-                            sx={{ mb: 2, fontWeight: 500 }}
-                        >
-                            Payment Method
-                        </Typography>
+                        <Box sx={{mb: 2, display: 'flex', alignItems: 'center'}}>
+                            <Typography
+                                variant="subtitle1"
+                                sx={{fontWeight: 500}}
+                            >
+                                Payment Method
+                            </Typography>
+                            {allErrors.paymentMethod && (
+                                <Chip
+                                    icon={<ErrorOutline fontSize="small"/>}
+                                    label="Required"
+                                    color="error"
+                                    size="small"
+                                    variant="outlined"
+                                    sx={{ml: 2}}
+                                />
+                            )}
+                        </Box>
 
                         <RadioGroup
                             aria-label="payment-method"
@@ -420,103 +556,182 @@ const AddPayment = ({
                             onChange={handlePaymentMethodChange}
                         >
                             <Grid container spacing={2}>
-                                {paymentMethods.map((method) => (
-                                    <Grid item size={{xs:12,sm:4}} key={method.value}>
-                                        <Paper
-                                            variant={data.paymentMethod === method.value ? "elevation" : "outlined"}
-                                            elevation={data.paymentMethod === method.value ? 4 : 0}
-                                            sx={{
-                                                p: 2,
-                                                borderRadius: 2,
-                                                borderColor: data.paymentMethod === method.value
-                                                    ? `${method.color}.main`
-                                                    : 'divider',
-                                                bgcolor: data.paymentMethod === method.value
-                                                    ? alpha(theme.palette[method.color].main, 0.1)
-                                                    : 'transparent',
-                                                transition: 'all 0.2s',
-                                                cursor: 'pointer',
-                                                '&:hover': {
-                                                    borderColor: `${method.color}.main`,
-                                                    bgcolor: alpha(theme.palette[method.color].main, 0.05)
-                                                }
-                                            }}
-                                            onClick={() => handlePaymentMethodChange({ target: { value: method.value } })}
-                                        >
-                                            <FormControlLabel
-                                                value={method.value}
-                                                control={<Radio color={method.color} checked={data.paymentMethod === method.value} />}
-                                                label=""
-                                                sx={{
-                                                    m: 0,
-                                                    width: '100%',
-                                                    '& .MuiRadio-root': { p: 0, mr: 1 }
-                                                }}
-                                            />
+                                {paymentMethods.map((method) => {
+                                    // Skip credit payment method if not applicable
+                                    if (method.value === "credit" && data.payer?.type !== "referrer") {
+                                        return null;
+                                    }
 
-                                            <Box sx={{ textAlign: 'center', mt: 1 }}>
-                                                <Box
+                                    return (
+                                        <Grid i size={{xs: 12, sm: 6, md: 3}} key={method.value}>
+                                            <Tooltip
+                                                title={method.disabled ? "Not available for this payer type" : ""}
+                                                placement="top"
+                                                slots={{
+                                                    transition: Zoom
+                                                }}
+                                            >
+                                                <Paper
+                                                    variant={data.paymentMethod === method.value ? "elevation" : "outlined"}
+                                                    elevation={data.paymentMethod === method.value ? 4 : 0}
                                                     sx={{
-                                                        display: 'inline-flex',
-                                                        p: 1,
-                                                        borderRadius: '50%',
-                                                        bgcolor: alpha(theme.palette[method.color].main, 0.15),
-                                                        color: `${method.color}.main`,
-                                                        mb: 1
+                                                        p: 2,
+                                                        borderRadius: 2,
+                                                        borderColor: data.paymentMethod === method.value
+                                                            ? `${method.color}.main`
+                                                            : 'divider',
+                                                        bgcolor: data.paymentMethod === method.value
+                                                            ? alpha(theme.palette[method.color].main, 0.1)
+                                                            : 'transparent',
+                                                        transition: 'all 0.2s',
+                                                        cursor: method.disabled ? 'not-allowed' : 'pointer',
+                                                        opacity: method.disabled ? 0.6 : 1,
+                                                        '&:hover': !method.disabled ? {
+                                                            borderColor: `${method.color}.main`,
+                                                            bgcolor: alpha(theme.palette[method.color].main, 0.05)
+                                                        } : {}
+                                                    }}
+                                                    onClick={() => {
+                                                        if (!method.disabled) {
+                                                            handlePaymentMethodChange({target: {value: method.value}});
+                                                        }
                                                     }}
                                                 >
-                                                    {React.cloneElement(method.icon, { fontSize: 'large' })}
-                                                </Box>
-                                                <Typography
-                                                    variant="subtitle1"
-                                                    sx={{
-                                                        fontWeight: data.paymentMethod === method.value ? 'bold' : 'normal'
-                                                    }}
-                                                >
-                                                    {method.label}
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    {method.description}
-                                                </Typography>
-                                            </Box>
-                                        </Paper>
-                                    </Grid>
-                                ))}
+                                                    <FormControlLabel
+                                                        value={method.value}
+                                                        control={
+                                                            <Radio
+                                                                color={method.color}
+                                                                checked={data.paymentMethod === method.value}
+                                                                disabled={method.disabled}
+                                                            />
+                                                        }
+                                                        label=""
+                                                        sx={{
+                                                            m: 0,
+                                                            width: '100%',
+                                                            '& .MuiRadio-root': {p: 0, mr: 1}
+                                                        }}
+                                                    />
+
+                                                    <Box sx={{textAlign: 'center', mt: 1}}>
+                                                        <Box
+                                                            sx={{
+                                                                display: 'inline-flex',
+                                                                p: 1.5,
+                                                                borderRadius: '50%',
+                                                                bgcolor: alpha(theme.palette[method.color].main, 0.15),
+                                                                color: `${method.color}.main`,
+                                                                mb: 1
+                                                            }}
+                                                        >
+                                                            {React.cloneElement(method.icon, {fontSize: 'large'})}
+                                                        </Box>
+                                                        <Typography
+                                                            variant="subtitle1"
+                                                            sx={{
+                                                                fontWeight: data.paymentMethod === method.value ? 'bold' : 'normal'
+                                                            }}
+                                                        >
+                                                            {method.label}
+                                                        </Typography>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            {method.description}
+                                                        </Typography>
+                                                    </Box>
+                                                </Paper>
+                                            </Tooltip>
+                                        </Grid>
+                                    );
+                                })}
                             </Grid>
                         </RadioGroup>
 
-                        {allErrors.paymentMethod && (
-                            <FormHelperText error sx={{ mt: 1 }}>
-                                {allErrors.paymentMethod}
-                            </FormHelperText>
-                        )}
+                        {/* Method-specific fields */}
+                        {data.paymentMethod && (
+                            <Box sx={{
+                                mt: 3,
+                                p: 2,
+                                bgcolor: alpha(theme.palette.background.default, 0.5),
+                                borderRadius: 2
+                            }}>
+                                {/* Card Payment Details */}
+                                {data.paymentMethod === "card" && (
+                                    <Box>
+                                        <Typography variant="subtitle2" gutterBottom
+                                                    sx={{display: 'flex', alignItems: 'center'}}>
+                                            <CreditCard fontSize="small" sx={{mr: 1}}/>
+                                            Card Payment Details
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            name="receiptReferenceCode"
+                                            label="Receipt Reference Code"
+                                            placeholder="Enter the transaction reference number"
+                                            value={data.information?.receiptReferenceCode || ""}
+                                            error={!!allErrors["information.receiptReferenceCode"]}
+                                            required
+                                            helperText={allErrors["information.receiptReferenceCode"] || "Enter the reference code from the card machine receipt"}
+                                            onChange={handleInformationChange}
+                                            slotProps={{
+                                                input: {
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Receipt color="primary"/>
+                                                        </InputAdornment>
+                                                    )
+                                                }
+                                            }}
+                                            sx={{mt: 1}}
+                                            autoFocus
+                                        />
+                                    </Box>
+                                )}
 
-                        {/* Card Receipt Reference Code */}
-                        {data.paymentMethod === "card" && (
-                            <Box sx={{ mt: 3 }}>
-                                <Typography variant="subtitle2" gutterBottom>
-                                    Card Payment Details
-                                </Typography>
+                                {/* Bank Transfer Details */}
+                                {data.paymentMethod === "transfer" && (
+                                    <Box>
+                                        <Typography variant="subtitle2" gutterBottom
+                                                    sx={{display: 'flex', alignItems: 'center'}}>
+                                            <SwapHoriz fontSize="small" sx={{mr: 1}}/>
+                                            Bank Transfer Details
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            name="transferReference"
+                                            label="Transfer Reference"
+                                            placeholder="Enter the bank transfer reference number"
+                                            value={data.information?.transferReference || ""}
+                                            error={!!allErrors["information.transferReference"]}
+                                            required
+                                            helperText={allErrors["information.transferReference"] || "Enter the transaction ID or reference from the bank transfer"}
+                                            onChange={handleInformationChange}
+                                            slotProps={{
+                                                input: {
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <AccountBalance color="info"/>
+                                                        </InputAdornment>
+                                                    )
+                                                }
+                                            }}
+                                            sx={{mt: 1}}
+                                            autoFocus
+                                        />
+                                    </Box>
+                                )}
+
+                                {/* Notes Field for All Payment Methods */}
                                 <TextField
                                     fullWidth
-                                    name="receiptReferenceCode"
-                                    label="Receipt Reference Code"
-                                    placeholder="Enter the transaction reference number"
-                                    value={data.information?.receiptReferenceCode || ""}
-                                    error={!!allErrors["information.receiptReferenceCode"]}
-                                    required
-                                    helperText={allErrors["information.receiptReferenceCode"] || "Enter the reference code from the card machine receipt"}
+                                    name="notes"
+                                    label="Payment Notes (Optional)"
+                                    placeholder="Add any additional notes about this payment"
+                                    value={data.information?.notes || ""}
+                                    multiline
+                                    rows={2}
                                     onChange={handleInformationChange}
-                                    slotProps={{
-                                        Input: {
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <CreditCard color="primary"/>
-                                                </InputAdornment>
-                                            )
-                                        }
-                                    }}
-                                    sx={{ mt: 1 }}
+                                    sx={{mt: 2}}
                                 />
                             </Box>
                         )}
@@ -524,24 +739,26 @@ const AddPayment = ({
                 )}
             </DialogContent>
 
-            <Divider />
+            <Divider/>
 
-            <DialogActions sx={{ p: 2, justifyContent: 'space-between' }}>
+            <DialogActions sx={{p: 2, justifyContent: 'space-between'}}>
                 <Button
                     onClick={onClose}
                     disabled={loading}
-                    startIcon={<Close />}
+                    startIcon={<Close/>}
                     variant="outlined"
                     color="inherit"
+                    size="large"
                 >
                     Cancel
                 </Button>
                 <Button
                     onClick={handleSubmit}
-                    disabled={loading}
-                    startIcon={loading ? <CircularProgress size={20} /> : <Save />}
+                    disabled={loading || !canSubmit}
+                    startIcon={loading ? <CircularProgress size={20}/> : <Save/>}
                     variant="contained"
                     color="primary"
+                    size="large"
                 >
                     {loading
                         ? "Processing..."

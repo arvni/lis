@@ -33,6 +33,11 @@ class StorePaymentRequest extends FormRequest
                 'string',
                 'max:255',
             ],
+            'information.transferReference' => [
+                'required_if:paymentMethod,transfer',
+                'string',
+                'max:255',
+            ],
             'invoice_id' => 'required|integer|exists:invoices,id',
             'payer' => 'required|array',
             'payer.type' => 'required|string|in:patient,referrer',

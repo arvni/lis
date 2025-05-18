@@ -1,84 +1,160 @@
-import React, {useState, useCallback, useRef, useEffect} from "react";
+import React, { useCallback, useEffect, useRef, useState, useMemo, memo } from "react";
 import {
     Alert,
+    Box,
+    Chip,
+    FormControl,
     FormGroup,
     InputLabel,
-    Typography,
-    Chip,
-    Box,
-    Select,
     MenuItem,
-    FormControl,
+    Select,
+    Typography,
 } from "@mui/material";
-import {styled} from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import axios from "axios";
 
 // Assuming UploadItem and DeleteForm exist and are adapted
-// to potentially receive file objects with status/progress/error info.
-import UploadItem from "@/Components/UploadItem"; // Assuming this component can handle the file state object
-import DeleteForm from "@/Components/DeleteForm";
+import UploadItem from "./UploadItem";
+import DeleteForm from "./DeleteForm";
 
-// --- Styled Components (Keep as before, minor tweak for focus) ---
-const UploadBox = styled(Box)(({theme, isDragOver, error}) => ({
-    border: `2px dashed ${error ? theme.palette.error.main : isDragOver ? theme.palette.primary.main : theme.palette.divider}`,
+// --- Styled Components ---
+const UploadBox = styled(Box)(({ theme, isDragOver, error }) => ({
+    border: `2px dashed ${
+        error ? theme.palette.error.main : isDragOver ? theme.palette.primary.main : theme.palette.divider
+    }`,
     borderRadius: theme.shape.borderRadius,
     padding: theme.spacing(3),
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    textAlign: 'center',
+    textAlign: "center",
     minHeight: "120px",
     cursor: "pointer",
     transition: "all 0.2s ease-in-out",
     backgroundColor: isDragOver ? `${theme.palette.primary.light}20` : "transparent",
-    outline: 'none', // Remove default outline
+    outline: "none", // Remove default outline
     "&:hover": {
         backgroundColor: `${theme.palette.primary.light}10`,
-        borderColor: theme.palette.primary.main
+        borderColor: theme.palette.primary.main,
     },
-    "&:focus-visible": { // Style for keyboard focus
+    "&:focus-visible": {
+        // Style for keyboard focus
         borderColor: theme.palette.primary.main,
         boxShadow: `0 0 0 2px ${theme.palette.primary.light}`,
-    }
+    },
 }));
 
-const FileTypeInfo = styled(Typography)(({theme}) => ({
+const FileTypeInfo = styled(Typography)(({ theme }) => ({
     fontSize: "0.75rem",
     color: theme.palette.text.secondary,
-    marginTop: theme.spacing(1)
+    marginTop: theme.spacing(1),
 }));
 
-// --- Helper Function ---
+// --- Helper Functions ---
 const generateTempId = () => `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-// --- Main Component ---
+const formatFileTypes = (accept) => {
+    return accept
+        .split(",")
+        .map((type) => type.trim())
+        .map((type) => {
+            if (type === "image/*") return "Images";
+            if (type.includes("pdf")) return "PDF";
+            if (type.includes("doc") || type.includes("word")) return "Word";
+            if (type.startsWith(".")) return type.substring(1).toUpperCase();
+            if (type.includes("/")) return type.split("/")[1]; // Basic MIME type part
+            return type;
+        })
+        .filter((value, index, self) => self.indexOf(value) === index) // Unique types
+        .join(", ");
+};
+
+// --- Sub-Components ---
+
+// Tag Selection Dialog Component
+const TagSelector = memo(({ files, tags, onConfirm, onCancel }) => {
+    const [selectedTag, setSelectedTag] = useState(tags[0]?.value || "TEMP");
+
+    return (
+        <Box
+            sx={{
+                border: "1px solid",
+                borderColor: "divider",
+                p: 2,
+                mb: 2,
+                borderRadius: 1,
+                bgcolor: "background.paper",
+                boxShadow: 1,
+            }}
+        >
+            <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                Select a tag for {files.length} file{files.length !== 1 ? "s" : ""}:
+            </Typography>
+
+            <FormControl fullWidth sx={{ mb: 2 }}>
+                <Select
+                    value={selectedTag}
+                    onChange={(e) => setSelectedTag(e.target.value)}
+                    displayEmpty
+                    size="small"
+                >
+                    {tags.map((tag) => (
+                        <MenuItem key={tag.value} value={tag.value}>
+                            {tag.label}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+
+            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+                <Chip label="Cancel" onClick={onCancel} color="default" variant="outlined" />
+                <Chip
+                    label="Confirm"
+                    onClick={() => onConfirm(selectedTag)}
+                    color="primary"
+                />
+            </Box>
+        </Box>
+    );
+});
+
+TagSelector.displayName = "TagSelector";
+
+// File Error Alert Component
+const FileErrorAlert = memo(({ errors, generalError, externalHelperText, onClear }) => {
+    if (!errors.length && !generalError && !externalHelperText) return null;
+
+    return (
+        <Alert
+            severity="error"
+            sx={{ mt: 1 }}
+            onClose={onClear}
+        >
+            {externalHelperText && <p>{externalHelperText}</p>}
+            {generalError && <p>{generalError}</p>}
+            {errors.length > 0 && (
+                <ul>
+                    {errors.map((err, i) => (
+                        <li key={i}>{err.message}</li>
+                    ))}
+                </ul>
+            )}
+        </Alert>
+    );
+});
+
+FileErrorAlert.displayName = "FileErrorAlert";
 
 /**
  * Enhanced file upload component with tag selection
- *
- * @param {Object} props - Component properties
- * @param {string} props.url - URL to upload files to
- * @param {string} props.label - Label for the upload field
- * @param {string} props.name - Field name for parent form state management
- * @param {Array|Object} props.value - Current file value(s) from parent (expected to be final server data structure)
- * @param {boolean} props.error - External error state (e.g., from form validation)
- * @param {string} props.helperText - External helper text / error message
- * @param {Function} props.onChange - Callback: onChange(name, newValue) - newValue is Array or Object matching `value` structure
- * @param {string} [props.accept] - Accepted file types
- * @param {boolean} [props.multiple=false] - Whether multiple files can be uploaded
- * @param {boolean} [props.editable=true] - Whether the component is editable (allows upload/delete)
- * @param {boolean} [props.required=false] - Whether the field is required
- * @param {number} [props.maxFileSize=10] - Maximum file size in MB
- * @param {number} [props.maxFiles=5] - Maximum number of files when multiple is true
- * @param {Array} [props.tags=[]] - Array of available tags to select from before upload
  */
 const Upload = ({
                     url,
                     label,
                     name,
-                    value: parentValue, // Rename to avoid conflict with internal state
+                    value: parentValue,
                     error: externalError,
                     helperText: externalHelperText,
                     onChange,
@@ -88,183 +164,145 @@ const Upload = ({
                     required = false,
                     maxFileSize = 20, // Default 20MB
                     maxFiles = 20, // Default max 20 files
-                    tags = []  // New prop for tag selection
+                    tags = [], // Tag selection
                 }) => {
-
     const inputRef = useRef(null);
     const [isDragOver, setIsDragOver] = useState(false);
-    // Internal state to manage all files (from parent + newly added/uploading)
-    // Each item: { tempId: string, file?: File, serverData?: any, status: 'idle' | 'validating' | 'uploading' | 'success' | 'error' | 'deleting', progress: number, error?: string, cancelSource?: CancelTokenSource }
     const [managedFiles, setManagedFiles] = useState([]);
-    const [validationErrors, setValidationErrors] = useState([]); // Array of { filename: string, message: string }
-    const [generalError, setGeneralError] = useState(""); // For general component errors
-    const [fileToDelete, setFileToDelete] = useState(null); // { tempId: string, serverData: any }
+    const [validationErrors, setValidationErrors] = useState([]);
+    const [generalError, setGeneralError] = useState("");
+    const [fileToDelete, setFileToDelete] = useState(null);
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
-
-    // State for tag selection
-    const [selectedTag, setSelectedTag] = useState("");
+    const [filesForTagging, setFilesForTagging] = useState([]);
     const [showTagSelector, setShowTagSelector] = useState(false);
-    const [filesForTagging, setFilesForTagging] = useState([]); // Files waiting for tag selection
 
-    // Set default tag on component mount
-    useEffect(() => {
-        // If tags array is empty or null, set default tag to TEMP
-        setSelectedTag(tags && tags.length > 0 ? tags[0] : "TEMP");
-    }, [tags]);
+    // --- Memoized Values ---
+    const acceptedFileTypes = useMemo(() => formatFileTypes(accept), [accept]);
+    const maxSizeBytes = useMemo(() => maxFileSize * 1024 * 1024, [maxFileSize]);
 
-    // Sync internal state with parentValue on initial load and external changes
+    const currentFileCount = useMemo(() =>
+            managedFiles.filter(f => f.status === 'success' || f.status === 'uploading').length,
+        [managedFiles]);
+
+    const canUploadMore = useMemo(() =>
+            editable && (multiple ? currentFileCount < maxFiles : currentFileCount === 0),
+        [editable, multiple, currentFileCount, maxFiles]);
+
+    const displayError = useMemo(() =>
+            externalError || validationErrors.length > 0 || !!generalError,
+        [externalError, validationErrors, generalError]);
+
+
+    const remainingSlots = useMemo(() =>
+            multiple ? Math.max(0, maxFiles - currentFileCount) : (currentFileCount === 0 ? 1 : 0),
+        [multiple, maxFiles, currentFileCount]);
+
+    // Create a cancelation token source map for better management
+    const cancelTokenMap = useRef(new Map());
+
+    // --- Sync with Parent Value ---
     useEffect(() => {
-        setManagedFiles(currentFiles => {
-            const parentFilesArray = parentValue ? (multiple ? parentValue : [parentValue]) : [];
-            const newManagedFiles = parentFilesArray.map(serverData => {
-                // Try to find if this file already exists in state (e.g., was just uploaded)
-                const existing = currentFiles.find(f => f.serverData?.id === serverData?.id); // Assuming server data has an ID
+        // Convert parent value to array format for consistent handling
+        const parentFilesArray = parentValue ? (multiple ? parentValue : [parentValue]).filter(Boolean) : [];
+
+        setManagedFiles((currentFiles) => {
+            // Map parent data to our internal format
+            const parentMappedFiles = parentFilesArray.map((serverData) => {
+                // Try to find existing file in state
+                const existing = currentFiles.find(
+                    (f) => f.serverData?.id === serverData?.id
+                );
+
                 if (existing && existing.status !== 'idle' && existing.status !== 'deleting') {
-                    return {...existing, serverData, status: 'success'}; // Update serverData if needed, ensure status is success
+                    return { ...existing, serverData, status: 'success' };
                 }
-                // Otherwise, create a new entry from parent value
+
+                // Create new entry
                 return {
-                    tempId: serverData?.id || generateTempId(), // Use server ID if available
-                    serverData: serverData,
-                    status: 'success', // Assume parent value represents successfully uploaded files
+                    tempId: serverData?.id || generateTempId(),
+                    serverData,
+                    status: 'success',
                     progress: 100,
                 };
             });
 
-            // Keep files that are currently uploading or failed, which aren't in parentValue yet
-            const uploadingOrFailedFiles = currentFiles.filter(f =>
-                (f.status === 'uploading' || f.status === 'error') &&
-                !parentFilesArray.some(pf => pf?.id === f.serverData?.id) // Ensure it's not also in parent value
+            // Keep files that are currently uploading or failed
+            const uploadingOrFailedFiles = currentFiles.filter(
+                (f) =>
+                    (f.status === 'uploading' || f.status === 'error') &&
+                    !parentFilesArray.some((pf) => pf?.id === f.serverData?.id)
             );
 
-            // Combine and filter out duplicates if any edge cases occurred
-            const combined = [...newManagedFiles, ...uploadingOrFailedFiles];
-            const uniqueCombined = combined.filter((file, index, self) =>
-                index === self.findIndex((f) => f.tempId === file.tempId)
+            // Combine and return without duplicates
+            const combined = [...parentMappedFiles, ...uploadingOrFailedFiles];
+            return combined.filter(
+                (file, index, self) => index === self.findIndex((f) => f.tempId === file.tempId)
             );
-            return uniqueCombined;
         });
     }, [parentValue, multiple]);
 
-
-    // --- Derived State ---
-    const currentFileCount = managedFiles.filter(f => f.status === 'success' || f.status === 'uploading').length;
-    const canUploadMore = editable && (multiple ? currentFileCount < maxFiles : currentFileCount === 0);
-    const displayError = externalError || validationErrors.length > 0 || !!generalError;
-    const displayHelperText = externalHelperText || generalError || (validationErrors.length > 0 ? `${validationErrors.length} validation error(s).` : "");
-
-    // --- File Type / Size Info ---
-    const acceptedFileTypes = accept
-        .split(',')
-        .map(type => type.trim())
-        .map(type => {
-            if (type === "image/*") return "Images";
-            if (type.includes("pdf")) return "PDF";
-            if (type.includes("doc") || type.includes("word")) return "Word";
-            if (type.startsWith('.')) return type.substring(1).toUpperCase();
-            if (type.includes('/')) return type.split('/')[1]; // Basic MIME type part
-            return type;
-        })
-        .filter((value, index, self) => self.indexOf(value) === index) // Unique types
-        .join(", ");
-
-    const maxSizeBytes = maxFileSize * 1024 * 1024;
-
-    // --- Validation ---
-    const validateFile = (file) => {
+    // --- File Validation ---
+    const validateFile = useCallback((file) => {
         const errors = [];
+
         // Check file size
         if (file.size > maxSizeBytes) {
             errors.push(`File "${file.name}" is too large (max ${maxFileSize}MB).`);
         }
 
-        // Check file type (improved logic)
+        // Check file type
         const fileType = file.type;
         const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
         const acceptList = accept.split(',').map(a => a.trim().toLowerCase());
 
         const isAccepted = acceptList.some(type => {
-            if (type.startsWith('.')) { // Match by extension
+            if (type.startsWith('.')) {
                 return fileExtension === type;
             }
-            if (type.endsWith('/*')) { // Match by MIME type prefix (e.g., "image/*")
+            if (type.endsWith('/*')) {
                 return fileType.startsWith(type.slice(0, -1));
             }
-            return fileType === type; // Match by exact MIME type
+            return fileType === type;
         });
 
         if (!isAccepted) {
             errors.push(`File type for "${file.name}" is not accepted (allowed: ${acceptedFileTypes}).`);
         }
 
-        return errors.length > 0 ? {filename: file.name, messages: errors} : null;
-    };
+        return errors.length > 0 ? { filename: file.name, messages: errors } : null;
+    }, [accept, acceptedFileTypes, maxSizeBytes, maxFileSize]);
 
-    // --- State Update Helper ---
-    const updateFileState = (tempId, updates) => {
-        setManagedFiles(current => current.map(f => f.tempId === tempId ? {...f, ...updates} : f));
-    };
+    // --- File State Management ---
+    const updateFileState = useCallback((tempId, updates) => {
+        setManagedFiles(current =>
+            current.map(f => f.tempId === tempId ? {...f, ...updates} : f)
+        );
+    }, []);
 
-    // Handle tag change for an existing file
-    const handleTagChange = useCallback(async (tempId, newTag) => {
-        const fileToUpdate = managedFiles.find(f => f.tempId === tempId);
-        if (!fileToUpdate || !fileToUpdate.serverData) return;
-
-        updateFileState(tempId, {status: 'updating'});
-
-        try {
-            // Assuming there's an API endpoint to update a file's tag
-            const response = await axios.patch(`${url}/${fileToUpdate.serverData.id}`, {
-                tag: newTag
-            });
-            let newFiles = managedFiles.map(f => f.tempId === tempId ? {
-                ...f,
-                status: 'success',
-                serverData: {
-                    ...fileToUpdate.serverData,
-                    tag: newTag
-                }
-            } : f)
-            // Update the file state with the new tag
-            setManagedFiles(newFiles);
-            // Notify parent of the change
-
-            const updatedFiles = newFiles.map(item => item.serverData);
-            onChange(name, multiple ? updatedFiles : updatedFiles[0] || null);
-
-        } catch (error) {
-            console.error("Tag update error:", error);
-            const errorMsg = error.response?.data?.message || error.message || "Failed to update tag";
-            updateFileState(tempId, {
-                status: 'success', // Revert to success state
-                error: errorMsg
-            });
-            setGeneralError(errorMsg);
-        }
-    }, [managedFiles, url]);
-
-    // Centralized function to notify parent of changes
+    // --- Notify Parent of Changes ---
     const notifyParentOfChange = useCallback((results = []) => {
-        let successfulFiles = managedFiles
+        const successfulFiles = managedFiles
             .filter(f => f.status === 'success' && f.serverData)
             .map(f => f.serverData);
-        if (results.length > 0) {
-            successfulFiles = [
-                ...successfulFiles,
-                ...results
-            ];
-        }
-        onChange(name, multiple ? successfulFiles : successfulFiles[0] || null);
+
+        const allSuccessFiles = results.length > 0
+            ? [...successfulFiles, ...results]
+            : successfulFiles;
+
+        onChange(name, multiple ? allSuccessFiles : allSuccessFiles[0] || null);
     }, [managedFiles, multiple, name, onChange]);
 
     // --- Upload Logic ---
     const performSingleUpload = useCallback(async (file, tempId, tag) => {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("tag", tag || "TEMP"); // Use selected tag or default to TEMP
+        formData.append("tag", tag || "TEMP");
 
+        // Create and store cancelation token
         const cancelSource = axios.CancelToken.source();
-        updateFileState(tempId, {status: 'uploading', progress: 0, cancelSource});
+        cancelTokenMap.current.set(tempId, cancelSource);
+
+        updateFileState(tempId, { status: 'uploading', progress: 0 });
 
         try {
             const response = await axios.post(url, formData, {
@@ -272,26 +310,25 @@ const Upload = ({
                 onUploadProgress: (e) => {
                     if (e.total) {
                         const percentCompleted = Math.round((e.loaded * 100) / e.total);
-                        updateFileState(tempId, {progress: percentCompleted});
+                        updateFileState(tempId, { progress: percentCompleted });
                     }
                 },
             });
 
+            // Update state with success data
             updateFileState(tempId, {
                 status: 'success',
                 progress: 100,
-                serverData: response.data.data, // Adjust based on your API response
-                file: undefined, // Remove blob after successful upload to save memory
-                cancelSource: undefined,
+                serverData: response.data.data,
+                file: undefined, // Remove blob to save memory
                 error: undefined
             });
 
             return response.data.data;
-
         } catch (error) {
             if (axios.isCancel(error)) {
                 console.log('Upload canceled:', file.name);
-                setManagedFiles(current => current.filter(f => f.tempId !== tempId)); // Remove from internal state
+                setManagedFiles(current => current.filter(f => f.tempId !== tempId));
                 return null;
             } else {
                 console.error("Upload error:", error);
@@ -300,15 +337,17 @@ const Upload = ({
                     status: 'error',
                     progress: 0,
                     error: errorMsg,
-                    cancelSource: undefined
                 });
                 setGeneralError("An upload failed. Please check individual files.");
-                throw error; // Propagate the error for Promise.all to catch
+                throw error;
             }
+        } finally {
+            // Always clean up the cancel token
+            cancelTokenMap.current.delete(tempId);
         }
-    }, [url]);
+    }, [url, updateFileState]);
 
-    // New function to handle multiple uploads with Promise.all
+    // Handle multiple uploads efficiently
     const performMultipleUploads = useCallback(async (filesToUpload, tag) => {
         if (filesToUpload.length === 0) return;
 
@@ -326,7 +365,7 @@ const Upload = ({
 
             // Only notify parent once after all uploads are done
             if (successfulUploads.length > 0) {
-                notifyParentOfChange(results);
+                notifyParentOfChange(successfulUploads);
             }
         } catch (error) {
             // Individual file errors are already handled in performSingleUpload
@@ -340,100 +379,139 @@ const Upload = ({
         e.preventDefault();
     }, []);
 
-    const processFilesForUpload = (validatedFiles) => {
-        // If there are tags to select from, show tag selector
+    // Process files before upload (with tag selection if needed)
+    const processFilesForUpload = useCallback((validatedFiles) => {
+        // If tags are available, show tag selector
         if (tags && tags.length > 0) {
             setFilesForTagging(validatedFiles);
             setShowTagSelector(true);
         } else {
-            // No tags provided, use default "TEMP" tag
-            if (multiple) {
-                performMultipleUploads(validatedFiles, "TEMP");
-            } else {
-                // For single file, still use the new method
-                performMultipleUploads([validatedFiles[0]], "TEMP");
-            }
+            // No tags, use default "TEMP" tag
+            performMultipleUploads(validatedFiles, "TEMP");
         }
-    };
+    }, [tags, performMultipleUploads]);
 
+    // Handle new files (from drop or input)
     const handleFiles = useCallback((files) => {
-        setValidationErrors([]); // Clear previous validation errors
+        setValidationErrors([]);
         setGeneralError("");
 
         const filesToProcess = Array.from(files);
-        let currentValidCount = managedFiles.filter(f => f.status === 'success' || f.status === 'uploading').length;
+        let currentValidCount = managedFiles.filter(
+            f => f.status === 'success' || f.status === 'uploading'
+        ).length;
+
         let newValidationErrors = [];
         let filesToUpload = [];
 
+        // Process each file
         filesToProcess.forEach(file => {
-            if (!multiple && currentValidCount >= 1) {
-                // Skip if single mode and already have a file
-                return;
-            }
+            // Skip if we already have a file in single mode
+            if (!multiple && currentValidCount >= 1) return;
+
+            // Skip if max files reached in multiple mode
             if (multiple && currentValidCount >= maxFiles) {
                 newValidationErrors.push({
                     filename: file.name,
                     message: `Cannot add more files (limit is ${maxFiles}).`
                 });
-                return; // Skip if max files reached
+                return;
             }
 
+            // Validate the file
             const validationResult = validateFile(file);
             if (validationResult) {
-                newValidationErrors.push(...validationResult.messages.map(msg => ({
-                    filename: validationResult.filename,
-                    message: msg
-                })));
+                validationResult.messages.forEach(msg =>
+                    newValidationErrors.push({
+                        filename: validationResult.filename,
+                        message: msg
+                    })
+                );
             } else {
+                // File is valid, prepare for upload
                 const tempId = generateTempId();
-                const newFileEntry = {
+                filesToUpload.push({
                     tempId,
                     file,
-                    status: 'pending', // Will be changed to 'uploading' by performUpload
+                    status: 'pending',
                     progress: 0,
-                };
-                filesToUpload.push(newFileEntry);
-                currentValidCount++; // Increment count for subsequent checks in this loop
+                });
+                currentValidCount++;
             }
         });
 
+        // Update validation errors if any
         if (newValidationErrors.length > 0) {
             setValidationErrors(newValidationErrors);
         }
 
+        // Process valid files
         if (filesToUpload.length > 0) {
             setManagedFiles(current => [...current, ...filesToUpload]);
-            // Process files for upload (with tag selection if needed)
             processFilesForUpload(filesToUpload);
         }
+    }, [managedFiles, multiple, maxFiles, validateFile, processFilesForUpload]);
 
-    }, [managedFiles, multiple, maxFiles, validateFile]);
-
-    // Handle tag selection confirmation
-    const handleTagConfirm = () => {
+    // Tag selector handlers
+    const handleTagConfirm = useCallback((selectedTag) => {
         if (filesForTagging.length > 0) {
-            // Proceed with upload using the selected tag
-            if (multiple) {
-                performMultipleUploads(filesForTagging, selectedTag);
-            } else {
-                performMultipleUploads([filesForTagging[0]], selectedTag);
-            }
+            performMultipleUploads(filesForTagging, selectedTag);
             setFilesForTagging([]);
             setShowTagSelector(false);
         }
-    };
+    }, [filesForTagging, performMultipleUploads]);
 
-    // Handle tag selection cancel
-    const handleTagCancel = () => {
-        // Remove the pending files
+    const handleTagCancel = useCallback(() => {
+        // Remove pending files
         setManagedFiles(current =>
             current.filter(f => !filesForTagging.some(pendingFile => pendingFile.tempId === f.tempId))
         );
         setFilesForTagging([]);
         setShowTagSelector(false);
-    };
+    }, [filesForTagging]);
 
-    const dragEvents = {
+    // Handle tag change for existing file
+    const handleTagChange = useCallback(async (tempId, newTag) => {
+        const fileToUpdate = managedFiles.find(f => f.tempId === tempId);
+        if (!fileToUpdate || !fileToUpdate.serverData) return;
+
+        updateFileState(tempId, { status: 'updating' });
+
+        try {
+            // Call API to update the tag
+            const response = await axios.patch(`${url}/${fileToUpdate.serverData.id}`, {
+                tag: newTag
+            });
+
+            const newFiles = managedFiles.map(f =>
+                f.tempId === tempId
+                    ? {
+                        ...f,
+                        status: 'success',
+                        serverData: {
+                            ...fileToUpdate.serverData,
+                            tag: newTag
+                        }
+                    }
+                    : f
+            );
+
+            // Update state and notify parent
+            setManagedFiles(newFiles);
+            onChange(name, multiple ? newFiles.map(item => item.serverData) : newFiles[0]?.serverData || null);
+        } catch (error) {
+            console.error("Tag update error:", error);
+            const errorMsg = error.response?.data?.message || error.message || "Failed to update tag";
+            updateFileState(tempId, {
+                status: 'success',
+                error: errorMsg
+            });
+            setGeneralError(errorMsg);
+        }
+    }, [managedFiles, url, updateFileState, onChange, name, multiple]);
+
+    // Drag and drop event handlers
+    const dragEvents = useMemo(() => ({
         onDragEnter: (e) => {
             stopDefaults(e);
             if (!editable) return;
@@ -442,17 +520,16 @@ const Upload = ({
         onDragLeave: (e) => {
             stopDefaults(e);
             if (!editable) return;
-            // Add a small delay or check relatedTarget to prevent flickering when dragging over children
             if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget)) {
                 setIsDragOver(false);
             } else if (!e.relatedTarget) {
-                setIsDragOver(false); // Handle leaving the window
+                setIsDragOver(false);
             }
         },
         onDragOver: (e) => {
             stopDefaults(e);
             if (!editable) return;
-            setIsDragOver(true); // Ensure it stays true while over
+            setIsDragOver(true);
         },
         onDrop: (e) => {
             stopDefaults(e);
@@ -462,38 +539,41 @@ const Upload = ({
                 handleFiles(e.dataTransfer.files);
             }
         },
-    };
+    }), [editable, stopDefaults, handleFiles]);
 
-    const handleInputChange = (e) => {
+    // Input change handler
+    const handleInputChange = useCallback((e) => {
         if (e.target.files) {
             handleFiles(e.target.files);
         }
-        // Reset input value to allow selecting the same file again
+        // Reset input value for reuse
         if (inputRef.current) {
             inputRef.current.value = '';
         }
-    };
+    }, [handleFiles]);
 
-    const handleTriggerInput = () => {
+    // Trigger file input click
+    const handleTriggerInput = useCallback(() => {
         if (editable && inputRef.current) {
-            setValidationErrors([]); // Clear errors on click
+            setValidationErrors([]);
             setGeneralError("");
             inputRef.current.click();
         }
-    };
+    }, [editable]);
 
-    const handleCancelUpload = (tempId) => {
-        const fileToCancel = managedFiles.find(f => f.tempId === tempId);
-        if (fileToCancel?.cancelSource) {
-            fileToCancel.cancelSource.cancel("Upload canceled by user.");
+    // Cancel an in-progress upload
+    const handleCancelUpload = useCallback((tempId) => {
+        const cancelSource = cancelTokenMap.current.get(tempId);
+        if (cancelSource) {
+            cancelSource.cancel("Upload canceled by user.");
+            cancelTokenMap.current.delete(tempId);
         }
-        // State update (removal/error) is handled in the upload catch block for cancellation
-    };
+    }, []);
 
-
+    // Handle file deletion
     const openDeleteDialog = useCallback((file) => {
         if (!editable) return;
-        setFileToDelete(file); // Store the file to be deleted
+        setFileToDelete(file);
         setOpenDeleteForm(true);
         setGeneralError("");
     }, [editable]);
@@ -506,115 +586,99 @@ const Upload = ({
     const handleDeleteFile = useCallback(async () => {
         if (!fileToDelete) return;
 
-        const {tempId, serverData} = fileToDelete;
-        updateFileState(tempId, {status: 'deleting'});
-        closeDeleteForm(); // Close dialog immediately
+        const { tempId, serverData } = fileToDelete;
+        updateFileState(tempId, { status: 'deleting' });
+        closeDeleteForm();
 
         try {
-            await axios.post(route("documents.destroy", serverData.id), {_method: "delete"});
-            let newFiles = managedFiles.filter(f => f.tempId !== tempId)
-            // Remove from internal state on success
+            await axios.post(route("documents.destroy", serverData.id), { _method: "delete" });
+
+            // Remove from state on success
+            const newFiles = managedFiles.filter(f => f.tempId !== tempId);
             setManagedFiles(newFiles);
 
-            onChange(name, multiple ? newFiles.map(item => item.serverData) : null);
+            // Notify parent of change
+            onChange(name, multiple ? newFiles.map(item => item.serverData) : newFiles[0]?.serverData || null);
         } catch (error) {
             console.error("Delete error:", error);
             const errorMsg = error.response?.data?.message || error.message || "Failed to delete file";
-            updateFileState(tempId, {status: 'success', error: errorMsg}); // Revert status to allow retry
+            updateFileState(tempId, { status: 'success', error: errorMsg });
             setGeneralError(errorMsg);
         } finally {
-            setFileToDelete(null); // Clear the file marked for deletion
+            setFileToDelete(null);
         }
-    }, [fileToDelete, notifyParentOfChange]);
+    }, [fileToDelete, managedFiles, closeDeleteForm, updateFileState, onChange, name, multiple]);
 
-    // Calculate remaining slots accurately
-    const remainingSlots = multiple ? Math.max(0, maxFiles - currentFileCount) : (currentFileCount === 0 ? 1 : 0);
+    // Clear all validation errors
+    const clearErrors = useCallback(() => {
+        setValidationErrors([]);
+        setGeneralError("");
+    }, []);
 
+    // --- Cleanup Effect ---
+    useEffect(() => {
+        // Clean up any pending cancel tokens on unmount
+        return () => {
+            cancelTokenMap.current.forEach(source => {
+                source.cancel('Component unmounted');
+            });
+            cancelTokenMap.current.clear();
+        };
+    }, []);
 
     return (
         <>
-            <FormGroup sx={{width: "100%", mb: 1}}>
+            <FormGroup sx={{ width: "100%", mb: 1 }}>
                 {label && (
                     <InputLabel
                         required={required}
                         error={displayError}
-                        sx={{mb: 1, fontWeight: 'bold'}} // Simplified styling
+                        sx={{ mb: 1, fontWeight: 'bold' }}
                     >
                         {label}
                     </InputLabel>
                 )}
 
                 {/* Display Existing & Uploading Files */}
-                <Box sx={{mb: managedFiles.length > 0 ? 2 : 0}}>
-                    {managedFiles.map((fileState) => (
-                        <UploadItem
-                            key={fileState.tempId}
-                            // Pass necessary props derived from fileState
-                            value={fileState.serverData || {
-                                originalName: fileState.file?.name,
-                                size: fileState.file?.size
-                            }} // Provide basic info if serverData not yet available
-                            file={fileState.file} // Pass the actual file object if available
-                            status={fileState.status}
-                            progress={fileState.progress}
-                            error={fileState.error}
-                            editable={editable && fileState.status !== 'uploading' && fileState.status !== 'deleting'} // Can't delete while uploading/deleting
-                            onDelete={() => fileState.status === 'success' && fileState.serverData ? openDeleteDialog(fileState) : null} // Only allow delete for successfully uploaded files with serverData
-                            onCancel={fileState.status === 'uploading' ? () => handleCancelUpload(fileState.tempId) : undefined} // Allow cancelling uploads
-                            showFileSize // Keep showing file size
-                            // Add tag editing capability
-                            onTagChange={editable && fileState.status === 'success' && fileState.serverData ?
-                                (newTag) => handleTagChange(fileState.tempId, newTag) : undefined}
-                            availableTags={tags} // Pass available tags for editing
-                        />
-                    ))}
-                </Box>
-
+                {managedFiles.length > 0 && (
+                    <Box sx={{ mb: 2 }}>
+                        {managedFiles.map((fileState) => (
+                            <UploadItem
+                                key={fileState.tempId}
+                                value={fileState.serverData || {
+                                    originalName: fileState.file?.name,
+                                    size: fileState.file?.size
+                                }}
+                                file={fileState.file}
+                                status={fileState.status}
+                                progress={fileState.progress}
+                                error={fileState.error}
+                                editable={editable && fileState.status !== 'uploading' && fileState.status !== 'deleting'}
+                                onDelete={() =>
+                                    fileState.status === 'success' && fileState.serverData ?
+                                        openDeleteDialog(fileState) : null
+                                }
+                                onCancel={fileState.status === 'uploading' ?
+                                    () => handleCancelUpload(fileState.tempId) : undefined
+                                }
+                                showFileSize
+                                onTagChange={editable && fileState.status === 'success' && fileState.serverData ?
+                                    (newTag) => handleTagChange(fileState.tempId, newTag) : undefined
+                                }
+                                availableTags={tags}
+                            />
+                        ))}
+                    </Box>
+                )}
 
                 {/* Tag Selection Dialog */}
                 {showTagSelector && (
-                    <Box sx={{
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        p: 2,
-                        mb: 2,
-                        borderRadius: 1,
-                        bgcolor: 'background.paper',
-                        boxShadow: 1
-                    }}>
-                        <Typography variant="subtitle1" sx={{mb: 2}}>
-                            Select a tag for {filesForTagging.length} file{filesForTagging.length !== 1 ? 's' : ''}:
-                        </Typography>
-
-                        <FormControl fullWidth sx={{mb: 2}}>
-                            <Select
-                                value={selectedTag}
-                                onChange={(e) => setSelectedTag(e.target.value)}
-                                displayEmpty
-                                size="small"
-                            >
-                                {tags.map((tag, index) => (
-                                    <MenuItem key={index} value={tag.value}>
-                                        {tag.label}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-
-                        <Box sx={{display: 'flex', justifyContent: 'flex-end', gap: 1}}>
-                            <Chip
-                                label="Cancel"
-                                onClick={handleTagCancel}
-                                color="default"
-                                variant="outlined"
-                            />
-                            <Chip
-                                label="Confirm"
-                                onClick={handleTagConfirm}
-                                color="primary"
-                            />
-                        </Box>
-                    </Box>
+                    <TagSelector
+                        files={filesForTagging}
+                        tags={tags}
+                        onConfirm={handleTagConfirm}
+                        onCancel={handleTagCancel}
+                    />
                 )}
 
                 {/* Upload Box / Drop Zone */}
@@ -624,12 +688,13 @@ const Upload = ({
                         onClick={handleTriggerInput}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' || e.key === ' ') handleTriggerInput();
-                        }} // Basic keyboard activation
+                        }}
                         isDragOver={isDragOver}
                         error={displayError}
-                        tabIndex={0} // Make it focusable
+                        tabIndex={0}
                         aria-label={label || "File Upload Area"}
-                        aria-describedby="upload-helper-text" // Link to helper text
+                        aria-describedby="upload-helper-text"
+                        role="button"
                     >
                         <CloudUploadIcon
                             sx={{
@@ -638,7 +703,7 @@ const Upload = ({
                                 color: isDragOver ? "primary.main" : "text.secondary"
                             }}
                         />
-                        <Typography variant="body1" sx={{mb: 1}}>
+                        <Typography variant="body1" sx={{ mb: 1 }}>
                             {isDragOver ? "Drop files here" : "Drag files or click to upload"}
                         </Typography>
                         <FileTypeInfo id="upload-helper-text">
@@ -648,6 +713,7 @@ const Upload = ({
                     </UploadBox>
                 )}
 
+                {/* Hidden file input */}
                 <input
                     ref={inputRef}
                     hidden
@@ -655,36 +721,26 @@ const Upload = ({
                     multiple={multiple}
                     onChange={handleInputChange}
                     accept={accept}
+                    aria-hidden="true"
                 />
 
                 {/* Display Errors */}
-                {displayError && (
-                    <Alert
-                        severity="error"
-                        sx={{mt: 1}}
-                        onClose={() => {
-                            setValidationErrors([]);
-                            setGeneralError("");
-                        }} // Allow closing general/validation errors
-                    >
-                        {externalHelperText} {/* Show external error first if present */}
-                        {generalError && <p>{generalError}</p>}
-                        {validationErrors.length > 0 && (
-                            <ul>
-                                {validationErrors.map((err, i) => <li key={i}>{err.message}</li>)}
-                            </ul>
-                        )}
-                    </Alert>
-                )}
+                <FileErrorAlert
+                    errors={validationErrors}
+                    generalError={generalError}
+                    externalHelperText={externalHelperText}
+                    onClear={clearErrors}
+                />
 
                 {/* Show file count / limit */}
-                {multiple && label && ( // Show chip near label if label exists
+                {multiple && label && (
                     <Chip
                         label={`${currentFileCount}/${maxFiles} files`}
                         size="small"
-                        sx={{position: 'absolute', top: 0, right: 0, mt: -0.5, mr: 1}} // Adjust positioning as needed
+                        sx={{ position: 'absolute', top: 0, right: 0, mt: -0.5, mr: 1 }}
                         color={currentFileCount >= maxFiles ? "error" : "default"}
                         variant={currentFileCount >= maxFiles ? "filled" : "outlined"}
+                        aria-live="polite"
                     />
                 )}
             </FormGroup>
@@ -692,7 +748,6 @@ const Upload = ({
             {/* Delete Confirmation */}
             {editable && (
                 <DeleteForm
-                    // Pass file name if available, otherwise a generic name
                     title={`Delete "${fileToDelete?.serverData?.originalName || fileToDelete?.file?.name || 'file'}"?`}
                     message="Are you sure you want to delete this file? This action cannot be undone."
                     openDelete={openDeleteForm}

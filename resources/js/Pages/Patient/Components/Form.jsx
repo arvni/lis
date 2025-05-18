@@ -10,10 +10,8 @@ import React, {useEffect, useState} from "react";
 import countries from "@/Data/Countries";
 import {router} from "@inertiajs/react";
 
-export const getPatientByIdNo = async (idNo, callback) => {
-    axios.get(route('api.patients.getByIdNo', {idNo}))
-        .then(res => callback(res.data));
-}
+export const getPatientByIdNo = (idNo, callback) => axios.get(route('api.patients.getByIdNo', {idNo}))
+    .then(res => callback(res.data));
 
 export default function ({data, setData, back, edit, next, step, ...rest}) {
     const [errors, setErrors] = useState({});
@@ -86,10 +84,10 @@ export default function ({data, setData, back, edit, next, step, ...rest}) {
             {step == 1 && <PatientForm data={data} errors={errors} edit={edit} onChange={handlePatientChange}/>}
             <Divider sx={{my: "1em"}}/>
             <Grid container flex justifyItems="flex-end" justifyContent="flex-end" spacing={2}>
-                <Grid >
+                <Grid>
                     <Button onClick={back}>Back</Button>
                 </Grid>
-                <Grid >
+                <Grid>
                     <Button variant="contained" onClick={handleNext}>Next</Button>
                 </Grid>
             </Grid>

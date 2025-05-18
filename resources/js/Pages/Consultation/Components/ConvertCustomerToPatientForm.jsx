@@ -40,7 +40,6 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
-    console.log(time);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [step, setStep] = useState(0);
@@ -151,11 +150,7 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                     await getPatientByIdNo(data.idNo, findPatientCallBack);
                 } catch (error) {
                     setLoading(false);
-                    setFeedback({
-                        show: true,
-                        message: "Failed to search for patient. Please try again.",
-                        severity: "error"
-                    });
+                    setStep(step + 1);
                 }
                 break;
 

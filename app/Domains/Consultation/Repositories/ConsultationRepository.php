@@ -2,7 +2,9 @@
 
 namespace App\Domains\Consultation\Repositories;
 
+use App\Domains\Consultation\Enums\ConsultationStatus;
 use App\Domains\Consultation\Models\Consultation;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -82,6 +84,21 @@ class ConsultationRepository
             $query->whereDate("dueDate", ">=", $filters["from_date"]);
         if (isset($filters["consultant_id"]))
             $query->where("consultant_id", $filters["consultant_id"]);
+    }
+
+    public function getTotalConsultationForDateRange($dateRange): int
+    {
+        return Consultation::query()
+            ->whereBetween("dueDate", $dateRange)
+            ->where("status", "done")
+            ->count();
+    }
+
+    public function getTotalWaitingForConsultation(): int
+    {
+        return Consultation::query()
+            ->where("status", ConsultationStatus::WAITING)
+            ->count();
     }
 
 }

@@ -45,6 +45,7 @@ import Prescription from "./Components/Prescription";
 import Payment from "./Components/Payment";
 import Button from "@mui/material/Button";
 import {Link} from "@inertiajs/react";
+import PageHeader from "@/Components/PageHeader.jsx";
 
 // Constants
 const TEST_TYPE = {
@@ -155,10 +156,10 @@ const SummaryCard = ({title, value, icon, color = "primary"}) => {
     );
 };
 
-const ReportMethodItem = ({ icon: Icon, color = "info", text }) => (
-    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-        <Icon color={color} />
-        <Typography variant="body2" sx={{ ml: 1 }}>
+const ReportMethodItem = ({icon: Icon, color = "info", text}) => (
+    <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+        <Icon color={color}/>
+        <Typography variant="body2" sx={{ml: 1}}>
             {text}
         </Typography>
     </Box>
@@ -215,7 +216,7 @@ const Show = ({
         const netTotal = total - discount;
         const paid = invoice?.payments ? invoice.payments.reduce((acc, payment) => acc + (parseFloat(payment.price) || 0), 0) : 0;
         const remaining = netTotal - paid;
-
+        console.log(paid, remaining)
         return {
             total,
             discount,
@@ -249,7 +250,8 @@ const Show = ({
                 <Button
                     variant="outlined"
                     startIcon={<Print/>}
-                    onClick={() => window.open(route("acceptances.print", acceptance.id), "_blank")}
+                    href={route("acceptances.print", acceptance.id)}
+                    component={Link}
                 >
                     Print Receipt
                 </Button>
@@ -270,7 +272,7 @@ const Show = ({
     );
 
     // Get the active report methods
-    const activeReportMethods = Object.keys(acceptance?.howReport||{})
+    const activeReportMethods = Object.keys(acceptance?.howReport || {})
         .filter(method =>
             ["print", "email", "whatsapp"].includes(method) &&
             acceptance.howReport[method]
@@ -283,75 +285,50 @@ const Show = ({
             borderRadius: 2,
             boxShadow: {xs: 0, md: 1}
         }}>
+
+            <PageHeader title={`Acceptance #${acceptance.id}`}
+                        subtitle={`Created: ${new Date(acceptance.created_at).toLocaleString()}`} actions={[
+                <StatusChip status={acceptance.status}/>
+            ]}/>
+
             {/* Header with status and basic info */}
-            <Box
-                sx={{
-                    display: 'flex',
-                    flexDirection: {xs: 'column', sm: 'row'},
-                    justifyContent: 'space-between',
-                    alignItems: {xs: 'flex-start', sm: 'center'},
-                    mb: 4,
-                    gap: 2
-                }}
-            >
-                <Box>
-                    <Typography
-                        variant="h4"
-                        sx={{
-                            fontWeight: 'bold',
-                            display: 'flex',
-                            alignItems: 'center',
-                            color: 'primary.main'
-                        }}
-                    >
-                        <ReceiptLong sx={{mr: 1}}/>
-                        Acceptance #{acceptance.id}
-                    </Typography>
-                    <Typography variant="subtitle1" color="text.secondary">
-                        Created: {new Date(acceptance.created_at).toLocaleString()}
-                    </Typography>
-                </Box>
-                <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                    <StatusChip status={acceptance.status}/>
-                </Box>
+            <Box sx={{mb: 4}}>
+                {/* Summary Cards Row */}
+                <Grid container spacing={2} sx={{mb: 4}}>
+                    <Grid size={{xs: 12, sm: 6, md: 3}}>
+                        <SummaryCard
+                            title="Total Items"
+                            value={totals.items}
+                            icon={PlaylistAddCheck}
+                            color="primary"
+                        />
+                    </Grid>
+                    <Grid size={{xs: 12, sm: 6, md: 3}}>
+                        <SummaryCard
+                            title="Total Amount"
+                            value={`${totals.netTotal.toFixed(2)}`}
+                            icon={RequestQuote}
+                            color="secondary"
+                        />
+                    </Grid>
+                    <Grid size={{xs: 12, sm: 6, md: 3}}>
+                        <SummaryCard
+                            title="Amount Paid"
+                            value={`${totals.paid ? totals.paid.toFixed(2) : '0.00'}`}
+                            icon={(props) => <Typography {...props}>OMR</Typography>}
+                            color="success"
+                        />
+                    </Grid>
+                    <Grid size={{xs: 12, sm: 6, md: 3}}>
+                        <SummaryCard
+                            title="Amount Due"
+                            value={`${totals.remaining.toFixed(2)}`}
+                            icon={Receipt}
+                            color={totals.remaining > 0 ? "error" : "success"}
+                        />
+                    </Grid>
+                </Grid>
             </Box>
-
-            {/* Summary Cards Row */}
-            <Grid container spacing={2} sx={{mb: 4}}>
-                <Grid size={{xs: 12, sm: 6, md: 3}}>
-                    <SummaryCard
-                        title="Total Items"
-                        value={totals.items}
-                        icon={PlaylistAddCheck}
-                        color="primary"
-                    />
-                </Grid>
-                <Grid size={{xs: 12, sm: 6, md: 3}}>
-                    <SummaryCard
-                        title="Total Amount"
-                        value={`${totals.netTotal.toFixed(2)}`}
-                        icon={RequestQuote}
-                        color="secondary"
-                    />
-                </Grid>
-                <Grid size={{xs: 12, sm: 6, md: 3}}>
-                    <SummaryCard
-                        title="Amount Paid"
-                        value={`${totals.paid ? totals.paid.toFixed(2) : '0.00'}`}
-                        icon={AttachMoney}
-                        color="success"
-                    />
-                </Grid>
-                <Grid size={{xs: 12, sm: 6, md: 3}}>
-                    <SummaryCard
-                        title="Amount Due"
-                        value={`${totals.remaining ? totals.remaining.toFixed(2) : totals.netTotal.toFixed(2)}`}
-                        icon={Receipt}
-                        color={totals.remaining > 0 ? "error" : "success"}
-                    />
-                </Grid>
-            </Grid>
-
             <QuickActions/>
 
             <Divider sx={{my: 4}}/>
@@ -606,7 +583,7 @@ const Show = ({
                                                 <TableCell>
                                                     <Typography
                                                         fontWeight="medium"
-                                                        component={Link}
+                                                        component={type.toLowerCase() === "service" ? 'p' : Link}
                                                         href={route('acceptanceItems.show', {
                                                             acceptanceItem: item.id,
                                                             acceptance: acceptance.id
@@ -628,10 +605,7 @@ const Show = ({
                                                 <TableCell align="right">{item.discount}</TableCell>
                                                 <TableCell
                                                     align="right"
-                                                    sx={{
-                                                        fontWeight: 'bold',
-                                                        color: 'primary.main'
-                                                    }}
+                                                    sx={{fontWeight: 'bold'}}
                                                 >
                                                     {(item.price - item.discount).toFixed(2)}
                                                 </TableCell>
@@ -707,21 +681,26 @@ const Show = ({
     );
 };
 
-// Breadcrumbs configuration
-const breadCrumbs = [
-    {
-        title: "Acceptances",
-        link: route("acceptances.index"),
-        icon: null,
-    },
-];
-
 Show.layout = page => (
     <AuthenticatedLayout
         auth={page.props.auth}
         children={page}
         breadcrumbs={[
-            ...breadCrumbs,
+            {
+                title: "Patients",
+                link: route("patients.index"),
+                icon: null,
+            },
+            {
+                title: page.props.patient.fullName,
+                link: route("patients.show", page.props.patient.id),
+                icon: null,
+            },
+            {
+                title: "Acceptances",
+                link: route("acceptances.index", {patient_id: page.props.patient.id}),
+                icon: null,
+            },
             {
                 title: `Acceptance #${page?.props?.acceptance?.id}`,
                 link: "",

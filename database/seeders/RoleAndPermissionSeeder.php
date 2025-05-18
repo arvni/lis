@@ -37,23 +37,23 @@ class RoleAndPermissionSeeder extends Seeder
                 ]
             ],
             "Consultation" => [
-               "Consultations"=>[
-                   "View Consultation",
-                   "Done Consultation",
-                   "Create Consultation",
-                   "Edit Consultation",
-                   "Delete Consultation",
-                   "List Consultations",
-                   "Waiting List Consultations",
-               ],
-               "Consultants"=>[
-                   "View Consultant",
-                   "Create Consultant",
-                   "Edit Consultant",
-                   "Delete Consultant",
-                   "List Consultants",
-               ],
-                "Reservations"=>[
+                "Consultations" => [
+                    "View Consultation",
+                    "Done Consultation",
+                    "Create Consultation",
+                    "Edit Consultation",
+                    "Delete Consultation",
+                    "List Consultations",
+                    "Waiting List Consultations",
+                ],
+                "Consultants" => [
+                    "View Consultant",
+                    "Create Consultant",
+                    "Edit Consultant",
+                    "Delete Consultant",
+                    "List Consultants",
+                ],
+                "Reservations" => [
                     "View Reservation",
                     "Create Reservation",
                     "Edit Reservation",
@@ -195,13 +195,22 @@ class RoleAndPermissionSeeder extends Seeder
                     "List Tests",
                 ],
             ],
+            "Dashboard" => [
+                "Total Acceptances",
+                "Total Tests",
+                "Total Waiting Sampling",
+                "Total Consultation",
+                "Total Waiting Consultation",
+                "Total Payments",
+                "Total Reports Waiting For Approving",
+            ],
             "Statistics"
         ];
 
         $sectionPermissions = $this->getSectionsPermissions();
         $documentsPermissions = $this->getDocumentsPermissions();
 
-        $permissions = array_merge($permissions, $sectionPermissions,$documentsPermissions);
+        $permissions = array_merge($permissions, $sectionPermissions, $documentsPermissions);
 
         $this->createPermissions($permissions, "");
         $permissions = Permission::all();

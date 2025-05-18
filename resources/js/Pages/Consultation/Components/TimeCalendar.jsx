@@ -251,6 +251,7 @@ const ModifiedTimeCalendar = ({
                                   canCheckConsultation = false,
                                   canConversion = false,
                                   onSelectDate = () => null,
+                                  onEdit = () => null,
                                   onTimeSelection
                               }) => {
     const [currentDate, setCurrentDate] = useState(new Date());

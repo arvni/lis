@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head,Link } from '@inertiajs/react';
 import OptimizedInvoiceReceipt from './Components/InvoiceReceipt';
 import {
     Box,
@@ -165,6 +165,7 @@ const OptimizedPrint = ({ acceptance }) => {
                             color="primary"
                             href={route('acceptances.show', acceptance.id)}
                             size="small"
+                            component={Link}
                         >
                             Back
                         </Button>

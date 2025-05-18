@@ -13,7 +13,7 @@ import {
     Grid2 as Grid,
     Paper,
     Tooltip,
-    alpha, Dialog
+    Dialog
 } from "@mui/material";
 import Button from "@mui/material/Button";
 import {LoadingButton} from "@mui/lab";
@@ -30,7 +30,7 @@ import {
     Badge as BadgeIcon,
     OpenInNew as OpenInNewIcon, AccessibilityNew, LocationCity, Home
 } from "@mui/icons-material";
-import {useForm} from "@inertiajs/react";
+import {useForm,Link} from "@inertiajs/react";
 import countries from "@/Data/Countries.js";
 import PatientForm from "@/Pages/Patient/Components/PatientForm";
 import DocumentsInfo from "@/Components/DocumentsInfo";
@@ -155,7 +155,6 @@ const PatientInfo = ({
                 sx={{
                     p: 2,
                     borderRadius: 2,
-                    backgroundColor: alpha('#f5f5f5', 0.5),
                     border: '1px solid',
                     borderColor: 'divider'
                 }}
@@ -251,7 +250,7 @@ const PatientInfo = ({
                                         size="small"
                                         startIcon={<OpenInNewIcon/>}
                                         href={patient.id ? route("patients.show", patient.id) : null}
-                                        target="_blank"
+                                        component={Link}
                                         sx={{borderRadius: 2}}
                                     >
                                         View Full Profile

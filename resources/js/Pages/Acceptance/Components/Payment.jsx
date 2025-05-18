@@ -291,7 +291,7 @@ const PaymentComponent = ({
     // Table components
     const PaymentTableHeader = () => (
         <TableHead>
-            <TableRow sx={{backgroundColor: '#f5f5f5'}}>
+            <TableRow>
                 <TableCell align="center" width="5%">
                     <Typography fontWeight="bold">#</Typography>
                 </TableCell>

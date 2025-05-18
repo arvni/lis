@@ -6,6 +6,7 @@ use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -185,5 +186,29 @@ class AcceptanceRepository
             ->values()
             ->all();
     }
+
+
+    public function getTotalAcceptancesForDateRange($dateRange): int
+    {
+        return Acceptance::whereBetween("created_at", $dateRange)->count();
+    }
+
+    public function getTotalWaitingForSampling(): int
+    {
+        return Acceptance::query()
+            ->whereNotIn("status", [AcceptanceStatus::PENDING, AcceptanceStatus::CANCELLED])
+            ->whereHas('acceptanceItems', function ($q) {
+                $q->whereHas("method.test", function ($q) {
+                    $q->where("type", TestType::TEST);
+                });
+            }) // only acceptances that have at least one item
+            ->whereDoesntHave('acceptanceItems.activeSamples') // none of the items have active samples
+            ->withSum(['Payments as total_payments' => fn($query) => $query->select(DB::raw('COALESCE(SUM(price), 0)'))], 'price')
+            ->withSum(['AcceptanceItems as total_price' => fn($query) => $query->select(DB::raw('COALESCE(SUM(price), 0)'))], 'price')
+            ->withSum(['AcceptanceItems as total_discount' => fn($query) => $query->select(DB::raw('COALESCE(SUM(discount), 0)'))], 'discount')
+            ->having('total_payments', '>=', DB::raw('total_price - total_discount'))
+            ->count();
+    }
+
 
 }

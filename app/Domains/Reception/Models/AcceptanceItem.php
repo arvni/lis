@@ -103,10 +103,16 @@ class AcceptanceItem extends Model
             ->withPivot("active");
     }
 
+    public function activeSamples()
+    {
+        return $this->samples()->wherePivot("active", true);
+    }
+
     public function acceptanceItemSamples()
     {
         return $this->hasMany(AcceptanceItemSample::class);
     }
+
     public function activeSample()
     {
         return $this->hasOneThrough(
@@ -151,8 +157,8 @@ class AcceptanceItem extends Model
             ->whereHas("samples", function ($q) {
                 $q->where("acceptance_item_samples.active", true);
             })
-            ->whereHas("acceptance",function ($q) {
-                $q->whereIn("status",[AcceptanceStatus::REPORTED,AcceptanceStatus::PROCESSING]);
+            ->whereHas("acceptance", function ($q) {
+                $q->whereIn("status", [AcceptanceStatus::REPORTED, AcceptanceStatus::PROCESSING]);
             })
             ->whereDoesntHave("reports", function ($q) {
                 $q->where("status", true);

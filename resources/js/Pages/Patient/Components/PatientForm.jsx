@@ -123,7 +123,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
     const handleAvatarChange = ({data}) => onChange({target: {name: "avatar", value: data}});
 
     // Helper function to check if a field has an error
-    const hasError = (fieldName) => errors && errors.hasOwnProperty(fieldName);
+    const hasError = (fieldName) => !!errors && errors.hasOwnProperty(fieldName);
 
     // Toggle section expansion
     const toggleSection = (section) => {
@@ -395,7 +395,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                 </Grid>
 
                                 {/* Gender Field */}
-                                <Grid size={{xs: 12, sm: 6}}>
+                                <Grid size={{xs: 12, sm: 7}}>
                                     <FormControlLabel labelPlacement="start"
                                                       label={<Stack direction="row" alignItems="center">
                                                           <Wc color="primary" sx={{mr: 1}}/>
@@ -472,7 +472,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                 </Grid>
 
                                 {/* Age Field - NEW */}
-                                <Grid size={{xs: 12, sm: 6, md: 3}}>
+                                <Grid size={{xs: 12, sm: 6, md: 2}}>
                                     <FormControl fullWidth variant="outlined" error={hasError("age")}>
                                         <TextField
                                             id="age"
@@ -485,10 +485,9 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             placeholder="Enter age"
                                             variant="outlined"
                                             label="Age"
-                                            InputProps={{
-                                                inputProps: { min: 0, max: 120 }
-                                            }}
                                             slotProps={{
+                                                htmlInput: {min: 0, max: 120}
+                                                ,
                                                 input: {startAdornment: <Cake color="primary" sx={{mr: 1}}/>}
                                             }}
                                         />
@@ -496,7 +495,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                 </Grid>
 
                                 {/* Phone Field */}
-                                <Grid size={{xs: 12, sm: 6, md: 3}}>
+                                <Grid size={{xs: 12, sm: 6, md: 4}}>
                                     <FormControl fullWidth variant="outlined" error={hasError("phone")}>
                                         <TextField
                                             id="phone"

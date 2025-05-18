@@ -158,6 +158,7 @@ class AcceptanceController extends Controller
      */
     public function update(Acceptance $acceptance, UpdateAcceptanceRequest $request): RedirectResponse
     {
+        $status = $acceptance->status;
         // Get validated data
         $validatedData = $request->validated();
         // Get current step
@@ -170,13 +171,19 @@ class AcceptanceController extends Controller
             $updatedAcceptance = $this->acceptanceService->updateAcceptance($acceptance, $validatedData);
             // If this is the final step, update status to "completed"
             if ($isFinalStep) {
-                if (isset($acceptance->howReport["whatsapp"]) && $acceptance->howReport["whatsapp"] && ($acceptance->howReport["whatsappNumber"])){
-                    $acceptance->loadMissing("patient","reportDate");
-                    $acceptance->patient->notify(new WelcomeNotification($acceptance,$acceptance->reportDate->report_date+1));
-                }
-                if (isset($acceptance->howReport["sendToReferrer"])  && ($acceptance->howReport["sendToReferrer"])) {
-                    $acceptance->loadMissing("referrer","reportDate");
-                    $acceptance->referrer->notify(new WelcomeNotification($acceptance,$acceptance->reportDate->report_date+1));
+                if($status == AcceptanceStatus::PENDING) {
+                    if (
+                        isset($updatedAcceptance->howReport["whatsapp"]) &&
+                        $updatedAcceptance->howReport["whatsapp"] &&
+                        ($updatedAcceptance->howReport["whatsappNumber"])
+                    ) {
+                        $updatedAcceptance->loadMissing("patient", "reportDate");
+                        $updatedAcceptance->patient->notify(new WelcomeNotification($acceptance, $acceptance->reportDate->report_date + 1));
+                    }
+                    if (isset($updatedAcceptance->howReport["sendToReferrer"]) && ($updatedAcceptance->howReport["sendToReferrer"])) {
+                        $updatedAcceptance->loadMissing("referrer", "reportDate");
+                        $updatedAcceptance->referrer->notify(new WelcomeNotification($updatedAcceptance, $updatedAcceptance->reportDate->report_date + 1));
+                    }
                 }
                 // Redirect to the acceptance details page with success message
                 return redirect()
@@ -192,7 +199,7 @@ class AcceptanceController extends Controller
             // Handle any exceptions
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'An error occurred: ' . $e->getMessage());
+                ->withErrors( 'An error occurred: ' . $e->getMessage());
         }
     }
 
