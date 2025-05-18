@@ -39,7 +39,12 @@ readonly class PatientService
     {
         $patient->load([
             "invoices" => function ($query) {
-                $query->latest()->limit(5);
+                $query
+                    ->withSum("acceptanceItems as total_amount","price")
+                    ->withSum("acceptanceItems as total_discount","discount")
+                    ->withSum("payments as total_paid","price")
+                    ->latest()
+                    ->limit(5);
             },
             "payments" => function ($query) {
                 $query->latest()->limit(5);

@@ -217,21 +217,49 @@ const Show = ({
     // --- Column Definitions (Memoized) ---
     const invoiceColumns = useMemo(() => [
         {
-            field: 'price', headerName: 'Price', type: 'number', flex: 0.5, align: "center",
-            valueFormatter: ({value}) => formatCurrency(value),
+            field: 'total_amount',
+            headerName: 'Total Amount',
+            type: 'number',
+            flex: 0.5,
+            align: "center",
+            valueFormatter: (value) => formatCurrency(value*1),
         },
         {
-            field: 'discount', headerName: 'Discount', type: 'number', flex: 0.6, align: "center",
-            valueFormatter: ({value}) => formatCurrency(value),
+            field: 'total_discount',
+            headerName: 'Total Discount',
+            type: 'number',
+            flex: 0.5,
+            align: "center",
+            valueFormatter: (value) => formatCurrency(value*1),
         },
         {
-            field: 'status', headerName: 'Status', flex: 1, align: "center",
-            renderCell: ({value}) => renderStatusChip(value, {
-                Paid: 'success', Pending: 'warning', Overdue: 'error'
-            }),
+            field: 'total_paid',
+            headerName: 'Total Paid',
+            type: 'number',
+            flex: 0.5,
+            align: "center",
+            valueFormatter: (value) => formatCurrency(value*1),
         },
         {
-            field: 'id', headerName: 'View', flex: 0.5, align: "center", sortable: false, filterable: false,
+            field: 'status',
+            headerName: 'Status',
+            flex: 1,
+            align: "center",
+            renderCell: ({value}) => renderStatusChip(value,
+                {
+                    Paid: 'success',
+                    Pending: 'warning',
+                    Overdue: 'error',
+                }
+            ),
+        },
+        {
+            field: 'id',
+            headerName: 'View',
+            flex: 0.5,
+            align: "center",
+            sortable: false,
+            filterable: false,
             renderCell: ({row}) => renderViewButton(route("invoices.show", row.id), handleNavigate),
         }
     ], [handleNavigate]);
