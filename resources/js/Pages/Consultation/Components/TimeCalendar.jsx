@@ -1,290 +1,90 @@
-import React, {useState} from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
     Box,
     Paper,
     Typography,
-    Grid2 as Grid,
+    Grid,
     IconButton,
-    Card,
-    CardContent,
-    Chip,
+    useTheme,
+    useMediaQuery,
     Button,
-    Link
+    Stack
 } from '@mui/material';
 import {
     ArrowBackIos,
     ArrowForwardIos,
     Today,
-    Event as EventIcon,
-    Person,
-    Phone,
-    MedicalServices
+    CalendarMonth
 } from '@mui/icons-material';
+import TimeSlotCard from "./TimeSlotCard";
 
-
-// Format time (HH:MM AM/PM)
-const formatTime = (dateString) => {
-    const date = new Date(dateString);
-    let hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12; // Convert 0 to 12
-    return `${hours}:${minutes} ${ampm}`;
-};
-
-const TimeSlotCard = ({
-                          timeSlot,
-                          onClick,
-                          canCheckConsultation = false,
-                          canCheckPatient = false,
-                          canConversion = false
+/**
+ * A calendar component that displays time slots with the ability to manage appointments
+ *
+ * @param {Object} props - Component props
+ * @param {Array} props.timeSlots - Array of time slot objects to display
+ * @param {Function} props.onTimeSlotSelect - Callback when a time slot is selected
+ * @param {Function} props.onDateSelect - Callback when a date is selected
+ * @param {Function} props.onMonthChange - Callback when month changes with (startDate, endDate) parameters
+ * @param {Function} props.onTimeSlotEdit - Callback when edit button is clicked on a time slot
+ * @param {Function} props.onTimeSlotDelete - Callback when delete button is clicked on a time slot
+ * @param {boolean} props.canViewPatient - Whether the user can view patient details
+ * @param {boolean} props.canViewConsultation - Whether the user can view consultation details
+ * @param {boolean} props.canConvertToPatient - Whether the user can convert a time slot to a patient appointment
+ * @param {boolean} props.canEditTimeSlot - Whether the user can edit time slots
+ * @param {boolean} props.canDeleteTimeSlot - Whether the user can delete time slots
+ * @param {boolean} props.canDeleteConsultantReserve - Whether the user can delete consultant reservations
+ * @returns {JSX.Element} The TimeCalendar component
+ */
+const TimeCalendar = ({
+                          timeSlots = [],
+                          onTimeSlotSelect,
+                          onDateSelect = () => {},
+                          onMonthChange,
+                          onTimeSlotEdit = () => {},
+                          onTimeSlotDelete = () => {},
+                          canViewPatient = false,
+                          canViewConsultation = false,
+                          canConvertToPatient = false,
+                          canEditTimeSlot = false,
+                          canDeleteTimeSlot = false,
+                          canDeleteConsultantReserve = false
                       }) => {
-    const handleConversion = () => canConversion && onClick(timeSlot)
-    return <Card
-        variant="outlined"
-        sx={{
-            borderColor: timeSlot.active ? 'success.main' : 'divider',
-        }}
-    >
-        <CardContent>
-            {/* Title and Status */}
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                <Typography variant="subtitle1" fontWeight="bold">
-                    {timeSlot.title}
-                </Typography>
-                <Chip
-                    size="small"
-                    label={timeSlot.active ? "Active" : "Inactive"}
-                    color={timeSlot.active ? "success" : "default"}
-                />
-            </Box>
-
-            {/* Time Information */}
-            <Box display="flex" alignItems="center" mb={2}>
-                <EventIcon fontSize="small" sx={{mr: 1, color: 'text.secondary'}}/>
-                <Typography variant="body2" color="text.secondary">
-                    {formatTime(timeSlot.started_at)} - {formatTime(timeSlot.ended_at)}
-                </Typography>
-            </Box>
-
-            {/* Consultant Information */}
-            {timeSlot.consultant && (
-                <Box sx={{mb: 2, display: 'flex', alignItems: 'center'}}>
-                    {timeSlot.consultant.avatar && (
-                        <Box
-                            component="img"
-                            src={timeSlot.consultant.avatar}
-                            alt={timeSlot.consultant.name}
-                            sx={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: '50%',
-                                mr: 1.5,
-                                objectFit: 'cover'
-                            }}
-                        />
-                    )}
-                    <Box>
-                        <Typography variant="body1" fontWeight="medium">
-                            {timeSlot.consultant.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            {timeSlot.consultant.title || 'Consultant'}
-                        </Typography>
-                    </Box>
-                </Box>
-            )}
-
-            {/* Reservation Information */}
-            {timeSlot.reservable_type && (
-                <>
-                    {/* Customer Reservation */}
-                    {timeSlot.reservable_type === 'customer' && timeSlot.reservable && (
-                        <Box sx={{
-                            p: 1.5,
-                            bgcolor: 'background.paper',
-                            borderRadius: 1,
-                            border: '1px solid',
-                            borderColor: 'divider'
-                        }}>
-                            <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
-                                <Person fontSize="small" sx={{mr: 1, color: 'text.secondary'}}/>
-                                <Typography variant="body2" fontWeight="medium">
-                                    Customer Appointment
-                                </Typography>
-                            </Box>
-
-                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 0.5}}>
-                                <Typography variant="body2">
-                                    Name: {timeSlot.reservable.name}
-                                </Typography>
-                                <Typography variant="body2">
-                                    Phone: {timeSlot.reservable.phone}
-                                </Typography>
-                                {timeSlot.reservable.email && (
-                                    <Typography variant="body2">
-                                        Email: {timeSlot.reservable.email}
-                                    </Typography>
-                                )}
-                            </Box>
-                            {canConversion && <Button onClick={handleConversion} variant="outlined">
-                                Convert to Patient Appointment
-                            </Button>}
-                        </Box>
-                    )}
-
-                    {/* Consultation Reservation */}
-                    {timeSlot.reservable_type === 'consultation' && timeSlot.reservable && (
-                        <Box sx={{
-                            p: 1.5,
-                            borderRadius: 1,
-                            border: '1px solid',
-                            borderColor: 'primary.main'
-                        }}>
-                            <Box sx={{display: 'flex', alignItems: 'center', mb: 1, justifyContent: "space-between"}}>
-                                <Typography variant="body2"
-                                            fontWeight="medium"
-                                            color="primary.dark"
-                                            sx={{display: "flex", justifyContent: "flex-start", alignItems: "center"}}>
-                                    <MedicalServices fontSize="small" sx={{mr: 1, color: 'primary.dark'}}/>
-                                    Medical Consultation
-                                </Typography>
-
-                                {timeSlot.reservable.status && (
-                                    <Chip
-                                        size="small"
-                                        label={timeSlot.reservable.status}
-                                        color={
-                                            timeSlot.reservable.status === 'completed' ? 'success' :
-                                                timeSlot.reservable.status === 'pending' ? 'warning' : 'default'
-                                        }
-                                        sx={{ml: 1}}
-                                    />
-                                )}
-                            </Box>
-
-                            {timeSlot.reservable.patient && (
-                                <Box sx={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: 0.5,
-                                    color: 'primary.dark'
-                                }}>
-                                    <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
-                                        {timeSlot.reservable.patient.avatar && (
-                                            <Box
-                                                component="img"
-                                                src={timeSlot.reservable.patient.avatar}
-                                                alt={timeSlot.reservable.patient.fullName}
-                                                sx={{
-                                                    width: 40,
-                                                    height: 40,
-                                                    borderRadius: '50%',
-                                                    mr: 1.5,
-                                                    objectFit: 'cover',
-                                                    border: '2px solid',
-                                                    borderColor: 'primary.main'
-                                                }}
-                                            />
-                                        )}
-                                        <Box>
-                                            <Typography variant="body2" fontWeight="medium">
-                                                {timeSlot.reservable.patient.fullName}
-                                            </Typography>
-                                            <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                                <Phone fontSize="small" sx={{mr: 0.5, fontSize: '0.875rem'}}/>
-                                                <Typography variant="body2" fontSize="small">
-                                                    {timeSlot.reservable.patient.phone}
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                    </Box>
-
-                                    {timeSlot.reservable.patient.idNo && (
-                                        <Typography variant="body2">
-                                            ID Number: {timeSlot.reservable.patient.idNo}
-                                        </Typography>
-                                    )}
-                                </Box>
-                            )}
-
-                            {/* Action buttons */}
-                            <Box sx={{mt: 2, display: 'flex', gap: 1}}>
-                                {canCheckConsultation && <Button
-                                    variant="outlined"
-                                    size="small"
-                                    component={Link}
-                                    href={route("consultations.show", timeSlot.reservable.id)}
-                                    sx={{flex: 1}}
-                                >
-                                    View Consultation
-                                </Button>}
-
-                                {timeSlot.reservable.patient && canCheckPatient && (
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
-                                        color="secondary"
-                                        component={Link}
-                                        href={route("patients.show", timeSlot.reservable.patient.id)}
-                                        sx={{flex: 1}}
-                                    >
-                                        Patient Profile
-                                    </Button>
-                                )}
-                            </Box>
-                        </Box>
-                    )}
-                </>
-            )}
-        </CardContent>
-    </Card>
-}
-
-
-// Modified TimeCalendar component with links to consultations and patients
-const ModifiedTimeCalendar = ({
-                                  times = [],
-                                  onChange,
-                                  canCheckPatient = false,
-                                  canCheckConsultation = false,
-                                  canConversion = false,
-                                  onSelectDate = () => null,
-                                  onEdit = () => null,
-                                  onTimeSelection
-                              }) => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
 
-    // Get days in month
-    const getDaysInMonth = (year, month) => {
-        return new Date(year, month + 1, 0).getDate();
-    };
+    // Format date as ISO string (YYYY-MM-DD)
+    const formatDateISO = useCallback((date) => {
+        if (!date) return '';
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }, []);
 
-    // Get day of week for the first day of month (0 = Sunday, 6 = Saturday)
-    const getFirstDayOfMonth = (year, month) => {
-        return new Date(year, month, 1).getDay();
-    };
-
-    // Reordering days of week to start with Saturday
-    const daysOfWeek = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-    const monthNames = [
+    // Days of week and month names
+    const daysOfWeek = useMemo(() => ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'], []);
+    const monthNames = useMemo(() => [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
-    ];
+    ], []);
 
-    // Create calendar days array
-    const createCalendarDays = () => {
+    // Calendar data and helpers
+    const calendarData = useMemo(() => {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
 
-        const daysInMonth = getDaysInMonth(year, month);
-        let firstDayOfMonth = getFirstDayOfMonth(year, month);
+        // Get days in month
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        // Convert day of week to our Saturday-first system (0 = Saturday, 1 = Sunday, ..., 6 = Friday)
+        // Get day of week for the first day of month (0 = Sunday, 6 = Saturday)
+        // Convert to our Saturday-first system (0 = Saturday, 1 = Sunday, ..., 6 = Friday)
+        let firstDayOfMonth = new Date(year, month, 1).getDay();
         firstDayOfMonth = (firstDayOfMonth + 6) % 7;
 
+        // Create calendar days array
         const days = [];
 
         // Add empty cells for days before the first day of month
@@ -299,300 +99,379 @@ const ModifiedTimeCalendar = ({
         }
 
         return days;
-    };
+    }, [currentDate]);
 
-    // Format date as ISO string (YYYY-MM-DD)
-    const formatDateISO = (date) => {
-        if (!date) return '';
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
+    // Time slot data filtered by date
+    const timeSlotsByDate = useMemo(() => {
+        return timeSlots.reduce((acc, timeSlot) => {
+            const startDate = new Date(timeSlot.started_at);
+            const dateStr = formatDateISO(startDate);
+            if (!acc[dateStr]) {
+                acc[dateStr] = [];
+            }
+            acc[dateStr].push(timeSlot);
+            return acc;
+        }, {});
+    }, [timeSlots, formatDateISO]);
 
-    // Check if a date has any time slots
-    const hasTimeSlots = (date) => {
-        if (!date) return false;
-        const dateStr = formatDateISO(date);
-        return times.some(time => {
-            const startDate = new Date(time.started_at);
-            const formattedStartDate = formatDateISO(startDate);
-            return formattedStartDate === dateStr;
-        });
-    };
-
-    // Count time slots for a specific date
-    const countTimeSlots = (date) => {
-        if (!date) return 0;
-        const dateStr = formatDateISO(date);
-        return times.filter(time => {
-            const startDate = new Date(time.started_at);
-            const formattedStartDate = formatDateISO(startDate);
-            return formattedStartDate === dateStr;
-        }).length;
-    };
-
-    // Check if date has any active time slots
-    const hasActiveTimeSlots = (date) => {
-        if (!date) return false;
-        const dateStr = formatDateISO(date);
-        return times.some(time => {
-            const startDate = new Date(time.started_at);
-            const formattedStartDate = formatDateISO(startDate);
-            return formattedStartDate === dateStr && time.active;
-        });
-    };
-
-    // Get time slots for the selected date
-    const getSelectedDateTimeSlots = () => {
+    // Get time slots for selected date
+    const selectedDateTimeSlots = useMemo(() => {
         if (!selectedDate) return [];
         const dateStr = formatDateISO(selectedDate);
-        return times.filter(time => {
-            const startDate = new Date(time.started_at);
-            const formattedStartDate = formatDateISO(startDate);
-            return formattedStartDate === dateStr;
-        });
-    };
+        return timeSlotsByDate[dateStr] || [];
+    }, [selectedDate, timeSlotsByDate, formatDateISO]);
 
+    // Helper functions
+    const hasTimeSlots = useCallback((date) => {
+        if (!date) return false;
+        const dateStr = formatDateISO(date);
+        return !!timeSlotsByDate[dateStr]?.length;
+    }, [timeSlotsByDate, formatDateISO]);
 
-    // Format date (Day, Month DD, YYYY)
-    const formatDate = (date) => {
-        if (!date) return '';
-        const day = date.getDate();
-        const month = monthNames[date.getMonth()];
-        const year = date.getFullYear();
-        const weekday = daysOfWeek[date.getDay()];
-        return `${weekday}, ${month} ${day}, ${year}`;
-    };
+    const hasActiveTimeSlots = useCallback((date) => {
+        if (!date) return false;
+        const dateStr = formatDateISO(date);
+        return timeSlotsByDate[dateStr]?.some(slot => slot.active) || false;
+    }, [timeSlotsByDate, formatDateISO]);
 
-    // Handle month navigation
-    const goToPreviousMonth = () => {
-        const newDate = new Date(currentDate);
-        newDate.setMonth(newDate.getMonth() - 1);
-        setCurrentDate(newDate);
-        setSelectedDate(null)
-        // Call onChange with new month range
-        if (onChange) {
-            const year = newDate.getFullYear();
-            const month = newDate.getMonth();
-            const startDate = new Date(year, month, 1);
-            const endDate = new Date(year, month + 1, 0);
-            onChange(startDate, endDate);
+    const countTimeSlots = useCallback((date) => {
+        if (!date) return 0;
+        const dateStr = formatDateISO(date);
+        return timeSlotsByDate[dateStr]?.length || 0;
+    }, [timeSlotsByDate, formatDateISO]);
 
-        }
-    };
-
-    const goToNextMonth = () => {
-        const newDate = new Date(currentDate);
-        newDate.setMonth(newDate.getMonth() + 1);
-        setCurrentDate(newDate);
-        setSelectedDate(null);
-
-        // Call onChange with new month range
-        if (onChange) {
-            const year = newDate.getFullYear();
-            const month = newDate.getMonth();
-            const startDate = new Date(year, month, 1);
-            const endDate = new Date(year, month + 1, 0);
-            onChange(startDate, endDate);
-        }
-    };
-
-    const goToToday = () => {
-        const today = new Date();
-        setCurrentDate(today);
-        setSelectedDate(today);
-
-        // Call onChange with current month range
-        if (onChange) {
-            const year = today.getFullYear();
-            const month = today.getMonth();
-            const startDate = new Date(year, month, 1);
-            const endDate = new Date(year, month + 1, 0);
-            onChange(startDate, endDate);
-        }
-    };
-
-    // Handle day selection
-    const handleDayClick = (date) => {
-        if (date) {
-            setSelectedDate(date);
-            onSelectDate(date);
-        }
-    };
-
-    // Get calendar days
-    const days = createCalendarDays();
-
-    // Get selected date time slots
-    const selectedDateTimeSlots = getSelectedDateTimeSlots();
-
-    // Check if date is today
-    const isToday = (date) => {
+    // Date helper functions
+    const isToday = useCallback((date) => {
         if (!date) return false;
         const today = new Date();
         return date.getDate() === today.getDate() &&
             date.getMonth() === today.getMonth() &&
             date.getFullYear() === today.getFullYear();
-    };
+    }, []);
 
-    // Check if date is selected
-    const isSelected = (date) => {
+    const isSelected = useCallback((date) => {
         if (!date || !selectedDate) return false;
         return date.getDate() === selectedDate.getDate() &&
             date.getMonth() === selectedDate.getMonth() &&
             date.getFullYear() === selectedDate.getFullYear();
-    };
+    }, [selectedDate]);
 
-    const handleTimeSlotClick = (time) => {
-        onTimeSelection(time)
-    }
+    const formatDate = useCallback((date) => {
+        if (!date) return '';
+        const day = date.getDate();
+        const month = monthNames[date.getMonth()];
+        const year = date.getFullYear();
+        const weekday = daysOfWeek[(date.getDay() + 6) % 7]; // Convert to our Saturday-first system
+        return `${weekday}, ${month} ${day}, ${year}`;
+    }, [daysOfWeek, monthNames]);
+
+    // Navigation handlers
+    const goToPreviousMonth = useCallback(() => {
+        const newDate = new Date(currentDate);
+        newDate.setMonth(newDate.getMonth() - 1);
+        setCurrentDate(newDate);
+        setSelectedDate(null);
+
+        // Call onMonthChange with new month range
+        if (onMonthChange) {
+            const year = newDate.getFullYear();
+            const month = newDate.getMonth();
+            const startDate = new Date(year, month, 1);
+            const endDate = new Date(year, month + 1, 0);
+            onMonthChange(startDate, endDate);
+        }
+    }, [currentDate, onMonthChange]);
+
+    const goToNextMonth = useCallback(() => {
+        const newDate = new Date(currentDate);
+        newDate.setMonth(newDate.getMonth() + 1);
+        setCurrentDate(newDate);
+        setSelectedDate(null);
+
+        // Call onMonthChange with new month range
+        if (onMonthChange) {
+            const year = newDate.getFullYear();
+            const month = newDate.getMonth();
+            const startDate = new Date(year, month, 1);
+            const endDate = new Date(year, month + 1, 0);
+            onMonthChange(startDate, endDate);
+        }
+    }, [currentDate, onMonthChange]);
+
+    const goToToday = useCallback(() => {
+        const today = new Date();
+        setCurrentDate(today);
+        setSelectedDate(today);
+
+        // Call onMonthChange with current month range
+        if (onMonthChange) {
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const startDate = new Date(year, month, 1);
+            const endDate = new Date(year, month + 1, 0);
+            onMonthChange(startDate, endDate);
+        }
+
+        // Call onDateSelect with today
+        onDateSelect(today);
+    }, [onMonthChange, onDateSelect]);
+
+    // Handle day selection
+    const handleDayClick = useCallback((date) => {
+        if (date) {
+            setSelectedDate(date);
+            onDateSelect(date);
+        }
+    }, [onDateSelect]);
+
+    // Handle time slot selection
+    const handleTimeSlotClick = useCallback((timeSlot) => {
+        if (onTimeSlotSelect) {
+            onTimeSlotSelect(timeSlot);
+        }
+    }, [onTimeSlotSelect]);
 
     return (
-        <Paper elevation={3} sx={{p: 2}}>
-            <Box sx={{mb: 2}}>
-                <Grid container alignItems="center" justifyContent="space-between">
-                    <Grid item>
-                        <Typography variant="h5">
-                            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-                        </Typography>
-                    </Grid>
-                    <Grid item>
-                        <IconButton onClick={goToPreviousMonth}>
-                            <ArrowBackIos/>
+        <Paper
+            elevation={3}
+            sx={{
+                p: { xs: 1, sm: 2 },
+                borderRadius: 2,
+                overflow: 'hidden',
+                backgroundColor: theme.palette.background.paper,
+                boxShadow: theme.shadows[3]
+            }}
+        >
+            {/* Calendar Header */}
+            <Box sx={{ mb: 2 }}>
+                <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    spacing={1}
+                >
+                    <Typography variant="h5" fontWeight="600" color="text.primary">
+                        {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+                    </Typography>
+                    <Stack direction="row" spacing={1}>
+                        <IconButton
+                            onClick={goToPreviousMonth}
+                            color="primary"
+                            aria-label="Previous month"
+                            size={isMobile ? "small" : "medium"}
+                        >
+                            <ArrowBackIos fontSize={isMobile ? "small" : "medium"} />
                         </IconButton>
-                        <IconButton onClick={goToToday}>
-                            <Today/>
+                        <IconButton
+                            onClick={goToToday}
+                            color="primary"
+                            aria-label="Go to today"
+                            size={isMobile ? "small" : "medium"}
+                        >
+                            <Today fontSize={isMobile ? "small" : "medium"} />
                         </IconButton>
-                        <IconButton onClick={goToNextMonth}>
-                            <ArrowForwardIos/>
+                        <IconButton
+                            onClick={goToNextMonth}
+                            color="primary"
+                            aria-label="Next month"
+                            size={isMobile ? "small" : "medium"}
+                        >
+                            <ArrowForwardIos fontSize={isMobile ? "small" : "medium"} />
                         </IconButton>
-                    </Grid>
+                    </Stack>
+                </Stack>
+            </Box>
+
+            {/* Calendar Grid */}
+            <Box sx={{ mb: 3 }}>
+                <Grid container>
+                    {/* Days of week header */}
+                    {daysOfWeek.map((day, index) => (
+                        <Grid item key={`header-${index}`} xs={12/7}>
+                            <Box
+                                sx={{
+                                    textAlign: 'center',
+                                    py: 1,
+                                    fontWeight: 'bold',
+                                    color: 'text.secondary',
+                                    borderBottom: 1,
+                                    borderColor: 'divider'
+                                }}
+                            >
+                                {day}
+                            </Box>
+                        </Grid>
+                    ))}
+
+                    {/* Calendar days */}
+                    {calendarData.map((dayObj, index) => (
+                        <Grid item key={`day-${index}`} xs={12/7}>
+                            <Box
+                                sx={{
+                                    height: { xs: 40, sm: 50 },
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: dayObj.day ? 'pointer' : 'default',
+                                    borderRadius: 1,
+                                    position: 'relative',
+                                    m: 0.5,
+                                    transition: 'all 0.2s',
+                                    backgroundColor: isSelected(dayObj.date)
+                                        ? theme.palette.primary.main
+                                        : isToday(dayObj.date)
+                                            ? theme.palette.primary.light
+                                            : 'transparent',
+                                    color: (isSelected(dayObj.date) || isToday(dayObj.date))
+                                        ? theme.palette.primary.contrastText
+                                        : theme.palette.text.primary,
+                                    '&:hover': {
+                                        backgroundColor: dayObj.day
+                                            ? (isSelected(dayObj.date)
+                                                ? theme.palette.primary.dark
+                                                : theme.palette.action.hover)
+                                            : 'transparent',
+                                        transform: dayObj.day ? 'scale(1.05)' : 'none'
+                                    }
+                                }}
+                                onClick={() => dayObj.day && handleDayClick(dayObj.date)}
+                            >
+                                {dayObj.day && (
+                                    <>
+                                        <Typography
+                                            variant="body2"
+                                            fontWeight={isToday(dayObj.date) || isSelected(dayObj.date) ? 'bold' : 'normal'}
+                                        >
+                                            {dayObj.day}
+                                        </Typography>
+
+                                        {/* Indicator for time slots */}
+                                        {hasTimeSlots(dayObj.date) && (
+                                            <Box
+                                                sx={{
+                                                    position: 'absolute',
+                                                    bottom: 2,
+                                                    width: '100%',
+                                                    display: 'flex',
+                                                    justifyContent: 'center',
+                                                    gap: 0.5
+                                                }}
+                                            >
+                                                <Box
+                                                    sx={{
+                                                        width: 6,
+                                                        height: 6,
+                                                        borderRadius: '50%',
+                                                        backgroundColor: hasActiveTimeSlots(dayObj.date)
+                                                            ? theme.palette.success.main
+                                                            : theme.palette.grey[400]
+                                                    }}
+                                                />
+                                                {countTimeSlots(dayObj.date) > 1 && (
+                                                    <Box
+                                                        sx={{
+                                                            width: 6,
+                                                            height: 6,
+                                                            borderRadius: '50%',
+                                                            backgroundColor: hasActiveTimeSlots(dayObj.date)
+                                                                ? theme.palette.success.main
+                                                                : theme.palette.grey[400]
+                                                        }}
+                                                    />
+                                                )}
+                                            </Box>
+                                        )}
+                                    </>
+                                )}
+                            </Box>
+                        </Grid>
+                    ))}
                 </Grid>
             </Box>
 
-            <Grid container spacing={3}>
-                {/* Calendar */}
-                <Grid size={{xs: 12}}>
-                    <Box sx={{mb: 2}}>
-                        <Grid container>
-                            {/* Days of week header */}
-                            {daysOfWeek.map((day, index) => (
-                                <Grid key={index} size={12 / 7}>
-                                    <Box
-                                        sx={{
-                                            textAlign: 'center',
-                                            py: 1,
-                                            fontWeight: 'bold',
-                                            color: 'text.secondary'
-                                        }}
-                                    >
-                                        {day}
-                                    </Box>
-                                </Grid>
-                            ))}
+            {/* Time slots for selected date */}
+            {selectedDate && (
+                <Paper
+                    elevation={1}
+                    sx={{
+                        p: { xs: 1.5, sm: 2 },
+                        borderRadius: 2,
+                        backgroundColor: theme.palette.background.default
+                    }}
+                >
+                    <Stack
+                        direction="row"
+                        alignItems="center"
+                        spacing={1}
+                        sx={{ mb: 2 }}
+                    >
+                        <CalendarMonth color="primary" />
+                        <Typography variant="h6" fontWeight="600">
+                            {formatDate(selectedDate)}
+                        </Typography>
+                    </Stack>
 
-                            {/* Calendar days */}
-                            {days.map((dayObj, index) => (
-                                <Grid item key={index} size={12 / 7}>
-                                    <Box
-                                        sx={{
-                                            height: 50,
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            cursor: dayObj.day ? 'pointer' : 'default',
-                                            borderRadius: 1,
-                                            position: 'relative',
-                                            bgcolor: isSelected(dayObj.date) ? 'primary.main' :
-                                                isToday(dayObj.date) ? 'primary.light' : 'transparent',
-                                            color: isSelected(dayObj.date) ? 'primary.contrastText' :
-                                                isToday(dayObj.date) ? 'primary.contrastText' : 'text.primary',
-                                            '&:hover': {
-                                                bgcolor: dayObj.day ?
-                                                    (isSelected(dayObj.date) ? 'primary.dark' : 'action.hover') :
-                                                    'transparent'
-                                            }
-                                        }}
-                                        onClick={() => handleDayClick(dayObj.date)}
-                                    >
-                                        {dayObj.day && (
-                                            <>
-                                                <Typography variant="body2">
-                                                    {dayObj.day}
-                                                </Typography>
-
-                                                {/* Indicator for time slots */}
-                                                {hasTimeSlots(dayObj.date) && (
-                                                    <Box
-                                                        sx={{
-                                                            position: 'absolute',
-                                                            bottom: 2,
-                                                            width: '100%',
-                                                            display: 'flex',
-                                                            justifyContent: 'center'
-                                                        }}
-                                                    >
-                                                        <Box
-                                                            sx={{
-                                                                width: 6,
-                                                                height: 6,
-                                                                borderRadius: '50%',
-                                                                bgcolor: hasActiveTimeSlots(dayObj.date) ? 'success.main' : 'grey.400'
-                                                            }}
-                                                        />
-                                                        {countTimeSlots(dayObj.date) > 1 && (
-                                                            <Box
-                                                                sx={{
-                                                                    width: 6,
-                                                                    height: 6,
-                                                                    borderRadius: '50%',
-                                                                    bgcolor: hasActiveTimeSlots(dayObj.date) ? 'success.main' : 'grey.400',
-                                                                    ml: 0.5
-                                                                }}
-                                                            />
-                                                        )}
-                                                    </Box>
-                                                )}
-                                            </>
-                                        )}
-                                    </Box>
+                    {selectedDateTimeSlots.length > 0 ? (
+                        <Grid container spacing={2}>
+                            {selectedDateTimeSlots.map((timeSlot) => (
+                                <Grid item xs={12} sm={6} md={4} key={timeSlot.id}>
+                                    <TimeSlotCard
+                                        timeSlot={timeSlot}
+                                        onClick={handleTimeSlotClick}
+                                        canCheckPatient={canViewPatient}
+                                        canCheckConsultation={canViewConsultation}
+                                        canConversion={canConvertToPatient}
+                                        canEdit={canEditTimeSlot}
+                                        canDelete={canDeleteTimeSlot}
+                                        onEdit={onTimeSlotEdit}
+                                        onDelete={onTimeSlotDelete}
+                                        canDeleteConsultantReserve={canDeleteConsultantReserve}
+                                    />
                                 </Grid>
                             ))}
                         </Grid>
-                    </Box>
-                </Grid>
-
-                {/* Time slots for selected date */}
-                {selectedDate && <Grid size={{xs: 12}}>
-                    <Paper elevation={1} sx={{p: 2, height: '100%', bgcolor: 'background.default'}}>
-                        <Typography variant="h6" gutterBottom>
-                            {formatDate(selectedDate)}
-                        </Typography>
-
-                        {selectedDateTimeSlots.length > 0 ? (
-                            <Grid container spacing={2}>
-                                {selectedDateTimeSlots.map((timeSlot) => (
-                                    <Grid size={{xs: 12, sm: 6, md: 4}} key={timeSlot.id}>
-                                        <TimeSlotCard timeSlot={timeSlot}
-                                                      onClick={handleTimeSlotClick}
-                                                      canCheckPatient={canCheckPatient}
-                                                      canConversion={canConversion}
-                                                      canCheckConsultation={canCheckConsultation}/>
-                                    </Grid>
-                                ))}
-                            </Grid>
-                        ) : (
-                            <Typography variant="body1" color="text.secondary" sx={{mt: 2}}>
+                    ) : (
+                        <Box
+                            sx={{
+                                py: 4,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                backgroundColor: theme.palette.background.paper,
+                                borderRadius: 2,
+                                borderStyle: 'dashed',
+                                borderWidth: 1,
+                                borderColor: theme.palette.divider
+                            }}
+                        >
+                            <CalendarMonth
+                                sx={{
+                                    fontSize: 48,
+                                    color: theme.palette.text.secondary,
+                                    mb: 2,
+                                    opacity: 0.5
+                                }}
+                            />
+                            <Typography variant="body1" color="text.secondary">
                                 No time slots scheduled for this day
                             </Typography>
-                        )}
-                    </Paper>
-                </Grid>}
-            </Grid>
+                            {canEditTimeSlot && (
+                                <Button
+                                    variant="outlined"
+                                    color="primary"
+                                    sx={{ mt: 2 }}
+                                    onClick={() => onTimeSlotEdit({ date: selectedDate })}
+                                >
+                                    Add Time Slot
+                                </Button>
+                            )}
+                        </Box>
+                    )}
+                </Paper>
+            )}
         </Paper>
     );
 };
 
-export default ModifiedTimeCalendar;
+export default TimeCalendar;

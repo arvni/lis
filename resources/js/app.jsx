@@ -7,6 +7,7 @@ import {createRoot} from 'react-dom/client';
 
 // Import additional components
 import ErrorBoundary from './Components/ErrorBoundary';
+import {SnackbarProvider} from "notistack";
 
 // App configuration
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Bion Genetic LIS';
@@ -44,7 +45,9 @@ createInertiaApp({
 
         root.render(
             <ErrorBoundary>
+                <SnackbarProvider maxSnack={3}>
                 <App {...props} />
+                </SnackbarProvider>
             </ErrorBoundary>
         );
 

@@ -7,8 +7,10 @@ use App\Domains\Billing\Policies\InvoicePolicy;
 use App\Domains\Consultation\Models\Consultant;
 use App\Domains\Consultation\Models\Consultation;
 use App\Domains\Consultation\Models\Customer;
+use App\Domains\Consultation\Models\Time;
 use App\Domains\Consultation\Policies\ConsultantPolicy;
 use App\Domains\Consultation\Policies\ConsultationPolicy;
+use App\Domains\Consultation\Policies\TimePolicy;
 use App\Domains\Document\Models\Document;
 use App\Domains\Laboratory\Models\BarcodeGroup;
 use App\Domains\Laboratory\Models\ReportTemplate;
@@ -112,5 +114,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Report::class, ReportPolicy::class);
         Gate::policy(Consultation::class, ConsultationPolicy::class);
         Gate::policy(Consultant::class, ConsultantPolicy::class);
+        Gate::policy(Time::class, TimePolicy::class);
     }
 }

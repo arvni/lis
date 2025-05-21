@@ -38,10 +38,7 @@ class TimeService
      */
     public function deleteTime(Time $time): void
     {
-        if (!$time->reservable()->exists()) {
-            $this->timeRepository->deleteTime($time);
-        } else
-            throw new Exception("This Time has some Reservation");
+        $this->timeRepository->deleteTime($time);
     }
 
     public function getConsultantTimes(Consultant $consultant, array $all): Collection

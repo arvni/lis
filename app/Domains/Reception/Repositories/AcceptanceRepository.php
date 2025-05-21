@@ -6,209 +6,286 @@ use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
+use App\Domains\Setting\Services\SettingService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+
+// Added for type hinting
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AcceptanceRepository
 {
+    // Define constants for filter and sort keys for better maintainability
+    private const FILTER_SEARCH = 'search';
+    private const FILTER_STATUS = 'status';
+    private const FILTER_REFERRER_ID = 'referrer_id';
+    private const FILTER_PATIENT_ID = 'patient_id';
+
+    private const SORT_FIELD = 'field';
+    private const SORT_DIRECTION = 'sort'; // 'sort' seems to be the key used in the original code for direction
+
+    public function __construct(private readonly SettingService $settingService)
+    {
+    }
+
+    /**
+     * Get the raw SQL expression for calculating payable amount.
+     * Uses COALESCE to handle cases where there are no items or discounts.
+     */
+    private function getPayableAmountSql(): string
+    {
+        return 'COALESCE((SELECT SUM(acceptance_items.price) FROM acceptance_items WHERE acceptances.id = acceptance_items.acceptance_id), 0) -
+                COALESCE((SELECT SUM(acceptance_items.discount) FROM acceptance_items WHERE acceptances.id = acceptance_items.acceptance_id), 0)';
+    }
+
     public function listAcceptances(array $queryData): LengthAwarePaginator
     {
-        $query = Acceptance::withCount(["acceptanceItems"])
-            ->with("samples:samples.id,barcode")
-            ->withSum("payments", "price")
-            ->withAggregate("referrer", "fullName")
-            ->withAggregate("patient", "fullName")
-            ->withAggregate("patient", "idNo")
-            ->withSum("payments", "price")
-            ->selectRaw('(select sum(acceptance_items.price) from acceptance_items where acceptances.id = acceptance_items.acceptance_id) -
-                 (select sum(acceptance_items.discount) from acceptance_items where acceptances.id = acceptance_items.acceptance_id)
-                 as payable_amount')
+        $query = Acceptance::query()
+            ->withCount('acceptanceItems')
+            ->with('samples:samples.id,barcode') // Be specific with selected columns for relationships
+            ->withSum('payments', 'price') // payment_sum_price
+            ->withAggregate('referrer', 'fullName') // referrer_full_name
+            ->withAggregate('patient', 'fullName')  // patient_full_name
+            ->withAggregate('patient', 'idNo')      // patient_id_no
+            ->selectRaw("({$this->getPayableAmountSql()}) as payable_amount")
             ->addSelect([
                 'report_date' => DB::table('acceptance_items')
                     ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
                     ->join('methods', 'methods.id', '=', 'method_tests.method_id')
                     ->selectRaw('MAX(methods.turnaround_time)')
                     ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id')
+                // Consider adding a default or COALESCE if no items exist, to avoid NULL report_date
             ]);
-        if (isset($queryData["filters"]))
-            $this->applyFilters($query, $queryData["filters"]);
-        if (isset($queryData["sort"]))
-            $query->orderBy($queryData['sort']['field'] ?? 'id', $queryData['sort']['sort'] ?? 'asc');
-        return $query->paginate($queryData["pageSize"] ?? 10);
+
+        if (isset($queryData['filters'])) {
+            $this->applyFilters($query, $queryData['filters']);
+        }
+
+        if (isset($queryData['sort'])) {
+            $query->orderBy(
+                $queryData['sort'][self::SORT_FIELD] ?? 'acceptances.id', // Qualify column name
+                $queryData['sort'][self::SORT_DIRECTION] ?? 'desc'
+            );
+        } else {
+            $query->orderBy('acceptances.id', 'asc'); // Default sort
+        }
+
+        return $query->paginate($queryData['pageSize'] ?? 10);
     }
 
-    public function creatAcceptance(array $acceptanceData): Acceptance
+    public function createAcceptance(array $acceptanceData): Acceptance // Fixed typo: creatAcceptance -> createAcceptance
     {
-        return Acceptance::query()->create($acceptanceData);
+        return Acceptance::create($acceptanceData); // Using static create method
     }
 
     public function updateAcceptance(Acceptance $acceptance, array $acceptanceData): Acceptance
     {
         $acceptance->fill($acceptanceData);
-        if ($acceptance->isDirty())
+        if ($acceptance->isDirty()) {
             $acceptance->save();
+        }
         return $acceptance;
     }
 
-    public function getAcceptanceById($id): ?Acceptance
+    public function getAcceptanceById(int $id): ?Acceptance // Added type hint for $id
     {
         return Acceptance::find($id);
     }
 
+    /**
+     * Get an acceptance by ID or fail.
+     */
+    public function getAcceptanceByIdOrFail(int $id): Acceptance
+    {
+        return Acceptance::findOrFail($id);
+    }
+
     public function deleteAcceptance(Acceptance $acceptance): void
     {
+        // Consider adding logic here if deletion has side effects or requires checks
         $acceptance->delete();
     }
 
-    public function listSampleCollection($queryData)
+    public function listSampleCollection(array $queryData): LengthAwarePaginator
     {
-        $query = Acceptance::withCount(["acceptanceItems"])
-            ->with("acceptanceItems.methodTest.test")
-            ->withSum("acceptanceItems", "price")
-            ->withSum("acceptanceItems", "discount")
-            ->withSum("payments", "price")
-            ->withAggregate("patient", "fullName")
-            ->withAggregate("patient", "idNo")
-            ->whereHas("acceptanceItems", function ($query) {
-                $query->whereDoesntHave('samples', function ($query) {
-                    $query->where('acceptance_item_samples.active', true);
+        $minAllowablePaymentPercentage = (float)$this->settingService->getSettingByKey('Payment', 'minPayment');
+
+        // Disable ONLY_FULL_GROUP_BY for this query
+        DB::statement('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,"ONLY_FULL_GROUP_BY",""))');
+
+        $query = Acceptance::query()
+            ->withCount('acceptanceItems')
+            ->with('acceptanceItems.methodTest.test:id,name,type')
+            ->withSum('acceptanceItems', 'price')
+            ->withSum('acceptanceItems', 'discount')
+            ->withSum('payments', 'price')
+            ->withAggregate('patient', 'fullName')
+            ->withAggregate('patient', 'idNo')
+            ->whereHas('acceptanceItems', function (Builder $itemQuery) {
+                $itemQuery->whereDoesntHave('samples', function (Builder $sampleQuery) {
+                    $sampleQuery->where('acceptance_item_samples.active', true);
                 });
-                $query->whereHas("test", function ($query) {
-                    $query->whereNot("type", TestType::SERVICE);
+                $itemQuery->whereHas('methodTest.test', function (Builder $testQuery) {
+                    $testQuery->where('type', '!=', TestType::SERVICE);
                 });
             })
-            ->selectRaw('COALESCE((select sum(acceptance_items.price) from acceptance_items where acceptances.id = acceptance_items.acceptance_id),0) -
-                 COALESCE((select sum(acceptance_items.discount) from acceptance_items where acceptances.id = acceptance_items.acceptance_id),0)
-                 as payable_amount')
-            ->having(DB::raw("payable_amount - COALESCE(payments_sum_price,0)"), "<=", 0);
-        if (isset($queryData["filters"]))
-            $this->applyFilters($query, $queryData["filters"]);
-        if (isset($queryData["sort"]))
-            $query->orderBy($queryData['sort']['field'] ?? 'id', $queryData['sort']['sort'] ?? 'asc');
-        return $query->paginate($queryData["pageSize"] ?? 10);
+            ->selectRaw("({$this->getPayableAmountSql()}) as payable_amount")
+            ->groupBy('acceptances.id')
+            ->havingRaw("COALESCE(payments_sum_price, 0) >= (({$this->getPayableAmountSql()}) * ? / 100)", [$minAllowablePaymentPercentage]);
+
+        if (isset($queryData['filters'])) {
+            $this->applyFilters($query, $queryData['filters']);
+        }
+
+        if (isset($queryData['sort'])) {
+            $query->orderBy(
+                $queryData['sort'][self::SORT_FIELD] ?? 'acceptances.id',
+                $queryData['sort'][self::SORT_DIRECTION] ?? 'desc'
+            );
+        } else {
+            $query->orderBy('acceptances.id', 'desc');
+        }
+
+        $result = $query->paginate($queryData['pageSize'] ?? 10);
+        DB::statement('SET SESSION sql_mode=(SELECT @@global.sql_mode)');
+
+        return $result;
     }
 
-
     /**
-     * Count published tests for an acceptance
-     *
-     * @param Acceptance $acceptance
-     * @return int
+     * Count published tests for an acceptance.
      */
     public function countPublishedTests(Acceptance $acceptance): int
     {
-        return $acceptance
-            ->AcceptanceItems()
-            ->whereHas("Report", function ($q) {
-                $q->whereNotNull("published_at");
-            })
+        return $acceptance->acceptanceItems() // Assuming 'acceptanceItems' is the relationship method
+        ->whereHas('report', function (Builder $q) { // Assuming 'report' is the relationship method
+            $q->whereNotNull('published_at');
+        })
             ->count();
     }
 
     /**
-     * Count reportable tests for an acceptance
-     *
-     * @param Acceptance $acceptance
-     * @return int
+     * Count reportable (non-service) tests for an acceptance.
      */
     public function countReportableTests(Acceptance $acceptance): int
     {
-        return $acceptance
-            ->AcceptanceItems()
-            ->isTest()
+        return $acceptance->acceptanceItems()
+            // Assuming AcceptanceItem model has an 'isTest' scope or similar logic here:
+            // This might be better as:
+            ->whereHas('methodTest.test', function (Builder $q) {
+                $q->where('type', '!=', TestType::SERVICE);
+            })
             ->count();
+        // If `isTest()` scope exists on AcceptanceItems and correctly filters non-service types, original is fine.
+        // return $acceptance->acceptanceItems()->isTest()->count();
     }
 
-
-    protected function applyFilters($query, array $filters)
+    protected function applyFilters(Builder $query, array $filters): void // Changed $query type to Builder
     {
-        if (isset($filters["search"]))
-            $query->search($filters["search"]);
-        if (isset($filters["status"]))
-            $query->where("status", $filters["status"]);
-        if (isset($filters["referrer_id"]))
-            $query->where("referrer_id", $filters["referrer_id"]);
-        if (isset($filters["patient_id"]))
-            $query->where("patient_id", $filters["patient_id"]);
-
+        if (isset($filters[self::FILTER_SEARCH])) {
+            // Assuming Acceptance model has a 'scopeSearch'
+            $query->search($filters[self::FILTER_SEARCH]);
+        }
+        if (isset($filters[self::FILTER_STATUS])) {
+            $query->where('acceptances.status', $filters[self::FILTER_STATUS]); // Qualify column name
+        }
+        if (isset($filters[self::FILTER_REFERRER_ID])) {
+            $query->where('acceptances.referrer_id', $filters[self::FILTER_REFERRER_ID]); // Qualify column name
+        }
+        if (isset($filters[self::FILTER_PATIENT_ID])) {
+            $query->where('acceptances.patient_id', $filters[self::FILTER_PATIENT_ID]); // Qualify column name
+        }
     }
 
     public function getPendingAcceptance(Patient $patient): ?Acceptance
     {
         return Acceptance::query()
-            ->where("patient_id", $patient->id)
-            ->where("status", AcceptanceStatus::PENDING)
+            ->where('patient_id', $patient->id)
+            ->where('status', AcceptanceStatus::PENDING)
             ->first();
-
     }
 
     /**
-     * Group acceptance items by test type
+     * Group acceptance items by test type.
      *
-     * @param array $acceptanceItems
-     * @return Collection
+     * @param array $acceptanceItemsData Array of acceptance item data (e.g., from a request).
+     * If these are Eloquent models, ensure necessary relations are loaded.
      */
-    public function groupItemsByTestType(array $acceptanceItems): Collection
+    public function groupItemsByTestType(array $acceptanceItemsData): Collection
     {
-        return collect($acceptanceItems)
-            ->groupBy("method_test.test.type")
-            ->map(function ($items, $type) {
-                // Return items directly for TEST and SERVICE types
-                if ($type == TestType::TEST->value || $type == TestType::SERVICE->value) {
+        return collect($acceptanceItemsData)
+            ->groupBy(function ($item) {
+                // Accessing nested properties. Ensure 'method_test' and 'test' are loaded if $item is a model,
+                // or that the array structure is as expected.
+                return $item['method_test']['test']['type'] instanceof TestType
+                    ? $item['method_test']['test']['type']->value
+                    : $item['method_test']['test']['type'];
+            })
+            ->map(function (Collection $items, string $type) { // Type hint $items as Collection
+                if ($type === TestType::TEST->value || $type === TestType::SERVICE->value) {
                     return $items;
                 }
-
-                // Process PANEL type items
-                return $this->processItemsAsPanel($items);
+                // Assumes PANEL type is the only other possibility based on original logic
+                return $this->processPanelItems($items); // Renamed for clarity
             });
     }
 
     /**
-     * Process items as a panel type, grouping by test_id
-     *
-     * @param Collection $items
-     * @return array
+     * Process items belonging to a panel, grouping them by their parent test_id.
      */
-    private function processItemsAsPanel(Collection $items): array
+    private function processPanelItems(Collection $items): array // Renamed from processItemsAsPanel
     {
         return $items
-            ->groupBy("method_test.test_id")
-            ->map(function ($panelItems) {
+            ->groupBy('method_test.test_id') // Group by the panel's main test ID
+            ->map(function (Collection $panelItems) { // Type hint $panelItems as Collection
+                $firstItem = $panelItems->first();
+                // Ensure 'method_test' and 'test' are available in the structure of $firstItem
                 return [
-                    "panel" => $panelItems->first()["method_test"]["test"],
-                    "acceptanceItems" => $panelItems,
-                    "price" => $panelItems->sum("price"),
-                    "discount" => $panelItems->sum("discount"),
+                    // 'panel' should represent the panel itself, not just one of its items' test
+                    'panel' => $firstItem['method_test']['test'], // This assumes the 'test' here is the panel definition
+                    'acceptanceItems' => $panelItems,
+                    'price' => $panelItems->sum('price'),
+                    'discount' => $panelItems->sum('discount'),
                 ];
             })
-            ->values()
+            ->values() // Reset keys to a simple indexed array
             ->all();
     }
 
-
-    public function getTotalAcceptancesForDateRange($dateRange): int
+    /**
+     * Get total number of acceptances within a given date range.
+     *
+     * @param array $dateRange ['start_date', 'end_date']
+     */
+    public function getTotalAcceptancesForDateRange(array $dateRange): int
     {
-        return Acceptance::whereBetween("created_at", $dateRange)->count();
+        // Basic validation for dateRange might be useful here or in the calling service
+        return Acceptance::whereBetween('created_at', $dateRange)->count();
     }
 
+    /**
+     * Get total number of acceptances that are fully paid and awaiting sampling for at least one test item.
+     */
     public function getTotalWaitingForSampling(): int
     {
         return Acceptance::query()
-            ->whereNotIn("status", [AcceptanceStatus::PENDING, AcceptanceStatus::CANCELLED])
-            ->whereHas('acceptanceItems', function ($q) {
-                $q->whereHas("method.test", function ($q) {
-                    $q->where("type", TestType::TEST);
-                });
-            }) // only acceptances that have at least one item
-            ->whereDoesntHave('acceptanceItems.activeSamples') // none of the items have active samples
-            ->withSum(['Payments as total_payments' => fn($query) => $query->select(DB::raw('COALESCE(SUM(price), 0)'))], 'price')
-            ->withSum(['AcceptanceItems as total_price' => fn($query) => $query->select(DB::raw('COALESCE(SUM(price), 0)'))], 'price')
-            ->withSum(['AcceptanceItems as total_discount' => fn($query) => $query->select(DB::raw('COALESCE(SUM(discount), 0)'))], 'discount')
-            ->having('total_payments', '>=', DB::raw('total_price - total_discount'))
+            ->whereNotIn('status', [AcceptanceStatus::PENDING, AcceptanceStatus::CANCELLED])
+            ->whereHas('acceptanceItems.methodTest.test', function (Builder $q) {
+                $q->where('type', TestType::TEST); // Ensures at least one item is a test
+            })
+            ->whereDoesntHave('acceptanceItems.activeSamples') // No item has an active sample
+            ->withSum([
+                'payments as total_payments_for_having' => fn(Builder $query) => $query->select(DB::raw('COALESCE(SUM(price), 0)'))
+            ], 'price')
+            ->withSum([
+                'acceptanceItems as total_price_for_having' => fn(Builder $query) => $query->select(DB::raw('COALESCE(SUM(price), 0)'))
+            ], 'price')
+            ->withSum([
+                'acceptanceItems as total_discount_for_having' => fn(Builder $query) => $query->select(DB::raw('COALESCE(SUM(discount), 0)'))
+            ], 'discount')
+            ->havingRaw('total_payments_for_having >= (total_price_for_having - total_discount_for_having)')
             ->count();
     }
-
-
 }

@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Domains\Consultation\Models\Time;
 use App\Rules\TimeSlotAvailable;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class BookAnAppointmentRequest extends FormRequest
@@ -14,7 +16,7 @@ class BookAnAppointmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return Gate::allows('create', Time::class);
     }
 
     /**

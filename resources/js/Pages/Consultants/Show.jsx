@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import PageHeader from "@/Components/PageHeader.jsx";
 import {router} from "@inertiajs/react";
 
 // Material UI components
@@ -32,7 +31,6 @@ import {
     AccessTime,
     EventNote,
     Assignment,
-    BarChart
 } from "@mui/icons-material";
 
 import TimeCalendar from "@/Pages/Consultation/Components/TimeCalendar.jsx";
@@ -98,6 +96,10 @@ const Show = ({consultant, times, recentConsultations}) => {
         if (v)
             value = v.toISOString().split("T")[0];
         setSelectedDate(value);
+    }
+
+    const handleDelete=(time)=>{
+
     }
 
     return (
@@ -266,11 +268,14 @@ const Show = ({consultant, times, recentConsultations}) => {
                             </Box>
                         </Box>
 
-                        <TimeCalendar times={times}
-                                      onChange={pageReload}
-                                      onSelectDate={handleSelectDate}
-                                      canCheckConsultation
-                                      canCheckPatient/>
+                        <TimeCalendar timeSlots={times}
+                                      onMonthChange={pageReload}
+                                      canViewPatient
+                                      canDeleteConsultantReserve
+                                      onDateSelect={handleSelectDate}
+                                      canViewConsultation
+                                      onTimeSlotDelete={handleDelete}
+                                      />
                     </Paper>
 
                     {/* Recent Consultations */}

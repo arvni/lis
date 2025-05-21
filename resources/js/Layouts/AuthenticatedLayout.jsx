@@ -210,8 +210,7 @@ const createAppTheme = (mode = 'light') => createTheme({
 
 const Authenticated = ({auth, breadcrumbs, children, title}) => {
     // Theme state
-    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-    const [darkMode, setDarkMode] = useRemember(prefersDarkMode, "dark-mode");
+    const [darkMode, setDarkMode] = useRemember(false, "dark-mode");
     const [theme, setTheme] = useState(() => createAppTheme(darkMode ? 'dark' : 'light'));
 
     useEffect(() => {

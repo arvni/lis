@@ -22,6 +22,7 @@ import TextFieldsIcon from '@mui/icons-material/TextFields';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import PedigreeChart from "@/Components/Drawing.jsx";
+import ImagePaintCanvas from "@/Pages/Consultation/Components/Drawing/PaintApp.jsx";
 
 /**
  * Enhanced form component with drawing and rich text editor
@@ -139,7 +140,7 @@ const DoneForm = ({
                             overflow: 'auto'
                         }}
                     >
-                            <PedigreeChart
+                            <ImagePaintCanvas
                                 onChange={handleImageChanged}
                                 defaultValue={data.image}
                             />
