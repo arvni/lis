@@ -72,7 +72,7 @@ RUN if [ -f "package.json" ]; then \
     fi
 
 # Finish composer installation
-RUN composer dump-autoloader --optimize --no-dev
+RUN composer dump-autoload --optimize --no-dev
 
 # Stage 2: Create the production image
 FROM php:8.2-alpine
