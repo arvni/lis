@@ -15,7 +15,7 @@ class UpdateReportRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("uprate",$this->route()->parameter("report"));
+        return Gate::allows("update",$this->route()->parameter("report"));
     }
 
     /**
