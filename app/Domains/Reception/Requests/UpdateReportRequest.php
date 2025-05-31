@@ -51,13 +51,12 @@ class UpdateReportRequest extends FormRequest
 
             // Supporting files validation
             'files' => 'nullable|array',
-            'files.*' => 'file|max:20480', // 20MB max for supporting files
+            'files.*' => 'array',
+            'files.*.id' => 'exists:documents,hash',
 
             // Signers validation if included
             'signers' => 'nullable|array',
             'signers.*.user_id' => 'required|exists:users,id',
-
-            'patient_id' => 'required|exists:patients,id',
         ];
 
         // Add dynamic parameter rules if we have a template
