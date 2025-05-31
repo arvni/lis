@@ -26,6 +26,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 use PhpOffice\PhpWord\Exception\Exception;
 use RuntimeException;
@@ -643,7 +644,11 @@ class ReportService
     {
         $sample->loadAggregate("sampleType", "name");
 
-        $barcodeValue = $sample->barcode;
+        $barcodeValue = strtoupper($sample->barcode);
+        $barcodePath = storage_path('app/barcodes/');
+        if (!file_exists($barcodePath)) {
+            mkdir($barcodePath, 0755, true);
+        }
         return [
             "barcode" => $barcodeValue,
             "sample_created_at" => $sample->created_at,
