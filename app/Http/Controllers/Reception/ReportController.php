@@ -141,7 +141,30 @@ class ReportController extends Controller
      */
     public function update(UpdateReportRequest $request, Report $report)
     {
-        //
+        $user = auth()->user();
+        $parameters = $request->get('parameters', []);
+        if ($parameters && count($parameters) > 0) {
+            foreach ($request->file("parameters") as $parameter => $value) {
+                $doc = $this->documentService->storeDocument("patient", $request->get("patient_id"), $value, DocumentTag::IMAGE->value);
+                $parameters[$parameter] = $doc;
+            }
+        }
+        else{
+            $doc=$this->documentService->getDocument($request->input("reported_document.id"));
+        }
+
+
+        $report = $this->reportService->updateReport(
+            $report,
+            $user,
+            $request->get('acceptance_item_id'),
+            $request->input('report_template.id'),
+            $request->get('reported_document'),
+            $parameters,
+            $request->get('files', []),
+        );
+
+        return redirect()->route('reports.show', $report);
     }
 
     /**

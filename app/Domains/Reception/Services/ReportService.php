@@ -122,6 +122,64 @@ class ReportService
     }
 
     /**
+     * @throws Exception
+     * @throws ConnectionException
+     */
+    public function updateReport(Report $report,
+                                 User   $user,
+                                 int    $acceptanceItemId,
+                                 int    $reportTemplateId,
+                                 ?array $reportedDocument = null,
+                                 array  $parameters = [],
+                                 ?array $additionalFiles = []): Report
+    {
+        // Get acceptance item
+        $acceptanceItem = $this->acceptanceItemRepository->findAcceptanceItemById($acceptanceItemId);
+
+        // Create report
+        $report = $this->reportRepository->update($report,
+            [
+                'reported_at' => Carbon::now("Asia/Muscat"),
+                'reporter_id' => $user->id,
+                'acceptance_item_id' => $acceptanceItemId,
+                'report_template_id' => $reportTemplateId,
+                'approver' => null,
+                'approved_at' => null,
+            ]);
+        // Create signer
+        $report->signers()->delete();
+        $signer = $this->signerFactory->createFromUser($user, $report);
+        $this->signerRepository->save($signer);
+        $report->load("reportTemplate.template", "acceptanceItem.patient");
+
+        // Associate additional files
+        if (count($additionalFiles)) {
+            foreach ($additionalFiles as $file) {
+                $this->processDocument($file['id'], $report, DocumentTag::ADDITIONAL);
+            }
+        }
+        if (count($parameters))
+            $this->createOrUpdateReportParameters($report, $parameters);
+        $this->acceptanceItemService->updateAcceptanceItemTimeline($acceptanceItem, "Report Updated By $user->name");
+
+        if (isset($reportedDocument['id']))
+            $this->processDocument($reportedDocument['id'], $report, DocumentTag::REPORTED);
+        elseif (count($parameters) > 0) {
+            $data = $this->getReportData($report);
+            $docAddr = $this->buildWordFileService->build($report->reportTemplate->template->path, $data);
+            $this->documentService->storeDocument(
+                "patient",
+                $report->acceptanceItem->patient->id,
+                new UploadedFile($docAddr, "Report.docx"),
+                DocumentTag::REPORTED->value,
+                "report",
+                $report->id);
+        }
+
+        return $report;
+    }
+
+    /**
      * Load a report with all its relations needed for display
      *
      * @param Report $report
