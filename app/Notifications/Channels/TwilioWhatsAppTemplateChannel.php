@@ -62,15 +62,16 @@ class TwilioWhatsAppTemplateChannel
         $from = 'whatsapp:' . $this->formatNumber($this->from);
 
         try {
-
+            $whatsappMessage = $this->saveWhatsAppMessage($notifiable);
             // Send the template message using Twilio's Content API
             $message = $this->twilio->messages->create($to, [
                 'from' => $from,
                 'contentSid' => $template['name'],
                 'contentVariables' => json_encode($template['parameters']),
-                "messagingServiceSid" => $this->messagingServiceSid
+                "messagingServiceSid" => $this->messagingServiceSid,
+                "" => config("CALL_BACK_SERVER" . "/api/whatsapp-message/")
             ]);
-            $this->saveWhatsAppMessage($notifiable, $message);
+            $this->updateWhatsAppMessage($whatsappMessage, $message);
             return $message;
         } catch (Exception $e) {
             Log::error('Twilio WhatsApp API error: ' . $e->getMessage(), [
@@ -106,17 +107,33 @@ class TwilioWhatsAppTemplateChannel
     /**
      * @param $notifiable
      * @param MessageInstance $message
-     * @return void
+     * @return WhatsappMessage
      */
-    protected function saveWhatsAppMessage($notifiable, MessageInstance $message): void
+    protected function saveWhatsAppMessage($notifiable): WhatsappMessage
     {
         $whatsappMessage = new WhatsappMessage(
+            [
+                "data" => [],
+                "status" => "initial",
+            ]
+        );
+        $whatsappMessage->messageable()->associate($notifiable);
+        $whatsappMessage->save();
+        return $whatsappMessage;
+    }
+
+    /**
+     * @param WhatsappMessage $whatsappMessage
+     * @param MessageInstance $message
+     * @return void
+     */
+    protected function updateWhatsAppMessage(WhatsappMessage $whatsappMessage, MessageInstance $message): void
+    {
+        $whatsappMessage->update(
             [
                 "data" => $message->toArray(),
                 "status" => $message->status,
             ]
         );
-        $whatsappMessage->messageable()->associate($notifiable);
-        $whatsappMessage->save();
     }
 }
