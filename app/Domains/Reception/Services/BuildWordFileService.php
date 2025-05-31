@@ -38,10 +38,10 @@ class BuildWordFileService
             Settings::loadConfig();
             Settings::setOutputEscapingEnabled(true);
             // Create template processor
-            $templateProcessor = new TemplateProcessor(storage_path("app/private/".$docPath));
+            $templateProcessor = new TemplateProcessor(storage_path("app/private/" . $docPath));
 
 
-                $templateProcessor->setValues(Arr::except($data,"images"));
+            $templateProcessor->setValues(Arr::except($data, "images"));
 
             // Create temp directory for downloaded images if needed
             $tempDir = storage_path('app/temp-images');
@@ -166,7 +166,7 @@ class BuildWordFileService
                     return $mimeToExt[$contentType];
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Ignore header reading errors
         }
 
@@ -183,8 +183,10 @@ class BuildWordFileService
     private static function isLocalhostUrl(string $url): bool
     {
         $host = parse_url($url, PHP_URL_HOST);
+        $appHost = parse_url(url("/"), PHP_URL_HOST);
         return $host === 'localhost' ||
             $host === '127.0.0.1' ||
+            $host === $appHost ||
             strpos($host, '.local') !== false ||
             strpos($host, '.test') !== false;
     }
@@ -211,11 +213,11 @@ class BuildWordFileService
         // If path starts with /storage, point to the storage/app/public folder
         if (strpos($path, '/storage') === 0) {
             return storage_path('app/public' . substr($path, 9));
-        }elseif (Str::endsWith($path, '/download')&&Str::startsWith($path,"/documents")) {
-            $id=Str::remove(["/download","/documents/","/"],$path);
-            $doc=Document::find($id);
+        } elseif (Str::endsWith($path, '/download') && Str::startsWith($path, "/documents")) {
+            $id = Str::remove(["/download", "/documents/", "/"], $path);
+            $doc = Document::find($id);
             if ($doc)
-                return storage_path("app/private/".$doc->path);
+                return storage_path("app/private/" . $doc->path);
         }
 
         // Otherwise, point to the public directory
