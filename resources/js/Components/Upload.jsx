@@ -56,6 +56,10 @@ const FileTypeInfo = styled(Typography)(({ theme }) => ({
 const generateTempId = () => `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
 const formatFileTypes = (accept) => {
+    // If accept is empty, undefined, or null, return "All files"
+    if (!accept || accept.trim() === '') {
+        return "All files";
+    }
     return accept
         .split(",")
         .map((type) => type.trim())
@@ -151,21 +155,21 @@ FileErrorAlert.displayName = "FileErrorAlert";
  * Enhanced file upload component with tag selection
  */
 const Upload = ({
-                    url,
-                    label,
-                    name,
-                    value: parentValue,
-                    error: externalError,
-                    helperText: externalHelperText,
-                    onChange,
-                    accept = "application/*",
-                    multiple = false,
-                    editable = true,
-                    required = false,
-                    maxFileSize = 20, // Default 20MB
-                    maxFiles = 20, // Default max 20 files
-                    tags = [], // Tag selection
-                }) => {
+                         url,
+                         label,
+                         name,
+                         value: parentValue,
+                         error: externalError,
+                         helperText: externalHelperText,
+                         onChange,
+                         accept,
+                         multiple = false,
+                         editable = true,
+                         required = false,
+                         maxFileSize = 20, // Default 20MB
+                         maxFiles = 20, // Default max 20 files
+                         tags = [], // Tag selection
+                     }) => {
     const inputRef = useRef(null);
     const [isDragOver, setIsDragOver] = useState(false);
     const [managedFiles, setManagedFiles] = useState([]);
@@ -250,24 +254,27 @@ const Upload = ({
             errors.push(`File "${file.name}" is too large (max ${maxFileSize}MB).`);
         }
 
-        // Check file type
-        const fileType = file.type;
-        const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
-        const acceptList = accept.split(',').map(a => a.trim().toLowerCase());
+        // Check file type only if accept prop is provided and not empty
+        if (accept && accept.trim() !== '') {
+            const fileType = file.type;
+            const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
+            const acceptList = accept.split(',').map(a => a.trim().toLowerCase());
 
-        const isAccepted = acceptList.some(type => {
-            if (type.startsWith('.')) {
-                return fileExtension === type;
-            }
-            if (type.endsWith('/*')) {
-                return fileType.startsWith(type.slice(0, -1));
-            }
-            return fileType === type;
-        });
+            const isAccepted = acceptList.some(type => {
+                if (type.startsWith('.')) {
+                    return fileExtension === type;
+                }
+                if (type.endsWith('/*')) {
+                    return fileType.startsWith(type.slice(0, -1));
+                }
+                return fileType === type;
+            });
 
-        if (!isAccepted) {
-            errors.push(`File type for "${file.name}" is not accepted (allowed: ${acceptedFileTypes}).`);
+            if (!isAccepted) {
+                errors.push(`File type for "${file.name}" is not accepted (allowed: ${acceptedFileTypes}).`);
+            }
         }
+        // If accept is empty/undefined, skip file type validation entirely
 
         return errors.length > 0 ? { filename: file.name, messages: errors } : null;
     }, [accept, acceptedFileTypes, maxSizeBytes, maxFileSize]);
@@ -720,7 +727,7 @@ const Upload = ({
                     type="file"
                     multiple={multiple}
                     onChange={handleInputChange}
-                    accept={accept}
+                    accept={accept || "*/*"}
                     aria-hidden="true"
                 />
 

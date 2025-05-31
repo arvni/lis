@@ -39,6 +39,7 @@
         "date-fns-tz": "^3.2.0",
         "dayjs": "^1.11.13",
         "file-saver": "^2.0.5",
+        "glob": "^11.0.2",
         "html-to-image": "^1.11.13",
         "immutability-helper": "^3.1.1",
         "jointjs": "^3.7.7",
