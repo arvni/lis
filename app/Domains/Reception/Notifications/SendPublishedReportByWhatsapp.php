@@ -47,7 +47,7 @@ class SendPublishedReportByWhatsapp extends Notification
             'to' => $this->whatsappNumber,
             'parameters' => [
                 "1" => $this->title, // {{1}} - Customer name
-                "2" => "0000bda7-f4ee-4279-ad07-0ec81a3bed34"//$this->documentId, // {{2}} - Customer name
+                "2" =>$this->documentId, // {{2}} - Customer name
             ]
         ];
     }
