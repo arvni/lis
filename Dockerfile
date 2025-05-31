@@ -60,7 +60,7 @@ WORKDIR /app
 
 # Copy composer files and install dependencies
 COPY composer.* ./
-RUN composer install --no-interaction --prefer-dist --no-scripts --no-dev --no-autoloader
+RUN composer install --no-interaction --prefer-dist --no-scripts --no-autoloader
 
 # Copy application code
 COPY . .
