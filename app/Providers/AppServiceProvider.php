@@ -39,6 +39,7 @@ use App\Domains\Reception\Policies\PatientPolicy;
 use App\Domains\Reception\Policies\ReportPolicy;
 use App\Domains\Reception\Policies\SamplePolicy;
 use App\Domains\Referrer\Models\Referrer;
+use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
 use App\Domains\User\Policies\RolePolicy;
@@ -95,6 +96,7 @@ class AppServiceProvider extends ServiceProvider
             "consultation" => Consultation::class,
             "consultant" => Consultant::class,
             "customer" => Customer::class,
+            "referrerOrder" => ReferrerOrder::class,
         ]);
 
         Gate::policy(User::class, UserPolicy::class);

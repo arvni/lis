@@ -48,16 +48,21 @@ class ReportController extends Controller
     {
         $user = auth()->user();
         $parameters = $request->get('parameters', []);
-        foreach ($request->file("parameters") as $parameter => $value) {
-            $doc = $this->documentService->storeDocument("patient", $request->get("patient_id"), $value, DocumentTag::IMAGE->value);
-            $parameters[$parameter] = $doc;
+        if ($parameters && count($parameters) > 0) {
+            foreach ($request->file("parameters") as $parameter => $value) {
+                $doc = $this->documentService->storeDocument("patient", $request->get("patient_id"), $value, DocumentTag::IMAGE->value);
+                $parameters[$parameter] = $doc;
+            }
+        }
+        else{
+            $doc=$this->documentService->getDocument($request->input("reported_document.id"));
         }
 
 
         $report = $this->reportService->createReport(
             $user,
             $request->get('acceptance_item_id'),
-            $request->get('report_template_id'),
+            $request->input('report_template.id'),
             $request->get('reported_document'),
             $parameters,
             $request->get('files', []),

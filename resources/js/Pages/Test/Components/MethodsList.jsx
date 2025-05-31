@@ -111,11 +111,11 @@ const MethodsList = ({
 
     // Render method as a table row
     const renderTableRow = (methodTest) => {
-        const { id, method, status } = methodTest;
+        const { id, method, status,acceptance_items_count } = methodTest;
         return (
             <TableRow key={id} hover>
                 <TableCell>{method?.name || "—"}</TableCell>
-                {type === '1' && (
+                {type === 'TEST' && (
                     <>
                         <TableCell>{method?.workflow?.name || "—"}</TableCell>
                         <TableCell>{method?.barcode_group?.name || "—"}</TableCell>
@@ -129,6 +129,7 @@ const MethodsList = ({
                         </Typography>
                     ) : "—"}
                 </TableCell>
+                <TableCell align="right">{acceptance_items_count || "—"}</TableCell>
                 <TableCell align="center">
                     <Tooltip title={status ? "Active" : "Inactive"}>
                         <Switch
@@ -198,7 +199,7 @@ const MethodsList = ({
                             </Typography>
                         </Box>
 
-                        {type === '1' && (
+                        {type === 'TEST' && (
                             <>
                                 <Box sx={{ mb: 1 }}>
                                     <Typography variant="body2" color="text.secondary">
@@ -366,7 +367,7 @@ const MethodsList = ({
                 <TableHead>
                     <TableRow sx={{ backgroundColor: theme.palette.action.hover }}>
                         <TableCell>Method Name</TableCell>
-                        {type === '1' && (
+                        {type === 'TEST' && (
                             <>
                                 <TableCell>Workflow</TableCell>
                                 <TableCell>Barcode Group</TableCell>
@@ -374,6 +375,7 @@ const MethodsList = ({
                             </>
                         )}
                         <TableCell align="right">Price</TableCell>
+                        <TableCell align="right">No. Acceptance Items</TableCell>
                         <TableCell align="center">Status</TableCell>
                         <TableCell align="right">Actions</TableCell>
                     </TableRow>

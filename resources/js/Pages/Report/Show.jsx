@@ -20,8 +20,6 @@ import {
     IconButton,
     Tooltip,
     LinearProgress,
-    Card,
-    CardContent
 } from "@mui/material";
 import {
     Edit,
@@ -53,6 +51,7 @@ import PublishForm from "./Components/PublishForm";
 
 import DialogContent from "@mui/material/DialogContent";
 import {router, useForm} from "@inertiajs/react";
+import PageHeader from "@/Components/PageHeader.jsx";
 
 const formatDate = (date) => {
     if (!date)
@@ -136,7 +135,7 @@ const Show = ({
     // Show success/error notifications
     useEffect(() => {
         if (wasSuccessful) {
-            enqueueSnackbar(status, {variant: "success"});
+            enqueueSnackbar("it has done successfully", {variant: "success"});
         }
         if (hasErrors) {
             Object.keys(errors).forEach((item) =>
@@ -230,24 +229,16 @@ const Show = ({
                 </Alert>
             )}
 
-            {/* Status Card */}
-            <Card elevation={2} sx={{mb: 3}}>
-                <CardContent sx={{p: 2}}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Stack direction="row" spacing={2} alignItems="center">
-                            <ReportIcon color="primary"/>
-                            <Typography variant="h6">
-                                Report #{report.id}
-                            </Typography>
-                            <Chip
-                                icon={statusChip.icon}
-                                label={statusChip.label}
-                                color={statusChip.color}
-                                size="small"
-                            />
-                        </Stack>
-                        <Stack direction="row" spacing={1}>
-                            {canEdit && (
+            <PageHeader title={`Report #${report.id}`}
+                        icon={<ReportIcon/>}
+                        subtitle={<Chip
+                            icon={statusChip.icon}
+                            label={statusChip.label}
+                            color={statusChip.color}
+                            size="small"
+                        />}
+                        actions={[
+                            canEdit ?
                                 <Tooltip title="Edit Report">
                                     <Button
                                         size="small"
@@ -258,34 +249,31 @@ const Show = ({
                                     >
                                         Edit
                                     </Button>
+                                </Tooltip> : null,
+                            canApprove && !report.approver ? <>
+                                <Tooltip title="Reject Report">
+                                    <Button
+                                        size="small"
+                                        color="error"
+                                        variant="outlined"
+                                        onClick={handleReject}
+                                        startIcon={<ThumbDownAlt/>}
+                                    >
+                                        Reject
+                                    </Button>
                                 </Tooltip>
-                            )}
-                            {canApprove && !report.approver && (
-                                <>
-                                    <Tooltip title="Reject Report">
-                                        <Button
-                                            size="small"
-                                            color="error"
-                                            variant="outlined"
-                                            onClick={handleReject}
-                                            startIcon={<ThumbDownAlt/>}
-                                        >
-                                            Reject
-                                        </Button>
-                                    </Tooltip>
-                                    <Tooltip title="Approve Report">
-                                        <Button
-                                            size="small"
-                                            variant="contained"
-                                            onClick={handleApprove}
-                                            startIcon={<ThumbUpAlt/>}
-                                        >
-                                            Approve
-                                        </Button>
-                                    </Tooltip>
-                                </>
-                            )}
-                            {canPublish && report.approver&& report.status && (
+                                <Tooltip title="Approve Report">
+                                    <Button
+                                        size="small"
+                                        variant="contained"
+                                        onClick={handleApprove}
+                                        startIcon={<ThumbUpAlt/>}
+                                    >
+                                        Approve
+                                    </Button>
+                                </Tooltip>
+                            </> : null,
+                            canPublish && report.approver && report.status && !report.publisher ?
                                 <Tooltip title="Publish Report">
                                     <Button
                                         size="small"
@@ -296,9 +284,8 @@ const Show = ({
                                     >
                                         Publish
                                     </Button>
-                                </Tooltip>
-                            )}
-                            {canUnpublish && report.publisher && (
+                                </Tooltip> : null,
+                            canUnpublish && report.publisher ?
                                 <Tooltip title="Unpublish Report">
                                     <Button
                                         size="small"
@@ -309,12 +296,8 @@ const Show = ({
                                     >
                                         Unpublish
                                     </Button>
-                                </Tooltip>
-                            )}
-                        </Stack>
-                    </Stack>
-                </CardContent>
-            </Card>
+                                </Tooltip> : null
+                        ]}/>
 
             {/* Patient Information */}
             {report.acceptance_item.patients.map((patient, index) => (

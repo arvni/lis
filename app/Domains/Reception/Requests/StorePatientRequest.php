@@ -6,6 +6,7 @@ use App\Domains\Reception\Models\Patient;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 
 class StorePatientRequest extends FormRequest
 {
@@ -24,39 +25,40 @@ class StorePatientRequest extends FormRequest
      */
     public function rules(): array
     {
-        $id=$this->input("id");
+        $id = $this->input("id") ?? $this->input("patient.id");
         return [
-            "id"=>["nullable","exists:patients,id"],
+            "id" => ["nullable", "exists:patients,id"],
+            "patient.id" => ["nullable", "exists:patients,id"],
             "avatar" => [
-                "required",
+                Rule::requiredIf(!$id),
             ],
             "dateOfBirth" => [
-                "required",
+                Rule::requiredIf(!$id),
                 "date",
                 "before:today"
             ],
             "fullName" => [
-                "required",
+                Rule::requiredIf(!$id),
                 "string",
                 "max:255"],
             "gender" => [
-                "required",
+                Rule::requiredIf(!$id),
                 "string",
             ],
             "idNo" => [
-                "required",
+                Rule::requiredIf(!$id),
                 "string",
-                "unique:patients,idNo".($id ? ",$id" : ''),
+                "unique:patients,idNo" . ($id ? ",$id" : ''),
                 "max:255"
             ],
             "nationality" => [
-                "required",
+                Rule::requiredIf(!$id),
             ],
             "phone" => [
-                "required",
+                Rule::requiredIf(!$id),
                 "string",
                 "max:255",
-                "unique:patients,phone".($id ? ",$id" : ''),
+                "unique:patients,phone" . ($id ? ",$id" : ''),
             ],
             "tribe" => [
                 "nullable",

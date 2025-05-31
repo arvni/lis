@@ -230,7 +230,7 @@ class TestController extends Controller
                 method_id: $methodTest["method"]["id"],
                 test_id: $test->id,
                 is_default: false,
-                status: true
+                status: $methodTest["status"] ?? true
             );
 
             $oldMethodTest = null;

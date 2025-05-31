@@ -189,9 +189,6 @@ class ReportService
     {
         $user = auth()->user();
 
-        // Report is editable if:
-        // - It's approved but not by someone else, OR
-        // - User has special permission to edit all reports
         return (!$report->approver_id && $report->status && $user->id == $report->reporter_id) || Gate::allows('editAll', $report);
     }
 
@@ -322,6 +319,26 @@ class ReportService
         return $report;
     }
 
+
+    /**
+     * Unpublish a report
+     *
+     * @param Report $report
+     * @return Report
+     */
+    public function unPublishReport(Report $report)
+    {
+        // Mark report as published
+        $report = $this->markReportAsUnpublished($report);
+
+        // Update acceptance item timeline and check if all tests are published
+        $this->processUnpublishedReport($report);
+
+        $this->deletePublishedDocument($report);
+
+        return $report;
+    }
+
     /**
      * Mark report as approved
      *
@@ -361,6 +378,21 @@ class ReportService
     }
 
     /**
+     * Delete Published Documents
+     *
+     * @param Report $report
+     * @return void
+     */
+    private function deletePublishedDocument(Report $report): void
+    {
+        $report->load("publishedDocument");
+        if ($report->publishedDocument) {
+            $this->documentService->deleteDocument($report->publishedDocument);
+        }
+
+    }
+
+    /**
      * Create approver signer record
      *
      * @param Report $report
@@ -390,6 +422,23 @@ class ReportService
             [
                 "published_at" => Carbon::now("Asia/Muscat"),
                 "publisher_id" => $publisher->id
+            ]);
+    }
+
+
+    /**
+     * Mark report as unpublished
+     *
+     * @param Report $report
+     * @return Report
+     */
+    private function markReportAsUnpublished(Report $report): Report
+    {
+        return $this->reportRepository->update(
+            $report,
+            [
+                "published_at" => null,
+                "publisher_id" => null
             ]);
     }
 
@@ -431,6 +480,24 @@ class ReportService
         $this->acceptanceItemService->updateAcceptanceItemTimeline($acceptanceItem, "Report Published By {$user->name}");
 
         ReportPublishedEvent::dispatch($report->acceptanceItem->acceptance);
+
+    }
+
+    /**
+     * Process the published report - update timeline and check acceptance status
+     *
+     * @param Report $report
+     * @return void
+     */
+    private function processUnpublishedReport(Report $report): void
+    {
+
+        $report->loadMissing("acceptanceItem.acceptance");
+
+        $acceptanceItem = $report->acceptanceItem;
+        $user = auth()->user();
+        // Update timeline
+        $this->acceptanceItemService->updateAcceptanceItemTimeline($acceptanceItem, "Report Unpublished By {$user->name}");
 
     }
 

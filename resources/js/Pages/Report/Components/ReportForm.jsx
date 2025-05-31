@@ -78,7 +78,7 @@ const TabbedReportForm = ({
     const handleTemplateChange = (e) => {
         setData(prevData => ({
             ...prevData,
-            report_template: templates.find(item => item.id === e.target.value),
+            report_template: templates.find(item => item?.id === e.target.value),
             parameters: {}
         }));
     }
@@ -124,7 +124,7 @@ const TabbedReportForm = ({
 
         activeParameters.forEach(param => {
             const {title, required, type} = param;
-            const fieldId = `${title.toLowerCase().replace(/\s+/g, '_')}_${param.id}`;
+            const fieldId = `${title.toLowerCase().replace(/\s+/g, '_')}_${param?.id}`;
             const value = data.parameters?.[fieldId];
 
             if (required) {
@@ -268,11 +268,11 @@ const TabbedReportForm = ({
 
                         {/* Template Selection */}
                         <Box sx={{mb: 4}}>
-                            {data.report_template && (
+                            {data?.report_template?.template && (
                                 <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 2}}>
                                     <Tooltip title="Download document template for this report">
                                         <Button
-                                            href={route("documents.download", (data.report_template.template.id || data.report_template.template.hash))}
+                                            href={route("documents.download", (data.report_template?.template?.id || data.report_template?.template?.hash))}
                                             target="_blank"
                                             variant="outlined"
                                             startIcon={<FileDownloadIcon/>}
@@ -319,9 +319,9 @@ const TabbedReportForm = ({
                                     onChange={handleTemplateChange}
                                 >
                                     {templates.map((template) => (
-                                        <MenuItem key={template.id}
-                                                  value={template.id}>
-                                            {template.name}
+                                        <MenuItem key={template?.id}
+                                                  value={template?.id}>
+                                            {template?.name}
                                         </MenuItem>
                                     ))}
                                 </Select>

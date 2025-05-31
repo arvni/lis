@@ -24,34 +24,20 @@ class ReferrerOrderService
         return $this->referrerRepository->createReferrerOrder($referrerDTO->toArray());
     }
 
-    public function getReferrerOrderDetails(ReferrerOrder $referrer): array
+    public function updateReferrerOrder(ReferrerOrder $referrerOrder, ReferrerOrderDTO $referrerDTO): ReferrerOrder
     {
-        $referrer->load([
-            "invoices" => function ($query) {
-                $query->latest()->limit(5);
-            },
-            "payments" => function ($query) {
-                $query->latest()->limit(5);
-            },
-            "acceptances" => function ($query) {
-                $query->latest()->limit(5);
-            },
-            "referrerOrders" => function ($query) {
-                $query->latest()->limit(5);
-            },
-        ]);
-        return [
-            "referrer"=>$referrer,
-            "referrerOrders" => $referrer->referrerOrders,
-            "invoices" => $referrer->invoices,
-            "payments" => $referrer->payments,
-            "acceptances" => $referrer->acceptances,
-        ];
+        return $this->referrerRepository->updateReferrerOrder($referrerOrder, $referrerDTO->toArray());
     }
+
+    public function updateReferrerOrderStatus(ReferrerOrder $referrerOrder, $status): ReferrerOrder
+    {
+        return $this->referrerRepository->updateReferrerOrder($referrerOrder, ["status" => $status]);
+    }
+
 
     public function loadShowRequirementLoaded(ReferrerOrder $referrerOrder): ReferrerOrder
     {
-        return $referrerOrder->load(["OwnedDocuments", "Patient", "Referrer","Acceptance.Samples"]);
+        return $referrerOrder->load(["OwnedDocuments", "Patient", "Referrer", "Acceptance.Samples"]);
     }
 
     /**
@@ -59,21 +45,10 @@ class ReferrerOrderService
      */
     public function deleteReferrerOrder(ReferrerOrder $referrer): void
     {
-        if (!$referrer->acceptances()->exists() && !$referrer->consultations()->exists()) {
+        if (!$referrer->acceptance()->exists()) {
             $this->referrerRepository->deleteReferrerOrder($referrer);
         } else {
             throw new Exception("ReferrerOrder has associated acceptances or Orders.");
         }
     }
-
-    public function getReferrerOrderByEmail($idNo): ?ReferrerOrder
-    {
-        return $this->referrerRepository->findReferrerOrderByEmail($idNo);
-    }
-
-    public function getReferrerOrderById($id)
-    {
-        return $this->referrerRepository->findReferrerOrderById($id);
-    }
-
 }

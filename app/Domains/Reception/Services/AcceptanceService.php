@@ -14,8 +14,12 @@ use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Notifications\PatientReportPublished;
+use App\Domains\Reception\Notifications\SendPublishedReportByWhatsapp;
 use App\Domains\Reception\Repositories\AcceptanceRepository;
+use App\Domains\Reception\Repositories\PatientRepository;
+use App\Domains\Referrer\Services\ReferrerOrderService;
 use App\Domains\Setting\Repositories\SettingRepository;
+use App\Notifications\Channels\TwilioWhatsAppTemplateChannel;
 use App\Notifications\ReferrerReportPublished;
 use Carbon\Carbon;
 use Exception;
@@ -34,6 +38,7 @@ class AcceptanceService
         private readonly AcceptanceItemService $acceptanceItemService,
         private readonly LaboratoryAdapter     $laboratoryAdapter,
         private readonly SettingRepository     $settingRepository,
+        private readonly ReferrerOrderService  $referrerOrderService,
     )
     {
     }
@@ -51,7 +56,7 @@ class AcceptanceService
     public function storeAcceptance(AcceptanceDTO $acceptanceDTO): Acceptance
     {
         $acceptance = $this->acceptanceRepository
-            ->creatAcceptance(Arr::except($acceptanceDTO->toArray(), ["acceptance_items"]));
+            ->createAcceptance(Arr::except($acceptanceDTO->toArray(), ["acceptance_items"]));
 
         if ($acceptanceDTO->consultationId) {
             $test = $this->settingRepository->getSettingsByClassAndKey("Acceptance", "defaultConsultationMethod");
@@ -353,7 +358,6 @@ class AcceptanceService
         // Check if all tests are published and update acceptance status if needed
         if ($this->areAllTestsPublished($acceptance)) {
             $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
-
             // Send notifications
             $this->sendPublishedNotifications($acceptance);
         }
@@ -485,22 +489,39 @@ class AcceptanceService
     {
         $acceptance->load([
             "patient",
-            "referrer"
+            "referrer",
+            "acceptanceItems" => fn($q) => $q->whereHas("test", fn($testQuery) => $testQuery->whereNot("type", TestType::SERVICE))->with("report.publishedDocument", "test")
         ]);
         $patient = $acceptance->patient;
         $referrer = $acceptance->referrer;
-
-        if (!$referrer && $patient->phone && preg_match($this->phonePattern, $patient->phone)) {
+        if (count($acceptance->acceptanceItems)) {
+            $howReport = $acceptance->howReport ?? [];
             // Send notification to patient
             Notification::send($patient, new PatientReportPublished($acceptance));
-        }
-        if ($referrer) {
-            // Send notification to referrer
-            Notification::send($referrer, new ReferrerReportPublished($acceptance));
 
-            // @todo
-            // Update referrer order status
-//            $this->acceptanceRepository->updateReferrerOrderStatus($acceptance, 'reported');
+            if ($howReport["whatsappNumber"]) {
+                foreach ($acceptance->acceptanceItems as $acceptanceItem) {
+                    Notification::send(
+                        $patient,
+                        new SendPublishedReportByWhatsapp(
+                            $acceptanceItem->test->name,
+                            $acceptanceItem->report->publishedDocument->hash,
+                            $howReport["whatsappNumber"]
+                        )
+                    );
+                }
+            }
+
+            if ($referrer) {
+                if ($howReport["sendToReferrer"] ?? false) {
+                    // Send notification to referrer
+                    Notification::send($referrer, new ReferrerReportPublished($acceptance));
+                    $acceptance->load("referrerOrder");
+                    // Update referrer order status
+                    if ($acceptance->referrerOrder)
+                        $this->referrerOrderService->updateReferrerOrderStatus($acceptance->referrerOrder, 'reported');
+                }
+            }
         }
     }
 

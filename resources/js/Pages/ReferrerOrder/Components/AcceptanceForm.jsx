@@ -1,215 +1,290 @@
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
+import React, {useState, Suspense} from "react";
 import {
-    Accordion,
-    AccordionDetails,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Box,
+    Typography,
     Button,
-    colors, List, ListItem, Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer, TableFooter,
-    TableHead,
-    TableRow
+    Stepper,
+    Step,
+    StepLabel,
+    Paper,
+    Alert,
+    Checkbox,
+    FormControlLabel,
+    IconButton,
+    Slide,
+    FormHelperText,
+    Switch,
+    Grid2 as Grid
 } from "@mui/material";
-import Box from "@mui/material/Box";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import {Delete as DeleteIcon, ExpandMore as ExpandMoreIcon} from "@mui/icons-material";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
-import IconButton from "@mui/material/IconButton";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import React, {useState} from "react";
-import {keyframes} from "@mui/system";
-import AddTest from "@/Pages/Acceptance/Components/AddTest";
-import DeleteForm from "@/Components/DeleteForm";
-import {useForm} from "@inertiajs/react";
+import {
+    Close as CloseIcon,
+    ArrowBack as ArrowBackIcon,
+    ArrowForward as ArrowForwardIcon,
+    Save as SaveIcon,
+    LocalHospital as LocalHospitalIcon,
+    Science as ScienceIcon,
+    Receipt as ReceiptIcon,
+} from "@mui/icons-material";
 
-const blink = keyframes`
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-`;
+// Transition component for dialog
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
+
+import TestsSection from "@/Pages/Acceptance/Components/TestsSection";
+import useAcceptanceFormState from "@/Pages/Acceptance/Components/hooks/useAcceptanceFormState.js";
 
 
-const AcceptanceForm = ({defaultValues, open, onClose, referrer, patient, id, requestedTests = [],maxDiscount=0}) => {
-    const {data, setData, errors, post, reset} = useForm({
-        patient: patient,
-        samplerGender: 1,
-        out_patient: true,
-        howReport: {},
-        doctor: {
-            name: "",
-            expertise: "",
-            phone: "",
-            licenseNo: ""
+// Report Section Component
+const ReportSection = ({data, errors, onChange}) => {
+
+    return (
+        <Box sx={{p: 2}}>
+            <Grid container spacing={3}>
+                {/* Out Patient Toggle */}
+                <Grid size={{xs: 12, sm: 6}}>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={data?.out_patient || false}
+                                onChange={(e) => onChange('out_patient', e.target.checked)}
+                                color="primary"
+                            />
+                        }
+                        label="Out Patient"
+                    />
+                </Grid>
+
+                {/* Send to Referrer option for referred patients */}
+                {
+                    <Grid item xs={12}>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={!!data?.howReport?.sendToReferrer}
+                                    onChange={e => onChange('howReport.sendToReferrer', e.target.checked)}
+                                    color="primary"
+                                />
+                            }
+                            label={`Send a copy to Referrer (${data.referrer.fullName})`}
+                        />
+                        {errors?.["howReport.sendToReferrer"] && (
+                            <FormHelperText error>{errors["howReport.sendToReferrer"]}</FormHelperText>
+                        )}
+                    </Grid>
+                }
+            </Grid>
+        </Box>
+    );
+};
+
+// Main Acceptance Form Dialog Component
+const AcceptanceFormDialog = ({
+                                  open = false,
+                                  onClose,
+                                  initialData = {},
+                                  errors = {},
+                                  onSubmit,
+                                  setData,
+                                  maxDiscount = 0,
+                                  requestedTests = []
+                              }) => {
+    const [activeStep, setActiveStep] = useState(0);
+    const correctedInitialData = {
+        referenceCode: "",
+        out_patient: false,
+        howReport: {
+            sendToReferrer: false
         },
-        acceptanceItems: [],
-        referrer: referrer,
-        referenceCode: defaultValues?.referenceCode,
-        prescription: null,
-        referred: true
-    })
-    const [openAdd, setOpenAdd] = useState(false);
-    const [openDelete, setOpenDelete] = useState(false);
-    const [acceptanceItem, setAcceptanceItem] = useState({
-        test: "",
-        details: "",
-        discount: 0
-    });
-    const handleSubmit = () => post(route('referrerOrders.acceptance', id), {onSuccess: closeAddAcceptance});
+        acceptanceItems: {
+            tests: [],
+            panels: []
+        },
+        ...initialData
+    };
+
+    const steps = [
+        {label: "Tests Selection", icon: <ScienceIcon/>},
+        {label: "Sampling & Delivery", icon: <LocalHospitalIcon/>},
+        {label: "Review & Submit", icon: <ReceiptIcon/>}
+    ];
+
+    const {
+        data,
+        testModalState,
+        panelModalState,
+        deleteConfirmState,
+        handlers
+    } = useAcceptanceFormState(correctedInitialData, maxDiscount);
+    const handleNext = () => {
+        if (activeStep < steps.length - 1) {
+            setActiveStep(prev => prev + 1);
+        }
+    };
+
+    const handleBack = () => {
+        if (activeStep > 0) {
+            setActiveStep(prev => prev - 1);
+        }
+    };
+
+    const handleSubmit = () => {
+        onSubmit && onSubmit(data);
+    };
+
+    const hasStepErrors = (step) => {
+        if (!errors) return false;
+        switch (step) {
+            case 0:
+                return Boolean(errors.acceptanceItems);
+            case 1:
+                return Boolean(
+                    errors["howReport.sendToReferrer"]
+                );
+            default:
+                return false;
+        }
+    };
+
+    const renderStepContent = (step) => {
+        switch (step) {
+            case 0:
+                return (
+                    <TestsSection
+                        data={data}
+                        errors={errors}
+                        testModalState={testModalState}
+                        panelModalState={panelModalState}
+                        deleteConfirmState={deleteConfirmState}
+                        handlers={handlers}
+                        requestedTests={requestedTests}
+                    />
+                );
+            case 1:
+                return (
+                    <ReportSection
+                        data={data}
+                        errors={errors}
+                        onChange={handlers.handleFormChange}
+                    />
+                );
+            case 2:
+                return (
+                    <Box sx={{p: 2}}>
+                        <Typography variant="h6" gutterBottom>Review Your Information</Typography>
+                        <Paper elevation={1} sx={{p: 3, borderRadius: 2}}>
+
+                            {
+                                <Box sx={{mt: 2}}>
+                                    <Typography variant="subtitle1" color="primary" gutterBottom>
+                                        Referral Information
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        Reference Code: {data.referenceCode || "N/A"}
+                                    </Typography>
+                                </Box>
+                            }
 
 
-    const destroy = (index) => () => {
-        setAcceptanceItem({...data.acceptanceItems[index], index});
-        setOpenDelete(true);
-    }
+                            <Box sx={{mt: 2}}>
+                                <Typography variant="subtitle1" color="primary" gutterBottom>
+                                    Sampling & Delivery
+                                </Typography>
+                                <Typography variant="body2">
+                                    Out Patient: {data.out_patient ? "Yes" : "No"}
+                                </Typography>
+                            </Box>
+                        </Paper>
+                    </Box>
+                );
+            default:
+                return null;
+        }
+    };
 
-    const closeDelete = () => {
-        setOpenDelete(false);
-        setAcceptanceItem({
-            test: "",
-            details: "",
-            discount: 0
-        })
-    }
-    const handleDestroy = () => {
-        let tmp = [...data.acceptanceItems];
-        tmp.splice(acceptanceItem.index, 1);
-        setData(prevData => ({...prevData, acceptanceItems: tmp}));
-        closeDelete();
-    }
-    const edit = (index) => () => {
-        setAcceptanceItem({...data.acceptanceItems[index], index});
-        setOpenAdd(true);
-    }
+    return (
+        <Dialog
+            open={open}
+            onClose={onClose}
+            slots={{transition: Transition}}
+            maxWidth="md"
+            fullWidth
+        >
+            <DialogTitle sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <Typography variant="h5">New Acceptance Form</Typography>
+                <IconButton onClick={onClose}>
+                    <CloseIcon/>
+                </IconButton>
+            </DialogTitle>
 
-    const submit = () => {
-        var tmp = [...data.acceptanceItems];
-        if (acceptanceItem.hasOwnProperty("index"))
-            tmp[acceptanceItem.index] = acceptanceItem
-        else
-            tmp.push(acceptanceItem);
-        setData(prevData => ({...prevData, acceptanceItems: tmp}));
-    }
-    const add = () => {
-        setOpenAdd(true);
-    }
-    const close = () => {
-        setOpenAdd(false);
-        setAcceptanceItem({
-            test: "",
-            details: "",
-            discount: 0
-        })
-    }
+            <DialogContent sx={{p: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column'}}>
+                {/* Stepper */}
+                <Box sx={{p: 3, borderBottom: 1, borderColor: 'divider'}}>
+                    <Stepper activeStep={activeStep} alternativeLabel>
+                        {steps.map((step, index) => (
+                            <Step key={step.label} completed={activeStep > index}>
+                                <StepLabel error={hasStepErrors(index)}>
+                                    {step.label}
+                                </StepLabel>
+                            </Step>
+                        ))}
+                    </Stepper>
+                </Box>
 
-    const closeAddAcceptance = () => {
-        reset();
-        onClose();
-    }
+                {/* Error Alert */}
+                {Object.keys(errors).length > 0 && (
+                    <Alert severity="error" sx={{m: 2}}>
+                        Please correct the errors before proceeding.
+                    </Alert>
+                )}
 
-    return <Dialog open={open} fullWidth maxWidth="lg">
-        <DialogContent>
-            <Box component="form" onSubmit={handleSubmit}>
-                <Accordion defaultExpanded>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon/>} aria-controls="test-information">
-                        <Typography variant="h5">Tests</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <List subheader="Requested Test" dense disablePadding>
-                            {requestedTests.map(item => <ListItem>{item.name}</ListItem>)}
-                        </List>
-                        <TableContainer component={Paper}>
-                            <Table aria-label="tests table" sx={{minWidth: 700}}>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell colSpan="7" align={"right"}>
-                                            <IconButton onClick={add} id="add-test" sx={{
-                                                "&:focus": {
-                                                    background: colors.red.A100,
-                                                    animation: `${blink} 1s linear 1s 2 forwards`,
-                                                }
-                                            }}>
-                                                <AddIcon/>
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell align="left">Code</TableCell>
-                                        <TableCell>Name</TableCell>
-                                        <TableCell align="center">Full Name</TableCell>
-                                        <TableCell align="center">Method</TableCell>
-                                        <TableCell align="left">Details</TableCell>
-                                        <TableCell align="right">Discount</TableCell>
-                                        <TableCell align="right">Price</TableCell>
-                                        <TableCell align="center">Action</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {data.acceptanceItems.map((item, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>{item.test.code}</TableCell>
-                                            <TableCell>{item.test.name}</TableCell>
-                                            <TableCell align="center">{item.test.fullName}</TableCell>
-                                            <TableCell align="center">{item.test.method.name}</TableCell>
-                                            <TableCell align="left">{item.details}</TableCell>
-                                            <TableCell align="center">{item.discount}</TableCell>
-                                            <TableCell align="center">{item.test.method.price_type == "Fix" ? item.test.method.price : calcPrice(item.test.method.extra.formula, item.test.method.extra.parameters, item.price, item?.test?.method?.extra?.conditions)}</TableCell>
-                                            <TableCell align="center">
-                                                <Stack direction="row" spacing={2}>
-                                                    <IconButton onClick={edit(index)}>
-                                                        <EditIcon color="warning"/>
-                                                    </IconButton>
-                                                    <IconButton onClick={destroy(index)}>
-                                                        <DeleteIcon color="error"/>
-                                                    </IconButton>
-                                                </Stack>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                    {!data.acceptanceItems.length && <TableRow>
-                                        <TableCell sx={{textAlign: "center"}} colSpan={6}>
-                                            <strong>Please Add Tests</strong>
-                                        </TableCell>
-                                    </TableRow>}
-                                </TableBody>
-                                {!!data.acceptanceItems.length && <TableFooter>
-                                    <TableRow>
-                                        <TableCell colSpan={4} sx={{textAlign: "center"}}>
-                                            <Typography variant="h5">Total:</Typography>
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Typography variant="h5">
-                                                {data.acceptanceItems.map(item => item.discount * 1).reduce((sum, a) => sum + a, 0)}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Typography variant="h5">
-                                                {data.acceptanceItems.map(item => (item.test.method.price_type == "Fix" ? item.test.method.price : calcPrice(item.test.method.extra.formula, item.test.method.extra.parameters, item.price, item.test?.method?.extra?.conditions)) * 1).reduce((sum, a) => sum + a, 0)}
-                                            </Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                </TableFooter>}
-                            </Table>
-                        </TableContainer>
-                    </AccordionDetails>
-                </Accordion>
-            </Box>
-        </DialogContent>
-        <DialogActions>
-            <Button type="reset" onClick={closeAddAcceptance}>Cancel</Button>
-            <Button variant="contained" type="submit" onClick={handleSubmit}>Submit</Button>
-        </DialogActions>
-        <AddTest onClose={close} setData={setAcceptanceItem} open={openAdd} OnSubmit={submit} data={acceptanceItem}
-                 maxDiscount={maxDiscount} referrer={referrer}/>
-        <DeleteForm openDelete={openDelete} agreeCB={handleDestroy} disAgreeCB={closeDelete}
-                    title={acceptanceItem.test?.name + " Test"}/>
-    </Dialog>
-}
-export default AcceptanceForm;
+                {/* Step Content */}
+                <Box sx={{flex: 1, overflow: 'auto'}}>
+                    <Suspense fallback={<Box sx={{p: 3}}>Loading...</Box>}>
+                        {renderStepContent(activeStep)}
+                    </Suspense>
+                </Box>
+            </DialogContent>
+
+            <DialogActions sx={{p: 3, borderTop: 1, borderColor: 'divider', justifyContent: 'space-between'}}>
+                <Button
+                    onClick={handleBack}
+                    disabled={activeStep === 0}
+                    startIcon={<ArrowBackIcon/>}
+                    variant="outlined"
+                    size="large"
+                >
+                    Back
+                </Button>
+
+                {activeStep === steps.length - 1 ? (
+                    <Button
+                        onClick={handleSubmit}
+                        variant="contained"
+                        color="primary"
+                        size="large"
+                        startIcon={<SaveIcon/>}
+                    >
+                        Submit Acceptance
+                    </Button>
+                ) : (
+                    <Button
+                        onClick={handleNext}
+                        variant="contained"
+                        color="primary"
+                        size="large"
+                        endIcon={<ArrowForwardIcon/>}
+                    >
+                        Continue
+                    </Button>
+                )}
+            </DialogActions>
+        </Dialog>
+    );
+};
+
+export default AcceptanceFormDialog;

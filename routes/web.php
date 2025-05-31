@@ -24,6 +24,7 @@ use App\Http\Controllers\Consultation\ListCustomersController;
 use App\Http\Controllers\Consultation\ListReservationTimesController;
 use App\Http\Controllers\Consultation\ListWaitingConsultationsController;
 use App\Http\Controllers\Consultation\StartConsultationController;
+use App\Http\Controllers\Consultation\TimeController;
 use App\Http\Controllers\Consultation\UpdateCustomerToPatientWithConsultationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Document\DocumentController;
@@ -75,13 +76,14 @@ use App\Http\Controllers\Reception\UpdatePatientMetaController;
 use App\Http\Controllers\Referrer\ReferrerController;
 use App\Http\Controllers\Referrer\ReferrerOrderController;
 use App\Http\Controllers\Referrer\ReferrerTestController;
+use App\Http\Controllers\Referrer\StoreReferrerOrderAcceptanceController;
+use App\Http\Controllers\Referrer\StoreReferrerOrderPatientController;
+use App\Http\Controllers\Referrer\StoreReferrerOrderSamplesController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ShowSectionController;
-use App\Http\Controllers\TimeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 
 Route::get('/', function () {
@@ -214,6 +216,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::group(["prefix" => "referrer"], function () {
         Route::resource("referrers", ReferrerController::class);
         Route::resource("referrer-tests", ReferrerTestController::class);
+        Route::post("referrer-tests/{referrerOrder}/patient", StoreReferrerOrderPatientController::class)->name("referrerOrders.patient");
+        Route::post("referrer-tests/{referrerOrder}/acceptance", StoreReferrerOrderAcceptanceController::class)->name("referrerOrders.acceptance");
+        Route::post("referrer-tests/{referrerOrder}/samples", StoreReferrerOrderSamplesController::class)->name("referrerOrders.samples");
         Route::resource("referrer-orders", ReferrerOrderController::class);
     });
     Route::post("upload-public", UploadPublicDocumentController::class)->name("upload-public");

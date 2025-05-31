@@ -16,11 +16,16 @@ class PublishReportController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Report $report,PublishReportRequest $request)
+    public function __invoke(Report $report, PublishReportRequest $request)
     {
+        if (!$report->status)
+            return back()->withErrors("this report has been rejected before");
+        if (!$report->approver_id)
+            return back()->withErrors("this report need to be approved before");
+        if ($report->publisher_id)
+            return back()->withErrors("this report published before");
         $user = auth()->user();
-
-        $this->reportService->unPublishReport($report);
+        $this->reportService->publishReport($report, $user, $request->input("published_document.id"));
 
         return redirect()->back()->with([
             "success" => true,

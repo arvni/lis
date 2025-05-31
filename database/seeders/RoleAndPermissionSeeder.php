@@ -34,6 +34,9 @@ class RoleAndPermissionSeeder extends Seeder
                     "Edit Referrer Order",
                     "Delete Referrer Order",
                     "List Referrer Orders",
+                    "Add Patient",
+                    "Add Acceptance",
+                    "Add Samples"
                 ]
             ],
             "Consultation" => [

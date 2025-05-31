@@ -252,8 +252,8 @@ const AddForm = ({ open, onClose, defaultValue }) => {
                                                                 name="sampleLocation"
                                                                 value={barcode.sampleLocation || "In Lab"}
                                                                 label="Sampling Place"
-                                                                InputProps={{
-                                                                    startAdornment: <LocationOn fontSize="small" color="action" sx={{ mr: 0.5 }} />
+                                                                slotProps={{
+                                                                    input:{startAdornment: <LocationOn fontSize="small" color="action" sx={{ mr: 0.5 }} />}
                                                                 }}
                                                                 sx={{
                                                                     "& .MuiOutlinedInput-root": {

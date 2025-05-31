@@ -77,7 +77,6 @@ export default function TestForm({
     const handleTypeChange = (e, v) => {
         setData(prevState => ({
             ...prevState,
-            ...updatedData,
             type: v,
             testGroup: "",
             report_templates: [],

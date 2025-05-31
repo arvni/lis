@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Consultation;
 
 use App\Domains\Consultation\DTOs\TimeDTO;
 use App\Domains\Consultation\Enums\ConsultationStatus;
 use App\Domains\Consultation\Models\Time;
-use App\Domains\Consultation\Repositories\TimeRepository;
 use App\Domains\Consultation\Services\ConsultationService;
 use App\Domains\Consultation\Services\TimeService;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTimeRequest;
-
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;

@@ -22,7 +22,7 @@ class SampleDTO
     {
         return new self(
             patientId: $data['patient']['id'] ?? null,
-            sampleTypeId: $data['sampleType']['id'] ?? null,
+            sampleTypeId: $data['sampleType']['id'] ?? $data['sampleType'] ?? null,
             samplerId: $data['sampler_id'] ?? auth()->user()->id,
             sampleLocation: $data['sampleLocation'] ?? null,
             collectionDate: $data['collection_date'] ?? null,

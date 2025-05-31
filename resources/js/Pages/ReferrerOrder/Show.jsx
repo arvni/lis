@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, {useState} from "react";
 import {
     Alert,
     Box,
@@ -10,7 +10,7 @@ import {
     Chip,
     CircularProgress,
     Divider,
-    Grid,
+    Grid2 as Grid,
     IconButton,
     List,
     ListItem,
@@ -27,9 +27,9 @@ import {
 import ClientLayout from "@/Layouts/AuthenticatedLayout";
 import PatientAddForm from "./Components/Form";
 import AcceptanceForm from "./Components/AcceptanceForm";
-import AddSampleForm from "@/Pages/ReferrerOrder/Components/AddSampleForm";
-import AddFromExistPatientForm from "@/Pages/ReferrerOrder/Components/AddFromExistPatientForm";
-import { router } from "@inertiajs/react";
+import AddSampleForm from "./Components/AddSampleForm";
+import AddFromExistPatientForm from "./Components/AddFromExistPatientForm";
+import {router} from "@inertiajs/react";
 import {
     Assignment,
     Description,
@@ -42,7 +42,6 @@ import {
     Email,
     Phone,
     LocationOn,
-    Flag,
     HomeWork,
     Public,
     Male,
@@ -53,9 +52,10 @@ import {
     Add
 } from "@mui/icons-material";
 import axios from "axios";
+import PageHeader from "@/Components/PageHeader.jsx";
 
 // Tab Panel Component for better organization
-function TabPanel({ children, value, index, ...other }) {
+function TabPanel({children, value, index, ...other}) {
     return (
         <div
             role="tabpanel"
@@ -65,7 +65,7 @@ function TabPanel({ children, value, index, ...other }) {
             {...other}
         >
             {value === index && (
-                <Box sx={{ p: 3 }}>
+                <Box sx={{p: 3}}>
                     {children}
                 </Box>
             )}
@@ -73,7 +73,7 @@ function TabPanel({ children, value, index, ...other }) {
     );
 }
 
-const Show = ({ auth, referrerOrder }) => {
+const Show = ({referrerOrder, errors = {}}) => {
     // State management
     const [openAddPatient, setOpenAddPatient] = useState(false);
     const [openAddFromExist, setOpenAddFromExist] = useState(false);
@@ -82,14 +82,32 @@ const Show = ({ auth, referrerOrder }) => {
     const [loading, setLoading] = useState(false);
     const [barcodes, setBarcodes] = useState([]);
     const [activeTab, setActiveTab] = useState(0);
-    const [notification, setNotification] = useState({ open: false, message: "", severity: "info" });
+    const [notification, setNotification] = useState({open: false, message: "", severity: "info"});
+    const acceptanceData = {
+        patient: referrerOrder.patient,
+        referrer: referrerOrder.referrer,
+        referred: true,
+        samplerGender: 1,
+        out_patient: false,
+        howReport: {},
+        acceptanceItems: {
+            panels: [],
+            tests: []
+        },
+        referenceCode: referrerOrder?.orderInformation?.patient?.reference_id,
+        prescription: null,
+    };
+    const handleSubmitAcceptance = (data) => {
+        router.post(route("referrerOrders.acceptance", referrerOrder.id), data, {onSuccess: handleCloseAddAcceptance});
+    }
+
 
     // Action handlers
     const handleAddPatient = () => setOpenAddPatient(true);
     const handleAddAcceptance = () => setOpenAddAcceptance(true);
     const handleAddSample = () => {
         setLoading(true);
-        axios.get(route("listBarcodes", referrerOrder.acceptance_id))
+        axios.get(route("api.sampleCollection.list", referrerOrder.acceptance_id))
             .then(res => {
                 setBarcodes(res.data.barcodes);
                 setOpenAddSample(true);
@@ -105,7 +123,6 @@ const Show = ({ auth, referrerOrder }) => {
                 setLoading(false);
             });
     };
-
     const handleCloseAddPatient = () => {
         setOpenAddPatient(false);
         setOpenAddFromExist(false);
@@ -122,7 +139,7 @@ const Show = ({ auth, referrerOrder }) => {
     const gotoPage = url => () => router.visit(url);
 
     const handleCloseNotification = () => {
-        setNotification({ ...notification, open: false });
+        setNotification({...notification, open: false});
     };
 
     // Helper functions for UI
@@ -139,11 +156,11 @@ const Show = ({ auth, referrerOrder }) => {
     const getGenderDisplay = (gender) => {
         const numGender = Number(gender);
         return numGender === 1 ?
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Male color="primary" sx={{ mr: 0.5 }} /> Male
+            <Box sx={{display: 'flex', alignItems: 'center'}}>
+                <Male color="primary" sx={{mr: 0.5}}/> Male
             </Box> :
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Female color="secondary" sx={{ mr: 0.5 }} /> Female
+            <Box sx={{display: 'flex', alignItems: 'center'}}>
+                <Female color="secondary" sx={{mr: 0.5}}/> Female
             </Box>;
     };
 
@@ -170,37 +187,19 @@ const Show = ({ auth, referrerOrder }) => {
 
     return (
         <>
-            <Paper sx={{ p: { xs: "0.5em", md: "1em" }, mt: "1em", borderRadius: "8px" }}>
-                {/* Header Section */}
-                <Box sx={{ mb: 3, p: { xs: 1, md: 2 } }}>
-                    <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        justifyContent="space-between"
-                        alignItems={{ xs: "flex-start", sm: "center" }}
-                        spacing={2}
-                    >
-                        <Box>
-                            <Typography
-                                component="h1"
-                                fontWeight="900"
-                                fontSize={{ xs: "16px", md: "20px" }}
-                                sx={{ display: "flex", alignItems: "center" }}
-                            >
-                                <Assignment sx={{ mr: 1 }} />
-                                Order ID: {referrerOrder.order_id}
-                            </Typography>
+            <PageHeader icon={<Assignment sx={{mr: 1}}/>}
+                        title={`Order ID: ${referrerOrder.order_id}`}
+                        subtitle={`Referrer: ${referrerOrder?.referrer?.fullName}`}
+                        actions={[<Box>
                             <Typography variant="subtitle2" color="text.secondary">
                                 Status:
                                 <Chip
                                     size="small"
                                     color={getCompletionColor()}
                                     label={`${getCompletionPercentage()}% Complete`}
-                                    sx={{ ml: 1 }}
+                                    sx={{ml: 1}}
                                 />
                             </Typography>
-                        </Box>
-
-                        <Box>
                             <Typography variant="subtitle1" fontWeight="600">
                                 Analysis requested:
                             </Typography>
@@ -211,17 +210,19 @@ const Show = ({ auth, referrerOrder }) => {
                                         label={test.name}
                                         color="primary"
                                         size="small"
-                                        icon={<MedicalServices fontSize="small" />}
-                                        sx={{ my: 0.5 }}
+                                        icon={<MedicalServices fontSize="small"/>}
+                                        sx={{my: 0.5}}
                                     />
                                 ))}
                             </Stack>
-                        </Box>
-                    </Stack>
-                </Box>
+                        </Box>]
+                        }
+            />
+            <Paper sx={{p: {xs: "0.5em", md: "1em"}, mt: "1em", borderRadius: "8px"}}>
+                {/* Header Section */}
 
                 {/* Tabs Navigation */}
-                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
                     <Tabs
                         value={activeTab}
                         onChange={handleTabChange}
@@ -229,9 +230,9 @@ const Show = ({ auth, referrerOrder }) => {
                         scrollButtons="auto"
                         allowScrollButtonsMobile
                     >
-                        <Tab label="Patient Details" icon={<Person />} iconPosition="start" />
-                        <Tab label="Request Form" icon={<Description />} iconPosition="start" />
-                        <Tab label="Files" icon={<FileCopy />} iconPosition="start" />
+                        <Tab label="Patient Details" icon={<Person/>} iconPosition="start"/>
+                        <Tab label="Request Form" icon={<Description/>} iconPosition="start"/>
+                        <Tab label="Files" icon={<FileCopy/>} iconPosition="start"/>
                     </Tabs>
                 </Box>
 
@@ -240,8 +241,8 @@ const Show = ({ auth, referrerOrder }) => {
                     <Card elevation={2}>
                         <CardHeader
                             title={
-                                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <Person sx={{ mr: 1 }} />
+                                <Typography variant="h6" sx={{display: 'flex', alignItems: 'center'}}>
+                                    <Person sx={{mr: 1}}/>
                                     Patient Details
                                 </Typography>
                             }
@@ -253,45 +254,51 @@ const Show = ({ auth, referrerOrder }) => {
                         <CardContent>
                             <Grid container spacing={3}>
                                 {/* Patient Information */}
-                                <Grid item xs={12} md={6}>
-                                    <Box sx={{ mb: 2 }}>
+                                <Grid size={{xs: 12, md: 6}}>
+                                    <Box sx={{mb: 2}}>
                                         <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-                                            <Person sx={{ mr: 1, verticalAlign: 'middle' }} />
+                                            <Person sx={{mr: 1, verticalAlign: 'middle'}}/>
                                             Personal Information
                                         </Typography>
-                                        <Divider sx={{ mb: 2 }} />
+                                        <Divider sx={{mb: 2}}/>
 
                                         <Grid container spacing={2}>
-                                            <Grid item xs={12}>
+                                            <Grid size={{xs: 12}}>
                                                 <Typography variant="body1" fontWeight="500">
                                                     {referrerOrder.orderInformation.patient?.fullName || "Not specified"}
                                                 </Typography>
                                             </Grid>
 
-                                            <Grid item xs={6}>
-                                                <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <CalendarToday fontSize="small" sx={{ mr: 1 }} />
+                                            <Grid size={{xs: 6}}>
+                                                <Typography variant="body2" color="text.secondary"
+                                                            sx={{display: 'flex', alignItems: 'center'}}>
+                                                    <CalendarToday fontSize="small" sx={{mr: 1}}/>
                                                     Born: {formatDate(referrerOrder.orderInformation.patient?.dateOfBirth)}
                                                 </Typography>
                                             </Grid>
 
-                                            <Grid item xs={6}>
-                                                <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <Grid size={{xs: 6}}>
+                                                <Typography variant="body2" color="text.secondary"
+                                                            sx={{display: 'flex', alignItems: 'center'}}>
                                                     {getGenderDisplay(referrerOrder.orderInformation.patient?.gender)}
                                                 </Typography>
                                             </Grid>
 
-                                            <Grid item xs={12}>
-                                                <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Fingerprint fontSize="small" sx={{ mr: 1 }} />
-                                                    Reference ID: {referrerOrder.orderInformation.patient?.reference_id || "Not specified"}
+                                            <Grid size={{xs: 12}}>
+                                                <Typography variant="body2" color="text.secondary"
+                                                            sx={{display: 'flex', alignItems: 'center'}}>
+                                                    <Fingerprint fontSize="small" sx={{mr: 1}}/>
+                                                    Reference
+                                                    ID: {referrerOrder.orderInformation.patient?.reference_id || "Not specified"}
                                                 </Typography>
                                             </Grid>
 
-                                            <Grid item xs={12}>
-                                                <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Info fontSize="small" sx={{ mr: 1 }} />
-                                                    Consanguineous parents: {referrerOrder.orderInformation.patient?.consanguineousParents ? "Yes" : "No"}
+                                            <Grid size={{xs: 12}}>
+                                                <Typography variant="body2" color="text.secondary"
+                                                            sx={{display: 'flex', alignItems: 'center'}}>
+                                                    <Info fontSize="small" sx={{mr: 1}}/>
+                                                    Consanguineous
+                                                    parents: {referrerOrder.orderInformation.patient?.consanguineousParents ? "Yes" : "No"}
                                                 </Typography>
                                             </Grid>
                                         </Grid>
@@ -299,39 +306,44 @@ const Show = ({ auth, referrerOrder }) => {
 
                                     <Box>
                                         <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-                                            <LocationOn sx={{ mr: 1, verticalAlign: 'middle' }} />
+                                            <LocationOn sx={{mr: 1, verticalAlign: 'middle'}}/>
                                             Contact Information
                                         </Typography>
-                                        <Divider sx={{ mb: 2 }} />
+                                        <Divider sx={{mb: 2}}/>
 
                                         <Grid container spacing={2}>
-                                            <Grid item xs={12}>
-                                                <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Email fontSize="small" sx={{ mr: 1 }} />
+                                            <Grid size={{xs: 12}}>
+                                                <Typography variant="body2" color="text.secondary"
+                                                            sx={{display: 'flex', alignItems: 'center'}}>
+                                                    <Email fontSize="small" sx={{mr: 1}}/>
                                                     {referrerOrder.orderInformation.patient?.contact?.email || "Email not specified"}
                                                 </Typography>
                                             </Grid>
 
-                                            <Grid item xs={12}>
-                                                <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Phone fontSize="small" sx={{ mr: 1 }} />
+                                            <Grid size={{xs: 12}}>
+                                                <Typography variant="body2" color="text.secondary"
+                                                            sx={{display: 'flex', alignItems: 'center'}}>
+                                                    <Phone fontSize="small" sx={{mr: 1}}/>
                                                     {referrerOrder.orderInformation.patient?.contact?.phone || "Phone not specified"}
                                                 </Typography>
                                             </Grid>
 
-                                            <Grid item xs={12}>
-                                                <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                                    <HomeWork fontSize="small" sx={{ mr: 1, mt: 0.5 }} />
+                                            <Grid size={{xs: 12}}>
+                                                <Typography variant="body2" color="text.secondary"
+                                                            sx={{display: 'flex', alignItems: 'flex-start'}}>
+                                                    <HomeWork fontSize="small" sx={{mr: 1, mt: 0.5}}/>
                                                     <span>
-                                                        {referrerOrder.orderInformation.patient?.contact?.address || "No address"}{referrerOrder.orderInformation.patient?.contact?.address ? "," : ""} <br />
+                                                        {referrerOrder.orderInformation.patient?.contact?.address || "No address"}{referrerOrder.orderInformation.patient?.contact?.address ? "," : ""}
+                                                        <br/>
                                                         {referrerOrder.orderInformation.patient?.contact?.city || ""}{referrerOrder.orderInformation.patient?.contact?.city ? "," : ""} {referrerOrder.orderInformation.patient?.contact?.state || ""}
                                                     </span>
                                                 </Typography>
                                             </Grid>
 
-                                            <Grid item xs={12}>
-                                                <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Public fontSize="small" sx={{ mr: 1 }} />
+                                            <Grid size={{xs: 12}}>
+                                                <Typography variant="body2" color="text.secondary"
+                                                            sx={{display: 'flex', alignItems: 'center'}}>
+                                                    <Public fontSize="small" sx={{mr: 1}}/>
                                                     {referrerOrder.orderInformation.patient?.contact?.country?.label || "Country not specified"}
                                                 </Typography>
                                             </Grid>
@@ -340,15 +352,15 @@ const Show = ({ auth, referrerOrder }) => {
                                 </Grid>
 
                                 {/* Sample Information */}
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{xs: 12, md: 6}}>
                                     <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-                                        <Science sx={{ mr: 1, verticalAlign: 'middle' }} />
+                                        <Science sx={{mr: 1, verticalAlign: 'middle'}}/>
                                         Material Details
                                     </Typography>
-                                    <Divider sx={{ mb: 2 }} />
+                                    <Divider sx={{mb: 2}}/>
 
                                     {referrerOrder.orderInformation.samples?.length > 0 ? (
-                                        <List sx={{ bgcolor: "#f5f5f5", borderRadius: 1, p: 2 }}>
+                                        <List sx={{bgcolor: "#f5f5f5", borderRadius: 1, p: 2}}>
                                             {referrerOrder.orderInformation.samples?.map((sample, index) => (
                                                 <React.Fragment key={sample.id || index}>
                                                     <ListItem
@@ -361,12 +373,13 @@ const Show = ({ auth, referrerOrder }) => {
                                                         }}
                                                     >
                                                         <ListItemIcon>
-                                                            <Science color="primary" />
+                                                            <Science color="primary"/>
                                                         </ListItemIcon>
                                                         <ListItemText
                                                             primary={
                                                                 <Typography fontWeight="500">
-                                                                    Sample #{index + 1}: {sample.sample_type?.name || "Unknown type"}
+                                                                    Sample
+                                                                    #{index + 1}: {sample.sample_type?.name || "Unknown type"}
                                                                 </Typography>
                                                             }
                                                             secondary={
@@ -374,9 +387,10 @@ const Show = ({ auth, referrerOrder }) => {
                                                                     <Typography variant="body2" component="span">
                                                                         Sample ID: {sample.sampleId || "Not specified"}
                                                                     </Typography>
-                                                                    <br />
+                                                                    <br/>
                                                                     <Typography variant="body2" component="span">
-                                                                        Collection Date: {formatDate(sample.collectionDate)}
+                                                                        Collection
+                                                                        Date: {formatDate(sample.collectionDate)}
                                                                     </Typography>
                                                                 </>
                                                             }
@@ -386,27 +400,27 @@ const Show = ({ auth, referrerOrder }) => {
                                             ))}
                                         </List>
                                     ) : (
-                                        <Alert severity="info" sx={{ mt: 2 }}>No samples have been added yet.</Alert>
+                                        <Alert severity="info" sx={{mt: 2}}>No samples have been added yet.</Alert>
                                     )}
                                 </Grid>
                             </Grid>
                         </CardContent>
 
-                        <CardActions sx={{ justifyContent: "flex-end", p: 2, backgroundColor: "#f5f5f5" }}>
+                        <CardActions sx={{justifyContent: "flex-end", p: 2, backgroundColor: "#f5f5f5"}}>
                             {!referrerOrder.patient_id ? (
                                 <>
                                     <Button
                                         variant="contained"
                                         onClick={handleAddPatient}
-                                        startIcon={<PersonAdd />}
-                                        sx={{ mr: 1 }}
+                                        startIcon={<PersonAdd/>}
+                                        sx={{mr: 1}}
                                     >
                                         Add New Patient
                                     </Button>
                                     <Button
                                         variant="outlined"
                                         onClick={handleAddFromExistsPatient}
-                                        startIcon={<Person />}
+                                        startIcon={<Person/>}
                                     >
                                         Select Existing Patient
                                     </Button>
@@ -415,7 +429,7 @@ const Show = ({ auth, referrerOrder }) => {
                                 <Button
                                     variant="contained"
                                     onClick={gotoPage(route("patients.show", referrerOrder.patient_id))}
-                                    startIcon={<Person />}
+                                    startIcon={<Person/>}
                                 >
                                     View Patient Details
                                 </Button>
@@ -429,8 +443,8 @@ const Show = ({ auth, referrerOrder }) => {
                     <Card elevation={2}>
                         <CardHeader
                             title={
-                                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <Description sx={{ mr: 1 }} />
+                                <Typography variant="h6" sx={{display: 'flex', alignItems: 'center'}}>
+                                    <Description sx={{mr: 1}}/>
                                     Request Form Details
                                 </Typography>
                             }
@@ -442,19 +456,19 @@ const Show = ({ auth, referrerOrder }) => {
                         <CardContent>
                             <Grid container spacing={3}>
                                 {Object.keys(referrerOrder.orderInformation.orderForms || {}).map((orderFormKey, index) => (
-                                    <Grid item xs={12} md={6} key={index}>
+                                    <Grid size={{xs: 12, md: 6}} key={index}>
                                         <Typography
                                             variant="subtitle1"
                                             fontWeight="600"
                                             gutterBottom
-                                            sx={{ display: 'flex', alignItems: 'center' }}
+                                            sx={{display: 'flex', alignItems: 'center'}}
                                         >
-                                            <Info sx={{ mr: 1 }} />
+                                            <Info sx={{mr: 1}}/>
                                             {orderFormKey}
                                         </Typography>
-                                        <Divider sx={{ mb: 2 }} />
+                                        <Divider sx={{mb: 2}}/>
 
-                                        <List sx={{ bgcolor: "#f5f5f5", borderRadius: 1 }}>
+                                        <List sx={{bgcolor: "#f5f5f5", borderRadius: 1}}>
                                             {referrerOrder.orderInformation.orderForms[orderFormKey].map((item, itemIndex) => (
                                                 <ListItem key={itemIndex}>
                                                     <ListItemText
@@ -472,7 +486,7 @@ const Show = ({ auth, referrerOrder }) => {
                                 ))}
 
                                 {Object.keys(referrerOrder.orderInformation.orderForms || {}).length === 0 && (
-                                    <Grid item xs={12}>
+                                    <Grid size={{xs: 12}}>
                                         <Alert severity="info">No form details available.</Alert>
                                     </Grid>
                                 )}
@@ -480,14 +494,14 @@ const Show = ({ auth, referrerOrder }) => {
                         </CardContent>
 
                         {referrerOrder.patient_id && (
-                            <CardActions sx={{ justifyContent: "space-between", p: 2, backgroundColor: "#f5f5f5" }}>
+                            <CardActions sx={{justifyContent: "space-between", p: 2, backgroundColor: "#f5f5f5"}}>
                                 {referrerOrder.acceptance_id ? (
                                     <>
                                         <Button
                                             variant="contained"
                                             color="primary"
                                             onClick={gotoPage(route("acceptances.show", referrerOrder.acceptance_id))}
-                                            startIcon={<Description />}
+                                            startIcon={<Description/>}
                                         >
                                             View Acceptance Details
                                         </Button>
@@ -496,10 +510,10 @@ const Show = ({ auth, referrerOrder }) => {
                                             <Button
                                                 variant="contained"
                                                 onClick={handleAddSample}
-                                                startIcon={<Add />}
+                                                startIcon={<Add/>}
                                                 disabled={loading}
                                             >
-                                                {loading ? <CircularProgress size={24} /> : "Add Samples"}
+                                                {loading ? <CircularProgress size={24}/> : "Add Samples"}
                                             </Button>
                                         ) : null}
                                     </>
@@ -507,7 +521,7 @@ const Show = ({ auth, referrerOrder }) => {
                                     <Button
                                         variant="contained"
                                         onClick={handleAddAcceptance}
-                                        startIcon={<Add />}
+                                        startIcon={<Add/>}
                                     >
                                         Add Acceptance
                                     </Button>
@@ -522,8 +536,8 @@ const Show = ({ auth, referrerOrder }) => {
                     <Card elevation={2}>
                         <CardHeader
                             title={
-                                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <FileCopy sx={{ mr: 1 }} />
+                                <Typography variant="h6" sx={{display: 'flex', alignItems: 'center'}}>
+                                    <FileCopy sx={{mr: 1}}/>
                                     Attached Files
                                 </Typography>
                             }
@@ -542,7 +556,7 @@ const Show = ({ auth, referrerOrder }) => {
                                                 bgcolor: '#f5f5f5',
                                                 mb: 1,
                                                 borderRadius: 1,
-                                                '&:hover': { bgcolor: '#e3f2fd' }
+                                                '&:hover': {bgcolor: '#e3f2fd'}
                                             }}
                                             secondaryAction={
                                                 <Tooltip title="Download file">
@@ -553,13 +567,13 @@ const Show = ({ auth, referrerOrder }) => {
                                                         target="_blank"
                                                         color="primary"
                                                     >
-                                                        <Download />
+                                                        <Download/>
                                                     </IconButton>
                                                 </Tooltip>
                                             }
                                         >
                                             <ListItemIcon>
-                                                <Description />
+                                                <Description/>
                                             </ListItemIcon>
                                             <ListItemText
                                                 primary={`Document #${index + 1}`}
@@ -592,19 +606,19 @@ const Show = ({ auth, referrerOrder }) => {
 
             {referrerOrder?.patient && (
                 <AcceptanceForm
-                    data={referrerOrder.orderInformation}
+                    errors={errors}
+                    initialData={acceptanceData}
+                    onSubmit={handleSubmitAcceptance}
                     open={openAddAcceptance}
                     id={referrerOrder.id}
                     onClose={handleCloseAddAcceptance}
                     requestedTests={referrerOrder?.orderInformation?.tests}
-                    patient={referrerOrder?.patient}
-                    referrer={referrerOrder?.referrer}
+                    maxDiscount={0}
                 />
             )}
-
-            {(referrerOrder.acceptance && barcodes.length) ? (
+            {(referrerOrder.acceptance_id && barcodes.length) ? (
                 <AddSampleForm
-                    acceptance={referrerOrder.acceptance.id}
+                    referrerOrder={referrerOrder}
                     onClose={handleAddSampleClose}
                     samples={referrerOrder.orderInformation.samples}
                     open={openAddSample}
@@ -617,13 +631,13 @@ const Show = ({ auth, referrerOrder }) => {
                 open={notification.open}
                 autoHideDuration={6000}
                 onClose={handleCloseNotification}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
             >
                 <Alert
                     onClose={handleCloseNotification}
                     severity={notification.severity}
                     variant="filled"
-                    sx={{ width: '100%' }}
+                    sx={{width: '100%'}}
                 >
                     {notification.message}
                 </Alert>

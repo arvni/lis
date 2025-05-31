@@ -40,7 +40,11 @@ class StoreReportRequest extends FormRequest
 
             'reported_document' => [
                 Rule::excludeIf(fn() => $template && $template->parameters_count > 0),
-                'required','file', 'mimes:doc,docx', 'max:10240'
+                'required', 'array'
+            ], // 10MB max
+            'reported_document.id' => [
+                Rule::excludeIf(fn() => $template && $template->parameters_count > 0),
+                'required', 'exists:documents,hash'
             ], // 10MB max
             'approved_document' => 'nullable|file|mimes:doc,docx|max:10240',
             'published_document' => 'nullable|file|mimes:pdf|max:10240',
@@ -79,7 +83,7 @@ class StoreReportRequest extends FormRequest
      */
     protected function getParameterKey(ReportTemplateParameter $parameter): string
     {
-        return "parameters." . str_replace([' ', '-'], '_', strtolower($parameter->title).'_'.$parameter->id);
+        return "parameters." . str_replace([' ', '-'], '_', strtolower($parameter->title) . '_' . $parameter->id);
     }
 
     /**

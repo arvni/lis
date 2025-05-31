@@ -24,6 +24,30 @@ class ReferrerOrderPolicy
     }
 
         /**
+         * Determine whether the user can create models.
+         */
+        public function createPatient(User $authUser): bool
+    {
+        return $authUser->can("Referrer.Referrer Orders.Add Patient");
+    }
+
+        /**
+         * Determine whether the user can create models.
+         */
+        public function createAcceptance(User $authUser): bool
+    {
+        return $authUser->can("Referrer.Referrer Orders.Add Acceptance");
+    }
+
+        /**
+         * Determine whether the user can create models.
+         */
+        public function createSamples(User $authUser): bool
+    {
+        return $authUser->can("Referrer.Referrer Orders.Add Samples");
+    }
+
+        /**
          * Determine whether the user can view the model.
          */
         public function view(User $user, ReferrerOrder $referrerOrder): bool

@@ -41,7 +41,8 @@ return [
         'whatsapp_ssid' => env('TWILIO_WHATSAPP_SERVICE_SID'),
         'templates' => [
             'welcome_message' => env('TWILIO_WELCOME_MESSAGE_TEMPLATE'),
-            'report_published' => env('REPORT_PUBLISHED_TEMPLATE'),
+            'acceptance_report_published' => env('REPORT_PUBLISHED_TEMPLATE'),
+            'send_report_file' => env('REPORT_PUBLISHED_FILE_TEMPLATE'),
         ]
     ],
     'omantel' => [

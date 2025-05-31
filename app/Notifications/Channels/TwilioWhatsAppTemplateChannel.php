@@ -105,10 +105,10 @@ class TwilioWhatsAppTemplateChannel
 
     /**
      * @param $notifiable
-     * @param WhatsappMessage $message
+     * @param MessageInstance $message
      * @return void
      */
-    protected function saveWhatsAppMessage($notifiable, WhatsappMessage $message): void
+    protected function saveWhatsAppMessage($notifiable, MessageInstance $message): void
     {
         $whatsappMessage = new WhatsappMessage(
             [

@@ -12,12 +12,17 @@ use Illuminate\Database\Eloquent\Model;
 class ReferrerOrder extends Model
 {
     protected $fillable = [
+        "received_at",
+        "referrer_id",
+        "order_id",
         "orderInformation",
         "status",
         "reference_no",
-        "order_id",
+        "user_id",
         "logisticInformation",
         "received_at",
+        "patient_id",
+        "acceptance_id",
     ];
 
     protected $casts = [
@@ -60,11 +65,11 @@ class ReferrerOrder extends Model
     {
         return $query->where(function ($q) use ($search) {
             $q->where("order_id", "like", "%$search%")
-                ->orwhereHas("Patient", function ($qu) use ($search) {
+                ->orwhereHas("patient", function ($qu) use ($search) {
                     $qu->search($search);
                 })
-                ->orWhereHas("Patient", function ($qu) use ($search) {
-                    $qu->whereHas("Samples", function ($que) use ($search) {
+                ->orWhereHas("patient", function ($qu) use ($search) {
+                    $qu->whereHas("samples", function ($que) use ($search) {
                         $que->where("barcode", "like", "%$search%");
                     });
                 });

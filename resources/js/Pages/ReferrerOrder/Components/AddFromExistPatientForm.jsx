@@ -3,14 +3,14 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import SelectSearch from "@/Components/SelectSearch";
 import {useForm} from "@inertiajs/react";
 
 const AddFromExistPatientForm = ({open, referrerOrder, onClose}) => {
     const {data, setData, post, reset, errors} = useForm({referrerOrder})
     const submit = () => {
-        post(route('referrerOrders.patient', referrerOrder.id), {onSuccess: handleClose})
+        post(route('referrerOrders.patient', referrerOrder.id), {onSuccess: handleClose,onError:console.log})
     }
     const handleClose = () => {
         reset();
@@ -21,7 +21,7 @@ const AddFromExistPatientForm = ({open, referrerOrder, onClose}) => {
         <DialogTitle>Select Patient From Exist Patients</DialogTitle>
         <DialogContent>
             <Grid container>
-                <Grid item>
+                <Grid>
                     <SelectSearch value={data.patient}
                                   sx={{width: "300px", mt: 2}}
                                   onChange={handleChange}

@@ -237,7 +237,7 @@ const routes = (sections = []) => {
         {
             title: "Referrers",
             route: "referrers.index",
-            permission: 'Referrer.List Referrer',
+            permission: 'Referrer.List Referrers',
             icon: <Hospital/>,
             child: [
                 {

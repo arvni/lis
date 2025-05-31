@@ -1,9 +1,9 @@
-import React from "react";
+import React, {useCallback} from "react";
 import TestsTable from "./TestsTable";
 import AddTest from "../AddTest.jsx";
 import AddPanel from "../AddPanel.jsx";
 import DeleteForm from "@/Components/DeleteForm.jsx";
-import { Box, Typography, Paper, Alert, Button } from "@mui/material";
+import {Box, Typography, Paper, Alert, Button, Chip} from "@mui/material";
 import ScienceIcon from "@mui/icons-material/Science";
 import AddIcon from "@mui/icons-material/Add";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
@@ -15,7 +15,8 @@ const TestsSection = ({
                           panelModalState,
                           deleteConfirmState,
                           handlers,
-                          maxDiscount
+                          maxDiscount,
+                          requestedTests = []
                       }) => {
     const hasTests = (data?.acceptanceItems?.tests || []).length > 0;
     const hasPanels = (data?.acceptanceItems?.panels || []).length > 0;
@@ -23,11 +24,10 @@ const TestsSection = ({
 
     return (
         <>
-            <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 2 }}>
+            <Box sx={{mb: 3}}>
+                <Typography variant="subtitle1" color="text.secondary" sx={{mb: 2}}>
                     Add laboratory tests or panels for this acceptance
                 </Typography>
-
                 {!hasItems && (
                     <Paper
                         elevation={0}
@@ -39,9 +39,9 @@ const TestsSection = ({
                             border: '1px dashed grey.300'
                         }}
                     >
-                        <ScienceIcon sx={{ fontSize: 60, color: 'primary.light', mb: 2 }} />
+                        <ScienceIcon sx={{fontSize: 60, color: 'primary.light', mb: 2}}/>
                         <Typography variant="h6">No Tests Selected</Typography>
-                        <Typography variant="body2" sx={{ mb: 3, maxWidth: 500, mx: 'auto' }}>
+                        <Typography variant="body2" sx={{mb: 3, maxWidth: 500, mx: 'auto'}}>
                             Click one of the buttons below to add laboratory tests or test panels for this patient
                         </Typography>
 
@@ -49,18 +49,18 @@ const TestsSection = ({
                             <Button
                                 onClick={handlers.openAddTestModal}
                                 id="add-test"
-                                startIcon={<AddIcon />}
+                                startIcon={<AddIcon/>}
                                 color="primary"
                                 variant="contained"
                                 size="large"
-                                sx={{ mr: 2 }}
+                                sx={{mr: 2}}
                             >
                                 Add Individual Test
                             </Button>
                             <Button
                                 onClick={handlers.openAddPanelModal}
                                 id="add-panel"
-                                startIcon={<PlaylistAddCheckIcon />}
+                                startIcon={<PlaylistAddCheckIcon/>}
                                 color="secondary"
                                 variant="contained"
                                 size="large"
@@ -73,7 +73,7 @@ const TestsSection = ({
 
                 {hasItems && (
                     <Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                        <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 2}}>
                             <Typography variant="h6">
                                 Selected Tests & Panels
                             </Typography>
@@ -81,18 +81,18 @@ const TestsSection = ({
                                 <Button
                                     onClick={handlers.openAddTestModal}
                                     id="add-test"
-                                    startIcon={<AddIcon />}
+                                    startIcon={<AddIcon/>}
                                     color="primary"
                                     variant="outlined"
                                     size="medium"
-                                    sx={{ mr: 2 }}
+                                    sx={{mr: 2}}
                                 >
                                     Add Test
                                 </Button>
                                 <Button
                                     onClick={handlers.openAddPanelModal}
                                     id="add-panel"
-                                    startIcon={<PlaylistAddCheckIcon />}
+                                    startIcon={<PlaylistAddCheckIcon/>}
                                     color="secondary"
                                     variant="outlined"
                                     size="medium"
@@ -102,7 +102,7 @@ const TestsSection = ({
                             </Box>
                         </Box>
 
-                        <Paper elevation={1} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                        <Paper elevation={1} sx={{borderRadius: 2, overflow: 'hidden'}}>
                             <TestsTable
                                 tests={data?.acceptanceItems?.tests || []}
                                 panels={data?.acceptanceItems?.panels || []}
@@ -116,7 +116,7 @@ const TestsSection = ({
                         </Paper>
 
                         {errors?.acceptanceItems && (
-                            <Alert severity="error" sx={{ mt: 2 }}>
+                            <Alert severity="error" sx={{mt: 2}}>
                                 {errors.acceptanceItems}
                             </Alert>
                         )}
@@ -135,6 +135,7 @@ const TestsSection = ({
                     maxDiscount={maxDiscount}
                     patient={data?.patient}
                     onChange={handlers.handleTestChange}
+                    requestedTests={requestedTests}
                 />
             )}
 

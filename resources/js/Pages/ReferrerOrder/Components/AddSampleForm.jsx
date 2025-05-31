@@ -13,38 +13,37 @@ import {
     TableRow
 } from "@mui/material";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import Stack from "@mui/material/Stack";
 import MenuItem from "@mui/material/MenuItem";
 import React from "react";
 import {useForm} from "@inertiajs/react";
 
-const Form = ({barcodes, samples, open, onClose, acceptance}) => {
+const Form = ({barcodes, samples, open, onClose, referrerOrder}) => {
     const {data, setData, errors, post, reset} = useForm({barcodes})
-    const handleSubmit = () => post(route('referrerOrders.samples'), {
+    const handleSubmit = () => post(route('referrerOrders.samples',referrerOrder), {
         onSuccess: () => {
-            window.open(route("printBarcode", acceptance), "_blank");
+            window.open(route("acceptances.barcodes", referrerOrder.acceptance_id), "_blank");
             handleClose();
-            reset();
         }
     });
     const handleClose = () => {
-        reset();
         onClose();
+        reset();
     }
     const sampleChange = (index) => (e, v) => {
-        let tmp = [...barcodes];
+        let tmp = [...data.barcodes];
         let sample = samples.find(item => item.id === e.target.value);
         tmp[index] = {...tmp[index], sample, collectionDate: sample.collection_date, barcode: sample.sampleId ?? null}
         setData({barcodes: tmp});
     }
     const sampleTypeChange = (index) => (e, v) => {
-        let tmp = [...barcodes];
+        let tmp = [...data.barcodes];
         tmp[index] = {...tmp[index], sampleType: e.target.value}
         setData({barcodes: tmp});
     }
 
-    return data.barcodes.length ? <Dialog open={open} fullWidth maxWidth="lg">
+    return data?.barcodes?.length ? <Dialog open={open} fullWidth maxWidth="lg">
         <DialogTitle>Select Samples</DialogTitle>
         <DialogContent>
             <Box component="form" onSubmit={handleSubmit}>
@@ -86,33 +85,36 @@ const Form = ({barcodes, samples, open, onClose, acceptance}) => {
                         </TableHead>
                         <TableBody>
                             {data.barcodes.map((barcode, index) => <TableRow key={"barcode-" + barcode.barcodeGroup.id}>
-                                <TableCell rowSpan={barcode.acceptanceItems.length}>
+                                <TableCell rowSpan={barcode?.items?.length}>
                                     {barcode.barcodeGroup.name}
                                 </TableCell>
                                 <TableCell colSpan={2}>
-                                    {barcode.acceptanceItems.map((item) => <Grid container
-                                                                                 key={"test-" + item.method.id}>
-                                        <Grid item xs={6}>
+                                    {barcode.items.map((item) => <Grid container
+                                                                       key={"test-" + item.method.id}>
+                                        <Grid size={6}>
                                             {`${item.method.test.name} >> ${item.method.name}`}
                                         </Grid>
-                                        <Grid item xs={6}>
+                                        <Grid size={6}>
                                             {item.method.test.sample_types.map(sampleType => `${sampleType.name}(${sampleType.pivot.description})`).join(", ")}
                                         </Grid>
                                     </Grid>)}
 
                                 </TableCell>
                                 <TableCell>
-                                    <Select sx={{minWidth: "100px"}} onChange={sampleTypeChange(index)}
+                                    <Select sx={{minWidth: "100px"}}
+                                            onChange={sampleTypeChange(index)}
                                             variant="standard"
                                             value={barcode.sampleType ?? ""}>
-                                        {barcode?.sampleTypes?.map(sampleType => <MenuItem
-                                            key={"sample-type-" + sampleType.id}
-                                            value={sampleType.id}>{sampleType.name}</MenuItem>)}
+                                        {barcode.items.map(item => item.method.test.sample_types?.map(sampleType =>
+                                            <MenuItem
+                                                key={"sample-type-" + sampleType.id}
+                                                value={sampleType.id}>{sampleType.name}</MenuItem>))}
                                     </Select>
                                 </TableCell>
                                 <TableCell>
                                     <Stack spacing={1}>
-                                        <Select sx={{minWidth: "100px"}} onChange={sampleChange(index)}
+                                        <Select sx={{minWidth: "100px"}}
+                                                onChange={sampleChange(index)}
                                                 variant="standard"
                                                 value={barcode?.sample?.id || ""}>
                                             {samples?.map(sample => <MenuItem

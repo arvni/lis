@@ -2,6 +2,7 @@
 
 namespace App\Domains\Laboratory\Models;
 
+use App\Domains\Reception\Models\AcceptanceItem;
 use Illuminate\Database\Eloquent\Model;
 
 class MethodTest extends Model
@@ -31,7 +32,7 @@ class MethodTest extends Model
 
     public function acceptanceItems()
     {
-        return $this->hasMany(\App\Domains\Reception\Models\AcceptanceItem::class);
+        return $this->hasMany(AcceptanceItem::class);
     }
 
 }

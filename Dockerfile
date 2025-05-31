@@ -32,11 +32,15 @@ RUN apk --no-cache add \
         git \
         nodejs \
         npm \
+        postgresql-dev \
+        libpq \
         $PHPIZE_DEPS && \
     docker-php-ext-configure gd --with-freetype --with-jpeg && \
     docker-php-ext-install -j$(nproc) \
         mysqli \
         pdo_mysql \
+        pdo_pgsql \
+        pgsql \
         sodium \
         zip \
         gd \
@@ -68,7 +72,7 @@ RUN if [ -f "package.json" ]; then \
     fi
 
 # Finish composer installation
-RUN composer dump-autoload --optimize --no-dev
+RUN composer dump-autoloader --optimize --no-dev
 
 # Stage 2: Create the production image
 FROM php:8.2-alpine
@@ -88,7 +92,7 @@ ENV PHP_MEMORY_LIMIT=256M \
 COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
 COPY --from=builder /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
 
-# Install minimal required packages
+# Install minimal required packages including PostgreSQL runtime libraries
 RUN apk --no-cache add \
         libmemcached-libs \
         zlib \
@@ -99,7 +103,8 @@ RUN apk --no-cache add \
         freetype \
         icu \
         bash \
-        supervisor && \
+        supervisor \
+        libpq && \
     # Configure PHP
     echo "memory_limit=${PHP_MEMORY_LIMIT}" > /usr/local/etc/php/conf.d/memory-limit.ini && \
     echo "upload_max_filesize=${UPLOAD_MAX_FILESIZE}" > /usr/local/etc/php/conf.d/uploads.ini && \
