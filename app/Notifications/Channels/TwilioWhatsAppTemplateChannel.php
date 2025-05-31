@@ -69,7 +69,7 @@ class TwilioWhatsAppTemplateChannel
                 'contentSid' => $template['name'],
                 'contentVariables' => json_encode($template['parameters']),
                 "messagingServiceSid" => $this->messagingServiceSid,
-                "" => config("CALL_BACK_SERVER" . "/api/whatsapp-message/")
+                "" => config("CALL_BACK_SERVER" . "/api/whatsapp-message/$whatsappMessage->id")
             ]);
             $this->updateWhatsAppMessage($whatsappMessage, $message);
             return $message;
