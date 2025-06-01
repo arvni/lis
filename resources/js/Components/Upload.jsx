@@ -598,7 +598,7 @@ const Upload = ({
         closeDeleteForm();
 
         try {
-            await axios.post(route("documents.destroy", serverData.id), { _method: "delete" });
+            await axios.post(route("documents.destroy", serverData.id||serverData.hash), { _method: "delete" });
 
             // Remove from state on success
             const newFiles = managedFiles.filter(f => f.tempId !== tempId);

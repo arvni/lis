@@ -45,9 +45,7 @@ class UpdateReportRequest extends FormRequest
             'reported_document.id' => [
                 Rule::excludeIf(fn() => $template && $template->parameters_count > 0),
                 'required', 'exists:documents,hash'
-            ], // 10MB max
-            'approved_document' => 'nullable|file|mimes:doc,docx|max:10240',
-            'published_document' => 'nullable|file|mimes:pdf|max:10240',
+            ],
 
             // Supporting files validation
             'files' => 'nullable|array',

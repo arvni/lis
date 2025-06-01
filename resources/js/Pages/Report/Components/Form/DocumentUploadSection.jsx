@@ -347,18 +347,6 @@ const DocumentUploadSection = ({
                         'Reported Document',
                         ".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     )}
-
-                    {renderDocumentUpload(
-                        'approved',
-                        'Approved Document',
-                        ".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    )}
-
-                    {renderDocumentUpload(
-                        'published',
-                        'Published Document',
-                        ".pdf"
-                    )}
                 </Paper>
             </Grid>
 
@@ -387,7 +375,7 @@ const DocumentUploadSection = ({
                                 })}
                                 onChange={handleFileChange}
                                 multiple
-                                value={data.files}
+                                value={data.files.filter(item=>!["REPORTED","PUBLISHED","CLINICAL_COMMENT"].includes(item.tag))}
                                 helperText="Upload any supporting files related to this report (optional)"
                                 disabled={isSubmitting}
                             />
