@@ -40,6 +40,7 @@ use App\Http\Controllers\Laboratory\ReportTemplateController;
 use App\Http\Controllers\Laboratory\SampleTypeController;
 use App\Http\Controllers\Laboratory\SectionController;
 use App\Http\Controllers\Laboratory\SectionGroupController;
+use App\Http\Controllers\Laboratory\ShowTestListController;
 use App\Http\Controllers\Laboratory\TestController;
 use App\Http\Controllers\Laboratory\TestGroupController;
 use App\Http\Controllers\Laboratory\WorkflowController;
@@ -223,6 +224,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
     Route::post("upload-public", UploadPublicDocumentController::class)->name("upload-public");
     Route::get("/notifications", ShowNotificationPageController::class)->name("notifications");
+    Route::get("test-list", ShowTestListController::class)->name("test-list");
 
 });
 require __DIR__ . '/auth.php';

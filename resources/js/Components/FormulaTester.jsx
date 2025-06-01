@@ -1,24 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     Box,
     Button,
     TextField,
     Typography,
     Paper,
-    Grid,
+    Grid2 as Grid,
     Alert,
     Collapse,
     IconButton,
-    Divider,
     Chip,
-    Tooltip
 } from '@mui/material';
 import {
     CalculateOutlined,
     PlayArrow,
     Refresh,
     Close,
-    Info,
     Check,
     Error
 } from '@mui/icons-material';
@@ -33,7 +30,7 @@ import * as mathjs from 'mathjs';
  * @param {Boolean} props.isConditional - Whether this is for conditional pricing
  * @param {Array} props.conditions - Array of condition objects (for conditional pricing)
  */
-const FormulaTester = ({ parameters = [], formula = '', isConditional = false, conditions = [] }) => {
+const FormulaTester = ({parameters = [], formula = '', isConditional = false, conditions = []}) => {
     const [paramValues, setParamValues] = useState({});
     const [result, setResult] = useState(null);
     const [error, setError] = useState('');
@@ -67,7 +64,7 @@ const FormulaTester = ({ parameters = [], formula = '', isConditional = false, c
     const evaluateFormula = () => {
         try {
             // Create a scope with current parameter values
-            const scope = { ...paramValues };
+            const scope = {...paramValues};
 
             // Validate all parameters have values
             const missingParams = Object.entries(scope).filter(([_, value]) => value === '');
@@ -89,7 +86,6 @@ const FormulaTester = ({ parameters = [], formula = '', isConditional = false, c
                     const conditionResult = evaluateCondition(condition.condition, scope);
                     let value = null;
                     let valueError = null;
-
                     try {
                         // Try to evaluate the price formula if condition is met
                         value = conditionResult ? mathjs.evaluate(condition.value, scope) : null;
@@ -133,7 +129,7 @@ const FormulaTester = ({ parameters = [], formula = '', isConditional = false, c
     // Evaluate a single condition expression
     const evaluateCondition = (conditionStr, scope) => {
         try {
-            return mathjs.evaluate(conditionStr, scope);
+            return new Function(...Object.keys(scope), `return ${conditionStr}`)(...Object.values(scope));
         } catch (err) {
             return false;
         }
@@ -157,7 +153,7 @@ const FormulaTester = ({ parameters = [], formula = '', isConditional = false, c
     };
 
     return (
-        <Paper variant="outlined" sx={{ mt: 2, mb: 2 }}>
+        <Paper variant="outlined" sx={{mt: 2, mb: 2}}>
             <Box
                 sx={{
                     p: 2,
@@ -170,27 +166,28 @@ const FormulaTester = ({ parameters = [], formula = '', isConditional = false, c
                 }}
                 onClick={() => setShowTester(!showTester)}
             >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <CalculateOutlined sx={{ mr: 1 }} color="primary" />
+                <Box sx={{display: 'flex', alignItems: 'center'}}>
+                    <CalculateOutlined sx={{mr: 1}} color="primary"/>
                     <Typography variant="subtitle1" fontWeight="medium">
                         Formula Tester
                     </Typography>
                 </Box>
                 <IconButton size="small">
-                    {showTester ? <Close fontSize="small" /> : <PlayArrow fontSize="small" />}
+                    {showTester ? <Close fontSize="small"/> : <PlayArrow fontSize="small"/>}
                 </IconButton>
             </Box>
 
             <Collapse in={showTester}>
-                <Box sx={{ p: 2 }}>
-                    <Alert severity="info" sx={{ mb: 2 }}>
-                        Enter values for each parameter to test {isConditional ? 'conditional pricing' : 'your formula'} and see the calculated result.
+                <Box sx={{p: 2}}>
+                    <Alert severity="info" sx={{mb: 2}}>
+                        Enter values for each parameter to
+                        test {isConditional ? 'conditional pricing' : 'your formula'} and see the calculated result.
                     </Alert>
 
-                    <Grid container spacing={2} sx={{ mb: 2 }}>
+                    <Grid container spacing={2} sx={{mb: 2}}>
                         {parameters.length > 0 ? (
                             parameters.map((param, index) => (
-                                <Grid item xs={12} sm={6} md={4} key={param.id || index}>
+                                <Grid size={{xs: 12, sm: 6, md: 4}} key={param.id || index}>
                                     <TextField
                                         label={`${param.value}`}
                                         placeholder="Enter value"
@@ -199,14 +196,14 @@ const FormulaTester = ({ parameters = [], formula = '', isConditional = false, c
                                         value={paramValues[param.value] || ''}
                                         onChange={(e) => handleParamChange(param.value, e.target.value)}
                                         type="number"
-                                        InputProps={{
-                                            inputProps: { step: 'any' }
+                                        slotProps={{
+                                            htmlInput: {step: 'any'}
                                         }}
                                     />
                                 </Grid>
                             ))
                         ) : (
-                            <Grid item xs={12}>
+                            <Grid size={12}>
                                 <Alert severity="warning">
                                     No parameters defined. Add parameters to test your formula.
                                 </Alert>
@@ -215,10 +212,10 @@ const FormulaTester = ({ parameters = [], formula = '', isConditional = false, c
                     </Grid>
 
                     {parameters.length > 0 && (
-                        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+                        <Box sx={{display: 'flex', gap: 2, mb: 3}}>
                             <Button
                                 variant="contained"
-                                startIcon={<CalculateOutlined />}
+                                startIcon={<CalculateOutlined/>}
                                 onClick={evaluateFormula}
                                 disabled={parameters.length === 0}
                             >
@@ -226,7 +223,7 @@ const FormulaTester = ({ parameters = [], formula = '', isConditional = false, c
                             </Button>
                             <Button
                                 variant="outlined"
-                                startIcon={<Refresh />}
+                                startIcon={<Refresh/>}
                                 onClick={resetValues}
                             >
                                 Reset Values
@@ -235,13 +232,13 @@ const FormulaTester = ({ parameters = [], formula = '', isConditional = false, c
                     )}
 
                     {error && (
-                        <Alert severity="error" sx={{ mb: 2 }}>
+                        <Alert severity="error" sx={{mb: 2}}>
                             {error}
                         </Alert>
                     )}
 
                     {result !== null && (
-                        <Paper sx={{ p: 2, bgcolor: 'success.light', color: 'success.contrastText' }}>
+                        <Paper sx={{p: 2, bgcolor: 'success.light', color: 'success.contrastText'}}>
                             <Typography variant="h6" gutterBottom>
                                 Result: {formatNumber(result)} OMR
                             </Typography>
@@ -254,7 +251,7 @@ const FormulaTester = ({ parameters = [], formula = '', isConditional = false, c
                     )}
 
                     {isConditional && conditionResults.length > 0 && (
-                        <Box sx={{ mt: 3 }}>
+                        <Box sx={{mt: 3}}>
                             <Typography variant="subtitle2" gutterBottom>
                                 Condition Evaluation Results:
                             </Typography>
@@ -270,13 +267,13 @@ const FormulaTester = ({ parameters = [], formula = '', isConditional = false, c
                                         borderColor: result.conditionMet ? 'success.main' : undefined
                                     }}
                                 >
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                                    <Box sx={{display: 'flex', alignItems: 'center', mb: 0.5}}>
                                         <Chip
-                                            icon={result.conditionMet ? <Check /> : <Close />}
+                                            icon={result.conditionMet ? <Check/> : <Close/>}
                                             label={result.conditionMet ? "Condition Met" : "Not Met"}
                                             size="small"
                                             color={result.conditionMet ? "success" : "default"}
-                                            sx={{ mr: 1 }}
+                                            sx={{mr: 1}}
                                         />
                                         <Typography variant="body2" fontFamily="monospace">
                                             {result.condition}
@@ -284,11 +281,12 @@ const FormulaTester = ({ parameters = [], formula = '', isConditional = false, c
                                     </Box>
 
                                     {result.conditionMet && (
-                                        <Box sx={{ mt: 1 }}>
+                                        <Box sx={{mt: 1}}>
                                             <Typography variant="body2" color="text.secondary">
                                                 Price Formula: <strong>{result.priceFormula}</strong>
                                             </Typography>
-                                            <Typography variant="body2" fontWeight="medium" color={result.error ? 'error.main' : 'success.main'}>
+                                            <Typography variant="body2" fontWeight="medium"
+                                                        color={result.error ? 'error.main' : 'success.main'}>
                                                 {result.error ? `Error: ${result.error}` : `Result: ${formatNumber(result.value)} OMR`}
                                             </Typography>
                                         </Box>

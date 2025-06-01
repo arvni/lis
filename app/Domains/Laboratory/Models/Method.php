@@ -4,11 +4,12 @@ namespace App\Domains\Laboratory\Models;
 
 use App\Domains\Laboratory\Enums\MethodPriceType;
 use App\Domains\Reception\Models\AcceptanceItem;
-use App\Domains\Referrer\Models\ReferrerMethod;
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 
 class Method extends Model
 {
+    use Searchable;
     protected $fillable = [
         "id",
         "name",
@@ -67,10 +68,5 @@ class Method extends Model
     public function scopeActive($query)
     {
         return $query->where("status", true);
-    }
-
-    public function scopeSearch($query, $search)
-    {
-        return $query->where("name", "like", "%$search%");
     }
 }

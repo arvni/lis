@@ -18,6 +18,9 @@ class TestRepository
             $this->applyFilters($query, $queryData["filters"]);
         if (isset($queryData["sort"]))
             $query->orderBy($queryData['sort']['field'] ?? 'id', $queryData['sort']['sort'] ?? 'asc');
+        if (isset($queryData["with"])) {
+            $query->with($queryData['with']);
+        }
         return $query->paginate($queryData["pageSize"] ?? 10);
     }
 
@@ -43,6 +46,7 @@ class TestRepository
     {
         return Test::find($id);
     }
+
     public function findTestByMethodTestId($id): ?Test
     {
         return Test::whereHas("methodTests", fn($q) => $q->where("method_tests.id", $id))->first();
@@ -58,6 +62,9 @@ class TestRepository
             $query->where("status", $filters["status"]);
         if (isset($filters["type"]))
             $query->whereIn("type", explode(",", $filters["type"]));
+        if (isset($filters["active"])) {
+            $query->active();
+        }
     }
 
 }

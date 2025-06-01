@@ -162,6 +162,12 @@ const routes = (sections = []) => {
             permission: 'Statistics',
         },
         {
+            title: "Test Lists",
+            route: "test-list",
+            permission: null,
+            icon: <VaccinesIcon/>
+        },
+        {
             title: "Advance Settings",
             permission: 'Advance Settings',
             icon: <TuneIcon/>,
