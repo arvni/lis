@@ -69,8 +69,10 @@ class TwilioWhatsAppTemplateChannel
                 'contentSid' => $template['name'],
                 'contentVariables' => json_encode($template['parameters']),
                 "messagingServiceSid" => $this->messagingServiceSid,
-                "" => config("CALL_BACK_SERVER" . "/api/whatsapp-message/$whatsappMessage->id")
+                "statusCallback" => config("CALL_BACK_SERVER" . "/api/whatsapp-message/callback")
             ]);
+
+
             $this->updateWhatsAppMessage($whatsappMessage, $message);
             return $message;
         } catch (Exception $e) {
@@ -129,11 +131,68 @@ class TwilioWhatsAppTemplateChannel
      */
     protected function updateWhatsAppMessage(WhatsappMessage $whatsappMessage, MessageInstance $message): void
     {
-        $whatsappMessage->update(
+        $body = $this->fetchMessageBody($message->sid);
+        $data = $message->toArray();
+        $data["body"] = $body;
+        $whatsappMessage->fill(
             [
-                "data" => $message->toArray(),
+                "data" => $data,
                 "status" => $message->status,
             ]
         );
+        $whatsappMessage->save();
     }
+
+    /**
+     * Fetch message body from Twilio API
+     *
+     * @param string $messageSid
+     * @return string|null
+     */
+    public function fetchMessageBody(string $messageSid): ?string
+    {
+        try {
+            $message = $this->twilio->messages($messageSid)->fetch();
+            return $message->body;
+        } catch (Exception $e) {
+            Log::error('Failed to fetch message body from Twilio: ' . $e->getMessage(), [
+                'messageSid' => $messageSid
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Get full message details from Twilio
+     *
+     * @param string $messageSid
+     * @return array|null
+     */
+    public function fetchFullMessageDetails(string $messageSid): ?array
+    {
+        try {
+            $message = $this->twilio->messages($messageSid)->fetch();
+            return [
+                'sid' => $message->sid,
+                'body' => $message->body,
+                'status' => $message->status,
+                'direction' => $message->direction,
+                'from' => $message->from,
+                'to' => $message->to,
+                'dateCreated' => $message->dateCreated,
+                'dateSent' => $message->dateSent,
+                'dateUpdated' => $message->dateUpdated,
+                'price' => $message->price,
+                'priceUnit' => $message->priceUnit,
+                'errorCode' => $message->errorCode,
+                'errorMessage' => $message->errorMessage,
+            ];
+        } catch (Exception $e) {
+            Log::error('Failed to fetch message details from Twilio: ' . $e->getMessage(), [
+                'messageSid' => $messageSid
+            ]);
+            return null;
+        }
+    }
+
 }
