@@ -71,4 +71,9 @@ class Section extends Model
         return $this->acceptanceItemStates()->where("status",AcceptanceItemStateStatus::REJECTED);
     }
 
+    public function scopeActive($query)
+    {
+        return $query->where("active", true);
+    }
+
 }
