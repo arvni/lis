@@ -44,8 +44,12 @@ class SectionGroupService
 
     public function getSectionGroupWithChildrenAndSection(SectionGroup $sectionGroup)
     {
+        $permittedSectionGroups = $this->getPermittedSectionGroupIds();
+        $permittedSections = $this->getPermittedSectionsIds();
         $sectionGroup->load([
-            'sections' => function ($q) {
+            'sections' => function ($q) use ($permittedSections) {
+                $q->whereIn('sections.id', $permittedSections);
+                $q->active();
                 $q->withCount([
                     "waitingItems",
                     "processingItems",
@@ -53,7 +57,9 @@ class SectionGroupService
                     "rejectedItems",
                 ]);
             },
-            'children' => function ($q) {
+            'children' => function ($q) use ($permittedSectionGroups) {
+                $q->whereIn("section_groups.id", $permittedSectionGroups);
+                $q->active();
                 $q->withCount([
                     "waitingItems",
                     "processingItems",
@@ -228,6 +234,21 @@ class SectionGroupService
         }
 
         return $breadcrumbs;
+    }
+
+    public function getPermittedSectionGroupIds():array
+    {
+        $output=[];
+        $user=auth()->user();
+        $sectionRoutes="user-$user->id-section-routes";
+        return $output;
+    }
+
+    public function getPermittedSectionsIds():array
+    {
+        $output=[];
+        return $output;
+
     }
 
 }

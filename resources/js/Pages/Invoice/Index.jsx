@@ -67,13 +67,6 @@ const InvoiceIndex = () => {
     // Table columns with improved readability
     const columns = [
         {
-            field: 'id',
-            headerName: 'ID',
-            type: "number",
-            hide: true,
-            width: 70
-        },
-        {
             field: 'invoiceNo',
             headerName: 'Invoice #',
             width: 110,
@@ -134,7 +127,8 @@ const InvoiceIndex = () => {
             }) : "—"
         },
         {
-            field: 'action',
+            field: 'id',
+            type:'action',
             sortable: false,
             headerName: 'Actions',
             width: 180,

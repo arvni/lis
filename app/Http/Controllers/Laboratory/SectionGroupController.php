@@ -53,6 +53,7 @@ class SectionGroupController extends Controller
 
     public function show(SectionGroup $sectionGroup)
     {
+        $this->authorize("view", $sectionGroup);
         $this->sectionGroupService->getSectionGroupWithChildrenAndSection($sectionGroup);
         return Inertia::render('SectionGroup/Show', compact("sectionGroup"));
     }

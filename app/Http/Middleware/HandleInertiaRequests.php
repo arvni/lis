@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use App\Domains\Laboratory\Services\SectionGroupService;
-use App\Domains\Notification\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
@@ -12,7 +11,6 @@ class HandleInertiaRequests extends Middleware
 {
     public function __construct(
         private readonly SectionGroupService $sectionGroupService,
-        private readonly NotificationService $notificationService,
     )
     {
     }

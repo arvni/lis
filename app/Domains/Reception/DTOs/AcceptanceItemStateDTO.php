@@ -8,33 +8,33 @@ use App\Domains\Reception\Models\AcceptanceItemState;
 class AcceptanceItemStateDTO
 {
     public function __construct(
-        public int     $acceptanceItemId,
-        public int     $sectionId,
-        public         $parameters,
-        public AcceptanceItemStateStatus  $status,
-        public int     $order = 0,
-        public bool    $isFirstSection = false,
-        public string  $details = "",
-        public ?int    $userId = null,
-        public ?int    $startedById = null,
-        public ?int    $finishedById = null,
-        public ?string $startedAt = null,
-        public ?string $finishedAt = null,
+        public int                       $acceptanceItemId,
+        public int                       $sectionId,
+        public                           $parameters,
+        public AcceptanceItemStateStatus $status,
+        public int                       $order = 0,
+        public bool                      $isFirstSection = false,
+        public string                    $details = "",
+        public ?int                      $userId = null,
+        public ?int                      $startedById = null,
+        public ?int                      $finishedById = null,
+        public ?string                   $startedAt = null,
+        public ?string                   $finishedAt = null,
 
     )
     {
     }
 
-    public Static function fromAcceptanceItemState(AcceptanceItemState $acceptanceItemState): AcceptanceItemStateDTO
+    public static function fromAcceptanceItemState(AcceptanceItemState $acceptanceItemState): AcceptanceItemStateDTO
     {
-        return new Self(
+        return new self(
             $acceptanceItemState->acceptance_item_id,
             $acceptanceItemState->section_id,
             $acceptanceItemState->parameters,
             $acceptanceItemState->status,
-            $acceptanceItemState->order,
+            $acceptanceItemState->order ?? ($acceptanceItemState->is_first_section ? 0 : null),
             $acceptanceItemState->is_first_section,
-            $acceptanceItemState->details||"",
+            $acceptanceItemState->details || "",
             $acceptanceItemState->user_id,
             $acceptanceItemState->started_by_id,
             $acceptanceItemState->finished_by_id,
@@ -43,6 +43,7 @@ class AcceptanceItemStateDTO
 
         );
     }
+
     public function toArray(): array
     {
         $data = [

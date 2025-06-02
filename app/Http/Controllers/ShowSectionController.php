@@ -21,6 +21,7 @@ class ShowSectionController extends Controller
      */
     public function __invoke(Section $section, Request $request)
     {
+
         $section->load("sectionGroup");
         $this->authorize("view", $section);
 

@@ -8,6 +8,7 @@ use App\Domains\User\Requests\StoreUserRequest;
 use App\Domains\User\Requests\UpdateUserRequest;
 use App\Domains\User\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -77,6 +78,7 @@ class UserController extends Controller
             $validated['roles']
         );
         $this->userService->updateUser($user, $userDto);
+        Cache::forget("user-$user->id-section-routes");
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
 
@@ -84,6 +86,7 @@ class UserController extends Controller
     {
         $this->authorize("delete", $user);
         $this->userService->deleteUser($user);
+        Cache::forget("user-$user->id-section-routes");
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }
 }

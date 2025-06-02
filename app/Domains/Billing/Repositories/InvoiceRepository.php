@@ -96,15 +96,15 @@ class InvoiceRepository
     }
 
 
-    public function getInvoiceNo($invoice)
+    public function getInvoiceNo(Invoice $invoice)
     {
         $created_at = Carbon::parse(($invoice->created_at));
         return "{$created_at->format('Y-m')}/" . $this->countInvoicesBeforeInThisYear($invoice->id, $created_at);
     }
 
-    private function countInvoicesBeforeInThisYear($id, $created_at)
+    private function countInvoicesBeforeInThisYear($id,Carbon $created_at)
     {
-        return Invoice::where("id", "<=", $id)->whereBetween("created_at", [$created_at->startOf("year")->toDate(), $created_at])->count();
+        return Invoice::where("id", "<=", $id)->whereBetween("created_at", [$created_at->copy()->startOf("year")->toDate(), $created_at])->count();
     }
 
 }

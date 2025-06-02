@@ -499,7 +499,7 @@ class AcceptanceService
             // Send notification to patient
             Notification::send($patient, new PatientReportPublished($acceptance));
 
-            if ($howReport["whatsappNumber"]) {
+            if ($howReport["whatsappNumber"]??null) {
                 foreach ($acceptance->acceptanceItems as $acceptanceItem) {
                     Notification::send(
                         $patient,

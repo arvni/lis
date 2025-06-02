@@ -428,7 +428,7 @@ const Show = ({
                                         size="small"
                                         startIcon={<DownloadOutlined/>}
                                         target="_blank"
-                                        href={route("reports.download", report)}
+                                        href={route("reports.download", (report.id ?? report.hash))}
                                     >
                                         Download Report
                                     </Button>
@@ -549,7 +549,7 @@ const Show = ({
                                         size="small"
                                         startIcon={<DownloadOutlined/>}
                                         target="_blank"
-                                        href={route("documents.download", report.clinical_comment_document.id)}
+                                        href={route("documents.download", (report.clinical_comment_document.id ?? report.clinical_comment_document.hash))}
                                     >
                                         Download Clinical Report
                                     </Button>

@@ -48,7 +48,6 @@ readonly class InvoiceService
             ->loadSum("acceptanceItems", "price");
 
         $invoice->invoiceNo = $this->invoiceRepository->getInvoiceNo($invoice);
-
         return $invoice;
     }
 
