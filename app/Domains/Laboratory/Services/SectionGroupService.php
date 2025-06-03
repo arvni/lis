@@ -9,6 +9,7 @@ use App\Domains\Laboratory\Repositories\SectionGroupRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 
 class SectionGroupService
 {
@@ -44,12 +45,11 @@ class SectionGroupService
 
     public function getSectionGroupWithChildrenAndSection(SectionGroup $sectionGroup)
     {
-        $permittedSectionGroups = $this->getPermittedSectionGroupIds();
-        $permittedSections = $this->getPermittedSectionsIds();
+        list($permittedSectionGroups, $permittedSections) = $this->getPermittedIds();
         $sectionGroup->load([
             'sections' => function ($q) use ($permittedSections) {
                 $q->whereIn('sections.id', $permittedSections);
-                $q->active();
+                $q->isActive();
                 $q->withCount([
                     "waitingItems",
                     "processingItems",
@@ -99,7 +99,7 @@ class SectionGroupService
      *
      * @return array
      */
-    public function getTransformedSectionGroups()
+    public function getTransformedSectionGroups(): array
     {
         // First get the nested structure
         $nestedGroups = $this->getAllNestedSectionGroups();
@@ -236,19 +236,37 @@ class SectionGroupService
         return $breadcrumbs;
     }
 
-    public function getPermittedSectionGroupIds():array
+    public function getPermittedIds(): array
     {
-        $output=[];
-        $user=auth()->user();
-        $sectionRoutes="user-$user->id-section-routes";
-        return $output;
+        $user = auth()->user();
+        $sectionRoutes = "user-$user->id-section-routes";
+        $extractedRoutes = $this->extractRoutes(cache()->get($sectionRoutes));
+        $sections = [];
+        $sectionGroups = [];
+        foreach ($extractedRoutes as $route) {
+            if (Str::startsWith($route, "sections.show.")) {
+                $sections[] = last(explode(".", $route));
+            } elseif (Str::startsWith($route, "sectionGroups.show.")) {
+                $sectionGroups[] = last(explode(".", $route));
+            }
+        }
+        return [$sectionGroups, $sections];
     }
 
-    public function getPermittedSectionsIds():array
+    function extractRoutes(array $items, array &$routes = []): array
     {
-        $output=[];
-        return $output;
+        foreach ($items as $item) {
+            if (isset($item['route'])) {
+                $routes[] = $item['route'];
+            }
 
+            if (isset($item['child']) && is_array($item['child'])) {
+                $this->extractRoutes($item['child'], $routes);
+            }
+        }
+
+        return $routes;
     }
+
 
 }
