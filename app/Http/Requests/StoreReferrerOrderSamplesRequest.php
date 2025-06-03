@@ -12,7 +12,7 @@ class StoreReferrerOrderSamplesRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("createSamples",$this->route()->parameter("referrerOrder"));
+        return Gate::allows("createSamples", $this->route()->parameter("referrerOrder"));
     }
 
     /**
@@ -24,14 +24,15 @@ class StoreReferrerOrderSamplesRequest extends FormRequest
     {
         return [
             "barcodes" => ["required", "array"],
-            "barcodes.*.patient"=>["required", "array"],
-            "barcodes.*.patient.id"=>["required", "exists:patients,id"],
+            "barcodes.*.patient" => ["required", "array"],
+            "barcodes.*.patient.id" => ["required", "exists:patients,id"],
             "barcodes.*.sampleType" => ["required", "exists:sample_types,id"],
-            "barcodes.*.items"=>["required", "array"],
+            "barcodes.*.items" => ["required", "array"],
             "barcodes.*.items.*.id" => ["required", "exists:acceptance_items,id"],
             "barcodes.*.collection_date" => ["required"],
             "barcodes.*.sampleLocation" => ["required"],
-            "barcodes.*.barcodeGroup" => ["required","array"],
+            "barcodes.*.barcodeGroup" => ["required", "array"],
+            "barcodes.*.barcode" => ["nullable", "string"],
         ];
     }
 }
