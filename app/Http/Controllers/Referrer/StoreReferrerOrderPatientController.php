@@ -33,7 +33,7 @@ class StoreReferrerOrderPatientController extends Controller
         if ($referrerOrder->patient_id)
             return back();
         $patient = null;
-        $patientId = $request->input("id") ?? $request->input("patient.id");
+        $patientId = $request->input("patient_id") ?? $request->input("patient.id");
         if ($patientId)
             $patient = $this->patientService->getPatientById($patientId);
         else {

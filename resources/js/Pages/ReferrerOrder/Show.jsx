@@ -185,6 +185,8 @@ const Show = ({referrerOrder, errors = {}}) => {
         return "success";
     };
 
+    const {id: patientID, ...patient} = referrerOrder?.orderInformation?.patient;
+
     return (
         <>
             <PageHeader icon={<Assignment sx={{mr: 1}}/>}
@@ -598,7 +600,7 @@ const Show = ({referrerOrder, errors = {}}) => {
             />
 
             <PatientAddForm
-                defaultValues={referrerOrder.orderInformation.patient}
+                defaultValues={patient}
                 id={referrerOrder.id}
                 open={openAddPatient}
                 onClose={handleCloseAddPatient}
