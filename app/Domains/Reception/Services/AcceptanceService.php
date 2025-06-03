@@ -513,14 +513,14 @@ class AcceptanceService
             }
 
             if ($referrer) {
-                if ($howReport["sendToReferrer"] ?? false) {
+                //if ($howReport["sendToReferrer"] ?? false) {
                     // Send notification to referrer
                     Notification::send($referrer, new ReferrerReportPublished($acceptance));
                     $acceptance->load("referrerOrder");
                     // Update referrer order status
                     if ($acceptance->referrerOrder)
                         $this->referrerOrderService->updateReferrerOrderStatus($acceptance->referrerOrder, 'reported');
-                }
+               // }
             }
         }
     }
