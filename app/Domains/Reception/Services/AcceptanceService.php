@@ -11,6 +11,7 @@ use App\Domains\Reception\DTOs\AcceptanceDTO;
 use App\Domains\Reception\DTOs\AcceptanceItemDTO;
 use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
+use App\Domains\Reception\Events\AcceptanceDeletedEvent;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Notifications\PatientReportPublished;
@@ -316,8 +317,11 @@ class AcceptanceService
      */
     public function deleteAcceptance(Acceptance $acceptance): void
     {
-        if ($acceptance->status !== AcceptanceStatus::REPORTED || $acceptance->status !== AcceptanceStatus::PROCESSING) {
+
+        if ($acceptance->status !== AcceptanceStatus::REPORTED && $acceptance->status !== AcceptanceStatus::PROCESSING && $acceptance->status !== AcceptanceStatus::CANCELLED) {
+            $invoiceId = $acceptance->invoice_id;
             $this->acceptanceRepository->deleteAcceptance($acceptance);
+            AcceptanceDeletedEvent::dispatch($invoiceId);
         } else
             throw new Exception("There is some Method that use this Acceptance");
     }
@@ -499,7 +503,7 @@ class AcceptanceService
             // Send notification to patient
             Notification::send($patient, new PatientReportPublished($acceptance));
 
-            if ($howReport["whatsappNumber"]??null) {
+            if ($howReport["whatsappNumber"] ?? null) {
                 foreach ($acceptance->acceptanceItems as $acceptanceItem) {
                     Notification::send(
                         $patient,
@@ -514,13 +518,13 @@ class AcceptanceService
 
             if ($referrer) {
                 //if ($howReport["sendToReferrer"] ?? false) {
-                    // Send notification to referrer
-                    Notification::send($referrer, new ReferrerReportPublished($acceptance));
-                    $acceptance->load("referrerOrder");
-                    // Update referrer order status
-                    if ($acceptance->referrerOrder)
-                        $this->referrerOrderService->updateReferrerOrderStatus($acceptance->referrerOrder, 'reported');
-               // }
+                // Send notification to referrer
+                Notification::send($referrer, new ReferrerReportPublished($acceptance));
+                $acceptance->load("referrerOrder");
+                // Update referrer order status
+                if ($acceptance->referrerOrder)
+                    $this->referrerOrderService->updateReferrerOrderStatus($acceptance->referrerOrder, 'reported');
+                // }
             }
         }
     }

@@ -4,9 +4,12 @@ namespace App\Providers;
 
 use App\Domains\Billing\Events\InvoiceAcceptanceUpdateEvent;
 use App\Domains\Billing\Events\PaymentsAddedEvent;
+use App\Domains\Billing\Listeners\InvoiceAcceptanceDeletedListener;
 use App\Domains\Document\Listeners\DocumentUpdateListener;
 use App\Domains\Laboratory\Events\ReportTemplateDocumentUpdateEvent;
 use App\Domains\Laboratory\Events\ReferrerOrderEvent;
+use App\Domains\Laboratory\Events\SectionEvent;
+use App\Domains\Reception\Events\AcceptanceDeletedEvent;
 use App\Domains\Reception\Events\PatientDocumentUpdateEvent;
 use App\Domains\Reception\Events\ReportPublishedEvent;
 use App\Domains\Reception\Events\SampleCollectedEvent;
@@ -57,8 +60,12 @@ class EventServiceProvider extends ServiceProvider
             [AcceptancePaymentListener::class, 'handle']
         );
         Event::listen(
-            [ReferrerOrderEvent::class],
+            [SectionEvent::class],
             [SectionPermissionsListener::class, 'handle']
+        );
+        Event::listen(
+            [AcceptanceDeletedEvent::class],
+            [InvoiceAcceptanceDeletedListener::class, 'handle']
         );
         Event::listen(
             [SampleCollectedEvent::class],

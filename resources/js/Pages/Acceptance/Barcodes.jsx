@@ -9,7 +9,7 @@ import {
     Tooltip,
     IconButton,
     Grid2 as Grid,
-    Chip, Stack
+    Chip, Stack, Divider
 } from '@mui/material';
 import {styled} from '@mui/material/styles';
 import JsBarcode from 'jsbarcode';
@@ -49,8 +49,8 @@ const BarcodeItem = styled(Paper)(({theme}) => ({
     justifyContent: 'center',
     pageBreakAfter: 'always',
     boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-    width: '50mm',
-    height: '20mm',
+    width: '37mm',
+    height: '25mm',
     border: '1px dashed #ddd',
     position: 'relative',
     overflow: 'hidden',
@@ -58,8 +58,6 @@ const BarcodeItem = styled(Paper)(({theme}) => ({
         margin: 0,
         boxShadow: 'none',
         border: 'none',
-        width: "unset",
-        height: "unset",
     }
 }));
 
@@ -67,7 +65,7 @@ const BarcodeText = styled(Typography)(() => ({
     margin: '0.5px',
     lineHeight: '2.2mm',
     fontWeight: 'bold',
-    fontSize: '3.5mm',
+    fontSize: '2.5mm',
     fontFamily: 'monospace',
     letterSpacing: '.15mm',
     textTransform: 'uppercase',
@@ -147,23 +145,25 @@ const BarcodeComponent = ({barcodes}) => {
 
     useEffect(() => {
         // Initialize barcodes after component mounts
-        barcodes.forEach(barcode => {
-            JsBarcode(`#barcode-${barcode.barcode}`, barcode.barcode, {
-                format: 'CODE128',
-                width: 1.4,
-                height: 35,
-                displayValue: false,
-                background: '#ffffff',
-                lineColor: '#000000'
+        if (!printOnlyBarcode) {
+            barcodes.forEach(barcode => {
+                JsBarcode(`#barcode-${barcode.barcode}`, barcode.barcode, {
+                    format: 'CODE128',
+                    width: .9,
+                    height: 35,
+                    displayValue: false,
+                    background: '#ffffff',
+                    lineColor: '#000000'
+                });
             });
-        });
+        }
         // Trigger print when component is loaded
         const printTimeout = setTimeout(() => {
             window.print();
         }, 500);
 
         return () => clearTimeout(printTimeout);
-    }, [barcodes]);
+    }, [barcodes, printOnlyBarcode]);
 
     // Format date function with enhanced formatting
     const formatDate = (dateString) => {
@@ -218,36 +218,37 @@ const BarcodeComponent = ({barcodes}) => {
                                 {(!barcode?.acceptance_items?.length || barcode.is_rejected) && (
                                     <RejectedOverlay>Rejected</RejectedOverlay>
                                 )}
-
-                                <Box sx={{width: '100%', pt: '0mm'}}>
-                                    <svg id={`barcode-${barcode.barcode}`}></svg>
-                                </Box>
-                                {!printOnlyBarcode && <Stack spacing={.5} sx={{mt: "-3mm", zIndex: 1}}>
-                                    <BarcodeText>{barcode.barcode}</BarcodeText>
-                                    <BarcodeText>
-                                        <Box component="span"
-                                             sx={{display: 'inline-flex', alignItems: 'center', mr: 0.5}}>
-                                            <CalendarTodayIcon sx={{fontSize: '2mm', mr: 0.5}}/>
-                                            {formatDate(barcode.collection_date || barcode.created_at)}
-                                        </Box>
-                                        |
-                                        {barcode.patient && <Box component="span"
-                                                                 sx={{
-                                                                     display: 'inline-flex',
-                                                                     alignItems: 'center',
-                                                                     ml: 0.5
-                                                                 }}>
-                                            <PersonIcon sx={{fontSize: '2mm', mr: 0.5}}/>
-                                            {barcode.patient.gender.substring(0, 1)}/{barcode.patient.age}
-                                        </Box>}
-                                    </BarcodeText>
-                                    {barcode?.acceptance_items?.length ? (
-                                        <BarcodeText
-                                            title={barcode.acceptance_items.map(item => item.test.name).join(', ')}>
-                                            {barcode.acceptance_items.map(item => item.test.name).join(', ')}
+                                {printOnlyBarcode ? <BarcodeText >{barcode.barcode}</BarcodeText> : <>
+                                    <Box sx={{width: '100%', pt: '0mm'}}>
+                                        <svg id={`barcode-${barcode.barcode}`}></svg>
+                                    </Box>
+                                    <Stack spacing={.5} sx={{mt: "-3mm", zIndex: 1}}>
+                                        <BarcodeText>{barcode.barcode}</BarcodeText>
+                                        <BarcodeText>
+                                            <Box component="span"
+                                                 sx={{display: 'inline-flex', alignItems: 'center', mr: 0.5}}>
+                                                <CalendarTodayIcon sx={{fontSize: '2mm', mr: 0.5}}/>
+                                                {formatDate(barcode.collection_date || barcode.created_at)}
+                                            </Box>
+                                            |
+                                            {barcode.patient && <Box component="span"
+                                                                     sx={{
+                                                                         display: 'inline-flex',
+                                                                         alignItems: 'center',
+                                                                         ml: 0.5
+                                                                     }}>
+                                                <PersonIcon sx={{fontSize: '2mm', mr: 0.5}}/>
+                                                {barcode.patient.gender.substring(0, 1)}/{barcode.patient.age}
+                                            </Box>}
                                         </BarcodeText>
-                                    ) : null}
-                                </Stack>}
+                                        {barcode?.acceptance_items?.length ? (
+                                            <BarcodeText
+                                                title={barcode.acceptance_items.map(item => item.test.name).join(', ')}>
+                                                {barcode.acceptance_items.map(item => item.test.name).join(', ')}
+                                            </BarcodeText>
+                                        ) : null}
+                                    </Stack>
+                                </>}
                             </BarcodeItem>
                         </Grid>
                     ))}
