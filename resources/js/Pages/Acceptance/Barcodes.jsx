@@ -9,7 +9,7 @@ import {
     Tooltip,
     IconButton,
     Grid2 as Grid,
-    Chip
+    Chip, Stack
 } from '@mui/material';
 import {styled} from '@mui/material/styles';
 import JsBarcode from 'jsbarcode';
@@ -54,7 +54,9 @@ const BarcodeItem = styled(Paper)(({theme}) => ({
     '@media print': {
         margin: 0,
         boxShadow: 'none',
-        border: 'none'
+        border: 'none',
+        width: "unset",
+        height: "unset",
     }
 }));
 
@@ -62,7 +64,7 @@ const BarcodeText = styled(Typography)(() => ({
     margin: '0.5px',
     lineHeight: '2.2mm',
     fontWeight: 'bold',
-    fontSize: '2.5mm',
+    fontSize: '3.5mm',
     fontFamily: 'monospace',
     letterSpacing: '.15mm',
     textTransform: 'uppercase',
@@ -74,7 +76,7 @@ const BarcodeText = styled(Typography)(() => ({
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     '@media print': {
-        fontSize: '2.5mm',
+        fontSize: '3.5mm',
     }
 }));
 
@@ -143,7 +145,7 @@ const BarcodeComponent = ({barcodes}) => {
         barcodes.forEach(barcode => {
             JsBarcode(`#barcode-${barcode.barcode}`, barcode.barcode, {
                 format: 'CODE128',
-                width: 1,
+                width: 1.5,
                 height: 30,
                 displayValue: false,
                 background: '#ffffff',
@@ -205,32 +207,31 @@ const BarcodeComponent = ({barcodes}) => {
                                     <RejectedOverlay>Rejected</RejectedOverlay>
                                 )}
 
-                                <Box sx={{width: '100%', height: '10mm', pt: '0mm'}}>
+                                <Box sx={{width: '100%', pt: '0mm'}}>
                                     <svg id={`barcode-${barcode.barcode}`}></svg>
                                 </Box>
-
-                                <BarcodeText>{barcode.barcode}</BarcodeText>
-
-                                <BarcodeText>
-                                    <Box component="span"
-                                         sx={{display: 'inline-flex', alignItems: 'center', mr: 0.5}}>
-                                        <CalendarTodayIcon sx={{fontSize: '2mm', mr: 0.5}}/>
-                                        {formatDate(barcode.collection_date || barcode.created_at)}
-                                    </Box>
-                                    |
-                                    <Box component="span"
-                                         sx={{display: 'inline-flex', alignItems: 'center', ml: 0.5}}>
-                                        <PersonIcon sx={{fontSize: '2mm', mr: 0.5}}/>
-                                        {barcode.patient.gender.substring(0, 1)}/{barcode.patient.age}
-                                    </Box>
-                                </BarcodeText>
-
-                                {barcode?.acceptance_items?.length ? (
-                                    <BarcodeText
-                                        title={barcode.acceptance_items.map(item => item.test.name).join(', ')}>
-                                        {barcode.acceptance_items.map(item => item.test.name).join(', ')}
+                                <Stack spacing={.5} sx={{mt:"-4mm",zIndex:1}}>
+                                    <BarcodeText>{barcode.barcode}</BarcodeText>
+                                    <BarcodeText>
+                                        <Box component="span"
+                                             sx={{display: 'inline-flex', alignItems: 'center', mr: 0.5}}>
+                                            <CalendarTodayIcon sx={{fontSize: '2mm', mr: 0.5}}/>
+                                            {formatDate(barcode.collection_date || barcode.created_at)}
+                                        </Box>
+                                        |
+                                        {barcode.patient&&<Box component="span"
+                                              sx={{display: 'inline-flex', alignItems: 'center', ml: 0.5}}>
+                                            <PersonIcon sx={{fontSize: '2mm', mr: 0.5}}/>
+                                            {barcode.patient.gender.substring(0, 1)}/{barcode.patient.age}
+                                        </Box>}
                                     </BarcodeText>
-                                ) : null}
+                                    {barcode?.acceptance_items?.length ? (
+                                        <BarcodeText
+                                            title={barcode.acceptance_items.map(item => item.test.name).join(', ')}>
+                                            {barcode.acceptance_items.map(item => item.test.name).join(', ')}
+                                        </BarcodeText>
+                                    ) : null}
+                                </Stack>
                             </BarcodeItem>
                         </Grid>
                     ))}
@@ -279,7 +280,6 @@ const GlobalStyles = () => {
         const style = document.createElement('style');
         style.innerHTML = `
       @page {
-        size: 50mm 25mm;
         margin: 0;
       }
       @media print {
@@ -287,17 +287,11 @@ const GlobalStyles = () => {
           padding: 0;
           margin: 0;
         }
-        html, body {
-          width: 50mm;
-          height: 20mm;
-        }
         .MuiGrid-container {
           display: block !important;
         }
         .MuiGrid-item {
           display: block !important;
-          width: 50mm !important;
-          height: 20mm !important;
           padding: 0 !important;
           margin: 0 !important;
         }

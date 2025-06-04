@@ -29,7 +29,7 @@ class SampleDTO
             acceptanceItems: $data['items'] ?? null,
             status: $data['status'] ?? null,
             barcodeGroup: $data['barcodeGroup'] ?? null,
-            barcode: strtoupper($data['barcode']) ?? null,
+            barcode: ($data['barcode']??null)?strtoupper($data['barcode']) : null,
         );
     }
 

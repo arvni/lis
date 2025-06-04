@@ -43,7 +43,8 @@ class SampleTypeController extends Controller
         $validatedData = $sampleTypeRequest->validated();
         $sampleTypeDto = new SampleTypeDTO(
             $validatedData["name"],
-            $validatedData["description"]??""
+            $validatedData["description"]??"",
+            $validatedData["orderable"]??false
         );
         $this->sampleTypeService->storeSampleType($sampleTypeDto);
         return back()->with(["success" => true, "status" => "$sampleTypeDto->name Created Successfully"]);
@@ -58,7 +59,8 @@ class SampleTypeController extends Controller
         $validatedData = $request->validated();
         $sampleTypeDto = new SampleTypeDTO(
             $validatedData["name"],
-            $validatedData["description"]??""
+            $validatedData["description"]??"",
+            $validatedData["orderable"]??false
         );
         $this->sampleTypeService->updateSampleType($sampleType, $sampleTypeDto);
         return back()->with(["success" => true, "status" => "$sampleTypeDto->name Updated Successfully"]);

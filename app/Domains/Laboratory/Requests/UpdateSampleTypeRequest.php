@@ -26,6 +26,7 @@ class UpdateSampleTypeRequest extends FormRequest
         return [
             "name" => ["string", "required", "unique:sample_types,name," . $this->route()->parameter("sampleType")->id],
             "description" => ["nullable", "string"],
+            "orderable" => ["nullable", "boolean"],
         ];
     }
 }

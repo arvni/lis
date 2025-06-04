@@ -1,7 +1,8 @@
-import {TextField} from "@mui/material";
+import {Switch, TextField} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
 import {FormProvider, useFormState} from "@/Components/FormTemplate.jsx";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 
 const AddForm = ({open, defaultValue = {}, onClose}) => {
@@ -51,6 +52,14 @@ const FormContent = () => {
                     variant="outlined"
                 />
             </Grid>
+            <Grid size={{sm: 6, xs: 12}}>
+                <FormControlLabel label="Orderable"
+                                  control={<Switch/>}
+                                  labelPlacement="start"
+                                  name="orderable"
+                                  onChange={handleChange}
+                                  checked={data.orderable}/>
+            </Grid>
             <Grid size={{xs: 12}}>
                 <TextField
                     label="Description"
@@ -66,6 +75,7 @@ const FormContent = () => {
                     variant="outlined"
                 />
             </Grid>
+
         </>
     )
 }

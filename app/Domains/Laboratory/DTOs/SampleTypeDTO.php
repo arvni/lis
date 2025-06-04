@@ -6,7 +6,8 @@ class SampleTypeDTO
 {
     public function __construct(
         public string $name,
-        public string $description
+        public string $description,
+        public bool   $orderable = false
     )
     {
     }
@@ -15,7 +16,8 @@ class SampleTypeDTO
     {
         return [
             "name" => $this->name,
-            "description" => $this->description
+            "description" => $this->description,
+            "orderable" => $this->orderable
         ];
     }
 }

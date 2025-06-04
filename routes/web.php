@@ -35,6 +35,7 @@ use App\Http\Controllers\GetUserDetailsController;
 use App\Http\Controllers\Laboratory\BarcodeGroupController;
 use App\Http\Controllers\Laboratory\DoctorController;
 use App\Http\Controllers\Laboratory\ExportReportTemplateParametersController;
+use App\Http\Controllers\Laboratory\MaterialController;
 use App\Http\Controllers\Laboratory\OfferController;
 use App\Http\Controllers\Laboratory\ReportTemplateController;
 use App\Http\Controllers\Laboratory\SampleTypeController;
@@ -207,6 +208,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource("sampleTypes", SampleTypeController::class)->except("create", "edit", "show");
         Route::resource("barcodeGroups", BarcodeGroupController::class)->except("create", "edit", "show");
         Route::resource("offers", OfferController::class)->except("create", "edit", "show");
+        Route::resource("materials", MaterialController::class)->except("create", "edit", "show");
         Route::resource("doctors", DoctorController::class)->except("create", "edit", "show");
         Route::resource("testGroups", TestGroupController::class)->except("create", "edit", "show");
         Route::resource("reportTemplates", ReportTemplateController::class)->except("create", "edit");

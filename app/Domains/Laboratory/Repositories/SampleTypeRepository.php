@@ -44,4 +44,9 @@ class SampleTypeRepository
             $query->search(["name"], $filters["search"]);
     }
 
+    public function getSampleTypeById($id): ?SampleType
+    {
+        return SampleType::query()->findOrFail($id);
+    }
+
 }

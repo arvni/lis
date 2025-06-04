@@ -10,7 +10,12 @@ class SampleType extends Model
     use Searchable;
     protected $fillable = [
         "name",
-        "description"
+        "description",
+        "orderable"
+    ];
+
+    protected $casts=[
+        "orderable"=>"boolean"
     ];
 
     public function tests()

@@ -6,10 +6,8 @@ use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Laboratory\Models\Section;
 use App\Domains\Laboratory\Models\SectionGroup;
 use App\Domains\User\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -37,6 +35,12 @@ class RoleAndPermissionSeeder extends Seeder
                     "Add Patient",
                     "Add Acceptance",
                     "Add Samples"
+                ],
+                "Materials" => [
+                    "Create Material",
+                    "Edit Material",
+                    "Delete Material",
+                    "List Materials",
                 ]
             ],
             "Consultation" => [

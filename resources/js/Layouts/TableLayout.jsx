@@ -14,7 +14,6 @@ import {
     IconButton,
     Tooltip,
     Button,
-    Divider,
     alpha,
     Skeleton,
     Fade,
@@ -23,9 +22,6 @@ import {
     TableRows as TableRowsIcon,
     Refresh as RefreshIcon,
     FilterList as FilterListIcon,
-    ViewColumn as ViewColumnIcon,
-    Search as SearchIcon,
-    MoreVert as MoreVertIcon,
     Download as DownloadIcon
 } from "@mui/icons-material";
 
@@ -48,8 +44,6 @@ const CustomNoRowsOverlay = () => {
  * Improved loading overlay with better visual feedback
  */
 const CustomLoadingOverlay = () => {
-    const theme = useTheme();
-
     return (
         <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, bgcolor: alpha('#fff', 0.7), zIndex: 2 }}>
             <Box sx={{ position: 'sticky', top: 0, width: '100%' }}>

@@ -20,7 +20,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import BusinessIcon from '@mui/icons-material/Business';
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import {Analytics} from "@mui/icons-material";
-import {PercentDiamond, Stethoscope as Doctor, Hospital} from "lucide-react";
+import {PercentDiamond, Stethoscope as Doctor, Hospital, PillBottle} from "lucide-react";
 
 export const refactorRoute = (addr) => {
     if (!addr)
@@ -191,9 +191,9 @@ const routes = (sections = []) => {
                     icon: <FlipCameraAndroidIcon/>
                 },
                 {
-                    title: "SampleTypes",
+                    title: "Sample Types",
                     route: "sampleTypes.index",
-                    permission: 'Advance Settings.Sample Type.List Sample Types',
+                    permission: 'Advance Settings.Sample Types.List Sample Types',
                     icon: <VaccinesIcon/>
                 },
                 {
@@ -251,6 +251,12 @@ const routes = (sections = []) => {
                     icon: <ReceiptIcon/>,
                     route: "referrer-orders.index",
                     permission: 'Referrer.Referrer Orders.List Referrer Orders',
+                },
+                {
+                    title: "Materials",
+                    icon: <PillBottle/>,
+                    route: "materials.index",
+                    permission: 'Referrer.Materials.List Materials',
                 },
             ]
         },

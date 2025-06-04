@@ -9,7 +9,7 @@ use App\Domains\Laboratory\Repositories\SampleTypeRepository;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-class SampleTypeService
+readonly class SampleTypeService
 {
     public function __construct(private SampleTypeRepository $sampleTypeRepository)
     {
@@ -39,5 +39,10 @@ class SampleTypeService
             $this->sampleTypeRepository->deleteSampleType($sampleType);
         } else
             throw new Exception("This sampleType has some Acceptance or participate in Workflow");
+    }
+
+    public function getSampleTypeById($id): SampleType
+    {
+        return $this->sampleTypeRepository->getSampleTypeById($id);
     }
 }
