@@ -218,9 +218,14 @@ const BarcodeComponent = ({barcodes}) => {
                                 {(!barcode?.acceptance_items?.length || barcode.is_rejected) && (
                                     <RejectedOverlay>Rejected</RejectedOverlay>
                                 )}
-                                {printOnlyBarcode ? <BarcodeText >{barcode.barcode}</BarcodeText> : <>
-                                    <Box sx={{width: '100%', pt: '0mm'}}>
-                                        <svg id={`barcode-${barcode.barcode}`}></svg>
+                                {printOnlyBarcode ? <BarcodeText>{barcode.barcode}</BarcodeText> : <>
+                                    <Box sx={{
+                                        width: '100%',
+                                        pt: '0mm',
+                                        display: "flex",
+                                        "& svg ": {width: "100% !important"}
+                                    }}>
+                                        <svg id={`barcode-${barcode.barcode}`} style={{width: "100% !important"}}></svg>
                                     </Box>
                                     <Stack spacing={.5} sx={{mt: "-3mm", zIndex: 1}}>
                                         <BarcodeText>{barcode.barcode}</BarcodeText>
