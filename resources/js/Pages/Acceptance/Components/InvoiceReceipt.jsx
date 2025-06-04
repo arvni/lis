@@ -239,7 +239,7 @@ const OptimizedInvoiceReceipt = ({acceptance, onPrint, showLogo}) => {
                 <InvoiceContainer elevation={3} ref={printRef}>
                     <InvoiceHeader>
                         <Box sx={{display: 'flex', alignItems: 'center'}}>
-                            {showLogo && (
+                            {showLogo && (<>
                                 <Box
                                     component="img"
                                     src="https://biongenetic.com/wp-content/uploads/2021/11/mmclogo-1.png"
@@ -249,16 +249,17 @@ const OptimizedInvoiceReceipt = ({acceptance, onPrint, showLogo}) => {
                                     }}
                                     alt="Company Logo"
                                 />
-                            )}
-                            <Box>
-                                <Typography variant="body1"
-                                            sx={{fontWeight: 'bold', color: 'primary.main', fontSize: '0.85rem'}}>
-                                    Muscat Medical Center
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary" sx={{fontSize: '0.6rem'}}>
-                                    Healthcare Excellence
-                                </Typography>
-                            </Box>
+
+                                <Box>
+                                    <Typography variant="body1"
+                                                sx={{fontWeight: 'bold', color: 'primary.main', fontSize: '0.85rem'}}>
+                                        Muscat Medical Center
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary" sx={{fontSize: '0.6rem'}}>
+                                        Healthcare Excellence
+                                    </Typography>
+                                </Box>
+                            </>)}
                         </Box>
 
                         <Box sx={{textAlign: 'right'}}>
@@ -281,7 +282,7 @@ const OptimizedInvoiceReceipt = ({acceptance, onPrint, showLogo}) => {
                     </SectionHeading>
 
                     <Grid container spacing={1} sx={{mb: 1}}>
-                        <Grid size={{xs: 6}}>
+                        <Grid size={{xs: 8}}>
                             <InfoItem
                                 label="Full Name"
                                 value={acceptance?.patient?.fullName}
@@ -292,7 +293,7 @@ const OptimizedInvoiceReceipt = ({acceptance, onPrint, showLogo}) => {
                                 value={acceptance?.patient?.idNo}
                             />
                         </Grid>
-                        <Grid size={{xs: 6}}>
+                        <Grid size={{xs: 4}}>
                             <InfoItem
                                 label="Age/Gender"
                                 value={`${acceptance?.patient?.age || ''} / ${
@@ -301,7 +302,7 @@ const OptimizedInvoiceReceipt = ({acceptance, onPrint, showLogo}) => {
                             />
                             <InfoItem
                                 label="Report Via"
-                                value={acceptance?.howReport?.way === 'email' ? 'Email' : 'Print'}
+                                value={Object.keys(acceptance?.howReport || {}).filter(item => ["print","email", "whatsapp", "sendToReferrer"].includes(item) && Boolean(acceptance.howReport[item]))}
                             />
                         </Grid>
                     </Grid>
@@ -467,8 +468,8 @@ const OptimizedInvoiceReceipt = ({acceptance, onPrint, showLogo}) => {
                         <AccessTime color="primary" sx={{mr: 1, fontSize: '0.75rem'}}/>
                         <Typography variant="caption">
                             The report will be available at
-                            <Box component="span" sx={{ml:1,fontWeight: 'bold', color: 'primary.main'}}>
-                                {calculateBusinessDays(acceptance.created_at,reportDays).toDateString()}
+                            <Box component="span" sx={{ml: 1, fontWeight: 'bold', color: 'primary.main'}}>
+                                {calculateBusinessDays(acceptance.created_at, reportDays).toDateString()}
                             </Box>.
                         </Typography>
                     </Box>

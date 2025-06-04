@@ -11,7 +11,8 @@ import countries from "@/Data/Countries";
 import {router} from "@inertiajs/react";
 
 export const getPatientByIdNo = (idNo, callback) => axios.get(route('api.patients.getByIdNo', {idNo}))
-    .then(res => callback(res.data));
+    .then(res => callback(res.data))
+    .catch(() => callback(null));
 
 export default function ({data, setData, back, edit, next, step, ...rest}) {
     const [errors, setErrors] = useState({});

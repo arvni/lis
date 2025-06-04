@@ -10,8 +10,6 @@ use App\Domains\Laboratory\Repositories\MaterialRepository;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 
 class MaterialService
 {
@@ -28,11 +26,11 @@ class MaterialService
     {
         $sampleType = $this->sampleTypeService->getSampleTypeById($groupMaterialDTO->sampleTypeId);
         $now = Carbon::now();
-        $packingSeries=$this->generatePackingSeries($sampleType);
+        $packingSeries = $this->generatePackingSeries($sampleType->name,$now);
         foreach ($groupMaterialDTO->tubes as $key => $tube) {
             $this->materialRepository->creatMaterial([
                 "sample_type_id" => $groupMaterialDTO->sampleTypeId,
-                "barcode" => $this->generateBarcode($now, $sampleType, $key),
+                "barcode" => $this->generateBarcode($now, $sampleType->name, $key),
                 "tube_barcode" => $tube["tube_barcode"],
                 "expire_date" => $tube["expire_date"],
                 "packing_series" => $packingSeries,
@@ -60,10 +58,10 @@ class MaterialService
         return Carbon::parse($date)->format("y") . ucfirst(substr($sampleType, 0, 1)) . (Carbon::now()->getTimestamp() + $i);
     }
 
-    private function generatePackingSeries($sampleTypeName,Carbon $date): string
+    private function generatePackingSeries($sampleTypeName, Carbon $date): string
     {
-        $prefix=explode(" ", $sampleTypeName);
-        return Str::kebab($sampleTypeName) . $date->format("Y-m-d-H-i-s");
+        $prefix = implode("", array_map(fn($item) => strtoupper(substr($item, 0, 1)), explode(" ", $sampleTypeName)));
+        return $prefix . "-" . $date->format("Y-m-d-H-i-s");
     }
 
 }

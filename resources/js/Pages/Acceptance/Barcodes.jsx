@@ -145,8 +145,8 @@ const BarcodeComponent = ({barcodes}) => {
         barcodes.forEach(barcode => {
             JsBarcode(`#barcode-${barcode.barcode}`, barcode.barcode, {
                 format: 'CODE128',
-                width: 1.5,
-                height: 30,
+                width: 1.4,
+                height: 35,
                 displayValue: false,
                 background: '#ffffff',
                 lineColor: '#000000'
@@ -210,7 +210,7 @@ const BarcodeComponent = ({barcodes}) => {
                                 <Box sx={{width: '100%', pt: '0mm'}}>
                                     <svg id={`barcode-${barcode.barcode}`}></svg>
                                 </Box>
-                                <Stack spacing={.5} sx={{mt:"-4mm",zIndex:1}}>
+                                <Stack spacing={.5} sx={{mt:"-3mm",zIndex:1}}>
                                     <BarcodeText>{barcode.barcode}</BarcodeText>
                                     <BarcodeText>
                                         <Box component="span"

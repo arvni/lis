@@ -21,18 +21,17 @@ const patient = {
 const Add = (props) => {
     const {data, setData, post, processing} = useForm({});
     const [step, setStep] = useState(0);
-    const [loading, setLoading] = useState(false);
     useEffect(() => {
         setData(patient);
     }, []);
     useEffect(() => {
         props.patient ? setData(prevData => ({...prevData, ...props.patient, _method: "put"})) : null;
     }, [props]);
-    const save = async () => {
+    const save = () => {
         switch (step) {
             case 0:
-                setLoading(true);
-                getPatientByIdNo(data.idNo, findPatientCallBack);
+                console.log("here");
+                setStep(1);
                 break;
             case 1:
                 post(route('patients.store'));
@@ -41,18 +40,6 @@ const Add = (props) => {
     };
     const back = () => step > 0 ? setStep(step - 1) : handleCancel();
     const handleCancel = () => router.visit(route('patients.index'));
-    const getPatientByIdNo = async (idNo, callBack) => {
-        axios.get(route('api.patients.getByIdNo', {idNo}))
-            .then(res => callBack(res.data))
-            .finally(()=>callBack({}));
-    }
-    const findPatientCallBack = (res) => {
-        if (res.id)
-            router.visit(route("patients.show", res.id))
-        else
-            setStep(1);
-        setLoading(false);
-    }
     return (
         <>
             <AddForm data={data}
@@ -61,7 +48,7 @@ const Add = (props) => {
                      back={back}
                      step={step}
                      {...props}/>
-            <Backdrop sx={{color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1}} open={processing || loading}>
+            <Backdrop sx={{color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1}} open={processing}>
                 <CircularProgress color="inherit"/>
             </Backdrop>
         </>
