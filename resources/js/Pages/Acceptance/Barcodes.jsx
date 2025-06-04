@@ -21,6 +21,9 @@ import {
     Close as CloseIcon,
     ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
+import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
 
 // Styled components with enhanced styling
 const BarcodeContainer = styled(Container)(({theme}) => ({
@@ -139,6 +142,8 @@ const HeaderBar = styled(Box)(({theme}) => ({
 
 const BarcodeComponent = ({barcodes}) => {
     const [showSnackbar, setShowSnackbar] = useState(false);
+    const [printOnlyBarcode, setPrintOnlyBarcode] = useState(false);
+    const handleChange = (e) => setPrintOnlyBarcode(e.target.checked)
 
     useEffect(() => {
         // Initialize barcodes after component mounts
@@ -186,6 +191,13 @@ const BarcodeComponent = ({barcodes}) => {
                     <LocalHospitalIcon sx={{mr: 1, verticalAlign: 'middle'}}/>
                     Barcode Labels ({barcodes.length})
                 </Typography>
+                <Box>
+                    <FormControlLabel sx={{mt: 1}}
+                                      label="Print The Barcode"
+                                      control={<Checkbox checked={printOnlyBarcode}
+                                                         name="printBarcode"
+                                                         onChange={handleChange}/>}/>
+                </Box>
                 <Chip
                     icon={<PrintIcon fontSize="small"/>}
                     label="Ready for Printing"
@@ -210,7 +222,7 @@ const BarcodeComponent = ({barcodes}) => {
                                 <Box sx={{width: '100%', pt: '0mm'}}>
                                     <svg id={`barcode-${barcode.barcode}`}></svg>
                                 </Box>
-                                <Stack spacing={.5} sx={{mt:"-3mm",zIndex:1}}>
+                                {!printOnlyBarcode && <Stack spacing={.5} sx={{mt: "-3mm", zIndex: 1}}>
                                     <BarcodeText>{barcode.barcode}</BarcodeText>
                                     <BarcodeText>
                                         <Box component="span"
@@ -219,8 +231,12 @@ const BarcodeComponent = ({barcodes}) => {
                                             {formatDate(barcode.collection_date || barcode.created_at)}
                                         </Box>
                                         |
-                                        {barcode.patient&&<Box component="span"
-                                              sx={{display: 'inline-flex', alignItems: 'center', ml: 0.5}}>
+                                        {barcode.patient && <Box component="span"
+                                                                 sx={{
+                                                                     display: 'inline-flex',
+                                                                     alignItems: 'center',
+                                                                     ml: 0.5
+                                                                 }}>
                                             <PersonIcon sx={{fontSize: '2mm', mr: 0.5}}/>
                                             {barcode.patient.gender.substring(0, 1)}/{barcode.patient.age}
                                         </Box>}
@@ -231,7 +247,7 @@ const BarcodeComponent = ({barcodes}) => {
                                             {barcode.acceptance_items.map(item => item.test.name).join(', ')}
                                         </BarcodeText>
                                     ) : null}
-                                </Stack>
+                                </Stack>}
                             </BarcodeItem>
                         </Grid>
                     ))}
