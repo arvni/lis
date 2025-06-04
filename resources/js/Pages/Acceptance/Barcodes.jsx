@@ -77,7 +77,7 @@ const BarcodeText = styled(Typography)(() => ({
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     '@media print': {
-        fontSize: '3.5mm',
+        fontSize: '2.2mm',
     }
 }));
 
@@ -149,7 +149,7 @@ const BarcodeComponent = ({barcodes}) => {
             barcodes.forEach(barcode => {
                 JsBarcode(`#barcode-${barcode.barcode}`, barcode.barcode, {
                     format: 'CODE128',
-                    width: .9,
+                    width: 1,
                     height: 35,
                     displayValue: false,
                     background: '#ffffff',
