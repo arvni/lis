@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Domains\Laboratory\Requests;
+namespace App\Domains\Referrer\Requests;
 
 use App\Domains\Laboratory\Enums\OfferType;
-use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;

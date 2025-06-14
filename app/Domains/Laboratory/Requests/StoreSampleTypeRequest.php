@@ -28,6 +28,7 @@ class StoreSampleTypeRequest extends FormRequest
             "name" => ["required", "string", "unique:sample_types,name"],
             "description" => ["nullable", "string"],
             "orderable" => ["nullable", "boolean"],
+            "required_barcode" => ["nullable", "boolean"],
         ];
     }
 }

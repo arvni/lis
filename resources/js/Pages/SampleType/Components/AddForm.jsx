@@ -37,7 +37,7 @@ const FormContent = () => {
 
 
     return (<>
-            <Grid size={{sm: 6, xs: 12}}>
+            <Grid size={{ xs: 12}}>
                 <TextField
                     label="Title"
                     name="name"
@@ -59,6 +59,14 @@ const FormContent = () => {
                                   name="orderable"
                                   onChange={handleChange}
                                   checked={data.orderable}/>
+            </Grid>
+            <Grid size={{sm: 6, xs: 12}}>
+                <FormControlLabel label="Required Material"
+                                  control={<Switch/>}
+                                  labelPlacement="start"
+                                  name="required_barcode"
+                                  onChange={handleChange}
+                                  checked={data.required_barcode}/>
             </Grid>
             <Grid size={{xs: 12}}>
                 <TextField

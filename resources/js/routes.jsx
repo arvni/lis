@@ -20,7 +20,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import BusinessIcon from '@mui/icons-material/Business';
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import {Analytics} from "@mui/icons-material";
-import {PercentDiamond, Stethoscope as Doctor, Hospital, PillBottle} from "lucide-react";
+import {PercentDiamond, Stethoscope as Doctor, Hospital, PillBottle, ClipboardList} from "lucide-react";
 
 export const refactorRoute = (addr) => {
     if (!addr)
@@ -257,6 +257,12 @@ const routes = (sections = []) => {
                     icon: <PillBottle/>,
                     route: "materials.index",
                     permission: 'Referrer.Materials.List Materials',
+                },
+                {
+                    title: "Order Materials",
+                    icon: <ClipboardList/>,
+                    route: "orderMaterials.index",
+                    permission: 'Referrer.Order Materials.List Order Materials',
                 },
             ]
         },

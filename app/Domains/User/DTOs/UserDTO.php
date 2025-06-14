@@ -13,7 +13,8 @@ class UserDTO
         public array|string|null $signature,
         public array|string|null $stamp,
         public ?string           $title = null,
-        public array             $roles = []
+        public array             $roles = [],
+        public bool              $isActive = true
     )
     {
     }
@@ -28,7 +29,8 @@ class UserDTO
             "title" => $this->title,
             'signature' => $this->signature,
             'stamp' => $this->stamp,
-            'roles' => $this->roles
+            'roles' => $this->roles,
+            'is_active' => $this->isActive
         ];
         if ($this->password) {
             $data['password'] = bcrypt($this->password);

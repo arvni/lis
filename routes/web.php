@@ -35,7 +35,6 @@ use App\Http\Controllers\GetUserDetailsController;
 use App\Http\Controllers\Laboratory\BarcodeGroupController;
 use App\Http\Controllers\Laboratory\DoctorController;
 use App\Http\Controllers\Laboratory\ExportReportTemplateParametersController;
-use App\Http\Controllers\Laboratory\MaterialController;
 use App\Http\Controllers\Laboratory\OfferController;
 use App\Http\Controllers\Laboratory\ReportTemplateController;
 use App\Http\Controllers\Laboratory\SampleTypeController;
@@ -75,6 +74,12 @@ use App\Http\Controllers\Reception\SampleController;
 use App\Http\Controllers\Reception\ShowAcceptanceItemController;
 use App\Http\Controllers\Reception\UnPublishReportController;
 use App\Http\Controllers\Reception\UpdatePatientMetaController;
+use App\Http\Controllers\Referrer\Api\CheckMaterialBarcodeIsAvailableController;
+use App\Http\Controllers\Referrer\ListMaterialsBasedOnPackingSeriesController;
+use App\Http\Controllers\Referrer\MaterialController;
+use App\Http\Controllers\Referrer\OrderMaterialController;
+use App\Http\Controllers\Referrer\PrintMaterialsBarcodeController;
+use App\Http\Controllers\Referrer\PrintOrderMaterialController;
 use App\Http\Controllers\Referrer\ReferrerController;
 use App\Http\Controllers\Referrer\ReferrerOrderController;
 use App\Http\Controllers\Referrer\ReferrerTestController;
@@ -184,6 +189,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
         Route::group(["prefix" => "referrer"], function () {
             Route::get("referrers", ListReferrersController::class)->name("referrers.list");
+            Route::get("check-materials", CheckMaterialBarcodeIsAvailableController::class)->name("materials.check");
+            Route::get("order-materials/{orderMaterial}", [OrderMaterialController::class,"show"])->name("orderMaterials.show");
         });
         Route::group(["prefix" => "consultation"], function () {
             Route::get("customers", ListCustomersController::class)->name("customers.list");
@@ -208,7 +215,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource("sampleTypes", SampleTypeController::class)->except("create", "edit", "show");
         Route::resource("barcodeGroups", BarcodeGroupController::class)->except("create", "edit", "show");
         Route::resource("offers", OfferController::class)->except("create", "edit", "show");
-        Route::resource("materials", MaterialController::class)->except("create", "edit", "show");
         Route::resource("doctors", DoctorController::class)->except("create", "edit", "show");
         Route::resource("testGroups", TestGroupController::class)->except("create", "edit", "show");
         Route::resource("reportTemplates", ReportTemplateController::class)->except("create", "edit");
@@ -223,6 +229,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post("referrer-tests/{referrerOrder}/acceptance", StoreReferrerOrderAcceptanceController::class)->name("referrerOrders.acceptance");
         Route::post("referrer-tests/{referrerOrder}/samples", StoreReferrerOrderSamplesController::class)->name("referrerOrders.samples");
         Route::resource("referrer-orders", ReferrerOrderController::class);
+        Route::get("materials/packing-series", ListMaterialsBasedOnPackingSeriesController::class)->name("materials.packing-series");
+        Route::get("materials/packing-series/{packingSeries}/print", PrintMaterialsBarcodeController::class)->name("materials.packing-series.print");
+        Route::resource("materials", MaterialController::class)->except("create", "edit", "show");
+        Route::resource("orderMaterials", OrderMaterialController::class)
+            ->except("create", "edit", "show");
+        Route::get("orderMaterials/{orderMaterial}/print", PrintOrderMaterialController::class)
+            ->name("orderMaterials.print");
+
     });
     Route::post("upload-public", UploadPublicDocumentController::class)->name("upload-public");
     Route::get("/notifications", ShowNotificationPageController::class)->name("notifications");

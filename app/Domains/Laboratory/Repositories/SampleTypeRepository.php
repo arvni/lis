@@ -42,6 +42,8 @@ class SampleTypeRepository
     {
         if (isset($filters["search"]))
             $query->search(["name"], $filters["search"]);
+        if (isset($filters["orderable"]))
+            $query->where("orderable", filter_var($filters["orderable"], FILTER_VALIDATE_BOOLEAN));
     }
 
     public function getSampleTypeById($id): ?SampleType

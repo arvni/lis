@@ -2,7 +2,7 @@
 
 use App\Domains\Laboratory\Models\SampleType;
 use App\Domains\Reception\Models\Sample;
-use App\Domains\Referrer\Models\Referrer;
+use App\Domains\Referrer\Models\OrderMaterial;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,10 +17,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignIdFor(SampleType::class)
                 ->constrained();
-            $table->foreignIdFor(Referrer::class)
-                ->nullable();
-            $table->foreignIdFor(Sample::class)
-                ->nullable();
+            $table->foreignIdFor(OrderMaterial::class)->nullable();
             $table->string("packing_series");
             $table->string("barcode")
                 ->unique()
@@ -33,12 +30,9 @@ return new class extends Migration {
             $table->timestamp("assigned_at")
                 ->nullable();
             $table->timestamps();
-            $table->foreign("referrer_id")
-                ->references("id")
-                ->on("referrers");
-            $table->foreign("sample_id")
-                ->references("id")
-                ->on("samples");
+            $table->foreign('order_material_id')
+                ->references('id')
+                ->on('order_materials')->nullOnDelete();
         });
     }
 

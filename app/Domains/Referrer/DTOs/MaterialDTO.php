@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Laboratory\DTOs;
+namespace App\Domains\Referrer\DTOs;
 
 use Carbon\Carbon;
 

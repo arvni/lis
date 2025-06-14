@@ -11,7 +11,7 @@ import {
     Paper,
     Alert,
     Checkbox,
-    FormControlLabel, Chip, Card, CardHeader, CardContent, Avatar
+    FormControlLabel, Chip, Card, CardHeader, CardContent, Avatar, IconButton
 } from "@mui/material";
 import useAcceptanceFormState from "./hooks/useAcceptanceFormState";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -32,6 +32,7 @@ import {
     PersonOutlined
 } from "@mui/icons-material";
 import Grid from "@mui/material/Grid";
+import EditIcon from "@mui/icons-material/Edit";
 
 // Lazy-loaded sections
 const FormAccordion = React.lazy(() => import("./FormAccordion"));
@@ -180,7 +181,7 @@ const ConsultationCard = memo(({initialData: {patient, consultant, ...consultati
             </CardContent>
         </Card>
     );
-}, );
+},);
 
 const AcceptanceForm = ({
                             initialData,
@@ -236,6 +237,7 @@ const AcceptanceForm = ({
         setData(prev => ({...prev, step: Math.min(prev?.step * 1 - 1, steps.length - 1)}));
         setActiveStep((prev) => Math.max(prev - 1, 0))
     };
+    const handleChangeStep = (step) => () => setActiveStep(step);
 
     // Helper to check if a step has errors
     const hasStepErrors = (step) => {
@@ -401,7 +403,6 @@ const AcceptanceForm = ({
                             </Box>
 
                             <Divider sx={{my: 2}}/>
-
                             {needsConsultation && (
                                 <>
                                     <Box sx={{mb: 3}}>
@@ -423,49 +424,62 @@ const AcceptanceForm = ({
                                 <Typography variant="subtitle1" color="primary" gutterBottom>
                                     Referral Information
                                 </Typography>
-                                <Box sx={{pl: 2}}>
-                                    <Typography variant="body1">
-                                        <strong>Referred:</strong> {data.referred ? "Yes" : "No"}
-                                    </Typography>
-                                    {data.referred && (
-                                        <>
-                                            <Typography variant="body1">
-                                                <strong>Referrer:</strong> {data.referrer ? data.referrer.name : "N/A"}
-                                            </Typography>
-                                            <Typography variant="body1">
-                                                <strong>Reference Code:</strong> {data.referenceCode || "N/A"}
-                                            </Typography>
-                                        </>
-                                    )}
+                                <Box sx={{
+                                    pl: 2,
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    justifyContent: "space-between"
+                                }}>
+                                    <Box>
+                                        <Typography variant="body1">
+                                            <strong>Referred:</strong> {data.referred ? "Yes" : "No"}
+                                        </Typography>
+                                        {data.referred && (
+                                            <>
+                                                <Typography variant="body1">
+                                                    <strong>Referrer:</strong> {data.referrer ? data.referrer.name : "N/A"}
+                                                </Typography>
+                                                <Typography variant="body1">
+                                                    <strong>Reference Code:</strong> {data.referenceCode || "N/A"}
+                                                </Typography>
+                                            </>
+                                        )}
+                                    </Box>
+                                    <IconButton onClick={handleChangeStep(2)}><EditIcon/></IconButton>
                                 </Box>
                             </Box>
-
-                            <Divider sx={{my: 2}}/>
-
                             {data.doctor && data.doctor.name && (
                                 <Box sx={{mb: 3}}>
                                     <Typography variant="subtitle1" color="primary" gutterBottom>
                                         Doctor Information
                                     </Typography>
-                                    <Box sx={{pl: 2}}>
-                                        <Typography variant="body1">
-                                            <strong>Name:</strong> {data.doctor.name}
-                                        </Typography>
-                                        {data.doctor.expertise && (
+                                    <Box sx={{
+                                        pl: 2,
+                                        display: "flex",
+                                        flexDirection: "row",
+                                        justifyContent: "space-between"
+                                    }}>
+                                        <Box>
                                             <Typography variant="body1">
-                                                <strong>Speciality:</strong> {data.doctor.expertise}
+                                                <strong>Name:</strong> {data.doctor.name}
                                             </Typography>
-                                        )}
-                                        {data.doctor.phone && (
-                                            <Typography variant="body1">
-                                                <strong>Phone:</strong> {data.doctor.phone}
-                                            </Typography>
-                                        )}
-                                        {data.doctor.licenseNo && (
-                                            <Typography variant="body1">
-                                                <strong>License:</strong> {data.doctor.licenseNo}
-                                            </Typography>
-                                        )}
+                                            {data.doctor.expertise && (
+                                                <Typography variant="body1">
+                                                    <strong>Speciality:</strong> {data.doctor.expertise}
+                                                </Typography>
+                                            )}
+                                            {data.doctor.phone && (
+                                                <Typography variant="body1">
+                                                    <strong>Phone:</strong> {data.doctor.phone}
+                                                </Typography>
+                                            )}
+                                            {data.doctor.licenseNo && (
+                                                <Typography variant="body1">
+                                                    <strong>License:</strong> {data.doctor.licenseNo}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                        <IconButton onClick={handleChangeStep(2)}><EditIcon/></IconButton>
                                     </Box>
                                 </Box>
                             )}
@@ -476,7 +490,13 @@ const AcceptanceForm = ({
                                 <Typography variant="subtitle1" color="primary" gutterBottom>
                                     Sampling & Delivery
                                 </Typography>
-                                <Box sx={{pl: 2}}>
+                                <Box sx={{
+                                    pl: 2,
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    justifyContent: "space-between"
+                                }}>
+                                    <Box>
                                     <Typography variant="body1">
                                         <strong>Out Patient:</strong> {data.out_patient ? "Yes" : "No"}
                                     </Typography>
@@ -485,12 +505,14 @@ const AcceptanceForm = ({
                                     </Typography>
                                     {!data.referred && (
                                         <>
-                                            {data?.howReport&&<Typography variant="body1">
+                                            {data?.howReport && <Typography variant="body1">
                                                 <strong>Report
                                                     Method:</strong> {Object.keys(data?.howReport).filter(method => data.howReport[method] && ["print", "email", "whatsapp", "sendToReferrer"].includes(method)).map(method => method.toUpperCase()).join(", ")}
                                             </Typography>}
                                         </>
                                     )}
+                                </Box>
+                                    <IconButton onClick={handleChangeStep(4)}><EditIcon/></IconButton>
                                 </Box>
                             </Box>
 
@@ -500,7 +522,13 @@ const AcceptanceForm = ({
                                 <Typography variant="subtitle1" color="primary" gutterBottom>
                                     Tests & Panels
                                 </Typography>
-                                <Box sx={{pl: 2}}>
+                                <Box sx={{
+                                    pl: 2,
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    justifyContent: "space-between"
+                                }}>
+                                    <Box>
                                     <Typography variant="body1">
                                         <strong>Tests:</strong> {(data.acceptanceItems?.tests || []).length}
                                     </Typography>
@@ -513,6 +541,8 @@ const AcceptanceForm = ({
                                         (data.acceptanceItems?.panels || []).reduce((sum, item) => sum + (Number(item.price) || 0), 0)
                                     }
                                     </Typography>
+                                </Box>
+                                    <IconButton onClick={handleChangeStep(3)}><EditIcon/></IconButton>
                                 </Box>
                             </Box>
 

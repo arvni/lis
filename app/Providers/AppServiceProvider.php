@@ -38,8 +38,12 @@ use App\Domains\Reception\Policies\AcceptancePolicy;
 use App\Domains\Reception\Policies\PatientPolicy;
 use App\Domains\Reception\Policies\ReportPolicy;
 use App\Domains\Reception\Policies\SamplePolicy;
+use App\Domains\Referrer\Models\Material;
+use App\Domains\Referrer\Models\OrderMaterial;
 use App\Domains\Referrer\Models\Referrer;
 use App\Domains\Referrer\Models\ReferrerOrder;
+use App\Domains\Referrer\Policies\MaterialPolicy;
+use App\Domains\Referrer\Policies\OrderMaterialPolicy;
 use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
 use App\Domains\User\Policies\RolePolicy;
@@ -117,5 +121,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Consultation::class, ConsultationPolicy::class);
         Gate::policy(Consultant::class, ConsultantPolicy::class);
         Gate::policy(Time::class, TimePolicy::class);
+        Gate::policy(OrderMaterial::class, OrderMaterialPolicy::class);
+        Gate::policy(Material::class, MaterialPolicy::class);
     }
 }

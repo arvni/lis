@@ -35,7 +35,8 @@ class StoreUserRequest extends FormRequest
             'stamp' => ['nullable',],
             'signature' => ['nullable'],
             "roles" => ["required", "array", "min:1"],
-            "roles.*.id" => ["required", "exists:roles,id"]
+            "roles.*.id" => ["required", "exists:roles,id"],
+            "is_active"=>["required", "boolean"],
         ];
     }
 }

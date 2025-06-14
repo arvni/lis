@@ -59,7 +59,7 @@ const Index = () => {
         setOpenDeleteForm(true);
     };
     const pageReload = (page, filters, sort, pageSize) => {
-        router.visit('/roles', {
+        router.visit(route("roles.index"), {
             data: {
                 page,
                 filters,

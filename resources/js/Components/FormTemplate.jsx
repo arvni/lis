@@ -15,8 +15,8 @@ const FormContext = createContext();
 export const useFormState = () => useContext(FormContext);
 
 
-export const FormProvider = ({open, onClose, url, children, defaultValue = {}, generalTitle = "",maxWidth="sm"}) => {
-    const {data, setData, post, processing, errors, reset, clearErrors} = useForm(defaultValue);
+export const FormProvider = ({open, onClose, url, children, defaultValue = {}, generalTitle = "", maxWidth = "sm"}) => {
+    const {data, setData, post, processing, errors, reset, clearErrors, setError} = useForm(defaultValue);
 
     useEffect(() => {
         setData(defaultValue);
@@ -46,7 +46,7 @@ export const FormProvider = ({open, onClose, url, children, defaultValue = {}, g
 
 
     return (
-        <FormContext.Provider value={{data, setData, errors, processing}}>
+        <FormContext.Provider value={{data, setData, errors, processing, clearErrors, setError}}>
             <Dialog
                 open={open}
                 onClose={handleClose}

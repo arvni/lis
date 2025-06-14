@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Laboratory;
+namespace App\Http\Controllers\Referrer;
 
-use App\Domains\Laboratory\DTOs\GroupMaterialDTO;
-use App\Domains\Laboratory\DTOs\MaterialDTO;
-use App\Domains\Laboratory\Models\Material;
-use App\Domains\Laboratory\Requests\StoreMaterialRequest;
-use App\Domains\Laboratory\Requests\UpdateMaterialRequest;
-use App\Domains\Laboratory\Services\MaterialService;
+use App\Domains\Referrer\DTOs\GroupMaterialDTO;
+use App\Domains\Referrer\DTOs\MaterialDTO;
+use App\Domains\Referrer\Models\Material;
+use App\Domains\Referrer\Requests\StoreMaterialRequest;
+use App\Domains\Referrer\Requests\UpdateMaterialRequest;
+use App\Domains\Referrer\Services\MaterialService;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -48,7 +48,7 @@ class MaterialController extends Controller
         ]);
         $packingSeries = $this->materialService->storeMaterial($materialDto);
 
-        return redirect()->route("materials.print-by-packing-series");
+        return redirect()->route("materials.packing-series.print",$packingSeries);
     }
 
 

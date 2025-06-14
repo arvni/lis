@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domains\Laboratory\Policies;
+namespace App\Domains\Referrer\Policies;
 
-use App\Domains\Laboratory\Models\Material;
+use App\Domains\Referrer\Models\Material;
 use App\Domains\User\Models\User;
 
 class MaterialPolicy
@@ -12,7 +12,7 @@ class MaterialPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can("Advance Settings.Materials.List Materials");
+        return $user->can("Referrer.Materials.List Materials");
     }
 
     /**
@@ -20,7 +20,7 @@ class MaterialPolicy
      */
     public function view(User $user, Material $material): bool
     {
-        return $user->can("Advance Settings.Materials.Create Material");
+        return $user->can("Referrer.Materials.Create Material");
     }
 
     /**
@@ -28,7 +28,7 @@ class MaterialPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can("Advance Settings.Materials.Create Material");
+        return $user->can("Referrer.Materials.Create Material");
     }
 
     /**
@@ -36,7 +36,7 @@ class MaterialPolicy
      */
     public function update(User $user, Material $material): bool
     {
-        return $user->can("Advance Settings.Materials.Edit Material");
+        return $user->can("Referrer.Materials.Edit Material");
     }
 
     /**
@@ -44,6 +44,6 @@ class MaterialPolicy
      */
     public function delete(User $user, Material $material): bool
     {
-        return $user->can("Advance Settings.Materials.Delete Material");
+        return $user->can("Referrer.Materials.Delete Material");
     }
 }

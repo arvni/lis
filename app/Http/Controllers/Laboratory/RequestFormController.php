@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Laboratory;
 
+use App\Domains\Laboratory\Models\RequestForm;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRequestFormRequest;
 use App\Http\Requests\UpdateRequestFormRequest;
-use App\Models\RequestForm;
 
 class RequestFormController extends Controller
 {

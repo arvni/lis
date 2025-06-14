@@ -1,19 +1,21 @@
 <?php
 
-namespace App\Domains\Laboratory\Services;
+namespace App\Domains\Referrer\Services;
 
 
-use App\Domains\Laboratory\DTOs\GroupMaterialDTO;
-use App\Domains\Laboratory\DTOs\MaterialDTO;
-use App\Domains\Laboratory\Models\Material;
-use App\Domains\Laboratory\Repositories\MaterialRepository;
+use App\Domains\Laboratory\Services\SampleTypeService;
+use App\Domains\Referrer\DTOs\GroupMaterialDTO;
+use App\Domains\Referrer\DTOs\MaterialDTO;
+use App\Domains\Referrer\Models\Material;
+use App\Domains\Referrer\Repositories\MaterialRepository;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
-class MaterialService
+readonly class MaterialService
 {
-    public function __construct(private readonly MaterialRepository $materialRepository, private readonly SampleTypeService $sampleTypeService)
+    public function __construct(private MaterialRepository $materialRepository, private SampleTypeService $sampleTypeService)
     {
     }
 
@@ -22,11 +24,16 @@ class MaterialService
         return $this->materialRepository->ListMaterials($queryData);
     }
 
+    public function listPackingSeriesMaterials($queryData): LengthAwarePaginator
+    {
+        return $this->materialRepository->listPackingSeriesMaterials($queryData);
+    }
+
     public function storeMaterial(GroupMaterialDTO $groupMaterialDTO): string
     {
         $sampleType = $this->sampleTypeService->getSampleTypeById($groupMaterialDTO->sampleTypeId);
         $now = Carbon::now();
-        $packingSeries = $this->generatePackingSeries($sampleType->name,$now);
+        $packingSeries = $this->generatePackingSeries($sampleType->name, $now);
         foreach ($groupMaterialDTO->tubes as $key => $tube) {
             $this->materialRepository->creatMaterial([
                 "sample_type_id" => $groupMaterialDTO->sampleTypeId,
@@ -61,7 +68,21 @@ class MaterialService
     private function generatePackingSeries($sampleTypeName, Carbon $date): string
     {
         $prefix = implode("", array_map(fn($item) => strtoupper(substr($item, 0, 1)), explode(" ", $sampleTypeName)));
-        return $prefix . "-" . $date->format("Y-m-d-H-i-s");
+        return $prefix . "-" . $date->format("Y-m-d-") . $date->timestamp;
     }
 
+    public function getMaterialsByPackingSeries(string $packingSeries): Collection
+    {
+        return $this->materialRepository->getAll(["filters" => ["packing_series" => $packingSeries]]);
+    }
+
+    public function isBarcodeAvailableToAssign($barcode,$sampleId): bool
+    {
+        return $this->materialRepository->isBarcodeAvailableToAssign($barcode,$sampleId);
+    }
+
+    public function getMaterialByBarcode($barcode)
+    {
+        return $this->materialRepository->getByBarcode($barcode);
+    }
 }

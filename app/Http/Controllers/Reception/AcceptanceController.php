@@ -114,6 +114,9 @@ class AcceptanceController extends Controller
 
     public function show(Acceptance $acceptance): Response
     {
+        if ($acceptance->status == AcceptanceStatus::PENDING) {
+            abort(403, "This Acceptance Didnt Completely Registered Yet");
+        }
         $acceptance = $this->acceptanceService->showAcceptance($acceptance);
         $data = [
             "acceptance" => array_merge(Arr::except($acceptance->toArray(), ["acceptance_items", "invoice", "payments", "prescription", "patient"]),
@@ -138,13 +141,11 @@ class AcceptanceController extends Controller
      * edit a created resource in storage.
      * @throws AuthorizationException
      */
-    public function edit(Acceptance $acceptance): Response
+    public function edit(Acceptance $acceptance, Request $request): Response
     {
         $this->authorize("update", $acceptance);
         // Get acceptance data with organized items from service
         $acceptanceData = $this->acceptanceService->prepareAcceptanceForEdit($acceptance);
-
-
         $maxDiscount = $this->settingRepository->getSettingsByClassAndKey('Payment', 'maxDiscount');
         return Inertia::render('Acceptance/Edit', [
             "acceptance" => $acceptanceData,
@@ -171,7 +172,7 @@ class AcceptanceController extends Controller
             $updatedAcceptance = $this->acceptanceService->updateAcceptance($acceptance, $validatedData);
             // If this is the final step, update status to "completed"
             if ($isFinalStep) {
-                if($status == AcceptanceStatus::PENDING) {
+                if ($status == AcceptanceStatus::PENDING) {
                     if (
                         isset($updatedAcceptance->howReport["whatsapp"]) &&
                         $updatedAcceptance->howReport["whatsapp"] &&
@@ -190,6 +191,10 @@ class AcceptanceController extends Controller
                     ->route('acceptances.show', $updatedAcceptance)
                     ->with(['success' => true, 'status' => 'Acceptance successfully updated and finalized.']);
             }
+            if ($updatedAcceptance->status!==AcceptanceStatus::PENDING) {
+                return redirect()->route('acceptances.show', $updatedAcceptance->id)
+                    ->with('info', 'Progress saved successfully.');
+            }
 
             // For intermediate steps, return to the edit page
             return redirect()->route('acceptances.edit', $updatedAcceptance->id)
@@ -199,7 +204,7 @@ class AcceptanceController extends Controller
             // Handle any exceptions
             return redirect()->back()
                 ->withInput()
-                ->withErrors( 'An error occurred: ' . $e->getMessage());
+                ->withErrors('An error occurred: ' . $e->getMessage());
         }
     }
 

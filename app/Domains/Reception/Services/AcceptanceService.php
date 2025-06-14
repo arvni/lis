@@ -191,7 +191,10 @@ class AcceptanceService
     {
         if (!isset($acceptanceDTO->doctor["id"]) && isset($acceptanceDTO->doctor["name"]))
             $acceptanceDTO->doctorId = $this->laboratoryAdapter->createOrGetDoctor($acceptanceDTO->doctor)->id;
-
+        if ($acceptanceDTO->status == AcceptanceStatus::PENDING) {
+            $acceptanceDTO->step = max($acceptanceDTO->step, $acceptanceDTO->step);
+        } else
+            $acceptanceDTO->step = 5;
         $acceptance = $this->acceptanceRepository
             ->updateAcceptance($acceptance, Arr::except($acceptanceDTO->toArray(), ["acceptance_items", "doctor"]));
 
@@ -549,10 +552,13 @@ class AcceptanceService
      * @param Acceptance $acceptance
      * @return array
      */
-    public function prepareAcceptanceForEdit(Acceptance $acceptance): array
+    public function prepareAcceptanceForEdit(Acceptance $acceptance, $step = null): array
     {
         // Get base acceptance data
         $acceptanceData = $this->showAcceptance($acceptance)->toArray();
+        if ($acceptance->status !== AcceptanceStatus::PENDING) {
+            $acceptanceData["step"] = $step ?? 5;
+        }
 
         // Process and organize acceptance items
         $acceptanceData['acceptanceItems'] = $this->organizeAcceptanceItems(

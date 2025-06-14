@@ -15,7 +15,9 @@ class IndexProvider
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $inputs["filters"] = array_merge($request->get("filters", []), $request->except("filters", "page", "sort", "pageSize"));
+        $filters = (array) $request->get("filters", []);
+        $otherInputs = $request->except("filters", "page", "sort", "pageSize");
+        $inputs["filters"] = array_merge($filters, $otherInputs);
         $inputs["page"] = $request->get("page", 1);
         $inputs["sort"] = $request->get("sort", ["field" => "id", "sort" => "desc"]);
         $inputs["pageSize"] = $request->get("pageSize", 10);

@@ -1,8 +1,6 @@
 <?php
 
-namespace App\Domains\Laboratory\DTOs;
-
-use Carbon\Carbon;
+namespace App\Domains\Referrer\DTOs;
 
 class GroupMaterialDTO
 {

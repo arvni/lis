@@ -1,17 +1,19 @@
 <?php
 
-namespace App\Domains\Laboratory\Repositories;
+namespace App\Domains\Referrer\Repositories;
 
-use App\Domains\Laboratory\Models\Material;
+use App\Domains\Referrer\Models\OrderMaterial;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use InvalidArgumentException;
 
-class MaterialRepository
+class OrderMaterialRepository
 {
 
-    public function listMaterials(array $queryData): LengthAwarePaginator
+    public function listOrderMaterials(array $queryData): LengthAwarePaginator
     {
-        $query = Material::query()
+        $query = OrderMaterial::query()
             ->withAggregate("referrer", "fullName")
             ->withAggregate("sampleType", "name");
         if (isset($queryData["filters"]))
@@ -21,25 +23,17 @@ class MaterialRepository
         return $query->paginate($queryData["pageSize"] ?? 10);
     }
 
-    public function creatMaterial(array $materialData): Material
+    public function updateOrderMaterial(OrderMaterial $orderMaterial, array $orderMaterialData): OrderMaterial
     {
-        $material = Material::query()->make($materialData);
-        $material->save();
-
-        return $material;
+        $orderMaterial->fill($orderMaterialData);
+        if ($orderMaterial->isDirty())
+            $orderMaterial->save();
+        return $orderMaterial;
     }
 
-    public function updateMaterial(Material $material, array $materialData): Material
+    public function deleteOrderMaterial(OrderMaterial $orderMaterial): void
     {
-        $material->fill($materialData);
-        if ($material->isDirty())
-            $material->save();
-        return $material;
-    }
-
-    public function deleteMaterial(Material $material): void
-    {
-        $material->delete();
+        $orderMaterial->delete();
     }
 
     protected function applyFilters($query, array $filters)
@@ -59,8 +53,7 @@ class MaterialRepository
 
         // Apply date range filters
         $dateFilters = [
-            'expire_date' => 'expire_date',
-            'assigned_at' => 'assigned_at',
+            'expire_date' => 'created_date',
         ];
 
         foreach ($dateFilters as $filterKey => $columnName) {
@@ -73,7 +66,6 @@ class MaterialRepository
         if (!empty($filters['search'])) {
             $query->search($filters['search']);
         }
-
         return $query;
     }
 
@@ -107,17 +99,15 @@ class MaterialRepository
 
             // Validate date range
             if ($fromDate->gt($toDate)) {
-                throw new \InvalidArgumentException("'From' date must be before or equal to 'To' date for field: {$field}");
+                throw new InvalidArgumentException("'From' date must be before or equal to 'To' date for field: {$field}");
             }
 
             $query->whereBetween($field, [$fromDate, $toDate]);
-        }
-        // Only 'from' date provided - use where >=
+        } // Only 'from' date provided - use where >=
         elseif ($hasFrom) {
             $fromDate = $this->ensureCarbonDate($dateFilter['from'], $timezone)->startOfDay();
             $query->where($field, '>=', $fromDate);
-        }
-        // Only 'to' date provided - use where <=
+        } // Only 'to' date provided - use where <=
         else {
             $toDate = $this->ensureCarbonDate($dateFilter['to'], $timezone)->endOfDay();
             $query->where($field, '<=', $toDate);
@@ -135,8 +125,8 @@ class MaterialRepository
 
         try {
             return Carbon::parse($date, $timezone);
-        } catch (\Exception $e) {
-            throw new \InvalidArgumentException("Invalid date format: {$date}");
+        } catch (Exception $e) {
+            throw new InvalidArgumentException("Invalid date format: {$date}");
         }
     }
 

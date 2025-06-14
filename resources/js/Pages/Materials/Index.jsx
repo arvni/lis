@@ -1,6 +1,6 @@
 import {useCallback, useMemo, useState} from "react";
 import {router, usePage} from "@inertiajs/react";
-import {Button,} from "@mui/material";
+import {Button, Tab, Tabs,} from "@mui/material";
 import {GridActionsCellItem} from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
@@ -11,6 +11,8 @@ import DeleteForm from "@/Components/DeleteForm";
 import PageHeader from "@/Components/PageHeader.jsx";
 import Filter from "./Components/Filter";
 import AddForm from "./Components/AddForm";
+import {TabContext, TabPanel} from "@mui/lab";
+import PackingSeries from "@/Pages/Materials/PackingSeries.jsx";
 
 const MaterialsIndex = () => {
     const {materials, status, errors, success, requestInputs} = usePage().props;
@@ -18,6 +20,7 @@ const MaterialsIndex = () => {
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const [openAddForm, setOpenAddForm] = useState(false);
     const [selectedMaterial, setSelectedMaterial] = useState(null);
+    const [activeTab, setActiveTab] = useState("1")
 
     // Memoize the findMaterial function to avoid recreating it on every render
     const findMaterial = useCallback((id) => {
@@ -100,7 +103,7 @@ const MaterialsIndex = () => {
             flex: 1,
         },
         {
-            field: 'referrerـfullname',
+            field: 'referrer_fullname',
             headerName: 'Assigned to',
             type: "string",
             width: 200,
@@ -126,7 +129,6 @@ const MaterialsIndex = () => {
                         icon={<EditIcon/>}
                         label="Edit"
                         onClick={handleEditMaterial(params.row.id)}
-                        showInMenu
                     />
                 ];
             }
@@ -135,73 +137,81 @@ const MaterialsIndex = () => {
         handleEditMaterial,
         handleDeleteMaterial,
     ]);
-
+    const handleChange = (event, newValue) => {
+        setActiveTab(newValue);
+    };
     return (
-        <>
-            <PageHeader
-                title="Materials Management"
-                subtitle="Create and manage discount materials for tests and referrals"
-                actions={
-                    <Button
-                        onClick={handleAddNew}
-                        startIcon={<AddIcon/>}
-                        color="success"
-                        variant="contained"
-                        size="medium"
-                    >
-                        Create New Material
-                    </Button>
-                }
-            />
+        <TabContext value={activeTab}>
+            <Tabs value={activeTab} onChange={handleChange} aria-label="basic tabs example">
+                <Tab label="Materials" value="1"/>
+                <Tab label="Packing Series" value="2"/>
+            </Tabs>
+            <TabPanel value="1">
+                <>
+                    <PageHeader
+                        title="Materials Management"
+                        subtitle="Create and manage discount materials for tests and referrals"
+                        actions={
+                            <Button
+                                onClick={handleAddNew}
+                                startIcon={<AddIcon/>}
+                                color="success"
+                                variant="contained"
+                                size="medium"
+                            >
+                                Create New Material
+                            </Button>
+                        }
+                    />
 
-            <TableLayout
-                defaultValues={requestInputs}
-                success={success}
-                status={status}
-                reload={handlePageReload}
-                columns={columns}
-                data={materials}
-                Filter={Filter}
-                errors={errors}
-                autoHeight
-                density="comfortable"
-                disableSelectionOnClick
-                getRowHeight={() => 'auto'}
-                sx={{
-                    '& .MuiDataGrid-cell': {
-                        py: 1.5
-                    }
-                }}
-            />
+                    <TableLayout
+                        defaultValues={requestInputs}
+                        success={success}
+                        status={status}
+                        reload={handlePageReload}
+                        columns={columns}
+                        data={materials}
+                        Filter={Filter}
+                        errors={errors}
+                        autoHeight
+                        density="comfortable"
+                        disableSelectionOnClick
+                        getRowHeight={() => 'auto'}
+                        sx={{
+                            '& .MuiDataGrid-cell': {
+                                py: 1.5
+                            }
+                        }}
+                    />
 
-            {openDeleteForm && (
-                <DeleteForm
-                    title={`Delete Material: ${selectedMaterial?.name || ''}`}
-                    message="Are you sure you want to delete this material? This action cannot be undone."
-                    agreeCB={handleDestroy}
-                    disAgreeCB={handleCloseForm}
-                    openDelete={openDeleteForm}
-                />
-            )}
+                    {openDeleteForm && (
+                        <DeleteForm
+                            title={`Delete Material: ${selectedMaterial?.name || ''}`}
+                            message="Are you sure you want to delete this material? This action cannot be undone."
+                            agreeCB={handleDestroy}
+                            disAgreeCB={handleCloseForm}
+                            openDelete={openDeleteForm}
+                        />
+                    )}
 
-            {openAddForm && (
-                <AddForm
-                    open={openAddForm}
-                    defaultValue={selectedMaterial}
-                    onClose={handleCloseForm}
-                />
-            )}
-        </>
+                    {openAddForm && (
+                        <AddForm
+                            open={openAddForm}
+                            defaultValue={selectedMaterial}
+                            onClose={handleCloseForm}
+                        />
+                    )}
+                </>
+            </TabPanel>
+            <TabPanel value="2">
+                <PackingSeries/>
+            </TabPanel>
+        </TabContext>
     );
 };
 
 // Define breadcrumbs outside the component
 const breadcrumbs = [
-    {
-        title: "Dashboard",
-        link: route("dashboard"),
-        icon: null
-    },
     {
         title: "Materials",
         link: null,

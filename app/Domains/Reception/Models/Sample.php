@@ -3,6 +3,7 @@
 namespace App\Domains\Reception\Models;
 
 use App\Domains\Laboratory\Models\SampleType;
+use App\Domains\Referrer\Models\Material;
 use App\Domains\User\Models\User;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,7 +21,8 @@ class Sample extends Model
         "sample_type_id",
         "patient_id",
         "collection_date",
-        "sampler_id"
+        "sampler_id",
+        "material_id"
     ];
 
     protected $searchable = [
@@ -100,5 +102,10 @@ class Sample extends Model
     public function samples()
     {
         return $this->hasMany(Sample::class);
+    }
+
+    public function material()
+    {
+        return $this->belongsTo(Material::class);
     }
 }

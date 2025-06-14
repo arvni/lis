@@ -1,14 +1,10 @@
 <?php
 
-namespace App\Domains\Laboratory\Requests;
+namespace App\Domains\Referrer\Requests;
 
-use App\Domains\Laboratory\Enums\OfferType;
-use App\Domains\Laboratory\Models\Material;
-use App\Domains\Laboratory\Models\Offer;
-use Carbon\Carbon;
+use App\Domains\Referrer\Models\Material;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\Rule;
 
 class StoreMaterialRequest extends FormRequest
 {

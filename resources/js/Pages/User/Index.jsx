@@ -9,8 +9,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import {Password} from "@mui/icons-material";
 import ChangePassword from "@/Pages/User/Components/ChangePassword";
 import {router, useForm} from "@inertiajs/react";
-import {Button, Card, IconButton, Paper, Stack} from "@mui/material";
-import Typography from "@mui/material/Typography";
+import {Button} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import PageHeader from "@/Components/PageHeader.jsx";
 

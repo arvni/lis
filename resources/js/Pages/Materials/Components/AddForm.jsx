@@ -141,6 +141,7 @@ const FormContent = () => {
                             helperText={errors?.sample_type || "Select the type of sample kit"}
                             onChange={handleChange}
                             name="sample_type"
+                            defaultData={{orderable:true}}
                             url={route("api.sampleTypes.list")}
                             variant="outlined"
                             placeholder="Search and select sample type..."
@@ -297,7 +298,6 @@ const FormContent = () => {
                                                 <TextField
                                                     label="Tube Barcode"
                                                     fullWidth
-                                                    required
                                                     variant="outlined"
                                                     size="small"
                                                     value={tube.tube_barcode}
@@ -319,7 +319,6 @@ const FormContent = () => {
                                                 <TextField
                                                     label="Expire Date"
                                                     fullWidth
-                                                    required
                                                     type="date"
                                                     variant="outlined"
                                                     size="small"

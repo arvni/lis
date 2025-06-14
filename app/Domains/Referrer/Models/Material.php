@@ -1,22 +1,20 @@
 <?php
 
-namespace App\Domains\Laboratory\Models;
+namespace App\Domains\Referrer\Models;
 
-use App\Domains\Laboratory\Enums\OfferType;
+use App\Domains\Laboratory\Models\SampleType;
 use App\Domains\Reception\Models\Sample;
-use App\Domains\Referrer\Models\Referrer;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Material extends Model
 {
     use Searchable;
 
-    protected $searchable = ['barcode', 'tube_barcode'];
+    protected $searchable = ['barcode', 'tube_barcode', 'packing_series'];
     protected $fillable = [
         "sample_type_id",
-        "referrer_id",
+        "order_material_id",
         "sample_id",
         "packing_series",
         "barcode",
@@ -34,14 +32,19 @@ class Material extends Model
         return $this->belongsTo(SampleType::class);
     }
 
+    public function orderMaterial()
+    {
+        return $this->belongsTo(OrderMaterial::class);
+    }
+
     public function referrer()
     {
-        return $this->belongsTo(Referrer::class);
+        return $this->hasOneThrough(Referrer::class, OrderMaterial::class, "id", "id", "order_material_id", "referrer_id");
     }
 
     public function sample()
     {
-        $this->belongsTo(Sample::class);
+        $this->hasOne(Sample::class);
     }
 
 

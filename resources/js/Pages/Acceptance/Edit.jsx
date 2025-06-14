@@ -141,22 +141,13 @@ const Edit = ({acceptance, maxDiscount, canAddPrescription = false}) => {
         );
     }, [setData, validateForm, reset]);
 
-    const activeStep = () => {
-        let step = 0;
-        if (data?.status === "pending") {
-            step = data?.step;
-        }
-
-        return step
-    }
-
     return (<>
         <AcceptanceForm initialData={data}
                         onSubmit={save}
                         errors={errors}
                         reset={reset}
                         setData={setData}
-                        defaultStep={activeStep()}
+                        defaultStep={data.step}
                         canAddPrescription={canAddPrescription}
                         maxDiscount={maxDiscount}/>
         <Dialog open={open}>

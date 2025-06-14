@@ -210,7 +210,7 @@ const TableLayout = ({
         <Fade in={true} timeout={300}>
             <Box sx={{ position: 'relative' }}>
                 {/* Filter Area - Only rendered when open */}
-                {filterOpen && (
+                {filterOpen && Filter && (
                     <Paper
                         elevation={0}
                         variant="outlined"
@@ -283,7 +283,7 @@ const TableLayout = ({
 
                             {/* Actions */}
                             <Box sx={{ display: 'flex', gap: 1 }}>
-                                {!filterOpen && (
+                                {!filterOpen && Filter && (
                                     <Tooltip title="Filter data">
                                         <IconButton
                                             size="small"

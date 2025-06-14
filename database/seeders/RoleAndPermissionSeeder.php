@@ -41,7 +41,14 @@ class RoleAndPermissionSeeder extends Seeder
                     "Edit Material",
                     "Delete Material",
                     "List Materials",
-                ]
+                ],
+                "Order Materials" => [
+                    "Create Order Material",
+                    "View Order Material",
+                    "Edit Order Material",
+                    "Delete Order Material",
+                    "List Order Materials",
+                ],
             ],
             "Consultation" => [
                 "Consultations" => [

@@ -9,6 +9,7 @@ use App\Domains\Document\Listeners\DocumentUpdateListener;
 use App\Domains\Laboratory\Events\ReportTemplateDocumentUpdateEvent;
 use App\Domains\Laboratory\Events\ReferrerOrderEvent;
 use App\Domains\Laboratory\Events\SectionEvent;
+use App\Domains\Notification\Listeners\NotifyProviderOfOrderMaterialUpdate;
 use App\Domains\Reception\Events\AcceptanceDeletedEvent;
 use App\Domains\Reception\Events\PatientDocumentUpdateEvent;
 use App\Domains\Reception\Events\ReportPublishedEvent;
@@ -17,6 +18,7 @@ use App\Domains\Reception\Listeners\AcceptanceInvoiceListener;
 use App\Domains\Reception\Listeners\AcceptancePaymentListener;
 use App\Domains\Reception\Listeners\AcceptanceReportedListener;
 use App\Domains\Reception\Listeners\SampleCollectedListener;
+use App\Domains\Referrer\Events\OrderMaterialUpdated;
 use App\Domains\User\Events\UserDocumentUpdateEvent;
 use App\Domains\User\Listeners\SectionPermissionsListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -72,5 +74,6 @@ class EventServiceProvider extends ServiceProvider
             [SampleCollectedListener::class, 'handle']
         );
         Event::listen(ReportPublishedEvent::class, [AcceptanceReportedListener::class, 'handle']);
+        Event::listen(OrderMaterialUpdated::class, [NotifyProviderOfOrderMaterialUpdate::class, 'handle']);
     }
 }
