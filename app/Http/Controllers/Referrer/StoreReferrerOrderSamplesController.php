@@ -5,13 +5,17 @@ namespace App\Http\Controllers\Referrer;
 use App\Domains\Reception\DTOs\SampleDTO;
 use App\Domains\Reception\Services\SampleService;
 use App\Domains\Referrer\Models\ReferrerOrder;
+use App\Domains\Referrer\Services\MaterialService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReferrerOrderSamplesRequest;
 use Illuminate\Http\RedirectResponse;
 
 class StoreReferrerOrderSamplesController extends Controller
 {
-    public function __construct(private SampleService $sampleService)
+    public function __construct(
+        private readonly SampleService   $sampleService,
+        private readonly MaterialService $materialService,
+    )
     {
     }
 
@@ -26,6 +30,12 @@ class StoreReferrerOrderSamplesController extends Controller
         if ($referrerOrder->acceptance->samples_count)
             return back()->withErrors(["This Order Sampled Before"]);
         foreach ($request->validated("barcodes") as $barcode) {
+            $material = $this->materialService->getMaterialByBarcode(strtoupper($barcode["barcode"]));
+            if ($material) {
+                $material->load("referrer");
+                if ($material->referrer->id == $referrerOrder->referrer->id && !$material->sample_id)
+                    $barcode["material"] = $material->toArray();
+            }
             $this->sampleService->storeSample(SampleDTO::fromArray($barcode));
         }
         return redirect()->back()->with(["success" => true, "status" => "Sample created successfully."]);
