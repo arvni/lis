@@ -6,7 +6,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForm from "@/Components/DeleteForm";
 import React, {useCallback, useMemo, useState} from "react";
 import {
-    RemoveRedEye,
     ExpandMore,
     KeyboardArrowRight,
     Male as MaleIcon,
@@ -28,7 +27,6 @@ import {
     Paper,
     Stack,
     Typography,
-    useTheme,
     List,
     ListItem,
     ListItemAvatar,
@@ -41,6 +39,7 @@ import Grid from "@mui/material/Grid2";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
+import {formatDate} from "@/Services/helper";
 
 const renderDebt = ({row}) => {
     let amount = row.payments_sum_price * 1 - row.acceptance_items_sum_price * 1 + row.acceptance_items_sum_discount * 1;
@@ -211,11 +210,14 @@ const GenderStats = ({stats}) => {
 
 const Index = () => {
     const {post, setData, data, reset, processing} = useForm();
-    const {patients, status, success, requestInputs, stats} = usePage().props;
+    const {patients, status, success, requestInputs, stats,canDelete} = usePage().props;
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const [statsExpanded, setStatsExpanded] = useState(false);
 
-    const showPatient = useCallback((id) => () => router.visit(route('patients.show', id)), []);
+    const showPatient = useCallback((id) => (e) => {
+        e.preventDefault();
+        router.visit(route('patients.show', id))
+    }, []);
     const deletePatient = useCallback((params) => () => {
         setData({_method: "delete", ...params});
         setOpenDeleteForm(true);
@@ -257,7 +259,9 @@ const Index = () => {
             headerName: 'Name',
             type: "string",
             flex: 1,
-            display: "flex"
+            display: "flex",
+            renderCell: ({value, row}) => <a href={route("patients.show", row.id)}
+                                             onClick={showPatient(row.id)}>{value}</a>
         },
         {
             field: 'idNo',
@@ -321,7 +325,8 @@ const Index = () => {
             flex: .6,
             display: "flex",
             type: "datetime",
-            valueGetter: (value) => value ? new Date(value) : null
+            valueGetter: (value) => value ? new Date(value) : null,
+            renderCell: ({value}) => value ? formatDate(value) : "-"
         },
         {
             field: 'action',
@@ -331,21 +336,12 @@ const Index = () => {
             display: "flex",
             sortable: false,
             getActions: (params) => {
-                let cols = [
-                    <GridActionsCellItem
-                        icon={<RemoveRedEye/>}
-                        label="Show"
-                        onClick={showPatient(params.row.id)}
-                        showInMenu
-                    />,
-                ];
-
-                if (params.row.acceptances_count < 1 && params.row.consultations_count < 1 && params.row.relatives_count < 1) {
+                let cols = [];
+                if (params.row.acceptances_count < 1 && params.row.consultations_count < 1 && params.row.relatives_count < 1 && canDelete) {
                     cols.push(
                         <GridActionsCellItem
                             icon={<DeleteIcon/>}
                             label="Delete"
-                            showInMenu
                             onClick={deletePatient(params.row)}
                         />
                     );
@@ -383,7 +379,7 @@ const Index = () => {
                         mb: 3,
                         borderRadius: 2,
                         overflow: 'hidden'
-                }}
+                    }}
                 >
                     <AccordionSummary expandIcon={<ExpandMore/>}>
                         <Typography variant="h6">Statistics Dashboard</Typography>

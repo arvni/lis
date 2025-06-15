@@ -76,7 +76,7 @@ class InvoicesExport implements FromCollection
                 optional($acceptanceItem->patient)->nationality ? Constants::countries(optional($acceptanceItem->patient)->nationality) : "",
                 ucfirst((string)optional($acceptanceItem->patient)->gender),
                 optional($acceptanceItem->patient)->age,
-                ucfirst((string)optional(optional($invoice->payments)[0])->paymentMethod->value)
+                ucfirst((string)optional(optional($invoice->payments)[0])->paymentMethod?->value)
             ];
         }
         return $rows;

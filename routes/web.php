@@ -61,6 +61,7 @@ use App\Http\Controllers\Reception\GetPatientWithIdNoController;
 use App\Http\Controllers\Reception\GetPrevSectionsController;
 use App\Http\Controllers\Reception\ListAcceptanceItemReadyReportController;
 use App\Http\Controllers\Reception\ListAcceptanceItemsController;
+use App\Http\Controllers\Reception\ListApprovingReportController;
 use App\Http\Controllers\Reception\ListBarcodesController;
 use App\Http\Controllers\Reception\PatientController;
 use App\Http\Controllers\Reception\PrintAcceptanceBarcodeController;
@@ -134,8 +135,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("acceptanceItems/export", ExportAcceptanceItemsController::class)->name("acceptanceItems.export");
         Route::get("acceptanceItems/{acceptanceItem}/check-workflow", CheckAcceptanceItemWorkflowController::class)->name("acceptanceItems.check-workflow");
         Route::get("acceptanceItemStates/{acceptanceItemState}/prev-sections", GetPrevSectionsController::class)->name("acceptanceItemStates.prevSections");
-
-        Route::get("reports/waitingList", ListAcceptanceItemReadyReportController::class)->name("reports.waitingList");
+        Route::get("reports/waiting-list", ListAcceptanceItemReadyReportController::class)->name("reports.waitingList");
+        Route::get("reports/approving-ist", ListApprovingReportController::class)->name("reports.approvingList");
         Route::get("acceptanceItems/{acceptanceItem}/create-report", CreateReportController::class)->name("acceptanceItems.createReport");
         Route::resource("reports", ReportController::class)->except("create");
         Route::get("reports/{report}/download", DownloadReportController::class)->name("reports.download");
@@ -190,7 +191,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::group(["prefix" => "referrer"], function () {
             Route::get("referrers", ListReferrersController::class)->name("referrers.list");
             Route::get("check-materials", CheckMaterialBarcodeIsAvailableController::class)->name("materials.check");
-            Route::get("order-materials/{orderMaterial}", [OrderMaterialController::class,"show"])->name("orderMaterials.show");
+            Route::get("order-materials/{orderMaterial}", [OrderMaterialController::class, "show"])->name("orderMaterials.show");
         });
         Route::group(["prefix" => "consultation"], function () {
             Route::get("customers", ListCustomersController::class)->name("customers.list");

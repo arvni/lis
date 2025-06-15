@@ -34,7 +34,8 @@ class PatientController extends Controller
         $requestInputs = $request->all();
         $patients = $this->patientService->listPatients($requestInputs);
         $stats = $this->patientService->getPatientStats();
-        return Inertia::render('Patient/Index', compact("patients", "requestInputs", "stats"));
+        $canDelete = Gate::allows('delete', new Patient());
+        return Inertia::render('Patient/Index', compact("patients", "requestInputs", "stats", "canDelete"));
     }
 
     /**
@@ -88,7 +89,7 @@ class PatientController extends Controller
      */
     public function destroy(Patient $patient): RedirectResponse
     {
-        $this->authorize("delete", Patient::class);
+        $this->authorize("delete", $patient);
         $this->patientService->deletePatient($patient);
         return redirect()->back()->with(["success" => true, "status" => "$patient->fullName successfully deleted"]);
     }

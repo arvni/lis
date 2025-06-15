@@ -19,7 +19,7 @@ import InterpreterModeIcon from '@mui/icons-material/InterpreterMode';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BusinessIcon from '@mui/icons-material/Business';
 import ReceiptIcon from "@mui/icons-material/Receipt";
-import {Analytics} from "@mui/icons-material";
+import {Analytics, FactCheck} from "@mui/icons-material";
 import {PercentDiamond, Stethoscope as Doctor, Hospital, PillBottle, ClipboardList} from "lucide-react";
 
 export const refactorRoute = (addr) => {
@@ -129,12 +129,12 @@ const routes = (sections = []) => {
                     permission: 'Report.Create Report',
                     icon: <PostAddIcon/>
                 },
-                //     {
-                //         title: "Waiting For Approving",
-                //         route: "reports.approving",
-                //         permission: 'Report.Approve',
-                //         icon: <FactCheckIcon/>
-                //     },
+                    {
+                        title: "Waiting For Approving",
+                        route: "reports.approvingList",
+                        permission: 'Report.Approve Report',
+                        icon: <FactCheck/>
+                    },
                 {
                     title: "List",
                     permission: 'Report.List Report',

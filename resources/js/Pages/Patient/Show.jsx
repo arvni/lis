@@ -93,6 +93,11 @@ const formatDate = (dateString, options = {}) => {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        timeZoneName: undefined
     };
     return new Intl.DateTimeFormat('en-US', {...defaultOptions, ...options}).format(date);
 };
@@ -132,14 +137,7 @@ const renderViewButton = (href, onClickHandler) => (
 const Show = ({
                   patient,
                   stats,
-                  // Make related data potentially undefined initially for lazy loading
-                  relatives: initialRelatives,
-                  invoices: initialInvoices,
-                  payments: initialPayments,
-                  acceptances: initialAcceptances,
-                  patientMeta: initialPatientMeta,
-                  documents: initialDocuments,
-                  consultations: initialConsultations,
+
                   success, // From Inertia flash messages
                   status,  // From Inertia flash messages
                   errors,  // From Inertia flash messages
@@ -156,13 +154,13 @@ const Show = ({
     // Get ALL props from usePage to access potentially lazy-loaded data
     const {props: pageProps} = usePage();
     const {
-        relatives = initialRelatives,
-        invoices = initialInvoices,
-        payments = initialPayments,
-        acceptances = initialAcceptances,
-        patientMeta = initialPatientMeta,
-        documents = initialDocuments,
-        consultations = initialConsultations,
+        relatives,
+        invoices,
+        payments,
+        acceptances,
+        patientMeta,
+        documents,
+        consultations,
     } = pageProps; // Use latest props from usePage, falling back to initial
 
 
@@ -222,7 +220,7 @@ const Show = ({
             type: 'number',
             flex: 0.5,
             align: "center",
-            valueFormatter: (value) => formatCurrency(value*1),
+            valueFormatter: (value) => formatCurrency(value * 1),
         },
         {
             field: 'total_discount',
@@ -230,7 +228,7 @@ const Show = ({
             type: 'number',
             flex: 0.5,
             align: "center",
-            valueFormatter: (value) => formatCurrency(value*1),
+            valueFormatter: (value) => formatCurrency(value * 1),
         },
         {
             field: 'total_paid',
@@ -238,7 +236,7 @@ const Show = ({
             type: 'number',
             flex: 0.5,
             align: "center",
-            valueFormatter: (value) => formatCurrency(value*1),
+            valueFormatter: (value) => formatCurrency(value * 1),
         },
         {
             field: 'status',
@@ -267,24 +265,27 @@ const Show = ({
     const paymentColumns = useMemo(() => [
         {
             field: 'price', headerName: 'Amount', type: 'number', flex: 1, align: "center",
-            valueFormatter: ({value}) => formatCurrency(value), // Standardized currency
+            valueFormatter: (value) => formatCurrency(value), // Standardized currency
         },
         {
             field: 'paymentMethod', headerName: 'Method', flex: 1, align: "center",
             renderCell: ({value}) => renderStatusChip(value, {
-                'Credit Card': 'primary', Cash: 'success', Insurance: 'info', Transfer: 'secondary' // Example mapping
+                Card: 'primary', Cash: 'success', Credit: 'info', Transfer: 'secondary'
             }),
         },
         {
             field: 'created_at', headerName: 'Date', flex: 1, align: "center", type: 'date',
             valueGetter: (value) => value && new Date(value),
-            valueFormatter: ({value}) => formatDate(value), // Use helper
+            valueFormatter: (value) => formatDate(value)
         }
     ], []);
 
     const consultationsColumns = useMemo(() => [
         {
-            field: 'consultant', headerName: 'Consultant', flex: 1.2,
+            field: 'consultant',
+            headerName: 'Consultant',
+            flex: 1.2,
+            display:"flex",
             renderCell: ({row}) => (
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 1, overflow: 'hidden'}}>
                     <ContactPhoneIcon fontSize="small" color="action"/>
@@ -294,23 +295,25 @@ const Show = ({
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
                     }}>
-                        {row?.consultant?.name || 'N/A'}
+                        {row?.consultant_name || 'N/A'}
                     </Typography>
                 </Box>
             )
         },
         {
-            field: 'status', headerName: 'Status', flex: 1, align: "center",
+            field: 'status',
+            headerName: 'Status',
+            flex: .8, align: "center",
             renderCell: ({value}) => renderStatusChip(value, {
                 Completed: 'success', Scheduled: 'primary', Waiting: 'warning', Canceled: 'error'
             }),
+            display:"flex",
         },
-        {field: 'waitingDuration', headerName: 'Waiting Since', flex: 1, align: "center"}, // Assuming this is pre-formatted text
-        {field: 'duration', headerName: 'Duration', flex: 0.8, align: "center"}, // Assuming this is pre-formatted text
         {
-            field: 'dueDate', headerName: 'Due Date', flex: 1, align: "center", type: 'dateTime',
+            field: 'dueDate',
+            headerName: 'Due Date', flex: 1, align: "center", type: 'dateTime',
             valueGetter: (value) => value && new Date(value),
-            valueFormatter: ({value}) => formatDate(value, {hour: '2-digit', minute: '2-digit'}), // Add time
+            valueFormatter: (value) => formatDate(value, {hour: '2-digit', minute: '2-digit'}), // Add time
         },
         {
             field: 'action', headerName: 'View', flex: 0.5, align: "center", sortable: false, filterable: false,
@@ -329,7 +332,7 @@ const Show = ({
         {
             field: "created_at", headerName: 'Created', flex: 1, align: "center", type: 'date',
             valueGetter: (value) => value && new Date(value),
-            valueFormatter: ({value}) => formatDate(value),
+            valueFormatter: (value) => formatDate(value),
         },
         {
             field: "view", headerName: 'View', flex: 0.5, align: "center", sortable: false, filterable: false,

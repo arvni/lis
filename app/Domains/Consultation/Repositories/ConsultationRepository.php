@@ -84,6 +84,11 @@ class ConsultationRepository
             $query->whereDate("dueDate", ">=", $filters["from_date"]);
         if (isset($filters["consultant_id"]))
             $query->where("consultant_id", $filters["consultant_id"]);
+        if (isset($filters["date"])){
+            $date=Carbon::parse($filters["date"]);
+            $dateRange=[$date->copy()->startOfDay(),$date->copy()->endOfDay()];
+            $query->whereBetween('created_at', $dateRange);
+        }
     }
 
     public function getTotalConsultationForDateRange($dateRange): int

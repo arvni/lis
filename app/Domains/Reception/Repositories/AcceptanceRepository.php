@@ -197,6 +197,12 @@ class AcceptanceRepository
         if (isset($filters[self::FILTER_PATIENT_ID])) {
             $query->where('acceptances.patient_id', $filters[self::FILTER_PATIENT_ID]); // Qualify column name
         }
+
+        if (isset($filters["date"])){
+            $date=Carbon::parse($filters["date"]);
+            $dateRange=[$date->copy()->startOfDay(),$date->copy()->endOfDay()];
+            $query->whereBetween('acceptances.created_at', $dateRange);
+        }
     }
 
     public function getPendingAcceptance(Patient $patient): ?Acceptance
@@ -272,20 +278,34 @@ class AcceptanceRepository
     {
         return Acceptance::query()
             ->whereNotIn('status', [AcceptanceStatus::PENDING, AcceptanceStatus::CANCELLED])
-            ->whereHas('acceptanceItems.methodTest.test', function (Builder $q) {
-                $q->where('type', TestType::TEST); // Ensures at least one item is a test
+            ->whereExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('acceptance_items')
+                    ->join('method_tests', 'acceptance_items.method_test_id', '=', 'method_tests.id')
+                    ->join('tests', 'method_tests.test_id', '=', 'tests.id')
+                    ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id')
+                    ->where('tests.type', TestType::TEST);
             })
-            ->whereDoesntHave('acceptanceItems.activeSamples') // No item has an active sample
-            ->withSum([
-                'payments as total_payments_for_having' => fn(Builder $query) => $query->select(DB::raw('COALESCE(SUM(price), 0)'))
-            ], 'price')
-            ->withSum([
-                'acceptanceItems as total_price_for_having' => fn(Builder $query) => $query->select(DB::raw('COALESCE(SUM(price), 0)'))
-            ], 'price')
-            ->withSum([
-                'acceptanceItems as total_discount_for_having' => fn(Builder $query) => $query->select(DB::raw('COALESCE(SUM(discount), 0)'))
-            ], 'discount')
-            ->havingRaw('total_payments_for_having >= (total_price_for_having - total_discount_for_having)')
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('acceptance_items')
+                    ->join('acceptance_item_samples', function ($join) {
+                        $join->on('acceptance_items.id', '=', 'acceptance_item_samples.acceptance_item_id')
+                            ->where('acceptance_item_samples.active',true); // Adjust status condition as needed
+                    })
+                    ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id');
+            })
+            ->whereExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('payments')
+                    ->leftJoin("invoices", "payments.invoice_id", "=", "invoices.id")
+                    ->whereColumn('invoices.id', 'acceptances.invoice_id')
+                    ->havingRaw('COALESCE(SUM(payments.price), 0) >= (
+                    SELECT COALESCE(SUM(ai.price - ai.discount), 0)
+                    FROM acceptance_items ai
+                    WHERE ai.acceptance_id = acceptances.id
+                )');
+            })
             ->count();
     }
 }

@@ -8,6 +8,7 @@ use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\Payment;
 use App\Domains\Billing\Repositories\PaymentRepository;
 use App\Domains\Setting\Services\SettingService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 readonly class PaymentService
 {
@@ -17,6 +18,11 @@ readonly class PaymentService
         private SettingService    $settingService
     )
     {
+    }
+
+    public function listPayments($queryData): LengthAwarePaginator
+    {
+        return $this->paymentRepository->listPayments($queryData);
     }
 
     /**
@@ -96,7 +102,6 @@ readonly class PaymentService
                     }
                 });
         }
-
         $this->invoiceService->updateStatus($invoice);
     }
 }

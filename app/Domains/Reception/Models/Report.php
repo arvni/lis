@@ -132,4 +132,14 @@ class Report extends Model
     {
         return $this->belongsTo(ReportTemplate::class);
     }
+
+    public function scopeNotApproved($query)
+    {
+        return $query->whereNull("approved_at")->whereNull("approver_id");
+    }
+
+    public function scopeIsActive($query)
+    {
+        return $query->where("status", true);
+    }
 }

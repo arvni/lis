@@ -91,7 +91,7 @@ const Index = ({auth, canEditAll}) => {
             }
         }
     ];
-    const {reports, status, errors, success, requestInputs} = usePage().props;
+    const {reports, status, errors, success, requestInputs, title} = usePage().props;
     const [report, setReport] = useState(null);
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
 
@@ -122,7 +122,7 @@ const Index = ({auth, canEditAll}) => {
     };
     return (
         <>
-            <PageHeader title="Reports List"/>
+            <PageHeader title={title || "Reports List"}/>
             <TableLayout defaultValues={requestInputs} success={success} status={status} reload={pageReload}
                          columns={columns} data={reports} processing={processing} Filter={Filter} errors={errors}/>
             <DeleteForm title={`${report?.name} Report`}

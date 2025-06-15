@@ -23,6 +23,7 @@ readonly class DashboardService
      * @param AcceptanceItemRepository $acceptanceItemRepository
      * @param PaymentRepository $paymentRepository
      * @param ConsultationRepository $consultationRepository
+     * @param ReportRepository $reportRepository
      */
     public function __construct(
         private AcceptanceRepository     $acceptanceRepository,
@@ -34,25 +35,17 @@ readonly class DashboardService
     {
     }
 
-    public function getDashboardData(): DashboardData
+    public function getDashboardData(Carbon $date): DashboardData
     {
         $user = Auth::user();
         $dashboardData = new DashboardData();
-        $dateRange = [Carbon::now("Asia/Muscat")->startOfDay(), Carbon::now("Asia/Muscat")->endOfDay()];
+        $dateRange = [$date->copy()->startOfDay(), $date->copy()->endOfDay()];
         // Reception domain metrics
         if ($user->can("Dashboard.Total Acceptances")) {
             $dashboardData->addItem(new DashboardItem(
                 'Today',
                 'Total Acceptances',
                 $this->acceptanceRepository->getTotalAcceptancesForDateRange($dateRange)
-            ));
-        }
-
-        if ($user->can("Dashboard.Total Tests")) {
-            $dashboardData->addItem(new DashboardItem(
-                'Today',
-                'Total Tests',
-                $this->acceptanceItemRepository->getTotalTestsForDateRange($dateRange)
             ));
         }
 
@@ -81,6 +74,14 @@ readonly class DashboardService
             ));
         }
 
+        if ($user->can("Dashboard.Total Tests")) {
+            $dashboardData->addItem(new DashboardItem(
+                'Today',
+                'Total Tests',
+                $this->acceptanceItemRepository->getTotalTestsForDateRange($dateRange)
+            ));
+        }
+
         // Billing domain metrics
         if ($user->can("Dashboard.Total Payments")) {
             $dashboardData->addItem(new DashboardItem(
@@ -99,6 +100,18 @@ readonly class DashboardService
                 'Today',
                 'Total Card Payments',
                 'OMR ' . $this->paymentRepository->getTotalCardPaymentsForDateRange($dateRange)
+            ));
+
+            $dashboardData->addItem(new DashboardItem(
+                'Today',
+                'Total Transfer Payments',
+                'OMR ' . $this->paymentRepository->getTotalTransferPaymentsForDateRange($dateRange)
+            ));
+
+            $dashboardData->addItem(new DashboardItem(
+                'Today',
+                'Total Credit Payments',
+                'OMR ' . $this->paymentRepository->getTotalCreditPaymentsForDateRange($dateRange)
             ));
         }
 

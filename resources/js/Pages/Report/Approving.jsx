@@ -16,13 +16,6 @@ const BREADCRUMBS = [
     }
 ];
 
-// Utility function to format test name
-const formatTestName = (acceptanceItem) => {
-    const { test, name } = acceptanceItem.method.test;
-    const methodName = acceptanceItem.method.name;
-    return `${test.name} >> ${methodName}`;
-};
-
 const Approving = () => {
     // Destructure page props
     const {
@@ -37,34 +30,38 @@ const Approving = () => {
     // Memoized columns to prevent unnecessary re-renders
     const columns = useMemo(() => [
         {
-            field: 'patient',
+            field: 'acceptance_item.patient.fullName',
             headerName: 'Patient',
+            type: "string",
             flex: 1,
             sortable: false,
-            renderCell: ({ row }) => row.acceptance_item.patient.fullName
+            renderCell: ({row}) => row.acceptance_item.patients.map(item => item.fullName).join(", ")
+
         },
         {
-            field: 'test',
+            field: 'name',
             headerName: 'Test',
+            type: "string",
             flex: 1,
             sortable: false,
-            renderCell: ({ row }) => formatTestName(row.acceptance_item)
+            renderCell: ({row}) => row.acceptance_item.test.name + " >> " + row.acceptance_item.method.name
+
         },
         {
-            field: 'reporter',
+            field: 'reporter_name',
             headerName: 'Reporter',
-            flex: 0.7,
-            sortable: false,
-            renderCell: ({ row }) => row.reporter.name
+            type: "string",
+            flex: .6,
         },
         {
-            field: 'reportedAt',
+            field: 'reported_at',
             headerName: 'Reported At',
-            type: 'date',
-            flex: 0.7,
+            type: "datetime",
+            flex: .7,
+            valueGetter: (value) => value && new Date(value),
         },
         {
-            field: 'actions',
+            field: 'id',
             headerName: 'Actions',
             type: 'actions',
             sortable: false,
@@ -116,7 +113,7 @@ const Approving = () => {
 
     return (
         <>
-            <Head title="Reports List" />
+            <Head title="Report Waiting for Approval" />
             <TableLayout
                 defaultValues={requestInputs}
                 success={success}

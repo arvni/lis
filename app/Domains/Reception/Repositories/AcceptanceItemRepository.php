@@ -168,13 +168,18 @@ class AcceptanceItemRepository
                     $q->search($filters["search"]);
                 });
         }
+        if (isset($filters["date"])){
+            $date=Carbon::parse($filters["date"]);
+            $dateRange=[$date->copy()->startOfDay(),$date->copy()->endOfDay()];
+            $query->whereBetween('created_at', $dateRange);
+        }
     }
 
     public function getTotalTestsForDateRange($dateRange): int
     {
         return AcceptanceItem::query()
             ->whereBetween("created_at", $dateRange)
-            ->whereHAs("test", function ($q) {
+            ->whereHas("test", function ($q) {
                 $q->whereNot("type", TestType::SERVICE);
             })
             ->count();

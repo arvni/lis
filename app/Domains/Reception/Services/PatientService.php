@@ -8,6 +8,7 @@ use App\Domains\Reception\Events\PatientDocumentUpdateEvent;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Repositories\PatientRepository;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 
 readonly class PatientService
 {
@@ -53,7 +54,10 @@ readonly class PatientService
                 $query->latest()->limit(5);
             },
             "consultations" => function ($query) {
-                $query->latest()->limit(5);
+                $query
+                    ->withAggregate("consultant","name")
+                    ->latest()
+                    ->limit(5);
             },
             "patientMeta",
             "patients",

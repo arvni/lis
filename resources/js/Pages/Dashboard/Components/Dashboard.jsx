@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, {useState, useMemo} from 'react';
 import {
     Box,
     Card,
@@ -50,14 +50,18 @@ import {
     NotificationsActive,
     ExpandMore,
     ExpandLess,
-    Error as ErrorIcon
+    Error as ErrorIcon,
+    CurrencyExchange,
+    RequestQuote
 } from '@mui/icons-material';
+import {Link} from "@inertiajs/react";
 
 // PropTypes for better documentation (optional)
 import PropTypes from 'prop-types';
+import TextField from "@mui/material/TextField";
 
 // Styled components for enhanced UI
-const StyledCard = styled(Card)(({ theme, priority, isAlert }) => ({
+const StyledCard = styled(Card)(({theme, priority, isAlert}) => ({
     height: '100%',
     transition: 'all 0.3s ease-in-out',
     borderRadius: theme.spacing(2),
@@ -79,7 +83,7 @@ const StyledCard = styled(Card)(({ theme, priority, isAlert }) => ({
     })
 }));
 
-const MetricValue = styled(Typography)(({ theme, isAlert }) => ({
+const MetricValue = styled(Typography)(({theme, isAlert}) => ({
     fontWeight: 'bold',
     fontSize: '2rem',
     background: isAlert
@@ -91,7 +95,7 @@ const MetricValue = styled(Typography)(({ theme, isAlert }) => ({
     transition: 'all 0.3s ease'
 }));
 
-const IconContainer = styled(Box)(({ theme, color = 'primary' }) => ({
+const IconContainer = styled(Box)(({theme, color = 'primary'}) => ({
     width: 56,
     height: 56,
     borderRadius: '50%',
@@ -116,7 +120,9 @@ const getMetricConfig = (label) => {
             description: 'New patient acceptances registered today',
             priority: 'high',
             category: 'operations',
-            unit: 'patients'
+            unit: 'patients',
+            route: "acceptances.index",
+            filter: true
         },
         'Total Tests': {
             icon: Description,
@@ -124,7 +130,10 @@ const getMetricConfig = (label) => {
             description: 'Laboratory tests completed and processed',
             priority: 'medium',
             category: 'operations',
-            unit: 'tests'
+            unit: 'tests',
+            route: "acceptanceItems.index",
+            filters: {"test.type": ["TEST", "PANEL"]},
+            filter: true
         },
         'Total Consultation': {
             icon: CheckCircle,
@@ -132,7 +141,9 @@ const getMetricConfig = (label) => {
             description: 'Patient consultations completed today',
             priority: 'high',
             category: 'medical',
-            unit: 'consultations'
+            unit: 'consultations',
+            route: "consultations.index",
+            filter: true
         },
         'Total Payments': {
             icon: AttachMoney,
@@ -140,7 +151,9 @@ const getMetricConfig = (label) => {
             description: 'Total revenue collected from all sources',
             priority: 'high',
             category: 'financial',
-            unit: 'currency'
+            unit: 'currency',
+            route: 'payments.index',
+            filter: true
         },
         'Total Cash Payments': {
             icon: MonetizationOn,
@@ -148,7 +161,10 @@ const getMetricConfig = (label) => {
             description: 'Cash payments received at reception',
             priority: 'low',
             category: 'financial',
-            unit: 'currency'
+            unit: 'currency',
+            route: 'payments.index',
+            filters: {type: "cash"},
+            filter: true
         },
         'Total Card Payments': {
             icon: CreditCard,
@@ -156,7 +172,32 @@ const getMetricConfig = (label) => {
             description: 'Credit/debit card payments processed',
             priority: 'low',
             category: 'financial',
-            unit: 'currency'
+            unit: 'currency',
+            route: 'payments.index',
+            filters: {type: "card"},
+            filter: true
+        },
+        'Total Transfer Payments': {
+            icon: CurrencyExchange,
+            color: 'success',
+            description: 'transfer payments processed',
+            priority: 'low',
+            category: 'financial',
+            unit: 'currency',
+            route: 'payments.index',
+            filters: {type: "transfer"},
+            filter: true
+        },
+        'Total Credit Payments': {
+            icon: RequestQuote,
+            color: 'success',
+            description: 'credit payments processed',
+            priority: 'low',
+            category: 'financial',
+            unit: 'currency',
+            route: 'payments.index',
+            filters: {type: "credit"},
+            filter: true
         },
         'Waiting For Sampling': {
             icon: AccessTime,
@@ -165,7 +206,9 @@ const getMetricConfig = (label) => {
             priority: 'high',
             category: 'alerts',
             unit: 'patients',
-            isAlert: true
+            isAlert: true,
+            route: 'sampleCollection',
+            filter: false,
         },
         'Waiting For Consultation': {
             icon: AccessTime,
@@ -174,7 +217,9 @@ const getMetricConfig = (label) => {
             priority: 'high',
             category: 'alerts',
             unit: 'patients',
-            isAlert: true
+            isAlert: true,
+            route: 'consultations.waiting-list',
+            filter: false,
         },
         'Reports Waiting For Approving': {
             icon: Warning,
@@ -183,7 +228,9 @@ const getMetricConfig = (label) => {
             priority: 'high',
             category: 'alerts',
             unit: 'reports',
-            isAlert: true
+            isAlert: true,
+            route: 'reports.approvingList',
+            filter: false,
         }
     };
     return configs[label] || {
@@ -197,18 +244,20 @@ const getMetricConfig = (label) => {
 };
 
 // Enhanced metric card component
+
 const MetricCard = React.memo(({
                                    label,
                                    valueData,
                                    category,
                                    delay = 0,
                                    onToggleVisibility,
-                                   isVisible = true
+                                   isVisible = true,
+                                   date
                                }) => {
-    const theme = useTheme();
     const [showDetails, setShowDetails] = useState(false);
     const config = getMetricConfig(label);
     const Icon = config.icon;
+    const url = route(config.route, config.filter ? {filters: {...config.filters, date}} : null);
 
     const value = valueData?.value || valueData;
     const trend = valueData?.trend || 0;
@@ -238,7 +287,7 @@ const MetricCard = React.memo(({
     };
 
     return (
-        <Fade in={isVisible} timeout={500} style={{ transitionDelay: `${delay}ms` }}>
+        <Fade in={isVisible} timeout={500} style={{transitionDelay: `${delay}ms`}}>
             <StyledCard
                 priority={config.priority}
                 isAlert={config.isAlert && numericValue > 0}
@@ -259,32 +308,32 @@ const MetricCard = React.memo(({
                             zIndex: 1
                         }}
                     >
-                        <Box sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: '50%' }} />
+                        <Box sx={{width: 8, height: 8, bgcolor: 'white', borderRadius: '50%'}}/>
                     </Box>
                 )}
 
                 {config.isAlert && numericValue > 0 && (
                     <Badge
-                        badgeContent={<NotificationsActive sx={{ fontSize: 12 }} />}
+                        badgeContent={<NotificationsActive sx={{fontSize: 12}}/>}
                         color="error"
-                        sx={{ position: 'absolute', top: 16, right: 16 }}
+                        sx={{position: 'absolute', top: 16, right: 16}}
                     />
                 )}
 
-                <CardContent sx={{ p: 3 }}>
+                <CardContent sx={{p: 3}}>
                     <Box display="flex" justifyContent="space-between" alignItems="flex-start">
                         <Box flex={1}>
                             <Box display="flex" alignItems="center" gap={1} mb={1}>
                                 <Typography
                                     variant="body2"
                                     color="text.secondary"
-                                    sx={{ fontWeight: 500 }}
+                                    sx={{fontWeight: 500}}
                                 >
                                     {label}
                                 </Typography>
                                 <Tooltip title={config.description} arrow>
-                                    <IconButton size="small" sx={{ p: 0 }}>
-                                        <Info sx={{ fontSize: 14 }} />
+                                    <IconButton size="small" sx={{p: 0}}>
+                                        <Info sx={{fontSize: 14}}/>
                                     </IconButton>
                                 </Tooltip>
                             </Box>
@@ -293,7 +342,7 @@ const MetricCard = React.memo(({
                                 variant="h3"
                                 component="div"
                                 isAlert={config.isAlert && numericValue > 0}
-                                sx={{ mb: 1 }}
+                                sx={{mb: 1}}
                             >
                                 {formatValue(value)}
                             </MetricValue>
@@ -305,7 +354,7 @@ const MetricCard = React.memo(({
                                         size="small"
                                         color={config.color}
                                         variant="outlined"
-                                        sx={{ fontSize: '0.75rem' }}
+                                        sx={{fontSize: '0.75rem'}}
                                     />
 
                                     {trend !== 0 && (
@@ -329,7 +378,7 @@ const MetricCard = React.memo(({
                                         size="small"
                                         color="warning"
                                         variant="filled"
-                                        sx={{ animation: 'pulse 2s infinite' }}
+                                        sx={{animation: 'pulse 2s infinite'}}
                                     />
                                 )}
                             </Box>
@@ -351,25 +400,25 @@ const MetricCard = React.memo(({
                                 <IconButton
                                     size="small"
                                     onClick={() => setShowDetails(!showDetails)}
-                                    sx={{ opacity: 0.7 }}
+                                    sx={{opacity: 0.7}}
                                 >
-                                    {showDetails ? <ExpandLess /> : <ExpandMore />}
+                                    {showDetails ? <ExpandLess/> : <ExpandMore/>}
                                 </IconButton>
 
                                 {onToggleVisibility && (
                                     <IconButton
                                         size="small"
                                         onClick={() => onToggleVisibility(label)}
-                                        sx={{ opacity: 0.7 }}
+                                        sx={{opacity: 0.7}}
                                     >
-                                        <VisibilityOff />
+                                        <VisibilityOff/>
                                     </IconButton>
                                 )}
                             </Box>
                         </Box>
 
                         <IconContainer color={config.color}>
-                            <Icon sx={{ fontSize: 28 }} />
+                            <Link href={url}><Icon sx={{fontSize: 28}}/></Link>
                         </IconContainer>
                     </Box>
                 </CardContent>
@@ -380,18 +429,18 @@ const MetricCard = React.memo(({
 
 // Loading skeleton component
 const MetricSkeleton = React.memo(() => (
-    <Card sx={{ height: '100%', borderRadius: 2 }}>
-        <CardContent sx={{ p: 3 }}>
+    <Card sx={{height: '100%', borderRadius: 2}}>
+        <CardContent sx={{p: 3}}>
             <Box display="flex" justifyContent="space-between" alignItems="flex-start">
                 <Box flex={1} mr={2}>
-                    <Skeleton variant="text" width="70%" height={24} />
-                    <Skeleton variant="text" width="50%" height={48} sx={{ my: 1 }} />
+                    <Skeleton variant="text" width="70%" height={24}/>
+                    <Skeleton variant="text" width="50%" height={48} sx={{my: 1}}/>
                     <Box display="flex" gap={1}>
-                        <Skeleton variant="rounded" width={80} height={24} />
-                        <Skeleton variant="rounded" width={60} height={24} />
+                        <Skeleton variant="rounded" width={80} height={24}/>
+                        <Skeleton variant="rounded" width={60} height={24}/>
                     </Box>
                 </Box>
-                <Skeleton variant="circular" width={56} height={56} />
+                <Skeleton variant="circular" width={56} height={56}/>
             </Box>
         </CardContent>
     </Card>
@@ -400,6 +449,7 @@ const MetricSkeleton = React.memo(() => (
 // Main Dashboard component that accepts data as props
 const Dashboard = ({
                        data = null,
+                       date = null,
                        loading = false,
                        error = null,
                        lastUpdated = null,
@@ -416,7 +466,6 @@ const Dashboard = ({
                        className,
                        ...props
                    }) => {
-    const theme = useTheme();
     const [filter, setFilter] = useState('all');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [hiddenMetrics, setHiddenMetrics] = useState(new Set());
@@ -429,7 +478,7 @@ const Dashboard = ({
         if (onRefresh) {
             setIsRefreshing(true);
             try {
-                await onRefresh();
+                await onRefresh(date);
                 setShowSuccess(true);
             } catch (err) {
                 console.error('Refresh failed:', err);
@@ -507,19 +556,19 @@ const Dashboard = ({
     // Error state
     if (error && !data) {
         return (
-            <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }} className={className} {...props}>
-                <Paper elevation={2} sx={{ p: 4, textAlign: 'center', borderRadius: 3 }}>
-                    <ErrorIcon sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
+            <Container maxWidth="lg" sx={{mt: 4, mb: 4}} className={className} {...props}>
+                <Paper elevation={2} sx={{p: 4, textAlign: 'center', borderRadius: 3}}>
+                    <ErrorIcon sx={{fontSize: 64, color: 'error.main', mb: 2}}/>
                     <Typography variant="h4" color="error" gutterBottom>
                         Unable to load dashboard
                     </Typography>
-                    <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                    <Typography variant="body1" color="text.secondary" sx={{mb: 3}}>
                         {error}
                     </Typography>
                     {onRefresh && (
                         <Button
                             variant="contained"
-                            startIcon={isRefreshing ? <CircularProgress size={20} /> : <Refresh />}
+                            startIcon={isRefreshing ? <CircularProgress size={20}/> : <Refresh/>}
                             onClick={handleRefresh}
                             disabled={isRefreshing}
                             size="large"
@@ -532,27 +581,38 @@ const Dashboard = ({
         );
     }
 
+    const handleDateChange = (e) => {
+        if (onRefresh)
+            onRefresh(e.target.value)
+    }
+    const today = () => {
+        let t = new Date();
+        return t.getFullYear() + "-" + (t.getMonth() + 1) + "-" + t.getDate();
+    };
+    console.log(today(), date);
+
     return (
-        <Box sx={{ flexGrow: 1 }} className={className} {...props}>
+        <Box sx={{flexGrow: 1}} className={className} {...props}>
             {/* Header */}
             {showHeader && (
-                <AppBar position="static" elevation={0} sx={{ bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider' }}>
+                <AppBar position="static" elevation={0}
+                        sx={{bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider'}}>
                     <Toolbar>
-                        <DashboardIcon sx={{ color: 'primary.main', mr: 2 }} />
-                        <Typography variant="h6" sx={{ flexGrow: 1, color: 'text.primary' }}>
+                        <DashboardIcon sx={{color: 'primary.main', mr: 2}}/>
+                        <Typography variant="h6" sx={{flexGrow: 1, color: 'text.primary'}}>
                             {title}
                         </Typography>
 
                         {showSystemHealth && totalAlerts > 0 && (
-                            <Badge badgeContent={totalAlerts} color="error" sx={{ mr: 2 }}>
-                                <NotificationsActive color="action" />
+                            <Badge badgeContent={totalAlerts} color="error" sx={{mr: 2}}>
+                                <NotificationsActive color="action"/>
                             </Badge>
                         )}
 
                         {showSystemHealth && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                 <Chip
-                                    icon={<Timeline />}
+                                    icon={<Timeline/>}
                                     label={systemHealth === 'good' ? 'All Systems Operational' : 'System Issues Detected'}
                                     color={systemHealth === 'good' ? 'success' : 'warning'}
                                     variant="outlined"
@@ -564,10 +624,10 @@ const Dashboard = ({
                 </AppBar>
             )}
 
-            <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+            <Container maxWidth="lg" sx={{mt: 4, mb: 4}}>
                 {/* Dashboard Title */}
                 <Box mb={4}>
-                    <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+                    <Typography variant="h3" component="h1" gutterBottom sx={{fontWeight: 'bold'}}>
                         Dashboard Overview
                     </Typography>
 
@@ -585,7 +645,13 @@ const Dashboard = ({
 
                         {showFilters && (
                             <Stack direction="row" spacing={2} alignItems="center">
-                                <FormControl size="small" sx={{ minWidth: 120 }}>
+                                <TextField onChange={handleDateChange}
+                                           value={date}
+                                           size="small"
+                                           type="date"
+                                           sx={{minWidth: 120}}
+                                           slotProps={{htmlInput: {max: today()}}}/>
+                                <FormControl size="small" sx={{minWidth: 120}}>
                                     <InputLabel>Priority</InputLabel>
                                     <Select
                                         value={filter}
@@ -598,7 +664,7 @@ const Dashboard = ({
                                     </Select>
                                 </FormControl>
 
-                                <FormControl size="small" sx={{ minWidth: 120 }}>
+                                <FormControl size="small" sx={{minWidth: 120}}>
                                     <InputLabel>Category</InputLabel>
                                     <Select
                                         value={categoryFilter}
@@ -616,7 +682,7 @@ const Dashboard = ({
                                 {onRefresh && (
                                     <Button
                                         variant="outlined"
-                                        startIcon={isRefreshing ? <CircularProgress size={16} /> : <Refresh />}
+                                        startIcon={isRefreshing ? <CircularProgress size={16}/> : <Refresh/>}
                                         onClick={handleRefresh}
                                         disabled={isRefreshing}
                                     >
@@ -630,7 +696,7 @@ const Dashboard = ({
 
                 {/* Error banner for refresh errors */}
                 {error && data && (
-                    <Alert severity="warning" sx={{ mb: 3, borderRadius: 2 }}>
+                    <Alert severity="warning" sx={{mb: 3, borderRadius: 2}}>
                         <AlertTitle>Failed to refresh data</AlertTitle>
                         {error} — Showing last known data.
                     </Alert>
@@ -639,9 +705,9 @@ const Dashboard = ({
                 {/* Content */}
                 {loading ? (
                     <Grid container spacing={3}>
-                        {Array.from({ length: 6 }).map((_, index) => (
-                            <Grid size={{xs:12,sm:6,md:4}} key={index}>
-                                <MetricSkeleton />
+                        {Array.from({length: 6}).map((_, index) => (
+                            <Grid size={{xs: 12, sm: 6, md: 4}} key={index}>
+                                <MetricSkeleton/>
                             </Grid>
                         ))}
                     </Grid>
@@ -652,9 +718,9 @@ const Dashboard = ({
                             const totalMetrics = data ? Object.keys(data[category] || {}).length : 0;
 
                             return (
-                                <Paper key={category} elevation={1} sx={{ p: 3, borderRadius: 3 }}>
+                                <Paper key={category} elevation={1} sx={{p: 3, borderRadius: 3}}>
                                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                                        <Typography variant="h4" component="h2" sx={{ fontWeight: 'bold' }}>
+                                        <Typography variant="h4" component="h2" sx={{fontWeight: 'bold'}}>
                                             {category} Metrics
                                         </Typography>
                                         <Chip
@@ -666,10 +732,11 @@ const Dashboard = ({
 
                                     <Grid container spacing={3}>
                                         {visibleMetrics.map(([label, valueData], index) => (
-                                            <Grid size={{xs:12,sm:6,md:4}} key={label}>
+                                            <Grid size={{xs: 12, sm: 6, md: 4}} key={label}>
                                                 <MetricCard
                                                     label={label}
                                                     valueData={valueData}
+                                                    date={date}
                                                     category={category}
                                                     delay={categoryIndex * 100 + index * 50}
                                                     onToggleVisibility={enableAutoHide ? toggleMetricVisibility : undefined}
@@ -681,7 +748,7 @@ const Dashboard = ({
                                     {/* Hidden metrics section */}
                                     {enableAutoHide && data && Object.keys(data[category] || {}).some(label => hiddenMetrics.has(label)) && (
                                         <Box mt={3} pt={3}>
-                                            <Divider sx={{ mb: 2 }} />
+                                            <Divider sx={{mb: 2}}/>
                                             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                                                 Hidden Metrics
                                             </Typography>
@@ -692,11 +759,11 @@ const Dashboard = ({
                                                         <Chip
                                                             key={label}
                                                             label={label}
-                                                            icon={<Visibility />}
+                                                            icon={<Visibility/>}
                                                             onClick={() => toggleMetricVisibility(label)}
                                                             variant="outlined"
                                                             size="small"
-                                                            sx={{ m: 0.5 }}
+                                                            sx={{m: 0.5}}
                                                         />
                                                     ))}
                                             </Stack>
@@ -713,9 +780,9 @@ const Dashboard = ({
                     open={showSuccess}
                     autoHideDuration={3000}
                     onClose={() => setShowSuccess(false)}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
                 >
-                    <Alert onClose={() => setShowSuccess(false)} severity="success" sx={{ width: '100%' }}>
+                    <Alert onClose={() => setShowSuccess(false)} severity="success" sx={{width: '100%'}}>
                         Dashboard data refreshed successfully!
                     </Alert>
                 </Snackbar>

@@ -23,10 +23,10 @@ use DNS1D;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Str;
 use InvalidArgumentException;
 use PhpOffice\PhpWord\Exception\Exception;
 use RuntimeException;
@@ -67,6 +67,11 @@ class ReportService
     public function listReports($queryData)
     {
         return $this->reportRepository->list($queryData);
+    }
+
+    public function listWaitingForApprovalReports($queryData): LengthAwarePaginator
+    {
+        return $this->reportRepository->listWaitignForApproving($queryData);
     }
 
     /**

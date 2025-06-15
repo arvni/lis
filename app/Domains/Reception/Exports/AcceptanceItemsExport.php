@@ -47,6 +47,7 @@ class AcceptanceItemsExport implements FromCollection
             "Discount",
             "Sampled At",
             "Status",
+            "Created At",
             "Last Update",
         ];
     }
@@ -65,13 +66,14 @@ class AcceptanceItemsExport implements FromCollection
             $row->discount,
             $row->active_sample_created_at,
             $row->status,
+            $row->created_at,
             $row->updated_at,
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->setAutoFilter('A1:L1');
+        $sheet->setAutoFilter('A1:M1');
         return [
             1 => [
                 'font' => [

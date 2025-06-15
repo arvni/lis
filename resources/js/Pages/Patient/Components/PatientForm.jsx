@@ -338,7 +338,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             required
                                             placeholder="Enter ID or passport number"
                                             variant="outlined"
-                                            label="ID/Passport Number *"
+                                            label="ID/Passport Number"
                                             slotProps={{
                                                 input: {startAdornment: <Badge color="primary" sx={{mr: 1}}/>}
                                             }}
@@ -361,7 +361,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             required
                                             placeholder="Enter full name"
                                             variant="outlined"
-                                            label="Full Name *"
+                                            label="Full Name"
                                             slotProps={{
                                                 input: {startAdornment: <Person color="primary" sx={{mr: 1}}/>}
                                             }}
@@ -381,10 +381,9 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             fullWidth
                                             name="tribe"
                                             onChange={onChange}
-                                            required
                                             placeholder="Enter tribe"
                                             variant="outlined"
-                                            label="Tribe *"
+                                            label="Tribe"
                                             slotProps={{
                                                 input: {
                                                     startAdornment: <AccessibilityNew color="primary" sx={{mr: 1}}/>
@@ -458,7 +457,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                         helperText={errors?.dateOfBirth}
                                         name="dateOfBirth"
                                         onChange={handleDOBChange}
-                                        label="Date of Birth *"
+                                        label="Date of Birth"
                                         sx={{textAlign: "right"}}
                                         slotProps={{
                                             input: {
@@ -508,7 +507,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             name="phone"
                                             onChange={onChange}
                                             placeholder="Enter phone number"
-                                            label="Phone Number *"
+                                            label="Phone Number"
                                             slotProps={{
                                                 input: {startAdornment: <Phone color="primary" sx={{mr: 1}}/>}
                                             }}
@@ -677,7 +676,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                                     required
                                                     placeholder="Enter village name"
                                                     variant="outlined"
-                                                    label="Village *"
+                                                    label="Village"
                                                     slotProps={{
                                                         input: {startAdornment: <Home color="primary" sx={{mr: 1}}/>}
                                                     }}

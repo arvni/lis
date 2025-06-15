@@ -31,6 +31,26 @@ class ReportRepository
         return $query->paginate($queryData["pageSize"] ?? 10);
     }
 
+    public function listWaitignForApproving($queryData)
+    {
+        $query = Report::query()
+            ->notApproved()
+            ->isActive()
+            ->with([
+                "acceptanceItem.method",
+                "acceptanceItem.test",
+                "reporter:id",
+                "acceptanceItem.patients:id,fullName"
+            ])
+            ->withAggregate("reporter", "name");
+        if (isset($queryData["filters"]))
+            $this->applyFilters($query, $queryData["filters"]);
+
+        if (isset($queryData["sort"]))
+            $query->orderBy($queryData['sort']['field'] ?? 'id', $queryData['sort']['sort'] ?? 'asc');
+        return $query->paginate($queryData["pageSize"] ?? 10);
+    }
+
     public function create($data)
     {
         return Report::create($data);

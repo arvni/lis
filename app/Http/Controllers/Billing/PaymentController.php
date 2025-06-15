@@ -8,6 +8,9 @@ use App\Domains\Billing\Requests\StorePaymentRequest;
 use App\Domains\Billing\Requests\UpdatePaymentRequest;
 use App\Domains\Billing\Services\PaymentService;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class PaymentController extends Controller
 {
@@ -19,9 +22,12 @@ class PaymentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request): Response
     {
-        //
+        $this->authorize("viewAny", Payment::class);
+        $requestInputs = $request->all();
+        $payments = $this->paymentService->listPayments($requestInputs);
+        return Inertia::render("Payment/Index", compact("requestInputs", "payments"));
     }
 
     /**

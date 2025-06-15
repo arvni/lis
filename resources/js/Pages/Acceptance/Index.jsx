@@ -41,7 +41,7 @@ import {
     HourglassEmpty as HourglassEmptyIcon,
     Warning as WarningIcon
 } from "@mui/icons-material";
-import {calculateBusinessDays} from "@/Services/helper.js";
+import {calculateBusinessDays, formatDate} from "@/Services/helper.js";
 
 const Index = () => {
     const {
@@ -73,19 +73,6 @@ const Index = () => {
             currency: 'OMR',
             minimumFractionDigits: 2
         }).format(amount);
-    };
-
-    // Format date
-    const formatDate = (date) => {
-        if (!date) return "N/A";
-        return new Intl.DateTimeFormat('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        }).format(new Date(date));
     };
 
     // Get status info based on status text
@@ -362,6 +349,15 @@ const Index = () => {
                     <Typography variant="body2" color="text.secondary">N/A</Typography>
                 );
             }
+        },
+        {
+            field: 'created_at',
+            headerName: 'Registered At',
+            flex: 0.4,
+            type: "datetime",
+            display: "flex",
+            valueGetter: (value) => value && new Date(value),
+            renderCell:({value})=>formatDate(value)
         },
         {
             field: 'id',

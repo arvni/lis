@@ -28,7 +28,7 @@ class InvoiceController extends Controller
      */
     public function index(Request $request): Response
     {
-        $this->authorize("viewAny", Role::class);
+        $this->authorize("viewAny", Invoice::class);
         $requestInputs = $request->all();
         $invoices = $this->invoiceService->listInvoices($requestInputs);
         return Inertia::render("Invoice/Index", compact("requestInputs", "invoices"));

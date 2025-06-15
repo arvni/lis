@@ -72,7 +72,8 @@ readonly class InvoiceService
             $this->invoiceRepository->updateInvoice($invoice, ["status" => InvoiceStatus::PAID]);
         } elseif ($invoice->isPartiallyPaid()) {
             $invoice->update(["status" => InvoiceStatus::PARTIALLY_PAID]);
-        }
+        } else
+            $invoice->update(["status" => InvoiceStatus::WAITING_FOR_PAYMENT]);
     }
 
 

@@ -3,6 +3,7 @@
 namespace App\Domains\Reception\Repositories;
 
 use App\Domains\Reception\Models\Patient;
+use DB;
 use Illuminate\Database\Eloquent\Collection;
 use function Laravel\Prompts\select;
 
@@ -10,7 +11,7 @@ class PatientRepository
 {
     public function listPatient(array $queryData)
     {
-        $query = Patient::withCount(["Acceptances", "Relatives", "Payments"])
+        $query = Patient::withCount(["acceptances", "relatives", "payments", "consultations"])
             ->withSum("Payments", "price")
             ->withSum("AcceptanceItems", "price")
             ->withSum("AcceptanceItems", "discount");
@@ -48,7 +49,7 @@ class PatientRepository
     {
         return $patient->ownedDocuments()->whereNotIn('tag', ['temp', 'avatar'])
             ->get()
-            ->map(fn($doc) => ['id' => $doc->hash, 'originalName' => $doc->originalName, "tag" => $doc->tag, "created_at" => $doc->created_at,"ext" => $doc->ext])
+            ->map(fn($doc) => ['id' => $doc->hash, 'originalName' => $doc->originalName, "tag" => $doc->tag, "created_at" => $doc->created_at, "ext" => $doc->ext])
             ->toArray();
     }
 
@@ -77,18 +78,18 @@ class PatientRepository
                 ->orWhereHas("patients", fn($q) => $q->where("relatives.relative_id", $filters["patient"]));
     }
 
-    public function countPatients($field = null):int|array
+    public function countPatients($field = null): int|array
     {
         switch ($field) {
             case "nationality":
-                return Patient::select('nationality', \DB::raw('count(*) as count'))
+                return Patient::select('nationality', DB::raw('count(*) as count'))
                     ->groupBy('nationality')
                     ->orderBy('count', 'desc')
                     ->pluck('count', 'nationality')
                     ->toArray();
                 break;
             case "gender":
-                return Patient::select('gender', \DB::raw('count(*) as count'))
+                return Patient::select('gender', DB::raw('count(*) as count'))
                     ->groupBy('gender')
                     ->pluck('count', 'gender')
                     ->toArray();
