@@ -244,5 +244,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get("test-list", ShowTestListController::class)->name("test-list");
 
 });
-Route::get("temp",\App\Http\Controllers\TempController::class);
 require __DIR__ . '/auth.php';
