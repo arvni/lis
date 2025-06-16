@@ -123,9 +123,9 @@ class Patient extends Model
         return $this->morphMany(Document::class, "related");
     }
 
-    public function Samples()
+    public function samples()
     {
-        return $this->hasManyThrough(Sample::class, Acceptance::class);
+        return $this->hasMany(Sample::class);
     }
 
     public function scopeIsResearch($query, $isResearch)

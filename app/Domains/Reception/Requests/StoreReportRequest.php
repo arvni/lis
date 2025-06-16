@@ -4,6 +4,7 @@ namespace App\Domains\Reception\Requests;
 
 use App\Domains\Laboratory\Models\ReportTemplate;
 use App\Domains\Laboratory\Models\ReportTemplateParameter;
+use App\Domains\Reception\Models\Report;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -15,7 +16,7 @@ class StoreReportRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('create', ReportTemplate::class);
+        return Gate::allows('create', Report::class);
     }
 
     /**
@@ -51,7 +52,7 @@ class StoreReportRequest extends FormRequest
 
             // Supporting files validation
             'files' => 'nullable|array',
-            'files.*' => 'file|max:20480', // 20MB max for supporting files
+            'files.*' => 'nullable',
 
             // Signers validation if included
             'signers' => 'nullable|array',
