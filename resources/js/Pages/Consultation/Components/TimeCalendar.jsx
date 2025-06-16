@@ -65,7 +65,7 @@ const TimeCalendar = ({
     }, []);
 
     // Days of week and month names
-    const daysOfWeek = useMemo(() => ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'], []);
+    const daysOfWeek = useMemo(() => [ 'Mon', 'Tue', 'Wed', 'Thu', 'Fri','Sat', 'Sun',], []);
     const monthNames = useMemo(() => [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
