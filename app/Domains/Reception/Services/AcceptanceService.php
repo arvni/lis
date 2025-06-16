@@ -98,6 +98,7 @@ class AcceptanceService
             "acceptanceItems.methodTest.method.test.sampleTypes",
             "acceptanceItems.patients",
             "acceptanceItems.latestState",
+            "acceptanceItems.activeSamples",
             "invoice.payments.cashier",
             "invoice.payments.payer",
             "invoice.owner",

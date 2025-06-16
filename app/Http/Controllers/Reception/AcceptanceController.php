@@ -130,8 +130,8 @@ class AcceptanceController extends Controller
             "acceptanceItems" => $acceptance->acceptanceItems,
             "invoice" => $acceptance->invoice,
             "minAllowablePayment",
-            "canEdit",
-            "status"
+            "canEdit" => Gate::allows("update", $acceptance),
+            "canPrintBarcode" => $acceptance->status === AcceptanceStatus::PROCESSING || $acceptance->status === AcceptanceStatus::REPORTED,
         ];
         return Inertia::render('Acceptance/Show', $data);
     }
@@ -191,7 +191,7 @@ class AcceptanceController extends Controller
                     ->route('acceptances.show', $updatedAcceptance)
                     ->with(['success' => true, 'status' => 'Acceptance successfully updated and finalized.']);
             }
-            if ($updatedAcceptance->status!==AcceptanceStatus::PENDING) {
+            if ($updatedAcceptance->status !== AcceptanceStatus::PENDING) {
                 return redirect()->route('acceptances.show', $updatedAcceptance->id)
                     ->with('info', 'Progress saved successfully.');
             }

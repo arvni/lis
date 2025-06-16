@@ -34,8 +34,7 @@ import {
     RequestQuote,
     Science,
     PlaylistAddCheck,
-    ReceiptLong,
-    AttachMoney, WhatsApp
+    WhatsApp
 } from "@mui/icons-material";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid2";
@@ -46,6 +45,7 @@ import Payment from "./Components/Payment";
 import Button from "@mui/material/Button";
 import {Link} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
+import {BarcodeIcon} from "lucide-react";
 
 // Constants
 const TEST_TYPE = {
@@ -188,7 +188,8 @@ const Show = ({
                   invoice,
                   minAllowablePayment = 0,
                   canEdit,
-                  status
+                  status,
+                  canPrintBarcode
               }) => {
     // Theme access for responsive design
     const theme = useTheme();
@@ -265,6 +266,18 @@ const Show = ({
                         href={route("acceptances.edit", acceptance.id)}
                     >
                         Edit
+                    </Button>
+                </Tooltip>
+            )}
+            {canPrintBarcode && (
+                <Tooltip title="Print Barcodes">
+                    <Button
+                        variant="outlined"
+                        color="info"
+                        target="_blank"
+                        startIcon={<BarcodeIcon/>}
+                        href={route("acceptances.barcodes", acceptance.id)}>
+                        Print Barcodes
                     </Button>
                 </Tooltip>
             )}
@@ -560,6 +573,7 @@ const Show = ({
                                             <TableCell width="15%">Method</TableCell>
                                             <TableCell width="20%">Patients</TableCell>
                                             <TableCell width="15%">Details</TableCell>
+                                            <TableCell width="15%">Barcodes</TableCell>
                                             <TableCell width="8%" align="right">Price</TableCell>
                                             <TableCell width="8%" align="right">Discount</TableCell>
                                             <TableCell width="9%" align="right">Net</TableCell>
@@ -601,6 +615,7 @@ const Show = ({
                                                     {item?.patients?.map(p => p.fullName).join(", ") || 'N/A'}
                                                 </TableCell>
                                                 <TableCell>{item.customParameters?.details || '-'}</TableCell>
+                                                <TableCell>{item.active_samples?.map(sample => sample.barcode).join(", ") || '-'}</TableCell>
                                                 <TableCell align="right">{item.price}</TableCell>
                                                 <TableCell align="right">{item.discount}</TableCell>
                                                 <TableCell
