@@ -8,7 +8,6 @@ use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Requests\StoreInvoiceRequest;
 use App\Domains\Billing\Requests\UpdateInvoiceRequest;
 use App\Domains\Billing\Services\InvoiceService;
-use App\Domains\User\Models\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
@@ -54,6 +53,7 @@ class InvoiceController extends Controller
 
     /**
      * Display the specified resource.
+     * @throws AuthorizationException
      */
     public function show(Invoice $invoice)
     {

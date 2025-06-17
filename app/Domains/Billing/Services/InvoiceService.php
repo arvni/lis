@@ -48,6 +48,7 @@ readonly class InvoiceService
             ->loadSum("acceptanceItems", "price");
 
         $invoice->invoiceNo = $this->invoiceRepository->getInvoiceNo($invoice);
+        $invoice->has_different_owner = $invoice->owner_type === "referrer";
         return $invoice;
     }
 
