@@ -16,8 +16,6 @@ import JsBarcode from 'jsbarcode';
 import {
     Print as PrintIcon,
     LocalHospital as LocalHospitalIcon,
-    CalendarToday as CalendarTodayIcon,
-    Person as PersonIcon,
     Close as CloseIcon,
     ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
@@ -49,7 +47,7 @@ const BarcodeItem = styled(Paper)(({theme}) => ({
     pageBreakAfter: 'always',
     boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
     width: '36mm',
-    height: '26mm',
+    height: '24mm',
     border: '1px dashed #ddd',
     position: 'relative',
     overflow: 'hidden',
