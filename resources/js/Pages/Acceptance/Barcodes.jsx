@@ -9,7 +9,7 @@ import {
     Tooltip,
     IconButton,
     Grid2 as Grid,
-    Chip, Stack, Divider
+    Chip, Stack
 } from '@mui/material';
 import {styled} from '@mui/material/styles';
 import JsBarcode from 'jsbarcode';
@@ -21,7 +21,6 @@ import {
     Close as CloseIcon,
     ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
-import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 
@@ -49,8 +48,8 @@ const BarcodeItem = styled(Paper)(({theme}) => ({
     justifyContent: 'center',
     pageBreakAfter: 'always',
     boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-    width: '37mm',
-    height: '25mm',
+    width: '36mm',
+    height: '26mm',
     border: '1px dashed #ddd',
     position: 'relative',
     overflow: 'hidden',
@@ -63,7 +62,7 @@ const BarcodeItem = styled(Paper)(({theme}) => ({
 
 const BarcodeText = styled(Typography)(() => ({
     margin: '0.5px',
-    lineHeight: '2.2mm',
+    lineHeight: '2.5mm',
     fontWeight: 'bold',
     fontSize: '2.5mm',
     fontFamily: 'monospace',
@@ -77,7 +76,7 @@ const BarcodeText = styled(Typography)(() => ({
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     '@media print': {
-        fontSize: '2.2mm',
+        fontSize: '2.5mm',
     }
 }));
 
@@ -169,7 +168,7 @@ const BarcodeComponent = ({barcodes}) => {
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         const date = new Date(dateString);
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     };
 
     const handlePrint = () => {
@@ -231,20 +230,19 @@ const BarcodeComponent = ({barcodes}) => {
                                         <BarcodeText>{barcode.barcode}</BarcodeText>
                                         <BarcodeText>
                                             <Box component="span"
-                                                 sx={{display: 'inline-flex', alignItems: 'center', mr: 0.5}}>
-                                                <CalendarTodayIcon sx={{fontSize: '2mm', mr: 0.5}}/>
+                                                 sx={{display: 'inline-flex', alignItems: 'center'}}>
                                                 {formatDate(barcode.collection_date || barcode.created_at)}
                                             </Box>
-                                            |
-                                            {barcode.patient && <Box component="span"
-                                                                     sx={{
-                                                                         display: 'inline-flex',
-                                                                         alignItems: 'center',
-                                                                         ml: 0.5
-                                                                     }}>
-                                                <PersonIcon sx={{fontSize: '2mm', mr: 0.5}}/>
-                                                {barcode.patient.gender.substring(0, 1)}/{barcode.patient.age}
-                                            </Box>}
+                                            {barcode.patient && <>
+                                                |
+                                                <Box component="span"
+                                                     sx={{
+                                                         display: 'inline-flex',
+                                                         alignItems: 'center',
+                                                     }}>
+                                                    {barcode.patient.gender.substring(0, 1)}/{barcode.patient.age}
+                                                </Box>
+                                            </>}
                                         </BarcodeText>
                                         {barcode?.acceptance_items?.length ? (
                                             <BarcodeText

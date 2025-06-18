@@ -16,11 +16,6 @@ use Illuminate\Support\Facades\Log;
 
 class BuildWordFileService
 {
-
-    public function __construct(private DocumentService $documentService)
-    {
-    }
-
     /**
      * Build a Word document from a template with data and optional signatures.
      *
@@ -40,8 +35,9 @@ class BuildWordFileService
             // Create template processor
             $templateProcessor = new TemplateProcessor(storage_path("app/private/" . $docPath));
 
-
-            $templateProcessor->setValues(Arr::except($data, "images"));
+            foreach (Arr::except($data, "images") as $key => $value) {
+                $templateProcessor->setValue($key, htmlspecialchars((string) $value));
+            }
 
             // Create temp directory for downloaded images if needed
             $tempDir = storage_path('app/temp-images');

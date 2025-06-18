@@ -17,11 +17,9 @@ import {
     Print as PrintIcon,
     LocalHospital as LocalHospitalIcon,
     CalendarToday as CalendarTodayIcon,
-    Person as PersonIcon,
     Close as CloseIcon,
     ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
-import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 
@@ -38,61 +36,46 @@ const BarcodeContainer = styled(Container)(({theme}) => ({
     }
 }));
 
-const BarcodeItem = styled(Paper)(({theme}) => ({
+const BarcodeItem = styled(Paper)(({theme, printOnlyBarcode}) => ({
     paddingTop: '0mm',
     textAlign: 'center',
     margin: theme.spacing(1),
-    display: 'flex',
+    display: printOnlyBarcode ? 'block' : 'flex',
     flexDirection: 'column',
     alignContent: 'center',
     alignItems: 'center',
     justifyContent: 'center',
     pageBreakAfter: 'always',
     boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-    width: '37mm',
-    height: '25mm',
+    width: '36mm',
+    height: '26mm',
     border: '1px dashed #ddd',
     position: 'relative',
     overflow: 'hidden',
     '@media print': {
-        margin: 0,
+        margin: printOnlyBarcode?'auto':0,
         boxShadow: 'none',
         border: 'none',
     }
 }));
 
-const BarcodeText = styled(Typography)(() => ({
+const BarcodeText = styled(Typography)(({printOnlyBarcode = false}) => ({
     margin: '0.5px',
-    lineHeight: '2.2mm',
+    lineHeight: printOnlyBarcode ? '3.5mm' : '2.5mm',
     fontWeight: 'bold',
-    fontSize: '2.5mm',
+    fontSize: printOnlyBarcode ? '3.5' : '2.5mm',
     fontFamily: 'monospace',
     letterSpacing: '.15mm',
     textTransform: 'uppercase',
     zIndex: 1,
     background: '#fff',
-    padding: '0 1mm',
+    padding: printOnlyBarcode ? 'unset' : '0 1mm',
     width: '100%',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     '@media print': {
-        fontSize: '2.2mm',
-    }
-}));
-
-const RejectedOverlay = styled(Typography)(({theme}) => ({
-    position: 'absolute',
-    transform: 'rotate(-30deg)',
-    fontSize: '2rem',
-    fontWeight: 'bold',
-    color: theme.palette.error.main,
-    opacity: 0.7,
-    zIndex: 2,
-    background: 'transparent',
-    pointerEvents: 'none',
-    '@media print': {
-        fontSize: '1.8rem',
+        fontSize: printOnlyBarcode ? '3.5mm' : '2.5mm',
     }
 }));
 
@@ -169,7 +152,7 @@ const BarcodeComponent = ({materials}) => {
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         const date = new Date(dateString);
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     };
 
     const handlePrint = () => {
@@ -212,10 +195,18 @@ const BarcodeComponent = ({materials}) => {
                     {materials.map((material) => (
                         <Grid key={material.id}
                               size={12}
-                              sx={{display: "flex", justifyContent: "center"}}
+                              sx={{display: printOnlyBarcode ? "block" : "flex", justifyContent: "center"}}
                               className="page-break">
-                            <BarcodeItem>
-                                {printOnlyBarcode ? <BarcodeText>{material.barcode}</BarcodeText> : <>
+                            <BarcodeItem printOnlyBarcode={printOnlyBarcode}>
+                                {printOnlyBarcode ? <Stack direction="column"
+                                                           sx={{height:"100%"}}
+                                                           justifyContent="space-around">
+                                    <BarcodeText printOnlyBarcode>{material.barcode}</BarcodeText>
+                                    <Divider/>
+                                    <BarcodeText printOnlyBarcode>{material.barcode}</BarcodeText>
+                                    <Divider/>
+                                    <BarcodeText printOnlyBarcode>{material.barcode}</BarcodeText>
+                                </Stack> : <>
                                     <Box sx={{
                                         width: '100%',
                                         pt: '0mm',
@@ -230,7 +221,6 @@ const BarcodeComponent = ({materials}) => {
                                         <BarcodeText>
                                             <Box component="span"
                                                  sx={{display: 'inline-flex', alignItems: 'center', mr: 0.5}}>
-                                                <CalendarTodayIcon sx={{fontSize: '2mm', mr: 0.5}}/>
                                                 {formatDate(material.expire_date || material.created_at)}
                                             </Box>
                                         </BarcodeText>
