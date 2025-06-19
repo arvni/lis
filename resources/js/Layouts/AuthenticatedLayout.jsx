@@ -267,7 +267,9 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
     const toggleDrawer = () => setDrawerOpen(!drawerOpen);
     const toggleMobileDrawer = () => setMobileOpen(!mobileOpen);
     const handleVisit = (addr) => () => {
-        if (!addr.includes(currentRoute))
+        const url=URL.parse(addr);
+        const current = URL.parse(origin+currentRoute);
+        if (url.pathname !== current.pathname)
             router.visit(addr, {preserveState: false})
     };
     const handleChangePassword = () => {
