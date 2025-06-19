@@ -92,43 +92,21 @@ const Index = ({auth, canEditAll}) => {
         }
     ];
     const {reports, status, errors, success, requestInputs, title} = usePage().props;
-    const [report, setReport] = useState(null);
-    const [openDeleteForm, setOpenDeleteForm] = useState(false);
 
     const editReport = (id) => () => get(route("reports.edit", id));
 
     const showReport = (id) => (e) => get(route("reports.show", id));
-    const deleteReport = (params) => () => {
-        setReport(params);
-        setData({_method: "delete"});
-        setOpenDeleteForm(true);
-    };
     const pageReload = (page, filters, sort, pageSize) => {
         router.visit(route('reports.index'), {
             data: {page, filters, sort, pageSize},
             only: ["reports", "status", "requestInputs", "success"]
         });
     }
-    const handleCloseDeleteForm = () => {
-        setReport(null);
-        reset();
-        setOpenDeleteForm(false);
-    };
-    const handleDestroy = async () => {
-        post(route('reports.destroy', report.id), {
-            preserveState: true
-        });
-        handleCloseDeleteForm();
-    };
     return (
         <>
             <PageHeader title={title || "Reports List"}/>
             <TableLayout defaultValues={requestInputs} success={success} status={status} reload={pageReload}
                          columns={columns} data={reports} processing={processing} Filter={Filter} errors={errors}/>
-            <DeleteForm title={`${report?.name} Report`}
-                        agreeCB={handleDestroy}
-                        disAgreeCB={handleCloseDeleteForm}
-                        openDelete={openDeleteForm}/>
         </>);
 }
 const breadCrumbs = [

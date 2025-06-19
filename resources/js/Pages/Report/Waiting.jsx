@@ -13,7 +13,6 @@ import {
     Tooltip,
     IconButton,
     Typography,
-    Avatar,
     Button,
     Alert,
 } from "@mui/material";
@@ -82,17 +81,6 @@ const formatWaitingTime = (waitingTime) => {
     }
 
     return waitingTime;
-};
-
-// Get initials from name
-const getInitials = (name) => {
-    if (!name) return "?";
-    return name
-        .split(' ')
-        .map(part => part.charAt(0))
-        .join('')
-        .toUpperCase()
-        .substring(0, 2);
 };
 
 const Waiting = () => {
@@ -247,7 +235,7 @@ const Waiting = () => {
     ], []);
 
     const pageReload = (page, filters, sort, pageSize) => {
-        router.visit(route('reports.waiting'), {
+        router.visit(route('reports.waitingList'), {
             data: {
                 page,
                 filters,

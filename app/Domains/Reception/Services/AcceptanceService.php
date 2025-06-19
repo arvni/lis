@@ -325,9 +325,10 @@ class AcceptanceService
         if ($acceptance->status !== AcceptanceStatus::REPORTED && $acceptance->status !== AcceptanceStatus::PROCESSING && $acceptance->status !== AcceptanceStatus::CANCELLED) {
             $invoiceId = $acceptance->invoice_id;
             $this->acceptanceRepository->deleteAcceptance($acceptance);
-            AcceptanceDeletedEvent::dispatch($invoiceId);
+            if ($invoiceId)
+                AcceptanceDeletedEvent::dispatch($invoiceId);
         } else
-            throw new Exception("There is some Method that use this Acceptance");
+            throw new Exception("this Acceptance cannot be deleted");
     }
 
     public function getAcceptanceById($id): ?Acceptance

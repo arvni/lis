@@ -104,7 +104,7 @@ const Approving = () => {
 
     // Page reload handler with clear parameter naming
     const handlePageReload = (page, filters, sort, pageSize) => {
-        router.visit(route('reports.approving'), {
+        router.visit(route('reports.approvingList'), {
             data: { page, filters, sort, pageSize },
             only: ["reports", "status", "success", "requestInputs"],
             preserveState: true
