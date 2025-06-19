@@ -21,7 +21,6 @@ import BrushIcon from '@mui/icons-material/Brush';
 import TextFieldsIcon from '@mui/icons-material/TextFields';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import PedigreeChart from "@/Components/Drawing.jsx";
 import ImagePaintCanvas from "@/Pages/Consultation/Components/Drawing/PaintApp.jsx";
 
 /**
@@ -41,13 +40,12 @@ const DoneForm = ({
                       data = {},
                       submit,
                       open,
-                      title = "Create Report",
+                      title = "Create Consultation Report",
                       loading,
                       onChange,
                       onClose
                   }) => {
     const [activeTab, setActiveTab] = useState(0);
-    const [saveInProgress, setSaveInProgress] = useState(false);
 
     const handleImageChanged = (imageData) => {
         if (typeof onChange === 'function') {
@@ -64,13 +62,8 @@ const DoneForm = ({
         setActiveTab(newValue);
     };
 
-    const handleSubmit = async () => {
-        setSaveInProgress(true);
-        try {
-            await submit();
-        } finally {
-            setSaveInProgress(false);
-        }
+    const handleSubmit =  () => {
+        submit();
     };
 
     return (
@@ -181,7 +174,6 @@ const DoneForm = ({
                     onClick={onClose}
                     variant="outlined"
                     color="secondary"
-                    disabled={saveInProgress}
                 >
                     Cancel
                 </Button>
@@ -189,10 +181,9 @@ const DoneForm = ({
                     onClick={handleSubmit}
                     variant="contained"
                     color="primary"
-                    disabled={saveInProgress}
-                    startIcon={saveInProgress ? <CircularProgress size={20} /> : <SaveIcon />}
+                    startIcon={<SaveIcon />}
                 >
-                    {saveInProgress ? "Saving..." : "Submit"}
+                    Submit
                 </Button>
             </DialogActions>
         </Dialog>

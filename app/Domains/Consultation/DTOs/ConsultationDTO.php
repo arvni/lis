@@ -13,14 +13,15 @@ class ConsultationDTO
         public int                $consultantId,
         public string             $dueDate,
         public ConsultationStatus $status,
-        public ?array              $information = [],
+        public ?array             $information = [],
         public ?string            $startedAt = null,
-        public ?int $timeID=null
+        public ?int               $timeID = null
     )
     {
     }
 
-    public static function fromConsultation(Consultation $consultation): self{
+    public static function fromConsultation(Consultation $consultation): self
+    {
         return new self(
             $consultation->patient_id,
             $consultation->consultant_id,
@@ -30,13 +31,14 @@ class ConsultationDTO
             $consultation->started_at,
         );
     }
+
     public static function fromRequest(array $request): self
     {
         return new self(
             $request['patient_id'],
             $request['consultant']["id"],
-            Carbon::createFromFormat("Y-m-d H:i", $request['dueDate']. " ". $request['time'],"Asia/Muscat"),
-            ConsultationStatus::BOOKED,
+            Carbon::createFromFormat("Y-m-d H:i", $request['dueDate'] . " " . $request['time'], "Asia/Muscat"),
+            ConsultationStatus::WAITING,
             $request['information'] ?? [],
             $request['startedAt'] ?? null,
         );

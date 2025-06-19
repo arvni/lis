@@ -141,7 +141,7 @@ const Show = ({
         post(route("consultations.update", consultation.id), {
             onSuccess: () => {
                 setOpenDoneForm(false);
-                enqueueSnackbar(status, {variant: "success"});
+                enqueueSnackbar("Successfully Update", {variant: "success"});
             }
         });
     };
