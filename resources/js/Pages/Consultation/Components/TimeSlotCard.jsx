@@ -659,7 +659,7 @@ const TimeSlotCard = ({
                                 )}
 
                                 {/* Consultation Actions */}
-                                {canCheckConsultation && timeSlot.reservable_type === "consultation" && (
+                                {canCheckConsultation && timeSlot.reservable_type === "consultation" && timeSlot?.reservable?.id && (
                                     <Button
                                         variant="contained"
                                         size="small"
