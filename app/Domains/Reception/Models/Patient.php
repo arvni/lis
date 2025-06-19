@@ -26,7 +26,10 @@ class Patient extends Model
         "gender",
         "avatar",
         "phone",
-        "research"
+        "research",
+        "tribe",
+        "wilayat",
+        "village",
     ];
     protected $casts = [
         "dateOfBirth" => "date:Y-m-d",
@@ -43,8 +46,9 @@ class Patient extends Model
         "phone"
     ];
 
-    public function getNameAttribute(){
-        return$this->attributes["fullName"];
+    public function getNameAttribute()
+    {
+        return $this->attributes["fullName"];
     }
 
     public function getAgeAttribute()
