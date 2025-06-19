@@ -82,11 +82,11 @@ const PaintCanvas = ({ defaultImage = null, onChange = () => {} }) => {
         // Load default image if provided
         if (defaultImage) {
             const img = new Image();
+            img.src = defaultImage;
             img.onload = () => {
                 context.drawImage(img, 0, 0, canvas.width, canvas.height);
                 saveToHistory();
             };
-            img.src = defaultImage;
         } else {
             saveToHistory();
         }

@@ -135,7 +135,7 @@ const DoneForm = ({
                     >
                             <ImagePaintCanvas
                                 onChange={handleImageChanged}
-                                defaultValue={data.image}
+                                defaultImage={data.image}
                             />
                     </Box>
 
