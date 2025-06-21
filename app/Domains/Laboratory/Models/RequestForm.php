@@ -2,10 +2,13 @@
 
 namespace App\Domains\Laboratory\Models;
 
+use App\Domains\Document\Models\Document;
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 
 class RequestForm extends Model
 {
+    use Searchable;
     protected $searchable = [
         "name"
     ];
@@ -13,15 +16,27 @@ class RequestForm extends Model
     protected $fillable = [
         "name",
         "file",
-        "formData"
+        "form_data",
+        "is_active"
     ];
 
     protected $casts = [
-        "formData" => "json"
+        "form_data" => "json",
+        "is_active" => "boolean"
     ];
 
     public function tests()
     {
         return $this->hasMany(Test::class);
+    }
+
+    public function document()
+    {
+        return $this->morphOne(Document::class, 'owner');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 }

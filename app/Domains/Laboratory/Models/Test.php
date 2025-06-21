@@ -88,6 +88,11 @@ class Test extends Model
         return $this->hasOne(ReferrerTest::class);
     }
 
+    public function requestForm()
+    {
+        return $this->belongsTo(RequestForm::class);
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', true);

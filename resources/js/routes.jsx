@@ -209,6 +209,12 @@ const routes = (sections = []) => {
                     icon: <WorkspacesIcon/>
                 },
                 {
+                    title: "Request Forms",
+                    route: "requestForms.index",
+                    // permission: 'Advance Settings.Request Form.List Request Forms',
+                    icon: <WorkspacesIcon/>
+                },
+                {
                     title: "Report Templates",
                     route: "reportTemplates.index",
                     permission: 'Advance Settings.Report Templates.List Report Templates',

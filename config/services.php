@@ -52,9 +52,10 @@ return [
         'sender_id' => env('OMANTEL_SENDER_ID'),
     ],
     'provider_app' => [
-        'webhook_domain' => env('PROVIDER_APP_WEBHOOK_DOMAIN',"http://localhost:8003"),
+        'webhook_domain' => env('PROVIDER_APP_WEBHOOK_DOMAIN',"http://localhost:8002"),
         'webhook_secret' => env('PROVIDER_APP_WEBHOOK_SECRET'),
         'order_material_webhook_url' => env('PROVIDER_APP_ORDER_MATERIAL_WEBHOOK_URL', '/order-materials/'),
+        'request_form_webhook_url' => env('PROVIDER_APP_REQUEST_FORM_WEBHOOK_URL', '/request-forms/'),
     ]
 
 ];

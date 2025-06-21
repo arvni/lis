@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Laboratory\ListActiveSectionsController;
 use App\Http\Controllers\Api\Laboratory\ListBarcodeGroupsController;
 use App\Http\Controllers\Api\Laboratory\ListDoctorsController;
 use App\Http\Controllers\Api\Laboratory\ListReportTemplatesController;
+use App\Http\Controllers\Api\Laboratory\ListRequestFormsController;
 use App\Http\Controllers\Api\Laboratory\ListSampleTypesController;
 use App\Http\Controllers\Api\Laboratory\ListSectionGroupsController;
 use App\Http\Controllers\Api\Laboratory\ListTestGroupsController;
@@ -37,6 +38,7 @@ use App\Http\Controllers\Laboratory\DoctorController;
 use App\Http\Controllers\Laboratory\ExportReportTemplateParametersController;
 use App\Http\Controllers\Laboratory\OfferController;
 use App\Http\Controllers\Laboratory\ReportTemplateController;
+use App\Http\Controllers\Laboratory\RequestFormController;
 use App\Http\Controllers\Laboratory\SampleTypeController;
 use App\Http\Controllers\Laboratory\SectionController;
 use App\Http\Controllers\Laboratory\SectionGroupController;
@@ -178,6 +180,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get("doctors", ListDoctorsController::class)->name("doctors.list");
             Route::get("report-templates", ListReportTemplatesController::class)->name("reportTemplates.list");
             Route::get("sample-types", ListSampleTypesController::class)->name("sampleTypes.list");
+            Route::get("request-forms", ListRequestFormsController::class)->name("requestForms.list");
             Route::get("workflows", ListWorkflowsController::class)->name("workflows.list");
             Route::get("tests", ListTestsController::class)->name("tests.list");
             Route::get("tests/{test}", [TestController::class, "show"])->name("tests.show");
@@ -221,7 +224,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource("reportTemplates", ReportTemplateController::class)->except("create", "edit");
         Route::get("reportTemplate/{reportTemplate}/parameters", ExportReportTemplateParametersController::class)->name("reportTemplates.export-parameters");
         Route::resource("tests", TestController::class)->except("show");
-
+        Route::resource("requestForms", RequestFormController::class)->except("edit", "show");
     });
     Route::group(["prefix" => "referrer"], function () {
         Route::resource("referrers", ReferrerController::class);

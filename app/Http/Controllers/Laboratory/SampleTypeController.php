@@ -17,7 +17,7 @@ use Inertia\Response;
 
 class SampleTypeController extends Controller
 {
-    public function __construct(private SampleTypeService $sampleTypeService)
+    public function __construct(private readonly SampleTypeService $sampleTypeService)
     {
         $this->middleware("indexProvider")->only("index");
     }

@@ -436,7 +436,7 @@ export default function TestForm({
                         </Grid>
                     )}
 
-                    {data.type === "TEST" && (
+                    {data.type === "TEST" && (<>
                         <Grid  size={{xs:12,md:6}}>
                             <Box sx={{ position: 'relative' }}>
                                 <SelectSearch
@@ -462,7 +462,32 @@ export default function TestForm({
                                 </Collapse>
                             </Box>
                         </Grid>
-                    )}
+                        <Grid  size={{xs:12,md:6}}>
+                            <Box sx={{ position: 'relative' }}>
+                                <SelectSearch
+                                    value={data.request_form||""}
+                                    onChange={handleChange}
+                                    name="request_form"
+                                    fullWidth
+                                    label="Request Form"
+                                    placeholder="Select request form"
+                                    url={route('api.requestForms.list')}
+                                    error={Boolean(errors?.request_form)}
+                                    helperText={errors?.request_form || "Request form used for test"}
+                                />
+                                <Collapse in={Boolean(helpVisible.request_form)}>
+                                    <Alert
+                                        severity="info"
+                                        sx={{ mt: 1 }}
+                                        onClose={() => toggleHelp('request_form')}
+                                    >
+                                        {getHelpText('request_form')}
+                                    </Alert>
+                                </Collapse>
+                            </Box>
+                        </Grid>
+
+                    </>)}
 
                     {data.type === "PANEL" && (
                         <Grid size={{xs:12,md:6}}>

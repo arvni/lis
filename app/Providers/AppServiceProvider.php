@@ -14,6 +14,7 @@ use App\Domains\Consultation\Policies\TimePolicy;
 use App\Domains\Document\Models\Document;
 use App\Domains\Laboratory\Models\BarcodeGroup;
 use App\Domains\Laboratory\Models\ReportTemplate;
+use App\Domains\Laboratory\Models\RequestForm;
 use App\Domains\Laboratory\Models\SampleType;
 use App\Domains\Laboratory\Models\Section;
 use App\Domains\Laboratory\Models\SectionGroup;
@@ -22,6 +23,7 @@ use App\Domains\Laboratory\Models\TestGroup;
 use App\Domains\Laboratory\Models\Workflow;
 use App\Domains\Laboratory\Policies\BarcodeGroupPolicy;
 use App\Domains\Laboratory\Policies\ReportTemplatePolicy;
+use App\Domains\Laboratory\Policies\RequestFormPolicy;
 use App\Domains\Laboratory\Policies\SampleTypePolicy;
 use App\Domains\Laboratory\Policies\SectionGroupPolicy;
 use App\Domains\Laboratory\Policies\SectionPolicy;
@@ -101,11 +103,17 @@ class AppServiceProvider extends ServiceProvider
             "consultant" => Consultant::class,
             "customer" => Customer::class,
             "referrerOrder" => ReferrerOrder::class,
+            "requestform" => RequestForm::class,
         ]);
 
         Gate::policy(User::class, UserPolicy::class);
         Gate::policy(Role::class, RolePolicy::class);
+
+        Gate::policy(Acceptance::class, AcceptancePolicy::class);
+        Gate::policy(Sample::class, SamplePolicy::class);
+        Gate::policy(Report::class, ReportPolicy::class);
         Gate::policy(Patient::class, PatientPolicy::class);
+
         Gate::policy(SectionGroup::class, SectionGroupPolicy::class);
         Gate::policy(Section::class, SectionPolicy::class);
         Gate::policy(Workflow::class, WorkflowPolicy::class);
@@ -113,15 +121,17 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(BarcodeGroup::class, BarcodeGroupPolicy::class);
         Gate::policy(TestGroup::class, TestGroupPolicy::class);
         Gate::policy(ReportTemplate::class, ReportTemplatePolicy::class);
+        Gate::policy(RequestForm::class, RequestFormPolicy::class);
         Gate::policy(Test::class, TestPolicy::class);
-        Gate::policy(Acceptance::class, AcceptancePolicy::class);
-        Gate::policy(Invoice::class, InvoicePolicy::class);
-        Gate::policy(Sample::class, SamplePolicy::class);
-        Gate::policy(Report::class, ReportPolicy::class);
+
+
         Gate::policy(Consultation::class, ConsultationPolicy::class);
         Gate::policy(Consultant::class, ConsultantPolicy::class);
         Gate::policy(Time::class, TimePolicy::class);
+
         Gate::policy(OrderMaterial::class, OrderMaterialPolicy::class);
         Gate::policy(Material::class, MaterialPolicy::class);
+
+        Gate::policy(Invoice::class, InvoicePolicy::class);
     }
 }

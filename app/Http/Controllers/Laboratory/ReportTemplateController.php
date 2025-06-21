@@ -50,7 +50,7 @@ class ReportTemplateController extends Controller
     public function show(ReportTemplate $reportTemplate)
     {
         $template = $this->reportTemplateService->getTemplate($reportTemplate);
-        abort_unless($template, 404);
+        abort_unless(!!$template, 404);
         return redirect()->route("documents.show", $template);
     }
 
