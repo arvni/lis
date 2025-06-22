@@ -32,7 +32,7 @@ const Index = () => {
                 id: _report_template.template.hash,
                 originalName: _report_template.template.originalName
             } : null,
-            parameters: _report_template?.parameters || [],
+            parameters: _report_template?.active_parameters || [],
             _method: 'put'
         });
         setOpenAddForm(true);
