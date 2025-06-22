@@ -13,6 +13,8 @@ use App\Domains\Consultation\Policies\ConsultationPolicy;
 use App\Domains\Consultation\Policies\TimePolicy;
 use App\Domains\Document\Models\Document;
 use App\Domains\Laboratory\Models\BarcodeGroup;
+use App\Domains\Laboratory\Models\ConsentForm;
+use App\Domains\Laboratory\Models\Instruction;
 use App\Domains\Laboratory\Models\ReportTemplate;
 use App\Domains\Laboratory\Models\RequestForm;
 use App\Domains\Laboratory\Models\SampleType;
@@ -22,6 +24,8 @@ use App\Domains\Laboratory\Models\Test;
 use App\Domains\Laboratory\Models\TestGroup;
 use App\Domains\Laboratory\Models\Workflow;
 use App\Domains\Laboratory\Policies\BarcodeGroupPolicy;
+use App\Domains\Laboratory\Policies\ConsentFormPolicy;
+use App\Domains\Laboratory\Policies\InstructionPolicy;
 use App\Domains\Laboratory\Policies\ReportTemplatePolicy;
 use App\Domains\Laboratory\Policies\RequestFormPolicy;
 use App\Domains\Laboratory\Policies\SampleTypePolicy;
@@ -104,6 +108,8 @@ class AppServiceProvider extends ServiceProvider
             "customer" => Customer::class,
             "referrerOrder" => ReferrerOrder::class,
             "requestform" => RequestForm::class,
+            "consentform" => ConsentForm::class,
+            "instruction" => Instruction::class
         ]);
 
         Gate::policy(User::class, UserPolicy::class);
@@ -122,6 +128,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(TestGroup::class, TestGroupPolicy::class);
         Gate::policy(ReportTemplate::class, ReportTemplatePolicy::class);
         Gate::policy(RequestForm::class, RequestFormPolicy::class);
+        Gate::policy(ConsentForm::class, ConsentFormPolicy::class);
+        Gate::policy(Instruction::class, InstructionPolicy::class);
         Gate::policy(Test::class, TestPolicy::class);
 
 

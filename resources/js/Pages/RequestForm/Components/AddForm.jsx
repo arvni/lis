@@ -71,7 +71,7 @@ const FormContent = () => {
     };
 
     return (
-        <Stack spacing={3}>
+        <Grid size={12}>
             {/* Basic Information Section */}
             <Paper elevation={0} sx={{p: 3, border: '1px solid #e0e0e0'}}>
                 <Typography variant="h6" gutterBottom color="primary">
@@ -80,7 +80,7 @@ const FormContent = () => {
                 <Divider sx={{mb: 2}}/>
 
                 <Grid container spacing={3}>
-                    <Grid xs={12}>
+                    <Grid size={12}>
                         <TextField
                             fullWidth
                             label="Request Form Title"
@@ -93,16 +93,15 @@ const FormContent = () => {
                         />
                     </Grid>
 
-                    <Grid xs={12}>
+                    <Grid size={12}>
                         <Typography variant="subtitle2" gutterBottom>
-                            Template Document
+                            Document
                         </Typography>
                         <Upload
                             value={data?.document}
                             name="document"
                             editable
                             onChange={setData}
-                            required
                             accept=".pdf,.docx,application/pdf"
                             url={route("documents.store")}
                         />
@@ -194,7 +193,7 @@ const FormContent = () => {
                     </Box>
                 )}
             </Paper>
-        </Stack>
+        </Grid>
     );
 };
 

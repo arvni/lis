@@ -14,9 +14,9 @@ class TestDTO
         public string   $fullName,
         public ?string  $description,
         public bool     $status = true,
-        public ?array     $report_templates = [],
-        public ?int $requestFormId,
-        public ?int $instructionId,
+        public ?array   $report_templates = [],
+        public ?int     $requestFormId,
+        public ?int     $instructionId,
         public ?int     $consentFormId,
         public ?int     $price = 0,
     )

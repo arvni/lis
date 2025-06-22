@@ -143,6 +143,9 @@ class TestController extends Controller
             $validatedData["description"],
             $validatedData["status"] ?? true,
             $validatedData["report_templates"] ?? [],
+            $validatedData["request_form"]["id"] ?? null,
+            $validatedData["instruction"]["id"] ?? null,
+            $validatedData["consent_form"]["id"] ?? null,
             $validatedData["price"] ?? 0
         );
 

@@ -172,6 +172,24 @@ class RoleAndPermissionSeeder extends Seeder
                     "Delete Sample Type",
                     "List Sample Types",
                 ],
+                "Consent Form" => [
+                    "Create Consent Form",
+                    "Edit Consent Form",
+                    "Delete Consent Form",
+                    "List Consent Forms",
+                ],
+                "Request Form" => [
+                    "Create Request Form",
+                    "Edit Request Form",
+                    "Delete Request Form",
+                    "List Request Forms",
+                ],
+                "Instruction" => [
+                    "Create Instruction",
+                    "Edit Instruction",
+                    "Delete Instruction",
+                    "List Instructions",
+                ],
                 "Barcode Groups" => [
                     "Create Barcode Group",
                     "Edit Barcode Group",

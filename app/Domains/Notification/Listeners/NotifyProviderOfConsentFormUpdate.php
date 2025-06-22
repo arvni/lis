@@ -2,9 +2,9 @@
 
 namespace App\Domains\Notification\Listeners;
 
-use App\Domains\Notification\Jobs\SendRequestFormUpdateWebhook;
+use App\Domains\Notification\Jobs\SendConsentFormUpdateWebhook;
 
-class NotifyProviderOfRequestFormUpdate
+class NotifyProviderOfConsentFormUpdate
 {
     /**
      * Create the event listener.
@@ -19,6 +19,6 @@ class NotifyProviderOfRequestFormUpdate
      */
     public function handle(object $event): void
     {
-        SendRequestFormUpdateWebhook::dispatch($event->requestForm,$event->action);
+        SendConsentFormUpdateWebhook::dispatch($event->consentForm,$event->action);
     }
 }

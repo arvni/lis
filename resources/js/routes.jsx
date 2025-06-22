@@ -129,12 +129,12 @@ const routes = (sections = []) => {
                     permission: 'Report.Create Report',
                     icon: <PostAddIcon/>
                 },
-                    {
-                        title: "Waiting For Approving",
-                        route: "reports.approvingList",
-                        permission: 'Report.Approve Report',
-                        icon: <FactCheck/>
-                    },
+                {
+                    title: "Waiting For Approving",
+                    route: "reports.approvingList",
+                    permission: 'Report.Approve Report',
+                    icon: <FactCheck/>
+                },
                 {
                     title: "List",
                     permission: 'Report.List Report',
@@ -211,7 +211,19 @@ const routes = (sections = []) => {
                 {
                     title: "Request Forms",
                     route: "requestForms.index",
-                    // permission: 'Advance Settings.Request Form.List Request Forms',
+                    permission: 'Advance Settings.Request Form.List Request Forms',
+                    icon: <WorkspacesIcon/>
+                },
+                {
+                    title: "Consent Forms",
+                    route: "consentForms.index",
+                    permission: 'Advance Settings.Consent Form.List Consent Forms',
+                    icon: <WorkspacesIcon/>
+                },
+                {
+                    title: "Instruction",
+                    route: "instructions.index",
+                    permission: 'Advance Settings.Instruction.List Instructions',
                     icon: <WorkspacesIcon/>
                 },
                 {

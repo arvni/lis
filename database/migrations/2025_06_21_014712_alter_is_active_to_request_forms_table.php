@@ -11,8 +11,10 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('request_forms', function (Blueprint $table) {
-            $table->renameColumn('formData','form_data');
-            $table->boolean('is_active')->default(true)->after('form_data');
+            if (!Schema::hasColumn('request_forms', 'form_Data'))
+                $table->renameColumn('formData', 'form_data');
+            if (!Schema::hasColumn('request_forms', 'is_active'))
+                $table->boolean('is_active')->default(true)->after('form_data');
         });
     }
 
@@ -22,7 +24,10 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('request_forms', function (Blueprint $table) {
-            $table->dropColumn('is_active');
+            if (Schema::hasColumn('request_forms', 'is_active'))
+                $table->dropColumn('is_active');
+            if (Schema::hasColumn('request_forms', 'form_Data'))
+                $table->renameColumn('form_data', 'formData');
         });
     }
 };

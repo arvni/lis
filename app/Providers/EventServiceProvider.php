@@ -6,11 +6,16 @@ use App\Domains\Billing\Events\InvoiceAcceptanceUpdateEvent;
 use App\Domains\Billing\Events\PaymentsAddedEvent;
 use App\Domains\Billing\Listeners\InvoiceAcceptanceDeletedListener;
 use App\Domains\Document\Listeners\DocumentUpdateListener;
+use App\Domains\Laboratory\Events\ConsentFormDocumentUpdateEvent;
+use App\Domains\Laboratory\Events\ConsentFormUpdated;
+use App\Domains\Laboratory\Events\InstructionDocumentUpdateEvent;
+use App\Domains\Laboratory\Events\InstructionUpdated;
 use App\Domains\Laboratory\Events\ReportTemplateDocumentUpdateEvent;
-use App\Domains\Laboratory\Events\ReferrerOrderEvent;
 use App\Domains\Laboratory\Events\RequestFormDocumentUpdateEvent;
 use App\Domains\Laboratory\Events\RequestFormUpdated;
 use App\Domains\Laboratory\Events\SectionEvent;
+use App\Domains\Notification\Listeners\NotifyProviderOfConsentFormUpdate;
+use App\Domains\Notification\Listeners\NotifyProviderOfInstructionUpdate;
 use App\Domains\Notification\Listeners\NotifyProviderOfOrderMaterialUpdate;
 use App\Domains\Notification\Listeners\NotifyProviderOfRequestFormUpdate;
 use App\Domains\Reception\Events\AcceptanceDeletedEvent;
@@ -47,7 +52,9 @@ class EventServiceProvider extends ServiceProvider
         Event::listen(
             [
                 ReportTemplateDocumentUpdateEvent::class,
+                InstructionDocumentUpdateEvent::class,
                 RequestFormDocumentUpdateEvent::class,
+                ConsentFormDocumentUpdateEvent::class,
                 PatientDocumentUpdateEvent::class,
                 UserDocumentUpdateEvent::class,
             ],
@@ -80,5 +87,7 @@ class EventServiceProvider extends ServiceProvider
         Event::listen(ReportPublishedEvent::class, [AcceptanceReportedListener::class, 'handle']);
         Event::listen(OrderMaterialUpdated::class, [NotifyProviderOfOrderMaterialUpdate::class, 'handle']);
         Event::listen(RequestFormUpdated::class, [NotifyProviderOfRequestFormUpdate::class, 'handle']);
+        Event::listen(ConsentFormUpdated::class, [NotifyProviderOfConsentFormUpdate::class, 'handle']);
+        Event::listen(InstructionUpdated::class, [NotifyProviderOfInstructionUpdate::class, 'handle']);
     }
 }

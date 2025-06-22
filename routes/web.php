@@ -3,7 +3,9 @@
 use App\Http\Controllers\Api\Laboratory\GetMethodController;
 use App\Http\Controllers\Api\Laboratory\ListActiveSectionsController;
 use App\Http\Controllers\Api\Laboratory\ListBarcodeGroupsController;
+use App\Http\Controllers\Api\Laboratory\ListConsentFormsController;
 use App\Http\Controllers\Api\Laboratory\ListDoctorsController;
+use App\Http\Controllers\Api\Laboratory\ListInstructionsController;
 use App\Http\Controllers\Api\Laboratory\ListReportTemplatesController;
 use App\Http\Controllers\Api\Laboratory\ListRequestFormsController;
 use App\Http\Controllers\Api\Laboratory\ListSampleTypesController;
@@ -34,8 +36,10 @@ use App\Http\Controllers\Document\UpdateBatchDocumentsController;
 use App\Http\Controllers\Document\UploadPublicDocumentController;
 use App\Http\Controllers\GetUserDetailsController;
 use App\Http\Controllers\Laboratory\BarcodeGroupController;
+use App\Http\Controllers\Laboratory\ConsentFormController;
 use App\Http\Controllers\Laboratory\DoctorController;
 use App\Http\Controllers\Laboratory\ExportReportTemplateParametersController;
+use App\Http\Controllers\Laboratory\InstructionController;
 use App\Http\Controllers\Laboratory\OfferController;
 use App\Http\Controllers\Laboratory\ReportTemplateController;
 use App\Http\Controllers\Laboratory\RequestFormController;
@@ -181,6 +185,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get("report-templates", ListReportTemplatesController::class)->name("reportTemplates.list");
             Route::get("sample-types", ListSampleTypesController::class)->name("sampleTypes.list");
             Route::get("request-forms", ListRequestFormsController::class)->name("requestForms.list");
+            Route::get("consent-forms", ListConsentFormsController::class)->name("consentForms.list");
+            Route::get("instructions", ListInstructionsController::class)->name("instructions.list");
             Route::get("workflows", ListWorkflowsController::class)->name("workflows.list");
             Route::get("tests", ListTestsController::class)->name("tests.list");
             Route::get("tests/{test}", [TestController::class, "show"])->name("tests.show");
@@ -222,9 +228,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource("doctors", DoctorController::class)->except("create", "edit", "show");
         Route::resource("testGroups", TestGroupController::class)->except("create", "edit", "show");
         Route::resource("reportTemplates", ReportTemplateController::class)->except("create", "edit");
-        Route::get("reportTemplate/{reportTemplate}/parameters", ExportReportTemplateParametersController::class)->name("reportTemplates.export-parameters");
+        Route::get("reportTemplate/{reportTemplate}/parameters", ExportReportTemplateParametersController::class)
+            ->name("reportTemplates.export-parameters");
         Route::resource("tests", TestController::class)->except("show");
         Route::resource("requestForms", RequestFormController::class)->except("edit", "show");
+        Route::resource("consentForms", ConsentFormController::class)->except("edit", "show");
+        Route::resource("instructions", InstructionController::class)->except("edit", "show");
     });
     Route::group(["prefix" => "referrer"], function () {
         Route::resource("referrers", ReferrerController::class);

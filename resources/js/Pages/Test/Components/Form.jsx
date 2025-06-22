@@ -485,6 +485,55 @@ export default function TestForm({
                                     </Alert>
                                 </Collapse>
                             </Box>
+
+                        </Grid>
+                        <Grid  size={{xs:12,md:6}}>
+                            <Box sx={{ position: 'relative' }}>
+                                <SelectSearch
+                                    value={data.consent_form||""}
+                                    onChange={handleChange}
+                                    name="consent_form"
+                                    fullWidth
+                                    label="Consent Form"
+                                    placeholder="Select Consent form"
+                                    url={route('api.consentForms.list')}
+                                    error={Boolean(errors?.consent_form)}
+                                    helperText={errors?.consent_form || "Consent form used for test"}
+                                />
+                                <Collapse in={Boolean(helpVisible.consent_form)}>
+                                    <Alert
+                                        severity="info"
+                                        sx={{ mt: 1 }}
+                                        onClose={() => toggleHelp('consent_form')}
+                                    >
+                                        {getHelpText('consent_form')}
+                                    </Alert>
+                                </Collapse>
+                            </Box>
+                        </Grid>
+                        <Grid  size={{xs:12,md:6}}>
+                            <Box sx={{ position: 'relative' }}>
+                                <SelectSearch
+                                    value={data.instruction||""}
+                                    onChange={handleChange}
+                                    name="instruction"
+                                    fullWidth
+                                    label="Instruction"
+                                    placeholder="Select Instruction"
+                                    url={route('api.instructions.list')}
+                                    error={Boolean(errors?.instruction)}
+                                    helperText={errors?.instruction || "Instruction used for test"}
+                                />
+                                <Collapse in={Boolean(helpVisible.instruction)}>
+                                    <Alert
+                                        severity="info"
+                                        sx={{ mt: 1 }}
+                                        onClose={() => toggleHelp('instruction')}
+                                    >
+                                        {getHelpText('instruction')}
+                                    </Alert>
+                                </Collapse>
+                            </Box>
                         </Grid>
 
                     </>)}

@@ -56,6 +56,8 @@ return [
         'webhook_secret' => env('PROVIDER_APP_WEBHOOK_SECRET'),
         'order_material_webhook_url' => env('PROVIDER_APP_ORDER_MATERIAL_WEBHOOK_URL', '/order-materials/'),
         'request_form_webhook_url' => env('PROVIDER_APP_REQUEST_FORM_WEBHOOK_URL', '/request-forms/'),
+        'consent_form_webhook_url' => env('PROVIDER_APP_CONSENT_FORM_WEBHOOK_URL', '/consent-forms/'),
+        'instruction_webhook_url' => env('PROVIDER_APP_INSTRUCTION_WEBHOOK_URL', '/instructions/'),
     ]
 
 ];
