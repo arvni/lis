@@ -44,12 +44,12 @@ class ReportController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreReportRequest $request)
+    public function store(StoreReportRequest $request): RedirectResponse
     {
         $user = auth()->user();
         $parameters = $request->get('parameters', []);
         if ($parameters && count($parameters) > 0) {
-            foreach ($request->file("parameters") as $parameter => $value) {
+            foreach (($request->file("parameters")??[]) as $parameter => $value) {
                 $doc = $this->documentService->storeDocument("patient", $request->get("patient_id"), $value, DocumentTag::IMAGE->value);
                 $parameters[$parameter] = $doc;
             }
