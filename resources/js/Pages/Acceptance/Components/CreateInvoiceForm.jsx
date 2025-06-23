@@ -18,7 +18,6 @@ import {
     alpha,
     Stack,
     Avatar,
-    Tooltip,
     IconButton,
     Chip,
     Alert,
@@ -147,11 +146,11 @@ const CreateInvoiceForm = ({ open, initialData, onClose }) => {
             onClose={processing ? undefined : onClose}
             maxWidth="md"
             fullWidth
-            PaperProps={{
-                sx: {
+            slotProps={{
+                paper:{sx: {
                     borderRadius: 2,
                     overflow: 'hidden'
-                }
+                }}
             }}
         >
             <DialogTitle

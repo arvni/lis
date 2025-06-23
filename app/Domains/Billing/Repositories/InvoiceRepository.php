@@ -23,7 +23,7 @@ class InvoiceRepository
     public function listAllInvoices(array $queryData)
     {
 
-        $query = $this->applyQuery(["owner", "patient", "payments", "acceptanceItems.method","acceptanceItems.patient", "acceptanceItems.test"]);
+        $query = $this->applyQuery(["owner", "patient", "payments", "acceptanceItems.method", "acceptanceItems.patient", "acceptanceItems.test"]);
         $query = $this->applyFilters($query, $queryData["filters"] ?? []);
         $query = $this->applyOrderBy($query, $queryData["sort"]);
         return $query->get();
@@ -61,8 +61,8 @@ class InvoiceRepository
                 DB::raw('ROW_NUMBER() OVER (PARTITION BY YEAR(created_at) ORDER BY id ASC) AS row_num')
             );
         return Invoice::joinSub($numberedInvoices, 'numberedInvoices', function ($join) {
-                $join->on('invoices.id', '=', 'numberedInvoices.id');
-            })
+            $join->on('invoices.id', '=', 'numberedInvoices.id');
+        })
             ->selectRaw("invoices.*,CONCAT(YEAR(invoices.created_at),'-',MONTH(invoices.created_at),'/',numberedInvoices.row_num) AS invoiceNo")
             ->with($with)
             ->withSum("payments", "price")
@@ -73,11 +73,10 @@ class InvoiceRepository
 
     private function applyFilters($query, array $filters)
     {
-        if (isset($filters["owner"])) {
-            $query
-                ->whereHasMorph("owner", "App\\Models\\" . ucfirst($filters["owner"]), function ($q) use ($filters) {
-                    $q->where(Str::lower($filters["owner"]) . "s.id", $filters["id"]);
-                });
+        if (isset($filters["owner_type"])) {
+            $query->where("owner_type", strtolower($filters["owner_type"]));
+            if (isset($filters["owner_id"]))
+                $query->where(Str::lower($filters["owner_type"]) . "s.id", $filters["owner_id"]);
         }
         if (isset($filters["search"]))
             $query->search($filters["search"] ?? "");
@@ -102,7 +101,7 @@ class InvoiceRepository
         return "{$created_at->format('Y-m')}/" . $this->countInvoicesBeforeInThisYear($invoice->id, $created_at);
     }
 
-    private function countInvoicesBeforeInThisYear($id,Carbon $created_at)
+    private function countInvoicesBeforeInThisYear($id, Carbon $created_at)
     {
         return Invoice::where("id", "<=", $id)->whereBetween("created_at", [$created_at->copy()->startOf("year")->toDate(), $created_at])->count();
     }

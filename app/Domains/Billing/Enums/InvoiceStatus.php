@@ -10,7 +10,7 @@ enum InvoiceStatus: string
 
     case WAITING_FOR_PAYMENT = 'Waiting';
     case PAID = 'Paid';
-    case PARTIALLY_PAID = 'Partially  Paid';
+    case PARTIALLY_PAID = 'Partially Paid';
     case CANCELED = 'Canceled';
 
 }

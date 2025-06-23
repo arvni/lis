@@ -16,21 +16,32 @@ import {
     Edit as EditIcon,
     Delete as DeleteIcon,
 } from "@mui/icons-material";
-import { useState, useCallback } from "react";
+import {useState, useCallback} from "react";
 import InvoiceEditForm from "@/Pages/Invoice/Components/InvoiceEditForm";
 import Excel from "@/../images/excel.svg";
 import DeleteForm from "@/Components/DeleteForm";
-import { Link, router, useForm, usePage } from "@inertiajs/react";
+import {Link, router, useForm, usePage} from "@inertiajs/react";
 import axios from "axios";
 
+
+export const INVOICE_STATUS = {
+    WAITING_FOR_PAYMENT: {
+        value: "Waiting",
+        color : "warning"
+    },
+    PAID: {value: "Paid",color :"success"},
+    PARTIALLY_PAID: {value: "Partially Paid",color : "info"},
+    CANCELED: {value: "Canceled",color: "error"}
+}
+
 const InvoiceIndex = () => {
-    const { invoices, status, success, requestInputs, canDelete } = usePage().props;
+    const {invoices, status, success, requestInputs, canDelete} = usePage().props;
 
     // State management
     const [loading, setLoading] = useState(false);
     const [openEditForm, setOpenEditForm] = useState(false);
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
-    const { data, setData, post, processing, reset } = useForm();
+    const {data, setData, post, processing, reset} = useForm();
 
     // Format currency values consistently
     const formatCurrency = (amount) => {
@@ -41,27 +52,9 @@ const InvoiceIndex = () => {
     };
 
     // Status indicator with appropriate colors
-    const StatusChip = ({ status }) => {
-        let color = "default";
-
-        switch(status.toLowerCase()) {
-            case "paid":
-                color = "success";
-                break;
-            case "pending":
-                color = "warning";
-                break;
-            case "overdue":
-                color = "error";
-                break;
-            case "partial":
-                color = "info";
-                break;
-            default:
-                color = "default";
-        }
-
-        return <Chip label={status} color={color} size="small" />;
+    const StatusChip = ({status}) => {
+        let stat=INVOICE_STATUS?.[Object.keys(INVOICE_STATUS).find(item=>INVOICE_STATUS?.[item].value==status)];
+        return <Chip label={status} color={stat?.color||'default'} size="small"/>;
     };
 
     // Table columns with improved readability
@@ -112,7 +105,7 @@ const InvoiceIndex = () => {
             headerName: 'Status',
             type: "string",
             width: 120,
-            renderCell: ({value}) => <StatusChip status={value} />
+            renderCell: ({value}) => <StatusChip status={value}/>
         },
         {
             field: 'created_at',
@@ -128,7 +121,7 @@ const InvoiceIndex = () => {
         },
         {
             field: 'id',
-            type:'action',
+            type: 'action',
             sortable: false,
             headerName: 'Actions',
             width: 180,
@@ -142,7 +135,7 @@ const InvoiceIndex = () => {
                                 size="small"
                                 color="info"
                             >
-                                <RemoveRedEye />
+                                <RemoveRedEye/>
                             </IconButton>
                         </Tooltip>
 
@@ -152,7 +145,7 @@ const InvoiceIndex = () => {
                                 size="small"
                                 color="primary"
                             >
-                                <EditIcon />
+                                <EditIcon/>
                             </IconButton>
                         </Tooltip>
 
@@ -164,7 +157,7 @@ const InvoiceIndex = () => {
                                     size="small"
                                     color="secondary"
                                 >
-                                    <EditNote />
+                                    <EditNote/>
                                 </IconButton>
                             </Tooltip>
                         )}
@@ -176,7 +169,7 @@ const InvoiceIndex = () => {
                                     size="small"
                                     color="error"
                                 >
-                                    <DeleteIcon />
+                                    <DeleteIcon/>
                                 </IconButton>
                             </Tooltip>
                         )}
@@ -189,7 +182,7 @@ const InvoiceIndex = () => {
     // Page reload function
     const pageReload = useCallback((page, filters, sort, pageSize) => {
         router.visit(route('invoices.index'), {
-            data: { page, filters, sort, pageSize },
+            data: {page, filters, sort, pageSize},
             only: ["invoices", "status", "success", "requestInputs"],
             preserveState: true
         });
@@ -200,7 +193,7 @@ const InvoiceIndex = () => {
         try {
             setLoading(true);
             const response = await axios.get(route("api.invoices.show", id));
-            setData({...response.data, _method: "put"});
+            setData({...response.data.data, _method: "put"});
             setOpenEditForm(true);
         } catch (error) {
             console.error("Error fetching invoice:", error);
@@ -209,14 +202,6 @@ const InvoiceIndex = () => {
         }
     };
 
-    const handleSubmit = () => {
-        post(route("invoices.update", data.id), {
-            onSuccess: () => {
-                setOpenEditForm(false);
-                reset();
-            }
-        });
-    };
 
     const deleteInvoice = (invoice) => {
         setData({...invoice, _method: "delete"});
@@ -250,10 +235,10 @@ const InvoiceIndex = () => {
 
     return (
         <>
-            <Box sx={{ mb: 3 }}>
-                <Paper sx={{ padding: 2 }}>
+            <Box sx={{mb: 3}}>
+                <Paper sx={{padding: 2}}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
+                        <Typography variant="h5" component="h1" sx={{fontWeight: 'bold'}}>
                             Invoice Management
                         </Typography>
 
@@ -268,8 +253,8 @@ const InvoiceIndex = () => {
                                 }}
                             >
                                 <Stack direction="row" spacing={1} alignItems="center">
-                                    <img src={Excel} alt="Excel" width="24px" />
-                                    <Typography variant="button" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                                    <img src={Excel} alt="Excel" width="24px"/>
+                                    <Typography variant="button" sx={{display: {xs: 'none', sm: 'block'}}}>
                                         Export
                                     </Typography>
                                 </Stack>
@@ -291,10 +276,8 @@ const InvoiceIndex = () => {
             >
                 <InvoiceEditForm
                     invoice={data}
-                    onSubmit={handleSubmit}
-                    onCancel={handleCancel}
+                    onClose={handleCancel}
                     open={openEditForm}
-                    onChange={handleChange}
                 />
 
                 <DeleteForm

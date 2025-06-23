@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Billing\GetInvoiceController;
 use App\Http\Controllers\Api\Laboratory\GetMethodController;
 use App\Http\Controllers\Api\Laboratory\ListActiveSectionsController;
 use App\Http\Controllers\Api\Laboratory\ListBarcodeGroupsController;
@@ -204,6 +205,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
         Route::group(["prefix" => "consultation"], function () {
             Route::get("customers", ListCustomersController::class)->name("customers.list");
+        });
+        Route::group(["prefix" => "billing"], function () {
+            Route::get("invoices/{invoice}", GetInvoiceController::class)->name("invoices.show");
         });
         Route::get("documents/{document}", [DocumentController::class, "download"])->name("api.documents.show");
 

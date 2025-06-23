@@ -66,20 +66,16 @@ class InvoiceController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Invoice $invoice)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(UpdateInvoiceRequest $request, Invoice $invoice)
     {
-        //
+        $data=$request->validated();
+        $invoiceDto=InvoiceDTO::fromArray(array_merge($invoice->toArray(),$data));
+        $this->invoiceService->updateInvoice($invoice, $invoiceDto);
+        return redirect()->back()->with(["success" => true, "message" => "Invoice updated successfully."]);
     }
 
     /**

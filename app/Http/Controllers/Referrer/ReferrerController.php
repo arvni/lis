@@ -101,7 +101,7 @@ class ReferrerController extends Controller
      */
     public function destroy(Referrer $referrer): RedirectResponse
     {
-        $this->authorize("delete", Referrer::class);
+        $this->authorize("delete", $referrer);
         $this->referrerService->deleteReferrer($referrer);
         return redirect()->back()->with(["success" => true, "status" => "$referrer->fullName successfully deleted"]);
     }

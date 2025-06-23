@@ -8,11 +8,13 @@ use App\Domains\Reception\Models\Patient;
 use App\Domains\Referrer\Models\Referrer;
 use App\Domains\User\Models\User;
 use App\Traits\Searchable;
+use DB;
 use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
 {
     use Searchable;
+
     protected $fillable = [
         'user_id',
         'owner_id',
@@ -64,14 +66,19 @@ class Invoice extends Model
         return $this->hasOneThrough(Patient::class, Acceptance::class, "invoice_id", "id", "id", "patient_id");
     }
 
+    public function referrer()
+    {
+        return $this->hasOneThrough(Referrer::class, Acceptance::class, "invoice_id", "id", "id", "referrer_id");
+    }
+
     public function patientPayments()
     {
-        return $this->Payments()->whereMorphedTo("payer",Patient::class);
+        return $this->Payments()->whereMorphedTo("payer", Patient::class);
     }
 
     public function sponsorPayments()
     {
-        return $this->Payments()->whereMorphedTo("payer",Referrer::class);
+        return $this->Payments()->whereMorphedTo("payer", Referrer::class);
     }
 
     /**
@@ -81,7 +88,7 @@ class Invoice extends Model
      */
     public function isPaid(): bool
     {
-        $totalAmount = $this->acceptanceItems()->sum(\DB::raw('price - discount'));
+        $totalAmount = $this->acceptanceItems()->sum(DB::raw('price - discount'));
         $totalPaid = $this->payments()->sum('price');
         return $totalPaid >= $totalAmount;
     }
@@ -93,7 +100,7 @@ class Invoice extends Model
      */
     public function isPartiallyPaid(): bool
     {
-        $totalAmount = $this->acceptanceItems()->sum(\DB::raw('price - discount'));
+        $totalAmount = $this->acceptanceItems()->sum(DB::raw('price - discount'));
         $totalPaid = $this->payments()->sum('price');
 
         return $totalPaid > 0 && $totalPaid < $totalAmount;
