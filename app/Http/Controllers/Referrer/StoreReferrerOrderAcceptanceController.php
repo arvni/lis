@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Referrer;
 
 use App\Domains\Billing\DTOs\InvoiceDTO;
 use App\Domains\Billing\DTOs\PaymentDTO;
+use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Services\InvoiceService;
 use App\Domains\Billing\Services\PaymentService;
@@ -36,7 +37,7 @@ class StoreReferrerOrderAcceptanceController extends Controller
             return back()->withErrors("it has Acceptance Currently");
         $user = auth()->user();
         $validated = $request->validated();
-        $invoiceDto = new InvoiceDTO("referrer", $referrerOrder->referrer_id, $user->id, 0);
+        $invoiceDto = new InvoiceDTO("referrer", $referrerOrder->referrer_id, $user->id);
         $invoice = $this->invoiceService->storeInvoice($invoiceDto);
         $acceptanceDto = new AcceptanceDto(
             $referrerOrder->patient_id,

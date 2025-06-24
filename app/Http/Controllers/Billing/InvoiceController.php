@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Billing;
 
 use App\Domains\Billing\DTOs\InvoiceDTO;
+use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Events\InvoiceAcceptanceUpdateEvent;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Requests\StoreInvoiceRequest;
@@ -44,6 +45,7 @@ class InvoiceController extends Controller
                 $request->get("owner_type"),
                 $request->get("owner_id"),
                 auth()->user()->id,
+                InvoiceStatus::WAITING_FOR_PAYMENT,
                 $request->get("discount", 0)
             ));
         InvoiceAcceptanceUpdateEvent::dispatch($request->get("acceptance_id"), $invoice->id);
