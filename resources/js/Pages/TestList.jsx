@@ -324,6 +324,7 @@ const TestList = () => {
             flex: 1,
             display: "flex",
             minWidth: 400,
+            alignItems: "center",
             renderCell: (params) => (
                 <Box sx={{py: 1}}>
                     {params.row.type === 'PANEL' ? (

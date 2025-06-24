@@ -123,11 +123,18 @@ const MethodsList = ({
                     </>
                 )}
                 <TableCell align="right">
-                    {method?.price ? (
+                    {method?.price && method.price_type==="Fix" ? (
                         <Typography fontWeight="medium">
                             {method.price.toFixed(3)} <small>OMR</small>
                         </Typography>
                     ) : "—"}
+                </TableCell>
+                <TableCell align="right">
+                    {method?.referrer_price && method.referrer_price_type==="Fix" ? (
+                        <Typography fontWeight="medium">
+                            {method.referrer_price} <small>OMR</small>
+                        </Typography>
+                    ) : method.referrer_price_type}
                 </TableCell>
                 <TableCell align="right">{acceptance_items_count || "—"}</TableCell>
                 <TableCell align="center">
@@ -375,6 +382,7 @@ const MethodsList = ({
                             </>
                         )}
                         <TableCell align="right">Price</TableCell>
+                        <TableCell align="right">Referrer Price</TableCell>
                         <TableCell align="right">No. Acceptance Items</TableCell>
                         <TableCell align="center">Status</TableCell>
                         <TableCell align="right">Actions</TableCell>

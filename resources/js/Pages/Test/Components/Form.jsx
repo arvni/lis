@@ -538,7 +538,7 @@ export default function TestForm({
 
                     </>)}
 
-                    {data.type === "PANEL" && (
+                    {data.type === "PANEL" && (<>
                         <Grid size={{xs:12,md:6}}>
                             <TextField
                                 value={data.price || ''}
@@ -555,6 +555,23 @@ export default function TestForm({
                                 }}
                             />
                         </Grid>
+                        <Grid size={{xs:12,md:6}}>
+                            <TextField
+                                value={data.referrer_price || ''}
+                                fullWidth
+                                name="referrer_price"
+                                type="number"
+                                label="Referrers Default Price"
+                                placeholder="Enter price amount"
+                                onChange={handleChange}
+                                error={Boolean(errors?.referrer_price)}
+                                helperText={errors?.referrer_price || "The Default Panel Price For Referrers "}
+                                slotProps={{
+                                    Input:{endAdornment: <Typography variant="caption" sx={{ ml: 1 }}>OMR</Typography>}
+                                }}
+                            />
+                        </Grid>
+                        </>
                     )}
                 </Grid>
             </Paper>

@@ -20,7 +20,8 @@ class Test extends Model
         "status",
         "test_group_id",
         "type",
-        "price"
+        "price",
+        "referrer_price",
     ];
 
     protected $searchable = [
@@ -32,7 +33,8 @@ class Test extends Model
     protected $casts = [
         "status" => "boolean",
         "type" => TestType::class,
-        "price" => "decimal:3"
+        "price" => "decimal:3",
+        "referrer_price" => "decimal:3",
     ];
 
     public function testGroup()

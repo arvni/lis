@@ -44,8 +44,9 @@ const AddPanel = ({
     // API Service functions
     const fetchTestDetails = useCallback((testId) => {
         setLoading(true);
-        return axios.get(route("api.tests.show", testId))
-            .then(({data: {data: {method_tests, ...res}}}) => {
+        return axios.get(route("api.tests.show", testId),{
+            params: referrer ? { referrer: { id: referrer.id } } : {},
+        }).then(({data: {data: {method_tests, ...res}}}) => {
                 const formattedItems = method_tests.map(item => ({
                     id: makeId(5),
                     method_test: item,

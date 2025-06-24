@@ -121,7 +121,7 @@ const MethodField = ({
     const validateForm = () => {
         let validationErrors = {};
 
-        if (type !== '3') {
+        if (type !== 'PANEL') {
             // Validation for method name
             if (!methodTest?.method?.name) {
                 validationErrors.name = "Please enter method name";
@@ -136,7 +136,14 @@ const MethodField = ({
                 validationErrors.price = "Method price must be greater than 0";
             }
 
-            if (type === '1') {
+            // Validation for price
+            if (!methodTest?.method?.referrer_price) {
+                validationErrors.referrer_price = "Please enter method referrer price";
+            } else if (methodTest?.method?.referrer_price < 1) {
+                validationErrors.referrer_price = "Method referrer price must be greater than 0";
+            }
+
+            if (type === 'TEST') {
                 // Validation for turnaround time
                 if (!methodTest.method?.turnaround_time) {
                     validationErrors.turnaround_time = "Please enter method turnaround time";

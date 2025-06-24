@@ -50,7 +50,8 @@ class TestResource extends JsonResource
         if ($this->type == TestType::PANEL) {
             if ($this->relationLoaded("referrerTest") && $this->referrerTest) {
                 return $this->referrerTest->price;
-            }
+            } elseif ($this->withDefaultReferrerPrice && $this->referrer_price)
+                return $this->referrer_price;
             return $this->price;
         }
         return null;
@@ -107,6 +108,8 @@ class TestResource extends JsonResource
                     }
                 }
             }
+        }elseif ($this->withDefaultReferrerPrice){
+            return $methodTest->method->referrer_price;
         }
 
         return $methodTest->method->price ?? null;
@@ -130,6 +133,8 @@ class TestResource extends JsonResource
                     }
                 }
             }
+        }elseif ($this->withDefaultReferrerPrice){
+            return $methodTest->method->referrer_price_type->value;
         }
 
         return $methodTest->method->price_type->value ?? null;
@@ -153,6 +158,8 @@ class TestResource extends JsonResource
                     }
                 }
             }
+        }elseif ($this->withDefaultReferrerPrice){
+            return $methodTest->method->referrer_extra;
         }
 
         return $methodTest->method->extra ?? null;

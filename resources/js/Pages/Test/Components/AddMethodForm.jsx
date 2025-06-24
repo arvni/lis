@@ -61,15 +61,18 @@ const AddMethodForm = ({ method = {}, onChange, onSubmit, onClose, open, errors,
                 ...method,
                 extra: method.extra || {},
                 price_type: method.price_type || "Fix",
-                price: method.price || 0
+                price: method.price || 0,
+                referrer_extra: method.referrer_extra || {},
+                referrer_price_type: method.referrer_price_type || "Fix",
+                referrer_price: method.referrer_price || 0
             });
-            setActiveStep(0);
         }
     }, [method, open]);
 
     const steps = [
         'Basic Information',
         'Pricing Configuration',
+        'Referrer Pricing Configuration',
         'Test & Confirm'
     ];
 
@@ -92,6 +95,18 @@ const AddMethodForm = ({ method = {}, onChange, onSubmit, onClose, open, errors,
             extra: updatedExtra
         });
         onChange("extra", updatedExtra);
+    };
+
+    const handleReferrerExtraChange = (e) => {
+        const updatedExtra = {
+            ...methodData.referrer_extra,
+            [e.target.name]: e.target.value
+        };
+        setMethodData({
+            ...methodData,
+            referrer_extra: updatedExtra
+        });
+        onChange("referrer_extra", updatedExtra);
     };
 
     const handleNext = () => {
@@ -324,6 +339,122 @@ const AddMethodForm = ({ method = {}, onChange, onSubmit, onClose, open, errors,
             case 2:
                 return (
                     <Box sx={{ mt: 2 }}>
+                        <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
+                            <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                Referrer Price Type
+                                <Tooltip title="Choose how reffered test pricing will be calculated for this method">
+                                    <IconButton size="small" sx={{ ml: 1 }}>
+                                        <Help fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
+                            </Typography>
+                            <Divider sx={{ mb: 2 }} />
+
+                            <FormControl fullWidth>
+                                <InputLabel id="price-type-select-label">Price Type</InputLabel>
+                                <Select
+                                    labelId="price-type-select-label"
+                                    id="price-type-select"
+                                    value={methodData?.referrer_price_type || "Fix"}
+                                    label="Price Type"
+                                    name="price_type"
+                                    onChange={(e) => handleChange("referrer_price_type", e.target.value)}
+                                    startAdornment={<CurrencyExchange sx={{ mr: 1, ml: -0.5 }} />}
+                                >
+                                    <MenuItem value="Fix">Fixed Price</MenuItem>
+                                    <MenuItem value="Formulate">Formula-based Price</MenuItem>
+                                    <MenuItem value="Conditional">Conditional Price</MenuItem>
+                                </Select>
+                            </FormControl>
+
+                            {methodData?.referrer_price_type === "Fix" && (
+                                <Box sx={{ mt: 2 }}>
+                                    <FormControl fullWidth>
+                                        <InputLabel
+                                            error={Boolean(errors?.referrer_price)}
+                                            id="payment-method-label"
+                                            required
+                                        >
+                                            Price
+                                        </InputLabel>
+                                        <OutlinedInput
+                                            fullWidth
+                                            type="number"
+                                            name="price"
+                                            label="Price"
+                                            value={methodData.referrer_price || 0}
+                                            error={Boolean(errors?.referrer_price)}
+                                            required
+                                            inputProps={{ min: 0, step: 0.001 }}
+                                            onChange={(e) => handleChange("referrer_price", e.target.value)}
+                                            endAdornment={<Typography variant="caption" sx={{ ml: 1 }}>OMR</Typography>}
+                                        />
+                                        {errors?.price && <FormHelperText error>{errors?.referrer_price}</FormHelperText>}
+                                    </FormControl>
+                                </Box>
+                            )}
+
+                            {methodData?.referrer_price_type === "Formulate" && (
+                                <Box sx={{ mt: 3 }}>
+                                    <ParametersField
+                                        defaultValue={methodData?.referrer_extra?.parameters || []}
+                                        onChange={handleReferrerExtraChange}
+                                        name="parameters"
+                                        errors={errors?.referrer_extra?.parameters}
+                                    />
+
+                                    <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                            Price Formula
+                                            <Tooltip title="Define a mathematical formula using parameters. E.g: age * 0.5 + 10">
+                                                <IconButton size="small" sx={{ ml: 1 }}>
+                                                    <Help fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Typography>
+                                        <Divider sx={{ mb: 2 }} />
+
+                                        <TextField
+                                            name="formula"
+                                            label="Formula"
+                                            placeholder="e.g. age * 0.5 + weight * 0.2 + 10"
+                                            onChange={handleReferrerExtraChange}
+                                            value={methodData?.referrer_extra?.formula || ""}
+                                            fullWidth
+                                            multiline
+                                            rows={2}
+                                            helperText={errors?.["referrer_extra.formula"] || "Define a mathematical formula using the parameters you've added"}
+                                            error={Boolean(errors?.["referrer_extra.formula"])}
+                                        />
+                                    </Paper>
+                                </Box>
+                            )}
+
+                            {methodData?.referrer_price_type === "Conditional" && (
+                                <Box sx={{ mt: 3 }}>
+                                    <ParametersField
+                                        defaultValue={methodData?.referrer_extra?.parameters || []}
+                                        onChange={handleReferrerExtraChange}
+                                        name="parameters"
+                                        errors={errors?.referrer_extra?.parameters}
+                                    />
+
+                                    <ConditionsField
+                                        defaultValue={methodData?.referrer_extra?.conditions || []}
+                                        onChange={handleReferrerExtraChange}
+                                        name="conditions"
+                                        errors={errors?.referrer_extra?.conditions}
+                                        parameters={methodData?.referrer_extra?.parameters || []}
+                                    />
+                                </Box>
+                            )}
+                        </Paper>
+                    </Box>
+                );
+
+            case 3:
+                return (
+                    <Box sx={{ mt: 2 }}>
                         <Alert severity="info" sx={{ mb: 3 }}>
                             Review your settings and test the price calculation before submitting
                         </Alert>
@@ -367,6 +498,10 @@ const AddMethodForm = ({ method = {}, onChange, onSubmit, onClose, open, errors,
                                 <Grid xs={12} sm={6}>
                                     <Typography variant="body2" color="text.secondary">Price Type</Typography>
                                     <Typography variant="body1" gutterBottom>{methodData?.price_type || "Fix"}</Typography>
+                                </Grid>
+                                <Grid xs={12} sm={6}>
+                                    <Typography variant="body2" color="text.secondary">Referrer Price Type</Typography>
+                                    <Typography variant="body1" gutterBottom>{methodData?.referrer_price_type || "Fix"}</Typography>
                                 </Grid>
                             </Grid>
                         </Paper>

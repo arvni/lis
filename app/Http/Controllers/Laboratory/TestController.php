@@ -14,7 +14,6 @@ use App\Domains\Laboratory\Resources\TestResource;
 use App\Domains\Laboratory\Services\MethodService;
 use App\Domains\Laboratory\Services\MethodTestService;
 use App\Domains\Laboratory\Services\TestService;
-use App\Domains\Setting\Services\SettingService;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -73,7 +72,8 @@ class TestController extends Controller
             $validatedData["request_form"]["id"] ?? null,
             $validatedData["instruction"]["id"] ?? null,
             $validatedData["consent_form"]["id"] ?? null,
-            $validatedData["price"] ?? 0
+            $validatedData["price"] ?? 0,
+            $validatedData["referrer_price"] ?? 0,
         );
 
         $test = $this->testService->storeTest($testDto);
@@ -101,6 +101,7 @@ class TestController extends Controller
     public function show(Test $test, Request $request): TestResource
     {
         $loadedTest = $this->testService->loadTest($test, $request->has("referrer") ? $request->input("referrer") : null);
+        $loadedTest->withDefaultReferrerPrice=$request->has("referrer");
         return new TestResource($loadedTest);
     }
 
@@ -146,7 +147,8 @@ class TestController extends Controller
             $validatedData["request_form"]["id"] ?? null,
             $validatedData["instruction"]["id"] ?? null,
             $validatedData["consent_form"]["id"] ?? null,
-            $validatedData["price"] ?? 0
+            $validatedData["price"] ?? 0,
+            $validatedData["referrer_price"] ?? 0,
         );
 
         $this->testService->updateTest($test, $testDto);
@@ -201,9 +203,11 @@ class TestController extends Controller
                 price_type: MethodPriceType::from($methodTest["method"]["price_type"]),
                 price: $methodTest["method"]["price"],
                 turnaround_time: $methodTest["method"]["turnaround_time"] ?? null,
-                requirements: $methodTest["method"]["requirements"] ?? null,
                 extra: $methodTest["method"]["extra"] ?? null,
-                noPatient: $methodTest["method"]["no_patient"] ?? 1
+                noPatient: $methodTest["method"]["no_patient"] ?? 1,
+                referrer_price_type: MethodPriceType::from($methodTest["method"]["referrer_price_type"]),
+                referrer_price: $methodTest["method"]["referrer_price"],
+                referrer_extra: $methodTest["method"]["referrer_extra"] ?? null,
             );
             $method = null;
             if ($methodTest["method"]["id"] ?? null)

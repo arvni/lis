@@ -16,9 +16,11 @@ class Method extends Model
         "turnaround_time",
         "status",
         "price",
-        "requirements",
         "price_type",
         "extra",
+        "referrer_price",
+        "referrer_price_type",
+        "referrer_extra",
         "barcode_group_id",
         "workflow_id",
         "no_patient"
@@ -26,10 +28,12 @@ class Method extends Model
 
     protected $casts = [
         "price" => "float",
+        "referrer_price" => "decimal:2",
         "status" => "boolean",
-        "requirements" => "json",
         "extra"=>"json",
-        "price_type" => MethodPriceType::class
+        "referrer_extra"=>"json",
+        "price_type" => MethodPriceType::class,
+        "referrer_price_type" => MethodPriceType::class,
     ];
 
     public function acceptanceItems()

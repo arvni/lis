@@ -19,6 +19,7 @@ class TestDTO
         public ?int     $instructionId,
         public ?int     $consentFormId,
         public ?int     $price = 0,
+        public ?int     $referrerPrice = 0,
     )
     {
     }
@@ -35,6 +36,7 @@ class TestDTO
             "status" => $this->status,
             "report_templates" => $this->report_templates,
             "price" => $this->price,
+            "referrer_price" => $this->referrerPrice,
             "request_form_id" => $this->requestFormId,
             "instruction_id" => $this->instructionId,
             "consent_form_id" => $this->consentFormId,

@@ -45,6 +45,7 @@ class UpdateTestRequest extends FormRequest
 
         $panelRules = [
             "price" => ["required_if:type," . TestType::PANEL->value, "numeric", "min:0"],
+            "referrer_price" => ["required_if:type," . TestType::PANEL->value, "numeric", "min:0"],
             "method_tests.*.method.id" => ["required", "exists:methods,id"],
             "method_tests.*.status" => ["nullable","boolean"],
         ];
@@ -72,14 +73,23 @@ class UpdateTestRequest extends FormRequest
                 "required",
                 Rule::enum(MethodPriceType::class)
             ],
+            "method_tests.*.method.referrer_price_type" => [
+                "required",
+                Rule::enum(MethodPriceType::class)
+            ],
             "method_tests.*.method.price" => [
                 "required_if:method_tests.*.method.price_type," . MethodPriceType::FIX->value,
                 "numeric",
                 "min:0"
             ],
+            "method_tests.*.method.referrer_price" => [
+                "required_if:method_tests.*.method.referrer_price_type," . MethodPriceType::FIX->value,
+                "numeric",
+                "min:0"
+            ],
             "method_tests.*.method.turnaround_time" => ["required", "numeric", "min:1"],
             "method_tests.*.method.extra" => ["nullable", "array"],
-            "method_tests.*.method.requirements" => ["nullable", "array"],
+            "method_tests.*.method.referrer_extra" => ["nullable", "array"],
         ];
         $serviceRules = [
             "method_tests.*.method" => ["required", "array"],
@@ -89,13 +99,22 @@ class UpdateTestRequest extends FormRequest
                 "required",
                 Rule::enum(MethodPriceType::class)
             ],
+            "method_tests.*.method.referrer_price_type" => [
+                "required",
+                Rule::enum(MethodPriceType::class)
+            ],
             "method_tests.*.method.price" => [
                 "required_if:method_tests.*.method.price_type," . MethodPriceType::FIX->value,
                 "numeric",
                 "min:0"
             ],
+            "method_tests.*.method.referrer_price" => [
+                "required_if:method_tests.*.method.referrer_price_type," . MethodPriceType::FIX->value,
+                "numeric",
+                "min:0"
+            ],
             "method_tests.*.method.extra" => ["nullable", "array"],
-            "method_tests.*.method.requirements" => ["nullable", "array"],
+            "method_tests.*.method.referrer_extra" => ["nullable", "array"],
         ];
 
         return array_merge(
