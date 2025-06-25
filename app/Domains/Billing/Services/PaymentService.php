@@ -3,6 +3,7 @@
 namespace App\Domains\Billing\Services;
 
 use App\Domains\Billing\DTOs\PaymentDTO;
+use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Events\PaymentsAddedEvent;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\Payment;
@@ -103,5 +104,28 @@ readonly class PaymentService
                 });
         }
         $this->invoiceService->updateStatus($invoice);
+    }
+
+    public function updatePayments(Invoice $invoice, array $paymentsData): void
+    {
+        $ids = [];
+        foreach ($paymentsData as $paymentData) {
+            if (isset($paymentData['id']) && $paymentData['id']) {
+                $payment = $this->findPaymentById($paymentData['id']);
+                $this->paymentRepository->updatePayment($payment,$paymentData);
+            } else {
+                $payment = $this->storePayment(new PaymentDTO(
+                    $invoice->id,
+                    auth()->user()->id,
+                    $paymentData["payer_type"],
+                    $paymentData["payer_id"],
+                    $paymentData["price"],
+                    PaymentMethod::find($paymentData["paymentMethod"]),
+                    $paymentData["information"],
+                ));
+            }
+            $ids[] = $payment->id;
+        }
+        $invoice->payments()->whereNotIn("id", $ids)->delete();
     }
 }

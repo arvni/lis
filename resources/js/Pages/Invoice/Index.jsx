@@ -63,12 +63,14 @@ const InvoiceIndex = () => {
             field: 'invoiceNo',
             headerName: 'Invoice #',
             width: 110,
+            display:"flex"
         },
         {
             field: 'owner',
             headerName: 'Owner',
             width: 200,
             sortable: false,
+            display:"flex",
             renderCell: ({value}) => value?.fullName || "—"
         },
         {
@@ -77,6 +79,7 @@ const InvoiceIndex = () => {
             type: "string",
             width: 200,
             sortable: false,
+            display:"flex",
             renderCell: ({row}) => row?.patient?.fullName || "—"
         },
         {
@@ -84,6 +87,7 @@ const InvoiceIndex = () => {
             headerName: 'Amount',
             type: "number",
             width: 100,
+            display:"flex",
             renderCell: ({value}) => formatCurrency(value)
         },
         {
@@ -91,6 +95,7 @@ const InvoiceIndex = () => {
             headerName: 'Discount',
             type: "number",
             width: 100,
+            display:"flex",
             renderCell: ({value}) => formatCurrency(Math.ceil(value))
         },
         {
@@ -105,14 +110,16 @@ const InvoiceIndex = () => {
             headerName: 'Status',
             type: "string",
             width: 120,
+            display:"flex",
             renderCell: ({value}) => <StatusChip status={value}/>
         },
         {
             field: 'created_at',
             headerName: 'Created Date',
             type: "date",
+            display:"flex",
             valueGetter: (value) => value && new Date(value),
-            width: 170,
+            width: 120,
             renderCell: ({value}) => value ? value.toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'short',
@@ -124,7 +131,7 @@ const InvoiceIndex = () => {
             type: 'action',
             sortable: false,
             headerName: 'Actions',
-            width: 180,
+            display:"flex",
             renderCell: ({row}) => {
                 return (
                     <Stack direction="row" spacing={1}>
@@ -139,7 +146,7 @@ const InvoiceIndex = () => {
                             </IconButton>
                         </Tooltip>
 
-                        <Tooltip title="Edit Invoice">
+                        {canDelete && (<Tooltip title="Edit Invoice">
                             <IconButton
                                 onClick={() => handleEdit(row.id)}
                                 size="small"
@@ -147,7 +154,7 @@ const InvoiceIndex = () => {
                             >
                                 <EditIcon/>
                             </IconButton>
-                        </Tooltip>
+                        </Tooltip>)}
 
                         {Boolean(row?.acceptance?.id) && (
                             <Tooltip title="Edit Acceptance">

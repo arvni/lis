@@ -9,15 +9,17 @@ use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Requests\StoreInvoiceRequest;
 use App\Domains\Billing\Requests\UpdateInvoiceRequest;
 use App\Domains\Billing\Services\InvoiceService;
+use App\Domains\Billing\Services\PaymentService;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class InvoiceController extends Controller
 {
-    public function __construct(private readonly InvoiceService $invoiceService)
+    public function __construct(private readonly InvoiceService $invoiceService, private readonly PaymentService $paymentService)
     {
         $this->middleware("indexProvider")->only("index");
     }
@@ -31,7 +33,9 @@ class InvoiceController extends Controller
         $this->authorize("viewAny", Invoice::class);
         $requestInputs = $request->all();
         $invoices = $this->invoiceService->listInvoices($requestInputs);
-        return Inertia::render("Invoice/Index", compact("requestInputs", "invoices"));
+        $canDelete = Gate::allows("delete", Invoice::class);
+        $canEdit = Gate::allows("edit", new Invoice());
+        return Inertia::render("Invoice/Index", compact("requestInputs", "invoices", "canEdit", "canDelete"));
     }
 
     /**
@@ -74,9 +78,11 @@ class InvoiceController extends Controller
      */
     public function update(UpdateInvoiceRequest $request, Invoice $invoice)
     {
-        $data=$request->validated();
-        $invoiceDto=InvoiceDTO::fromArray(array_merge($invoice->toArray(),$data));
+        $data = $request->validated();
+        $invoiceDto = InvoiceDTO::fromArray(array_merge($invoice->toArray(), $data));
         $this->invoiceService->updateInvoice($invoice, $invoiceDto);
+        $this->invoiceService->updateInvoiceItems($data["acceptance_items"]);
+        $this->paymentService->updatePayments($invoice, $data["payments"]);
         return redirect()->back()->with(["success" => true, "message" => "Invoice updated successfully."]);
     }
 

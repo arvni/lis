@@ -14,7 +14,23 @@ class GetInvoiceController extends Controller
      */
     public function __invoke(Invoice $invoice, Request $request)
     {
-        $invoice->load("owner","patient","acceptance","referrer");
+        $invoice->load(
+            [
+                "owner",
+                "patient",
+                "acceptance",
+                "acceptanceItems" => function ($q) {
+                    $q->with([
+                        "test" => function ($testQuery) {
+                            $testQuery->withCount("methodTests");
+                        },
+                        "patients"
+                    ]);
+                },
+                "referrer",
+                "payments.payer",
+                "payments.cashier",
+            ]);
         return new InvoiceResource($invoice);
     }
 }

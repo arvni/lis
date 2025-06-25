@@ -3,6 +3,7 @@
 namespace App\Domains\Billing\Services;
 
 
+use App\Domains\Billing\Adapters\ReceptionAdapter;
 use App\Domains\Billing\DTOs\InvoiceDTO;
 use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Models\Invoice;
@@ -11,7 +12,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 readonly class InvoiceService
 {
-    public function __construct(private InvoiceRepository $invoiceRepository)
+    public function __construct(
+        private InvoiceRepository $invoiceRepository,
+        private ReceptionAdapter  $receptionAdapter,
+    )
     {
     }
 
@@ -39,7 +43,8 @@ readonly class InvoiceService
             "acceptanceItems.method",
             "acceptanceItems.test",
             "acceptanceItems.patients",
-            "owner"
+            "owner",
+            "payments.payer"
         ])
             ->loadSum("payments", "price")
             ->loadSum("patientPayments", "price")
@@ -75,6 +80,13 @@ readonly class InvoiceService
             $invoice->update(["status" => InvoiceStatus::PARTIALLY_PAID]);
         } else
             $invoice->update(["status" => InvoiceStatus::WAITING_FOR_PAYMENT]);
+    }
+
+    public function updateInvoiceItems($items): void
+    {
+        foreach ($items as $item) {
+            $this->receptionAdapter->updateAcceptanceItem($item);
+        }
     }
 
 
