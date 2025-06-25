@@ -85,6 +85,7 @@ const SelectSearch = ({
                          getOptionKey={(option)=>data.find(op => op.id == option.id)?.id ?? value?.id}
                          multiple={multiple}
                          disabled={disabled}
+                         filterOptions={(options)=>options}
                          onInputChange={handleSearch}
                          getOptionLabel={(option) => data.find(op => op.id == option.id)?.name ?? value?.name}
                          loading={loading}
