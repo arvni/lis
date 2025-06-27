@@ -45,10 +45,6 @@ const TEST_TYPES={
     PANEL:'PANEL'
 }
 
-const PRICE_TYPES={
-    FIX:'FIX',
-
-}
 
 
 const AddMethodForm = ({ method = {}, onChange, onSubmit, onClose, open, errors, type = '1' }) => {

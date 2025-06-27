@@ -40,6 +40,7 @@ use App\Http\Controllers\Laboratory\BarcodeGroupController;
 use App\Http\Controllers\Laboratory\ConsentFormController;
 use App\Http\Controllers\Laboratory\DoctorController;
 use App\Http\Controllers\Laboratory\ExportReportTemplateParametersController;
+use App\Http\Controllers\Laboratory\ExportTestsController;
 use App\Http\Controllers\Laboratory\InstructionController;
 use App\Http\Controllers\Laboratory\OfferController;
 use App\Http\Controllers\Laboratory\ReportTemplateController;
@@ -234,6 +235,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource("reportTemplates", ReportTemplateController::class)->except("create", "edit");
         Route::get("reportTemplate/{reportTemplate}/parameters", ExportReportTemplateParametersController::class)
             ->name("reportTemplates.export-parameters");
+        Route::get("tests/export", ExportTestsController::class)->name("tests.export");
         Route::resource("tests", TestController::class)->except("show");
         Route::resource("requestForms", RequestFormController::class)->except("edit", "show");
         Route::resource("consentForms", ConsentFormController::class)->except("edit", "show");
