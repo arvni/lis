@@ -81,6 +81,13 @@ class ReportRepository
             $query->whereHas("acceptanceItem", function ($q) use ($filters) {
                 $q->whereHas("patient", fn($q) => $q->where("patients.id", $filters["patient_id"]));
             });
+        if (isset($filters["patient_id"]))
+            $query->whereHas("acceptanceItem", function ($q) use ($filters) {
+                $q->whereHas("patient", fn($q) => $q->where("patients.id", $filters["patient_id"]));
+            });
+        if (isset($filters["search"])) {
+            $query->search($filters["search"]);
+        }
     }
 
     public function loadWithAllRelations(Report $report)

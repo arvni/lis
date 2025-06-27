@@ -6,6 +6,7 @@ use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Document\Models\Document;
 use App\Domains\Laboratory\Models\ReportTemplate;
 use App\Domains\User\Models\User;
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -141,5 +142,21 @@ class Report extends Model
     public function scopeIsActive($query)
     {
         return $query->where("status", true);
+    }
+
+    public function scopeSearch($query, $search)
+    {
+        return $query->whereHas("acceptanceItem", function ($query) use ($search) {
+            $query
+                ->whereHas("samples", function ($query) use ($search) {
+                    $query->search($search);
+                })
+                ->orWhereHas("patient", function ($query) use ($search) {
+                    $query->search($search);
+                })
+                ->orWhereHas("test", function ($query) use ($search) {
+                    $query->search($search);
+                });
+        });
     }
 }
