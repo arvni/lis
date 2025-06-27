@@ -2,6 +2,7 @@
 
 namespace App\Domains\Laboratory\Exports;
 
+use App\Domains\Laboratory\Enums\MethodPriceType;
 use App\Domains\Laboratory\Models\Test;
 use App\Domains\Laboratory\Enums\TestType;
 use Illuminate\Support\Collection;
@@ -32,6 +33,7 @@ class TestExport implements
 
     private const PRIMARY_COLOR = '0361ac';
     private const TEXT_COLOR = 'ffffff';
+
     /**
      * @return Collection
      */
@@ -97,7 +99,7 @@ class TestExport implements
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet;
 
                 // Auto-filter for easier sorting/filtering
@@ -112,7 +114,6 @@ class TestExport implements
             },
         ];
     }
-
 
 
     /**
@@ -201,7 +202,20 @@ class TestExport implements
         if ($test->type == TestType::PANEL) {
             return $test->price;
         }
-        return $test->methodTests->map(fn($item) => $item->method->price)->max();
+        $defaultMethod = $test->methodTests->where("is_default")->first()->method;
+        if ($defaultMethod->price_type == MethodPriceType::FIX)
+            return $defaultMethod->price;
+        else if ($defaultMethod->price_type == MethodPriceType::FORMULATE)
+            return $defaultMethod->extra["formula"];
+        else if ($defaultMethod->price_type == MethodPriceType::CONDITIONAL) {
+            $formatted = "Conditional Pricing:\n";
+            foreach ($defaultMethod->extra['conditions'] as $index => $condition) {
+                $conditionText = str_replace(['<=', '>=', '&&', '||'], ['≤', '≥', ' and ', ' or '], $condition['condition']);
+                $formatted .= "• {$conditionText}: \${$condition['value']}\n";
+            }
+            return trim($formatted);
+        }
+        return "-";
     }
 
     private function getReferrerPrice(Test $test): string
@@ -209,6 +223,19 @@ class TestExport implements
         if ($test->type == TestType::PANEL) {
             return $test->referrer_price;
         }
-        return $test->methodTests->map(fn($item) => $item->method->referrer_price)?->max();
+        $defaultMethod = $test->methodTests->where("is_default")->first()->method;
+        if ($defaultMethod->referrer_price_type == MethodPriceType::FIX)
+            return $defaultMethod->referrer_price;
+        else if ($defaultMethod->referrer_price_type == MethodPriceType::FORMULATE)
+            return $defaultMethod->referrer_extra["formulate"];
+        else if ($defaultMethod->referrer_price_type == MethodPriceType::CONDITIONAL) {
+            $formatted = "Conditional Pricing:\n";
+            foreach ($defaultMethod->referrer_extra['conditions'] as $index => $condition) {
+                $conditionText = str_replace(['<=', '>=', '&&', '||'], ['≤', '≥', ' and ', ' or '], $condition['condition']);
+                $formatted .= "• {$conditionText}: \${$condition['value']}\n";
+            }
+            return trim($formatted);
+        }
+        return "-";
     }
 }

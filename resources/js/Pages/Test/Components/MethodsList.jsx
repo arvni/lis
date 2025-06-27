@@ -125,9 +125,9 @@ const MethodsList = ({
                 <TableCell align="right">
                     {method?.price && method.price_type==="Fix" ? (
                         <Typography fontWeight="medium">
-                            {method.price.toFixed(3)} <small>OMR</small>
+                            {method.price} <small>OMR</small>
                         </Typography>
-                    ) : "—"}
+                    ) : method.price_type}
                 </TableCell>
                 <TableCell align="right">
                     {method?.referrer_price && method.referrer_price_type==="Fix" ? (
