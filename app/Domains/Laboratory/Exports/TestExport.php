@@ -231,8 +231,8 @@ class TestExport implements
         else if ($defaultMethod->referrer_price_type == MethodPriceType::CONDITIONAL) {
             $formatted = "Conditional Pricing:\n";
             foreach ($defaultMethod->referrer_extra['conditions'] as $index => $condition) {
-                $conditionText = str_replace(['<=', '>=', '&&', '||'], ['≤', '≥', ' and ', ' or '], $condition['condition']);
-                $formatted .= "• {$conditionText}: \${$condition['value']}\n";
+                $conditionText = str_replace(['<=', '>=', '&&', '||'], [' ≤ ', ' ≥ ', ' and ', ' or '], $condition['condition']);
+                $formatted .= "• {$conditionText}: {$condition['value']}\n";
             }
             return trim($formatted);
         }
