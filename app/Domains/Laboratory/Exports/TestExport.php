@@ -61,6 +61,7 @@ class TestExport implements
             'Referrer Price',
             'Methods',
             'Sample Types',
+            'TAT',
             'Description',
         ];
     }
@@ -82,7 +83,8 @@ class TestExport implements
             'G' => 35,  // Referrer Price
             'H' => 25,  // Methods
             'I' => 25,  // Sample Types
-            'J' => 40,  // Description
+            'J' => 15,  // Turnaround Time
+            'K' => 40,  // Description
         ];
     }
 
@@ -108,6 +110,7 @@ class TestExport implements
             $this->getReferrerPrice($test),
             $methods,
             $sampleTypes,
+            $this->getTurnaroundTime($test),
             strip_tags($test->description),
         ];
     }
@@ -242,6 +245,24 @@ class TestExport implements
         if ($test->type == TestType::PANEL) {
             return $test->price;
         }
+
+        if ($test->methodTests->where("status", true)->count() ==1) {
+            $method=$test->methodTests->where("status", true)->first()->method;
+            if ($method->price_type == MethodPriceType::FIX) {
+                return "{$method->price}\n";
+            } else if ($method->price_type == MethodPriceType::FORMULATE)
+                return "{$method->extra["formula"]}\n";
+            else if ($method->price_type == MethodPriceType::CONDITIONAL) {
+                $formatted = "Conditional Pricing:\n { \n";
+                foreach ($method->extra['conditions'] as $index => $condition) {
+                    $conditionText = str_replace(['<=', '>=', '&&', '||'], [' ≤ ', ' ≥ ', ' and ', ' or '], $condition['condition']);
+                    $formatted .= "• {$conditionText}: {$condition['value']}\n";
+                }
+                $formatted .= "}\n";
+                return $formatted;
+            }
+        }
+
         $formatted = "";
         foreach ($test->methodTests->where("status", true) as $methodTest) {
             $method = $methodTest->method;
@@ -266,6 +287,24 @@ class TestExport implements
         if ($test->type == TestType::PANEL) {
             return $test->referrer_price;
         }
+
+        if ($test->methodTests->where("status", true)->count() ==1) {
+            $method=$test->methodTests->where("status", true)->first()->method;
+            if ($method->referrer_price_type == MethodPriceType::FIX) {
+                return "{$method->referrer_price}\n";
+            } else if ($method->referrer_price_type == MethodPriceType::FORMULATE)
+               return "{$method->referrer_extra["formula"]}\n";
+            else if ($method->referrer_price_type == MethodPriceType::CONDITIONAL) {
+                $formatted = "$method->name Conditional Pricing:\n { \n";
+                foreach ($method->referrer_extra['conditions'] as $index => $condition) {
+                    $conditionText = str_replace(['<=', '>=', '&&', '||'], [' ≤ ', ' ≥ ', ' and ', ' or '], $condition['condition']);
+                    $formatted .= "• {$conditionText}: {$condition['value']}\n";
+                }
+                $formatted .= "}\n";
+                return $formatted;
+            }
+        }
+
         $formatted = "";
         foreach ($test->methodTests->where("status", true) as $methodTest) {
             $method = $methodTest->method;
@@ -281,6 +320,23 @@ class TestExport implements
                 }
                 $formatted .= "}\n";
             }
+        }
+        return $formatted !== "" ? $formatted : "-";
+    }
+
+    private function getTurnaroundTime(Test $test): string
+    {
+        if ($test->type == TestType::PANEL) {
+            return $test->methodTests->map(fn($item)=>$item->method->turnaround_time)->max();
+        }
+        if ($test->methodTests->count() ==1) {
+            $method=$test->methodTests->first()->method;
+            return "{$method->turnaround_time} Day\n";
+        }
+        $formatted = "";
+        foreach ($test->methodTests->where("status", true) as $methodTest) {
+            $method = $methodTest->method;
+                $formatted .= "• {$method->name}: {$method->turnaround_time} Day\n";
         }
         return $formatted !== "" ? $formatted : "-";
     }
