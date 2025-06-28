@@ -6,7 +6,6 @@ use App\Domains\Laboratory\Enums\MethodPriceType;
 use App\Domains\Laboratory\Models\Test;
 use App\Domains\Laboratory\Enums\TestType;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -14,7 +13,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -28,7 +27,8 @@ class TestExport implements
     WithStrictNullComparison,
     ShouldAutoSize,
     WithStyles,
-    WithEvents
+    WithEvents,
+    WithColumnWidths  // Add this interface
 {
 
     private const PRIMARY_COLOR = '0361ac';
@@ -62,6 +62,27 @@ class TestExport implements
             'Methods',
             'Sample Types',
             'Description',
+        ];
+    }
+
+    /**
+     * Set column widths
+     *
+     * @return array
+     */
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 15,  // Code
+            'B' => 25,  // Name
+            'C' => 35,  // Full Name
+            'D' => 20,  // Test Group
+            'E' => 15,  // Type
+            'F' => 35,  // Price
+            'G' => 35,  // Referrer Price
+            'H' => 25,  // Methods
+            'I' => 25,  // Sample Types
+            'J' => 40,  // Description
         ];
     }
 
@@ -104,17 +125,24 @@ class TestExport implements
 
                 // Auto-filter for easier sorting/filtering
                 $lastColumn = $sheet->getHighestColumn();
+                $lastRow = $sheet->getHighestRow();
                 $sheet->setAutoFilter("A1:{$lastColumn}1");
 
                 // Freeze the top row
                 $sheet->freezePane('A2');
 
-                // Set width for parameter column
-                $sheet->getColumnDimension('A')->setWidth(15);
+                // Enable auto row height for all rows
+                for ($row = 1; $row <= $lastRow; $row++) {
+                    $sheet->getRowDimension($row)->setRowHeight(-1); // -1 enables auto height
+                }
+
+                // Alternative: Set auto height for data rows only (excluding header)
+                // for ($row = 2; $row <= $lastRow; $row++) {
+                //     $sheet->getRowDimension($row)->setRowHeight(-1);
+                // }
             },
         ];
     }
-
 
     /**
      * Apply styles to the worksheet
@@ -135,6 +163,10 @@ class TestExport implements
                     'color' => ['rgb' => 'CCCCCC'],
                 ],
             ],
+            'alignment' => [
+                'wrapText' => true,  // Enable text wrapping
+                'vertical' => Alignment::VERTICAL_TOP, // Align text to top
+            ],
         ]);
 
         return [
@@ -151,6 +183,14 @@ class TestExport implements
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
                     'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ],
+            ],
+            // Data rows styling
+            '2:' . $sheet->getHighestRow() => [
+                'alignment' => [
+                    'wrapText' => true,
+                    'vertical' => Alignment::VERTICAL_TOP,
                 ],
             ],
         ];
