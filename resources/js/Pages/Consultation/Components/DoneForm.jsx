@@ -7,7 +7,6 @@ import {
     IconButton,
     Box,
     Divider,
-    CircularProgress,
     Paper,
     Tooltip,
     AppBar,
@@ -63,13 +62,18 @@ const DoneForm = ({
     };
 
     const handleSubmit =  () => {
+        setActiveTab(0);
         submit();
     };
+    const handleClose = () => {
+      setActiveTab(0);
+      onClose();
+    }
 
     return (
         <Dialog
             open={open && !loading}
-            onClose={onClose}
+            onClose={handleClose}
             fullScreen
             slotProps={{
                 sx: {
@@ -88,7 +92,7 @@ const DoneForm = ({
                         <IconButton
                             edge="end"
                             color="inherit"
-                            onClick={onClose}
+                            onClick={handleClose}
                             aria-label="close"
                         >
                             <CloseIcon />
@@ -171,7 +175,7 @@ const DoneForm = ({
 
             <DialogActions sx={{ px: 3, py: 2, justifyContent: 'space-between' }}>
                 <Button
-                    onClick={onClose}
+                    onClick={handleClose}
                     variant="outlined"
                     color="secondary"
                 >
