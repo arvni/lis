@@ -266,11 +266,11 @@ class TestExport implements
         $formatted = "";
         foreach ($test->methodTests->where("status", true) as $methodTest) {
             $method = $methodTest->method;
-            if ($method->referrer_price_type == MethodPriceType::FIX) {
+            if ($method->price_type == MethodPriceType::FIX) {
                 $formatted .= "• {$method->name}: {$method->price}\n";
-            } else if ($method->referrer_price_type == MethodPriceType::FORMULATE)
+            } else if ($method->price_type == MethodPriceType::FORMULATE)
                 $formatted .= "• {$method->name}: {$method->extra["formula"]}\n";
-            else if ($method->referrer_price_type == MethodPriceType::CONDITIONAL) {
+            else if ($method->price_type == MethodPriceType::CONDITIONAL) {
                 $formatted = "$method->name Conditional Pricing:\n {\n";
                 foreach ($method->extra['conditions'] as $index => $condition) {
                     $conditionText = str_replace(['<=', '>=', '&&', '||'], [' ≤ ', ' ≥ ', ' and ', ' or '], $condition['condition']);
@@ -295,7 +295,7 @@ class TestExport implements
             } else if ($method->referrer_price_type == MethodPriceType::FORMULATE)
                return "{$method->referrer_extra["formula"]}\n";
             else if ($method->referrer_price_type == MethodPriceType::CONDITIONAL) {
-                $formatted = "$method->name Conditional Pricing:\n { \n";
+                $formatted = "Conditional Pricing:\n { \n";
                 foreach ($method->referrer_extra['conditions'] as $index => $condition) {
                     $conditionText = str_replace(['<=', '>=', '&&', '||'], [' ≤ ', ' ≥ ', ' and ', ' or '], $condition['condition']);
                     $formatted .= "• {$conditionText}: {$condition['value']}\n";
