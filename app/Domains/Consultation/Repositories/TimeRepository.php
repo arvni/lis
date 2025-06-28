@@ -3,6 +3,7 @@
 namespace App\Domains\Consultation\Repositories;
 
 use App\Domains\Consultation\Models\Time;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
 class TimeRepository
@@ -38,13 +39,12 @@ class TimeRepository
     {
         if (isset($filters["consultant_id"]))
             $query->where("consultant_id", $filters["consultant_id"]);
-        if (isset($filters["startDate"])) {
-            $query->whereDate("started_at", ">=", $filters["startDate"]);
-        }
+        if (isset($filters["startDate"]))
+            $query->whereDate("started_at", ">=", Carbon::parse($filters["startDate"],"Asia/Muscat")->startOfDay()->format("Y-m-d"));
         if (isset($filters["endDate"])) {
-            $query->whereDate("started_at", "<=", $filters["endDate"]);
-        if (isset($filters["betweenDate"]))
-            $query->whereBetween("started_at", $filters["betweenDate"]);
+            $query->whereDate("started_at", "<=", Carbon::parse($filters["endDate"],"Asia/Muscat")->endOfDay()->format("Y-m-d"));
+            if (isset($filters["betweenDate"]))
+                $query->whereBetween("started_at", $filters["betweenDate"]);
         }
     }
 

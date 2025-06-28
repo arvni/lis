@@ -27,6 +27,7 @@ const Reservations = ({times, canEdit, canAdd, canDelete}) => {
 
     const { enqueueSnackbar } = useSnackbar();
     const pageReload = (startDate, endDate) => {
+        console.log(startDate,endDate);
         router.visit(route('times.index'), {
             data: {
                 startDate,

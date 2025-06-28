@@ -67,7 +67,8 @@ const AddForm = ({openAdd, onClose}) => {
             phone: "",
             name: "",
             email: ""
-        }
+        },
+        note:"",
     });
 
     useEffect(() => {
@@ -415,6 +416,17 @@ const AddForm = ({openAdd, onClose}) => {
                                     </Paper>
                                 </Grid>
                             )}
+                            <Grid size={{xs: 12}}>
+                                    <TextField
+                                        name="note"
+                                        label="Note"
+                                        value={data?.note || ""}
+                                        onChange={handleChange}
+                                        fullWidth
+                                        multiline
+                                        rows={3}
+                                    />
+                            </Grid>
                         </Grid>
                     </Container>
                 </DialogContent>

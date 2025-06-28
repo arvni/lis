@@ -14,6 +14,7 @@ class TimeDTO
         public bool     $active = true,
         public ?string  $reservableType = null,
         public ?int     $reservableID = null,
+        public ?string  $note = "",
     )
     {
     }
@@ -29,6 +30,7 @@ class TimeDTO
             'active' => $this->active,
             'reservable_type' => $this->reservableType,
             'reservable_id' => $this->reservableID,
+            "note" => $this->note,
         ];
     }
 }

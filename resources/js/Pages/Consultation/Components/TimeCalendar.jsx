@@ -176,8 +176,8 @@ const TimeCalendar = ({
         if (onMonthChange) {
             const year = newDate.getFullYear();
             const month = newDate.getMonth();
-            const startDate = new Date(year, month, 1);
-            const endDate = new Date(year, month + 1, 0);
+            const startDate = new Date(year, month, 1).toLocaleDateString();
+            const endDate = new Date(year, month + 1, 0).toLocaleDateString();
             onMonthChange(startDate, endDate);
         }
     }, [currentDate, onMonthChange]);
@@ -192,8 +192,8 @@ const TimeCalendar = ({
         if (onMonthChange) {
             const year = newDate.getFullYear();
             const month = newDate.getMonth();
-            const startDate = new Date(year, month, 1);
-            const endDate = new Date(year, month + 1, 0);
+            const startDate = new Date(year, month, 1).toLocaleDateString();
+            const endDate = new Date(year, month + 1, 0).toLocaleDateString();
             onMonthChange(startDate, endDate);
         }
     }, [currentDate, onMonthChange]);
@@ -207,8 +207,8 @@ const TimeCalendar = ({
         if (onMonthChange) {
             const year = today.getFullYear();
             const month = today.getMonth();
-            const startDate = new Date(year, month, 1);
-            const endDate = new Date(year, month + 1, 0);
+            const startDate = new Date(year, month, 1).toLocaleDateString();
+            const endDate = new Date(year, month + 1, 0).toLocaleDateString();
             onMonthChange(startDate, endDate);
         }
 

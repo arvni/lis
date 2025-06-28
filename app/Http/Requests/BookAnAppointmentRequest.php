@@ -55,6 +55,7 @@ class BookAnAppointmentRequest extends FormRequest
             ],
             "customer.name" => "required|string|max:255",
             "customer.email" => "nullable|email|max:255",
+            "note" => "nullable|string",
         ];
     }
 

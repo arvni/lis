@@ -610,6 +610,19 @@ const TimeSlotCard = ({
                             )}
                         </>
                     )}
+                    {timeSlot.note && <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.5,
+                        my: 2,
+                        p: 1.5,
+                        borderRadius: 1.5,
+                        border: '1px solid',
+                        borderColor: getThemedColor('grey.200', 'grey.600')
+                    }}>
+                        {timeSlot.note}
+                    </Box>}
+
                 </CardContent>
 
                 {/* Action Buttons */}

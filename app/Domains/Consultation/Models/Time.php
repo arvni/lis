@@ -15,6 +15,7 @@ class Time extends Model
         "started_at",
         "ended_at",
         "active",
+        "note"
     ];
     protected $casts=[
         "active"=>"boolean",

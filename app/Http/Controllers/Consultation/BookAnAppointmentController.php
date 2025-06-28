@@ -33,6 +33,7 @@ class BookAnAppointmentController extends Controller
             "started_at" => $dueDate,
             "ended_at" => $dueDate->copy()->addMinutes(30),
             "active" => true,
+            "note" => $validated["note"]
         ]);
         return back()->with(["success" => true, "status" => "Time added successfully"]);
 
