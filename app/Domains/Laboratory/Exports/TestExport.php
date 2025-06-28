@@ -43,7 +43,7 @@ class TestExport implements
             'testGroup',
             'methodTests.method.test.sampleTypes',
             'methodTests.method.workflow',
-        ])->get();
+        ])->active()->get();
     }
 
     /**
@@ -202,20 +202,23 @@ class TestExport implements
         if ($test->type == TestType::PANEL) {
             return $test->price;
         }
-        $defaultMethod = $test->methodTests->where("is_default")->first()->method;
-        if ($defaultMethod->price_type == MethodPriceType::FIX)
-            return $defaultMethod->price;
-        else if ($defaultMethod->price_type == MethodPriceType::FORMULATE)
-            return $defaultMethod->extra["formula"];
-        else if ($defaultMethod->price_type == MethodPriceType::CONDITIONAL) {
-            $formatted = "Conditional Pricing:\n";
-            foreach ($defaultMethod->extra['conditions'] as $index => $condition) {
-                $conditionText = str_replace(['<=', '>=', '&&', '||'], ['≤', '≥', ' and ', ' or '], $condition['condition']);
-                $formatted .= "• {$conditionText}: \${$condition['value']}\n";
+        $formatted = "";
+        foreach ($test->methodTests->where("status", true) as $methodTest) {
+            $method = $methodTest->method;
+            if ($method->referrer_price_type == MethodPriceType::FIX) {
+                $formatted .= "• {$method->name}: {$method->price}\n";
+            } else if ($method->referrer_price_type == MethodPriceType::FORMULATE)
+                $formatted .= "• {$method->name}: {$method->extra["formula"]}\n";
+            else if ($method->referrer_price_type == MethodPriceType::CONDITIONAL) {
+                $formatted = "$method->name Conditional Pricing:\n {\n";
+                foreach ($method->extra['conditions'] as $index => $condition) {
+                    $conditionText = str_replace(['<=', '>=', '&&', '||'], [' ≤ ', ' ≥ ', ' and ', ' or '], $condition['condition']);
+                    $formatted .= "• {$conditionText}: {$condition['value']}\n";
+                }
+                $formatted .= "}\n";
             }
-            return trim($formatted);
         }
-        return "-";
+        return $formatted !== "" ? $formatted : "-";
     }
 
     private function getReferrerPrice(Test $test): string
@@ -223,19 +226,22 @@ class TestExport implements
         if ($test->type == TestType::PANEL) {
             return $test->referrer_price;
         }
-        $defaultMethod = $test->methodTests->where("is_default")->first()->method;
-        if ($defaultMethod->referrer_price_type == MethodPriceType::FIX)
-            return $defaultMethod->referrer_price;
-        else if ($defaultMethod->referrer_price_type == MethodPriceType::FORMULATE)
-            return $defaultMethod->referrer_extra["formulate"];
-        else if ($defaultMethod->referrer_price_type == MethodPriceType::CONDITIONAL) {
-            $formatted = "Conditional Pricing:\n";
-            foreach ($defaultMethod->referrer_extra['conditions'] as $index => $condition) {
-                $conditionText = str_replace(['<=', '>=', '&&', '||'], [' ≤ ', ' ≥ ', ' and ', ' or '], $condition['condition']);
-                $formatted .= "• {$conditionText}: {$condition['value']}\n";
+        $formatted = "";
+        foreach ($test->methodTests->where("status", true) as $methodTest) {
+            $method = $methodTest->method;
+            if ($method->referrer_price_type == MethodPriceType::FIX) {
+                $formatted .= "• {$method->name}: {$method->referrer_price}\n";
+            } else if ($method->referrer_price_type == MethodPriceType::FORMULATE)
+                $formatted .= "• {$method->name}: {$method->referrer_extra["formula"]}\n";
+            else if ($method->referrer_price_type == MethodPriceType::CONDITIONAL) {
+                $formatted = "$method->name Conditional Pricing:\n { \n";
+                foreach ($method->referrer_extra['conditions'] as $index => $condition) {
+                    $conditionText = str_replace(['<=', '>=', '&&', '||'], [' ≤ ', ' ≥ ', ' and ', ' or '], $condition['condition']);
+                    $formatted .= "• {$conditionText}: {$condition['value']}\n";
+                }
+                $formatted .= "}\n";
             }
-            return trim($formatted);
         }
-        return "-";
+        return $formatted !== "" ? $formatted : "-";
     }
 }
