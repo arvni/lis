@@ -12,10 +12,11 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
+use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 class Patient extends Model
 {
-    use HasFactory, Notifiable, Searchable;
+    use HasFactory, Notifiable, Searchable,HasRelationships;
 
 
     protected $fillable = [
@@ -64,15 +65,17 @@ class Patient extends Model
         }
     }
 
-    public function acceptances()
-    {
-        return $this->hasMany(Acceptance::class);
-    }
-
     public function acceptanceItems()
     {
         return $this->belongsToMany(AcceptanceItem::class, "acceptance_item_patient")
             ->withPivot("order");
+    }
+    public function acceptances()
+    {
+        return $this->hasManyDeepFromRelations(
+            $this->acceptanceItems(),           // Patient → AcceptanceItem (through pivot)
+            (new AcceptanceItem)->acceptance()  // AcceptanceItem → Acceptance
+        )->distinct(); // Use distinct to avoid duplicate acceptances if patient has multiple items per acceptance
     }
 
     public function consultations()
