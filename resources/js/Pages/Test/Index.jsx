@@ -52,8 +52,7 @@ const Index = () => {
             field: 'acceptance_items_count',
             headerName: 'Acceptance No',
             type: "number",
-            sortable: false,
-            renderCell: ({row}) => row.methods.reduce((a, b) => a + (b?.acceptance_items_count || 0), 0),
+            sortable: true,
         },
         {
             field: 'id',
@@ -66,7 +65,7 @@ const Index = () => {
                     <GridActionsCellItem icon={<EditIcon/>} label="Edit" onClick={editTest(params.row.id)}
                                          showInMenu/>
                 ]
-                if (!params.row.methods.reduce((a, b) => a + (b?.acceptance_items_count || 0), 0))
+                if (!params.row.acceptance_items_count)
                     cols.push(<GridActionsCellItem icon={<DeleteIcon/>} label="Delete" showInMenu
                                                    onClick={deleteTest(params.row)}/>)
                 return cols;

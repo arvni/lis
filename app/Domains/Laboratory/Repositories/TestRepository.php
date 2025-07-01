@@ -10,9 +10,7 @@ class TestRepository
 
     public function listTests(array $queryData): LengthAwarePaginator
     {
-        $query = Test::with(["methods" => function ($query) {
-            $query->withCount("acceptanceItems");
-        }])
+        $query = Test::withCount("acceptanceItems")
             ->withAggregate("testGroup", "name");
         if (isset($queryData["filters"]))
             $this->applyFilters($query, $queryData["filters"]);
