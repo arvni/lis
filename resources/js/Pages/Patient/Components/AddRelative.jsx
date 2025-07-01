@@ -73,16 +73,18 @@ const AddRelative = ({
         }
     };
 
-    const findPatientCallBack = ({data = {}}) => {
-        const {id = null, nationality = null, ...res} = data
-        setRelative(prevRelative => ({
-            ...prevRelative,
-            relative_id: id,
-            ...res,
-            nationality: countries.find((item) => item.code === nationality) ?? null,
-        }));
+    const findPatientCallBack = (response) => {
         setLoading(false);
         setStep(step + 1);
+        if (response) {
+            const {id = null, nationality = null, ...res} = response.data
+            setRelative(prevRelative => ({
+                ...prevRelative,
+                relative_id: id,
+                ...res,
+                nationality: countries.find((item) => item.code === nationality) ?? null,
+            }));
+        }
     };
 
     const back = () => setStep(step - 1);

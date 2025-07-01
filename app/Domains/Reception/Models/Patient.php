@@ -97,13 +97,13 @@ class Patient extends Model
 
     public function patients()
     {
-        return $this->belongsToMany(Patient::class, 'relatives', 'patient_id')
+        return $this->belongsToMany(Patient::class, 'relatives', 'patient_id',"relative_id")
             ->withPivot("relationship", "id");
     }
 
     public function relatives()
     {
-        return $this->belongsToMany(Patient::class, 'relatives', 'relative_id')
+        return $this->belongsToMany(Patient::class, 'relatives', 'relative_id',"patient_id")
             ->withPivot("relationship", "id");
     }
 

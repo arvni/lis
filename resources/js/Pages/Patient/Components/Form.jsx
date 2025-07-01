@@ -12,7 +12,7 @@ import {router} from "@inertiajs/react";
 
 export const getPatientByIdNo = (idNo, callback) => axios.get(route('api.patients.getByIdNo', {idNo}))
     .then(res => callback(res.data))
-    .catch(() => callback(null));
+    .catch((e) => callback(e));
 
 export default function ({data, setData, back, edit, next, step, ...rest}) {
     const [errors, setErrors] = useState({});
