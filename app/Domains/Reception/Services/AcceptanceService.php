@@ -362,7 +362,7 @@ class AcceptanceService
         return ["barcodes" => $barcodes, "patient" => $acceptance->patient];
     }
 
-    public function checkAcceptanceReport(Acceptance $acceptance)
+    public function checkAcceptanceReport(Acceptance $acceptance): void
     {
         // Check if all tests are published and update acceptance status if needed
         if ($this->areAllTestsPublished($acceptance)) {

@@ -10,7 +10,7 @@ use Twilio\Rest\Client as TwilioClient;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
-class TwilioWhatsAppTemplateChannel
+class TwilioWhatsAppChannel
 {
     /**
      * The Twilio client instance.
@@ -32,9 +32,9 @@ class TwilioWhatsAppTemplateChannel
      *
      * @param TwilioClient $twilio
      * @param string $from
-     * @return void
+     * @param $messagingServiceSid
      */
-    public function __construct(TwilioClient $twilio, $from, $messagingServiceSid)
+    public function __construct(TwilioClient $twilio, string $from, $messagingServiceSid)
     {
         $this->twilio = $twilio;
         $this->from = $from;
@@ -50,64 +50,13 @@ class TwilioWhatsAppTemplateChannel
      */
     public function send($notifiable, Notification $notification)
     {
-        // Check if notification supports WhatsApp template
-        if (method_exists($notification, 'toWhatsAppTemplate')) {
-            return $this->sendTemplate($notifiable, $notification);
-        }
-
         // Check if notification supports WhatsApp message
-        if (method_exists($notification, 'toWhatsApp')) {
-            return $this->sendMessage($notifiable, $notification);
+        if (!method_exists($notification, 'toWhatsApp')) {
+            Log::error('Notification must implement toWhatsApp method');
+            return null;
         }
 
-        Log::error('Notification must implement either toWhatsAppTemplate or toWhatsApp method');
-        return null;
-    }
-
-    /**
-     * Send template message (existing functionality)
-     *
-     * @param mixed $notifiable
-     * @param Notification $notification
-     * @return MessageInstance|void|null
-     */
-    protected function sendTemplate($notifiable, Notification $notification)
-    {
-        $template = $notification->toWhatsAppTemplate($notifiable);
-
-        if (empty($template['name'])) {
-            Log::error('WhatsApp template name is required');
-            return;
-        }
-
-        // Format the WhatsApp number for Twilio
-        $to = 'whatsapp:' . $this->formatNumber($template['to']);
-        $from = 'whatsapp:' . $this->formatNumber($this->from);
-
-        try {
-            $whatsappMessage = $this->saveWhatsAppMessage($notifiable);
-
-            // Send the template message using Twilio's Content API
-            $message = $this->twilio->messages->create($to, [
-                'from' => $from,
-                'contentSid' => $template['name'],
-                'contentVariables' => json_encode($template['parameters']),
-                "messagingServiceSid" => $this->messagingServiceSid,
-                "statusCallback" => config("CALL_BACK_SERVER") . "/api/whatsapp-message/callback"
-            ]);
-
-            $this->updateWhatsAppMessage($whatsappMessage, $message);
-            return $message;
-        } catch (Exception $e) {
-            Log::error('Twilio WhatsApp template API error: ' . $e->getMessage(), [
-                'notifiable' => get_class($notifiable),
-                'notification' => get_class($notification),
-                'to' => $to,
-                'template' => $template['name'],
-                'contentVariables' => json_encode($template['parameters']),
-                "messagingServiceSid" => $this->messagingServiceSid
-            ]);
-        }
+        return $this->sendMessage($notifiable, $notification);
     }
 
     /**

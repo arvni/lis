@@ -8,7 +8,7 @@ class WhatsappMessage extends Model
 {
     protected $fillable=[
         'data',
-'status',
+        'status',
     ];
 
     protected $casts=[

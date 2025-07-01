@@ -13,11 +13,13 @@ use App\Domains\Laboratory\Events\InstructionUpdated;
 use App\Domains\Laboratory\Events\ReportTemplateDocumentUpdateEvent;
 use App\Domains\Laboratory\Events\RequestFormDocumentUpdateEvent;
 use App\Domains\Laboratory\Events\RequestFormUpdated;
+use App\Domains\Laboratory\Events\SampleTypeUpdated;
 use App\Domains\Laboratory\Events\SectionEvent;
 use App\Domains\Notification\Listeners\NotifyProviderOfConsentFormUpdate;
 use App\Domains\Notification\Listeners\NotifyProviderOfInstructionUpdate;
 use App\Domains\Notification\Listeners\NotifyProviderOfOrderMaterialUpdate;
 use App\Domains\Notification\Listeners\NotifyProviderOfRequestFormUpdate;
+use App\Domains\Notification\Listeners\NotifyProviderOfSampleTypeUpdate;
 use App\Domains\Reception\Events\AcceptanceDeletedEvent;
 use App\Domains\Reception\Events\PatientDocumentUpdateEvent;
 use App\Domains\Reception\Events\ReportPublishedEvent;
@@ -89,5 +91,6 @@ class EventServiceProvider extends ServiceProvider
         Event::listen(RequestFormUpdated::class, [NotifyProviderOfRequestFormUpdate::class, 'handle']);
         Event::listen(ConsentFormUpdated::class, [NotifyProviderOfConsentFormUpdate::class, 'handle']);
         Event::listen(InstructionUpdated::class, [NotifyProviderOfInstructionUpdate::class, 'handle']);
+        Event::listen(SampleTypeUpdated::class, [NotifyProviderOfSampleTypeUpdate::class, 'handle']);
     }
 }

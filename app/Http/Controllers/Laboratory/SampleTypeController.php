@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Laboratory;
 
 use App\Domains\Laboratory\DTOs\SampleTypeDTO;
+use App\Domains\Laboratory\Events\SampleTypeUpdated;
 use App\Domains\Laboratory\Models\SampleType;
 use App\Domains\Laboratory\Requests\StoreSampleTypeRequest;
 use App\Domains\Laboratory\Requests\UpdateSampleTypeRequest;
@@ -43,11 +44,12 @@ class SampleTypeController extends Controller
         $validatedData = $sampleTypeRequest->validated();
         $sampleTypeDto = new SampleTypeDTO(
             $validatedData["name"],
-            $validatedData["description"]??"",
-            $validatedData["orderable"]??false,
-            $validatedData["required_barcode"]??false,
+            $validatedData["description"] ?? "",
+            $validatedData["orderable"] ?? false,
+            $validatedData["required_barcode"] ?? false,
         );
-        $this->sampleTypeService->storeSampleType($sampleTypeDto);
+        $sampleType = $this->sampleTypeService->storeSampleType($sampleTypeDto);
+        SampleTypeUpdated::dispatch($sampleType, "create");
         return back()->with(["success" => true, "status" => "$sampleTypeDto->name Created Successfully"]);
     }
 
@@ -60,11 +62,12 @@ class SampleTypeController extends Controller
         $validatedData = $request->validated();
         $sampleTypeDto = new SampleTypeDTO(
             $validatedData["name"],
-            $validatedData["description"]??"",
-            $validatedData["orderable"]??false,
-            $validatedData["required_barcode"]??false,
+            $validatedData["description"] ?? "",
+            $validatedData["orderable"] ?? false,
+            $validatedData["required_barcode"] ?? false,
         );
-        $this->sampleTypeService->updateSampleType($sampleType, $sampleTypeDto);
+        $updatedSampleType = $this->sampleTypeService->updateSampleType($sampleType, $sampleTypeDto);
+        SampleTypeUpdated::dispatch($updatedSampleType, "update");
         return back()->with(["success" => true, "status" => "$sampleTypeDto->name Updated Successfully"]);
     }
 

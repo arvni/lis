@@ -52,12 +52,17 @@ return [
         'sender_id' => env('OMANTEL_SENDER_ID'),
     ],
     'provider_app' => [
-        'webhook_domain' => env('PROVIDER_APP_WEBHOOK_DOMAIN',"http://localhost:8002"),
+        'webhook_domain' => env('PROVIDER_APP_WEBHOOK_DOMAIN',"http://localhost:8003"),
         'webhook_secret' => env('PROVIDER_APP_WEBHOOK_SECRET'),
         'order_material_webhook_url' => env('PROVIDER_APP_ORDER_MATERIAL_WEBHOOK_URL', '/order-materials/'),
         'request_form_webhook_url' => env('PROVIDER_APP_REQUEST_FORM_WEBHOOK_URL', '/request-forms/'),
         'consent_form_webhook_url' => env('PROVIDER_APP_CONSENT_FORM_WEBHOOK_URL', '/consent-forms/'),
         'instruction_webhook_url' => env('PROVIDER_APP_INSTRUCTION_WEBHOOK_URL', '/instructions/'),
+        'sample_type_webhook_url' => env('PROVIDER_APP_SAMPLE_TYPE_WEBHOOK_URL', '/sample-types/'),
+    ],
+    'whatsapp'=>[
+        'callback-server'=>env('WHATSAPP_CALLBACK_SERVER'),
+        'callback-url'=>env('WHATSAPP_CALLBACK_URL','/api/whatsapp-messages/callback'),
     ]
 
 ];
