@@ -75,43 +75,8 @@ class Patient extends Model
         return $this->hasManyDeepFromRelations(
             $this->acceptanceItems(),           // Patient → AcceptanceItem (through pivot)
             (new AcceptanceItem)->acceptance()  // AcceptanceItem → Acceptance
-        )->select(
-            "acceptances.id",
-            "acceptances.patient_id",
-            "consultation_id",
-            "out_patient",
-            "invoice_id",
-            "referrer_id",
-            "acceptor_id",
-            "doctor_id",
-            "referenceCode",
-            "samplerGender",
-            "howReport",
-            "status",
-            "step",
-            'acceptances.created_at',
-            'acceptances.updated_at'
-        )
-            ->groupBy(
-                'acceptances.id',
-                "acceptances.patient_id",
-                "consultation_id",
-                "out_patient",
-                "invoice_id",
-                "referrer_id",
-                "acceptor_id",
-                "doctor_id",
-                "referenceCode",
-                "samplerGender",
-                "howReport",
-                "status",
-                "step",
-                'lis_temp.acceptance_item_patient.patient_id',
-                'acceptances.created_at',
-                'acceptances.updated_at'
-            ); // Group by acceptance.id to avoid duplicate acceptances
+        )->distinct(); // Use distinct to avoid duplicate acceptances if patient has multiple items per acceptance
     }
-
 
     public function consultations()
     {
