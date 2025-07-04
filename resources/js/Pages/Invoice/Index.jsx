@@ -30,6 +30,7 @@ export const INVOICE_STATUS = {
         color : "warning"
     },
     PAID: {value: "Paid",color :"success"},
+    CREDIT_PAID: {value: "Credit Paid",color : "warning"},
     PARTIALLY_PAID: {value: "Partially Paid",color : "info"},
     CANCELED: {value: "Canceled",color: "error"}
 }

@@ -6,6 +6,7 @@ namespace App\Domains\Billing\Services;
 use App\Domains\Billing\Adapters\ReceptionAdapter;
 use App\Domains\Billing\DTOs\InvoiceDTO;
 use App\Domains\Billing\Enums\InvoiceStatus;
+use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Repositories\InvoiceRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -75,7 +76,8 @@ readonly class InvoiceService
     public function updateStatus(Invoice $invoice): void
     {
         if ($invoice->isPaid()) {
-            $this->invoiceRepository->updateInvoice($invoice, ["status" => InvoiceStatus::PAID]);
+            $paidByCredit = $invoice->payments()->where("paymentMethod", PaymentMethod::CREDIT)->count() > 0;
+            $this->invoiceRepository->updateInvoice($invoice, ["status" => $paidByCredit ? InvoiceStatus::CREDIT_PAID : InvoiceStatus::PAID]);
         } elseif ($invoice->isPartiallyPaid()) {
             $invoice->update(["status" => InvoiceStatus::PARTIALLY_PAID]);
         } else

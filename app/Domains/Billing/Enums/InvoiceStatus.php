@@ -13,4 +13,6 @@ enum InvoiceStatus: string
     case PARTIALLY_PAID = 'Partially Paid';
     case CANCELED = 'Canceled';
 
+    case CREDIT_PAID = 'Credit Paid';
+
 }

@@ -126,8 +126,6 @@ class TestExport implements
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet;
-
-                // Auto-filter for easier sorting/filtering
                 $lastColumn = $sheet->getHighestColumn();
                 $lastRow = $sheet->getHighestRow();
                 $sheet->setAutoFilter("A1:{$lastColumn}1");
@@ -139,11 +137,6 @@ class TestExport implements
                 for ($row = 1; $row <= $lastRow; $row++) {
                     $sheet->getRowDimension($row)->setRowHeight(-1); // -1 enables auto height
                 }
-
-                // Alternative: Set auto height for data rows only (excluding header)
-                // for ($row = 2; $row <= $lastRow; $row++) {
-                //     $sheet->getRowDimension($row)->setRowHeight(-1);
-                // }
             },
         ];
     }

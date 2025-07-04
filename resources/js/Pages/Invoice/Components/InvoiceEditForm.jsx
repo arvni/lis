@@ -40,7 +40,7 @@ import {
     ArrowForward,
     PaymentRounded,
     AccountBalance,
-    SwapHoriz
+    SwapHoriz, CreditCardOff, CreditScore
 } from "@mui/icons-material";
 import {router} from "@inertiajs/react";
 import TableRowsIcon from '@mui/icons-material/TableRows';
@@ -225,6 +225,7 @@ const EditInvoiceForm = ({invoice, open, onClose, onSubmit, onChange}) => {
             case 'Paid':
                 return 'success';
             case 'Partially Paid':
+            case 'Credit Paid':
                 return 'warning';
             case 'Canceled':
                 return 'error';
@@ -243,6 +244,8 @@ const EditInvoiceForm = ({invoice, open, onClose, onSubmit, onChange}) => {
                 return <PaymentRounded/>;
             case 'Canceled':
                 return <Close/>;
+            case 'Credit Paid':
+                return <CreditScore/>;
             case 'Waiting':
             default:
                 return <AccountBalance/>;
@@ -397,6 +400,13 @@ const EditInvoiceForm = ({invoice, open, onClose, onSubmit, onChange}) => {
                                             <Box sx={{display: 'flex', alignItems: 'center'}}>
                                                 <CheckCircle sx={{mr: 1, fontSize: 20, color: 'success.main'}}/>
                                                 Paid
+                                            </Box>
+                                        </MenuItem>
+                                        <MenuItem value="Credit Paid">
+                                            <Box sx={{display: 'flex', alignItems: 'center'}}>
+                                                <PaymentRounded
+                                                    sx={{mr: 1, fontSize: 20, color: 'warning.main'}}/>
+                                                Credit Paid
                                             </Box>
                                         </MenuItem>
                                         <MenuItem value="Partially Paid">
