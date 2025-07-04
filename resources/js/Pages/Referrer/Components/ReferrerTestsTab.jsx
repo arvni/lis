@@ -8,6 +8,8 @@ import TableLayout from '@/Layouts/TableLayout';
 import Filter from './Filter';
 import AddPrice from '@/Pages/Referrer/Components/AddPrice';
 import DeleteForm from '@/Components/DeleteForm';
+import PageHeader from "@/Components/PageHeader.jsx";
+import Button from "@mui/material/Button";
 
 
 const ReferrerTestsTab = ({referrer}) => {
@@ -192,14 +194,16 @@ const ReferrerTestsTab = ({referrer}) => {
 
     return (
         <>
+            <PageHeader actions={[
+                <Button onClick={handleOpenAddNewForm}>Add New</Button>,
+                <Button href={route("referrer.export-tests",referrer)} target="_blank">Download List</Button>
+            ]}/>
             <TableLayout
                 defaultValues={requestInputs}
                 columns={columns}
                 data={referrerTests}
                 reload={pageReload}
                 Filter={Filter}
-                addNew
-                onClickAddNew={handleOpenAddNewForm}
                 loading={loading}
             />
             <AddPrice

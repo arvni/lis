@@ -84,6 +84,7 @@ use App\Http\Controllers\Reception\ShowAcceptanceItemController;
 use App\Http\Controllers\Reception\UnPublishReportController;
 use App\Http\Controllers\Reception\UpdatePatientMetaController;
 use App\Http\Controllers\Referrer\Api\CheckMaterialBarcodeIsAvailableController;
+use App\Http\Controllers\Referrer\ExportReferrerTestsController;
 use App\Http\Controllers\Referrer\ListMaterialsBasedOnPackingSeriesController;
 use App\Http\Controllers\Referrer\MaterialController;
 use App\Http\Controllers\Referrer\OrderMaterialController;
@@ -242,15 +243,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource("instructions", InstructionController::class)->except("edit", "show");
     });
     Route::group(["prefix" => "referrer"], function () {
+        Route::get("referrer/{referrer}/tests", ExportReferrerTestsController::class)
+            ->name("referrer.export-tests");
         Route::resource("referrers", ReferrerController::class);
         Route::resource("referrer-tests", ReferrerTestController::class);
-        Route::post("referrer-tests/{referrerOrder}/patient", StoreReferrerOrderPatientController::class)->name("referrerOrders.patient");
-        Route::post("referrer-tests/{referrerOrder}/acceptance", StoreReferrerOrderAcceptanceController::class)->name("referrerOrders.acceptance");
-        Route::post("referrer-tests/{referrerOrder}/samples", StoreReferrerOrderSamplesController::class)->name("referrerOrders.samples");
+        Route::post("referrer-orders/{referrerOrder}/patient", StoreReferrerOrderPatientController::class)
+            ->name("referrerOrders.patient");
+        Route::post("referrer-orders/{referrerOrder}/acceptance", StoreReferrerOrderAcceptanceController::class)
+            ->name("referrerOrders.acceptance");
+        Route::post("referrer-orders/{referrerOrder}/samples", StoreReferrerOrderSamplesController::class)
+            ->name("referrerOrders.samples");
         Route::resource("referrer-orders", ReferrerOrderController::class);
-        Route::get("materials/packing-series", ListMaterialsBasedOnPackingSeriesController::class)->name("materials.packing-series");
-        Route::get("materials/packing-series/{packingSeries}/print", PrintMaterialsBarcodeController::class)->name("materials.packing-series.print");
-        Route::resource("materials", MaterialController::class)->except("create", "edit", "show");
+        Route::get("materials/packing-series", ListMaterialsBasedOnPackingSeriesController::class)
+            ->name("materials.packing-series");
+        Route::get("materials/packing-series/{packingSeries}/print", PrintMaterialsBarcodeController::class)
+            ->name("materials.packing-series.print");
+        Route::resource("materials", MaterialController::class)
+            ->except("create", "edit", "show");
         Route::resource("orderMaterials", OrderMaterialController::class)
             ->except("create", "edit", "show");
         Route::get("orderMaterials/{orderMaterial}/print", PrintOrderMaterialController::class)
