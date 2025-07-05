@@ -5,6 +5,7 @@ namespace App\Notifications\Channels;
 use App\Domains\Notification\Models\WhatsappMessage;
 use Exception;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 use Twilio\Rest\Api\V2010\Account\MessageInstance;
 use Twilio\Rest\Client as TwilioClient;
 use Illuminate\Support\Facades\Log;
@@ -85,7 +86,7 @@ class TwilioWhatsAppTemplateChannel
         $from = 'whatsapp:' . $this->formatNumber($this->from);
 
         try {
-            $whatsappMessage = $this->saveWhatsAppMessage($notifiable);
+            $whatsappMessage = $this->saveWhatsAppMessage($notifiable, $to);
 
             // Send the template message using Twilio's Content API
             $message = $this->twilio->messages->create($to, [
@@ -93,7 +94,7 @@ class TwilioWhatsAppTemplateChannel
                 'contentSid' => $template['name'],
                 'contentVariables' => json_encode($template['parameters']),
                 "messagingServiceSid" => $this->messagingServiceSid,
-                "statusCallback" => config("CALL_BACK_SERVER") . "/api/whatsapp-message/callback"
+                'statusCallback' => config("services.whatsapp.callback-server") . config("services.whatsapp.callback-url")
             ]);
 
             $this->updateWhatsAppMessage($whatsappMessage, $message);
@@ -131,12 +132,12 @@ class TwilioWhatsAppTemplateChannel
         $from = 'whatsapp:' . $this->formatNumber($this->from);
 
         try {
-            $whatsappMessage = $this->saveWhatsAppMessage($notifiable);
-
+            $whatsappMessage = $this->saveWhatsAppMessage($notifiable, $to);
+            Log::info(config("services.whatsapp.callback-server") . config("services.whatsapp.callback-url"));
             $messageData = [
                 'from' => $from,
                 'messagingServiceSid' => $this->messagingServiceSid,
-                'statusCallback' => config("services.whatsapp.callback-server") .config("services.whatsapp.callback-url")
+                'statusCallback' => config("services.whatsapp.callback-server") . config("services.whatsapp.callback-url")
             ];
 
             // Add body text if provided
@@ -248,6 +249,9 @@ class TwilioWhatsAppTemplateChannel
         // Remove any non-numeric characters except +
         $number = preg_replace('/[^0-9+]/', '', $number);
 
+        if (strlen($number)<=9)
+            $number = '968'.$number;
+
         // Ensure it has international format
         if (!str_starts_with($number, '+')) {
             $number = '+' . $number;
@@ -260,11 +264,12 @@ class TwilioWhatsAppTemplateChannel
      * @param $notifiable
      * @return WhatsappMessage
      */
-    protected function saveWhatsAppMessage($notifiable): WhatsappMessage
+    protected function saveWhatsAppMessage($notifiable, $to): WhatsappMessage
     {
         $whatsappMessage = new WhatsappMessage([
             "data" => [],
             "status" => "initial",
+            "waId" => Str::startsWith($to, "+") ? Str::substr($to, 1) : $to,
         ]);
         $whatsappMessage->messageable()->associate($notifiable);
         $whatsappMessage->save();

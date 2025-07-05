@@ -9,6 +9,8 @@ class WhatsappMessage extends Model
     protected $fillable=[
         'data',
         'status',
+        'waId',
+        'type'
     ];
 
     protected $casts=[
