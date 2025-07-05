@@ -10,6 +10,7 @@ use App\Domains\Reception\Models\Acceptance;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 
 class Referrer extends Model
@@ -59,14 +60,18 @@ class Referrer extends Model
         return $this->morphMany(Payment::class, 'payer');
     }
 
-    public function methods()
+    public function tests()
     {
-        return $this->belongsToMany(Method::class, "referrer_methods")
+        return $this->belongsToMany(ReferrerTest::class, "referrer_tests")
             ->withPivot([
                 "price",
-                "price_type",
-                "extra",
+                "method"
             ]);
+    }
+
+    public function referrerTests(): HasMany
+    {
+        return $this->hasMany(ReferrerTest::class);
     }
 
     public function referrerOrders()

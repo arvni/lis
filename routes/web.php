@@ -84,6 +84,7 @@ use App\Http\Controllers\Reception\ShowAcceptanceItemController;
 use App\Http\Controllers\Reception\UnPublishReportController;
 use App\Http\Controllers\Reception\UpdatePatientMetaController;
 use App\Http\Controllers\Referrer\Api\CheckMaterialBarcodeIsAvailableController;
+use App\Http\Controllers\Referrer\CopyReferrerTestsFromOtherReferrerController;
 use App\Http\Controllers\Referrer\ExportReferrerTestsController;
 use App\Http\Controllers\Referrer\ListMaterialsBasedOnPackingSeriesController;
 use App\Http\Controllers\Referrer\MaterialController;
@@ -245,6 +246,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::group(["prefix" => "referrer"], function () {
         Route::get("referrer/{referrer}/tests", ExportReferrerTestsController::class)
             ->name("referrer.export-tests");
+        Route::post("referrer/{referrer}/tests", CopyReferrerTestsFromOtherReferrerController::class)
+            ->name("referrer.copy-from-other");
         Route::resource("referrers", ReferrerController::class);
         Route::resource("referrer-tests", ReferrerTestController::class);
         Route::post("referrer-orders/{referrerOrder}/patient", StoreReferrerOrderPatientController::class)

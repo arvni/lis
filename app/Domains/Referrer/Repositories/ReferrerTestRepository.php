@@ -25,7 +25,7 @@ class ReferrerTestRepository
 
     public function findById(int $id): ?ReferrerTest
     {
-        return ReferrerTest::findOrFail($id);
+        return ReferrerTest::find($id);
     }
 
     public function findByMethodIdAdnReferrerId(int $methodId, int $referrerId): ?ReferrerTest
@@ -33,14 +33,14 @@ class ReferrerTestRepository
         return ReferrerTest::where('method_id', $methodId)->where('referrer_id', $referrerId)->first();
     }
 
-    public function store(ReferrerTestDTO $dto): ReferrerTest
+    public function store($data): ReferrerTest
     {
-        return ReferrerTest::create($dto->toArray());
+        return ReferrerTest::create($data);
     }
 
-    public function update(ReferrerTest $referrerMethod, ReferrerTestDTO $dto)
+    public function update(ReferrerTest $referrerMethod,  $data)
     {
-        $referrerMethod->update($dto->toArray());
+        $referrerMethod->update($data);
 
         return $referrerMethod;
     }
