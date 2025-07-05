@@ -4,6 +4,7 @@ namespace App\Domains\Referrer\Exports;
 
 use App\Domains\Laboratory\Enums\MethodPriceType;
 use App\Domains\Laboratory\Enums\TestType;
+use App\Domains\Laboratory\Models\Method;
 use App\Domains\Referrer\Models\ReferrerTest;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -190,9 +191,10 @@ class ReferrerTestExport implements
 
         if ($referrerTest->test->methodTests->where("status", true)->count() ==1) {
             $method=$referrerTest->test->methodTests->where("status", true)->first()->method;
-            $referrerTestMethod=collect($referrerTest->methods)->where("id", $method->id)->first();
-            if ($referrerTestMethod)
-                $method=collect($referrerTestMethod);
+            $referrerTestMethod=collect($referrerTest->methods)->where("method_id", $method->id)->first();
+            if ($referrerTestMethod) {
+                $method =new Method($referrerTestMethod);
+            }
             if ($method->price_type == MethodPriceType::FIX) {
                 return "{$method->price}\n";
             } else if ($method->price_type == MethodPriceType::FORMULATE)
@@ -211,9 +213,9 @@ class ReferrerTestExport implements
         $formatted = "";
         foreach ($referrerTest->test->methodTests->where("status", true) as $methodTest) {
             $method = $methodTest->method;
-            $referrerTestMethod=collect($referrerTest->methods)->where("id", $method->id)->first();
+            $referrerTestMethod=collect($referrerTest->methods)->where("method_id", $method->id)->first();
             if ($referrerTestMethod)
-                $method=collect($referrerTestMethod);
+                $method =new Method([...$referrerTestMethod,"name"=>$method->name]);
             if ($method->price_type == MethodPriceType::FIX) {
                 $formatted .= "• {$method->name}: {$method->price}\n";
             } else if ($method->price_type == MethodPriceType::FORMULATE)
