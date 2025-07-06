@@ -52,6 +52,11 @@ class UpdateReferrerTestRequest extends FormRequest
                 'numeric',
                 'min:0'
             ],
+            'price_type' => [
+                'nullable',
+                Rule::enum(MethodPriceType::class),
+            ],
+            'extra' => ["nullable", "array"],
             'methods.*.price' => [
                 'nullable',
                 'numeric',

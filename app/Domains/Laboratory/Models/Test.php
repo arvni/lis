@@ -2,6 +2,7 @@
 
 namespace App\Domains\Laboratory\Models;
 
+use App\Domains\Laboratory\Enums\MethodPriceType;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Referrer\Models\ReferrerTest;
@@ -22,6 +23,10 @@ class Test extends Model
         "type",
         "price",
         "referrer_price",
+        "price_type",
+        "referrer_price_type",
+        "extra",
+        "referrer_extra"
     ];
 
     protected $searchable = [
@@ -35,6 +40,10 @@ class Test extends Model
         "type" => TestType::class,
         "price" => "decimal:3",
         "referrer_price" => "decimal:3",
+        "price_type" => MethodPriceType::class,
+        "referrer_price_type" => MethodPriceType::class,
+        'extra' => 'json',
+        'referrer_extra' => 'json',
     ];
 
     public function testGroup()

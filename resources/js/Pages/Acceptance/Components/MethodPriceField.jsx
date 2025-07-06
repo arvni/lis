@@ -20,12 +20,13 @@ import {
     getCondition
 } from '@/Services/pricing-utils';
 
-const MethodPriceField = ({
+const PriceField = ({
                               method,
                               onChange,
                               values = {},
                               errors = {}
                           }) => {
+     console.log(values);
     // Memoized price calculation to optimize performance
     const {calculatedPrice, formula, selectedCondition, isValid} = useMemo(() => {
         const price = calcPrice(
@@ -325,4 +326,4 @@ const MethodPriceField = ({
     );
 };
 
-export default MethodPriceField;
+export default PriceField;

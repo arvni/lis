@@ -145,10 +145,8 @@ const SampleTypesDisplay = ({sampleTypes = []}) => {
 };
 
 // Method Display Component with Price Calculator
-const MethodDisplay = ({method, testType}) => {
+const MethodDisplay = ({method,testType}) => {
     const [calculatorOpen, setCalculatorOpen] = useState(false);
-
-    if (testType === 'PANEL') return null;
 
     const handleCalculatorOpen = () => {
         setCalculatorOpen(true);
@@ -161,9 +159,9 @@ const MethodDisplay = ({method, testType}) => {
     return (
         <Box>
             <Stack direction="row" spacing={0.5} alignItems="center">
-                <Typography variant="body2" fontWeight="medium">
+                {testType!=="PANEL"&&<Typography variant="body2" fontWeight="medium">
                     {method.name}
-                </Typography>
+                </Typography>}
                 {method.price_type === 'Fix' ? (<Chip
                     label={`${method.price} OMR`}
                     size="small"
@@ -181,9 +179,9 @@ const MethodDisplay = ({method, testType}) => {
                     </Tooltip>
                 )}
             </Stack>
-            <Typography variant="caption" color="text.secondary">
+            {method.turnaround_time&&method.workflow?.name&&<Typography variant="caption" color="text.secondary">
                 {method.turnaround_time} days • {method.workflow?.name}
-            </Typography>
+            </Typography>}
 
             {/* Price Calculator Dialog */}
             {method.price_type !== 'Fix' && (
@@ -328,17 +326,7 @@ const TestList = () => {
             renderCell: (params) => (
                 <Box sx={{py: 1}}>
                     {params.row.type === 'PANEL' ? (
-                        <Box>
-                            <Stack direction="row" spacing={1} alignItems="center">
-                                <PriceIcon fontSize="small" color="primary"/>
-                                <Typography variant="body2" fontWeight="medium">
-                                    {params.row.price} OMR
-                                </Typography>
-                            </Stack>
-                            <Typography variant="caption" color="text.secondary">
-                                Panel Price
-                            </Typography>
-                        </Box>
+                        <MethodDisplay method={params.row} testType="PANEL"/>
                     ) : (
                         <MethodsList methodTests={params.value} testType={params.row.type}/>
                     )}

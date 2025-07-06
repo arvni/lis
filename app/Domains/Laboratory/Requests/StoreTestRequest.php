@@ -46,6 +46,10 @@ class StoreTestRequest extends FormRequest
         $panelRules = [
             "price" => ["required_if:type," . TestType::PANEL->value, "numeric", "min:0"],
             "referrer_price" => ["required_if:type," . TestType::PANEL->value, "numeric", "min:0"],
+            "price_type"=>["required", Rule::in(MethodPriceType::values())],
+            "referrer_price_type"=>["required", Rule::in(MethodPriceType::values())],
+            "extra"=>["nullable", "array"],
+            "referrer_extra"=>["nullable", "array"],
             "method_tests.*.method.id" => ["required", "exists:methods,id"],
             "method_tests.*.status" => ["nullable", "boolean"],
         ];

@@ -228,6 +228,7 @@ const ReferrerTestsTab = ({ referrer }) => {
 
         try {
             const response = await axios.get(route('referrer-tests.show', id));
+            console.log(response.data);
             setReferrerTest({
                 ...response?.data?.data,
                 referrer: { id: referrer.id },

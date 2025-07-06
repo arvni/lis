@@ -34,6 +34,11 @@ class StoreReferrerTestRequest extends FormRequest
                     ->where('referrer_id', $this->input('referrer.id'))
             ],
             'price' => ['nullable', 'numeric', 'min:0'],
+            'price_type' => [
+                'nullable',
+                Rule::enum(MethodPriceType::class),
+            ],
+            'extra' => ["nullable", "array"],
             'methods.*.method_id' => [
                 'required',
                 'integer',

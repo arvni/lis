@@ -14,11 +14,14 @@ class ReferrerTest extends Model
         "referrer_id",
         "test_id",
         "price",
-        "methods"
+        "methods",
+        "price_type",
+        "extra"
     ];
 
     protected $casts = [
         "methods" => "json",
+        "extra" => "json",
     ];
 
     public function test()

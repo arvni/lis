@@ -15,6 +15,7 @@ use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -28,28 +29,36 @@ class TestExport implements
     ShouldAutoSize,
     WithStyles,
     WithEvents,
-    WithColumnWidths  // Add this interface
+    WithColumnWidths
 {
-
     private const PRIMARY_COLOR = '0361ac';
     private const TEXT_COLOR = 'ffffff';
+    private const BORDER_COLOR = 'CCCCCC';
+
+    private const COLUMN_WIDTHS = [
+        'A' => 15,  // Code
+        'B' => 25,  // Name
+        'C' => 35,  // Full Name
+        'D' => 20,  // Test Group
+        'E' => 15,  // Type
+        'F' => 35,  // Price
+        'G' => 35,  // Referrer Price
+        'H' => 25,  // Methods
+        'I' => 25,  // Sample Types
+        'J' => 15,  // Turnaround Time
+        'K' => 40,  // Description
+    ];
 
     public function __construct(protected Collection $tests)
     {
-
+        // Constructor body intentionally empty
     }
 
-    /**
-     * @return Collection
-     */
     public function collection(): Collection
     {
         return $this->tests;
     }
 
-    /**
-     * @return array
-     */
     public function headings(): array
     {
         return [
@@ -67,271 +76,312 @@ class TestExport implements
         ];
     }
 
-    /**
-     * Set column widths
-     *
-     * @return array
-     */
     public function columnWidths(): array
     {
-        return [
-            'A' => 15,  // Code
-            'B' => 25,  // Name
-            'C' => 35,  // Full Name
-            'D' => 20,  // Test Group
-            'E' => 15,  // Type
-            'F' => 35,  // Price
-            'G' => 35,  // Referrer Price
-            'H' => 25,  // Methods
-            'I' => 25,  // Sample Types
-            'J' => 15,  // Turnaround Time
-            'K' => 40,  // Description
-        ];
+        return self::COLUMN_WIDTHS;
     }
 
-    /**
-     * @param Test $test
-     * @return array
-     */
     public function map($test): array
     {
-        // Get methods based on test type
-        $methods = $this->getTestMethods($test);
-
-        // Get sample types
-        $sampleTypes = $test->methodTests->map(fn($methodTest) => $methodTest->method->test->sampleTypes->pluck('name'))->flatten()->unique()->implode(", ");
-
         return [
             $test->code,
             $test->name,
             $test->fullName,
             $test->testGroup?->name ?? '',
             $test->type->value ?? '',
-            $this->getPrice($test),
-            $this->getReferrerPrice($test),
-            $methods,
-            $sampleTypes,
-            $this->getTurnaroundTime($test),
-            strip_tags($test->description),
+            $this->formatPrice($test),
+            $this->formatReferrerPrice($test),
+            $this->formatMethods($test),
+            $this->formatSampleTypes($test),
+            $this->formatTurnaroundTime($test),
+            strip_tags($test->description ?? ''),
         ];
     }
 
-    /**
-     * Register events for the worksheet
-     *
-     * @return array
-     */
     public function registerEvents(): array
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $sheet = $event->sheet;
-                $lastColumn = $sheet->getHighestColumn();
-                $lastRow = $sheet->getHighestRow();
-                $sheet->setAutoFilter("A1:{$lastColumn}1");
-
-                // Freeze the top row
-                $sheet->freezePane('A2');
-
-                // Enable auto row height for all rows
-                for ($row = 1; $row <= $lastRow; $row++) {
-                    $sheet->getRowDimension($row)->setRowHeight(-1); // -1 enables auto height
-                }
+                $this->configureSheet($event->sheet);
             },
         ];
     }
 
-    /**
-     * Apply styles to the worksheet
-     *
-     * @param Worksheet $sheet
-     * @return array
-     */
     public function styles(Worksheet $sheet): array
+    {
+        $this->applyBordersAndAlignment($sheet);
+
+        return [
+            1 => $this->getHeaderStyle(),
+            '2:' . $sheet->getHighestRow() => $this->getDataRowStyle(),
+        ];
+    }
+
+    private function configureSheet($sheet): void
     {
         $lastColumn = $sheet->getHighestColumn();
         $lastRow = $sheet->getHighestRow();
 
-        // Apply borders to all cells
+        // Set auto filter and freeze panes
+        $sheet->setAutoFilter("A1:{$lastColumn}1");
+        $sheet->freezePane('A2');
+
+        // Enable auto row height for all rows
+        for ($row = 1; $row <= $lastRow; $row++) {
+            $sheet->getRowDimension($row)->setRowHeight(-1);
+        }
+    }
+
+    private function applyBordersAndAlignment(Worksheet $sheet): void
+    {
+        $lastColumn = $sheet->getHighestColumn();
+        $lastRow = $sheet->getHighestRow();
+
         $sheet->getStyle("A1:{$lastColumn}{$lastRow}")->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => 'CCCCCC'],
+                    'color' => ['rgb' => self::BORDER_COLOR],
                 ],
             ],
             'alignment' => [
-                'wrapText' => true,  // Enable text wrapping
-                'vertical' => Alignment::VERTICAL_TOP, // Align text to top
+                'wrapText' => true,
+                'vertical' => Alignment::VERTICAL_TOP,
             ],
         ]);
+    }
 
+    private function getHeaderStyle(): array
+    {
         return [
-            // Header row styling
-            1 => [
-                'font' => [
-                    'bold' => true,
-                    'color' => ['rgb' => self::TEXT_COLOR]
-                ],
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'color' => ['rgb' => self::PRIMARY_COLOR],
-                ],
-                'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER,
-                    'wrapText' => true,
-                ],
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => self::TEXT_COLOR]
             ],
-            // Data rows styling
-            '2:' . $sheet->getHighestRow() => [
-                'alignment' => [
-                    'wrapText' => true,
-                    'vertical' => Alignment::VERTICAL_TOP,
-                ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'color' => ['rgb' => self::PRIMARY_COLOR],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
             ],
         ];
     }
 
-    /**
-     * Get methods for the test based on test type
-     *
-     * @param Test $test
-     * @return string
-     */
-    private function getTestMethods(Test $test): string
+    private function getDataRowStyle(): array
+    {
+        return [
+            'alignment' => [
+                'wrapText' => true,
+                'vertical' => Alignment::VERTICAL_TOP,
+            ],
+        ];
+    }
+
+    private function formatMethods(Test $test): string
     {
         if ($test->type === TestType::PANEL) {
-            // For panel tests, get methods from test type test methods
             return $test->methodTests
                 ->pluck('method.test.name')
                 ->implode(', ');
         }
 
-        // For other test types, get methods directly
         return $test->methodTests->pluck('method.workflow.name')->implode(', ');
     }
 
-    /**
-     * Get default method for the test
-     *
-     * @param Test $test
-     * @return string
-     */
-    private function getDefaultMethod(Test $test): string
+    private function formatSampleTypes(Test $test): string
+    {
+        return $test->methodTests
+            ->map(fn($methodTest) => $methodTest->method->test->sampleTypes->pluck('name'))
+            ->flatten()
+            ->unique()
+            ->implode(', ');
+    }
+
+    private function formatPrice(Test $test): string
     {
         if ($test->type === TestType::PANEL) {
-            // For panel tests, get default method from method tests
-            $defaultMethodTest = $test->methodTests
-                ->where('is_default', true)->pluck('method.test.name')->implode(", ");
-
-            return $defaultMethodTest;
+            return $this->formatPanelPrice($test);
         }
 
-        // For other test types, get default method from pivot
-        return $test->methodTests
-            ->where('is_default', true)
-            ->first()?->method?->name ?? '';
+        return $this->formatMethodPrice($test);
     }
 
-    private function getPrice(Test $test): string
+    private function formatReferrerPrice(Test $test): string
     {
-        if ($test->type == TestType::PANEL) {
-            return $test->price;
+        if ($test->type === TestType::PANEL) {
+            return $this->formatPanelReferrerPrice($test);
         }
 
-        if ($test->methodTests->where("status", true)->count() ==1) {
-            $method=$test->methodTests->where("status", true)->first()->method;
-            if ($method->price_type == MethodPriceType::FIX) {
-                return "{$method->price}\n";
-            } else if ($method->price_type == MethodPriceType::FORMULATE)
-                return "{$method->extra["formula"]}\n";
-            else if ($method->price_type == MethodPriceType::CONDITIONAL) {
-                $formatted = "Conditional Pricing:\n { \n";
-                foreach ($method->extra['conditions'] as $index => $condition) {
-                    $conditionText = str_replace(['<=', '>=', '&&', '||'], [' ≤ ', ' ≥ ', ' and ', ' or '], $condition['condition']);
-                    $formatted .= "• {$conditionText}: {$condition['value']}\n";
-                }
-                $formatted .= "}\n";
-                return $formatted;
-            }
-        }
-
-        $formatted = "";
-        foreach ($test->methodTests->where("status", true) as $methodTest) {
-            $method = $methodTest->method;
-            if ($method->price_type == MethodPriceType::FIX) {
-                $formatted .= "• {$method->name}: {$method->price}\n";
-            } else if ($method->price_type == MethodPriceType::FORMULATE)
-                $formatted .= "• {$method->name}: {$method->extra["formula"]}\n";
-            else if ($method->price_type == MethodPriceType::CONDITIONAL) {
-                $formatted = "$method->name Conditional Pricing:\n {\n";
-                foreach ($method->extra['conditions'] as $index => $condition) {
-                    $conditionText = str_replace(['<=', '>=', '&&', '||'], [' ≤ ', ' ≥ ', ' and ', ' or '], $condition['condition']);
-                    $formatted .= "• {$conditionText}: {$condition['value']}\n";
-                }
-                $formatted .= "}\n";
-            }
-        }
-        return $formatted !== "" ? $formatted : "-";
+        return $this->formatMethodReferrerPrice($test);
     }
 
-    private function getReferrerPrice(Test $test): string
+    private function formatPanelPrice(Test $test): string
     {
-        if ($test->type == TestType::PANEL) {
-            return $test->referrer_price;
-        }
-
-        if ($test->methodTests->where("status", true)->count() ==1) {
-            $method=$test->methodTests->where("status", true)->first()->method;
-            if ($method->referrer_price_type == MethodPriceType::FIX) {
-                return "{$method->referrer_price}\n";
-            } else if ($method->referrer_price_type == MethodPriceType::FORMULATE)
-               return "{$method->referrer_extra["formula"]}\n";
-            else if ($method->referrer_price_type == MethodPriceType::CONDITIONAL) {
-                $formatted = "Conditional Pricing:\n { \n";
-                foreach ($method->referrer_extra['conditions'] as $index => $condition) {
-                    $conditionText = str_replace(['<=', '>=', '&&', '||'], [' ≤ ', ' ≥ ', ' and ', ' or '], $condition['condition']);
-                    $formatted .= "• {$conditionText}: {$condition['value']}\n";
-                }
-                $formatted .= "}\n";
-                return $formatted;
-            }
-        }
-
-        $formatted = "";
-        foreach ($test->methodTests->where("status", true) as $methodTest) {
-            $method = $methodTest->method;
-            if ($method->referrer_price_type == MethodPriceType::FIX) {
-                $formatted .= "• {$method->name}: {$method->referrer_price}\n";
-            } else if ($method->referrer_price_type == MethodPriceType::FORMULATE)
-                $formatted .= "• {$method->name}: {$method->referrer_extra["formula"]}\n";
-            else if ($method->referrer_price_type == MethodPriceType::CONDITIONAL) {
-                $formatted = "$method->name Conditional Pricing:\n { \n";
-                foreach ($method->referrer_extra['conditions'] as $index => $condition) {
-                    $conditionText = str_replace(['<=', '>=', '&&', '||'], [' ≤ ', ' ≥ ', ' and ', ' or '], $condition['condition']);
-                    $formatted .= "• {$conditionText}: {$condition['value']}\n";
-                }
-                $formatted .= "}\n";
-            }
-        }
-        return $formatted !== "" ? $formatted : "-";
+        return match ($test->price_type) {
+            MethodPriceType::FIX => "{$test->price}\n",
+            MethodPriceType::FORMULATE => "{$test->extra['formula']}\n",
+            MethodPriceType::CONDITIONAL => $this->formatConditionalPrice($test->extra['conditions']),
+            default => '-',
+        };
     }
 
-    private function getTurnaroundTime(Test $test): string
+    private function formatPanelReferrerPrice(Test $test): string
     {
-        if ($test->type == TestType::PANEL) {
-            return $test->methodTests->map(fn($item)=>$item->method->turnaround_time)->max();
+        return match ($test->referrer_price_type) {
+            MethodPriceType::FIX => "{$test->referrer_price}\n",
+            MethodPriceType::FORMULATE => "{$test->referrer_extra['formula']}\n",
+            MethodPriceType::CONDITIONAL => $this->formatConditionalPrice($test->referrer_extra['conditions']),
+            default => '-',
+        };
+    }
+
+    private function formatMethodPrice(Test $test): string
+    {
+        $activeMethods = $test->methodTests->where('status', true);
+
+        if ($activeMethods->count() === 1) {
+            return $this->formatSingleMethodPrice($activeMethods->first()->method);
         }
-        if ($test->methodTests->count() ==1) {
-            $method=$test->methodTests->first()->method;
-            return "{$method->turnaround_time} Day\n";
+
+        return $this->formatMultipleMethodPrices($activeMethods);
+    }
+
+    private function formatMethodReferrerPrice(Test $test): string
+    {
+        $activeMethods = $test->methodTests->where('status', true);
+
+        if ($activeMethods->count() === 1) {
+            return $this->formatSingleMethodReferrerPrice($activeMethods->first()->method);
         }
-        $formatted = "";
-        foreach ($test->methodTests->where("status", true) as $methodTest) {
+
+        return $this->formatMultipleMethodReferrerPrices($activeMethods);
+    }
+
+    private function formatSingleMethodPrice($method): string
+    {
+        return match ($method->price_type) {
+            MethodPriceType::FIX => "{$method->price}\n",
+            MethodPriceType::FORMULATE => "{$method->extra['formula']}\n",
+            MethodPriceType::CONDITIONAL => $this->formatConditionalPrice($method->extra['conditions']),
+            default => '-',
+        };
+    }
+
+    private function formatSingleMethodReferrerPrice($method): string
+    {
+        return match ($method->referrer_price_type) {
+            MethodPriceType::FIX => "{$method->referrer_price}\n",
+            MethodPriceType::FORMULATE => "{$method->referrer_extra['formula']}\n",
+            MethodPriceType::CONDITIONAL => $this->formatConditionalPrice($method->referrer_extra['conditions']),
+            default => '-',
+        };
+    }
+
+    private function formatMultipleMethodPrices($methods): string
+    {
+        $formatted = [];
+
+        foreach ($methods as $methodTest) {
             $method = $methodTest->method;
-                $formatted .= "• {$method->name}: {$method->turnaround_time} Day\n";
+            $formatted[] = match ($method->price_type) {
+                MethodPriceType::FIX => "• {$method->name}: {$method->price}",
+                MethodPriceType::FORMULATE => "• {$method->name}: {$method->extra['formula']}",
+                MethodPriceType::CONDITIONAL => $this->formatMethodConditionalPrice($method),
+                default => "• {$method->name}: -",
+            };
         }
-        return $formatted !== "" ? $formatted : "-";
+
+        return implode("\n", $formatted) ?: '-';
+    }
+
+    private function formatMultipleMethodReferrerPrices($methods): string
+    {
+        $formatted = [];
+
+        foreach ($methods as $methodTest) {
+            $method = $methodTest->method;
+            $formatted[] = match ($method->referrer_price_type) {
+                MethodPriceType::FIX => "• {$method->name}: {$method->referrer_price}",
+                MethodPriceType::FORMULATE => "• {$method->name}: {$method->referrer_extra['formula']}",
+                MethodPriceType::CONDITIONAL => $this->formatMethodConditionalReferrerPrice($method),
+                default => "• {$method->name}: -",
+            };
+        }
+
+        return implode("\n", $formatted) ?: '-';
+    }
+
+    private function formatConditionalPrice(array $conditions): string
+    {
+        $formatted = "Conditional Pricing:\n{\n";
+
+        foreach ($conditions as $condition) {
+            $conditionText = $this->formatConditionOperators($condition['condition']);
+            $formatted .= "• {$conditionText}: {$condition['value']}\n";
+        }
+
+        return $formatted . "}\n";
+    }
+
+    private function formatMethodConditionalPrice($method): string
+    {
+        $formatted = "{$method->name} Conditional Pricing:\n{\n";
+
+        foreach ($method->extra['conditions'] as $condition) {
+            $conditionText = $this->formatConditionOperators($condition['condition']);
+            $formatted .= "• {$conditionText}: {$condition['value']}\n";
+        }
+
+        return $formatted . "}\n";
+    }
+
+    private function formatMethodConditionalReferrerPrice($method): string
+    {
+        $formatted = "{$method->name} Conditional Pricing:\n{\n";
+
+        foreach ($method->referrer_extra['conditions'] as $condition) {
+            $conditionText = $this->formatConditionOperators($condition['condition']);
+            $formatted .= "• {$conditionText}: {$condition['value']}\n";
+        }
+
+        return $formatted . "}\n";
+    }
+
+    private function formatConditionOperators(string $condition): string
+    {
+        return str_replace(
+            ['==','<=', '>=', '&&', '||'],
+            ['=',' ≤ ', ' ≥ ', ' and ', ' or '],
+            $condition
+        );
+    }
+
+    private function formatTurnaroundTime(Test $test): string
+    {
+        if ($test->type === TestType::PANEL) {
+            $maxTurnaround = $test->methodTests
+                ->map(fn($item) => $item->method->turnaround_time)
+                ->max();
+
+            return "{$maxTurnaround} Days";
+        }
+
+        $activeMethods = $test->methodTests->where('status', true);
+
+        if ($activeMethods->count() === 1) {
+            $turnaroundTime = $activeMethods->first()->method->turnaround_time;
+            return "{$turnaroundTime} Days";
+        }
+
+        $formatted = [];
+        foreach ($activeMethods as $methodTest) {
+            $method = $methodTest->method;
+            $formatted[] = "• {$method->name}: {$method->turnaround_time} Days";
+        }
+
+        return implode("\n", $formatted) ?: '-';
     }
 }

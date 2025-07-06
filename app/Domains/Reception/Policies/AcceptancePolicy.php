@@ -2,6 +2,8 @@
 
 namespace App\Domains\Reception\Policies;
 
+use App\Domains\Reception\Enums\AcceptanceStatus;
+use App\Domains\Reception\Models\Acceptance;
 use App\Domains\User\Models\User;
 
 class AcceptancePolicy
@@ -33,9 +35,9 @@ class AcceptancePolicy
         /**
          * Determine whether the user can update the model.
          */
-        public function update(User $authUser): bool
+        public function update(User $authUser,Acceptance $acceptance): bool
     {
-        return $authUser->can("Reception.Acceptances.Edit Acceptance");
+        return $authUser->can("Reception.Acceptances.Edit Acceptance") || $acceptance?->status == AcceptanceStatus::PENDING;
     }
 
         /**

@@ -2,14 +2,20 @@
 
 namespace App\Domains\Referrer\DTOs;
 
+use App\Domains\Laboratory\Enums\MethodPriceType;
+
 class ReferrerTestDTO
 {
     public function __construct(
-        public ?float $price = null,
-        public ?int $referrerId = null,
-        public ?int $testId = null,
-        public ?array $methods = [],
-    ) {}
+        public ?float           $price = null,
+        public ?int             $referrerId = null,
+        public ?int             $testId = null,
+        public ?array           $methods = [],
+        public ?MethodPriceType $priceType = MethodPriceType::FIX,
+        public ?array           $extra = null
+    )
+    {
+    }
 
     public static function fromRequest(array $data): self
     {
@@ -17,7 +23,9 @@ class ReferrerTestDTO
             price: $data['price'] ?? null,
             referrerId: $data['referrer']["id"] ?? null,
             testId: $data['test']["id"] ?? null,
-            methods: $data['methods'] ?? null
+            methods: $data['methods'] ?? null,
+            priceType: ($data['price_type']??null) ? MethodPriceType::find($data['price_type']) : null,
+            extra: $data['extra'] ?? null
         );
     }
 
@@ -28,7 +36,9 @@ class ReferrerTestDTO
             'price' => $this->price,
             'referrer_id' => $this->referrerId,
             'test_id' => $this->testId,
-            'methods' => $this->methods
+            'methods' => $this->methods,
+            'price_type' => $this->priceType,
+            'extra' => $this->extra,
         ], fn($value) => $value !== null);
     }
 }

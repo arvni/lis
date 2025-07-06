@@ -8,12 +8,18 @@ const Add = () => {
         fullName: "",
         code: "",
         sample_type_tests: [],
-        type:'1',
+        type:'TEST',
         method_tests: [],
         testGroup: "",
         report_templates: [],
         description: "",
         status: true,
+        price:0,
+        price_type:"Fix",
+        extra:{},
+        referrer_price:0,
+        referrer_price_type:"Fix",
+        referrer_extra:{},
     });
     const handleSubmit = () => post(route('tests.store'))
     const handleCancel = () => router.visit(route('tests.index'));

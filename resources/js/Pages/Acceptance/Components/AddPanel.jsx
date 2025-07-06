@@ -40,7 +40,6 @@ const AddPanel = ({
                   }) => {
     const [loading, setLoading] = useState(false);
     const {errors, validatePanel, setErrors} = useFormValidation(data, maxDiscount);
-
     // API Service functions
     const fetchTestDetails = useCallback((testId) => {
         setLoading(true);
@@ -82,7 +81,7 @@ const AddPanel = ({
     };
 
     const handleFormChange = (updatedData) => {
-        onChange({acceptanceItems: updatedData});
+        onChange({acceptanceItems: updatedData,price:updatedData.reduce((a, b) => a + b.price, 0)});
     };
 
     const handleSubmit = () => {
@@ -185,46 +184,6 @@ const AddPanel = ({
                             <Box sx={{mb: 3}}>
                                 <TestDetails test={data.panel}/>
                             </Box>
-
-                            <Divider sx={{my: 2}}/>
-
-                            <Grid container spacing={3}>
-                                <Grid size={{xs: 12, md: 6}}>
-                                    <TextField
-                                        label="Panel Price"
-                                        type="number"
-                                        fullWidth
-                                        slotProps={{Input: {readOnly: true}}}
-                                        value={data.panel.price}
-                                        variant="outlined"
-                                        helperText="Standard price for this panel"
-                                    />
-                                </Grid>
-
-                                <Grid size={{xs: 12, md: 6}}>
-                                    <Box display="flex" alignItems="flex-start">
-                                        <TextField
-                                            type="number"
-                                            error={Boolean(errors.discount)}
-                                            helperText={errors.discount || `Maximum discount: ${maxDiscount}%`}
-                                            label="Discount Amount"
-                                            onChange={(e) => onChange({discount: e.target.value})}
-                                            value={data.discount || 0}
-                                            fullWidth
-                                            variant="outlined"
-                                            slotProps={{
-                                                Input: {
-                                                    endAdornment: <Typography variant="caption"
-                                                                              sx={{ml: 1}}>of {data.panel.price}</Typography>
-                                                }
-                                            }}
-                                        />
-                                        <Tooltip title={`Maximum allowed discount is ${maxDiscount}% of the price`}>
-                                            <HelpOutline fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
-                                        </Tooltip>
-                                    </Box>
-                                </Grid>
-                            </Grid>
                         </Paper>
 
                         <Paper elevation={1} sx={{p: 3, borderRadius: 2}}>

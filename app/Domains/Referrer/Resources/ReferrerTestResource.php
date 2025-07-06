@@ -19,6 +19,8 @@ class ReferrerTestResource extends JsonResource
             'price' => $this->price,
             'methods' => $this->methods,
             'test' => $this->test,
+            "price_type" => $this->price_type,
+            "extra" => $this->extra
         ];
     }
 }
