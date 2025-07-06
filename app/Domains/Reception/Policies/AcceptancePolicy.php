@@ -43,7 +43,7 @@ class AcceptancePolicy
         /**
          * Determine whether the user can update the model.
          */
-        public function cancel(User $authUser): bool
+        public function cancel(User $authUser, Acceptance $acceptance): bool
     {
         return $authUser->can("Reception.Acceptances.Cancel Acceptance");
     }
@@ -51,9 +51,9 @@ class AcceptancePolicy
         /**
          * Determine whether the user can delete the model.
          */
-        public function delete(User $authUser): bool
+        public function delete(User $authUser, Acceptance $acceptance): bool
     {
-        return $authUser->can("Reception.Acceptances.Delete Acceptance");
+        return $authUser->can("Reception.Acceptances.Delete Acceptance") || $acceptance?->status == AcceptanceStatus::PENDING;
     }
 
     public function sampleCollection(User $authUser): bool

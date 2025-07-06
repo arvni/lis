@@ -383,7 +383,7 @@ const Index = () => {
                     );
                 }
 
-                if (canUpdate) {
+                if (canUpdate || params.row.status==="pending") {
                     cols.push(
                         <GridActionsCellItem
                             icon={
@@ -398,7 +398,7 @@ const Index = () => {
                     );
                 }
 
-                if (canDelete) {
+                if (canDelete || params.row.status==="pending") {
                     cols.push(
                         <GridActionsCellItem
                             icon={

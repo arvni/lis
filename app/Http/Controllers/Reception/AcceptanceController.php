@@ -39,14 +39,15 @@ class AcceptanceController extends Controller
         $requestInputs = $request->all();
 
         $acceptances = $this->acceptanceService->listAcceptances($requestInputs);
+        $acceptance=new Acceptance();
         return Inertia::render('Acceptance/Index',
             [
                 "acceptances" => $acceptances,
                 "requestInputs" => $requestInputs,
                 "canView" => Gate::allows("view", Acceptance::class),
-                "canUpdate" => Gate::allows("update", Acceptance::class),
-                "canDelete" => Gate::allows("delete", Acceptance::class),
-                "canCancel" => Gate::allows("cancel", Acceptance::class)
+                "canUpdate" => Gate::allows("update", $acceptance),
+                "canDelete" => Gate::allows("delete", $acceptance),
+                "canCancel" => Gate::allows("cancel", $acceptance)
             ]);
     }
 
