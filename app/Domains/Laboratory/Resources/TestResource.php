@@ -66,7 +66,7 @@ class TestResource extends JsonResource
                 "extra" => $this->extra
             ];
         }
-        return null;
+        return [];
     }
 
     /**
