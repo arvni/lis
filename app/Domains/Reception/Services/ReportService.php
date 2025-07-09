@@ -71,7 +71,7 @@ class ReportService
 
     public function listWaitingForApprovalReports($queryData): LengthAwarePaginator
     {
-        return $this->reportRepository->listWaitignForApproving($queryData);
+        return $this->reportRepository->listWaitingForApproving($queryData);
     }
 
     /**

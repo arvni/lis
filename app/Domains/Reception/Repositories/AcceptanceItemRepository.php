@@ -24,8 +24,9 @@ class AcceptanceItemRepository
                 ]);
             },
             "invoice.owner",
+            "report"
         ])
-            ->withAggregate("activeSample", "created_at")
+            ->withAggregate("activeSample", "collection_date")
             ->withAggregate("method", "name")
             ->withAggregate("test", "tests.name")
             ->withAggregate("patient", "fullName")
@@ -157,22 +158,39 @@ class AcceptanceItemRepository
     public function applyFilters($query, $filters = [])
     {
         if (isset($filters["search"])) {
-            $query
-                ->whereHas("patient", function ($q) use ($filters) {
-                    $q->search($filters["search"]);
-                })
-                ->orWhereHas("samples", function ($q) use ($filters) {
-                    $q->search($filters["search"]);
-                })
-                ->orWhereHas("method", function ($q) use ($filters) {
-                    $q->search($filters["search"]);
-                });
+            $query->where(function ($q) use ($filters) {
+                $q
+                    ->whereHas("patient", function ($q) use ($filters) {
+                        $q->search($filters["search"]);
+                    })
+                    ->orWhereHas("samples", function ($q) use ($filters) {
+                        $q->search($filters["search"]);
+                    })
+                    ->orWhereHas("test", function ($q) use ($filters) {
+                        $q->search($filters["search"]);
+                    });
+            });
         }
-        if (isset($filters["date"])){
-            $date=Carbon::parse($filters["date"]);
-            $dateRange=[$date->copy()->startOfDay(),$date->copy()->endOfDay()];
+        if (isset($filters["date"])) {
+            $date = Carbon::parse($filters["date"]);
+            $dateRange = [$date->copy()->startOfDay(), $date->copy()->endOfDay()];
             $query->whereBetween('created_at', $dateRange);
         }
+
+        // Apply date range filtering on started_at field using Carbon
+        if (!empty($filters["from_date"]) || !empty($filters["to_date"])) {
+            // Set default values for the date range
+            $startDate = !empty($filters["from_date"])
+                ? Carbon::parse($filters["from_date"])->startOfDay()
+                : Carbon::createFromTimestamp(0);
+
+            $endDate = !empty($filters["to_date"])
+                ? Carbon::parse($filters["to_date"])->endOfDay()
+                : Carbon::now(); // Current time
+
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
     }
 
     public function getTotalTestsForDateRange($dateRange): int

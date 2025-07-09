@@ -29,6 +29,28 @@ class AcceptanceItem extends Model
         "customParameters" => "json",
         "timeline" => "json"
     ];
+    protected $appends = [
+        "status"
+    ];
+
+    public function getStatusAttribute()
+    {
+        $this->loadMissing("report", "latestState.section:name,id");
+        if ($this->report) {
+            if ($this->report->publisher_id)
+                return "Report Published";
+            elseif ($this->report->approver_id)
+                return "Report Approved";
+            else
+                return "Report Waiting For Approve";
+        } else {
+            if ($this->latestState?->status === AcceptanceItemStateStatus::FINISHED) {
+                return "Waiting For Report";
+            } else {
+                return ucfirst($this->latestState?->status?->value) . " in " . $this->latestState?->section?->name;
+            }
+        }
+    }
 
     public function acceptance()
     {
@@ -158,7 +180,7 @@ class AcceptanceItem extends Model
                 $q->where("acceptance_item_samples.active", true);
             })
             ->whereHas("acceptance", function ($q) {
-                $q->whereIn("status", [AcceptanceStatus::REPORTED, AcceptanceStatus::PROCESSING]);
+                $q->whereIn("status", [AcceptanceStatus::PROCESSING]);
             })
             ->whereDoesntHave("reports", function ($q) {
                 $q->where("status", true);

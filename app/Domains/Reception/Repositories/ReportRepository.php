@@ -31,7 +31,7 @@ class ReportRepository
         return $query->paginate($queryData["pageSize"] ?? 10);
     }
 
-    public function listWaitignForApproving($queryData)
+    public function listWaitingForApproving($queryData)
     {
         $query = Report::query()
             ->notApproved()

@@ -22,6 +22,7 @@ import Filter from "./Components/Filter";
 import Excel from "@/../images/excel.svg";
 import {Head, router, usePage} from "@inertiajs/react";
 import {useState, useCallback, useEffect} from "react";
+import {formatDate} from "@/Services/helper.js";
 
 const StatisticsIndex = () => {
     const {acceptanceItems, requestInputs} = usePage().props;
@@ -35,20 +36,6 @@ const StatisticsIndex = () => {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         }).format(amount);
-    };
-
-    // Format date in a readable format
-    const formatDate = (dateString) => {
-        if (!dateString) return "—";
-
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
     };
 
     // Status indicator component
@@ -158,7 +145,7 @@ const StatisticsIndex = () => {
             type: "date",
             valueGetter: (value) => value ? new Date(value) : null,
             flex: 0.3,
-            renderCell: ({value}) => value ? formatDate(value) : "-"
+            renderCell: ({value}) => value ? value.toLocaleDateString() : "-"
         },
         {
             field: 'status',
@@ -166,14 +153,13 @@ const StatisticsIndex = () => {
             type: "string",
             flex: 0.3,
             sortable: false,
-            renderCell: ({value}) => <StatusChip status={value}/>
         },
         {
             field: 'updated_at',
             headerName: 'Last Updated',
             type: "date",
             valueGetter: (value) => value ? new Date(value) : null,
-            flex: 0.3,
+            flex: 0.4,
             renderCell: ({value}) => formatDate(value)
         },
         {
