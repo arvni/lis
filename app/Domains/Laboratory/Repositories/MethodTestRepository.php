@@ -6,11 +6,9 @@ use App\Domains\Laboratory\Models\MethodTest;
 
 class MethodTestRepository
 {
-    public function creatMethodTest(array $methodTestData): MethodTest
+    public function createMethodTest(array $methodTestData): MethodTest
     {
-        $methodTest = MethodTest::query()->make($methodTestData);
-        $methodTest->save();
-        return $methodTest;
+        return MethodTest::create($methodTestData);
     }
 
     public function updateMethodTest(MethodTest $methodTest, array $methodTestData): MethodTest
@@ -28,7 +26,7 @@ class MethodTestRepository
 
     public function findMethodTestById($id): ?MethodTest
     {
-        return MethodTest::with(["Test", "Method"])->find($id);
+        return MethodTest::find($id);
     }
 
 }

@@ -153,8 +153,8 @@ class TestController extends Controller
             $validatedData["consent_form"]["id"] ?? null,
             $validatedData["price"] ?? 0,
             $validatedData["referrer_price"] ?? 0,
-            ($validatedData["price_type"] ?? null) ? MethodPriceType::find($validatedData["price_type"]) : null,
-            ($validatedData["referrer_price_type"] ?? null) ? MethodPriceType::find($validatedData["referrer_price_type"]) : null,
+            ($validatedData["price_type"] ?? null) ? MethodPriceType::find($validatedData["price_type"]) : MethodPriceType::FIX,
+            ($validatedData["referrer_price_type"] ?? null) ? MethodPriceType::find($validatedData["referrer_price_type"]) : MethodPriceType::FIX,
             $validatedData["extra"] ?? null,
             $validatedData["referrer_extra"] ?? null,
         );

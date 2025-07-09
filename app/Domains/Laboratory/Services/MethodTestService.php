@@ -16,7 +16,7 @@ class MethodTestService
 
     public function storeMethodTest(MethodTestDTO $methodTestDTO): MethodTest
     {
-        return $this->methodTestRepository->creatMethodTest($methodTestDTO->toArray());
+        return $this->methodTestRepository->createMethodTest($methodTestDTO->toArray());
     }
 
     public function updateMethodTest(MethodTest $methodTest, MethodTestDTO $methodTestDTO): MethodTest

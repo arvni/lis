@@ -43,9 +43,9 @@ class TestResource extends JsonResource
     /**
      * Resolve the test price based on type and referrer relationship.
      *
-     * @return float|null
+     * @return array
      */
-    private function resolveTestPrice(): ?array
+    private function resolveTestPrice(): array
     {
         if ($this->type == TestType::PANEL) {
             if ($this->relationLoaded("referrerTest") && $this->referrerTest) {
