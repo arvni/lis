@@ -43,13 +43,14 @@ class AcceptanceItem extends Model
                 return "Report Approved";
             else
                 return "Report Waiting For Approve";
-        } else {
+        } elseif ($this->latestState) {
             if ($this->latestState?->status === AcceptanceItemStateStatus::FINISHED) {
                 return "Waiting For Report";
             } else {
                 return ucfirst($this->latestState?->status?->value) . " in " . $this->latestState?->section?->name;
             }
         }
+        return "-";
     }
 
     public function acceptance()
