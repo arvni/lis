@@ -1,10 +1,6 @@
 import Grid from "@mui/material/Grid2";
 import TextField from "@mui/material/TextField";
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
 import React, {memo, useEffect, useState} from "react";
-import FilterIcon from '@mui/icons-material/FilterAlt'
 import Button from "@mui/material/Button";
 import {Box, Chip, IconButton, InputAdornment, Paper, Tooltip, Typography} from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";

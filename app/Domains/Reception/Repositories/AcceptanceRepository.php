@@ -194,6 +194,9 @@ class AcceptanceRepository
         if (isset($filters[self::FILTER_REFERRER_ID])) {
             $query->where('acceptances.referrer_id', $filters[self::FILTER_REFERRER_ID]); // Qualify column name
         }
+        if (isset($filters["referrer"]["id"])) {
+            $query->where('acceptances.referrer_id', $filters["referrer"]["id"]); // Qualify column name
+        }
         if (isset($filters[self::FILTER_PATIENT_ID])) {
             $query->where('acceptances.patient_id', $filters[self::FILTER_PATIENT_ID]); // Qualify column name
         }
@@ -202,6 +205,18 @@ class AcceptanceRepository
             $date=Carbon::parse($filters["date"]);
             $dateRange=[$date->copy()->startOfDay(),$date->copy()->endOfDay()];
             $query->whereBetween('acceptances.created_at', $dateRange);
+        }
+        if (!empty($filters["from_date"]) || !empty($filters["to_date"])) {
+            // Set default values for the date range
+            $startDate = !empty($filters["from_date"])
+                ? Carbon::parse($filters["from_date"])->startOfDay()
+                : Carbon::createFromTimestamp(0);
+
+            $endDate = !empty($filters["to_date"])
+                ? Carbon::parse($filters["to_date"])->endOfDay()
+                : Carbon::now(); // Current time
+
+            $query->whereBetween('created_at', [$startDate, $endDate]);
         }
     }
 
