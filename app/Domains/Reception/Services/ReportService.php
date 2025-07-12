@@ -635,7 +635,7 @@ class ReportService
             $output["patient_{$key}_full_name"] = $patient->fullName ?? 'N/A';
             $output["patient_{$key}_no_id"] = $patient->idNo ?? 'N/A';
             $output["patient_{$key}_gender"] = $patient->gender ?? 'N/A';
-            $output["patient_{$key}_date_of_birth"] = $patient->dateOfBirth ?? 'N/A';
+            $output["patient_{$key}_date_of_birth"] = Carbon::parse($patient->dateOfBirth)->format("d M Y") ?? 'N/A';
             $output["patient_{$key}_nationality"] = $patient->nationality ?? 'N/A';
             $output["patient_{$key}_age"] = $patient->age ?? 'N/A';
         }
@@ -656,8 +656,8 @@ class ReportService
         }
         return [
             "barcode" => $barcodeValue,
-            "sample_created_at" => Carbon::parse($sample->created_at,"Asia/Muscat")->format("d, M Y"),
-            "sample_collection_date" => Carbon::parse($sample->collection_date,"Asia/Muscat")->format("d, M Y"),
+            "sample_created_at" => Carbon::parse($sample->created_at,"Asia/Muscat")->format("d M Y"),
+            "sample_collection_date" => Carbon::parse($sample->collection_date,"Asia/Muscat")->format("d M Y"),
             "sample_type_name" => $sample->sample_type_name ?? 'N/A',
             "images" => [
                 "logo" => url("/images/logo.png"),
