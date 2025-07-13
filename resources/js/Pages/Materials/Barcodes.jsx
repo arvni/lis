@@ -16,7 +16,6 @@ import JsBarcode from 'jsbarcode';
 import {
     Print as PrintIcon,
     LocalHospital as LocalHospitalIcon,
-    CalendarToday as CalendarTodayIcon,
     Close as CloseIcon,
     ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
@@ -56,6 +55,8 @@ const BarcodeItem = styled(Paper)(({theme, printOnlyBarcode}) => ({
         margin: printOnlyBarcode?'auto':0,
         boxShadow: 'none',
         border: 'none',
+        width:"100%",
+        height:"100%"
     }
 }));
 
@@ -195,7 +196,7 @@ const BarcodeComponent = ({materials}) => {
                     {materials.map((material) => (
                         <Grid key={material.id}
                               size={12}
-                              sx={{display: printOnlyBarcode ? "block" : "flex", justifyContent: "center"}}
+                              sx={{display: printOnlyBarcode ? "block" : "flex", justifyContent: "center",gap:"0"}}
                               className="page-break">
                             <BarcodeItem printOnlyBarcode={printOnlyBarcode}>
                                 {printOnlyBarcode ? <Stack direction="column"

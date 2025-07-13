@@ -55,6 +55,8 @@ const BarcodeItem = styled(Paper)(({theme}) => ({
         margin: 0,
         boxShadow: 'none',
         border: 'none',
+        width: '100%',
+        height: '100%',
     }
 }));
 
@@ -209,7 +211,7 @@ const BarcodeComponent = ({barcodes}) => {
                     {barcodes.map((barcode) => (
                         <Grid key={barcode.barcode}
                               size={12}
-                              sx={{display: "flex", justifyContent: "center"}}
+                              sx={{display: "flex", justifyContent: "center",gap:0}}
                               className={(!barcode?.acceptance_items?.length || barcode.is_rejected) ? "no-print page-break" : "page-break"}>
                             <BarcodeItem>
                                 {(!barcode?.acceptance_items?.length || barcode.is_rejected) && (

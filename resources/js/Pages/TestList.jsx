@@ -20,7 +20,6 @@ import {
     ViewInAr as PanelIcon,
     Biotech as SampleIcon,
     Calculate as CalculateIcon,
-    MonetizationOn as PriceIcon,
     FilterList as FilterIcon,
     Clear as ClearIcon
 } from '@mui/icons-material';
@@ -73,7 +72,7 @@ const TestFilter = ({defaultFilter, onFilter}) => {
                     label="Test Type"
                     value={filters.type}
                     onChange={(e) => handleFilterChange('type', e.target.value)}
-                    slotProps={{select: {native: true}}}
+                    slotProps={{select: {native: true}, inputLabel: {shrink: true}}}
                 >
                     <option value="">All Types</option>
                     <option value="TEST">Test</option>
@@ -89,7 +88,7 @@ const TestFilter = ({defaultFilter, onFilter}) => {
                     label="Status"
                     value={filters.status}
                     onChange={(e) => handleFilterChange('status', e.target.value)}
-                    slotProps={{select: {native: true}}}
+                    slotProps={{select: {native: true}, inputLabel: {shrink: true}}}
                 >
                     <option value="">All Status</option>
                     <option value="active">Active</option>
@@ -145,7 +144,7 @@ const SampleTypesDisplay = ({sampleTypes = []}) => {
 };
 
 // Method Display Component with Price Calculator
-const MethodDisplay = ({method,testType}) => {
+const MethodDisplay = ({method, testType}) => {
     const [calculatorOpen, setCalculatorOpen] = useState(false);
 
     const handleCalculatorOpen = () => {
@@ -159,7 +158,7 @@ const MethodDisplay = ({method,testType}) => {
     return (
         <Box>
             <Stack direction="row" spacing={0.5} alignItems="center">
-                {testType!=="PANEL"&&<Typography variant="body2" fontWeight="medium">
+                {testType !== "PANEL" && <Typography variant="body2" fontWeight="medium">
                     {method.name}
                 </Typography>}
                 {method.price_type === 'Fix' ? (<Chip
@@ -179,7 +178,7 @@ const MethodDisplay = ({method,testType}) => {
                     </Tooltip>
                 )}
             </Stack>
-            {method.turnaround_time&&method.workflow?.name&&<Typography variant="caption" color="text.secondary">
+            {method.turnaround_time && method.workflow?.name && <Typography variant="caption" color="text.secondary">
                 {method.turnaround_time} days • {method.workflow?.name}
             </Typography>}
 
