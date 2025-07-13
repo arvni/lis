@@ -7,13 +7,11 @@ import {useCallback, useMemo, useState} from "react";
 import {Button} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import {router, usePage} from "@inertiajs/react";
-import {Print} from "@mui/icons-material";
 
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageHeader from "@/Components/PageHeader.jsx";
 import Filter from "./Components/Filter";
 import AddForm from "./Components/AddForm";
-import TuneIcon from '@mui/icons-material/Tune';
 import {DownloadIcon} from "lucide-react";
 
 const Index = () => {

@@ -16,7 +16,6 @@ import {DownloadIcon} from "lucide-react";
 
 const Index = () => {
     const {consentForms, status, errors, success, requestInputs} = usePage().props;
-    console.log(consentForms);
     const [consentForm, setConsentForm] = useState(null);
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const [openAddForm, setOpenAddForm] = useState(false);
@@ -31,7 +30,7 @@ const Index = () => {
             document: _report_template.document ? {
                 id: _report_template.document.hash,
                 originalName: _report_template.document.originalName,
-                tag:_report_template.document.tag
+                tag: _report_template.document.tag
             } : null,
             _method: 'put'
         });
@@ -86,12 +85,12 @@ const Index = () => {
                 let cols = [
                     <GridActionsCellItem icon={<EditIcon/>}
                                          label="Edit"
-                                         onClick={editConsentForm(params.row.id)}/>,
-                    <GridActionsCellItem icon={<DownloadIcon/>}
-                                         label="Download"
-                                         target="_blank"
-                                         href={route("documents.show",params?.row?.document?.id||params?.row?.document?.hash)}/>,
-                ]
+                                         onClick={editConsentForm(params.row.id)}/>,];
+                if (!!(params?.row?.document?.id || params?.row?.document?.hash))
+                    cols.push(<GridActionsCellItem icon={<DownloadIcon/>}
+                                                   label="Download"
+                                                   target="_blank"
+                                                   href={route("documents.show", params?.row?.document?.id || params?.row?.document?.hash)}/>)
                 if (params.row.tests_count < 1)
                     cols.push(<GridActionsCellItem icon={<DeleteIcon/>} label="Delete"
                                                    onClick={deleteConsentForm(params.row.id)}/>)
