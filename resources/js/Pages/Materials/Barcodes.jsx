@@ -192,7 +192,7 @@ const BarcodeComponent = ({materials}) => {
                 />
             </HeaderBar>
             <BarcodeContainer>
-                <Grid container spacing={1} justifyContent="center">
+                <Grid container spacing={0} sx={{gap:0}} justifyContent="center">
                     {materials.map((material) => (
                         <Grid key={material.id}
                               size={12}
