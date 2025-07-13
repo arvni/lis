@@ -143,10 +143,13 @@ class ReportController extends Controller
     {
         $user = auth()->user();
         $parameters = $request->get('parameters', []);
+
         if ($parameters && count($parameters) > 0) {
-            foreach ($request->file("parameters") as $parameter => $value) {
-                $doc = $this->documentService->storeDocument("patient", $request->get("patient_id"), $value, DocumentTag::IMAGE->value);
-                $parameters[$parameter] = $doc;
+            if ($parameters && count($parameters) > 0) {
+                foreach (($request->file("parameters")??[]) as $parameter => $value) {
+                    $doc = $this->documentService->storeDocument("patient", $request->get("patient_id"), $value, DocumentTag::IMAGE->value);
+                    $parameters[$parameter] = $doc;
+                }
             }
         }
         else{
