@@ -19,11 +19,16 @@ use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class TestController extends Controller
 {
+    private const DEFAULT_PRICE = 0;
+    private const DEFAULT_STATUS = true;
+    private const DEFAULT_NO_PATIENT = 1;
+
     public function __construct(private readonly TestService       $testService,
                                 private readonly MethodTestService $methodTestService,
                                 private readonly MethodService     $methodService)
@@ -58,44 +63,20 @@ class TestController extends Controller
      */
     public function store(StoreTestRequest $testRequest): RedirectResponse
     {
-        $validatedData = $testRequest->validated();
-
-        $testDto = new TestDTO(
-            $validatedData["test_group"]["id"],
-            $validatedData["name"],
-            TestType::from($validatedData["type"]),
-            $validatedData["code"],
-            $validatedData["fullName"],
-            $validatedData["description"],
-            $validatedData["status"] ?? true,
-            $validatedData["report_templates"] ?? [],
-            $validatedData["request_form"]["id"] ?? null,
-            $validatedData["instruction"]["id"] ?? null,
-            $validatedData["consent_form"]["id"] ?? null,
-            $validatedData["price"] ?? 0,
-            $validatedData["referrer_price"] ?? 0,
-            $validatedData["price_type"] ? MethodPriceType::find($validatedData["price_type"]) : null,
-            $validatedData["referrer_price_type"] ? MethodPriceType::find($validatedData["referrer_price_type"]) : null,
-            $validatedData["extra"] ?? null,
-            $validatedData["referrer_extra"] ?? null,
-        );
-
-        $test = $this->testService->storeTest($testDto);
-
-        $this->handleMethodTests($test, $validatedData["method_tests"]);
-        if (count($validatedData["sample_type_tests"] ?? []))
-            $test->sampletypes()
-                ->sync(collect($validatedData["sample_type_tests"])
-                    ->keyBy("sample_type.id")
-                    ->map(fn($item) => [
-                        "description" => $item["description"],
-                        "defaultType" => $item["defaultType"]
-                    ])
-                    ->toArray()
-                );
-
-        return redirect()->route("tests.index")
-            ->with(["success" => true, "status" => "$testDto->name Created Successfully"]);
+        try {
+            DB::beginTransaction();
+            $validatedData = $testRequest->validated();
+            $testDto = TestDTO::fromArray($validatedData);
+            $test = $this->testService->storeTest($testDto);
+            $this->syncTestRelationships($test, $validatedData);
+            DB::commit();
+            return $this->redirectWithSuccess('tests.index', "$testDto->name Created Successfully");
+        } catch (Exception $e) {
+            DB::rollBack();
+            return back()
+                ->withInput()
+                ->with(["error" => true, "status" => "Failed to create test: " . $e->getMessage()]);
+        }
     }
 
 
@@ -104,8 +85,10 @@ class TestController extends Controller
      */
     public function show(Test $test, Request $request): TestResource
     {
-        $loadedTest = $this->testService->loadTest($test, $request->has("referrer") ? $request->input("referrer") : null);
-        $loadedTest->withDefaultReferrerPrice = $request->has("referrer");
+        $isReferrer = $request->boolean('referrer');
+        $loadedTest = $this->testService->loadTest($test, $isReferrer ? $request->input('referrer') : null);
+        $loadedTest->withDefaultReferrerPrice = $isReferrer;
+
         return new TestResource($loadedTest);
     }
 
@@ -137,45 +120,28 @@ class TestController extends Controller
      */
     public function update(UpdateTestRequest $request, Test $test): RedirectResponse
     {
-        $validatedData = $request->validated();
+        try {
+            DB::beginTransaction();
+            $validatedData = $request->validated();
 
-        $testDto = new TestDTO(
-            $validatedData["test_group"]["id"],
-            $validatedData["name"],
-            $test->type,
-            $validatedData["code"],
-            $validatedData["fullName"],
-            $validatedData["description"],
-            $validatedData["status"] ?? true,
-            $validatedData["report_templates"] ?? [],
-            $validatedData["request_form"]["id"] ?? null,
-            $validatedData["instruction"]["id"] ?? null,
-            $validatedData["consent_form"]["id"] ?? null,
-            $validatedData["price"] ?? 0,
-            $validatedData["referrer_price"] ?? 0,
-            ($validatedData["price_type"] ?? null) ? MethodPriceType::find($validatedData["price_type"]) : MethodPriceType::FIX,
-            ($validatedData["referrer_price_type"] ?? null) ? MethodPriceType::find($validatedData["referrer_price_type"]) : MethodPriceType::FIX,
-            $validatedData["extra"] ?? null,
-            $validatedData["referrer_extra"] ?? null,
-        );
+            $testDto = TestDTO::fromArray($validatedData);
 
-        $this->testService->updateTest($test, $testDto);
+            $this->testService->updateTest($test, $testDto);
 
-        $this->handleMethodTests($test, $validatedData["method_tests"]);
+            $this->handleMethodTests($test, $validatedData["method_tests"]);
 
-        if (count($validatedData["sample_type_tests"] ?? []))
-            $test->sampletypes()
-                ->sync(collect($validatedData["sample_type_tests"])
-                    ->keyBy("sample_type.id")
-                    ->map(fn($item) => [
-                        "description" => $item["description"],
-                        "defaultType" => $item["defaultType"]
-                    ])
-                    ->toArray()
-                );
+            $this->syncTestRelationships($test, $validatedData);
 
-        return redirect()->route("tests.index")
-            ->with(["success" => true, "status" => "$testDto->name Updated Successfully"]);
+            DB::commit();
+
+            return $this->redirectWithSuccess('tests.index', "$testDto->name Updated Successfully");
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return back()
+                ->withInput()
+                ->with(["error" => true, "status" => "Failed to create test: " . $e->getMessage()]);
+        }
     }
 
     /**`
@@ -193,11 +159,10 @@ class TestController extends Controller
 
     private function handleMethodTests(Test $test, array $methodTests): void
     {
-        if ($test->type !== TestType::PANEL) {
-            $this->handleNonPanelMethodTests($test, $methodTests);
-        } else {
-            $this->handlePanelMethodTests($test, $methodTests);
-        }
+        match ($test->type) {
+            TestType::PANEL => $this->handlePanelMethodTests($test, $methodTests),
+            default => $this->handleNonPanelMethodTests($test, $methodTests),
+        };
     }
 
     private function handleNonPanelMethodTests(Test $test, array $methodTests): void
@@ -259,6 +224,35 @@ class TestController extends Controller
             else
                 $this->methodTestService->storeMethodTest($methodTestDTO);
         }
+    }
+
+    private function syncTestRelationships(Test $test, array $validatedData): void
+    {
+        $this->handleMethodTests($test, $validatedData["method_tests"]);
+        $this->syncSampleTypeTests($test, $validatedData["sample_type_tests"] ?? []);
+    }
+
+    private function syncSampleTypeTests(Test $test, array $sampleTypeTests): void
+    {
+        if (empty($sampleTypeTests)) {
+            return;
+        }
+
+        $syncData = collect($sampleTypeTests)
+            ->keyBy("sample_type.id")
+            ->map(fn($item) => [
+                "description" => $item["description"],
+                "defaultType" => $item["defaultType"]
+            ])
+            ->toArray();
+
+        $test->sampletypes()->sync($syncData);
+    }
+
+    private function redirectWithSuccess(string $route, string $message): RedirectResponse
+    {
+        return redirect()->route($route)
+            ->with(["success" => true, "status" => $message]);
     }
 
 }

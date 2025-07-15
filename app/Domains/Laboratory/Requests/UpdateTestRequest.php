@@ -50,6 +50,7 @@ class UpdateTestRequest extends FormRequest
             "referrer_price_type"=>["required", Rule::in(MethodPriceType::values())],
             "extra"=>["nullable", "array"],
             "referrer_extra"=>["nullable", "array"],
+            "method_tests.*.id" => ["nullable"],
             "method_tests.*.method.id" => ["required", "exists:methods,id"],
             "method_tests.*.status" => ["nullable","boolean"],
         ];
@@ -61,6 +62,7 @@ class UpdateTestRequest extends FormRequest
             "sample_type_tests.*.defaultType" => ["nullable", "boolean"],
             "report_templates" => ["required_if:type," . TestType::TEST->value, "array"],
             "report_templates.*.id" => ["required_if:type," . TestType::TEST->value, "exists:report_templates,id"],
+            "method_tests.*.id" => ["nullable"],
             "method_tests.*.method" => ["required", "array"],
             "method_tests.*.method.id" => ["nullable"],
             "method_tests.*.method.workflow" => ["required", "array"],
@@ -96,6 +98,7 @@ class UpdateTestRequest extends FormRequest
             "method_tests.*.method.referrer_extra" => ["nullable", "array"],
         ];
         $serviceRules = [
+            "method_tests.*.id" => ["nullable"],
             "method_tests.*.method" => ["required", "array"],
             "method_tests.*.method.id" => ["nullable"],
             "method_tests.*.method.name" => ["required", "string", "max:255"],

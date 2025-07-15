@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import {
     Box,
     Button,
@@ -52,7 +52,7 @@ const MethodsList = ({
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = useState(isMobile ? 'grid' : 'table');
-    const [filters, setFilters] = useState({ showActive: true, showInactive: true });
+    const [filters, setFilters] = useState({showActive: true, showInactive: true});
 
     // Handle page change
     const handleChangePage = (event, newPage) => {
@@ -111,7 +111,7 @@ const MethodsList = ({
 
     // Render method as a table row
     const renderTableRow = (methodTest) => {
-        const { id, method, status,acceptance_items_count } = methodTest;
+        const {id, method, status, acceptance_items_count} = methodTest;
         return (
             <TableRow key={id} hover>
                 <TableCell>{method?.name || "—"}</TableCell>
@@ -122,20 +122,22 @@ const MethodsList = ({
                         <TableCell align="right">{method?.turnaround_time || "—"}</TableCell>
                     </>
                 )}
-                <TableCell align="right">
-                    {method?.price && method.price_type==="Fix" ? (
-                        <Typography fontWeight="medium">
-                            {method.price} <small>OMR</small>
-                        </Typography>
-                    ) : method.price_type}
-                </TableCell>
-                <TableCell align="right">
-                    {method?.referrer_price && method.referrer_price_type==="Fix" ? (
-                        <Typography fontWeight="medium">
-                            {method.referrer_price} <small>OMR</small>
-                        </Typography>
-                    ) : method.referrer_price_type}
-                </TableCell>
+                {type !== "PANEL" && <>
+                    <TableCell align="right">
+                        {method?.price && method.price_type === "Fix" ? (
+                            <Typography fontWeight="medium">
+                                {method.price} <small>OMR</small>
+                            </Typography>
+                        ) : method.price_type}
+                    </TableCell>
+                    <TableCell align="right">
+                        {method?.referrer_price && method.referrer_price_type === "Fix" ? (
+                            <Typography fontWeight="medium">
+                                {method.referrer_price} <small>OMR</small>
+                            </Typography>
+                        ) : method.referrer_price_type}
+                    </TableCell>
+                </>}
                 <TableCell align="right">{acceptance_items_count || "—"}</TableCell>
                 <TableCell align="center">
                     <Tooltip title={status ? "Active" : "Inactive"}>
@@ -151,14 +153,14 @@ const MethodsList = ({
                     <Box>
                         <Tooltip title="Edit">
                             <IconButton onClick={handleEdit(id)} size="small" color="primary">
-                                <Edit fontSize="small" />
+                                <Edit fontSize="small"/>
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title="Delete">
+                        {!acceptance_items_count && <Tooltip title="Delete">
                             <IconButton onClick={handleDelete(id)} size="small" color="error">
-                                <Delete fontSize="small" />
+                                <Delete fontSize="small"/>
                             </IconButton>
-                        </Tooltip>
+                        </Tooltip>}
                     </Box>
                 </TableCell>
             </TableRow>
@@ -167,9 +169,9 @@ const MethodsList = ({
 
     // Render method as a grid card
     const renderGridCard = (methodTest) => {
-        const { id, method, status } = methodTest;
+        const {id, method, status, acceptance_items_count} = methodTest;
         return (
-            <Grid  size={{xs:12,sm:6, md:6}} key={id}>
+            <Grid size={{xs: 12, sm: 6, md: 6}} key={id}>
                 <Card
                     variant="outlined"
                     sx={{
@@ -182,33 +184,41 @@ const MethodsList = ({
                         transition: 'all 0.2s'
                     }}
                 >
-                    <CardContent sx={{ flexGrow: 1 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                            <Typography variant="h6" noWrap sx={{ maxWidth: '80%' }}>
+                    <CardContent sx={{flexGrow: 1}}>
+                        <Box sx={{display: 'flex', justifyContent: 'space-between', mb: 1}}>
+                            <Typography variant="h6" noWrap sx={{maxWidth: '80%'}}>
                                 {method?.name || "Unnamed Method"}
                             </Typography>
                             <Chip
                                 size="small"
                                 color={status ? "success" : "default"}
                                 label={status ? "Active" : "Inactive"}
-                                sx={{ height: 20 }}
+                                sx={{height: 20}}
                             />
                         </Box>
 
-                        <Divider sx={{ my: 1 }} />
-
-                        <Box sx={{ mb: 2 }}>
-                            <Typography variant="body2" color="text.secondary">
-                                Price:
-                            </Typography>
-                            <Typography variant="body1" fontWeight="medium">
-                                {method?.price ? `${method.price.toFixed(3)} OMR` : "—"}
-                            </Typography>
-                        </Box>
-
+                        <Divider sx={{my: 1}}/>
+                        {type !== "PANEL" && <>
+                            <Box sx={{mb: 2}}>
+                                <Typography variant="body2" color="text.secondary">
+                                    Price:
+                                </Typography>
+                                <Typography variant="body1" fontWeight="medium">
+                                    {method?.price_type === "FIX" && method?.price ? `${method.price.toFixed(3)} OMR` : "—"}
+                                </Typography>
+                            </Box>
+                            <Box sx={{mb: 2}}>
+                                <Typography variant="body2" color="text.secondary">
+                                    Referrer Price:
+                                </Typography>
+                                <Typography variant="body1" fontWeight="medium">
+                                    {method?.referrer_price_type === "FIX" && method?.referrer_price ? `${method.referrer_price.toFixed(3)} OMR` : "—"}
+                                </Typography>
+                            </Box>
+                        </>}
                         {type === 'TEST' && (
                             <>
-                                <Box sx={{ mb: 1 }}>
+                                <Box sx={{mb: 1}}>
                                     <Typography variant="body2" color="text.secondary">
                                         Workflow:
                                     </Typography>
@@ -217,7 +227,7 @@ const MethodsList = ({
                                     </Typography>
                                 </Box>
 
-                                <Box sx={{ mb: 1 }}>
+                                <Box sx={{mb: 1}}>
                                     <Typography variant="body2" color="text.secondary">
                                         Barcode Group:
                                     </Typography>
@@ -237,7 +247,7 @@ const MethodsList = ({
                             </>
                         )}
                     </CardContent>
-                    <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
+                    <CardActions sx={{justifyContent: 'space-between', px: 2, pb: 2}}>
                         <Switch
                             checked={status}
                             onChange={onStatusChange(id)}
@@ -247,14 +257,14 @@ const MethodsList = ({
                         <Box>
                             <Tooltip title="Edit">
                                 <IconButton onClick={handleEdit(id)} size="small" color="primary">
-                                    <Edit fontSize="small" />
+                                    <Edit fontSize="small"/>
                                 </IconButton>
                             </Tooltip>
-                            <Tooltip title="Delete">
+                            {!acceptance_items_count && <Tooltip title="Delete">
                                 <IconButton onClick={handleDelete(id)} size="small" color="error">
-                                    <Delete fontSize="small" />
+                                    <Delete fontSize="small"/>
                                 </IconButton>
-                            </Tooltip>
+                            </Tooltip>}
                         </Box>
                     </CardActions>
                 </Card>
@@ -278,7 +288,7 @@ const MethodsList = ({
             <Typography variant="h6" color="text.secondary" align="center" gutterBottom>
                 No methods added yet
             </Typography>
-            <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary" align="center" sx={{mb: 2}}>
                 {type === '3'
                     ? "Select an existing method to add to this test"
                     : "Add your first method by clicking the button below"}
@@ -286,7 +296,7 @@ const MethodsList = ({
             <Button
                 variant="contained"
                 color="primary"
-                startIcon={<Add />}
+                startIcon={<Add/>}
                 onClick={handleAdd}
             >
                 {type === '3' ? "Select Method" : "Add Method"}
@@ -296,9 +306,9 @@ const MethodsList = ({
 
     // Render toolbar with actions
     const renderToolbar = () => (
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{mb: 2}}>
             <Grid container spacing={2} alignItems="center">
-                <Grid size={{xs:12, md:6}}>
+                <Grid size={{xs: 12, md: 6}}>
                     <TextField
                         placeholder="Search methods..."
                         variant="outlined"
@@ -320,12 +330,12 @@ const MethodsList = ({
                         }}
                     />
                 </Grid>
-                <Grid  size={{xs:12, md:6}}>
-                    <Box sx={{ display: 'flex', justifyContent: { xs: 'space-between', md: 'flex-end' }, gap: 1 }}>
+                <Grid size={{xs: 12, md: 6}}>
+                    <Box sx={{display: 'flex', justifyContent: {xs: 'space-between', md: 'flex-end'}, gap: 1}}>
                         <Box>
                             <Tooltip title="Show/Hide Active Methods">
                                 <Chip
-                                    icon={<CheckCircle fontSize="small" />}
+                                    icon={<CheckCircle fontSize="small"/>}
                                     label="Active"
                                     clickable
                                     color={filters.showActive ? "primary" : "default"}
@@ -336,26 +346,26 @@ const MethodsList = ({
                             </Tooltip>
                             <Tooltip title="Show/Hide Inactive Methods">
                                 <Chip
-                                    icon={<Cancel fontSize="small" />}
+                                    icon={<Cancel fontSize="small"/>}
                                     label="Inactive"
                                     clickable
                                     color={filters.showInactive ? "primary" : "default"}
                                     onClick={() => toggleFilter('showInactive')}
                                     variant={filters.showInactive ? "filled" : "outlined"}
                                     size="small"
-                                    sx={{ ml: 1 }}
+                                    sx={{ml: 1}}
                                 />
                             </Tooltip>
                         </Box>
                         <Tooltip title={viewMode === 'table' ? "Switch to Grid View" : "Switch to Table View"}>
                             <IconButton onClick={toggleViewMode} color="primary" size="small">
-                                {viewMode === 'table' ? <ViewModule /> : <ViewList />}
+                                {viewMode === 'table' ? <ViewModule/> : <ViewList/>}
                             </IconButton>
                         </Tooltip>
                         <Button
                             variant="contained"
                             color="primary"
-                            startIcon={<Add />}
+                            startIcon={<Add/>}
                             onClick={handleAdd}
                             size={isTablet ? "small" : "medium"}
                         >
@@ -369,10 +379,10 @@ const MethodsList = ({
 
     // Render table view
     const renderTableView = () => (
-        <TableContainer component={Paper} variant="outlined" sx={{ mb: 2 }}>
+        <TableContainer component={Paper} variant="outlined" sx={{mb: 2}}>
             <Table size="small">
                 <TableHead>
-                    <TableRow sx={{ backgroundColor: theme.palette.action.hover }}>
+                    <TableRow sx={{backgroundColor: theme.palette.action.hover}}>
                         <TableCell>Method Name</TableCell>
                         {type === 'TEST' && (
                             <>
@@ -381,8 +391,10 @@ const MethodsList = ({
                                 <TableCell align="right">Turnaround (days)</TableCell>
                             </>
                         )}
-                        <TableCell align="right">Price</TableCell>
-                        <TableCell align="right">Referrer Price</TableCell>
+                        {type !== "PANEL" && (<>
+                            <TableCell align="right">Price</TableCell>
+                            <TableCell align="right">Referrer Price</TableCell>
+                        </>)}
                         <TableCell align="right">No. Acceptance Items</TableCell>
                         <TableCell align="center">Status</TableCell>
                         <TableCell align="right">Actions</TableCell>
@@ -396,7 +408,7 @@ const MethodsList = ({
                             <TableCell
                                 colSpan={type === '1' ? 7 : 4}
                                 align="center"
-                                sx={{ py: 3 }}
+                                sx={{py: 3}}
                             >
                                 <Typography variant="body2" color="text.secondary">
                                     No methods found
@@ -407,15 +419,16 @@ const MethodsList = ({
                 </TableBody>
             </Table>
         </TableContainer>
-    );
+    )
+
 
     // Render grid view
     const renderGridView = () => (
-        <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid container spacing={2} sx={{mb: 2}}>
             {paginatedMethods.length ? (
                 paginatedMethods.map(renderGridCard)
             ) : (
-                <Grid  size={{xs:12}}>
+                <Grid size={{xs: 12}}>
                     <Box
                         sx={{
                             p: 3,
@@ -447,7 +460,7 @@ const MethodsList = ({
     );
 
     return (
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{mb: 2}}>
             {methodTests.length > 0 ? (
                 <>
                     {renderToolbar()}

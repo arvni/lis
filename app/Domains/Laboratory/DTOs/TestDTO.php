@@ -16,9 +16,9 @@ class TestDTO
         public ?string         $description,
         public bool            $status = true,
         public ?array          $report_templates = [],
-        public ?int            $requestFormId,
-        public ?int            $instructionId,
-        public ?int            $consentFormId,
+        public ?int            $requestFormId = null,
+        public ?int            $instructionId = null,
+        public ?int            $consentFormId = null,
         public ?int            $price = 0,
         public ?int            $referrerPrice = 0,
         public MethodPriceType $priceType = MethodPriceType::FIX,
@@ -27,6 +27,27 @@ class TestDTO
         public ?array          $referrerExtra = null,
     )
     {
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self($data["test_group"]["id"],
+            $data["name"],
+            $existingType ?? TestType::from($data["type"]),
+            $data["code"],
+            $data["fullName"],
+            $data["description"],
+            $data["status"] ?? true,
+            $data["report_templates"] ?? [],
+            $data["request_form"]["id"] ?? null,
+            $data["instruction"]["id"] ?? null,
+            $data["consent_form"]["id"] ?? null,
+            $data["price"] ?? 0,
+            $data["referrer_price"] ?? 0,
+            self::resolvePriceType($data["price_type"] ?? null),
+            self::resolvePriceType($data["referrer_price_type"] ?? null),
+            $data["extra"] ?? null,
+            $data["referrer_extra"] ?? null,);
     }
 
     public function toArray()
@@ -50,5 +71,10 @@ class TestDTO
             "extra" => $this->extra,
             "referrer_extra" => $this->referrerExtra,
         ];
+    }
+
+    public static function resolvePriceType(?string $priceType): MethodPriceType
+    {
+        return $priceType ? MethodPriceType::find($priceType) : MethodPriceType::FIX;
     }
 }
