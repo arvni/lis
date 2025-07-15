@@ -4,6 +4,7 @@ namespace App\Domains\Laboratory\Repositories;
 
 use App\Domains\Laboratory\Models\Test;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 
 class TestRepository
 {
@@ -11,7 +12,7 @@ class TestRepository
     public function listTests(array $queryData): LengthAwarePaginator
     {
         $query = Test::withCount("acceptanceItems")
-            ->withAggregate("testGroup", "name");
+            ->with("testGroups");
         if (isset($queryData["filters"]))
             $this->applyFilters($query, $queryData["filters"]);
         if (isset($queryData["sort"]))
@@ -54,8 +55,8 @@ class TestRepository
     {
         if (isset($filters["search"]))
             $query->search($filters["search"]);
-        if (isset($filters["test_group"]["id"]))
-            $query->whereHas("testGroup", fn($q) => $q->where("test_groups.id", $filters["test_group"]["id"]));
+        if (isset($filters["test_groups"]) && count($filters["test_groups"]))
+            $query->whereHas("testGroups", fn($q) => $q->whereIn("test_groups.id", Arr::pluck($filters["test_groups"], "id")));
         if (isset($filters["status"]))
             $query->where("status", $filters["status"]);
         if (isset($filters["type"]))

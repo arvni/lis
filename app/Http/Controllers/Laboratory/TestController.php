@@ -109,7 +109,7 @@ class TestController extends Controller
             },
             "sampleTypeTests.sampleType:name,id",
             "reportTemplates:name,id",
-            "testGroup",
+            "testGroups",
         ]);
         return Inertia::render('Test/Edit', compact("test"));
     }
@@ -230,6 +230,7 @@ class TestController extends Controller
     {
         $this->handleMethodTests($test, $validatedData["method_tests"]);
         $this->syncSampleTypeTests($test, $validatedData["sample_type_tests"] ?? []);
+        $this->syncTestGroupTests($test,$validatedData["test_groups"]??[]);
     }
 
     private function syncSampleTypeTests(Test $test, array $sampleTypeTests): void
@@ -247,6 +248,19 @@ class TestController extends Controller
             ->toArray();
 
         $test->sampletypes()->sync($syncData);
+    }
+
+    private function syncTestGroupTests(Test $test, array $testGroups): void
+    {
+        if (empty($testGroups)) {
+            return;
+        }
+
+        $syncData = collect($testGroups)
+            ->map(fn($item) => $item["id"])
+            ->toArray();
+
+        $test->testGroups()->sync($syncData);
     }
 
     private function redirectWithSuccess(string $route, string $message): RedirectResponse

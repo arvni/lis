@@ -16,6 +16,6 @@ class TestGroup extends Model
     ];
     public function tests()
     {
-        return $this->hasMany(Test::class);
+        return $this->belongsToMany(Test::class,"test_group_test");
     }
 }

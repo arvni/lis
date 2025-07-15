@@ -20,9 +20,10 @@ const Filter = ({defaultFilter, onFilter}) => {
             <Grid size={{xs:12,sm:4}}>
                 <SelectSearch onChange={handleChange}
                               fullWidth
+                              multiple
                               url={route("api.testGroups.list")}
-                              value={filter?.test_group||""}
-                              name="test_group"/>
+                              value={filter?.test_groups.filter(item=>item.id)||[]}
+                              name="test_groups"/>
             </Grid>
         </FilterTemplate>
     );

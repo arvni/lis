@@ -87,7 +87,7 @@ class TestExport implements
             $test->code,
             $test->name,
             $test->fullName,
-            $test->testGroup?->name ?? '',
+            implode(", ",$test->testGroups?->map(fn($item)=>$item->name ?? '')->toArray()),
             $test->type->value ?? '',
             $this->formatPrice($test),
             $this->formatReferrerPrice($test),

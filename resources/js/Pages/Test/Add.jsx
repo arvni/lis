@@ -10,7 +10,7 @@ const Add = () => {
         sample_type_tests: [],
         type:'TEST',
         method_tests: [],
-        testGroup: "",
+        test_groups: [],
         report_templates: [],
         description: "",
         status: true,

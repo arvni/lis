@@ -4,11 +4,11 @@ namespace App\Domains\Laboratory\DTOs;
 
 use App\Domains\Laboratory\Enums\MethodPriceType;
 use App\Domains\Laboratory\Enums\TestType;
+use Illuminate\Support\Arr;
 
 class TestDTO
 {
     public function __construct(
-        public int             $test_group_id,
         public string          $name,
         public TestType        $type,
         public string          $code,
@@ -31,7 +31,7 @@ class TestDTO
 
     public static function fromArray(array $data): self
     {
-        return new self($data["test_group"]["id"],
+        return new self(
             $data["name"],
             $existingType ?? TestType::from($data["type"]),
             $data["code"],
@@ -53,7 +53,6 @@ class TestDTO
     public function toArray()
     {
         return [
-            "test_group_id" => $this->test_group_id,
             "name" => $this->name,
             "type" => $this->type,
             "code" => $this->code,

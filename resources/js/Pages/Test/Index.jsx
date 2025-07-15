@@ -23,42 +23,48 @@ const Index = () => {
         {
             field: 'code',
             headerName: 'Test Code',
+            flex:.2
         },
         {
             field: 'name',
             headerName: 'Title',
             type: "string",
-            width: 200
+            flex:.4
         },
         {
             field: 'type',
             headerName: 'Type',
             type: "string",
+            width: 100,
+            flex:.2,
             renderCell: ({row}) => TestType?.[row.type],
         },
         {
-            field: 'test_group_name',
+            field: 'test_group',
             headerName: 'Category',
             sortable: false,
             type: "string",
-            width: 200,
+            flex:.8,
+            renderCell: ({row}) => row.test_groups.map((item) => item.name).join(", ")
         },
         {
             field: 'status',
             headerName: 'Status',
             type: "boolean",
+            flex:.1
         },
         {
             field: 'acceptance_items_count',
             headerName: 'Acceptance No',
             type: "number",
             sortable: true,
+            flex:.2,
         },
         {
             field: 'id',
             headerName: 'Action',
             type: 'actions',
-            width: 100,
+            flex:.2,
             sortable: false,
             getActions: (params) => {
                 let cols = [
@@ -112,10 +118,10 @@ const Index = () => {
                     startIcon={<AddIcon/>}>Add Test</Button>,
 
             <Button key="download-excel-list-button"
-                href={route("tests.export")}
-                variant="contained"
-                color="info"
-                startIcon={<ExcelIcon/>}>
+                    href={route("tests.export")}
+                    variant="contained"
+                    color="info"
+                    startIcon={<ExcelIcon/>}>
                 Export to Excel
             </Button>
         ]}/>

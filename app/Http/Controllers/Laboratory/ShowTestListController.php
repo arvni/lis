@@ -40,7 +40,8 @@ class ShowTestListController extends Controller
                     });
                     $query->active();
                     $query->with(["method"]);
-                }
+                },
+                "testGroups:name,id"
             ]
         ];
 

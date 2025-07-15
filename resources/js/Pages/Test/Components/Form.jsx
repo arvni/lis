@@ -17,7 +17,7 @@ import {
     Tabs,
     Tab,
     Chip,
-    Collapse, Divider, InputLabel, Select, MenuItem, OutlinedInput
+    Collapse, InputLabel, Select, MenuItem, OutlinedInput
 } from "@mui/material";
 import SelectSearch from "@/Components/SelectSearch";
 import MethodFields from "./MethodFields";
@@ -82,7 +82,7 @@ export default function TestForm({
         setData(prevState => ({
             ...prevState,
             type: v,
-            testGroup: "",
+            test_groups: [],
             report_templates: [],
             parameters: [],
             sampleTypes: [],
@@ -167,7 +167,6 @@ export default function TestForm({
     };
 
     const handleExtraChange = (e) => {
-        console.log(e);
         const updatedExtra = {
             ...data.extra,
             [e.target.name]: e.target.value
@@ -221,7 +220,7 @@ export default function TestForm({
             name: "A shorter version of the test name for quick reference in the system.",
             code: "A unique identifier code for this test, used for tracking and referencing.",
             test_type: "Select whether this is a standard test, a service, or a panel of multiple tests.",
-            test_group: "The category or group this test belongs to for organizational purposes.",
+            test_groups: "The category or group this test belongs to for organizational purposes.",
             report_template: "The template that will be used when generating reports for this test.",
             sample_types: "The types of samples that can be used for this test.",
             methods: "The testing methods that can be used for this test.",
@@ -449,23 +448,24 @@ export default function TestForm({
                         <Grid size={{xs: 12, md: 6}}>
                             <Box sx={{position: 'relative'}}>
                                 <SelectSearch
-                                    value={data.test_group || ''}
+                                    value={data.test_groups || ''}
                                     onChange={handleChange}
-                                    name="test_group"
+                                    name="test_groups"
                                     fullWidth
-                                    label="Test Group"
-                                    placeholder="Select a test group"
+                                    multiple
+                                    label="Test Groups"
+                                    placeholder="Select test groups"
                                     url={route('api.testGroups.list')}
-                                    error={Boolean(errors?.test_group)}
-                                    helperText={errors?.test_group || "The category this test belongs to"}
+                                    error={Boolean(errors?.test_groups)}
+                                    helperText={errors?.test_groups || "The category this test belongs to"}
                                 />
-                                <Collapse in={Boolean(helpVisible.test_group)}>
+                                <Collapse in={Boolean(helpVisible.test_groups)}>
                                     <Alert
                                         severity="info"
                                         sx={{mt: 1}}
-                                        onClose={() => toggleHelp('test_group')}
+                                        onClose={() => toggleHelp('test_groups')}
                                     >
-                                        {getHelpText('test_group')}
+                                        {getHelpText('test_groups')}
                                     </Alert>
                                 </Collapse>
                             </Box>

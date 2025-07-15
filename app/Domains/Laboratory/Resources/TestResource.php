@@ -24,7 +24,7 @@ class TestResource extends JsonResource
             "fullName" => $this->fullName,
             "description" => $this->description,
             "status" => $this->status,
-            "test_group" => $this->whenLoaded('testGroup'),
+            "test_groups" => $this->whenLoaded('testGroups'),
             "type" => $this->type,
             ...$this->resolveTestPrice(),
 

@@ -8,13 +8,13 @@ import {
     Fade,
     useTheme,
 } from "@mui/material";
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import AddMethodForm from "@/Pages/Test/Components/AddMethodForm";
 import DeleteForm from "@/Components/DeleteForm";
-import { makeId } from "@/Services/helper";
+import {makeId} from "@/Services/helper";
 import MethodsList from "@/Pages/Test/Components/MethodsList.jsx";
 import SelectMethodForm from "@/Pages/Test/Components/SelectMethodForm.jsx";
-import {  Info } from "@mui/icons-material";
+import {Info} from "@mui/icons-material";
 
 const MethodField = ({
                          onChange,
@@ -26,7 +26,13 @@ const MethodField = ({
                          description
                      }) => {
     const theme = useTheme();
-    const [methodTest, setMethodTest] = useState({ method: {}, status: true });
+    const [methodTest, setMethodTest] = useState({
+        method: {
+            price_type: "Fix",
+            referrer_price_type: "Fix",
+        },
+        status: true
+    });
     const [errors, setErrors] = useState({});
     const [openAddForm, setOpenAddForm] = useState(false);
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
@@ -87,7 +93,13 @@ const MethodField = ({
         resetMethodTest();
     };
 
-    const resetMethodTest = () => setMethodTest({ method: {}, status: true });
+    const resetMethodTest = () => setMethodTest({
+        method: {
+            price_type: "Fix",
+            referrer_price_type: "Fix",
+        },
+        status: true
+    });
 
     const handleCloseAddForm = () => {
         setOpenAddForm(false);
@@ -95,9 +107,9 @@ const MethodField = ({
         resetMethodTest();
     };
 
-    const handleChange = (key, value) => setMethodTest(prevMethod => ({ ...prevMethod, [key]: value }));
+    const handleChange = (key, value) => setMethodTest(prevMethod => ({...prevMethod, [key]: value}));
 
-    const handleMethodChange = (key, value) => handleChange("method", { ...methodTest?.method || {}, [key]: value });
+    const handleMethodChange = (key, value) => handleChange("method", {...methodTest?.method || {}, [key]: value});
 
     const handleSubmit = () => {
         if (validateForm()) {
@@ -108,7 +120,7 @@ const MethodField = ({
                     tmp[index] = methodTest;
                 }
             } else {
-                tmp.push({ ...methodTest, id: makeId(5) });
+                tmp.push({...methodTest, id: makeId(5)});
             }
             onChange(name, tmp);
             setOpenAddForm(false);
@@ -176,7 +188,7 @@ const MethodField = ({
         const tmp = [...methodTests];
         const index = findIndex(id);
         if (index >= 0) {
-            tmp[index] = { ...tmp[index], status: e.target.checked };
+            tmp[index] = {...tmp[index], status: e.target.checked};
             onChange(name, tmp);
         }
     };
@@ -221,8 +233,8 @@ const MethodField = ({
                 </Typography>
                 {description && (
                     <Tooltip title={description}>
-                        <IconButton size="small" sx={{ ml: 1, mt: -1 }}>
-                            <Info fontSize="small" color="action" />
+                        <IconButton size="small" sx={{ml: 1, mt: -1}}>
+                            <Info fontSize="small" color="action"/>
                         </IconButton>
                     </Tooltip>
                 )}
@@ -232,7 +244,7 @@ const MethodField = ({
                 <Fade in={showAlert}>
                     <Alert
                         severity="error"
-                        sx={{ mb: 2 }}
+                        sx={{mb: 2}}
                         onClose={() => setShowAlert(false)}
                     >
                         {error}

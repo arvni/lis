@@ -302,11 +302,12 @@ const TestList = () => {
             )
         },
         {
-            field: 'testGroup',
+            field: 'testGroups',
             headerName: 'Group',
             flex: 0.15,
             display: "flex",
-            renderCell: ({row}) => row.test_group_name || '—'
+            sortable:false,
+            renderCell: ({row}) => row.test_groups?.map(item=>item.name)?.join(", ") || '—'
         },
         {
             field: 'sample_types',

@@ -19,7 +19,6 @@ class Test extends Model
         "fullName",
         "description",
         "status",
-        "test_group_id",
         "type",
         "price",
         "referrer_price",
@@ -49,6 +48,11 @@ class Test extends Model
     public function testGroup()
     {
         return $this->belongsTo(TestGroup::class);
+    }
+
+    public function testGroups()
+    {
+        return $this->belongsToMany(TestGroup::class,"test_group_test");
     }
 
 

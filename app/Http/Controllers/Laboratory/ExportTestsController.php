@@ -16,10 +16,12 @@ class ExportTestsController extends Controller
     public function __invoke(Request $request)
     {
         $tests=Test::with([
-            'testGroup',
+            'testGroups',
             'methodTests.method.test.sampleTypes',
             'methodTests.method.workflow',
-        ])->active()->get();
+        ])
+            ->active()
+            ->get();
         return Excel::download(new TestExport($tests), 'tests-list.xlsx');
 
     }

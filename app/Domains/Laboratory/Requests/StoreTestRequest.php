@@ -32,8 +32,8 @@ class StoreTestRequest extends FormRequest
         $isService = $this->input('type') === TestType::SERVICE->value;
 
         $baseRules = [
-            "test_group" => ["required", "array"],
-            "test_group.id" => ["required", "exists:test_groups,id"],
+            "test_groups" => ["required", "array","min:1"],
+            "test_groups.*.id" => ["required", "exists:test_groups,id"],
             "name" => ["required", "string", "max:255", "unique:tests,name"],
             "description" => ["nullable", "string", "max:1000"],
             "fullName" => ["required", "string", "max:255"],

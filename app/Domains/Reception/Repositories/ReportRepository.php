@@ -100,7 +100,7 @@ class ReportRepository
                 $q->with([
                     "method",
                     "test",
-                    "test.testGroup:name,id",
+                    "test.testGroups:name,id",
                     "patients" => function ($qu) {
                         $qu->with([
                             "OwnedDocuments" => function ($qur) {
@@ -149,7 +149,7 @@ class ReportRepository
                     "method" => function ($q) {
                         $q->with("test.reportTemplates.template");
                     },
-                    "test.testGroup"
+                    "test.testGroups"
                 ]);
             },
             "signers"

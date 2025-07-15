@@ -50,7 +50,7 @@ readonly class AcceptanceItemService
             "acceptanceItemStates.finishedBy:name,id",
             "acceptanceItemStates.startedBy:name,id",
             "method.workflow.sections",
-            "test.testGroup",
+            "test.testGroups",
             "report:id,reported_at,approved_at,printed_at,approver_id,reporter_id",
             "report.reporter:id,name",
             "report.approver:id,name"

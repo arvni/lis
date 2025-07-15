@@ -74,7 +74,7 @@ readonly class TestService
             "methodTests.method.barcodeGroup",
             "methodTests.method.test.sampleTypes",
             "reportTemplates",
-            "testGroup",
+            "testGroups",
             "offers" => function ($q) use ($referrer) {
                 $q->where("started_at", "<=", Carbon::now("Asia/Muscat"))
                     ->where("ended_at", ">=", Carbon::now("Asia/Muscat"))
