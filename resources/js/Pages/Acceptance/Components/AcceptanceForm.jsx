@@ -11,7 +11,7 @@ import {
     Paper,
     Alert,
     Checkbox,
-    FormControlLabel, Chip, Card, CardHeader, CardContent, Avatar, IconButton
+    FormControlLabel, Card, CardContent, Avatar, IconButton
 } from "@mui/material";
 import useAcceptanceFormState from "./hooks/useAcceptanceFormState";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -31,7 +31,7 @@ import {
     LocalHospital,
     PersonOutlined
 } from "@mui/icons-material";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import EditIcon from "@mui/icons-material/Edit";
 
 // Lazy-loaded sections
@@ -44,35 +44,6 @@ const DoctorReferralSection = React.lazy(() => import("./DoctorReferralSection")
 const SamplingDeliverySection = React.lazy(() => import("./ReportSection.jsx"));
 
 const ConsultationCard = memo(({initialData: {patient, consultant, ...consultation}}) => {
-
-    // Status badge with appropriate colors
-    const StatusBadge = ({status}) => {
-        const getColor = () => {
-            switch (status?.toLowerCase()) {
-                case 'waiting':
-                    return 'warning';
-                case 'started':
-                    return 'info';
-                case 'done':
-                    return 'success';
-                default:
-                    return 'default';
-            }
-        };
-
-        return (
-            <Chip
-                label={status || 'Unknown'}
-                color={getColor()}
-                size="small"
-                sx={{
-                    textTransform: 'capitalize',
-                    fontWeight: 500,
-                    borderRadius: 2
-                }}
-            />
-        );
-    };
 
     // Format date for better display
     const formatDate = (dateString) => {
@@ -112,7 +83,7 @@ const ConsultationCard = memo(({initialData: {patient, consultant, ...consultati
                     <Divider sx={{my: 2}}/>
 
                     <Grid container spacing={2}>
-                        <Grid item xs={6}>
+                        <Grid size={6}>
                             <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                 <LocalHospital color="primary" fontSize="small"/>
                                 <Typography variant="body2" color="text.secondary">Consultant</Typography>
@@ -122,7 +93,7 @@ const ConsultationCard = memo(({initialData: {patient, consultant, ...consultati
                             </Typography>
                         </Grid>
 
-                        <Grid item xs={6}>
+                        <Grid size={6}>
                             <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                 <CalendarToday color="primary" fontSize="small"/>
                                 <Typography variant="body2" color="text.secondary">Due Date</Typography>
@@ -134,7 +105,7 @@ const ConsultationCard = memo(({initialData: {patient, consultant, ...consultati
 
                         {consultation.started_at && (
                             <>
-                                <Grid item xs={6}>
+                                <Grid size={6}>
                                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                         <EventAvailable color="primary" fontSize="small"/>
                                         <Typography variant="body2" color="text.secondary">Started At</Typography>
@@ -144,7 +115,7 @@ const ConsultationCard = memo(({initialData: {patient, consultant, ...consultati
                                     </Typography>
                                 </Grid>
 
-                                <Grid item xs={6}>
+                                <Grid size={6}>
                                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                         <AccessTime color="primary" fontSize="small"/>
                                         <Typography variant="body2" color="text.secondary">Duration</Typography>
