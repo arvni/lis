@@ -88,12 +88,12 @@ class AcceptanceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreAcceptanceRequest $acceptanceRequest, Patient $patient)
+    public function store(StoreAcceptanceRequest $acceptanceRequest, Patient $patient): RedirectResponse
     {
         $validatedData = $acceptanceRequest->validated();
         $acceptanceDto = new AcceptanceDTO(
             $patient->id,
-            2,
+            3,
             null,
             $acceptanceRequest->get("doctor")["id"] ?? null,
             null,

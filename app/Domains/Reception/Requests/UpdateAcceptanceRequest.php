@@ -2,10 +2,12 @@
 
 namespace App\Domains\Reception\Requests;
 
+use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 use function PHPUnit\Framework\isArray;
 
@@ -178,7 +180,10 @@ class UpdateAcceptanceRequest extends FormRequest
 
             case 4: // Sampling & Delivery
                 // Sampling Information
-                $rules['samplerGender'] = 'required|in:0,1';
+                $rules['samplerGender'] = [
+                    Rule::excludeIf(fn() => $this->checkIstthereAnyTestOnRequest()),
+                    'required',
+                    'in:0,1'];
                 $rules['out_patient'] = 'boolean';
 
                 // Report Information
@@ -186,6 +191,7 @@ class UpdateAcceptanceRequest extends FormRequest
 
                 // Ensure at least one delivery method is selected when not referred
                 $rules['howReport'] = [
+                    Rule::excludeIf(fn() => $this->checkIstthereAnyTestOnRequest()),
                     'required_if:referred,false',
                     function ($attribute, $value, $fail) {
                         if ($this->input('referred') === false &&
@@ -460,9 +466,17 @@ class UpdateAcceptanceRequest extends FormRequest
             $services = $this->input('acceptanceItems.services', []);
 
             // Verify at least one test or panel is selected
-            if (empty($tests) && empty($panels) && empty($services) ) {
+            if (empty($tests) && empty($panels) && empty($services)) {
                 $validator->errors()->add('acceptanceItems', 'Please select at least one test or panel.');
             }
         });
+    }
+
+    private function checkIstThereAnyTestOnRequest(): bool
+    {
+        return (count($this->input("acceptanceItems.panels", [])) +
+                collect($this->input("acceptanceItems.tests", []))->filter(fn($item) => $item["method_test"]["test"]["type"] == TestType::TEST->value)->count()
+            ) < 1 ||
+            $this->input("out_patient");
     }
 }

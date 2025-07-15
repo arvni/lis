@@ -94,7 +94,6 @@ const ReportOptions = ({howReport = {}, onChange, errors = {}, isReferred = fals
                     How Would You Like to Receive Your Report?
                 </Typography>
             </Box>
-
             <Box sx={{p: 3}}>
                 <Stack spacing={3}>
                     {/* Delivery Methods Section */}
@@ -105,6 +104,9 @@ const ReportOptions = ({howReport = {}, onChange, errors = {}, isReferred = fals
                         <Typography variant="body2" color="text.secondary" gutterBottom>
                             Choose one or more ways to receive your report
                         </Typography>
+                        {errors?.howReport && (
+                            <Typography color="error">{errors.howReport}</Typography>
+                        )}
 
                         <FormControl component="fieldset" fullWidth sx={{mt: 2}}>
                             <FormGroup row>
