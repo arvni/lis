@@ -205,7 +205,7 @@ const routes = (sections = []) => {
                 {
                     title: "Test Groups",
                     route: "testGroups.index",
-                    permission: 'Advance Settings.Test Group.List Test Groups',
+                    permission: 'Advance Settings.Test Groups.List Test Groups',
                     icon: <WorkspacesIcon/>
                 },
                 {
