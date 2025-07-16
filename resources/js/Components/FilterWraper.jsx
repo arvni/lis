@@ -9,7 +9,9 @@ const FilterTemplate = ({children, onFilter}) => {
         e.preventDefault();
         onFilter();
     };
-    return <form action="#" onSubmit={handleSubmit} style={{bg: theme.palette.background.paper}}>
+    return <form action="#"
+                 onSubmit={handleSubmit}
+                 style={{background: theme.palette.background.paper,padding:"1rem",borderRadius:"1rem"}} >
         <Grid container spacing={2}>
             {children}
             <Grid size={{xs: 12, sm: 2}} sx={{display: "flex"}} justifyContent="center">

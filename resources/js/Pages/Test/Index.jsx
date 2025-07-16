@@ -118,7 +118,7 @@ const Index = () => {
                     startIcon={<AddIcon/>}>Add Test</Button>,
 
             <Button key="download-excel-list-button"
-                    href={route("tests.export")}
+                    href={route("tests.export",requestInputs)}
                     variant="contained"
                     color="info"
                     startIcon={<ExcelIcon/>}>

@@ -10,6 +10,7 @@ use App\Domains\Laboratory\Repositories\TestRepository;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 
 readonly class TestService
@@ -21,6 +22,11 @@ readonly class TestService
     public function listTests($queryData): LengthAwarePaginator
     {
         return $this->testRepository->ListTests($queryData);
+    }
+
+    public function allTests($queryData): Collection
+    {
+        return $this->testRepository->allTests($queryData);
     }
 
     public function storeTest(TestDTO $testDTO): Test
@@ -81,8 +87,8 @@ readonly class TestService
                     ->where("active", true);
                 if ($referrer)
                     $q->where(function ($q) use ($referrer) {
-                        $q->whereHas("referrers",function ($q)use($referrer){
-                            $q->where("referrers.id",$referrer);
+                        $q->whereHas("referrers", function ($q) use ($referrer) {
+                            $q->where("referrers.id", $referrer);
                         })->orWhereDoesntHave("referrers");
                     });
             }

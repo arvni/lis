@@ -4,6 +4,7 @@ namespace App\Domains\Laboratory\Repositories;
 
 use App\Domains\Laboratory\Models\Test;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 
 class TestRepository
@@ -21,6 +22,22 @@ class TestRepository
             $query->with($queryData['with']);
         }
         return $query->paginate($queryData["pageSize"] ?? 10);
+    }
+
+    public function allTests(array $queryData): Collection
+    {
+        $query = Test::query();
+        if (isset($queryData["with"])) {
+            $query->with($queryData['with']);
+        }
+        if (isset($queryData["withCount"])) {
+            $query->withCount($queryData['withCount']);
+        }
+        if (isset($queryData["filters"]))
+            $this->applyFilters($query, $queryData["filters"]);
+        if (isset($queryData["sort"]))
+            $query->orderBy($queryData['sort']['field'] ?? 'id', $queryData['sort']['sort'] ?? 'asc');
+        return $query->get();
     }
 
     public function creatTest(array $testData): Test
@@ -55,8 +72,10 @@ class TestRepository
     {
         if (isset($filters["search"]))
             $query->search($filters["search"]);
-        if (isset($filters["test_groups"]) && count($filters["test_groups"]))
-            $query->whereHas("testGroups", fn($q) => $q->whereIn("test_groups.id", Arr::pluck($filters["test_groups"], "id")));
+        if (isset($filters["test_groups"]) && count(array_filter($filters["test_groups"], fn($item) => boolval($item["id"] ?? null)))) {
+            $testGroups = array_filter($filters["test_groups"], fn($item) => boolval($item["id"] ?? null));
+            $query->whereHas("testGroups", fn($q) => $q->whereIn("test_groups.id", Arr::pluck($testGroups, "id")));
+        }
         if (isset($filters["status"]))
             $query->where("status", $filters["status"]);
         if (isset($filters["type"]))
