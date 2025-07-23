@@ -646,7 +646,7 @@ class ReportService
      */
     public function getSampleData($samples): array
     {
-        $data = [];
+        $data = ["images" => ["logo" => url("/images/logo.png"),]];
 
         foreach ($samples as $key => $sample) {
             $sample->loadAggregate("sampleType", "name");
@@ -656,30 +656,28 @@ class ReportService
             if (!file_exists($barcodePath)) {
                 mkdir($barcodePath, 0755, true);
             }
-            if($key==0)
-            $data[]=[
-                "barcode" => $barcodeValue,
-                "sample_created_at" => Carbon::parse($sample->created_at,"Asia/Muscat")->format("d M Y"),
-                "sample_collection_date" => Carbon::parse($sample->collection_date,"Asia/Muscat")->format("d M Y"),
-                "sample_type_name" => $sample->sample_type_name ?? 'N/A',
-                "images" => [
-                    "logo" => url("/images/logo.png"),
+            if ($key == 0) {
+
+                $data["barcode"] = $barcodeValue;
+                $data["sample_created_at"] = Carbon::parse($sample->created_at, "Asia/Muscat")->format("d M Y");
+                $data["sample_collection_date"] = Carbon::parse($sample->collection_date, "Asia/Muscat")->format("d M Y");
+                $data["sample_type_name"] = $sample->sample_type_name ?? 'N/A';
+                $data["images"] = [
+                    ...$data["images"],
                     "barcodeImg" => $barcodeValue ? DNS1D::getBarcodePNGPath($barcodeValue, 'C128', 1, 30) : null
-                ]
-            ];
-            else
-                $data[]=[
-                    "barcode_{$key}" => $barcodeValue,
-                    "sample_{$key}_created_at" => Carbon::parse($sample->created_at,"Asia/Muscat")->format("d M Y"),
-                    "sample_{$key}_collection_date" => Carbon::parse($sample->collection_date,"Asia/Muscat")->format("d M Y"),
-                    "sample_{$key}_type_name" => $sample->sample_type_name ?? 'N/A',
-                    "images" => [
-                        "logo" => url("/images/logo.png"),
-                        "barcodeImg_{$key}" => $barcodeValue ? DNS1D::getBarcodePNGPath($barcodeValue, 'C128', 1, 30) : null
-                    ]
                 ];
+            } else {
+                $data["barcode_{$key}"] = $barcodeValue;
+                $data["sample_{$key}_created_at"] = Carbon::parse($sample->created_at, "Asia/Muscat")->format("d M Y");
+                $data["sample_{$key}_collection_date"] = Carbon::parse($sample->collection_date, "Asia/Muscat")->format("d M Y");
+                $data["sample_{$key}_type_name"] = $sample->sample_type_name ?? 'N/A';
+                $data["images"] = [
+                    ...$data["images"],
+                    "barcodeImg_{$key}" => $barcodeValue ? DNS1D::getBarcodePNGPath($barcodeValue, 'C128', 1, 30) : null
+                ];
+            }
         }
-        return Arr::flatten($data,1);
+        return $data;
     }
 
     /**
