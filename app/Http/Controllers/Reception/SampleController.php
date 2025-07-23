@@ -58,7 +58,7 @@ class SampleController extends Controller
             "patient",
             "acceptanceItems" => function ($q) {
                 $q->wherePivot("active", true);
-                $q->with("test");
+                $q->with("method.test");
             }
         ]);
         return Inertia::render('Acceptance/Barcodes', ["barcodes" => [
