@@ -71,7 +71,7 @@ class AcceptanceService
                         "price" => $methodTest->method->price,
                         'discount' => 0,
                         [],
-                        "patients" => [["id" => $acceptanceDTO->patientId]],
+                        "samples" => [["patients" => [["id" => $acceptanceDTO->patientId]]]],
                         "customParameters" => []
                     ];
                 }

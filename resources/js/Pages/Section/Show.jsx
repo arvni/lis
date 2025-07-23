@@ -131,9 +131,9 @@ const Show = () => {
             flex: 1,
             renderCell: ({row}) => {
                 return (
-                    <Tooltip title={row.sample.patient.fullName || "No patient name"} arrow>
+                    <Tooltip title={row?.sample?.patient?.fullName || "No patient name"} arrow>
                         <Typography noWrap variant="body2">
-                            {row.sample.patient.fullName || "-"}
+                            {row.sample?.patient?.fullName || "-"}
                         </Typography>
                     </Tooltip>
                 );
@@ -147,7 +147,7 @@ const Show = () => {
             flex: 0.2,
             type: "string",
             renderCell: ({row}) => {
-                return <Typography variant="body2">{row.sample.patient.age || "-"}</Typography>;
+                return <Typography variant="body2">{row?.sample?.patient?.age || "-"}</Typography>;
             }
         },
         {

@@ -247,7 +247,11 @@ class UpdateAcceptanceRequest extends FormRequest
                 $rules['patient_id'] = 'required';
                 $rules['acceptor_id'] = 'nullable';
                 // Sampling Information
-                $rules['samplerGender'] = 'required|in:0,1';
+                $rules['samplerGender'] = [
+                    Rule::excludeIf(fn() => $this->checkIstthereAnyTestOnRequest()),
+                    'required',
+                    'in:0,1'
+                ];
                 $rules['out_patient'] = 'boolean';
 
                 // Report Information
@@ -255,6 +259,7 @@ class UpdateAcceptanceRequest extends FormRequest
 
                 // Ensure at least one delivery method is selected when not referred
                 $rules['howReport'] = [
+                    Rule::excludeIf(fn() => $this->checkIstthereAnyTestOnRequest()),
                     'required_if:referred,false',
                     function ($attribute, $value, $fail) {
                         if ($this->input('referred') === false &&
