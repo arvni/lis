@@ -52,8 +52,10 @@ class StoreReferrerOrderAcceptanceRequest extends FormRequest
                 }
             },
         ];
-        $rules['acceptanceItems.tests.*.patients'] = 'required|array|min:1';
-        $rules['acceptanceItems.tests.*.patients.*.id'] = 'required|exists:patients,id';
+        $rules['acceptanceItems.tests.*.samples'] = 'required|array|min:1';
+        $rules['acceptanceItems.tests.*.samples.*.sampleType'] = 'required|exists:sample_types,id';
+        $rules['acceptanceItems.tests.*.samples.*.patients'] = 'required|array|min:1';
+        $rules['acceptanceItems.tests.*.samples.*.patients.*.id'] = 'required|exists:patients,id';
         $rules['acceptanceItems.tests.*.details'] = 'nullable|string|max:500';
         $rules['acceptanceItems.tests.*.customParameters.discounts'] = 'nullable|array';
 
@@ -86,9 +88,9 @@ class StoreReferrerOrderAcceptanceRequest extends FormRequest
         $rules['acceptanceItems.panels.*.acceptanceItems'] = 'required|array';
         $rules['acceptanceItems.panels.*.acceptanceItems.*.id'] = 'nullable';
         $rules['acceptanceItems.panels.*.acceptanceItems.*.method_test.id'] = 'required|exists:method_tests,id';
-        $rules['acceptanceItems.panels.*.acceptanceItems.*.customParameters.sampleType'] = 'required|exists:sample_types,id';
-        $rules['acceptanceItems.panels.*.acceptanceItems.*.patients'] = 'required|array|min:1';
-        $rules['acceptanceItems.panels.*.acceptanceItems.*.patients.*.id'] = 'required|exists:patients,id';
+        $rules['acceptanceItems.panels.*.acceptanceItems.*.samples.*.sampleType'] = 'required|exists:sample_types,id';
+        $rules['acceptanceItems.panels.*.acceptanceItems.*.samples.*.patients'] = 'required|array|min:1';
+        $rules['acceptanceItems.panels.*.acceptanceItems.*.samples.*.patients.*.id'] = 'required|exists:patients,id';
         $rules['acceptanceItems.panels.*.acceptanceItems.*.details'] = 'nullable|string|max:500';
         $rules['howReport.sendToReferrer'] = [
             'boolean',

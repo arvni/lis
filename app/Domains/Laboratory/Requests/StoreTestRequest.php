@@ -72,6 +72,11 @@ class StoreTestRequest extends FormRequest
                 "numeric",
                 "min:1"
             ],
+            "method_tests.*.method.no_sample" => [
+                "nullable",
+                "numeric",
+                "min:1"
+            ],
             "method_tests.*.method.price_type" => [
                 "required",
                 Rule::enum(MethodPriceType::class)

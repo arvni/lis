@@ -40,7 +40,7 @@ readonly class AcceptanceItemStateService
             "acceptanceItem.test",
             "acceptanceItem.method",
             "acceptanceItem.patients",
-            "acceptanceItem.activeSample",
+            "sample.sampleType",
         ]);
         return $acceptanceItemState;
     }
@@ -128,12 +128,12 @@ readonly class AcceptanceItemStateService
                 $nextSectionOrder,
             );
             if ($section) {
-                $this->createNextState($acceptanceItem->id, $section);
+                $this->createNextState($acceptanceItem->id, $section,$state->sample_id);
             }
         } else {
             // Trigger rejection event
 //            AcceptanceItemSampleRejectedEvent::dispatch($acceptanceItem);
-            $this->acceptanceItemService->rejectSample($acceptanceItem);
+            $this->acceptanceItemService->rejectSample($acceptanceItem,$state->sample_id);
         }
     }
 
@@ -149,14 +149,14 @@ readonly class AcceptanceItemStateService
         );
 
         if ($nextSection) {
-            $this->createNextState($acceptanceItem->id, $nextSection);
+            $this->createNextState($acceptanceItem->id, $nextSection,$state->sample_id);
         }
     }
 
     /**
      * Create the next state in the workflow.
      */
-    private function createNextState(int $acceptanceItemId, object $section): void
+    private function createNextState(int $acceptanceItemId, object $section,?int $sampleId=null): void
     {
         $userId = auth()->id();
 
@@ -172,7 +172,8 @@ readonly class AcceptanceItemStateService
             $userId,
             null,
             now(),
-            null
+            null,
+            $sampleId
         );
 
         $this->acceptanceItemStateRepository->creatAcceptanceItemState($dto->toArray());

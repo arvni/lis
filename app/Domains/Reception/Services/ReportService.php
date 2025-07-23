@@ -12,7 +12,6 @@ use App\Domains\Reception\Events\ReportPublishedEvent;
 use App\Domains\Reception\Factories\SignerFactory;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Report;
-use App\Domains\Reception\Models\Sample;
 use App\Domains\Reception\Repositories\AcceptanceItemRepository;
 use App\Domains\Reception\Repositories\ReportParameterRepository;
 use App\Domains\Reception\Repositories\ReportRepository;
@@ -572,7 +571,7 @@ class ReportService
     {
         return $report->load([
             "acceptanceItem.patients",
-            "acceptanceItem.activeSample.sampleType",
+            "acceptanceItem.activeSamples.sampleType",
             "acceptanceItem.test",
             "signers",
             "acceptanceItem.acceptance.referrer",
@@ -592,12 +591,12 @@ class ReportService
         $report = $this->loadReportRelationships($report);
 
         // Check if required relationships are loaded
-        if (!$report->acceptanceItem || !$report->acceptanceItem->activeSample) {
+        if (!$report->acceptanceItem || !$report->acceptanceItem->activeSamples) {
             throw new RuntimeException('Required report relationships not loaded');
         }
 
         $patientData = $this->preparePatientData($report->acceptanceItem->patients);
-        $sampleData = $this->getSampleData($report->acceptanceItem->activeSample);
+        $sampleData = $this->getSampleData($report->acceptanceItem->activeSamples);
         $signers = $this->prepareSigners($report->signers);
         if (count($report->parameters)) ;
         $parametersData = $this->prepareParametersData($report->parameters);
@@ -645,25 +644,42 @@ class ReportService
     /**
      * Get sample data for report
      */
-    public function getSampleData(Sample $sample): array
+    public function getSampleData($samples): array
     {
-        $sample->loadAggregate("sampleType", "name");
+        $data = [];
 
-        $barcodeValue = strtoupper($sample->barcode);
-        $barcodePath = storage_path('app/barcodes/');
-        if (!file_exists($barcodePath)) {
-            mkdir($barcodePath, 0755, true);
+        foreach ($samples as $key => $sample) {
+            $sample->loadAggregate("sampleType", "name");
+
+            $barcodeValue = strtoupper($sample->barcode);
+            $barcodePath = storage_path('app/barcodes/');
+            if (!file_exists($barcodePath)) {
+                mkdir($barcodePath, 0755, true);
+            }
+            if($key==0)
+            $data[]=[
+                "barcode" => $barcodeValue,
+                "sample_created_at" => Carbon::parse($sample->created_at,"Asia/Muscat")->format("d M Y"),
+                "sample_collection_date" => Carbon::parse($sample->collection_date,"Asia/Muscat")->format("d M Y"),
+                "sample_type_name" => $sample->sample_type_name ?? 'N/A',
+                "images" => [
+                    "logo" => url("/images/logo.png"),
+                    "barcodeImg" => $barcodeValue ? DNS1D::getBarcodePNGPath($barcodeValue, 'C128', 1, 30) : null
+                ]
+            ];
+            else
+                $data[]=[
+                    "barcode_{$key}" => $barcodeValue,
+                    "sample_{$key}_created_at" => Carbon::parse($sample->created_at,"Asia/Muscat")->format("d M Y"),
+                    "sample_{$key}_collection_date" => Carbon::parse($sample->collection_date,"Asia/Muscat")->format("d M Y"),
+                    "sample_{$key}_type_name" => $sample->sample_type_name ?? 'N/A',
+                    "images" => [
+                        "logo" => url("/images/logo.png"),
+                        "barcodeImg_{$key}" => $barcodeValue ? DNS1D::getBarcodePNGPath($barcodeValue, 'C128', 1, 30) : null
+                    ]
+                ];
         }
-        return [
-            "barcode" => $barcodeValue,
-            "sample_created_at" => Carbon::parse($sample->created_at,"Asia/Muscat")->format("d M Y"),
-            "sample_collection_date" => Carbon::parse($sample->collection_date,"Asia/Muscat")->format("d M Y"),
-            "sample_type_name" => $sample->sample_type_name ?? 'N/A',
-            "images" => [
-                "logo" => url("/images/logo.png"),
-                "barcodeImg" => $barcodeValue ? DNS1D::getBarcodePNGPath($barcodeValue, 'C128', 1, 30) : null
-            ]
-        ];
+        return Arr::flatten($data,1);
     }
 
     /**

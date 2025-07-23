@@ -4,9 +4,10 @@ import React, {useCallback, useMemo, useState} from "react";
 import PrintIcon from "@mui/icons-material/Print";
 import AddForm from "@/Pages/Sample/Components/AddForm";
 import IconButton from "@mui/material/IconButton";
-import {router, useForm, usePage} from "@inertiajs/react";
+import {router, usePage} from "@inertiajs/react";
 import PageHeader from '@/Components/PageHeader';
 import Filter from './Components/Filter';
+import {formatDate} from "@/Services/helper.js";
 
 
 const Index = () => {
@@ -54,31 +55,35 @@ const Index = () => {
             headerName: 'Name',
             type: "string",
             width: 200,
+            display:"flex"
         },
         {
             field: 'patient_idno',
             headerName: 'ID No./Passport No.',
             type: "string",
             width: 150,
+            display:"flex"
         },
         {
             field: 'status',
             headerName: 'Status',
             type: "string",
             width: 150,
+            display:"flex"
         },
 
         {
             field: 'created_at',
             headerName: 'Added Date',
-            type: "datetime",
-            valueGetter: (value) => value && new Date(value),
-            width: 170
+            valueGetter: (value) => value?formatDate(new Date(value)):"-",
+            width: 170,
+            display:"flex"
         },
         {
             field: 'id',
             headerName: 'Action',
             type: 'actions',
+            display:"flex",
             width: 100,
             sortable: false,
             renderCell: (params) => <IconButton onClick={print(params.row.id)}><PrintIcon/></IconButton>,

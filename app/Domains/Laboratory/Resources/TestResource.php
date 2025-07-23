@@ -62,7 +62,7 @@ class TestResource extends JsonResource
                 ];
             return [
                 "price" => $this->price,
-                "price_type" => $this->pric_type,
+                "price_type" => $this->price_type,
                 "extra" => $this->extra
             ];
         }

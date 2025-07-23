@@ -19,6 +19,7 @@ class MethodDTO
         public ?MethodPriceType $referrer_price_type = MethodPriceType::FIX,
         public ?int             $referrer_price = 0,
         public ?array          $referrer_extra = null,
+        public ?int            $noSample = 1,
     )
     {
     }
@@ -37,7 +38,8 @@ class MethodDTO
             "extra" => $this->extra,
             "barcode_group_id" => $this->barcodeGroupId,
             "workflow_id" => $this->workflowId,
-            "no_patient" => $this->noPatient
+            "no_patient" => $this->noPatient,
+            "no_sample" => $this->noSample,
         ];
     }
 }

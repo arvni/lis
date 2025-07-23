@@ -24,9 +24,9 @@ class AcceptanceItemRepository
                 ]);
             },
             "invoice.owner",
-            "report"
+            "report",
+            "activeSamples"
         ])
-            ->withAggregate("activeSample", "collection_date")
             ->withAggregate("method", "name")
             ->withAggregate("test", "tests.name")
             ->withAggregate("patient", "fullName")
@@ -46,8 +46,8 @@ class AcceptanceItemRepository
                     "StartedBy:name,id"
                 ]);
             },
+            "activeSamples",
         ])
-            ->withAggregate("activeSample", "collection_date")
             ->withAggregate("method", "name")
             ->withAggregate("test", "tests.name")
             ->withAggregate("patient", "fullName")
@@ -83,17 +83,23 @@ class AcceptanceItemRepository
     public function creatAcceptanceItem(array $acceptanceItemData): AcceptanceItem
     {
         $acceptanceItem = AcceptanceItem::query()->create(Arr::except($acceptanceItemData, "patients"));
-        $this->syncPatients($acceptanceItem, $acceptanceItemData["patients"]);
+        if (isset($acceptanceItemData["customParameters"]["samples"])) {
+            $patients=Arr::flatten(array_map(fn($item)=>$item["patients"]??[],$acceptanceItemData["customParameters"]["samples"]),1);
+            $this->syncPatients($acceptanceItem, $patients);
+        }
         return $acceptanceItem;
     }
 
     public function updateAcceptanceItem(AcceptanceItem $acceptanceItem, array $acceptanceItemData): AcceptanceItem
     {
         $acceptanceItem->fill(Arr::except($acceptanceItemData, "patients"));
-        if ($acceptanceItem->isDirty())
+        if ($acceptanceItem->isDirty()) {
             $acceptanceItem->save();
-        if (isset($acceptanceItemData["patients"]))
-            $this->syncPatients($acceptanceItem, $acceptanceItemData["patients"]);
+        }
+        if (isset($acceptanceItemData["customParameters"]["samples"])) {
+            $patients=Arr::flatten(array_map(fn($item)=>$item["patients"]??[],$acceptanceItemData["customParameters"]["samples"]),1);
+            $this->syncPatients($acceptanceItem, $patients);
+        }
         return $acceptanceItem;
     }
 
@@ -116,6 +122,8 @@ class AcceptanceItemRepository
                 }]);
             },
             "acceptanceItemStates.section",
+            "acceptanceItemStates.sample.patient:id,fullName",
+            "acceptanceItemStates.sample.sampleType",
             "acceptanceItemStates.startedBy:id,name",
             "acceptanceItemStates.finishedBy:id,name",
             "reports" => function ($q) {
@@ -139,8 +147,7 @@ class AcceptanceItemRepository
             ->map(fn($item, $index) => ["order" => $index, "main" => $index == 0 ? 1 : null, "id" => $item["id"]])
             ->keyBy("id")
             ->map(fn($item) => Arr::only($item, ["order", "main"]));
-        $acceptanceItem->patients()
-            ->sync($patientsList);
+        $acceptanceItem->patients()->sync($patientsList);
     }
 
     private function limitAccess($query)
@@ -202,5 +209,6 @@ class AcceptanceItemRepository
             })
             ->count();
     }
+
 
 }

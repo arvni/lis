@@ -1,14 +1,9 @@
-import React, {useCallback, useState, useMemo} from 'react';
+import React, {useState, useMemo} from 'react';
 import {
     Alert,
     Box,
     Divider,
-    FormControl,
-    FormHelperText,
-    InputLabel,
-    MenuItem,
     Paper,
-    Select,
     Table,
     TableBody,
     TableCell,
@@ -21,12 +16,10 @@ import {
     Tooltip,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PaidIcon from '@mui/icons-material/Paid';
 import ScienceIcon from '@mui/icons-material/Science';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import DiscountIcon from '@mui/icons-material/LocalOffer';
-import axios from 'axios';
 import MethodPriceField from '../MethodPriceField';
 import DiscountManager from '../DiscountManager'; // Import the DiscountManager component
 
@@ -35,7 +28,6 @@ const ServiceTestForm = ({
                              onChange,
                              errors = {},
                              maxDiscount = 0,
-                             referrer,
                              patient
                          }) => {
     // Safely destructure with defaults to prevent undefined errors

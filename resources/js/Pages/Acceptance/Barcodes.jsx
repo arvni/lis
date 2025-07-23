@@ -246,8 +246,8 @@ const BarcodeComponent = ({barcodes}) => {
                                         </BarcodeText>
                                         {barcode?.acceptance_items?.length ? (
                                             <BarcodeText
-                                                title={barcode.acceptance_items.map(item => item.test.name).join(', ')}>
-                                                {barcode.acceptance_items.map(item => item.test.name).join(', ')}
+                                                title={barcode.acceptance_items.map(item => item.method.test.name).join(', ')}>
+                                                {barcode.acceptance_items.map(item => item.method.test.name).join(', ')}
                                             </BarcodeText>
                                         ) : null}
                                     </Stack>

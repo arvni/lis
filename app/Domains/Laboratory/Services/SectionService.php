@@ -5,9 +5,8 @@ namespace App\Domains\Laboratory\Services;
 
 use App\Domains\Laboratory\DTOs\SectionDTO;
 use App\Domains\Laboratory\Enums\ActionType;
-use App\Domains\Laboratory\Events\ReferrerOrderEvent;
+use App\Domains\Laboratory\Events\SectionEvent;
 use App\Domains\Laboratory\Models\Section;
-use App\Domains\Laboratory\Models\Workflow;
 use App\Domains\Laboratory\Repositories\SectionRepository;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -29,7 +28,7 @@ class SectionService
     {
         $section = $this->sectionRepository->creatSection($sectionDTO->toArray());
         $section->load("sectionGroup");
-        ReferrerOrderEvent::dispatch(ActionType::CREATE, $section->toArray(), []);
+        SectionEvent::dispatch(ActionType::CREATE, $section->toArray(), []);
         return $section;
     }
 
@@ -39,7 +38,7 @@ class SectionService
         $oldSectionData = $section->toArray();
         $section = $this->sectionRepository->updateSection($section, $sectionDTO->toArray());
         $section->load("sectionGroup");
-        ReferrerOrderEvent::dispatch(ActionType::UPDATE, $section->toArray(), $oldSectionData);
+        SectionEvent::dispatch(ActionType::UPDATE, $section->toArray(), $oldSectionData);
         return $section;
     }
 
@@ -51,7 +50,7 @@ class SectionService
         $sectionData = $section->toArray();
         if (!$section->acceptanceItemStates()->exists() && !$section->workflows()->exists()) {
             $this->sectionRepository->deleteSection($section);
-            ReferrerOrderEvent::dispatch(ActionType::DELETE, $sectionData);
+            SectionEvent::dispatch(ActionType::DELETE, $sectionData);
         } else
             throw new Exception("This section has some Acceptance or participate in Workflow");
     }

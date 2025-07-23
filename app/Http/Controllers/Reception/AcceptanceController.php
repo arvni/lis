@@ -39,7 +39,7 @@ class AcceptanceController extends Controller
         $requestInputs = $request->all();
 
         $acceptances = $this->acceptanceService->listAcceptances($requestInputs);
-        $acceptance=new Acceptance();
+        $acceptance = new Acceptance();
         return Inertia::render('Acceptance/Index',
             [
                 "acceptances" => $acceptances,
@@ -120,8 +120,16 @@ class AcceptanceController extends Controller
         }
         $acceptance = $this->acceptanceService->showAcceptance($acceptance);
         $data = [
-            "acceptance" => array_merge(Arr::except($acceptance->toArray(), ["acceptance_items", "invoice", "payments", "prescription", "patient"]),
+            "acceptance" => array_merge(Arr::except($acceptance->toArray(), [
+                "acceptance_items",
+                "invoice",
+                "payments",
+                "prescription",
+                "patient",
+
+            ]),
                 ([
+                    "acceptance_items" => $this->acceptanceService->organizeAcceptanceItems($acceptance->acceptanceItems->toArray()),
                     "prescription" => $acceptance->prescription ? [
                         "id" => $acceptance->prescription->hash,
                         'originalName' => $acceptance->prescription->originalName

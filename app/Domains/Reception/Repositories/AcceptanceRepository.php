@@ -5,6 +5,7 @@ namespace App\Domains\Reception\Repositories;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Setting\Services\SettingService;
 use Carbon\Carbon;
@@ -116,25 +117,27 @@ class AcceptanceRepository
         DB::statement('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,"ONLY_FULL_GROUP_BY",""))');
 
         $query = Acceptance::query()
-            ->withCount('acceptanceItems')
-            ->with('acceptanceItems.methodTest.test:id,name,type')
-            ->withSum('acceptanceItems', 'price')
-            ->withSum('acceptanceItems', 'discount')
-            ->withSum('payments', 'price')
+            ->withSum('acceptanceItems as acceptance_items_sum_price', 'price')
+            ->withSum('acceptanceItems as acceptance_items_sum_discount', 'discount')
+            ->withSum('payments as payments_sum_price', 'price')
+            ->withAggregate('invoice', 'discount')
             ->withAggregate('patient', 'fullName')
             ->withAggregate('patient', 'idNo')
             ->whereHas('acceptanceItems', function (Builder $itemQuery) {
-                $itemQuery->whereDoesntHave('samples', function (Builder $sampleQuery) {
-                    $sampleQuery->where('acceptance_item_samples.active', true);
-                });
                 $itemQuery->whereHas('methodTest.test', function (Builder $testQuery) {
                     $testQuery->where('type', '!=', TestType::SERVICE);
                 });
+
+                // Use whereRaw to properly reference the table columns in the subquery context
+                $itemQuery->whereRaw('(select count(*) from `samples`
+    inner join `acceptance_item_samples` on `samples`.`id` = `acceptance_item_samples`.`sample_id`
+    where `acceptance_items`.`id` = `acceptance_item_samples`.`acceptance_item_id`
+    and `acceptance_item_samples`.`active` = 1
+) < `acceptance_items`.`no_sample`');
             })
             ->selectRaw("({$this->getPayableAmountSql()}) as payable_amount")
             ->groupBy('acceptances.id')
-            ->havingRaw("COALESCE(payments_sum_price, 0) >= (({$this->getPayableAmountSql()}) * ? / 100)", [$minAllowablePaymentPercentage]);
-
+            ->havingRaw("COALESCE(payments_sum_price + invoice_discount, 0) >= ((payable_amount) * ? / 100)", [$minAllowablePaymentPercentage]);
         if (isset($queryData['filters'])) {
             $this->applyFilters($query, $queryData['filters']);
         }
@@ -201,9 +204,9 @@ class AcceptanceRepository
             $query->where('acceptances.patient_id', $filters[self::FILTER_PATIENT_ID]); // Qualify column name
         }
 
-        if (isset($filters["date"])){
-            $date=Carbon::parse($filters["date"]);
-            $dateRange=[$date->copy()->startOfDay(),$date->copy()->endOfDay()];
+        if (isset($filters["date"])) {
+            $date = Carbon::parse($filters["date"]);
+            $dateRange = [$date->copy()->startOfDay(), $date->copy()->endOfDay()];
             $query->whereBetween('acceptances.created_at', $dateRange);
         }
         if (!empty($filters["from_date"]) || !empty($filters["to_date"])) {
@@ -246,7 +249,14 @@ class AcceptanceRepository
             })
             ->map(function (Collection $items, string $type) { // Type hint $items as Collection
                 if ($type === TestType::TEST->value || $type === TestType::SERVICE->value) {
-                    return $items;
+                    return $items->map(function ($acceptanceItem) {
+                        $customParameters = (object)($acceptanceItem['customParameters'] ?? []);
+                        $acceptanceItem = (object)$acceptanceItem;
+                        $acceptanceItem->samples = $customParameters->samples ?? [];
+                        $acceptanceItem->discounts = $customParameters->discounts ?? [];
+                        $acceptanceItem->details = $customParameters->details ?? "";
+                        return $acceptanceItem;
+                    });
                 }
                 // Assumes PANEL type is the only other possibility based on original logic
                 return $this->processPanelItems($items); // Renamed for clarity
@@ -259,14 +269,15 @@ class AcceptanceRepository
     private function processPanelItems(Collection $items): array // Renamed from processItemsAsPanel
     {
         return $items
-            ->groupBy('method_test.test_id') // Group by the panel's main test ID
+            ->groupBy('panel_id') // Group by the panel's main test ID
             ->map(function (Collection $panelItems) { // Type hint $panelItems as Collection
                 $firstItem = $panelItems->first();
                 // Ensure 'method_test' and 'test' are available in the structure of $firstItem
                 return [
                     // 'panel' should represent the panel itself, not just one of its items' test
+                    'id' => $firstItem["panel_id"],
                     'panel' => $firstItem['method_test']['test'], // This assumes the 'test' here is the panel definition
-                    'acceptanceItems' => $panelItems,
+                    'acceptanceItems' => $panelItems->map(fn($item) => [...$item, "samples" => $item["customParameters"]["samples"] ?? [], "discounts" => $item["customParameters"]["discounts"] ?? [], "details" => $item["customParameters"]["details"] ?? ""]),
                     'price' => $panelItems->sum('price'),
                     'discount' => $panelItems->sum('discount'),
                 ];
@@ -299,14 +310,14 @@ class AcceptanceRepository
                     ->join('method_tests', 'acceptance_items.method_test_id', '=', 'method_tests.id')
                     ->join('tests', 'method_tests.test_id', '=', 'tests.id')
                     ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id')
-                    ->where('tests.type', TestType::TEST);
+                    ->whereNot('tests.type', TestType::SERVICE);
             })
             ->whereNotExists(function ($query) {
                 $query->select(DB::raw(1))
                     ->from('acceptance_items')
                     ->join('acceptance_item_samples', function ($join) {
                         $join->on('acceptance_items.id', '=', 'acceptance_item_samples.acceptance_item_id')
-                            ->where('acceptance_item_samples.active',true); // Adjust status condition as needed
+                            ->where('acceptance_item_samples.active', true); // Adjust status condition as needed
                     })
                     ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id');
             })

@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 
 class AcceptanceService
 {
@@ -270,7 +271,6 @@ class AcceptanceService
         // Process acceptance items using existing logic
         $acceptanceItems = $this->prepareAcceptanceItems($acceptance, $acceptanceDTO->acceptanceItems);
         $updatedAcceptanceItems = [];
-
         foreach ($acceptanceItems as $acceptanceItemData) {
             $acceptanceItem = $this->acceptanceItemService->findAcceptanceItemById($acceptanceItemData->id);
             if ($acceptanceItem)
@@ -355,7 +355,7 @@ class AcceptanceService
             "acceptanceItems.method.barcodeGroup",
             "acceptanceItems.method.test.sampleTypes",
             "acceptanceItems.test",
-            "acceptanceItems.patient",
+            "acceptanceItems.patients",
             "patient"
         ]);
         $barcodes = $this->convertAcceptanceItems($acceptance->acceptanceItems->where("test.type", "!=", TestType::SERVICE));
@@ -384,7 +384,6 @@ class AcceptanceService
     private function prepareAcceptanceItems(Acceptance $acceptance, array $acceptanceItems): array
     {
         $output = [];
-
         if (isset($acceptanceItems['tests']) && $acceptanceItems['tests'] && is_array($acceptanceItems['tests']) && count($acceptanceItems["tests"])) {
             foreach ($acceptanceItems["tests"] as $acceptance_item) {
                 $output[] = new AcceptanceItemDTO(
@@ -393,9 +392,13 @@ class AcceptanceService
                     $acceptance_item["price"],
                     $acceptance_item['discount'],
                     array_merge(($acceptance_item["customParameters"] ?? []), Arr::except($acceptance_item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters"])),
-                    $acceptance_item["patients"],
-                    $acceptance_item["timeLine"] ?? [
-                    Carbon::now()->format("Y-m-d H:i:s") => "Created By " . auth()->user()->name,],
+                    !($acceptance_item['timeLine'] ?? null) ? [
+                        Carbon::now()->format("Y-m-d H:i:s") => "Created By " . auth()->user()->name,
+                    ] : [
+                        ...$acceptance_item['timeLine'],
+                        Carbon::now()->format("Y-m-d H:i:s") => "Edited By " . auth()->user()->name,
+                    ],
+                    $acceptance_item["no_sample"] ?? (count($acceptance_item["samples"] ?? [1]) || 1),
                     $acceptance_item["id"] ?? null
                 );
             }
@@ -403,21 +406,23 @@ class AcceptanceService
         if (isset($acceptanceItems['panels']) && is_array($acceptanceItems['panels'])) {
             foreach ($acceptanceItems['panels'] as $panelData) {
                 if (isset($panelData["acceptanceItems"]) && is_array($panelData["acceptanceItems"])) {
+                    $panelID = Str::uuid();
                     foreach ($panelData["acceptanceItems"] as $item) {
                         $output[] = new AcceptanceItemDTO(
                             $acceptance->id,
                             $item['method_test']['id'],
                             $panelData['price'] / count($panelData['acceptanceItems']), // Distribute price among items
                             $panelData['discount'] / count($panelData['acceptanceItems']), // Distribute discount among items
-                            array_merge($item["customParameters"], Arr::except($item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters"])),
-                            $item['patients'],
+                            array_merge(($item["customParameters"] ?? []), Arr::except($item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters"])),
                             !($item['timeLine'] ?? null) ? [
                                 Carbon::now()->format("Y-m-d H:i:s") => "Created By " . auth()->user()->name,
                             ] : [
                                 ...$item['timeLine'],
                                 Carbon::now()->format("Y-m-d H:i:s") => "Edited By " . auth()->user()->name,
                             ],
-                            $item["id"] ?? null
+                            $item["no_sample"] ?? (count($item["samples"] ?? [1]) || 1),
+                            $item["id"] ?? null,
+                            $panelID,
                         );
                     }
                 }
@@ -428,12 +433,46 @@ class AcceptanceService
 
     private function convertAcceptanceItems(Collection $acceptanceItems)
     {
-        return $acceptanceItems->groupBy(function ($item) {
-            // Get barcode group ID
-            $barcodeGroupId = $item->method->barcode_group_id ?? 'no_barcode_group';
-            // Return composite key
-            return $barcodeGroupId . '_' . $item->patient->id;
-        })
+        return $acceptanceItems
+            ->flatMap(function ($item) {
+                $samples = $item->customParameters['samples'] ?? [];
+
+                if (empty($samples)) {
+                    $newModel = $item->replicate();
+                    $newModel->patient = $item->patients->first();
+                    return collect([$newModel]);
+                }
+
+                return collect($samples)->flatMap(function ($sample, $sampleIndex) use ($item) {
+                    try {
+                        // If $sample is an array of patient data
+                        if (is_array($sample["patients"])) {
+                            return collect($sample["patients"])
+                                ->map(function ($patientData) use ($item) {
+                                    $newModel = $item->replicate();
+                                    $newModel->id = $item->id;
+                                    $patient = $item->patients->where('id', $patientData['id'])->first();
+                                    $newModel->patient = $patient;
+                                    return $newModel;
+                                });
+                        } else {
+                            // If $sample is a single patient object
+                            $newModel = $item->replicate();
+                            $patient = $item->patients->where('id', $sample['id'])->first();
+                            $newModel->patient = $patient;
+                            return $newModel;
+                        }
+                    } catch (Exception $exception) {
+                        dd($exception, $sampleIndex, $sample, $item->customParameters["samples"]);
+                    }
+                });
+            })
+            ->groupBy(function ($item) {
+                // Get barcode group ID
+                $barcodeGroupId = $item->method->barcode_group_id ?? 'no_barcode_group';
+                // Return composite key
+                return $barcodeGroupId . '_' . $item->patient->id;
+            })
             ->map(function ($item, $key) {
                 return [
                     "id" => $key,
@@ -552,6 +591,7 @@ class AcceptanceService
      * Prepare acceptance data for editing, including organized items
      *
      * @param Acceptance $acceptance
+     * @param null $step
      * @return array
      */
     public function prepareAcceptanceForEdit(Acceptance $acceptance, $step = null): array
@@ -575,13 +615,12 @@ class AcceptanceService
      * @param array $acceptanceItems
      * @return array
      */
-    private function organizeAcceptanceItems(array $acceptanceItems): array
+    public function organizeAcceptanceItems(array $acceptanceItems): array
     {
         $groupedItems = $this->acceptanceRepository->groupItemsByTestType($acceptanceItems);
-
         // Get tests and services
-        $tests = $groupedItems->get(TestType::TEST->value, collect())->toArray();
-        $services = $groupedItems->get(TestType::SERVICE->value, collect())->toArray();
+        $tests = $groupedItems->get(TestType::TEST->value, collect());
+        $services = $groupedItems->get(TestType::SERVICE->value, collect());
 
 
         // Build final structure

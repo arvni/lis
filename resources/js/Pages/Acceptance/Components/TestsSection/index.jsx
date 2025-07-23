@@ -1,9 +1,9 @@
-import React, {useCallback} from "react";
+import React from "react";
 import TestsTable from "./TestsTable";
 import AddTest from "../AddTest.jsx";
 import AddPanel from "../AddPanel.jsx";
 import DeleteForm from "@/Components/DeleteForm.jsx";
-import {Box, Typography, Paper, Alert, Button, Chip} from "@mui/material";
+import {Box, Typography, Paper, Alert, Button} from "@mui/material";
 import ScienceIcon from "@mui/icons-material/Science";
 import AddIcon from "@mui/icons-material/Add";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
@@ -123,7 +123,6 @@ const TestsSection = ({
                     </Box>
                 )}
             </Box>
-
             {/* Test Modal */}
             {testModalState.open && (
                 <AddTest

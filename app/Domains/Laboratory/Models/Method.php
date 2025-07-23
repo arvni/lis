@@ -23,7 +23,8 @@ class Method extends Model
         "referrer_extra",
         "barcode_group_id",
         "workflow_id",
-        "no_patient"
+        "no_patient",
+        "no_sample",
     ];
 
     protected $casts = [

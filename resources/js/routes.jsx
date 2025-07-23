@@ -175,7 +175,7 @@ const routes = (sections = []) => {
                 {
                     title: "Section Groups",
                     route: "sectionGroups.index",
-                    permission: 'Advance Settings.Section Groups.ListSection Groups',
+                    permission: 'Advance Settings.Section Groups.List Section Groups',
                     icon: <BusinessIcon/>
                 },
                 {

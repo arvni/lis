@@ -12,13 +12,15 @@ export const useFormValidation = (data, maxDiscount) => {
             newErrors.discount = "Please Enter A lower discount";
         }
         for (let i = 0; i < data.acceptanceItems.length; i++) {
-            if (!data.acceptanceItems[i].customParameters?.sampleType)
-                newErrors[`acceptanceItems.${i}.customParameters.sampleType`] = "Please Select A Sample Type";
-            if (data?.acceptanceItems[i]?.patients?.length !== data.acceptanceItems[i].method_test?.method?.no_patient)
-                newErrors[`acceptanceItems.${i}.patients`] = "Please Select A Patient";
-            for (let j = 0; j < data.acceptanceItems[i].patients.length; j++) {
-                if (!data.acceptanceItems[i].patients[j]?.id)
-                    newErrors[`acceptanceItems.${i}.patients.${j}.id`] = "Please Select A Patient";
+            if (data?.acceptanceItems[i]?.samples?.length<1||data?.acceptanceItems[i]?.samples?.length > data.acceptanceItems[i].method_test?.method?.no_sample)
+                newErrors[`acceptanceItems.${i}.samples`] = "Please Enter Samples Data";
+            for (let j = 0; j < data.acceptanceItems[i].samples.length; j++) {
+                if (!data.acceptanceItems[i].samples[j]?.sampleType)
+                    newErrors[`acceptanceItems.${i}.samples.${j}.sampleType`] = "Please Select A Sample Type";
+                for (let k = 0; k < data.acceptanceItems[i].samples[j].patients.length; k++) {
+                    if (!data.acceptanceItems[i].samples[j]?.patients[k].id)
+                        newErrors[`acceptanceItems.${i}.samples.${j}.patients.${k}.id`] = "Please Select A Patient";
+                }
             }
         }
         console.log(newErrors,data);

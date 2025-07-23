@@ -55,14 +55,18 @@ const AddMethodForm = ({ method = {}, onChange, onSubmit, onClose, open, errors,
     useEffect(() => {
         if (open) {
             setMethodData({
-                ...method,
                 extra: method.extra || {},
                 price_type: method.price_type || "Fix",
                 price: method.price || 0,
                 referrer_extra: method.referrer_extra || {},
                 referrer_price_type: method.referrer_price_type || "Fix",
-                referrer_price: method.referrer_price || 0
+                referrer_price: method.referrer_price || 0,
+                no_patient: method.no_patient || 1,
+                no_sample: method.no_sample || 1,
+                ...method,
             });
+            setActiveStep(0);
+            setTab("1")
         }
     }, [method, open]);
 
@@ -123,12 +127,20 @@ const AddMethodForm = ({ method = {}, onChange, onSubmit, onClose, open, errors,
 
     const handleReset = () => {
         // Reset to default values or initial data
+        console.log(method);
         setMethodData({
-            ...method,
             extra: method.extra || {},
             price_type: method.price_type || "Fix",
-            price: method.price || 0
+            price: method.price || 0,
+            referrer_extra: method.extra || {},
+            referrer_price_type: method.price_type || "Fix",
+            referrer_price: method.price || 0,
+            no_patient: 1,
+            no_sample: 1,
+            ...method,
         });
+        setActiveStep(0);
+        setTab("1")
     };
 
     // Render different form content based on the active step
@@ -202,17 +214,33 @@ const AddMethodForm = ({ method = {}, onChange, onSubmit, onClose, open, errors,
                         <Grid size={{xs:12,sm:6}}>
                             <TextField
                                 type="number"
+                                value={methodData?.no_sample || 1}
+                                name="no_sample"
+                                label="Number of Samples"
+                                onChange={(e) => handleChange("no_sample", e.target.value)}
+                                fullWidth
+                                error={Boolean(errors?.no_sample)}
+                                helperText={errors?.no_sample || "How many sample can be processed"}
+                                slotProps={{
+                                    Input: {
+                                        inputProps: {min: 1}
+                                    }
+                                }}
+                            />
+                        </Grid>
+                        <Grid size={{xs:12,sm:6}}>
+                            <TextField
+                                type="number"
                                 value={methodData?.no_patient || 0}
                                 name="no_patient"
-                                label="Number of Patients"
-                                placeholder="Capacity per batch"
+                                label="Number of Patients related to each"
                                 onChange={(e) => handleChange("no_patient", e.target.value)}
                                 fullWidth
                                 error={Boolean(errors?.no_patient)}
-                                helperText={errors?.no_patient || "How many patients can be processed at once"}
+                                helperText={errors?.no_patient || "How many patient related to each sample"}
                                 slotProps={{
                                     Input: {
-                                        inputProps: {min: 0}
+                                        inputProps: {min: 1}
                                     }
                                 }}
                             />

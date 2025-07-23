@@ -7,13 +7,18 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Tooltip from "@mui/material/Tooltip";
 import Chip from "@mui/material/Chip";
-import { Box, Typography } from "@mui/material";
+import {Box, Divider, Typography} from "@mui/material";
+import {Link} from "@inertiajs/react";
 
-const TestRow = ({ test, testTypes, onEdit, onDelete }) => (
-    <TableRow hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+const TestRow = ({test, testTypes, onEdit, onDelete, showButton = false}) => (
+    <TableRow hover sx={{'&:last-child td, &:last-child th': {border: 0}}}>
         <TableCell>
             <Typography fontWeight="medium">
-                {test?.method_test?.test?.name}
+                {showButton ? <Link
+                    href={route("acceptanceItems.show", {
+                        acceptanceItem: test.id,
+                        acceptance: test.acceptance_id
+                    })}>{test?.method_test?.test?.name}</Link> : test?.method_test?.test?.name}
             </Typography>
         </TableCell>
 
@@ -44,19 +49,29 @@ const TestRow = ({ test, testTypes, onEdit, onDelete }) => (
         </TableCell>
 
         <TableCell>
-            {test?.patients?.map((item, index) => (
+            {!test?.patients?.length ? test?.samples?.map((sample, sampleIndex) => (
+                <React.Fragment key={sampleIndex}>
+                    {sample.patients.map((patient, patientIndex) =>
+                        <Chip
+                            key={patientIndex}
+                            label={patient.fullName || patient.name}
+                            size="small"
+                            sx={{m: 0.5}}
+                        />)}
+                    {sampleIndex !== test.samples.length - 1 && <Divider/>}
+                </React.Fragment>
+            )) : test?.patients?.map((patient, patientIndex) =>
                 <Chip
-                    key={index}
-                    label={item.name}
+                    key={patientIndex}
+                    label={patient.name}
                     size="small"
-                    sx={{ m: 0.5 }}
-                />
-            ))}
+                    sx={{m: 0.5}}
+                />)}
         </TableCell>
 
         <TableCell>
             {test?.details ? (
-                <Box sx={{ maxWidth: 200, maxHeight: 60, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Box sx={{maxWidth: 200, maxHeight: 60, overflow: 'hidden', textOverflow: 'ellipsis'}}>
                     {test.details}
                 </Box>
             ) : (
@@ -76,20 +91,20 @@ const TestRow = ({ test, testTypes, onEdit, onDelete }) => (
             </Typography>
         </TableCell>
 
-        <TableCell align="center">
+        {(onEdit || onDelete) && <TableCell align="center">
             <Stack direction="row" spacing={1} justifyContent="center">
-                <Tooltip title="Edit test">
+                {onEdit && <Tooltip title="Edit test">
                     <IconButton onClick={onEdit} size="small">
-                        <EditIcon color="primary" />
+                        <EditIcon color="primary"/>
                     </IconButton>
-                </Tooltip>
-                <Tooltip title="Remove test">
+                </Tooltip>}
+                {onDelete && <Tooltip title="Remove test">
                     <IconButton onClick={onDelete} size="small">
-                        <DeleteIcon color="error" />
+                        <DeleteIcon color="error"/>
                     </IconButton>
-                </Tooltip>
+                </Tooltip>}
             </Stack>
-        </TableCell>
+        </TableCell>}
     </TableRow>
 );
 

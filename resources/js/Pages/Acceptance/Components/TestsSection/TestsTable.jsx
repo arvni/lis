@@ -23,9 +23,11 @@ const TestsTable = ({
                         onEditTest,
                         onDeleteTest,
                         onEditPanel,
-                        onDeletePanel
+                        onDeletePanel,
+    showButton=false,
+    showTotal=true
                     }) => {
-    const { totalDiscount, totalPrice, hasItems } = useTotalCalculations(tests, panels);
+    const {totalDiscount, totalPrice, hasItems} = useTotalCalculations(tests, panels);
 
     if (!hasItems) {
         return null;
@@ -33,7 +35,7 @@ const TestsTable = ({
 
     return (
         <TableContainer>
-            <Table aria-label="tests table" sx={{ minWidth: 700 }}>
+            <Table aria-label="tests table" sx={{minWidth: 700}}>
                 <TableHead>
                     <TableRow>
                         <TableCell>Name</TableCell>
@@ -45,31 +47,34 @@ const TestsTable = ({
                         <TableCell>Details</TableCell>
                         <TableCell align="right">Discount</TableCell>
                         <TableCell align="right">Price</TableCell>
-                        <TableCell align="center">Actions</TableCell>
+                        {(onEditPanel || onDeletePanel || onEditTest || onDeleteTest) &&
+                            <TableCell align="center">Actions</TableCell>}
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {panels.map(panel => (
                         <PanelRow
                             key={panel.id}
+                            showButton={showButton}
                             panel={panel}
                             testTypes={TEST_TYPE}
-                            onEdit={() => onEditPanel(panel.id)}
-                            onDelete={() => onDeletePanel(panel.id)}
+                            onEdit={onEditPanel ? () => onEditPanel(panel.id) : null}
+                            onDelete={onDeletePanel ? () => onDeletePanel(panel.id) : null}
                         />
                     ))}
 
                     {tests.map(test => (
                         <TestRow
                             key={test.id}
+                            showButton={showButton}
                             test={test}
                             testTypes={TEST_TYPE}
-                            onEdit={() => onEditTest(test.id)}
-                            onDelete={() => onDeleteTest(test.id)}
+                            onEdit={onEditTest ? () => onEditTest(test.id) : null}
+                            onDelete={onDeleteTest ? () => onDeleteTest(test.id) : null}
                         />
                     ))}
                 </TableBody>
-                <TableFooter>
+                {showTotal&&<TableFooter>
                     <TableRow>
                         <TableCell colSpan={7} align="right">
                             <Typography variant="subtitle1" fontWeight="bold">Total:</Typography>
@@ -84,9 +89,9 @@ const TestsTable = ({
                                 {totalPrice}
                             </Typography>
                         </TableCell>
-                        <TableCell />
+                        <TableCell/>
                     </TableRow>
-                </TableFooter>
+                </TableFooter>}
             </Table>
         </TableContainer>
     );

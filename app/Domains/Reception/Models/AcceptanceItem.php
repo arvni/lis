@@ -24,6 +24,8 @@ class AcceptanceItem extends Model
         'discount',
         'timeline',
         'customParameters',
+        'panel_id',
+        'no_sample'
     ];
     protected $casts = [
         "customParameters" => "json",
@@ -177,12 +179,14 @@ class AcceptanceItem extends Model
             ->whereDoesntHave("acceptanceItemStates", function ($q) {
                 $q->whereIn("status", [AcceptanceItemStateStatus::WAITING, AcceptanceItemStateStatus::PROCESSING]);
             })
-            ->whereHas("samples", function ($q) {
-                $q->where("acceptance_item_samples.active", true);
-            })
-            ->whereHas("acceptance", function ($q) {
-                $q->whereIn("status", [AcceptanceStatus::PROCESSING]);
-            })
+            ->whereRaw("(select count(*) from `samples`
+    inner join `acceptance_item_samples` on `samples`.`id` = `acceptance_item_samples`.`sample_id`
+    where `acceptance_items`.`id` = `acceptance_item_samples`.`acceptance_item_id`
+    and `acceptance_item_samples`.`active` = 1
+) >= `acceptance_items`.`no_sample`")
+        ->whereHas("acceptance", function ($q) {
+            $q->whereIn("status", [AcceptanceStatus::PROCESSING]);
+        })
             ->whereDoesntHave("reports", function ($q) {
                 $q->where("status", true);
             });

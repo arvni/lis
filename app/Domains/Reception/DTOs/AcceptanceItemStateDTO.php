@@ -14,13 +14,13 @@ class AcceptanceItemStateDTO
         public AcceptanceItemStateStatus $status,
         public int                       $order = 0,
         public bool                      $isFirstSection = false,
-        public string                    $details = "",
+        public ?string                    $details = "",
         public ?int                      $userId = null,
         public ?int                      $startedById = null,
         public ?int                      $finishedById = null,
         public ?string                   $startedAt = null,
         public ?string                   $finishedAt = null,
-
+        public ?int                      $sampleId = null,
     )
     {
     }
@@ -39,8 +39,8 @@ class AcceptanceItemStateDTO
             $acceptanceItemState->started_by_id,
             $acceptanceItemState->finished_by_id,
             $acceptanceItemState->started_at,
-            $acceptanceItemState->finished_at
-
+            $acceptanceItemState->finished_at,
+            $acceptanceItemState->sample_id,
         );
     }
 
@@ -59,6 +59,7 @@ class AcceptanceItemStateDTO
             "finished_by_id" => $this->finishedById,
             "started_by_id" => $this->startedById,
             "order" => $this->order,
+            "sample_id" => $this->sampleId,
         ];
         return $data;
     }

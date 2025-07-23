@@ -43,8 +43,8 @@ class SampleController extends Controller
      */
     public function store(StoreSampleRequest $request)
     {
-        foreach ($request->validated("barcodes") as $barcode) {
-            $this->sampleService->storeSample(SampleDTO::fromArray($barcode));
+        foreach ($request->validated("barcodes") as $key => $barcode) {
+            $this->sampleService->storeSample(SampleDTO::fromArray($barcode), $key);
         }
         return redirect()->back()->with(["success" => true, "status" => "Sample created successfully."]);
     }
@@ -56,7 +56,7 @@ class SampleController extends Controller
     {
         $sample->load([
             "patient",
-            "acceptanceItems" => function ($q)  {
+            "acceptanceItems" => function ($q) {
                 $q->wherePivot("active", true);
                 $q->with("test");
             }

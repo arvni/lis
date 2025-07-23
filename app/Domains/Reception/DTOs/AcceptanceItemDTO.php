@@ -12,9 +12,10 @@ class AcceptanceItemDTO
         public float           $price,
         public float           $discount,
         public array           $customParameters,
-        public array           $patients,
         public ?array          $timeline,
-        public int|string|null $id = null
+        public int             $noSample = 1,
+        public int|string|null $id = null,
+        public int|string|null $panelId = null
     )
     {
     }
@@ -27,8 +28,10 @@ class AcceptanceItemDTO
             'price' => $this->price,
             'discount' => $this->discount,
             'customParameters' => $this->customParameters,
-            'patients' => $this->patients,
             'timeline' => $this->timeline,
+            'no_sample' => $this->noSample,
+            "id" => $this->id,
+            "panel_id" => $this->panelId,
         ];
         return $data;
     }

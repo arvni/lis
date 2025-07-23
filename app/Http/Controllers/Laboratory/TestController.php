@@ -85,7 +85,7 @@ class TestController extends Controller
      */
     public function show(Test $test, Request $request): TestResource
     {
-        $isReferrer = $request->boolean('referrer');
+        $isReferrer = $request->has("referrer.id");
         $loadedTest = $this->testService->loadTest($test, $isReferrer ? $request->input('referrer') : null);
         $loadedTest->withDefaultReferrerPrice = $isReferrer;
 
@@ -181,6 +181,7 @@ class TestController extends Controller
                 referrer_price_type: MethodPriceType::from($methodTest["method"]["referrer_price_type"]),
                 referrer_price: $methodTest["method"]["referrer_price"],
                 referrer_extra: $methodTest["method"]["referrer_extra"] ?? null,
+                noSample: $methodTest["method"]["no_sample"] ?? 1,
             );
             $method = null;
             if ($methodTest["method"]["id"] ?? null)

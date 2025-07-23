@@ -46,9 +46,15 @@ readonly class AcceptanceItemService
         $acceptanceItem->load([
             "acceptance",
             "patients",
-            "acceptanceItemStates.section",
-            "acceptanceItemStates.finishedBy:name,id",
-            "acceptanceItemStates.startedBy:name,id",
+            "acceptanceItemStates" => function ($query) {
+                return $query->with([
+                    'section',
+                    'sample.sampleType',
+                    'sample.patient:id,fullName',
+                    'finishedBy:name,id',
+                    'startedBy:name,id'
+                ]);
+            },
             "method.workflow.sections",
             "test.testGroups",
             "report:id,reported_at,approved_at,printed_at,approver_id,reporter_id",
@@ -88,10 +94,10 @@ readonly class AcceptanceItemService
         return $this->reportRepository->getHistoryForAcceptanceItem($acceptanceItem);
     }
 
-    public function rejectSample(AcceptanceItem $acceptanceItem): void
+    public function rejectSample(AcceptanceItem $acceptanceItem, $sampleId): void
     {
-        $acceptanceItem->acceptanceItemSamples()->update(["active" => false]);
-        $user=auth()->user();
+        $acceptanceItem->acceptanceItemSamples()->where("sample_id", $sampleId)->update(["active" => false]);
+        $user = auth()->user();
         $this->updateAcceptanceItemTimeline($acceptanceItem, "Rejected For Resampling By $user->name");
     }
 

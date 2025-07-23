@@ -117,7 +117,7 @@ const Show = () => {
             renderCell: ({row}) => (
                 <Tooltip title={row?.acceptance_item?.test?.name || "No test name"} arrow>
                     <Typography noWrap variant="body2">
-                        {row?.acceptance_item?.test?.name || "-"}
+                        {(row?.acceptance_item?.test?.name + " >>  " + row?.acceptance_item?.method?.test?.name) || "-"}
                     </Typography>
                 </Tooltip>
             )
@@ -130,11 +130,10 @@ const Show = () => {
             type: "string",
             flex: 1,
             renderCell: ({row}) => {
-                const patientNames = row?.acceptance_item?.patients.map(item => item.fullName).join(", ");
                 return (
-                    <Tooltip title={patientNames || "No patient name"} arrow>
+                    <Tooltip title={row.sample.patient.fullName || "No patient name"} arrow>
                         <Typography noWrap variant="body2">
-                            {patientNames || "-"}
+                            {row.sample.patient.fullName || "-"}
                         </Typography>
                     </Tooltip>
                 );
@@ -148,8 +147,7 @@ const Show = () => {
             flex: 0.2,
             type: "string",
             renderCell: ({row}) => {
-                const ages = row?.acceptance_item?.patients.map(item => item.age).join(", ");
-                return <Typography variant="body2">{ages || "-"}</Typography>;
+                return <Typography variant="body2">{row.sample.patient.age || "-"}</Typography>;
             }
         },
         {
@@ -160,8 +158,8 @@ const Show = () => {
             sortable: false,
             width: 160,
             renderCell: ({row}) => {
-                const date = row?.acceptance_item?.active_sample?.created_at
-                    ? formatDateTime(new Date(row.acceptance_item.active_sample.created_at))
+                const date = row?.sample?.created_at
+                    ? formatDateTime(new Date(row.sample.created_at))
                     : '-';
                 return (
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>

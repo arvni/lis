@@ -29,14 +29,14 @@ class StoreReferrerOrderSamplesController extends Controller
         $referrerOrder->load(["acceptance" => fn($q) => $q->withCount("samples")]);
         if ($referrerOrder->acceptance->samples_count)
             return back()->withErrors(["This Order Sampled Before"]);
-        foreach ($request->validated("barcodes") as $barcode) {
+        foreach ($request->validated("barcodes") as $key => $barcode) {
             $material = $this->materialService->getMaterialByBarcode(strtoupper($barcode["barcode"]));
             if ($material) {
                 $material->load("referrer");
                 if ($material->referrer->id == $referrerOrder->referrer->id && !$material->sample_id)
                     $barcode["material"] = $material->toArray();
             }
-            $this->sampleService->storeSample(SampleDTO::fromArray($barcode));
+            $this->sampleService->storeSample(SampleDTO::fromArray($barcode), $key);
         }
         return redirect()->back()->with(["success" => true, "status" => "Sample created successfully."]);
     }

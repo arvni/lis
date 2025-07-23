@@ -30,6 +30,8 @@ const MethodField = ({
         method: {
             price_type: "Fix",
             referrer_price_type: "Fix",
+            no_patient: 1,
+            no_sample: 1,
         },
         status: true
     });

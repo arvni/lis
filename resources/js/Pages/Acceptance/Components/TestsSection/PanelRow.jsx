@@ -7,10 +7,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Tooltip from "@mui/material/Tooltip";
 import Chip from "@mui/material/Chip";
-import { Box, Typography } from "@mui/material";
+import {Box, Divider, Typography} from "@mui/material";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
+import {Link} from "@inertiajs/react";
 
-const PanelRow = ({panel, testTypes, onEdit, onDelete}) => (
+const PanelRow = ({panel, testTypes, onEdit, onDelete, showButton = false}) => (
     <>
         {panel.acceptanceItems.map((item, itemIndex) => (
             <TableRow
@@ -18,17 +19,17 @@ const PanelRow = ({panel, testTypes, onEdit, onDelete}) => (
                 hover
                 sx={{
                     backgroundColor: itemIndex === 0 ? 'rgba(0, 0, 0, 0.02)' : 'inherit',
-                    '&:last-child td, &:last-child th': { border: 0 }
+                    '&:last-child td, &:last-child th': {border: 0}
                 }}
             >
                 {itemIndex === 0 && (
                     <>
                         <TableCell
                             rowSpan={panel?.acceptanceItems?.length}
-                            sx={{ borderLeft: '3px solid', borderLeftColor: 'secondary.main' }}
+                            sx={{borderLeft: '3px solid', borderLeftColor: 'secondary.main'}}
                         >
                             <Box display="flex" alignItems="center">
-                                <PlaylistAddCheckIcon color="secondary" sx={{ mr: 1 }} />
+                                <PlaylistAddCheckIcon color="secondary" sx={{mr: 1}}/>
                                 <Typography fontWeight="medium">
                                     {panel?.panel?.name}
                                 </Typography>
@@ -65,23 +66,35 @@ const PanelRow = ({panel, testTypes, onEdit, onDelete}) => (
                 )}
 
                 <TableCell>
-                    {item?.method_test?.method?.name}
+                    {showButton ?
+                        <Link href={route("acceptanceItems.show", {acceptanceItem: item.id, acceptance: item.acceptance_id})}>
+                            {item?.method_test?.method?.name}</Link> : item?.method_test?.method?.name}
                 </TableCell>
 
                 <TableCell>
-                    {item?.patients?.map((patient, index) => (
+                    {!item?.patients?.length ? item?.samples?.map((sample, sampleIndex) => (
+                        <React.Fragment key={sampleIndex}>
+                            {sample.patients.map((patient, patientIndex) =>
+                                <Chip
+                                    key={patientIndex}
+                                    label={patient.fullName || patient.name}
+                                    size="small"
+                                    sx={{m: 0.5}}
+                                />)}
+                            {sampleIndex !== item.samples.length - 1 && <Divider/>}
+                        </React.Fragment>
+                    )) : item?.patients?.map((patient, patientIndex) =>
                         <Chip
-                            key={index}
+                            key={patientIndex}
                             label={patient.name}
                             size="small"
-                            sx={{ m: 0.5 }}
-                        />
-                    ))}
+                            sx={{m: 0.5}}
+                        />)}
                 </TableCell>
 
                 <TableCell>
                     {item?.details ? (
-                        <Box sx={{ maxWidth: 200, maxHeight: 60, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <Box sx={{maxWidth: 200, maxHeight: 60, overflow: 'hidden', textOverflow: 'ellipsis'}}>
                             {item.details}
                         </Box>
                     ) : (
@@ -95,7 +108,8 @@ const PanelRow = ({panel, testTypes, onEdit, onDelete}) => (
                             rowSpan={panel?.acceptanceItems?.length}
                             align="right"
                         >
-                            <Typography fontWeight="medium" color={Number(panel.discount) > 0 ? "success.main" : "text.primary"}>
+                            <Typography fontWeight="medium"
+                                        color={Number(panel.discount) > 0 ? "success.main" : "text.primary"}>
                                 {panel.discount}
                             </Typography>
                         </TableCell>
@@ -109,23 +123,23 @@ const PanelRow = ({panel, testTypes, onEdit, onDelete}) => (
                             </Typography>
                         </TableCell>
 
-                        <TableCell
+                        {(onEdit || onDelete) && <TableCell
                             rowSpan={panel?.acceptanceItems?.length}
                             align="center"
                         >
                             <Stack direction="row" spacing={1} justifyContent="center">
-                                <Tooltip title="Edit panel">
+                                {onEdit && <Tooltip title="Edit panel">
                                     <IconButton onClick={onEdit} size="small">
-                                        <EditIcon color="primary" />
+                                        <EditIcon color="primary"/>
                                     </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Remove panel">
+                                </Tooltip>}
+                                {onDelete && <Tooltip title="Remove panel">
                                     <IconButton onClick={onDelete} size="small">
-                                        <DeleteIcon color="error" />
+                                        <DeleteIcon color="error"/>
                                     </IconButton>
-                                </Tooltip>
+                                </Tooltip>}
                             </Stack>
-                        </TableCell>
+                        </TableCell>}
                     </>
                 )}
             </TableRow>

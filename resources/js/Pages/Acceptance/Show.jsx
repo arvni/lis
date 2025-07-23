@@ -5,17 +5,9 @@ import {
     Chip,
     Box,
     Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
     Card,
     CardContent,
     Tooltip,
-    useMediaQuery,
-    useTheme,
     Divider
 } from "@mui/material";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -46,13 +38,8 @@ import Button from "@mui/material/Button";
 import {Link} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 import {BarcodeIcon} from "lucide-react";
+import TestsTable from "@/Pages/Acceptance/Components/TestsSection/TestsTable.jsx";
 
-// Constants
-const TEST_TYPE = {
-    "TEST": "Test",
-    "SERVICE": "Service",
-    "PANEL": "Panel"
-};
 
 // Status chip component for better consistency
 const StatusChip = ({status}) => {
@@ -191,9 +178,6 @@ const Show = ({
                   status,
                   canPrintBarcode
               }) => {
-    // Theme access for responsive design
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     // State
     const [expanded, setExpanded] = useState({
@@ -217,7 +201,6 @@ const Show = ({
         const netTotal = total - discount;
         const paid = invoice?.payments ? invoice.payments.reduce((acc, payment) => acc + (parseFloat(payment.price) || 0), 0) : 0;
         const remaining = netTotal - paid;
-        console.log(paid, remaining)
         return {
             total,
             discount,
@@ -227,23 +210,6 @@ const Show = ({
             items: acceptanceItems.length
         };
     }, [acceptanceItems, invoice]);
-
-    // Group items by type for better display
-    const groupedItems = useMemo(() => {
-        const grouped = {};
-
-        acceptanceItems.forEach(item => {
-            const testType = TEST_TYPE?.[item.method_test?.test?.type] || 'Unknown';
-
-            if (!grouped[testType]) {
-                grouped[testType] = [];
-            }
-
-            grouped[testType].push(item);
-        });
-        return grouped;
-    }, [acceptanceItems]);
-
     // Quick action buttons
     const QuickActions = () => (
         <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2}}>
@@ -537,101 +503,14 @@ const Show = ({
                     <SectionTitle icon={Science} title="Test Items"/>
                 </AccordionSummary>
                 <AccordionDetails sx={{backgroundColor: 'background.default', p: 3}}>
-                    {Object.entries(groupedItems).map(([type, items]) => (
-                        <Box key={type} sx={{mb: 3}}>
-                            <Typography
-                                variant="h6"
-                                sx={{
-                                    mb: 2,
-                                    fontWeight: 'medium',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    color: 'primary.main',
-                                    borderBottom: 1,
-                                    borderColor: 'divider',
-                                    pb: 1
-                                }}
-                            >
-                                <Science sx={{mr: 1, fontSize: '1.2rem'}}/>
-                                {type}s ({items.length})
-                            </Typography>
-
-                            <TableContainer
-                                component={Paper}
-                                variant="outlined"
-                                sx={{
-                                    borderRadius: 1,
-                                    overflow: 'hidden',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                                }}
-                            >
-                                <Table size={isMobile ? "small" : "medium"}>
-                                    <TableHead>
-                                        <TableRow sx={{backgroundColor: 'action.hover'}}>
-                                            <TableCell width="5%">#</TableCell>
-                                            <TableCell width="20%">Test</TableCell>
-                                            <TableCell width="15%">Method</TableCell>
-                                            <TableCell width="20%">Patients</TableCell>
-                                            <TableCell width="15%">Details</TableCell>
-                                            <TableCell width="15%">Barcodes</TableCell>
-                                            <TableCell width="8%" align="right">Price</TableCell>
-                                            <TableCell width="8%" align="right">Discount</TableCell>
-                                            <TableCell width="9%" align="right">Net</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {items.map((item, index) => (
-                                            <TableRow
-                                                key={item.id}
-                                                sx={{
-                                                    '&:nth-of-type(odd)': {
-                                                        backgroundColor: 'action.hover'
-                                                    },
-                                                    '&:hover': {
-                                                        backgroundColor: 'action.selected'
-                                                    },
-                                                    transition: 'background-color 0.2s'
-                                                }}
-                                            >
-                                                <TableCell>{index + 1}</TableCell>
-                                                <TableCell>
-                                                    <Typography
-                                                        fontWeight="medium"
-                                                        component={type.toLowerCase() === "service" ? 'p' : Link}
-                                                        href={route('acceptanceItems.show', {
-                                                            acceptanceItem: item.id,
-                                                            acceptance: acceptance.id
-                                                        })}>
-                                                        {item.method_test?.test?.name || 'Unknown Test'}
-                                                    </Typography>
-                                                    <Box sx={{mt: 0.5}}>
-                                                        <Typography variant="caption" color="text.secondary">
-                                                            Code: {item.method_test?.test?.code || 'N/A'}
-                                                        </Typography>
-                                                    </Box>
-                                                </TableCell>
-                                                <TableCell>{item.method_test?.method?.name || 'N/A'}</TableCell>
-                                                <TableCell>
-                                                    {item?.patients?.map(p => p.fullName).join(", ") || 'N/A'}
-                                                </TableCell>
-                                                <TableCell>{item.customParameters?.details || '-'}</TableCell>
-                                                <TableCell>{item.active_samples?.map(sample => sample.barcode).join(", ") || '-'}</TableCell>
-                                                <TableCell align="right">{item.price}</TableCell>
-                                                <TableCell align="right">{item.discount}</TableCell>
-                                                <TableCell
-                                                    align="right"
-                                                    sx={{fontWeight: 'bold'}}
-                                                >
-                                                    {(item.price - item.discount).toFixed(2)}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </Box>
-                    ))}
-
+                    <Paper elevation={1} sx={{borderRadius: 2, overflow: 'hidden'}}>
+                        <TestsTable
+                            showButton
+                            showTotal={false}
+                            tests={acceptance?.acceptance_items?.tests || []}
+                            panels={acceptance?.acceptance_items?.panels || []}
+                        />
+                    </Paper>
                     <Box
                         sx={{
                             mt: 3,

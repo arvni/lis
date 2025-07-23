@@ -41,7 +41,7 @@ class SampleRepository
                     $q->wherePivot("active", true);
                     if (isset($filters["acceptance_id"]))
                         $q->where("acceptance_id", $filters["acceptance_id"]);
-                    $q->with("test");
+                    $q->with("test","method.test");
                 }
             ])
             ->get();
@@ -50,14 +50,14 @@ class SampleRepository
     public function creatSample(array $sampleData): Sample
     {
         $sample = Sample::query()->create([
-            "barcode" => $sampleData["barcode"] ?? $this->generateBarcode($sampleData["barcodeGroup"]),
+            "barcode" => $sampleData["barcode"],
             "sample_type_id" => $sampleData["sample_type_id"],
             "status" => "sampled",
             "collection_date" => isset($sampleData["collection_date"]) ? Carbon::parse($sampleData["collection_date"]) : Carbon::now(),
             "sampler_id" => auth()->user()->id,
             "patient_id" => $sampleData["patient_id"]
         ]);
-        $this->syncAcceptanceItems($sample, Arr::pluck($sampleData["acceptance_items"], "id"));
+        $this->syncAcceptanceItems($sample, collect($sampleData["acceptance_items"])->pluck( "id")->unique()->toArray());
         return $sample;
     }
 
@@ -84,28 +84,24 @@ class SampleRepository
     {
         $sample->acceptanceItems()->sync($acceptanceItems);
         foreach ($acceptanceItems as $acceptanceItem) {
-            SampleCollectedEvent::dispatch($acceptanceItem, $sample->barcode);
+            SampleCollectedEvent::dispatch($acceptanceItem, $sample->barcode,$sample->id);
         }
     }
 
-    public function generateBarcode(array $barcodeGroup): string
-    {
-
-        return $barcodeGroup["abbr"] . Carbon::now()->getTimestamp();
-    }
-
-    public function findActiveSamples($acceptanceItemIds, $sampleType): ?Sample
+    public function findActiveSample($acceptanceItemIds,$patientId, $sampleType): ?Sample
     {
         return Sample::whereHas("acceptanceItems", fn($q) => $q->whereIn("acceptance_items.id", $acceptanceItemIds)
             ->where("active", true))
+            ->where("patient_id",$patientId)
             ->where("sample_type_id", $sampleType)
             ->first();
     }
 
-    public function findDeactivatedSamples($acceptanceItemIds, $sampleType): ?Sample
+    public function findDeactivatedSample($acceptanceItemIds,$patientId, $sampleType): ?Sample
     {
         return Sample::whereHas("acceptanceItems", fn($q) => $q->whereIn("acceptance_items.id", $acceptanceItemIds)
             ->where("active", false))
+            ->where("patient_id",$patientId)
             ->where("sample_type_id", $sampleType)
             ->latest()
             ->first();

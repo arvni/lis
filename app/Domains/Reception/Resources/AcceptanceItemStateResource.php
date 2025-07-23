@@ -37,10 +37,11 @@ class AcceptanceItemStateResource extends JsonResource
                     "fullName" => $patient->fullName,
                 ];
             }),
-            "sample" => $this->acceptanceItem->activeSample ? [
-                "barcode" => $this->acceptanceItem->activeSample->barcode,
-                "sampleType" => $this->acceptanceItem->activeSample->sampleType->name,
-                "created_at" => (new Carbon($this->acceptanceItem->activeSample->created_at))->diffForHumans(),
+            "sample" =>$this->sample? [
+                "barcode" => $this->sample->barcode,
+                "sampleType" => $this->sample->sampleType->name,
+                "patient" => $this->sample->patient,
+                "created_at" => (new Carbon($this->sample->created_at))->diffForHumans(),
             ] : [],
         ];
     }

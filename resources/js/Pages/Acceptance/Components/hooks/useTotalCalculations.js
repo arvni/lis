@@ -2,6 +2,7 @@ import {useMemo} from "react";
 
 const useTotalCalculations = (tests, panels) => {
 
+
     const testDiscount = useMemo(() =>
             tests.reduce((sum, item) => sum + (Number(item.discount) || 0), 0),
         [tests]
@@ -24,6 +25,7 @@ const useTotalCalculations = (tests, panels) => {
 
     const totalDiscount = testDiscount + panelDiscount;
     const totalPrice = testPrice + panelPrice;
+    console.log(totalDiscount, totalPrice,testPrice,testDiscount,panelPrice,panelDiscount,);
     const hasItems = panels.length > 0 || tests.length > 0;
     return {totalDiscount, totalPrice, hasItems}
 

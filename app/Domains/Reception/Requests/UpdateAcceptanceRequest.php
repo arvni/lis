@@ -9,7 +9,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
-use function PHPUnit\Framework\isArray;
 
 class UpdateAcceptanceRequest extends FormRequest
 {
@@ -81,6 +80,7 @@ class UpdateAcceptanceRequest extends FormRequest
                 $rules['acceptanceItems'] = 'required|array';
                 $rules['acceptanceItems.tests'] = 'nullable|array';
                 $rules['acceptanceItems.tests.*.id'] = 'nullable';
+                $rules['acceptanceItems.tests.*.no_sample'] = 'nullable';
                 $rules['acceptanceItems.tests.*.method_test.id'] = 'required|exists:method_tests,id';
                 $rules['acceptanceItems.tests.*.customParameters.sampleType'] = 'nullable|exists:sample_types,id';
                 $rules['acceptanceItems.tests.*.customParameters.price'] = 'nullable|array';
@@ -106,12 +106,14 @@ class UpdateAcceptanceRequest extends FormRequest
                         }
                     },
                 ];
-                $rules['acceptanceItems.tests.*.patients'] = 'required|array|min:1';
-                $rules['acceptanceItems.tests.*.patients.*.id'] = 'required|exists:patients,id';
+                $rules['acceptanceItems.tests.*.samples'] = 'nullable|array|min:1';
+                $rules['acceptanceItems.tests.*.samples.*'] = 'nullable|array|min:1';
+                $rules['acceptanceItems.tests.*.samples.*.patients.*.id'] = 'nullable|exists:patients,id';
+                $rules['acceptanceItems.tests.*.samples.*.sampleType'] = 'nullable|exists:sample_types,id';
                 $rules['acceptanceItems.tests.*.details'] = 'nullable|string|max:500';
                 $rules['acceptanceItems.tests.*.customParameters.discounts'] = 'nullable|array';
 
-                $rules['acceptanceItems'] = 'required|array';
+
                 $rules['acceptanceItems.services'] = 'nullable|array';
                 $rules['acceptanceItems.services.*.id'] = 'nullable';
                 $rules['acceptanceItems.services.*.method_test.id'] = 'required|exists:method_tests,id';
@@ -138,8 +140,6 @@ class UpdateAcceptanceRequest extends FormRequest
                         }
                     },
                 ];
-                $rules['acceptanceItems.services.*.patients'] = 'required|array|min:1';
-                $rules['acceptanceItems.services.*.patients.*.id'] = 'required|exists:patients,id';
                 $rules['acceptanceItems.services.*.details'] = 'nullable|string|max:500';
                 $rules['acceptanceItems.services.*.customParameters.discounts'] = 'nullable|array';
 
@@ -171,11 +171,15 @@ class UpdateAcceptanceRequest extends FormRequest
                 ];
                 $rules['acceptanceItems.panels.*.acceptanceItems'] = 'required|array';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.id'] = 'nullable';
+                $rules['acceptanceItems.panels.*.acceptanceItems.*.no_sample'] = 'nullable';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.method_test.id'] = 'required|exists:method_tests,id';
-                $rules['acceptanceItems.panels.*.acceptanceItems.*.customParameters.sampleType'] = 'required|exists:sample_types,id';
-                $rules['acceptanceItems.panels.*.acceptanceItems.*.patients'] = 'required|array|min:1';
-                $rules['acceptanceItems.panels.*.acceptanceItems.*.patients.*.id'] = 'required|exists:patients,id';
+                $rules['acceptanceItems.panels.*.acceptanceItems.*.samples'] = 'nullable|array|min:1';
+                $rules['acceptanceItems.panels.*.acceptanceItems.*.samples.*.sampleType'] = 'nullable|exists:sample_types,id';
+                $rules['acceptanceItems.panels.*.acceptanceItems.*.samples.*.patients'] = 'nullable|array|min:1';
+                $rules['acceptanceItems.panels.*.acceptanceItems.*.samples.*.patients.*.id'] = 'nullable|exists:patients,id';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.details'] = 'nullable|string|max:500';
+                $rules['acceptanceItems.panels.*.acceptanceItems.*.customParameters.price'] = 'nullable|array';
+                $rules['acceptanceItems.panels.*.acceptanceItems.*.customParameters.discounts'] = 'nullable|array';
                 break;
 
             case 4: // Sampling & Delivery
@@ -347,8 +351,10 @@ class UpdateAcceptanceRequest extends FormRequest
                         }
                     },
                 ];
-                $rules['acceptanceItems.tests.*.patients'] = 'required|array|min:1';
-                $rules['acceptanceItems.tests.*.patients.*.id'] = 'required|exists:patients,id';
+                $rules['acceptanceItems.tests.*.samples'] = 'nullable|array|min:1';
+                $rules['acceptanceItems.tests.*.samples.*.patients'] = 'nullable|array|min:1';
+                $rules['acceptanceItems.tests.*.samples.*.sampleType'] = 'nullable|exists:sample_types,id';
+                $rules['acceptanceItems.tests.*.samples.*.patients.*.id'] = 'nullable|exists:patients,id';
                 $rules['acceptanceItems.tests.*.details'] = 'nullable|string|max:500';
 
                 // Panel validations
@@ -380,9 +386,11 @@ class UpdateAcceptanceRequest extends FormRequest
                 $rules['acceptanceItems.panels.*.acceptanceItems'] = 'required|array';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.id'] = 'nullable';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.method_test.id'] = 'required|exists:method_tests,id';
-                $rules['acceptanceItems.panels.*.acceptanceItems.*.customParameters.sampleType'] = 'required|exists:sample_types,id';
-                $rules['acceptanceItems.panels.*.acceptanceItems.*.patients'] = 'required|array|min:1';
-                $rules['acceptanceItems.panels.*.acceptanceItems.*.patients.*.id'] = 'required|exists:patients,id';
+                $rules['acceptanceItems.panels.*.acceptanceItems.*.customParameters.sampleType'] = 'nullable|exists:sample_types,id';
+                $rules['acceptanceItems.panels.*.acceptanceItems.*.samples'] = 'nullable|array|min:1';
+                $rules['acceptanceItems.panels.*.acceptanceItems.*.samples.*.patients'] = 'nullable|array|min:1';
+                $rules['acceptanceItems.panels.*.acceptanceItems.*.samples.*.sampleType'] = 'nullable|exists:sample_types,id';
+                $rules['acceptanceItems.panels.*.acceptanceItems.*.samples.*.patients.*.id'] = 'nullable|exists:patients,id';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.details'] = 'nullable|string|max:500';
 
                 // Optional Prescription
@@ -414,7 +422,7 @@ class UpdateAcceptanceRequest extends FormRequest
             'acceptanceItems.tests.*.sample_type' => 'sample type',
             'acceptanceItems.tests.*.price' => 'test price',
             'acceptanceItems.tests.*.discount' => 'test discount',
-            'acceptanceItems.tests.*.patients.*.id' => 'test patient',
+            'acceptanceItems.tests.*.samples.*.*.id' => 'test patient',
             'acceptanceItems.panels.*.panel.id' => 'panel',
             'acceptanceItems.panels.*.price' => 'panel price',
             'acceptanceItems.panels.*.discount' => 'panel discount',
@@ -439,7 +447,7 @@ class UpdateAcceptanceRequest extends FormRequest
             'referrer.required_if' => 'Please select a referrer.',
             'acceptanceItems.tests.*.method_test.id.required' => 'Please select a test method.',
             'acceptanceItems.tests.*.sample_type.required' => 'Please select a sample type for the test.',
-            'acceptanceItems.tests.*.patients.required' => 'Please select at least one patient for the test.',
+            'acceptanceItems.tests.*.samples.required' => 'Please select at least one patient for the test.',
             'acceptanceItems.panels.*.panel.id.required' => 'Please select a panel.',
             'acceptanceItems.panels.*.acceptanceItems.*.sample_type.required' => 'Please select a sample type for each panel test.',
             'acceptanceItems.panels.*.acceptanceItems.*.patients.required' => 'Please select patient(s) for each panel test.',

@@ -7,11 +7,14 @@ use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\User\Models\User;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 class AcceptanceItemState extends Model
 {
     use Searchable, HasRelationships;
+
     protected $fillable = [
         'acceptance_item_id',
         "section_id",
@@ -25,17 +28,18 @@ class AcceptanceItemState extends Model
         "started_at",
         "finished_at",
         "order",
+        "sample_id"
     ];
 
     protected $searchable = [
-      "patients.fullName",
-      "samples.barcode",
+        "patients.fullName",
+        "sample.barcode",
     ];
 
-    protected $casts=[
-        "parameters"=>"json",
-        "finished_at"=>"datetime",
-        "started_at"=>"datetime",
+    protected $casts = [
+        "parameters" => "json",
+        "finished_at" => "datetime",
+        "started_at" => "datetime",
         "status" => AcceptanceItemStateStatus::class
     ];
 
@@ -45,27 +49,32 @@ class AcceptanceItemState extends Model
         return $this->belongsTo(AcceptanceItem::class);
     }
 
-    public function Section()
+    public function section(): BelongsTo
     {
         return $this->belongsTo(Section::class);
     }
 
-    public function finishedBy()
+    public function sample(): BelongsTo
+    {
+        return $this->belongsTo(Sample::class);
+    }
+
+    public function finishedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, "finished_by_id");
     }
 
-    public function startedBy()
+    public function startedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, "started_by_id");
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function samples()
+    public function samples(): HasManyDeep
     {
         return $this->hasManyDeep(
             Sample::class,
@@ -84,7 +93,7 @@ class AcceptanceItemState extends Model
         );
     }
 
-    public function patients()
+    public function patients(): HasManyDeep
     {
         return $this->hasManyDeep(
             Patient::class,

@@ -13,10 +13,9 @@ class AcceptanceItemStateRepository
     public function listAcceptanceItemStates($queryData)
     {
         $query = AcceptanceItemState::with([
-            "acceptanceItem.patients",
             "acceptanceItem.test",
-            "acceptanceItem.method",
-            "acceptanceItem.activeSample",
+            "acceptanceItem.method.test",
+            "sample.patient"
         ]);
         if (isset($queryData["filters"]))
             $this->applyFilters($query, $queryData["filters"]);
@@ -50,10 +49,8 @@ class AcceptanceItemStateRepository
 
     public function findAcceptanceItemStateByBarcode($barcode): Collection
     {
-        return AcceptanceItemState::whereHas("acceptanceItem", function ($q) use ($barcode) {
-            $q->whereHas("samples", function ($q) use ($barcode) {
-                $q->where("barcode", $barcode);
-            });
+        return AcceptanceItemState::whereHas("sample", function ($q) use ($barcode) {
+            $q->where("barcode", $barcode);
         })
             ->get();
     }
