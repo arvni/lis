@@ -6,11 +6,9 @@ import {
     Typography,
     Slider,
     Tooltip,
-    Divider,
     Grid2 as Grid,
     Card,
-    CardContent,
-    Chip
+    CardContent
 } from '@mui/material';
 import {
     Brush as BrushIcon,
@@ -22,9 +20,10 @@ import {
     Redo as RedoIcon,
     Clear as ClearIcon,
     MoreHoriz as DottedLineIcon,
+    Diamond as DiamondIcon
 } from '@mui/icons-material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import {Eraser} from "lucide-react";
+import { Eraser } from "lucide-react";
 
 const theme = createTheme({
     palette: {
@@ -51,16 +50,19 @@ const ReactPaintMUI = ({
                            onChange = () => {}
                        }) => {
     const canvasRef = useRef(null);
+    const previewCanvasRef = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [tool, setTool] = useState('pen');
     const [color, setColor] = useState('#000000');
     const [lineWidth, setLineWidth] = useState(3);
+    const [shapeSize, setShapeSize] = useState(50);
     const [history, setHistory] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
     const [startPos, setStartPos] = useState({ x: 0, y: 0 });
     const [previewCanvas, setPreviewCanvas] = useState(null);
+    const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+    const [showCursorPreview, setShowCursorPreview] = useState(false);
 
-    // Optimized color palette
     const colors = [
         '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00',
         '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#FFC0CB', '#A52A2A',
@@ -75,10 +77,10 @@ const ReactPaintMUI = ({
         { name: 'line', icon: LineIcon, label: 'Line' },
         { name: 'dottedLine', icon: DottedLineIcon, label: 'Dotted Line' },
         { name: 'rectangle', icon: RectangleIcon, label: 'Rectangle' },
-        { name: 'circle', icon: CircleIcon, label: 'Circle' }
+        { name: 'circle', icon: CircleIcon, label: 'Circle' },
+        { name: 'diamond', icon: DiamondIcon, label: 'Diamond' }
     ];
 
-    // Optimized history management
     const saveToHistory = useCallback(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -87,7 +89,6 @@ const ReactPaintMUI = ({
         const newHistory = history.slice(0, historyIndex + 1);
         newHistory.push(imageData);
 
-        // Limit history to prevent memory issues
         if (newHistory.length > 50) {
             newHistory.shift();
         } else {
@@ -95,11 +96,9 @@ const ReactPaintMUI = ({
         }
 
         setHistory(newHistory);
-        // Call onChange with the new image data
         onChange(imageData);
-    }, [history, historyIndex]);
+    }, [history, historyIndex, onChange]);
 
-    // Optimized position calculation
     const getCanvasPosition = useCallback((e) => {
         const canvas = canvasRef.current;
         const rect = canvas.getBoundingClientRect();
@@ -115,56 +114,42 @@ const ReactPaintMUI = ({
         };
     }, []);
 
-    // Optimized flood fill algorithm
     const floodFill = useCallback((startX, startY, newColor) => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
-
-        const startIndex = (startY * canvas.width + startX) * 4;
-        const targetColor = [
-            data[startIndex], data[startIndex + 1], data[startIndex + 2], data[startIndex + 3]
-        ];
-
-        const fillColor = [
-            parseInt(newColor.slice(1, 3), 16),
-            parseInt(newColor.slice(3, 5), 16),
-            parseInt(newColor.slice(5, 7), 16),
-            255
-        ];
-
-        // Don't fill if colors are the same
-        if (targetColor.every((c, i) => c === fillColor[i])) return;
+        const targetColorRgba = [data[(startY * canvas.width + startX) * 4], data[(startY * canvas.width + startX) * 4 + 1], data[(startY * canvas.width + startX) * 4 + 2], data[(startY * canvas.width + startX) * 4 + 3]];
+        const fillColorRgba = [parseInt(newColor.slice(1, 3), 16), parseInt(newColor.slice(3, 5), 16), parseInt(newColor.slice(5, 7), 16), 255];
+        if (targetColorRgba.join(',') === fillColorRgba.join(',')) return;
 
         const stack = [[startX, startY]];
-        const visited = new Set();
-
-        while (stack.length > 0) {
+        while (stack.length) {
             const [x, y] = stack.pop();
-            const key = `${x},${y}`;
-
-            if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height || visited.has(key)) continue;
-
+            if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) continue;
             const index = (y * canvas.width + x) * 4;
-            const currentColor = [data[index], data[index + 1], data[index + 2], data[index + 3]];
-
-            if (!currentColor.every((c, i) => c === targetColor[i])) continue;
-
-            visited.add(key);
-
-            data[index] = fillColor[0];
-            data[index + 1] = fillColor[1];
-            data[index + 2] = fillColor[2];
-            data[index + 3] = fillColor[3];
-
-            stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+            if (data[index] === targetColorRgba[0] && data[index + 1] === targetColorRgba[1] && data[index + 2] === targetColorRgba[2] && data[index + 3] === targetColorRgba[3]) {
+                data[index] = fillColorRgba[0];
+                data[index + 1] = fillColorRgba[1];
+                data[index + 2] = fillColorRgba[2];
+                data[index + 3] = fillColorRgba[3];
+                stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+            }
         }
-
         ctx.putImageData(imageData, 0, 0);
     }, []);
 
-    // Fixed shape drawing with proper preview
+    const drawDiamond = useCallback((ctx, centerX, centerY, size) => {
+        const halfSize = size / 2;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY - halfSize); // top
+        ctx.lineTo(centerX + halfSize, centerY); // right
+        ctx.lineTo(centerX, centerY + halfSize); // bottom
+        ctx.lineTo(centerX - halfSize, centerY); // left
+        ctx.closePath();
+        ctx.stroke();
+    }, []);
+
     const drawShape = useCallback((ctx, start, end, isPreview = false) => {
         ctx.strokeStyle = color;
         ctx.lineWidth = lineWidth;
@@ -173,22 +158,17 @@ const ReactPaintMUI = ({
 
         if (isPreview) {
             ctx.globalAlpha = 0.7;
-            if (tool === 'dottedLine') {
-                ctx.setLineDash([lineWidth * 2, lineWidth * 2]);
-            } else {
-                ctx.setLineDash([5, 5]);
-            }
+            ctx.setLineDash([5, 5]);
         } else {
             ctx.globalAlpha = 1;
-            if (tool === 'dottedLine') {
-                ctx.setLineDash([lineWidth * 2, lineWidth * 2]);
-            } else {
-                ctx.setLineDash([]);
-            }
+            ctx.setLineDash([]);
+        }
+
+        if (tool === 'dottedLine') {
+            ctx.setLineDash([lineWidth * 2, lineWidth * 2]);
         }
 
         ctx.beginPath();
-
         switch (tool) {
             case 'line':
             case 'dottedLine':
@@ -196,28 +176,120 @@ const ReactPaintMUI = ({
                 ctx.lineTo(end.x, end.y);
                 break;
             case 'rectangle':
-                const width = end.x - start.x;
-                const height = end.y - start.y;
-                ctx.rect(start.x, start.y, width, height);
+                ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
                 break;
             case 'circle':
                 const radius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
                 ctx.arc(start.x, start.y, radius, 0, 2 * Math.PI);
                 break;
+            case 'diamond':
+                const diamondRadius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
+                const halfDiamond = diamondRadius;
+                ctx.moveTo(start.x, start.y - halfDiamond); // top
+                ctx.lineTo(start.x + halfDiamond, start.y); // right
+                ctx.lineTo(start.x, start.y + halfDiamond); // bottom
+                ctx.lineTo(start.x - halfDiamond, start.y); // left
+                ctx.closePath();
+                break;
+            default:
+                break;
         }
-
         ctx.stroke();
         ctx.globalAlpha = 1;
         ctx.setLineDash([]);
     }, [tool, color, lineWidth]);
 
+    // Function to draw cursor preview
+    const drawCursorPreview = useCallback(() => {
+        const previewCanvas = previewCanvasRef.current;
+        if (!previewCanvas || !showCursorPreview) return;
+
+        const ctx = previewCanvas.getContext('2d');
+        ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+        if (['rectangle', 'circle', 'diamond'].includes(tool)) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = Math.max(1, lineWidth / 2);
+            ctx.globalAlpha = 0.6;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+
+            if (tool === 'rectangle') {
+                ctx.rect(
+                    cursorPos.x - shapeSize / 2,
+                    cursorPos.y - shapeSize / 2,
+                    shapeSize,
+                    shapeSize
+                );
+            } else if (tool === 'circle') {
+                ctx.arc(cursorPos.x, cursorPos.y, shapeSize / 2, 0, 2 * Math.PI);
+            } else if (tool === 'diamond') {
+                const halfSize = shapeSize / 2;
+                ctx.moveTo(cursorPos.x, cursorPos.y - halfSize); // top
+                ctx.lineTo(cursorPos.x + halfSize, cursorPos.y); // right
+                ctx.lineTo(cursorPos.x, cursorPos.y + halfSize); // bottom
+                ctx.lineTo(cursorPos.x - halfSize, cursorPos.y); // left
+                ctx.closePath();
+            }
+
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+            ctx.setLineDash([]);
+        }
+    }, [tool, color, lineWidth, shapeSize, cursorPos, showCursorPreview]);
+
+    const handleMouseMove = useCallback((e) => {
+        const pos = getCanvasPosition(e);
+        setCursorPos(pos);
+
+        // Call the existing draw function if drawing
+        if (isDrawing) {
+            draw(e);
+        }
+    }, [getCanvasPosition, isDrawing]);
+
+    const handleMouseEnter = useCallback(() => {
+        setShowCursorPreview(true);
+    }, []);
+
+    const handleMouseLeave = useCallback(() => {
+        setShowCursorPreview(false);
+        const previewCanvas = previewCanvasRef.current;
+        if (previewCanvas) {
+            const ctx = previewCanvas.getContext('2d');
+            ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        }
+    }, []);
+
     const startDrawing = useCallback((e) => {
         e.preventDefault();
-        setIsDrawing(true);
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         const pos = getCanvasPosition(e);
 
+        // Handle fixed-size shapes on a single click
+        if (['rectangle', 'circle', 'diamond'].includes(tool)) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.setLineDash([]);
+            ctx.beginPath();
+
+            if (tool === 'rectangle') {
+                ctx.rect(pos.x - shapeSize / 2, pos.y - shapeSize / 2, shapeSize, shapeSize);
+            } else if (tool === 'circle') {
+                ctx.arc(pos.x, pos.y, shapeSize / 2, 0, 2 * Math.PI);
+            } else if (tool === 'diamond') {
+                drawDiamond(ctx, pos.x, pos.y, shapeSize);
+            }
+            ctx.stroke();
+            saveToHistory();
+            setIsDrawing(false);
+            return;
+        }
+
+        setIsDrawing(true);
         setStartPos(pos);
 
         if (tool === 'fill') {
@@ -226,8 +298,7 @@ const ReactPaintMUI = ({
             return;
         }
 
-        // Save canvas state for shape tools
-        if (['line', 'dottedLine', 'rectangle', 'circle'].includes(tool)) {
+        if (['line', 'dottedLine'].includes(tool)) {
             setPreviewCanvas(canvas.toDataURL());
         }
 
@@ -235,17 +306,17 @@ const ReactPaintMUI = ({
         ctx.lineWidth = lineWidth;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
+        ctx.setLineDash(tool === 'dottedLine' ? [lineWidth * 2, lineWidth * 2] : []);
 
         if (tool === 'pen' || tool === 'eraser') {
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
         }
-    }, [tool, color, lineWidth, getCanvasPosition, floodFill, saveToHistory]);
+    }, [tool, color, lineWidth, shapeSize, getCanvasPosition, floodFill, saveToHistory, drawDiamond]);
 
     const draw = useCallback((e) => {
         if (!isDrawing || tool === 'fill') return;
         e.preventDefault();
-
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         const pos = getCanvasPosition(e);
@@ -253,8 +324,7 @@ const ReactPaintMUI = ({
         if (tool === 'pen' || tool === 'eraser') {
             ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
-        } else if (['line', 'dottedLine', 'rectangle', 'circle'].includes(tool)) {
-            // Clear canvas and redraw from saved state
+        } else if (['line', 'dottedLine'].includes(tool)) {
             const img = new Image();
             img.onload = () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -268,15 +338,12 @@ const ReactPaintMUI = ({
     const stopDrawing = useCallback((e) => {
         if (!isDrawing) return;
         e?.preventDefault();
-
         setIsDrawing(false);
 
-        if (['line', 'dottedLine', 'rectangle', 'circle'].includes(tool)) {
+        if (['line', 'dottedLine'].includes(tool)) {
             const canvas = canvasRef.current;
             const ctx = canvas.getContext('2d');
             const pos = getCanvasPosition(e);
-
-            // Clear and redraw final shape
             const img = new Image();
             img.onload = () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -294,33 +361,31 @@ const ReactPaintMUI = ({
 
     const undo = useCallback(() => {
         if (historyIndex > 0) {
+            const newIndex = historyIndex - 1;
+            setHistoryIndex(newIndex);
             const canvas = canvasRef.current;
             const ctx = canvas.getContext('2d');
             const img = new Image();
-
             img.onload = () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0);
             };
-
-            img.src = history[historyIndex - 1];
-            setHistoryIndex(prev => prev - 1);
+            img.src = history[newIndex];
         }
     }, [history, historyIndex]);
 
     const redo = useCallback(() => {
         if (historyIndex < history.length - 1) {
+            const newIndex = historyIndex + 1;
+            setHistoryIndex(newIndex);
             const canvas = canvasRef.current;
             const ctx = canvas.getContext('2d');
             const img = new Image();
-
             img.onload = () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0);
             };
-
-            img.src = history[historyIndex + 1];
-            setHistoryIndex(prev => prev + 1);
+            img.src = history[newIndex];
         }
     }, [history, historyIndex]);
 
@@ -332,8 +397,6 @@ const ReactPaintMUI = ({
         saveToHistory();
     }, [saveToHistory]);
 
-
-    // Color picker component
     const ColorPicker = ({ selectedColor, onColorChange }) => (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxWidth: 320 }}>
             {colors.map((c) => (
@@ -372,24 +435,24 @@ const ReactPaintMUI = ({
         </Box>
     );
 
-    // Initialize canvas
+    // Update cursor preview when relevant properties change
+    useEffect(() => {
+        drawCursorPreview();
+    }, [drawCursorPreview]);
+
     useEffect(() => {
         const canvas = canvasRef.current;
+        const previewCanvas = previewCanvasRef.current;
         const ctx = canvas.getContext('2d');
-
-        // Set canvas size
         canvas.width = 800;
         canvas.height = 600;
 
-        // Initialize with white background
+        // Setup preview canvas
+        previewCanvas.width = 800;
+        previewCanvas.height = 600;
+
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        // Clear canvas with white background
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Load default image if provided
-
         if (defaultImage) {
             const img = new Image();
             img.src = defaultImage;
@@ -400,163 +463,146 @@ const ReactPaintMUI = ({
         } else {
             saveToHistory();
         }
+    }, [defaultImage]);
 
-    }, []);
-
-    // Event listeners
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-
-        const handleMouseDown = (e) => startDrawing(e);
-        const handleMouseMove = (e) => draw(e);
-        const handleMouseUp = (e) => stopDrawing(e);
-        const handleMouseLeave = (e) => stopDrawing(e);
-
-        const handleTouchStart = (e) => startDrawing(e);
-        const handleTouchMove = (e) => draw(e);
-        const handleTouchEnd = (e) => stopDrawing(e);
-
-        // Mouse events
-        canvas.addEventListener('mousedown', handleMouseDown);
+        const preventDefault = (e) => e.preventDefault();
+        canvas.addEventListener('touchstart', preventDefault, { passive: false });
+        canvas.addEventListener('touchmove', preventDefault, { passive: false });
+        canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', handleMouseMove);
-        canvas.addEventListener('mouseup', handleMouseUp);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+        canvas.addEventListener('mouseenter', handleMouseEnter);
         canvas.addEventListener('mouseleave', handleMouseLeave);
-
-        // Touch events
-        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-        canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-        canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
 
         return () => {
-            canvas.removeEventListener('mousedown', handleMouseDown);
+            canvas.removeEventListener('touchstart', preventDefault);
+            canvas.removeEventListener('touchmove', preventDefault);
+            canvas.removeEventListener('mousedown', startDrawing);
             canvas.removeEventListener('mousemove', handleMouseMove);
-            canvas.removeEventListener('mouseup', handleMouseUp);
+            canvas.removeEventListener('mouseup', stopDrawing);
+            canvas.removeEventListener('mouseleave', stopDrawing);
+            canvas.removeEventListener('mouseenter', handleMouseEnter);
             canvas.removeEventListener('mouseleave', handleMouseLeave);
-            canvas.removeEventListener('touchstart', handleTouchStart);
-            canvas.removeEventListener('touchmove', handleTouchMove);
-            canvas.removeEventListener('touchend', handleTouchEnd);
+            canvas.removeEventListener('touchstart', startDrawing);
+            canvas.removeEventListener('touchmove', draw);
+            canvas.removeEventListener('touchend', stopDrawing);
         };
-    }, [startDrawing, draw, stopDrawing]);
+    }, [startDrawing, handleMouseMove, draw, stopDrawing, handleMouseEnter, handleMouseLeave]);
 
     const getCursor = () => {
         switch (tool) {
             case 'pen': return 'crosshair';
             case 'eraser': return 'grab';
             case 'fill': return 'cell';
+            case 'rectangle':
+            case 'circle':
+            case 'diamond': return 'none'; // Hide cursor for shapes since we show preview
             default: return 'crosshair';
         }
     };
 
     return (
         <ThemeProvider theme={theme}>
-            <Box sx={{flexGrow: 1, bgcolor: '#f5f5f5', minHeight: '100vh'}}>
-                {/* Tools Panel */}
-                <Card elevation={3} sx={{mb: 3}}>
+            <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', p: 2 }}>
+                <Card elevation={3} sx={{ mb: 3 }}>
                     <CardContent>
-                        <Grid container spacing={3} alignItems="flex-start">
+                        <Grid container spacing={3} alignItems="center">
                             {/* Drawing Tools */}
-                            <Grid size={{ xs:12, sm:6, md:3}}>
-                                <Typography variant="subtitle1" gutterBottom sx={{fontWeight: 600}}>
-                                    Drawing Tools
+                            <Grid size={{ xs:12, md:4}}>
+                                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+                                    Tools
                                 </Typography>
-                                <ButtonGroup variant="outlined" size="medium" sx={{flexWrap: 'wrap', gap: 0}}>
-                                    {tools.map(({name, icon: Icon, label}) => (
+                                <ButtonGroup variant="outlined" size="medium" sx={{ flexWrap: 'wrap' }}>
+                                    {tools.map(({ name, icon: Icon, label }) => (
                                         <Tooltip key={name} title={label}>
                                             <Button
                                                 variant={tool === name ? 'contained' : 'outlined'}
                                                 onClick={() => setTool(name)}
-                                                sx={{
-                                                    minWidth: 48,
-                                                    height: 48,
-                                                    mb: 1
-                                                }}
+                                                sx={{ minWidth: 48, height: 48 }}
                                             >
-                                                <Icon/>
+                                                <Icon />
                                             </Button>
                                         </Tooltip>
                                     ))}
                                 </ButtonGroup>
-                                <Box sx={{mt: 1}}>
-                                    <Chip
-                                        label={`Active: ${tools.find(t => t.name === tool)?.label}`}
-                                        color="primary"
-                                        size="small"
-                                    />
-                                </Box>
                             </Grid>
-
-                            <Divider orientation="vertical" flexItem/>
 
                             {/* Color Palette */}
-                            <Grid size={{ xs:12, sm:6, md:3}}>
-                                <Typography variant="subtitle1" gutterBottom sx={{fontWeight: 600}}>
-                                    Color Palette
+                            <Grid size={{ xs:12, md:3}}>
+                                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+                                    Color
                                 </Typography>
-                                <ColorPicker selectedColor={color} onColorChange={setColor}/>
-                                <Box sx={{mt: 1}}>
-                                    <Chip
-                                        label={`Selected: ${color}`}
-                                        sx={{backgroundColor: color, color: color === '#000000' ? 'white' : 'black'}}
-                                        size="small"
+                                <ColorPicker selectedColor={color} onColorChange={setColor} />
+                            </Grid>
+
+                            {/* Settings */}
+                            <Grid size={{ xs:12, md:3}}>
+                                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+                                    Settings
+                                </Typography>
+                                <Box>
+                                    <Typography variant="body2" color="text.secondary">
+                                        Brush Size: {lineWidth}px
+                                    </Typography>
+                                    <Slider
+                                        value={lineWidth}
+                                        onChange={(e, value) => setLineWidth(value)}
+                                        min={1}
+                                        max={50}
+                                        step={1}
+                                        valueLabelDisplay="auto"
+                                    />
+                                </Box>
+                                <Box mt={2}>
+                                    <Typography variant="body2" color="text.secondary">
+                                        Shape Size: {shapeSize}px
+                                    </Typography>
+                                    <Slider
+                                        value={shapeSize}
+                                        onChange={(e, value) => setShapeSize(value)}
+                                        min={10}
+                                        max={200}
+                                        step={1}
+                                        valueLabelDisplay="auto"
+                                        disabled={!['rectangle', 'circle', 'diamond'].includes(tool)}
                                     />
                                 </Box>
                             </Grid>
 
-                            <Divider orientation="vertical" flexItem/>
-
-                            {/* Brush Settings */}
-                            <Grid  size={{ xs:12, sm:6, md:2}}>
-                                <Typography variant="subtitle1" gutterBottom sx={{fontWeight: 600}}>
-                                    Brush Size
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" gutterBottom>
-                                    {lineWidth}px
-                                </Typography>
-                                <Slider
-                                    value={lineWidth}
-                                    onChange={(e, value) => setLineWidth(value)}
-                                    min={1}
-                                    max={50}
-                                    step={1}
-                                    valueLabelDisplay="auto"
-                                    size="medium"
-                                />
-                            </Grid>
-
-                            <Divider orientation="vertical" flexItem/>
-
-                            {/* Action Buttons */}
-                            <Grid  size={{ xs:12, sm:6, md:2}}>
-                                <Typography variant="subtitle1" gutterBottom sx={{fontWeight: 600}}>
+                            {/* Actions */}
+                            <Grid size={{ xs:12, md:2}}>
+                                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
                                     Actions
                                 </Typography>
-                                <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
-                                    <ButtonGroup variant="outlined" size="small">
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                    <ButtonGroup>
                                         <Tooltip title="Undo">
-                        <span>
-                          <Button
-                              onClick={undo}
-                              disabled={historyIndex <= 0}
-                          >
-                            <UndoIcon fontSize="small"/>
-                          </Button>
-                        </span>
+                                            <span>
+                                                <Button onClick={undo} disabled={historyIndex <= 0}>
+                                                    <UndoIcon />
+                                                </Button>
+                                            </span>
                                         </Tooltip>
                                         <Tooltip title="Redo">
-                        <span>
-                          <Button
-                              onClick={redo}
-                              disabled={historyIndex >= history.length - 1}
-                          >
-                            <RedoIcon fontSize="small"/>
-                          </Button>
-                        </span>
+                                            <span>
+                                                <Button onClick={redo} disabled={historyIndex >= history.length - 1}>
+                                                    <RedoIcon />
+                                                </Button>
+                                            </span>
                                         </Tooltip>
-                                        <Tooltip title="Clear Canvas">
-                                            <Button onClick={clearCanvas} color="error">
-                                                <ClearIcon fontSize="small"/>
-                                            </Button>
+                                        <Tooltip title="Clear">
+                                            <span>
+                                                <Button onClick={clearCanvas} color="secondary">
+                                                    <ClearIcon />
+                                                </Button>
+                                            </span>
                                         </Tooltip>
                                     </ButtonGroup>
                                     <Typography variant="caption" color="text.secondary">
@@ -568,19 +614,34 @@ const ReactPaintMUI = ({
                     </CardContent>
                 </Card>
 
-                {/* Canvas */}
-                <canvas
-                    ref={canvasRef}
-                    style={{
-                        border: '2px solid #e0e0e0',
-                        borderRadius: 8,
-                        cursor: getCursor(),
-                        width: 'calc(100dvw - 4rem)',
-                        height: '100dvh',
-                        touchAction: 'none',
-                        boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                    }}
-                />
+                <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                    <canvas
+                        ref={canvasRef}
+                        style={{
+                            border: '2px solid #e0e0e0',
+                            borderRadius: 8,
+                            cursor: getCursor(),
+                            maxWidth: '100%',
+                            maxHeight: '70vh',
+                            touchAction: 'none',
+                            boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                        }}
+                    />
+                    <canvas
+                        ref={previewCanvasRef}
+                        style={{
+                            position: 'absolute',
+                            top: '2px',
+                            left: '2px',
+                            border: 'none',
+                            borderRadius: 8,
+                            pointerEvents: 'none',
+                            maxWidth: '100%',
+                            maxHeight: '70vh',
+                            touchAction: 'none'
+                        }}
+                    />
+                </Box>
             </Box>
         </ThemeProvider>
     );
