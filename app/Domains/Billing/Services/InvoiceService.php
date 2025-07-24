@@ -9,7 +9,9 @@ use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Repositories\InvoiceRepository;
+use App\Domains\Laboratory\Enums\TestType;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 
 readonly class InvoiceService
 {
@@ -55,7 +57,35 @@ readonly class InvoiceService
 
         $invoice->invoiceNo = $this->invoiceRepository->getInvoiceNo($invoice);
         $invoice->has_different_owner = $invoice->owner_type === "referrer";
-        return $invoice;
+        $output=$invoice->toArray();
+
+        $output["acceptance_items"]=
+            Arr::flatten(
+                array_values(
+                    $invoice->acceptanceItems
+                        ->groupBy("test.type")
+                        ->map(function ($item,$key) {
+            if ($key!==TestType::PANEL->value)
+                return $item;
+            else
+                return array_values($item
+                    ->groupBy("panel_id")
+                    ->map(function ($item,$key) {
+                    return collect([
+                        "id"=>$key,
+                        "price"=>$item->sum("price"),
+                        "discount"=>$item->sum("discount"),
+                        "test"=>$item->first()->test,
+                        "items"=>$item
+                    ]);
+                })->toArray());
+        })
+                        ->toArray()
+                )
+                ,1)
+    ;
+//        dd($output);
+        return $output;
     }
 
     public function updateInvoice(Invoice $invoice, InvoiceDTO $invoiceDTO): Invoice

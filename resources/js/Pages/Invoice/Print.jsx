@@ -179,7 +179,8 @@ const Print = ({invoice}) => {
                                     </TableRow>
                                     <TableRow>
                                         <TableCell colSpan={2}>
-                                            <strong>ID/Reference No.: </strong>{invoice?.acceptance?.referrer_order?.orderInformation?.patient?.reference_id??invoice?.acceptance?.referenceCode??invoice?.acceptance?.patient?.idNo}
+                                            <strong>ID/Reference
+                                                No.: </strong>{invoice?.acceptance?.referrer_order?.orderInformation?.patient?.reference_id ?? invoice?.acceptance?.referenceCode ?? invoice?.acceptance?.patient?.idNo}
                                         </TableCell>
                                     </TableRow>
                                     <TableRow>
@@ -241,7 +242,7 @@ const Print = ({invoice}) => {
                         <TableBody sx={{"& td": {paddingY: "1mm"}}}>
                             {invoice?.acceptance_items?.map((item) => <TableRow key={item.id}>
                                 <TableCell>{item.test.code}</TableCell>
-                                <TableCell>{`${item.test.name} ` + (item.test.id ? `(${item.method.name})` : "")}</TableCell>
+                                <TableCell>{item.test.name} </TableCell>
                                 <TableCell sx={{textAlign: "center"}}>1</TableCell>
                                 <TableCell sx={{textAlign: "center"}}>{item.price}</TableCell>
                                 <TableCell sx={{textAlign: "center"}}>{Math.ceil(item.discount)}</TableCell>
@@ -368,7 +369,7 @@ const Print = ({invoice}) => {
                                             Total Credit Amount(OMR):
                                         </TableCell>
                                         <TableCell sx={{textAlign: "center"}}>
-                                            {invoice.has_different_owner&&invoice.sponsor_payments_sum_price ? `-${invoice.sponsor_payments_sum_price??0}` : ""}
+                                            {invoice.has_different_owner && invoice.sponsor_payments_sum_price ? `-${invoice.sponsor_payments_sum_price ?? 0}` : ""}
                                         </TableCell>
 
                                         <TableCell/>
@@ -378,7 +379,7 @@ const Print = ({invoice}) => {
                                             Total Amount to pay (OMR):
                                         </TableCell>
                                         <TableCell sx={{textAlign: "center"}}>
-                                            {invoice.has_different_owner&&invoice.sponsor_payments_sum_price ? `${invoice.sponsor_payments_sum_price}` : ""}
+                                            {invoice.has_different_owner && invoice.sponsor_payments_sum_price ? `${invoice.sponsor_payments_sum_price}` : ""}
                                         </TableCell>
                                     </TableRow>
                                     <TableRow>

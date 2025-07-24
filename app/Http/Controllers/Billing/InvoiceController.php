@@ -65,9 +65,10 @@ class InvoiceController extends Controller
     {
         $this->authorize("view", $invoice);
 //        $vat = (int)(Setting::where("key", "vat")->first()->value["value"]);
-        $this->invoiceService->loadForShow($invoice);
+        $output=$this->invoiceService->loadForShow($invoice);
+
         return Inertia::render("Invoice/Print", [
-            "invoice" => $invoice,
+            "invoice" => $output,
 //            "vat" => $vat
         ]);
     }
