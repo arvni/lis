@@ -2,9 +2,11 @@
 
 namespace App\Domains\Billing\Exports;
 
+use App\Domains\Laboratory\Enums\TestType;
 use App\Utils\Constants;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Arr;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -56,26 +58,31 @@ class InvoicesExport implements FromCollection
     public function map($invoice): array
     {
         $rows = [];
-        foreach ($invoice->acceptanceItems as $acceptanceItem) {
-            $total = $acceptanceItem->price - $acceptanceItem->discount;
+
+        $acceptanceItems=$this->getAcceptanceItems($invoice);
+        foreach ($acceptanceItems as $acceptanceItem) {
+            $total = $acceptanceItem["price"] - $acceptanceItem["discount"];
+            $discount=$acceptanceItem["discount"]??"0";
+            $price=$acceptanceItem["price"]??"0";
+            $patient=(object)$acceptanceItem["patient"]??[];
             $rows[] = [
                 Carbon::parse($invoice->created_at)->toDate(),
                 $invoice->invoiceNo,
-                (string)optional($acceptanceItem->patient)->fullName,
+                (string)optional($patient)->fullName,
                 (string)optional($invoice->owner)->fullName,
-                $acceptanceItem->test->name,
-                $acceptanceItem->method->name,
-                "$acceptanceItem->price",
-                "$acceptanceItem->discount",
+                $acceptanceItem["test"]["name"],
+                $acceptanceItem["method"]["name"]??"",
+                "$price",
+                "$discount",
                 "$total",
                 "0",
                 "0",
                 "$total",
                 "$total",
                 $invoice->status,
-                optional($acceptanceItem->patient)->nationality ? Constants::countries(optional($acceptanceItem->patient)->nationality) : "",
-                ucfirst((string)optional($acceptanceItem->patient)->gender),
-                optional($acceptanceItem->patient)->age,
+                optional($patient)->nationality ? Constants::countries(optional($patient)->nationality) : "",
+                ucfirst((string)optional($patient)->gender),
+                optional($patient)->age,
                 ucfirst((string)optional(optional($invoice->payments)[0])->paymentMethod?->value)
             ];
         }
@@ -104,5 +111,33 @@ class InvoicesExport implements FromCollection
             "Age",
             "Payment Method",
         ];
+    }
+    private function getAcceptanceItems($invoice){
+
+        return Arr::flatten(
+            array_values(
+                $invoice->acceptanceItems
+                    ->groupBy("test.type")
+                    ->map(function ($item,$key) {
+                        if ($key!==TestType::PANEL->value)
+                            return $item;
+                        else
+                            return array_values($item
+                                ->groupBy("panel_id")
+                                ->map(function ($item,$key) {
+                                    return collect([
+                                        "id"=>$key,
+                                        "price"=>$item->sum("price"),
+                                        "discount"=>$item->sum("discount"),
+                                        "test"=>$item->first()->test,
+                                        "patient"=>$item->first()->patient,
+                                        "items"=>$item
+                                    ]);
+                                })->toArray());
+                    })
+                    ->toArray()
+            )
+            ,1);
+
     }
 }

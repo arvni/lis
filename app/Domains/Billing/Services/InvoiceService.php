@@ -59,8 +59,7 @@ readonly class InvoiceService
         $invoice->has_different_owner = $invoice->owner_type === "referrer";
         $output=$invoice->toArray();
 
-        $output["acceptance_items"]=
-            Arr::flatten(
+        $output["acceptance_items"]= Arr::flatten(
                 array_values(
                     $invoice->acceptanceItems
                         ->groupBy("test.type")
@@ -82,9 +81,7 @@ readonly class InvoiceService
         })
                         ->toArray()
                 )
-                ,1)
-    ;
-//        dd($output);
+                ,1);
         return $output;
     }
 
