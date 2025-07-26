@@ -3,7 +3,11 @@
 namespace App\Providers;
 
 use App\Domains\Billing\Models\Invoice;
+use App\Domains\Billing\Models\Payment;
+use App\Domains\Billing\Models\Statement;
 use App\Domains\Billing\Policies\InvoicePolicy;
+use App\Domains\Billing\Policies\PaymentPolicy;
+use App\Domains\Billing\Policies\StatementPolicy;
 use App\Domains\Consultation\Models\Consultant;
 use App\Domains\Consultation\Models\Consultation;
 use App\Domains\Consultation\Models\Customer;
@@ -141,5 +145,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Material::class, MaterialPolicy::class);
 
         Gate::policy(Invoice::class, InvoicePolicy::class);
+        Gate::policy(Payment::class, PaymentPolicy::class);
+        Gate::policy(Statement::class, StatementPolicy::class);
     }
 }

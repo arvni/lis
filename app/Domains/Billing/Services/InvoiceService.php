@@ -8,6 +8,7 @@ use App\Domains\Billing\DTOs\InvoiceDTO;
 use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Models\Invoice;
+use App\Domains\Billing\Models\Statement;
 use App\Domains\Billing\Repositories\InvoiceRepository;
 use App\Domains\Laboratory\Enums\TestType;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -116,6 +117,12 @@ readonly class InvoiceService
         foreach ($items as $item) {
             $this->receptionAdapter->updateAcceptanceItem($item);
         }
+    }
+
+    public function updateInvoicesStatementID(Statement $statement, $invoices)
+    {
+        $statement->loadMissing("invoices");
+        $this->invoiceRepository->updateMany(Arr::pluck($invoices, "id"), $statement);
     }
 
 

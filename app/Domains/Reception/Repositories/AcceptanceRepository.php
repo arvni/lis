@@ -5,7 +5,6 @@ namespace App\Domains\Reception\Repositories;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
-use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Setting\Services\SettingService;
 use Carbon\Carbon;
@@ -74,6 +73,57 @@ class AcceptanceRepository
         }
 
         return $query->paginate($queryData['pageSize'] ?? 10);
+    }
+
+    public function getReported($referrerId, $date = null): Collection
+    {
+        $carbonDate = Carbon::parse($date);
+        $dateRange = [
+            $carbonDate->startOfMonth()->startOfDay(),
+            $carbonDate->copy()->endOfMonth()->endOfDay(),
+        ];
+
+        $reportDateSubquery = DB::table('acceptance_items')
+            ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
+            ->join('methods', 'methods.id', '=', 'method_tests.method_id')
+            ->selectRaw('MAX(DATE_ADD(acceptance_items.created_at, INTERVAL methods.turnaround_time DAY))')
+            ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id');
+
+        return Acceptance::query()
+            ->with([
+                'acceptanceItems.test',
+                'samples:samples.id,barcode',
+                'invoice' => function ($query) {
+                    $query->addSelect([
+                            'id',
+                            'created_at',
+                        DB::raw('CONCAT(
+                    DATE_FORMAT(created_at, "%Y-%m"),
+                    "/",
+                    (SELECT COUNT(*)
+                     FROM invoices i2
+                     WHERE i2.id <= invoices.id
+                     AND YEAR(i2.created_at) = YEAR(invoices.created_at)
+                    )
+                ) AS invoice_no')
+                        ]
+                    );
+                }
+            ])
+            ->withAggregate('patient', 'fullName')
+            ->withAggregate('patient', 'idNo')
+            ->selectRaw("({$this->getPayableAmountSql()}) as payable_amount")
+            ->addSelect(['report_date' => $reportDateSubquery])
+            ->where(function ($q) use ($dateRange, $reportDateSubquery) {
+                $q->whereBetween(DB::raw("({$reportDateSubquery->toSql()})"), $dateRange)
+                    ->orWhere(function ($q) use ($dateRange) {
+                        $q->whereBetween('created_at', $dateRange)
+                            ->where("status", AcceptanceStatus::REPORTED);
+                    });
+            })
+            ->where("referrer_id", $referrerId)
+            ->whereRelation("invoice","statement_id","=",null)
+            ->get();
     }
 
     public function createAcceptance(array $acceptanceData): Acceptance // Fixed typo: creatAcceptance -> createAcceptance

@@ -16,6 +16,7 @@ class Invoice extends Model
     use Searchable;
 
     protected $fillable = [
+        'statement_id',
         'user_id',
         'owner_id',
         'owner_type',
@@ -79,6 +80,11 @@ class Invoice extends Model
     public function sponsorPayments()
     {
         return $this->Payments()->whereMorphedTo("payer", Referrer::class);
+    }
+
+    public function statement()
+    {
+        return $this->belongsTo(Statement::class);
     }
 
     /**

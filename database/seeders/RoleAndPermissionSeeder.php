@@ -103,6 +103,13 @@ class RoleAndPermissionSeeder extends Seeder
                     "Delete Payment",
                     "List Payments",
                 ],
+                "Statements" => [
+                    "View Statement",
+                    "Create Statement",
+                    "Edit Statement",
+                    "Delete Statement",
+                    "List Statements",
+                ],
             ],
             "User Management" => [
                 "Users" => [

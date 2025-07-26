@@ -19,7 +19,8 @@ import InterpreterModeIcon from '@mui/icons-material/InterpreterMode';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BusinessIcon from '@mui/icons-material/Business';
 import ReceiptIcon from "@mui/icons-material/Receipt";
-import {Analytics, FactCheck} from "@mui/icons-material";
+import {Analytics, FactCheck, Payments} from "@mui/icons-material";
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import {PercentDiamond, Stethoscope as Doctor, Hospital, PillBottle, ClipboardList} from "lucide-react";
 
 export const refactorRoute = (addr) => {
@@ -144,17 +145,30 @@ const routes = (sections = []) => {
             ]
         },
         {
-            title: "Invoices",
+            title: "Billing",
+            permission: "Billing",
             icon: <ReceiptIcon/>,
-            route: "invoices.index",
-            permission: 'Billing.Invoices.List Invoices',
+            child: [
+                {
+                    title: "Invoices",
+                    icon: <ReceiptIcon/>,
+                    route: "invoices.index",
+                    permission: 'Billing.Invoices.List Invoices',
+                },
+                {
+                    title: "Payments",
+                    icon: <Payments/>,
+                    route: "payments.index",
+                    permission: 'Billing.Payments.List Payments',
+                },
+                {
+                    title: "Statements",
+                    icon: <ReceiptLongIcon/>,
+                    route: "statements.index",
+                    permission: 'Billing.Statements.List Statements',
+                },
+            ]
         },
-        // {
-        //     title: "Payments",
-        //     icon: <PaymentsIcon/>,
-        //     route: "payments.index",
-        //     permission: 'Payment.Index',
-        // },
         {
             title: "Statistics",
             icon: <Analytics/>,

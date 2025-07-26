@@ -50,6 +50,11 @@ class AcceptanceService
         return $this->acceptanceRepository->ListAcceptances($queryData);
     }
 
+    public function getReferrerAcceptanceReported($referrer_id,$date)
+    {
+        return $this->acceptanceRepository->getReported($referrer_id,$date);
+    }
+
     public function listSampleCollections($queryData): LengthAwarePaginator
     {
         return $this->acceptanceRepository->listSampleCollection($queryData);

@@ -289,9 +289,9 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
     const [tempDiscounts, setTempDiscounts] = useState([]);
 
     // Group items by type
-    const tests = items.filter(item => item.test?.type === "TEST");
-    const services = items.filter(item => item.test?.type === "SERVICE");
-    const panels = items.filter(item => item.test?.type === "PANEL");
+    const tests = items.TEST;
+    const services = items.SERVICE;
+    const panels = items.PANEL;
 
     // Calculate totals
     const calculateTotals = (itemsList) => {
@@ -438,10 +438,12 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
                     onChange={(e) => handleEditChange('price', e.target.value)}
                     error={Boolean(errors.price)}
                     helperText={errors.price}
-                    inputProps={{
-                        min: 0,
-                        step: 0.01,
-                        style: { textAlign: 'right' }
+                    slotProps={{
+                        htmlInput:{
+                            min: 0,
+                            step: 0.01,
+                            style: { textAlign: 'right' }
+                        }
                     }}
                     sx={{ width: 100 }}
                 />
@@ -572,7 +574,7 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
     // Render panel with sub-items
     const renderPanelRow = (panel) => {
         const isExpanded = expandedPanels[panel.id];
-        const subItems = panel.acceptanceItems || [];
+        const subItems = panel.acceptance_items || [];
 
         return (
             <React.Fragment key={panel.id}>

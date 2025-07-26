@@ -16,10 +16,13 @@ use App\Http\Controllers\Api\Laboratory\ListTestsController;
 use App\Http\Controllers\Api\Laboratory\ListWorkflowsController;
 use App\Http\Controllers\Api\ListRoleController;
 use App\Http\Controllers\Api\Reception\ListPatientsController;
+use App\Http\Controllers\Api\Reception\ListReferrerAcceptanceReportedOrExpectedToBeReportedController;
 use App\Http\Controllers\Api\Referrer\ListReferrersController;
 use App\Http\Controllers\Billing\ExportInvoicesController;
 use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentController;
+use App\Http\Controllers\Billing\StatementController;
+use App\Http\Controllers\Billing\StatementExportController;
 use App\Http\Controllers\Consultation\BookAnAppointmentController;
 use App\Http\Controllers\Consultation\ConsultantController;
 use App\Http\Controllers\Consultation\ConsultationController;
@@ -197,6 +200,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get("methods/{method}", GetMethodController::class)->name("methods.show");
         });
         Route::group(["prefix" => "reception"], function () {
+            Route::get("acceptances/reported", ListReferrerAcceptanceReportedOrExpectedToBeReportedController::class)
+                ->name("acceptances.reported");
             Route::get("patients/{idNo}", GetPatientWithIdNoController::class)->name("patients.getByIdNo");
             Route::get("patients", ListPatientsController::class)->name("patients.list");
             Route::get("sample-collection/{acceptance}", ListBarcodesController::class)->name("sampleCollection.list");
@@ -223,6 +228,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::group(["prefix" => "billing"], function () {
         Route::get("invoices/export", ExportInvoicesController::class)->name("invoices.export");
         Route::resource("invoices", InvoiceController::class);
+        Route::get("statements/{statement}/export", StatementExportController::class)->name("statements.export");
+        Route::resource("statements", StatementController::class);
         Route::resource("payments", PaymentController::class);
     });
     Route::group(["prefix" => "laboratory"], function () {

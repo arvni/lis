@@ -3,6 +3,7 @@
 namespace App\Domains\Billing\Repositories;
 
 use App\Domains\Billing\Models\Invoice;
+use App\Domains\Billing\Models\Statement;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -104,6 +105,14 @@ class InvoiceRepository
     private function countInvoicesBeforeInThisYear($id, Carbon $created_at)
     {
         return Invoice::where("id", "<=", $id)->whereBetween("created_at", [$created_at->copy()->startOf("year")->toDate(), $created_at])->count();
+    }
+
+    public function updateMany(array $invoiceIds, Statement $statement)
+    {
+        $statement->invoices()->whereNotIn("id", $invoiceIds)->update(["statement_id" => null]);
+        Invoice::query()->whereIn("id", $invoiceIds)
+            ->whereNotIn("id", $statement->invoices->pluck("id"))
+            ->update(["statement_id" => $statement->id]);
     }
 
 }
