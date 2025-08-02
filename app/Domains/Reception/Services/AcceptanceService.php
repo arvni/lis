@@ -6,6 +6,9 @@ namespace App\Domains\Reception\Services;
 use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Laboratory\Enums\TestType;
+use App\Domains\Notification\Enums\WhatsappMessageType;
+use App\Domains\Notification\Enums\WhatsappMessageWritten;
+use App\Domains\Notification\Models\WhatsappMessage;
 use App\Domains\Reception\Adapters\LaboratoryAdapter;
 use App\Domains\Reception\DTOs\AcceptanceDTO;
 use App\Domains\Reception\DTOs\AcceptanceItemDTO;
@@ -17,10 +20,8 @@ use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Notifications\PatientReportPublished;
 use App\Domains\Reception\Notifications\SendPublishedReportByWhatsapp;
 use App\Domains\Reception\Repositories\AcceptanceRepository;
-use App\Domains\Reception\Repositories\PatientRepository;
 use App\Domains\Referrer\Services\ReferrerOrderService;
 use App\Domains\Setting\Repositories\SettingRepository;
-use App\Notifications\Channels\TwilioWhatsAppTemplateChannel;
 use App\Notifications\ReferrerReportPublished;
 use Carbon\Carbon;
 use Exception;
@@ -50,9 +51,9 @@ class AcceptanceService
         return $this->acceptanceRepository->ListAcceptances($queryData);
     }
 
-    public function getReferrerAcceptanceReported($referrer_id,$date)
+    public function getReferrerAcceptanceReported($referrer_id, $date)
     {
-        return $this->acceptanceRepository->getReported($referrer_id,$date);
+        return $this->acceptanceRepository->getReported($referrer_id, $date);
     }
 
     public function listSampleCollections($queryData): LengthAwarePaginator
@@ -553,15 +554,25 @@ class AcceptanceService
             Notification::send($patient, new PatientReportPublished($acceptance));
 
             if ($howReport["whatsappNumber"] ?? null) {
+                $to = $this->formatNumber($howReport["whatsappNumber"]);
                 foreach ($acceptance->acceptanceItems as $acceptanceItem) {
-                    Notification::send(
-                        $patient,
-                        new SendPublishedReportByWhatsapp(
-                            $acceptanceItem->test->name,
-                            $acceptanceItem->report->publishedDocument->hash,
-                            $howReport["whatsappNumber"]
-                        )
-                    );
+                    $data = [
+                        'contentSid' => config('services.twilio.templates.send_report_file'),
+                        'to' => 'whatsapp:' . $to,
+                        'contentVariables' => [
+                            "1" => $acceptanceItem->test->name, // {{1}} - Customer name
+                            "2" => $acceptanceItem->report->publishedDocument->hash, // {{2}} - Report File
+                        ]
+                    ];
+                    $whatsappMessage = new WhatsappMessage([
+                        "data" => $data,
+                        "status" => "initial",
+                        "waId" => Str::startsWith($to, "+") ? Str::substr($to, 1) : $to,
+                        'type' => WhatsappMessageType::OUTBOUND,
+                        'written' => WhatsappMessageWritten::TEMPLATE,
+                    ]);
+                    $whatsappMessage->messageable()->associate($patient);
+                    $whatsappMessage->save();
                 }
             }
 
@@ -633,6 +644,22 @@ class AcceptanceService
             "tests" => [...$tests, ...$services],
             "panels" => $groupedItems->get(TestType::PANEL->value, []),
         ];
+    }
+
+    protected function formatNumber($number): string
+    {
+        // Remove any non-numeric characters except +
+        $number = preg_replace('/[^0-9+]/', '', $number);
+
+        if (strlen($number) <= 9)
+            $number = '968' . $number;
+
+        // Ensure it has international format
+        if (!str_starts_with($number, '+')) {
+            $number = '+' . $number;
+        }
+
+        return $number;
     }
 
 

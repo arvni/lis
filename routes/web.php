@@ -59,6 +59,7 @@ use App\Http\Controllers\ListUsersController;
 use App\Http\Controllers\Notification\GetUnreadNotificationsController;
 use App\Http\Controllers\Notification\ListNotificationController;
 use App\Http\Controllers\Notification\ShowNotificationPageController;
+use App\Http\Controllers\Notification\WhatsappMessageController;
 use App\Http\Controllers\Reception\AcceptanceController;
 use App\Http\Controllers\Reception\AcceptanceItemStateController;
 use App\Http\Controllers\Reception\AcceptancePrescriptionController;
@@ -277,7 +278,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     });
     Route::post("upload-public", UploadPublicDocumentController::class)->name("upload-public");
-    Route::get("/notifications", ShowNotificationPageController::class)->name("notifications");
+    Route::group(["prefix" => "notifications"], function () {
+        Route::get("/", ShowNotificationPageController::class)->name("notifications");
+        Route::resource("whatsappMessages", WhatsappMessageController::class);
+    });
     Route::get("test-list", ShowTestListController::class)->name("test-list");
 
 });
