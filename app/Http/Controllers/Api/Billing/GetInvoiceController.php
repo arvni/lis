@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\Billing;
 
 use App\Domains\Billing\Models\Invoice;
+use App\Domains\Laboratory\Enums\TestType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InvoiceResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class GetInvoiceController extends Controller
 {
@@ -21,16 +23,16 @@ class GetInvoiceController extends Controller
                 "acceptance",
                 "acceptanceItems" => function ($q) {
                     $q->with([
-                        "test" => function ($testQuery) {
-                            $testQuery->withCount("methodTests");
-                        },
-                        "patients"
+                        "patients",
+                        "methodTest.method",
+                        "methodTest.test",
                     ]);
                 },
                 "referrer",
                 "payments.payer",
                 "payments.cashier",
             ]);
+
         return new InvoiceResource($invoice);
     }
 }

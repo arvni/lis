@@ -185,8 +185,7 @@ class UpdateAcceptanceRequest extends FormRequest
             case 4: // Sampling & Delivery
                 // Sampling Information
                 $rules['samplerGender'] = [
-                    Rule::excludeIf(fn() => $this->checkIstthereAnyTestOnRequest()),
-                    'required',
+                    $this->checkIstthereAnyTestOnRequest()?'nullable':'required',
                     'in:0,1'];
                 $rules['out_patient'] = 'boolean';
 
@@ -195,8 +194,7 @@ class UpdateAcceptanceRequest extends FormRequest
 
                 // Ensure at least one delivery method is selected when not referred
                 $rules['howReport'] = [
-                    Rule::excludeIf(fn() => $this->checkIstthereAnyTestOnRequest()),
-                    'required_if:referred,false',
+                    $this->checkIstthereAnyTestOnRequest()?'nullable': 'required_if:referred,false',
                     function ($attribute, $value, $fail) {
                         if ($this->input('referred') === false &&
                             (!isset($value['print']) && !isset($value['email']) && !isset($value['whatsapp']))) {

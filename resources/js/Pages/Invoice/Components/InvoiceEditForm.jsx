@@ -40,7 +40,7 @@ import {
     ArrowForward,
     PaymentRounded,
     AccountBalance,
-    SwapHoriz, CreditCardOff, CreditScore
+    SwapHoriz, CreditScore
 } from "@mui/icons-material";
 import {router} from "@inertiajs/react";
 import TableRowsIcon from '@mui/icons-material/TableRows';

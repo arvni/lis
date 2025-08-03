@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useCallback, useEffect} from "react";
+import React, {useState, useMemo, useEffect} from "react";
 import {
     Box,
     Typography,
@@ -102,7 +102,19 @@ const formatCurrency = (value) => {
     return Math.round((value + Number.EPSILON) * 100) / 100;
 };
 
-const sum = (items, field) => {
+const sumAcceptanceItems = (items, field) => {
+    if (Array.isArray(items))
+        return items.reduce((total, item) => {
+            return total + (parseFloat(item[field]) || 0);
+        }, 0);
+    return Object.keys(items).reduce((total, item) => {
+        const itemTotal = items[item]?.reduce((a, b) => a + (parseFloat(b[field])||0), 0);
+
+        return total + itemTotal;
+    }, 0)
+};
+
+const sumPayments = (items, field) => {
     return items.reduce((total, item) => total + (parseFloat(item[field]) || 0), 0);
 };
 
@@ -549,14 +561,14 @@ const InvoicePaymentManager = ({
 
     // Calculations
     const totalSum = useMemo(() => {
-        const itemsTotal = sum(acceptanceItems, "price");
-        const itemsDiscount = sum(acceptanceItems, "discount");
+        const itemsTotal = sumAcceptanceItems(acceptanceItems, "price");
+        const itemsDiscount = sumAcceptanceItems(acceptanceItems, "discount");
         const invoiceDiscount = invoice?.discount || 0;
         return itemsTotal - itemsDiscount - invoiceDiscount;
     }, [acceptanceItems, invoice?.discount]);
 
     const totalPayments = useMemo(() => {
-        return invoice?.payments ? sum(invoice.payments, "price") : 0;
+        return invoice?.payments ? sumPayments(invoice.payments, "price") : 0;
     }, [invoice?.payments]);
 
     const payableAmount = useMemo(() => {
@@ -736,7 +748,7 @@ const InvoicePaymentManager = ({
                                             {payment?.payer_type === 'patient' ? <Person fontSize="small"/> :
                                                 <Business fontSize="small"/>}
                                             <Typography variant="body2">
-                                                {payment.payer.fullName||payment.payer.name}
+                                                {payment.payer.fullName || payment.payer.name}
                                             </Typography>
                                         </Box>
                                     </TableCell>
