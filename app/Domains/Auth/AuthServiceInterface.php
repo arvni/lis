@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domain\Auth;
+namespace App\Domains\Auth;
 
-use App\Domain\Auth\DTOs\LoginDTO;
+use App\Domains\Auth\DTOs\LoginDTO;
 
 interface AuthServiceInterface
 {

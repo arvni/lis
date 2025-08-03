@@ -37,7 +37,16 @@ class DocumentService
             abort(404, 'File not found.');
         }
 
-        return response()->file($filePath);
+        return response()->download(
+            $filePath,
+            $document->originalName,
+            [
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => '0',
+            ]
+            ,
+            "inline");
     }
 
     public function getDocument($id)

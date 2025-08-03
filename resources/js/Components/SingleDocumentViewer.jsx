@@ -362,9 +362,9 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
     return (
         <Box
             sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: isFullScreen ? '100vh' : 'auto',
+                // display: 'flex',
+                // flexDirection: 'column',
+                height: isFullScreen ? '100vh' : '100%',
                 minHeight: isFullScreen ? '100vh' : 300,
                 width: '100%',
                 position: isFullScreen ? 'fixed' : 'relative',
@@ -501,7 +501,7 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
                         borderColor: 'divider',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 2
+                        gap: 2,
                     }}
                 >
                     <Box sx={{display: 'flex', alignItems: 'center'}}>
@@ -526,7 +526,7 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
             )}
 
             {/* Document viewer content area */}
-            <Box sx={{flex: 1, overflow: 'hidden', position: 'relative'}}>
+            <Box sx={{flex: 1, overflow: 'hidden', position: 'relative',height:'100%'}}>
                 {renderViewer()}
             </Box>
 

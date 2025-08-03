@@ -33,7 +33,7 @@ class DownloadReportController extends Controller
             $reportedDoc=$report->reportTemplate->template;
         try {
             $docAddr=$this->buildWordFileService->build($reportedDoc->path, $data);
-            return response()->download($docAddr)->deleteFileAfterSend();
+            return response()->download($docAddr,$reportedDoc->originalName)->deleteFileAfterSend();
         } catch (ConnectionException $e) {
         } catch (Exception $e) {
             return back()->with(["success" => false, "status" => $e->getMessage()]);

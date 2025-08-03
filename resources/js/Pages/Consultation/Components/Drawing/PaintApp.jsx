@@ -6,9 +6,10 @@ import {
     Typography,
     Slider,
     Tooltip,
-    Grid2 as Grid,
-    Card,
-    CardContent
+    AppBar,
+    Toolbar,
+    Divider,
+    Chip
 } from '@mui/material';
 import {
     Brush as BrushIcon,
@@ -20,7 +21,9 @@ import {
     Redo as RedoIcon,
     Clear as ClearIcon,
     MoreHoriz as DottedLineIcon,
-    Diamond as DiamondIcon
+    Diamond as DiamondIcon,
+    ChangeHistory as TriangleIcon,
+    ViewStream as CoplanarLinesIcon
 } from '@mui/icons-material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Eraser } from "lucide-react";
@@ -51,6 +54,7 @@ const ReactPaintMUI = ({
                        }) => {
     const canvasRef = useRef(null);
     const previewCanvasRef = useRef(null);
+    const containerRef = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [tool, setTool] = useState('pen');
     const [color, setColor] = useState('#000000');
@@ -62,6 +66,9 @@ const ReactPaintMUI = ({
     const [previewCanvas, setPreviewCanvas] = useState(null);
     const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
     const [showCursorPreview, setShowCursorPreview] = useState(false);
+    const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+    const [coplanarLineCount, setCoplanarLineCount] = useState(2);
+    const [coplanarLineSpacing, setCoplanarLineSpacing] = useState(5);
 
     const colors = [
         '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00',
@@ -76,10 +83,35 @@ const ReactPaintMUI = ({
         { name: 'fill', icon: FillIcon, label: 'Fill' },
         { name: 'line', icon: LineIcon, label: 'Line' },
         { name: 'dottedLine', icon: DottedLineIcon, label: 'Dotted Line' },
+        { name: 'coplanarLines', icon: CoplanarLinesIcon, label: 'Parallel Lines' },
         { name: 'rectangle', icon: RectangleIcon, label: 'Rectangle' },
         { name: 'circle', icon: CircleIcon, label: 'Circle' },
-        { name: 'diamond', icon: DiamondIcon, label: 'Diamond' }
+        { name: 'diamond', icon: DiamondIcon, label: 'Diamond' },
+        { name: 'triangle', icon: TriangleIcon, label: 'Triangle' }
     ];
+
+    // Update canvas size when window resizes
+    const updateCanvasSize = useCallback(() => {
+        if (containerRef.current) {
+            const container = containerRef.current;
+            const rect = container.getBoundingClientRect();
+            // Account for padding and make canvas fill the container
+            const newWidth = Math.floor(rect.width - 16);
+            const newHeight = Math.floor(rect.height - 16);
+            setCanvasSize({ width: newWidth, height: newHeight });
+        }
+    }, []);
+
+    useEffect(() => {
+        updateCanvasSize();
+        window.addEventListener('resize', updateCanvasSize);
+        // Small delay to ensure container is properly sized
+        const timer = setTimeout(updateCanvasSize, 100);
+        return () => {
+            window.removeEventListener('resize', updateCanvasSize);
+            clearTimeout(timer);
+        };
+    }, [updateCanvasSize]);
 
     const saveToHistory = useCallback(() => {
         const canvas = canvasRef.current;
@@ -149,6 +181,15 @@ const ReactPaintMUI = ({
         ctx.closePath();
         ctx.stroke();
     }, []);
+    const drawTriangle = useCallback((ctx, centerX, centerY, size) => {
+        const height = (size * Math.sqrt(3)) / 2;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY - height / 2); // top
+        ctx.lineTo(centerX - size / 2, centerY + height / 2); // bottom left
+        ctx.lineTo(centerX + size / 2, centerY + height / 2); // bottom right
+        ctx.closePath();
+        ctx.stroke();
+    }, []);
 
     const drawShape = useCallback((ctx, start, end, isPreview = false) => {
         ctx.strokeStyle = color;
@@ -166,6 +207,39 @@ const ReactPaintMUI = ({
 
         if (tool === 'dottedLine') {
             ctx.setLineDash([lineWidth * 2, lineWidth * 2]);
+        }
+
+        // Handle coplanar lines separately
+        if (tool === 'coplanarLines') {
+            const dx = end.x - start.x;
+            const dy = end.y - start.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+
+            if (length === 0) return;
+
+            // Calculate perpendicular vector for spacing
+            const perpX = -dy / length;
+            const perpY = dx / length;
+
+            // Draw multiple parallel lines
+            const totalLines = coplanarLineCount;
+            const startOffset = -((totalLines - 1) * coplanarLineSpacing) / 2;
+
+            for (let i = 0; i < totalLines; i++) {
+                const offset = startOffset + (i * coplanarLineSpacing);
+                const offsetStartX = start.x + perpX * offset;
+                const offsetStartY = start.y + perpY * offset;
+                const offsetEndX = end.x + perpX * offset;
+                const offsetEndY = end.y + perpY * offset;
+
+                ctx.beginPath();
+                ctx.moveTo(offsetStartX, offsetStartY);
+                ctx.lineTo(offsetEndX, offsetEndY);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+            ctx.setLineDash([]);
+            return;
         }
 
         ctx.beginPath();
@@ -191,13 +265,21 @@ const ReactPaintMUI = ({
                 ctx.lineTo(start.x - halfDiamond, start.y); // left
                 ctx.closePath();
                 break;
+            case 'triangle':
+                const triangleRadius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
+                const triangleHeight = (triangleRadius * Math.sqrt(3)) / 2;
+                ctx.moveTo(start.x, start.y - triangleHeight / 2); // top
+                ctx.lineTo(start.x - triangleRadius / 2, start.y + triangleHeight / 2); // bottom left
+                ctx.lineTo(start.x + triangleRadius / 2, start.y + triangleHeight / 2); // bottom right
+                ctx.closePath();
+                break;
             default:
                 break;
         }
         ctx.stroke();
         ctx.globalAlpha = 1;
         ctx.setLineDash([]);
-    }, [tool, color, lineWidth]);
+    }, [tool, color, lineWidth, coplanarLineCount, coplanarLineSpacing]);
 
     // Function to draw cursor preview
     const drawCursorPreview = useCallback(() => {
@@ -207,7 +289,29 @@ const ReactPaintMUI = ({
         const ctx = previewCanvas.getContext('2d');
         ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
 
-        if (['rectangle', 'circle', 'diamond'].includes(tool)) {
+        if (tool === 'eraser') {
+            // Draw eraser area preview
+            ctx.strokeStyle = '#ff0000';
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = 0.8;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.arc(cursorPos.x, cursorPos.y, lineWidth / 2, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // Draw a crosshair in the center
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 0.6;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(cursorPos.x - 5, cursorPos.y);
+            ctx.lineTo(cursorPos.x + 5, cursorPos.y);
+            ctx.moveTo(cursorPos.x, cursorPos.y - 5);
+            ctx.lineTo(cursorPos.x, cursorPos.y + 5);
+            ctx.stroke();
+
+            ctx.globalAlpha = 1;
+        } else if (['rectangle', 'circle', 'diamond', 'triangle'].includes(tool)) {
             ctx.strokeStyle = color;
             ctx.lineWidth = Math.max(1, lineWidth / 2);
             ctx.globalAlpha = 0.6;
@@ -229,6 +333,12 @@ const ReactPaintMUI = ({
                 ctx.lineTo(cursorPos.x + halfSize, cursorPos.y); // right
                 ctx.lineTo(cursorPos.x, cursorPos.y + halfSize); // bottom
                 ctx.lineTo(cursorPos.x - halfSize, cursorPos.y); // left
+                ctx.closePath();
+            } else if (tool === 'triangle') {
+                const height = (shapeSize * Math.sqrt(3)) / 2;
+                ctx.moveTo(cursorPos.x, cursorPos.y - height / 2); // top
+                ctx.lineTo(cursorPos.x - shapeSize / 2, cursorPos.y + height / 2); // bottom left
+                ctx.lineTo(cursorPos.x + shapeSize / 2, cursorPos.y + height / 2); // bottom right
                 ctx.closePath();
             }
 
@@ -268,7 +378,7 @@ const ReactPaintMUI = ({
         const pos = getCanvasPosition(e);
 
         // Handle fixed-size shapes on a single click
-        if (['rectangle', 'circle', 'diamond'].includes(tool)) {
+        if (['rectangle', 'circle', 'diamond', 'triangle'].includes(tool)) {
             ctx.strokeStyle = color;
             ctx.lineWidth = lineWidth;
             ctx.lineCap = 'round';
@@ -282,6 +392,8 @@ const ReactPaintMUI = ({
                 ctx.arc(pos.x, pos.y, shapeSize / 2, 0, 2 * Math.PI);
             } else if (tool === 'diamond') {
                 drawDiamond(ctx, pos.x, pos.y, shapeSize);
+            } else if (tool === 'triangle') {
+                drawTriangle(ctx, pos.x, pos.y, shapeSize);
             }
             ctx.stroke();
             saveToHistory();
@@ -298,7 +410,7 @@ const ReactPaintMUI = ({
             return;
         }
 
-        if (['line', 'dottedLine'].includes(tool)) {
+        if (['line', 'dottedLine', 'coplanarLines'].includes(tool)) {
             setPreviewCanvas(canvas.toDataURL());
         }
 
@@ -312,7 +424,7 @@ const ReactPaintMUI = ({
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
         }
-    }, [tool, color, lineWidth, shapeSize, getCanvasPosition, floodFill, saveToHistory, drawDiamond]);
+    }, [tool, color, lineWidth, shapeSize, getCanvasPosition, floodFill, saveToHistory, drawDiamond, drawTriangle]);
 
     const draw = useCallback((e) => {
         if (!isDrawing || tool === 'fill') return;
@@ -324,7 +436,7 @@ const ReactPaintMUI = ({
         if (tool === 'pen' || tool === 'eraser') {
             ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
-        } else if (['line', 'dottedLine'].includes(tool)) {
+        } else if (['line', 'dottedLine', 'coplanarLines'].includes(tool)) {
             const img = new Image();
             img.onload = () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -340,7 +452,7 @@ const ReactPaintMUI = ({
         e?.preventDefault();
         setIsDrawing(false);
 
-        if (['line', 'dottedLine'].includes(tool)) {
+        if (['line', 'dottedLine', 'coplanarLines'].includes(tool)) {
             const canvas = canvasRef.current;
             const ctx = canvas.getContext('2d');
             const pos = getCanvasPosition(e);
@@ -404,16 +516,16 @@ const ReactPaintMUI = ({
                     key={c}
                     onClick={() => onColorChange(c)}
                     sx={{
-                        width: 24,
-                        height: 24,
+                        width: 20,
+                        height: 20,
                         backgroundColor: c,
-                        border: selectedColor === c ? '3px solid #1976d2' : '1px solid #ccc',
-                        borderRadius: 1,
+                        border: selectedColor === c ? '2px solid #1976d2' : '1px solid #ccc',
+                        borderRadius: 0.5,
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
                         '&:hover': {
                             transform: 'scale(1.1)',
-                            boxShadow: 2
+                            boxShadow: 1
                         }
                     }}
                 />
@@ -424,10 +536,10 @@ const ReactPaintMUI = ({
                 value={selectedColor}
                 onChange={(e) => onColorChange(e.target.value)}
                 sx={{
-                    width: 24,
-                    height: 24,
+                    width: 20,
+                    height: 20,
                     border: 'none',
-                    borderRadius: 1,
+                    borderRadius: 0.5,
                     cursor: 'pointer',
                     padding: 0
                 }}
@@ -443,13 +555,15 @@ const ReactPaintMUI = ({
     useEffect(() => {
         const canvas = canvasRef.current;
         const previewCanvas = previewCanvasRef.current;
+        if (!canvas || !previewCanvas) return;
+
         const ctx = canvas.getContext('2d');
-        canvas.width = 800;
-        canvas.height = 600;
+        canvas.width = canvasSize.width;
+        canvas.height = canvasSize.height;
 
         // Setup preview canvas
-        previewCanvas.width = 800;
-        previewCanvas.height = 600;
+        previewCanvas.width = canvasSize.width;
+        previewCanvas.height = canvasSize.height;
 
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -463,7 +577,7 @@ const ReactPaintMUI = ({
         } else {
             saveToHistory();
         }
-    }, [defaultImage]);
+    }, [canvasSize]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -499,148 +613,200 @@ const ReactPaintMUI = ({
     const getCursor = () => {
         switch (tool) {
             case 'pen': return 'crosshair';
-            case 'eraser': return 'grab';
+            case 'eraser': return 'none'; // Hide cursor since we show custom preview
             case 'fill': return 'cell';
             case 'rectangle':
             case 'circle':
-            case 'diamond': return 'none'; // Hide cursor for shapes since we show preview
+            case 'diamond':
+            case 'triangle': return 'none'; // Hide cursor for shapes since we show preview
             default: return 'crosshair';
         }
     };
 
     return (
         <ThemeProvider theme={theme}>
-            <Box sx={{ flexGrow: 1, bgcolor: '#f5f5f5', p: 2 }}>
-                <Card elevation={3} sx={{ mb: 3 }}>
-                    <CardContent>
-                        <Grid container spacing={3} alignItems="center">
-                            {/* Drawing Tools */}
-                            <Grid size={{ xs:12, md:4}}>
-                                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-                                    Tools
-                                </Typography>
-                                <ButtonGroup variant="outlined" size="medium" sx={{ flexWrap: 'wrap' }}>
-                                    {tools.map(({ name, icon: Icon, label }) => (
-                                        <Tooltip key={name} title={label}>
-                                            <Button
-                                                variant={tool === name ? 'contained' : 'outlined'}
-                                                onClick={() => setTool(name)}
-                                                sx={{ minWidth: 48, height: 48 }}
-                                            >
-                                                <Icon />
-                                            </Button>
-                                        </Tooltip>
-                                    ))}
-                                </ButtonGroup>
-                            </Grid>
+            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: '#f5f5f5' }}>
+                {/* Top Toolbar */}
+                <AppBar position="static" elevation={1} sx={{ bgcolor: 'white', color: 'text.primary' }}>
+                    <Toolbar variant="dense" sx={{ minHeight: 48, gap: 2, flexWrap: 'wrap', py: 1 }}>
+                        {/* Tools */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 600, mr: 1 }}>
+                                Tools:
+                            </Typography>
+                            <ButtonGroup variant="outlined" size="small">
+                                {tools.map(({ name, icon: Icon, label }) => (
+                                    <Tooltip key={name} title={label}>
+                                        <Button
+                                            variant={tool === name ? 'contained' : 'outlined'}
+                                            onClick={() => setTool(name)}
+                                            sx={{ minWidth: 36, height: 36, p: 0.5 }}
+                                        >
+                                            <Icon sx={{ fontSize: 16 }} />
+                                        </Button>
+                                    </Tooltip>
+                                ))}
+                            </ButtonGroup>
+                        </Box>
 
-                            {/* Color Palette */}
-                            <Grid size={{ xs:12, md:3}}>
-                                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-                                    Color
-                                </Typography>
-                                <ColorPicker selectedColor={color} onColorChange={setColor} />
-                            </Grid>
+                        <Divider orientation="vertical" flexItem />
 
-                            {/* Settings */}
-                            <Grid size={{ xs:12, md:3}}>
-                                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-                                    Settings
-                                </Typography>
-                                <Box>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Brush Size: {lineWidth}px
-                                    </Typography>
-                                    <Slider
-                                        value={lineWidth}
-                                        onChange={(e, value) => setLineWidth(value)}
-                                        min={1}
-                                        max={50}
-                                        step={1}
-                                        valueLabelDisplay="auto"
-                                    />
-                                </Box>
-                                <Box mt={2}>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Shape Size: {shapeSize}px
-                                    </Typography>
-                                    <Slider
-                                        value={shapeSize}
-                                        onChange={(e, value) => setShapeSize(value)}
-                                        min={10}
-                                        max={200}
-                                        step={1}
-                                        valueLabelDisplay="auto"
-                                        disabled={!['rectangle', 'circle', 'diamond'].includes(tool)}
-                                    />
-                                </Box>
-                            </Grid>
+                        {/* Color Palette */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                Color:
+                            </Typography>
+                            <ColorPicker selectedColor={color} onColorChange={setColor} />
+                        </Box>
 
-                            {/* Actions */}
-                            <Grid size={{ xs:12, md:2}}>
-                                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-                                    Actions
-                                </Typography>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                                    <ButtonGroup>
-                                        <Tooltip title="Undo">
-                                            <span>
-                                                <Button onClick={undo} disabled={historyIndex <= 0}>
-                                                    <UndoIcon />
-                                                </Button>
-                                            </span>
-                                        </Tooltip>
-                                        <Tooltip title="Redo">
-                                            <span>
-                                                <Button onClick={redo} disabled={historyIndex >= history.length - 1}>
-                                                    <RedoIcon />
-                                                </Button>
-                                            </span>
-                                        </Tooltip>
-                                        <Tooltip title="Clear">
-                                            <span>
-                                                <Button onClick={clearCanvas} color="secondary">
-                                                    <ClearIcon />
-                                                </Button>
-                                            </span>
-                                        </Tooltip>
-                                    </ButtonGroup>
-                                    <Typography variant="caption" color="text.secondary">
-                                        History: {historyIndex + 1}/{history.length}
-                                    </Typography>
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    </CardContent>
-                </Card>
+                        <Divider orientation="vertical" flexItem />
 
-                <Box sx={{ position: 'relative', display: 'inline-block' }}>
-                    <canvas
-                        ref={canvasRef}
-                        style={{
-                            border: '2px solid #e0e0e0',
-                            borderRadius: 8,
-                            cursor: getCursor(),
-                            maxWidth: '100%',
-                            maxHeight: '70vh',
-                            touchAction: 'none',
-                            boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                        }}
-                    />
-                    <canvas
-                        ref={previewCanvasRef}
-                        style={{
-                            position: 'absolute',
-                            top: '2px',
-                            left: '2px',
-                            border: 'none',
-                            borderRadius: 8,
-                            pointerEvents: 'none',
-                            maxWidth: '100%',
-                            maxHeight: '70vh',
-                            touchAction: 'none'
-                        }}
-                    />
+                        {/* Settings */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Box sx={{ minWidth: 120 }}>
+                                <Typography variant="caption" color="text.secondary">
+                                    Brush: {lineWidth}px
+                                </Typography>
+                                <Slider
+                                    value={lineWidth}
+                                    onChange={(e, value) => setLineWidth(value)}
+                                    min={1}
+                                    max={50}
+                                    size="small"
+                                    sx={{ mt: -0.5 }}
+                                />
+                            </Box>
+                            <Box sx={{ minWidth: 120 }}>
+                                <Typography variant="caption" color="text.secondary">
+                                    Shape: {shapeSize}px
+                                </Typography>
+                                <Slider
+                                    value={shapeSize}
+                                    onChange={(e, value) => setShapeSize(value)}
+                                    min={10}
+                                    max={200}
+                                    size="small"
+                                    disabled={!['rectangle', 'circle', 'diamond', 'triangle'].includes(tool)}
+                                    sx={{ mt: -0.5 }}
+                                />
+                            </Box>
+                            {tool === 'coplanarLines' && (
+                                <>
+                                    <Box sx={{ minWidth: 100 }}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Lines: {coplanarLineCount}
+                                        </Typography>
+                                        <Slider
+                                            value={coplanarLineCount}
+                                            onChange={(e, value) => setCoplanarLineCount(value)}
+                                            min={2}
+                                            max={10}
+                                            size="small"
+                                            sx={{ mt: -0.5 }}
+                                        />
+                                    </Box>
+                                    <Box sx={{ minWidth: 120 }}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Spacing: {coplanarLineSpacing}px
+                                        </Typography>
+                                        <Slider
+                                            value={coplanarLineSpacing}
+                                            onChange={(e, value) => setCoplanarLineSpacing(value)}
+                                            min={5}
+                                            max={50}
+                                            size="small"
+                                            sx={{ mt: -0.5 }}
+                                        />
+                                    </Box>
+                                </>
+                            )}
+                        </Box>
+
+                        <Divider orientation="vertical" flexItem />
+
+                        {/* Actions */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <ButtonGroup variant="outlined" size="small">
+                                <Tooltip title="Undo">
+                                    <span>
+                                        <Button onClick={undo} disabled={historyIndex <= 0} sx={{ minWidth: 36, height: 36 }}>
+                                            <UndoIcon sx={{ fontSize: 16 }} />
+                                        </Button>
+                                    </span>
+                                </Tooltip>
+                                <Tooltip title="Redo">
+                                    <span>
+                                        <Button onClick={redo} disabled={historyIndex >= history.length - 1} sx={{ minWidth: 36, height: 36 }}>
+                                            <RedoIcon sx={{ fontSize: 16 }} />
+                                        </Button>
+                                    </span>
+                                </Tooltip>
+                                <Tooltip title="Clear">
+                                    <span>
+                                        <Button onClick={clearCanvas} color="secondary" sx={{ minWidth: 36, height: 36 }}>
+                                            <ClearIcon sx={{ fontSize: 16 }} />
+                                        </Button>
+                                    </span>
+                                </Tooltip>
+                            </ButtonGroup>
+                            <Chip
+                                label={`${historyIndex + 1}/${history.length}`}
+                                size="small"
+                                variant="outlined"
+                                sx={{ fontSize: '0.7rem', height: 24 }}
+                            />
+                        </Box>
+                    </Toolbar>
+                </AppBar>
+
+                {/* Canvas Container */}
+                <Box
+                    ref={containerRef}
+                    sx={{
+                        flexGrow: 1,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        p: 1,
+                        overflow: 'hidden',
+                        width: '100%',
+                        height: '100%'
+                    }}
+                >
+                    <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
+                        <canvas
+                            ref={canvasRef}
+                            width={canvasSize.width}
+                            height={canvasSize.height}
+                            style={{
+                                border: '2px solid #e0e0e0',
+                                borderRadius: 8,
+                                cursor: getCursor(),
+                                width: canvasSize.width,
+                                height: canvasSize.height,
+                                touchAction: 'none',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                backgroundColor: '#ffffff',
+                                display: 'block'
+                            }}
+                        />
+                        <canvas
+                            ref={previewCanvasRef}
+                            width={canvasSize.width}
+                            height={canvasSize.height}
+                            style={{
+                                position: 'absolute',
+                                top: '2px',
+                                left: '2px',
+                                border: 'none',
+                                borderRadius: 8,
+                                pointerEvents: 'none',
+                                width: canvasSize.width,
+                                height: canvasSize.height,
+                                touchAction: 'none'
+                            }}
+                        />
+                    </Box>
                 </Box>
             </Box>
         </ThemeProvider>
