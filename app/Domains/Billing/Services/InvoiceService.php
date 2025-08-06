@@ -89,6 +89,7 @@ readonly class InvoiceService
                 ...$item,
                 "qty" => collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["id"] == $testItem["test"]["id"])->count(),
                 "price" => collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["id"] == $testItem["test"]["id"])->sum("price"),
+                "unit_price" => $item["price"],
                 "discount" => collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["id"] == $testItem["test"]["id"])->sum("discount"),
             ];
         });

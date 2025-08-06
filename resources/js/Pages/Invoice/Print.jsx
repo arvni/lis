@@ -244,7 +244,7 @@ const Print = ({invoice}) => {
                                 <TableCell>{item.test.code}</TableCell>
                                 <TableCell>{item.test.name} </TableCell>
                                 <TableCell sx={{textAlign: "center"}}>{item.qty}</TableCell>
-                                <TableCell sx={{textAlign: "center"}}>{item.price}</TableCell>
+                                <TableCell sx={{textAlign: "center"}}>{item.unit_price}</TableCell>
                                 <TableCell sx={{textAlign: "center"}}>{Math.ceil(item.discount)}</TableCell>
                                 <TableCell
                                     sx={{textAlign: "center"}}>{Math.floor(item.price - item.discount)}</TableCell>
@@ -255,8 +255,7 @@ const Print = ({invoice}) => {
                             </TableRow>)}
                             <TableRow>
                                 <TableCell colSpan={3} sx={{fontWeight: "900", textAlign: "center"}}>Total</TableCell>
-                                <TableCell
-                                    sx={{textAlign: "center"}}>{Math.floor(invoice.acceptance_items_sum_price * 1)}</TableCell>
+                                <TableCell/>
                                 <TableCell
                                     sx={{textAlign: "center"}}>{Math.ceil(invoice.acceptance_items_sum_discount * 1)}</TableCell>
                                 <TableCell
