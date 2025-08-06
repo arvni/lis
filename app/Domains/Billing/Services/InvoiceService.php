@@ -58,31 +58,40 @@ readonly class InvoiceService
 
         $invoice->invoiceNo = $this->invoiceRepository->getInvoiceNo($invoice);
         $invoice->has_different_owner = $invoice->owner_type === "referrer";
-        $output=$invoice->toArray();
+        $output = $invoice->toArray();
 
-        $output["acceptance_items"]= Arr::flatten(
-                array_values(
-                    $invoice->acceptanceItems
-                        ->groupBy("test.type")
-                        ->map(function ($item,$key) {
-            if ($key!==TestType::PANEL->value)
-                return $item;
-            else
-                return array_values($item
-                    ->groupBy("panel_id")
-                    ->map(function ($item,$key) {
-                    return collect([
-                        "id"=>$key,
-                        "price"=>$item->sum("price"),
-                        "discount"=>$item->sum("discount"),
-                        "test"=>$item->first()->test,
-                        "items"=>$item
-                    ]);
-                })->toArray());
-        })
-                        ->toArray()
-                )
-                ,1);
+        $output["acceptance_items"] = Arr::flatten(
+            array_values(
+                $invoice->acceptanceItems
+                    ->groupBy("test.type")
+                    ->map(function ($item, $key) {
+                        if ($key !== TestType::PANEL->value)
+                            return $item;
+                        else
+                            return array_values($item
+                                ->groupBy("panel_id")
+                                ->map(function ($item, $key) {
+                                    return collect([
+                                        "id" => $key,
+                                        "price" => $item->sum("price"),
+                                        "discount" => $item->sum("discount"),
+                                        "test" => $item->first()->test,
+                                        "items" => $item
+                                    ]);
+                                })->toArray());
+                    })
+                    ->toArray()
+            )
+            , 1);
+        $uniqueTests = collect($output["acceptance_items"])->unique("test.id");
+        $output["acceptance_items"] = $uniqueTests->map(function ($item, $key) use ($output) {
+            return [
+                ...$item,
+                "qty" => collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["id"] == $testItem["test"]["id"])->count(),
+                "price" => collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["id"] == $testItem["test"]["id"])->sum("price"),
+                "discount" => collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["id"] == $testItem["test"]["id"])->sum("discount"),
+            ];
+        });
         return $output;
     }
 

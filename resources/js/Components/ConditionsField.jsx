@@ -1,6 +1,6 @@
 import {useState} from "react";
 import List from "@mui/material/List";
-import {IconButton, ListItem, ListItemSecondaryAction, ListItemText, Stack} from "@mui/material";
+import {IconButton, ListItem, Stack} from "@mui/material";
 import TextField from "@mui/material/TextField";
 import {Add, Delete} from "@mui/icons-material";
 import {makeId} from "@/Services/helper";
@@ -8,9 +8,9 @@ import {makeId} from "@/Services/helper";
 const ConditionsField = ({defaultValue = [], onChange, errors, name}) => {
     const [conditions, setConditions] = useState(defaultValue);
     const handleAdd = () => {
-        let id=makeId(6);
-        setConditions(prevState => ([...prevState, {condition: "", id,value:""}]));
-        onChange({target: {name, value: [...conditions, {condition: "", id,value:""}]}});
+        let id = makeId(6);
+        setConditions(prevState => ([...prevState, {condition: "", id, value: ""}]));
+        onChange({target: {name, value: [...conditions, {condition: "", id, value: ""}]}});
     };
     const handleDelete = (id) => () => {
         const temp = [...conditions];
@@ -31,8 +31,8 @@ const ConditionsField = ({defaultValue = [], onChange, errors, name}) => {
         {conditions.map(condition => <ListItem key={condition.id}
                                                secondaryAction={<IconButton onClick={handleDelete(condition.id)}>
                                                    <Delete/>
-        </IconButton>}>
-                <Stack direction="row" spacing={1}>
+                                               </IconButton>}>
+            <Stack direction="row" spacing={1}>
                 <TextField name="condition"
                            size="small"
                            label="Condition"
@@ -47,7 +47,7 @@ const ConditionsField = ({defaultValue = [], onChange, errors, name}) => {
                            value={condition.value}
                            error={Boolean(errors?.[condition.id])}
                            helperText={errors?.[condition.id]}/>
-                </Stack>
+            </Stack>
         </ListItem>)}
         <ListItem>
             <IconButton onClick={handleAdd}>

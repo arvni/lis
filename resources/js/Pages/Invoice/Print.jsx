@@ -243,7 +243,7 @@ const Print = ({invoice}) => {
                             {invoice?.acceptance_items?.map((item) => <TableRow key={item.id}>
                                 <TableCell>{item.test.code}</TableCell>
                                 <TableCell>{item.test.name} </TableCell>
-                                <TableCell sx={{textAlign: "center"}}>1</TableCell>
+                                <TableCell sx={{textAlign: "center"}}>{item.qty}</TableCell>
                                 <TableCell sx={{textAlign: "center"}}>{item.price}</TableCell>
                                 <TableCell sx={{textAlign: "center"}}>{Math.ceil(item.discount)}</TableCell>
                                 <TableCell
