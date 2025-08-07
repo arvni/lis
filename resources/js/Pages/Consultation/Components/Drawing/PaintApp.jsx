@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, {useState, useRef, useEffect, useCallback} from 'react';
 import {
     Button,
     ButtonGroup,
@@ -9,7 +9,8 @@ import {
     AppBar,
     Toolbar,
     Divider,
-    Chip
+    Chip,
+    Paper
 } from '@mui/material';
 import {
     Brush as BrushIcon,
@@ -23,10 +24,11 @@ import {
     MoreHoriz as DottedLineIcon,
     Diamond as DiamondIcon,
     ChangeHistory as TriangleIcon,
-    ViewStream as CoplanarLinesIcon
+    ViewStream as CoplanarLinesIcon,
+    ArrowUpward as ArrowIcon
 } from '@mui/icons-material';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Eraser } from "lucide-react";
+import {createTheme, ThemeProvider} from '@mui/material/styles';
+import {Eraser} from "lucide-react";
 
 const theme = createTheme({
     palette: {
@@ -50,7 +52,8 @@ const theme = createTheme({
 
 const ReactPaintMUI = ({
                            defaultImage = null,
-                           onChange = () => {}
+                           onChange = () => {
+                           }
                        }) => {
     const canvasRef = useRef(null);
     const previewCanvasRef = useRef(null);
@@ -60,13 +63,14 @@ const ReactPaintMUI = ({
     const [color, setColor] = useState('#000000');
     const [lineWidth, setLineWidth] = useState(3);
     const [shapeSize, setShapeSize] = useState(50);
+    const [arrowRotation, setArrowRotation] = useState(0);
     const [history, setHistory] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
-    const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+    const [startPos, setStartPos] = useState({x: 0, y: 0});
     const [previewCanvas, setPreviewCanvas] = useState(null);
-    const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+    const [cursorPos, setCursorPos] = useState({x: 0, y: 0});
     const [showCursorPreview, setShowCursorPreview] = useState(false);
-    const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+    const [canvasSize, setCanvasSize] = useState({width: 800, height: 600});
     const [coplanarLineCount, setCoplanarLineCount] = useState(2);
     const [coplanarLineSpacing, setCoplanarLineSpacing] = useState(5);
 
@@ -78,16 +82,30 @@ const ReactPaintMUI = ({
     ];
 
     const tools = [
-        { name: 'pen', icon: BrushIcon, label: 'Pen' },
-        { name: 'eraser', icon: Eraser, label: 'Eraser' },
-        { name: 'fill', icon: FillIcon, label: 'Fill' },
-        { name: 'line', icon: LineIcon, label: 'Line' },
-        { name: 'dottedLine', icon: DottedLineIcon, label: 'Dotted Line' },
-        { name: 'coplanarLines', icon: CoplanarLinesIcon, label: 'Parallel Lines' },
-        { name: 'rectangle', icon: RectangleIcon, label: 'Rectangle' },
-        { name: 'circle', icon: CircleIcon, label: 'Circle' },
-        { name: 'diamond', icon: DiamondIcon, label: 'Diamond' },
-        { name: 'triangle', icon: TriangleIcon, label: 'Triangle' }
+        {name: 'pen', icon: BrushIcon, label: 'Pen'},
+        {name: 'eraser', icon: Eraser, label: 'Eraser'},
+        {name: 'fill', icon: FillIcon, label: 'Fill'},
+        {name: 'line', icon: LineIcon, label: 'Line'},
+        {name: 'dottedLine', icon: DottedLineIcon, label: 'Dotted Line'},
+        {name: 'coplanarLines', icon: CoplanarLinesIcon, label: 'Parallel Lines'},
+        {name: 'rectangle', icon: RectangleIcon, label: 'Rectangle'},
+        {name: 'circle', icon: CircleIcon, label: 'Circle'},
+        {name: 'diamond', icon: DiamondIcon, label: 'Diamond'},
+        {name: 'triangle', icon: TriangleIcon, label: 'Triangle'},
+        {name: 'arrow', icon: ArrowIcon, label: 'Arrow'}
+    ];
+
+    const numberTools = [
+        {name: 'number0', label: '0'},
+        {name: 'number1', label: '1'},
+        {name: 'number2', label: '2'},
+        {name: 'number3', label: '3'},
+        {name: 'number4', label: '4'},
+        {name: 'number5', label: '5'},
+        {name: 'number6', label: '6'},
+        {name: 'number7', label: '7'},
+        {name: 'number8', label: '8'},
+        {name: 'number9', label: '9'}
     ];
 
     // Update canvas size when window resizes
@@ -95,17 +113,16 @@ const ReactPaintMUI = ({
         if (containerRef.current) {
             const container = containerRef.current;
             const rect = container.getBoundingClientRect();
-            // Account for padding and make canvas fill the container
-            const newWidth = Math.floor(rect.width - 16);
+            // Account for padding and leave space for the number toolbox
+            const newWidth = Math.floor(rect.width - 160); // 140px for toolbox + padding
             const newHeight = Math.floor(rect.height - 16);
-            setCanvasSize({ width: newWidth, height: newHeight });
+            setCanvasSize({width: newWidth, height: newHeight});
         }
     }, []);
 
     useEffect(() => {
         updateCanvasSize();
         window.addEventListener('resize', updateCanvasSize);
-        // Small delay to ensure container is properly sized
         const timer = setTimeout(updateCanvasSize, 100);
         return () => {
             window.removeEventListener('resize', updateCanvasSize);
@@ -174,22 +191,54 @@ const ReactPaintMUI = ({
     const drawDiamond = useCallback((ctx, centerX, centerY, size) => {
         const halfSize = size / 2;
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY - halfSize); // top
-        ctx.lineTo(centerX + halfSize, centerY); // right
-        ctx.lineTo(centerX, centerY + halfSize); // bottom
-        ctx.lineTo(centerX - halfSize, centerY); // left
+        ctx.moveTo(centerX, centerY - halfSize);
+        ctx.lineTo(centerX + halfSize, centerY);
+        ctx.lineTo(centerX, centerY + halfSize);
+        ctx.lineTo(centerX - halfSize, centerY);
         ctx.closePath();
         ctx.stroke();
     }, []);
+
     const drawTriangle = useCallback((ctx, centerX, centerY, size) => {
         const height = (size * Math.sqrt(3)) / 2;
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY - height / 2); // top
-        ctx.lineTo(centerX - size / 2, centerY + height / 2); // bottom left
-        ctx.lineTo(centerX + size / 2, centerY + height / 2); // bottom right
+        ctx.moveTo(centerX, centerY - height / 2);
+        ctx.lineTo(centerX - size / 2, centerY + height / 2);
+        ctx.lineTo(centerX + size / 2, centerY + height / 2);
         ctx.closePath();
         ctx.stroke();
     }, []);
+
+    const drawArrow = useCallback((ctx, centerX, centerY, size, rotation = 0) => {
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate((rotation * Math.PI) / 180);
+
+        const arrowLength = size;
+        const arrowHeadLength = size * 0.3;
+        const arrowHeadWidth = size * 0.2;
+
+        ctx.beginPath();
+        ctx.moveTo(0, -arrowLength / 2);
+        ctx.lineTo(0, arrowLength / 2 - arrowHeadLength);
+
+        ctx.moveTo(-arrowHeadWidth, arrowLength / 2 - arrowHeadLength);
+        ctx.lineTo(0, arrowLength / 2);
+        ctx.lineTo(arrowHeadWidth, arrowLength / 2 - arrowHeadLength);
+
+        ctx.stroke();
+        ctx.restore();
+    }, []);
+
+    const drawNumber = useCallback((ctx, centerX, centerY, size, number) => {
+        ctx.save();
+        ctx.font = `bold ${size}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = color;
+        ctx.fillText(number, centerX, centerY);
+        ctx.restore();
+    }, [color]);
 
     const drawShape = useCallback((ctx, start, end, isPreview = false) => {
         ctx.strokeStyle = color;
@@ -209,7 +258,6 @@ const ReactPaintMUI = ({
             ctx.setLineDash([lineWidth * 2, lineWidth * 2]);
         }
 
-        // Handle coplanar lines separately
         if (tool === 'coplanarLines') {
             const dx = end.x - start.x;
             const dy = end.y - start.y;
@@ -217,11 +265,9 @@ const ReactPaintMUI = ({
 
             if (length === 0) return;
 
-            // Calculate perpendicular vector for spacing
             const perpX = -dy / length;
             const perpY = dx / length;
 
-            // Draw multiple parallel lines
             const totalLines = coplanarLineCount;
             const startOffset = -((totalLines - 1) * coplanarLineSpacing) / 2;
 
@@ -259,18 +305,18 @@ const ReactPaintMUI = ({
             case 'diamond':
                 const diamondRadius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
                 const halfDiamond = diamondRadius;
-                ctx.moveTo(start.x, start.y - halfDiamond); // top
-                ctx.lineTo(start.x + halfDiamond, start.y); // right
-                ctx.lineTo(start.x, start.y + halfDiamond); // bottom
-                ctx.lineTo(start.x - halfDiamond, start.y); // left
+                ctx.moveTo(start.x, start.y - halfDiamond);
+                ctx.lineTo(start.x + halfDiamond, start.y);
+                ctx.lineTo(start.x, start.y + halfDiamond);
+                ctx.lineTo(start.x - halfDiamond, start.y);
                 ctx.closePath();
                 break;
             case 'triangle':
                 const triangleRadius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
                 const triangleHeight = (triangleRadius * Math.sqrt(3)) / 2;
-                ctx.moveTo(start.x, start.y - triangleHeight / 2); // top
-                ctx.lineTo(start.x - triangleRadius / 2, start.y + triangleHeight / 2); // bottom left
-                ctx.lineTo(start.x + triangleRadius / 2, start.y + triangleHeight / 2); // bottom right
+                ctx.moveTo(start.x, start.y - triangleHeight / 2);
+                ctx.lineTo(start.x - triangleRadius / 2, start.y + triangleHeight / 2);
+                ctx.lineTo(start.x + triangleRadius / 2, start.y + triangleHeight / 2);
                 ctx.closePath();
                 break;
             default:
@@ -281,7 +327,6 @@ const ReactPaintMUI = ({
         ctx.setLineDash([]);
     }, [tool, color, lineWidth, coplanarLineCount, coplanarLineSpacing]);
 
-    // Function to draw cursor preview
     const drawCursorPreview = useCallback(() => {
         const previewCanvas = previewCanvasRef.current;
         if (!previewCanvas || !showCursorPreview) return;
@@ -290,7 +335,6 @@ const ReactPaintMUI = ({
         ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
 
         if (tool === 'eraser') {
-            // Draw eraser area preview
             ctx.strokeStyle = '#ff0000';
             ctx.lineWidth = 2;
             ctx.globalAlpha = 0.8;
@@ -299,7 +343,6 @@ const ReactPaintMUI = ({
             ctx.arc(cursorPos.x, cursorPos.y, lineWidth / 2, 0, 2 * Math.PI);
             ctx.stroke();
 
-            // Draw a crosshair in the center
             ctx.setLineDash([]);
             ctx.globalAlpha = 0.6;
             ctx.lineWidth = 1;
@@ -311,7 +354,7 @@ const ReactPaintMUI = ({
             ctx.stroke();
 
             ctx.globalAlpha = 1;
-        } else if (['rectangle', 'circle', 'diamond', 'triangle'].includes(tool)) {
+        } else if (['rectangle', 'circle', 'diamond', 'triangle', 'arrow'].includes(tool) || tool.startsWith('number')) {
             ctx.strokeStyle = color;
             ctx.lineWidth = Math.max(1, lineWidth / 2);
             ctx.globalAlpha = 0.6;
@@ -329,30 +372,43 @@ const ReactPaintMUI = ({
                 ctx.arc(cursorPos.x, cursorPos.y, shapeSize / 2, 0, 2 * Math.PI);
             } else if (tool === 'diamond') {
                 const halfSize = shapeSize / 2;
-                ctx.moveTo(cursorPos.x, cursorPos.y - halfSize); // top
-                ctx.lineTo(cursorPos.x + halfSize, cursorPos.y); // right
-                ctx.lineTo(cursorPos.x, cursorPos.y + halfSize); // bottom
-                ctx.lineTo(cursorPos.x - halfSize, cursorPos.y); // left
+                ctx.moveTo(cursorPos.x, cursorPos.y - halfSize);
+                ctx.lineTo(cursorPos.x + halfSize, cursorPos.y);
+                ctx.lineTo(cursorPos.x, cursorPos.y + halfSize);
+                ctx.lineTo(cursorPos.x - halfSize, cursorPos.y);
                 ctx.closePath();
             } else if (tool === 'triangle') {
                 const height = (shapeSize * Math.sqrt(3)) / 2;
-                ctx.moveTo(cursorPos.x, cursorPos.y - height / 2); // top
-                ctx.lineTo(cursorPos.x - shapeSize / 2, cursorPos.y + height / 2); // bottom left
-                ctx.lineTo(cursorPos.x + shapeSize / 2, cursorPos.y + height / 2); // bottom right
+                ctx.moveTo(cursorPos.x, cursorPos.y - height / 2);
+                ctx.lineTo(cursorPos.x - shapeSize / 2, cursorPos.y + height / 2);
+                ctx.lineTo(cursorPos.x + shapeSize / 2, cursorPos.y + height / 2);
                 ctx.closePath();
+            } else if (tool === 'arrow') {
+                ctx.setLineDash([]);
+                drawArrow(ctx, cursorPos.x, cursorPos.y, shapeSize, arrowRotation);
+                ctx.globalAlpha = 1;
+                ctx.setLineDash([]);
+                return;
+            } else if (tool.startsWith('number')) {
+                ctx.setLineDash([]);
+                ctx.globalAlpha = 0.6;
+                const number = tool.replace('number', '');
+                drawNumber(ctx, cursorPos.x, cursorPos.y, shapeSize, number);
+                ctx.globalAlpha = 1;
+                ctx.setLineDash([]);
+                return;
             }
 
             ctx.stroke();
             ctx.globalAlpha = 1;
             ctx.setLineDash([]);
         }
-    }, [tool, color, lineWidth, shapeSize, cursorPos, showCursorPreview]);
+    }, [tool, color, lineWidth, shapeSize, arrowRotation, cursorPos, showCursorPreview, drawArrow, drawNumber]);
 
     const handleMouseMove = useCallback((e) => {
         const pos = getCanvasPosition(e);
         setCursorPos(pos);
 
-        // Call the existing draw function if drawing
         if (isDrawing) {
             draw(e);
         }
@@ -377,8 +433,8 @@ const ReactPaintMUI = ({
         const ctx = canvas.getContext('2d');
         const pos = getCanvasPosition(e);
 
-        // Handle fixed-size shapes on a single click
-        if (['rectangle', 'circle', 'diamond', 'triangle'].includes(tool)) {
+        // Handle fixed-size shapes and numbers on a single click
+        if (['rectangle', 'circle', 'diamond', 'triangle', 'arrow'].includes(tool) || tool.startsWith('number')) {
             ctx.strokeStyle = color;
             ctx.lineWidth = lineWidth;
             ctx.lineCap = 'round';
@@ -388,14 +444,21 @@ const ReactPaintMUI = ({
 
             if (tool === 'rectangle') {
                 ctx.rect(pos.x - shapeSize / 2, pos.y - shapeSize / 2, shapeSize, shapeSize);
+                ctx.stroke();
             } else if (tool === 'circle') {
                 ctx.arc(pos.x, pos.y, shapeSize / 2, 0, 2 * Math.PI);
+                ctx.stroke();
             } else if (tool === 'diamond') {
                 drawDiamond(ctx, pos.x, pos.y, shapeSize);
             } else if (tool === 'triangle') {
                 drawTriangle(ctx, pos.x, pos.y, shapeSize);
+            } else if (tool === 'arrow') {
+                drawArrow(ctx, pos.x, pos.y, shapeSize, arrowRotation);
+            } else if (tool.startsWith('number')) {
+                const number = tool.replace('number', '');
+                drawNumber(ctx, pos.x, pos.y, shapeSize, number);
             }
-            ctx.stroke();
+
             saveToHistory();
             setIsDrawing(false);
             return;
@@ -424,7 +487,7 @@ const ReactPaintMUI = ({
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
         }
-    }, [tool, color, lineWidth, shapeSize, getCanvasPosition, floodFill, saveToHistory, drawDiamond, drawTriangle]);
+    }, [tool, color, lineWidth, shapeSize, arrowRotation, getCanvasPosition, floodFill, saveToHistory, drawDiamond, drawTriangle, drawArrow, drawNumber]);
 
     const draw = useCallback((e) => {
         if (!isDrawing || tool === 'fill') return;
@@ -509,8 +572,8 @@ const ReactPaintMUI = ({
         saveToHistory();
     }, [saveToHistory]);
 
-    const ColorPicker = ({ selectedColor, onColorChange }) => (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxWidth: 320 }}>
+    const ColorPicker = ({selectedColor, onColorChange}) => (
+        <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5, maxWidth: 320}}>
             {colors.map((c) => (
                 <Box
                     key={c}
@@ -547,7 +610,6 @@ const ReactPaintMUI = ({
         </Box>
     );
 
-    // Update cursor preview when relevant properties change
     useEffect(() => {
         drawCursorPreview();
     }, [drawCursorPreview]);
@@ -561,7 +623,6 @@ const ReactPaintMUI = ({
         canvas.width = canvasSize.width;
         canvas.height = canvasSize.height;
 
-        // Setup preview canvas
         previewCanvas.width = canvasSize.width;
         previewCanvas.height = canvasSize.height;
 
@@ -583,8 +644,8 @@ const ReactPaintMUI = ({
         const canvas = canvasRef.current;
         if (!canvas) return;
         const preventDefault = (e) => e.preventDefault();
-        canvas.addEventListener('touchstart', preventDefault, { passive: false });
-        canvas.addEventListener('touchmove', preventDefault, { passive: false });
+        canvas.addEventListener('touchstart', preventDefault, {passive: false});
+        canvas.addEventListener('touchmove', preventDefault, {passive: false});
         canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', handleMouseMove);
         canvas.addEventListener('mouseup', stopDrawing);
@@ -612,58 +673,65 @@ const ReactPaintMUI = ({
 
     const getCursor = () => {
         switch (tool) {
-            case 'pen': return 'crosshair';
-            case 'eraser': return 'none'; // Hide cursor since we show custom preview
-            case 'fill': return 'cell';
+            case 'pen':
+                return 'crosshair';
+            case 'eraser':
+                return 'none';
+            case 'fill':
+                return 'cell';
             case 'rectangle':
             case 'circle':
             case 'diamond':
-            case 'triangle': return 'none'; // Hide cursor for shapes since we show preview
-            default: return 'crosshair';
+            case 'triangle':
+            case 'arrow':
+                return 'none';
+            default:
+                if (tool.startsWith('number')) return 'none';
+                return 'crosshair';
         }
     };
 
     return (
         <ThemeProvider theme={theme}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: '#f5f5f5' }}>
+            <Box sx={{display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: '#f5f5f5'}}>
                 {/* Top Toolbar */}
-                <AppBar position="static" elevation={1} sx={{ bgcolor: 'white', color: 'text.primary' }}>
-                    <Toolbar variant="dense" sx={{ minHeight: 48, gap: 2, flexWrap: 'wrap', py: 1 }}>
+                <AppBar position="static" elevation={1} sx={{bgcolor: 'white', color: 'text.primary'}}>
+                    <Toolbar variant="dense" sx={{minHeight: 48, gap: 2, flexWrap: 'wrap', py: 1}}>
                         {/* Tools */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 600, mr: 1 }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                            <Typography variant="subtitle2" sx={{fontWeight: 600, mr: 1}}>
                                 Tools:
                             </Typography>
                             <ButtonGroup variant="outlined" size="small">
-                                {tools.map(({ name, icon: Icon, label }) => (
+                                {tools.map(({name, icon: Icon, label}) => (
                                     <Tooltip key={name} title={label}>
                                         <Button
                                             variant={tool === name ? 'contained' : 'outlined'}
                                             onClick={() => setTool(name)}
-                                            sx={{ minWidth: 36, height: 36, p: 0.5 }}
+                                            sx={{minWidth: 36, height: 36, p: 0.5}}
                                         >
-                                            <Icon sx={{ fontSize: 16 }} />
+                                            <Icon sx={{fontSize: 16}}/>
                                         </Button>
                                     </Tooltip>
                                 ))}
                             </ButtonGroup>
                         </Box>
 
-                        <Divider orientation="vertical" flexItem />
+                        <Divider orientation="vertical" flexItem/>
 
                         {/* Color Palette */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                            <Typography variant="subtitle2" sx={{fontWeight: 600}}>
                                 Color:
                             </Typography>
-                            <ColorPicker selectedColor={color} onColorChange={setColor} />
+                            <ColorPicker selectedColor={color} onColorChange={setColor}/>
                         </Box>
 
-                        <Divider orientation="vertical" flexItem />
+                        <Divider orientation="vertical" flexItem/>
 
                         {/* Settings */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Box sx={{ minWidth: 120 }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                            <Box sx={{minWidth: 120}}>
                                 <Typography variant="caption" color="text.secondary">
                                     Brush: {lineWidth}px
                                 </Typography>
@@ -673,10 +741,10 @@ const ReactPaintMUI = ({
                                     min={1}
                                     max={50}
                                     size="small"
-                                    sx={{ mt: -0.5 }}
+                                    sx={{mt: -0.5}}
                                 />
                             </Box>
-                            <Box sx={{ minWidth: 120 }}>
+                            <Box sx={{minWidth: 120}}>
                                 <Typography variant="caption" color="text.secondary">
                                     Shape: {shapeSize}px
                                 </Typography>
@@ -686,13 +754,28 @@ const ReactPaintMUI = ({
                                     min={10}
                                     max={200}
                                     size="small"
-                                    disabled={!['rectangle', 'circle', 'diamond', 'triangle'].includes(tool)}
-                                    sx={{ mt: -0.5 }}
+                                    disabled={!['rectangle', 'circle', 'diamond', 'triangle', 'arrow'].includes(tool) && !tool.startsWith('number')}
+                                    sx={{mt: -0.5}}
                                 />
                             </Box>
+                            {tool === 'arrow' && (
+                                <Box sx={{minWidth: 120}}>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Rotation: {arrowRotation}°
+                                    </Typography>
+                                    <Slider
+                                        value={arrowRotation}
+                                        onChange={(e, value) => setArrowRotation(value)}
+                                        min={0}
+                                        max={360}
+                                        size="small"
+                                        sx={{mt: -0.5}}
+                                    />
+                                </Box>
+                            )}
                             {tool === 'coplanarLines' && (
                                 <>
-                                    <Box sx={{ minWidth: 100 }}>
+                                    <Box sx={{minWidth: 100}}>
                                         <Typography variant="caption" color="text.secondary">
                                             Lines: {coplanarLineCount}
                                         </Typography>
@@ -702,10 +785,10 @@ const ReactPaintMUI = ({
                                             min={2}
                                             max={10}
                                             size="small"
-                                            sx={{ mt: -0.5 }}
+                                            sx={{mt: -0.5}}
                                         />
                                     </Box>
-                                    <Box sx={{ minWidth: 120 }}>
+                                    <Box sx={{minWidth: 120}}>
                                         <Typography variant="caption" color="text.secondary">
                                             Spacing: {coplanarLineSpacing}px
                                         </Typography>
@@ -715,36 +798,38 @@ const ReactPaintMUI = ({
                                             min={5}
                                             max={50}
                                             size="small"
-                                            sx={{ mt: -0.5 }}
+                                            sx={{mt: -0.5}}
                                         />
                                     </Box>
                                 </>
                             )}
                         </Box>
 
-                        <Divider orientation="vertical" flexItem />
+                        <Divider orientation="vertical" flexItem/>
 
                         {/* Actions */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                             <ButtonGroup variant="outlined" size="small">
                                 <Tooltip title="Undo">
                                     <span>
-                                        <Button onClick={undo} disabled={historyIndex <= 0} sx={{ minWidth: 36, height: 36 }}>
-                                            <UndoIcon sx={{ fontSize: 16 }} />
+                                        <Button onClick={undo} disabled={historyIndex <= 0}
+                                                sx={{minWidth: 36, height: 36}}>
+                                            <UndoIcon sx={{fontSize: 16}}/>
                                         </Button>
                                     </span>
                                 </Tooltip>
                                 <Tooltip title="Redo">
                                     <span>
-                                        <Button onClick={redo} disabled={historyIndex >= history.length - 1} sx={{ minWidth: 36, height: 36 }}>
-                                            <RedoIcon sx={{ fontSize: 16 }} />
+                                        <Button onClick={redo} disabled={historyIndex >= history.length - 1}
+                                                sx={{minWidth: 36, height: 36}}>
+                                            <RedoIcon sx={{fontSize: 16}}/>
                                         </Button>
                                     </span>
                                 </Tooltip>
                                 <Tooltip title="Clear">
                                     <span>
-                                        <Button onClick={clearCanvas} color="secondary" sx={{ minWidth: 36, height: 36 }}>
-                                            <ClearIcon sx={{ fontSize: 16 }} />
+                                        <Button onClick={clearCanvas} color="secondary" sx={{minWidth: 36, height: 36}}>
+                                            <ClearIcon sx={{fontSize: 16}}/>
                                         </Button>
                                     </span>
                                 </Tooltip>
@@ -753,64 +838,104 @@ const ReactPaintMUI = ({
                                 label={`${historyIndex + 1}/${history.length}`}
                                 size="small"
                                 variant="outlined"
-                                sx={{ fontSize: '0.7rem', height: 24 }}
+                                sx={{fontSize: '0.7rem', height: 24}}
                             />
                         </Box>
                     </Toolbar>
                 </AppBar>
 
-                {/* Canvas Container */}
-                <Box
-                    ref={containerRef}
-                    sx={{
-                        flexGrow: 1,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        p: 1,
-                        overflow: 'hidden',
-                        width: '100%',
-                        height: '100%'
-                    }}
-                >
-                    <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
-                        <canvas
-                            ref={canvasRef}
-                            width={canvasSize.width}
-                            height={canvasSize.height}
-                            style={{
-                                border: '2px solid #e0e0e0',
-                                borderRadius: 8,
-                                cursor: getCursor(),
-                                width: canvasSize.width,
-                                height: canvasSize.height,
-                                touchAction: 'none',
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                                backgroundColor: '#ffffff',
-                                display: 'block'
-                            }}
-                        />
-                        <canvas
-                            ref={previewCanvasRef}
-                            width={canvasSize.width}
-                            height={canvasSize.height}
-                            style={{
-                                position: 'absolute',
-                                top: '2px',
-                                left: '2px',
-                                border: 'none',
-                                borderRadius: 8,
-                                pointerEvents: 'none',
-                                width: canvasSize.width,
-                                height: canvasSize.height,
-                                touchAction: 'none'
-                            }}
-                        />
+                {/* Main Content Area */}
+                <Box sx={{display: 'flex', flexGrow: 1, overflow: 'hidden'}}>
+                    {/* Number Toolbox */}
+                    <Paper
+                        elevation={2}
+                        sx={{
+                            width: 140,
+                            m: 1,
+                            mr: 0.5,
+                            p: 1,
+                            bgcolor: 'white',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 1
+                        }}
+                    >
+                        <Typography variant="subtitle2" sx={{fontWeight: 600, textAlign: 'center', mb: 1}}>
+                            Numbers
+                        </Typography>
+                        <Box sx={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1}}>
+                            {numberTools.map(({name, label}) => (
+                                <Tooltip key={name} title={`Number ${label}`}>
+                                    <Button
+                                        variant={tool === name ? 'contained' : 'outlined'}
+                                        onClick={() => setTool(name)}
+                                        sx={{
+                                            minWidth: 36,
+                                            height: 36,
+                                            fontSize: '16px',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        {label}
+                                    </Button>
+                                </Tooltip>
+                            ))}
+                        </Box>
+                        <Typography variant="caption" color="text.secondary" sx={{textAlign: 'center', mt: 1}}>
+                            Click to place numbers on canvas
+                        </Typography>
+                    </Paper>
+
+                    {/* Canvas Container */}
+                    <Box
+                        ref={containerRef}
+                        sx={{
+                            flexGrow: 1,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            p: 1,
+                            pl: 0.5,
+                            overflow: 'hidden'
+                        }}
+                    >
+                        <Box sx={{position: 'relative', width: '100%', height: '100%'}}>
+                            <canvas
+                                ref={canvasRef}
+                                width={canvasSize.width}
+                                height={canvasSize.height}
+                                style={{
+                                    border: '2px solid #e0e0e0',
+                                    borderRadius: 8,
+                                    cursor: getCursor(),
+                                    width: canvasSize.width,
+                                    height: canvasSize.height,
+                                    touchAction: 'none',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                    backgroundColor: '#ffffff',
+                                    display: 'block'
+                                }}
+                            />
+                            <canvas
+                                ref={previewCanvasRef}
+                                width={canvasSize.width}
+                                height={canvasSize.height}
+                                style={{
+                                    position: 'absolute',
+                                    top: '2px',
+                                    left: '2px',
+                                    border: 'none',
+                                    borderRadius: 8,
+                                    pointerEvents: 'none',
+                                    width: canvasSize.width,
+                                    height: canvasSize.height,
+                                    touchAction: 'none'
+                                }}
+                            />
+                        </Box>
                     </Box>
                 </Box>
             </Box>
-        </ThemeProvider>
-    );
-};
-
+        </ThemeProvider>);
+}
 export default ReactPaintMUI;
