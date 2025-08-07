@@ -368,7 +368,7 @@ class ReportService
      * @param string $publishedDocumentId
      * @return Report
      */
-    public function publishReport(Report $report, User $publisher, string $publishedDocumentId): Report
+    public function publishReport(Report $report, User $publisher, string $publishedDocumentId, $silentlyPublish = false): Report
     {
         // Mark report as published
         $report = $this->markReportAsPublished($report, $publisher);
@@ -377,7 +377,7 @@ class ReportService
         $this->processDocument($publishedDocumentId, $report, DocumentTag::PUBLISHED);
 
         // Update acceptance item timeline and check if all tests are published
-        $this->processPublishedReport($report);
+        $this->processPublishedReport($report, $silentlyPublish);
 
         return $report;
     }
@@ -532,7 +532,7 @@ class ReportService
      * @param Report $report
      * @return void
      */
-    private function processPublishedReport(Report $report): void
+    private function processPublishedReport(Report $report, $silentlyPublish = false): void
     {
 
         $report->loadMissing("acceptanceItem.acceptance");
@@ -542,7 +542,7 @@ class ReportService
         // Update timeline
         $this->acceptanceItemService->updateAcceptanceItemTimeline($acceptanceItem, "Report Published By {$user->name}");
 
-        ReportPublishedEvent::dispatch($report->acceptanceItem->acceptance);
+        ReportPublishedEvent::dispatch($report->acceptanceItem->acceptance, $silentlyPublish);
 
     }
 

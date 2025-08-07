@@ -368,13 +368,13 @@ class AcceptanceService
         return ["barcodes" => $barcodes, "patient" => $acceptance->patient];
     }
 
-    public function checkAcceptanceReport(Acceptance $acceptance): void
+    public function checkAcceptanceReport(Acceptance $acceptance, $silent = false): void
     {
         // Check if all tests are published and update acceptance status if needed
         if ($this->areAllTestsPublished($acceptance)) {
             $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
             // Send notifications
-            $this->sendPublishedNotifications($acceptance);
+            $this->sendPublishedNotifications($acceptance, $silent);
         }
 
     }
@@ -537,9 +537,10 @@ class AcceptanceService
      * Send notifications about published report
      *
      * @param Acceptance $acceptance
+     * @param bool $silent
      * @return void
      */
-    private function sendPublishedNotifications(Acceptance $acceptance): void
+    private function sendPublishedNotifications(Acceptance $acceptance, bool $silent = false): void
     {
         $acceptance->load([
             "patient",
@@ -551,35 +552,38 @@ class AcceptanceService
         if (count($acceptance->acceptanceItems)) {
             $howReport = $acceptance->howReport ?? [];
             // Send notification to patient
-            Notification::send($patient, new PatientReportPublished($acceptance));
+            if (!$silent) {
+                Notification::send($patient, new PatientReportPublished($acceptance));
 
-            if ($howReport["whatsappNumber"] ?? null) {
-                $to = $this->formatNumber($howReport["whatsappNumber"]);
-                foreach ($acceptance->acceptanceItems as $acceptanceItem) {
-                    $data = [
-                        'contentSid' => config('services.twilio.templates.send_report_file'),
-                        'to' => 'whatsapp:' . $to,
-                        'contentVariables' => [
-                            "1" => $acceptanceItem->test->name, // {{1}} - Customer name
-                            "2" => $acceptanceItem->report->publishedDocument->hash, // {{2}} - Report File
-                        ]
-                    ];
-                    $whatsappMessage = new WhatsappMessage([
-                        "data" => $data,
-                        "status" => "initial",
-                        "waId" => Str::startsWith($to, "+") ? Str::substr($to, 1) : $to,
-                        'type' => WhatsappMessageType::OUTBOUND,
-                        'written' => WhatsappMessageWritten::TEMPLATE,
-                    ]);
-                    $whatsappMessage->messageable()->associate($patient);
-                    $whatsappMessage->save();
+                if ($howReport["whatsappNumber"] ?? null) {
+                    $to = $this->formatNumber($howReport["whatsappNumber"]);
+                    foreach ($acceptance->acceptanceItems as $acceptanceItem) {
+                        $data = [
+                            'contentSid' => config('services.twilio.templates.send_report_file'),
+                            'to' => 'whatsapp:' . $to,
+                            'contentVariables' => [
+                                "1" => $acceptanceItem->test->name, // {{1}} - Customer name
+                                "2" => $acceptanceItem->report->publishedDocument->hash, // {{2}} - Report File
+                            ]
+                        ];
+                        $whatsappMessage = new WhatsappMessage([
+                            "data" => $data,
+                            "status" => "initial",
+                            "waId" => Str::startsWith($to, "+") ? Str::substr($to, 1) : $to,
+                            'type' => WhatsappMessageType::OUTBOUND,
+                            'written' => WhatsappMessageWritten::TEMPLATE,
+                        ]);
+                        $whatsappMessage->messageable()->associate($patient);
+                        $whatsappMessage->save();
+                    }
                 }
             }
 
             if ($referrer) {
                 //if ($howReport["sendToReferrer"] ?? false) {
                 // Send notification to referrer
-                Notification::send($referrer, new ReferrerReportPublished($acceptance));
+                if (!$silent)
+                    Notification::send($referrer, new ReferrerReportPublished($acceptance));
                 $acceptance->load("referrerOrder");
                 // Update referrer order status
                 if ($acceptance->referrerOrder)

@@ -20,6 +20,7 @@ class AcceptanceReportedListener
     public function handle(object $event): void
     {
         $acceptance = $event->acceptance;
-        $this->acceptanceService->checkAcceptanceReport($acceptance);
+        $silent=$event->silent??false;
+        $this->acceptanceService->checkAcceptanceReport($acceptance,$silent);
     }
 }

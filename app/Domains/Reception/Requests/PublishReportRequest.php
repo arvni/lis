@@ -26,7 +26,8 @@ class PublishReportRequest extends FormRequest
     public function rules()
     {
         return [
-            "published_document.id" => ["required", "exists:documents,hash"]
+            "published_document.id" => ["required", "exists:documents,hash"],
+            "silently_publish"=>["nullable", "boolean"],
         ];
     }
 }

@@ -12,15 +12,17 @@ class ReportPublishedEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-   public Acceptance $acceptance;
+    public Acceptance $acceptance;
+    public bool $silent = false;
 
 
     /**
      * Create a new event instance.
      */
-    public function __construct(Acceptance $acceptance)
+    public function __construct(Acceptance $acceptance, $silent = false)
     {
-        $this->acceptance=$acceptance;
+        $this->acceptance = $acceptance;
+        $this->silent = $silent;
     }
 
 }
