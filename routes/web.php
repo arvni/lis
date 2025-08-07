@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\ListRoleController;
 use App\Http\Controllers\Api\Reception\ListPatientsController;
 use App\Http\Controllers\Api\Reception\ListReferrerAcceptanceReportedOrExpectedToBeReportedController;
 use App\Http\Controllers\Api\Referrer\ListReferrersController;
+use App\Http\Controllers\Billing\DailyCashReportController;
 use App\Http\Controllers\Billing\ExportInvoicesController;
 use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentController;
@@ -217,6 +218,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
         Route::group(["prefix" => "billing"], function () {
             Route::get("invoices/{invoice}", GetInvoiceController::class)->name("invoices.show");
+            Route::get("daily-cash-report", DailyCashReportController::class)->name("dailyCashReport.export");
         });
         Route::get("documents/{document}", [DocumentController::class, "download"])->name("api.documents.show");
 

@@ -59,6 +59,7 @@ import {Link} from "@inertiajs/react";
 // PropTypes for better documentation (optional)
 import PropTypes from 'prop-types';
 import TextField from "@mui/material/TextField";
+import Excel from "../../../../images/excel.svg";
 
 // Styled components for enhanced UI
 const StyledCard = styled(Card)(({theme, priority, isAlert}) => ({
@@ -589,7 +590,6 @@ const Dashboard = ({
         let t = new Date();
         return t.getFullYear() + "-" + (t.getMonth() + 1) + "-" + t.getDate();
     };
-    console.log(today(), date);
 
     return (
         <Box sx={{flexGrow: 1}} className={className} {...props}>
@@ -645,6 +645,25 @@ const Dashboard = ({
 
                         {showFilters && (
                             <Stack direction="row" spacing={2} alignItems="center">
+                                <Tooltip title="Export to Excel">
+                                    <IconButton
+                                        href={route("api.dailyCashReport.export", {date})}
+                                        color="success"
+                                        target="_blank"
+                                        sx={{
+                                            border: '1px solid #e0e0e0',
+                                            borderRadius: 1,
+                                            p: 1
+                                        }}
+                                    >
+                                        <Stack direction="row" spacing={1} alignItems="center">
+                                            <img src={Excel} alt="Excel" width="24px"/>
+                                            <Typography variant="button" sx={{display: {xs: 'none', sm: 'block'}}}>
+                                                Export
+                                            </Typography>
+                                        </Stack>
+                                    </IconButton>
+                                </Tooltip>
                                 <TextField onChange={handleDateChange}
                                            value={date}
                                            size="small"
