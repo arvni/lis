@@ -3,6 +3,8 @@
 namespace App\Domains\Laboratory\Repositories;
 
 use App\Domains\Laboratory\Models\Test;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
@@ -13,6 +15,7 @@ class TestRepository
     public function listTests(array $queryData): LengthAwarePaginator
     {
         $query = Test::withCount("acceptanceItems")
+            ->withAggregate("methods as tat","turnaround_time","max")
             ->with("testGroups");
         if (isset($queryData["filters"]))
             $this->applyFilters($query, $queryData["filters"]);
@@ -42,20 +45,25 @@ class TestRepository
 
     public function creatTest(array $testData): Test
     {
-        return Test::query()->create($testData);
+        $test= Test::query()->create($testData);
+        UserActivityService::createUserActivity($test,ActivityType::CREATE);
+        return $test;
     }
 
     public function updateTest(Test $test, array $testData): Test
     {
         $test->fill($testData);
-        if ($test->isDirty())
+        if ($test->isDirty()) {
             $test->save();
+            UserActivityService::createUserActivity($test,ActivityType::UPDATE);
+        }
         return $test;
     }
 
     public function deleteTest(Test $test): void
     {
         $test->delete();
+        UserActivityService::createUserActivity($test,ActivityType::DELETE);
     }
 
     public function findTestById($id): ?Test

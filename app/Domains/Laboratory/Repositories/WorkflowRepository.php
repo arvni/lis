@@ -3,6 +3,8 @@
 namespace App\Domains\Laboratory\Repositories;
 
 use App\Domains\Laboratory\Models\Workflow;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class WorkflowRepository
@@ -19,20 +21,25 @@ class WorkflowRepository
 
     public function creatWorkflow(array $workflowData): Workflow
     {
-        return Workflow::query()->create($workflowData);
+        $workflow= Workflow::query()->create($workflowData);
+        UserActivityService::createUserActivity($workflow,ActivityType::CREATE);
+        return $workflow;
     }
 
     public function updateWorkflow(Workflow $workflow, array $workflowData): Workflow
     {
         $workflow->fill($workflowData);
-        if ($workflow->isDirty())
+        if ($workflow->isDirty()) {
             $workflow->save();
+            UserActivityService::createUserActivity($workflow,ActivityType::UPDATE);
+        }
         return $workflow;
     }
 
     public function deleteWorkflow(Workflow $workflow): void
     {
         $workflow->delete();
+        UserActivityService::createUserActivity($workflow,ActivityType::DELETE);
     }
 
     protected function applyFilters($query, array $filters)

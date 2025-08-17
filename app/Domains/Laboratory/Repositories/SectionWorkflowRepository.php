@@ -3,6 +3,8 @@
 namespace App\Domains\Laboratory\Repositories;
 
 use App\Domains\Laboratory\Models\SectionWorkflow;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Illuminate\Database\Eloquent\Collection;
 
 class SectionWorkflowRepository
@@ -10,20 +12,25 @@ class SectionWorkflowRepository
 
     public function creatSectionWorkflow(array $workflowData): SectionWorkflow
     {
-        return SectionWorkflow::query()->create($workflowData);
+        $workflow= SectionWorkflow::query()->create($workflowData);
+        UserActivityService::createUserActivity($workflow,ActivityType::CREATE);
+        return $workflow;
     }
 
     public function updateSectionWorkflow(SectionWorkflow $workflow, array $workflowData): SectionWorkflow
     {
         $workflow->fill($workflowData);
-        if ($workflow->isDirty())
+        if ($workflow->isDirty()) {
             $workflow->save();
+            UserActivityService::createUserActivity($workflow,ActivityType::UPDATE);
+        }
         return $workflow;
     }
 
     public function deleteSectionWorkflow(SectionWorkflow $workflow): void
     {
         $workflow->delete();
+        UserActivityService::createUserActivity($workflow,ActivityType::DELETE);
     }
 
     public function findSectionWorkflowById($id): ?SectionWorkflow

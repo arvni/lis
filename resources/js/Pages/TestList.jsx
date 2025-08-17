@@ -28,6 +28,7 @@ import PageHeader from "@/Components/PageHeader.jsx";
 import {router, usePage} from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
 import FormulaTester from "@/Components/FormulaTester.jsx";
+import {DownloadIcon} from "lucide-react";
 
 
 // Filter Component
@@ -306,8 +307,8 @@ const TestList = () => {
             headerName: 'Group',
             flex: 0.15,
             display: "flex",
-            sortable:false,
-            renderCell: ({row}) => row.test_groups?.map(item=>item.name)?.join(", ") || '—'
+            sortable: false,
+            renderCell: ({row}) => row.test_groups?.map(item => item.name)?.join(", ") || '—'
         },
         {
             field: 'sample_types',
@@ -315,6 +316,37 @@ const TestList = () => {
             flex: 0.4,
             display: "flex",
             renderCell: ({row}) => <SampleTypesDisplay sampleTypes={row.sample_types}/>
+        },
+        {
+            field: 'tat',
+            headerName: 'Turnaround Time(Business Day)',
+            flex: 0.2,
+            display: "flex",
+        },
+        {
+            field: 'consent_form_id',
+            headerName: 'Consent Form',
+            flex: 0.2,
+            display: "flex",
+            renderCell: ({row}) => row?.consent_form?.document &&
+                <IconButton href={route("documents.show", row?.consent_form?.document)} target="_blank"><DownloadIcon/></IconButton>
+        },
+        {
+            field: 'request_form_id',
+            headerName: 'Request Form',
+            flex: 0.2,
+            display: "flex",
+            renderCell: ({row}) => row?.request_form?.document &&
+                <IconButton href={route("documents.show", row?.request_form?.document)} target="_blank"><DownloadIcon/></IconButton>
+        },
+        {
+            field: 'instruction_id',
+            headerName: 'Instruction',
+            flex: 0.2,
+            display: "flex",
+            renderCell: ({row}) => row?.instruction?.document &&
+                <IconButton href={route("documents.show", row?.instruction?.document)}
+                            target="_blank"><DownloadIcon/></IconButton>
         },
         {
             field: 'method_tests',

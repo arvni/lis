@@ -3,6 +3,8 @@
 namespace App\Domains\Laboratory\Repositories;
 
 use App\Domains\Laboratory\Models\Instruction;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class InstructionRepository
@@ -20,20 +22,25 @@ class InstructionRepository
 
     public function creatInstruction(array $instructionData): Instruction
     {
-        return Instruction::query()->create($instructionData);
+        $instruction= Instruction::query()->create($instructionData);
+        UserActivityService::createUserActivity($instruction,ActivityType::CREATE);
+        return $instruction;
     }
 
     public function updateInstruction(Instruction $instruction, array $instructionData): Instruction
     {
         $instruction->fill($instructionData);
-        if ($instruction->isDirty())
+        if ($instruction->isDirty()) {
             $instruction->save();
+            UserActivityService::createUserActivity($instruction,ActivityType::UPDATE);
+        }
         return $instruction;
     }
 
     public function deleteInstruction(Instruction $instruction): void
     {
         $instruction->delete();
+        UserActivityService::createUserActivity($instruction,ActivityType::DELETE);
     }
 
     protected function applyFilters($query, array $filters)

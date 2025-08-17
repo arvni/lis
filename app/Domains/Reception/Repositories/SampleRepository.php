@@ -4,6 +4,8 @@ namespace App\Domains\Reception\Repositories;
 
 use App\Domains\Reception\Events\SampleCollectedEvent;
 use App\Domains\Reception\Models\Sample;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -58,14 +60,17 @@ class SampleRepository
             "patient_id" => $sampleData["patient_id"]
         ]);
         $this->syncAcceptanceItems($sample, collect($sampleData["acceptance_items"])->pluck( "id")->unique()->toArray());
+        UserActivityService::createUserActivity($sample,ActivityType::CREATE);
         return $sample;
     }
 
     public function updateSample(Sample $sample, array $sampleData): Sample
     {
         $sample->fill(Arr::except($sampleData, "acceptance_items"));
-        if ($sample->isDirty())
+        if ($sample->isDirty()) {
             $sample->save();
+            UserActivityService::createUserActivity($sample,ActivityType::UPDATE);
+        }
         $this->syncAcceptanceItems($sample, $sampleData["acceptance_items"]);
         return $sample;
     }
@@ -73,6 +78,8 @@ class SampleRepository
     public function deleteSample(Sample $sample): void
     {
         $sample->delete();
+        UserActivityService::createUserActivity($sample,ActivityType::DELETE);
+
     }
 
     public function findSampleById($id): ?Sample

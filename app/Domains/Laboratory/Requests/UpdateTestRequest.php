@@ -41,6 +41,12 @@ class UpdateTestRequest extends FormRequest
             "method_tests" => ["required", "array", "min:1"],
             "method_tests.*.id"=>["nullable"],
             "method_tests.*.status"=>["boolean"],
+            "request_form" => ["nullable", "array", "min:1"],
+            "request_form.id" => ["exists:request_forms,id"],
+            "consent_form" => ["nullable", "array", "min:1"],
+            "consent_form.id" => ["exists:consent_forms,id"],
+            "instruction" => ["nullable", "array", "min:1"],
+            "instruction.id" => ["exists:instructions,id"],
         ];
 
         $panelRules = [

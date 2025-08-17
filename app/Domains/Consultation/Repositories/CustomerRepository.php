@@ -3,6 +3,8 @@
 namespace App\Domains\Consultation\Repositories;
 
 use App\Domains\Consultation\Models\Customer;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class CustomerRepository
@@ -18,24 +20,28 @@ class CustomerRepository
         return $query->paginate($queryData["pageSize"] ?? 10);
     }
 
-    public function creatCustomer(array $doctorData): Customer
+    public function creatCustomer(array $customerData): Customer
     {
-        $doctor = Customer::query()->make($doctorData);
-        $doctor->save();
-        return $doctor;
+        $customer = Customer::query()->make($customerData);
+        $customer->save();
+        UserActivityService::createUserActivity($customer,ActivityType::CREATE);
+        return $customer;
     }
 
-    public function updateCustomer(Customer $doctor, array $doctorData): Customer
+    public function updateCustomer(Customer $customer, array $customerData): Customer
     {
-        $doctor->fill($doctorData);
-        if ($doctor->isDirty())
-            $doctor->save();
-        return $doctor;
+        $customer->fill($customerData);
+        if ($customer->isDirty()) {
+            $customer->save();
+            UserActivityService::createUserActivity($customer,ActivityType::UPDATE);
+        }
+        return $customer;
     }
 
-    public function deleteCustomer(Customer $doctor): void
+    public function deleteCustomer(Customer $customer): void
     {
-        $doctor->delete();
+        $customer->delete();
+        UserActivityService::createUserActivity($customer,ActivityType::DELETE);
     }
 
     protected function applyFilters($query, array $filters)

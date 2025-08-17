@@ -7,6 +7,8 @@ use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Setting\Services\SettingService;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -126,9 +128,11 @@ class AcceptanceRepository
             ->get();
     }
 
-    public function createAcceptance(array $acceptanceData): Acceptance // Fixed typo: creatAcceptance -> createAcceptance
+    public function createAcceptance(array $acceptanceData): Acceptance
     {
-        return Acceptance::create($acceptanceData); // Using static create method
+        $acceptance= Acceptance::create($acceptanceData);
+        UserActivityService::createUserActivity($acceptance,ActivityType::CREATE);
+        return $acceptance;
     }
 
     public function updateAcceptance(Acceptance $acceptance, array $acceptanceData): Acceptance
@@ -136,6 +140,7 @@ class AcceptanceRepository
         $acceptance->fill($acceptanceData);
         if ($acceptance->isDirty()) {
             $acceptance->save();
+            UserActivityService::createUserActivity($acceptance,ActivityType::UPDATE);
         }
         return $acceptance;
     }
@@ -157,6 +162,7 @@ class AcceptanceRepository
     {
         // Consider adding logic here if deletion has side effects or requires checks
         $acceptance->delete();
+        UserActivityService::createUserActivity($acceptance,ActivityType::DELETE);
     }
 
     public function listSampleCollection(array $queryData): LengthAwarePaginator

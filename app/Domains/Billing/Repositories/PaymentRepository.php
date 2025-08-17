@@ -4,6 +4,8 @@ namespace App\Domains\Billing\Repositories;
 
 use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Models\Payment;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
@@ -20,20 +22,25 @@ class PaymentRepository
 
     public function creatPayment(array $paymentData): Payment
     {
-        return Payment::query()->create($paymentData);
+        $payment= Payment::query()->create($paymentData);
+        UserActivityService::createUserActivity($payment,ActivityType::CREATE);
+        return $payment;
     }
 
     public function updatePayment(Payment $payment, array $paymentData): Payment
     {
         $payment->fill($paymentData);
-        if ($payment->isDirty())
+        if ($payment->isDirty()) {
             $payment->save();
+            UserActivityService::createUserActivity($payment,ActivityType::UPDATE);
+        }
         return $payment;
     }
 
     public function deletePayment(Payment $payment): void
     {
         $payment->delete();
+        UserActivityService::createUserActivity($payment,ActivityType::DELETE);
     }
 
     public function findPaymentById($id): ?Payment

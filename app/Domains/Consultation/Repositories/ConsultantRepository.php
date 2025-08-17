@@ -3,6 +3,8 @@
 namespace App\Domains\Consultation\Repositories;
 
 use App\Domains\Consultation\Models\Consultant;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 
 class ConsultantRepository
 {
@@ -25,18 +27,22 @@ class ConsultantRepository
     public function create(array $data): Consultant
     {
 
-        return Consultant::create($data);
+        $consultant= Consultant::create($data);
+        UserActivityService::createUserActivity($consultant,ActivityType::CREATE);
+        return $consultant;
     }
 
-    public function update(Consultant $user, array $data): Consultant
+    public function update(Consultant $consultant, array $data): Consultant
     {
-        $user->update($data);
-        return $user;
+        $consultant->update($data);
+        UserActivityService::createUserActivity($consultant,ActivityType::UPDATE);
+        return $consultant;
     }
 
-    public function delete(Consultant $user): void
+    public function delete(Consultant $consultant): void
     {
-        $user->delete();
+        $consultant->delete();
+        UserActivityService::createUserActivity($consultant,ActivityType::DELETE);
     }
 
     public function apalyFilters($query, array $filters)

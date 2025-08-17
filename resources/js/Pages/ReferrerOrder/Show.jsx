@@ -155,7 +155,7 @@ const Show = ({referrerOrder, errors = {}}) => {
     // Get gender display with icon
     const getGenderDisplay = (gender) => {
         const numGender = Number(gender);
-        return numGender === 1 ?
+        return numGender == 1 ?
             <Box sx={{display: 'flex', alignItems: 'center'}}>
                 <Male color="primary" sx={{mr: 0.5}}/> Male
             </Box> :

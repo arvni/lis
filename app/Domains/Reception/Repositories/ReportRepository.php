@@ -6,6 +6,8 @@ namespace App\Domains\Reception\Repositories;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Report;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Illuminate\Database\Eloquent\Collection;
 
 class ReportRepository
@@ -53,7 +55,9 @@ class ReportRepository
 
     public function create($data)
     {
-        return Report::create($data);
+        $report= Report::create($data);
+        UserActivityService::createUserActivity($report,ActivityType::CREATE);
+        return $report;
     }
 
     public function getHistoryForAcceptanceItem(AcceptanceItem $acceptanceItem): Collection
@@ -67,8 +71,10 @@ class ReportRepository
     public function update(Report $report, array $data): Report
     {
         $report->fill($data);
-        if ($report->isDirty())
+        if ($report->isDirty()) {
             $report->save();
+            UserActivityService::createUserActivity($report,ActivityType::UPDATE);
+        }
 
         return $report;
     }

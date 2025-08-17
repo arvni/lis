@@ -4,6 +4,8 @@ namespace App\Domains\Consultation\Repositories;
 
 use App\Domains\Consultation\Enums\ConsultationStatus;
 use App\Domains\Consultation\Models\Consultation;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -58,20 +60,25 @@ class ConsultationRepository
 
     public function createConsultation(array $data): Consultation
     {
-        return Consultation::create($data);
+        $consultation= Consultation::create($data);
+        UserActivityService::createUserActivity($consultation,ActivityType::CREATE);
+        return $consultation;
     }
 
     public function updateConsultation(Consultation $consultation, array $data): Consultation
     {
         $consultation->fill($data);
-        if ($consultation->isDirty())
+        if ($consultation->isDirty()) {
             $consultation->save();
+            UserActivityService::createUserActivity($consultation,ActivityType::UPDATE);
+        }
         return $consultation;
     }
 
     public function deleteConsultation(Consultation $consultation): void
     {
         $consultation->delete();
+        UserActivityService::createUserActivity($consultation,ActivityType::DELETE);
     }
 
     private function applyFilters($query, array $filters): void

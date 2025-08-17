@@ -216,8 +216,8 @@ class ReportService
      */
     public function getTemplates(AcceptanceItem $acceptanceItem): array
     {
-        $test = $this->laboratoryService->getTestForAcceptanceItem($acceptanceItem);
-        return $this->laboratoryService->getTemplateUrl($test->reportTemplates);
+        $acceptanceItem->load("method.test.reportTemplates");
+        return $this->laboratoryService->getTemplateUrl($acceptanceItem->method->test->reportTemplates);
     }
 
     /**

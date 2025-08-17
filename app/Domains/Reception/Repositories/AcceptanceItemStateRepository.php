@@ -3,6 +3,8 @@
 namespace App\Domains\Reception\Repositories;
 
 use App\Domains\Reception\Models\AcceptanceItemState;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -25,20 +27,25 @@ class AcceptanceItemStateRepository
 
     public function creatAcceptanceItemState(array $acceptanceItemStateData): AcceptanceItemState
     {
-        return AcceptanceItemState::query()->create($acceptanceItemStateData);
+        $acceptanceItemState= AcceptanceItemState::query()->create($acceptanceItemStateData);
+        UserActivityService::createUserActivity($acceptanceItemState,ActivityType::CREATE);
+        return $acceptanceItemState;
     }
 
     public function updateAcceptanceItemState(AcceptanceItemState $acceptanceItemState, array $acceptanceItemStateData): AcceptanceItemState
     {
         $acceptanceItemState->fill($acceptanceItemStateData);
-        if ($acceptanceItemState->isDirty())
+        if ($acceptanceItemState->isDirty()) {
             $acceptanceItemState->save();
+            UserActivityService::createUserActivity($acceptanceItemState,ActivityType::UPDATE);
+        }
         return $acceptanceItemState;
     }
 
     public function deleteAcceptanceItemState(AcceptanceItemState $acceptanceItemState): void
     {
         $acceptanceItemState->delete();
+        UserActivityService::createUserActivity($acceptanceItemState,ActivityType::DELETE);
     }
 
     public function findAcceptanceItemStateById($id): ?AcceptanceItemState

@@ -3,6 +3,8 @@
 namespace App\Domains\Laboratory\Repositories;
 
 use App\Domains\Laboratory\Models\RequestForm;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class RequestFormRepository
@@ -21,20 +23,25 @@ class RequestFormRepository
 
     public function creatRequestForm(array $requestFormData): RequestForm
     {
-        return RequestForm::create($requestFormData);
+        $requestForm= RequestForm::create($requestFormData);
+        UserActivityService::createUserActivity($requestForm,ActivityType::CREATE);
+        return $requestForm;
     }
 
     public function updateRequestForm(RequestForm $requestForm, array $requestFormData): RequestForm
     {
         $requestForm->fill($requestFormData);
-        if ($requestForm->isDirty())
+        if ($requestForm->isDirty()) {
             $requestForm->save();
+            UserActivityService::createUserActivity($requestForm,ActivityType::UPDATE);
+        }
         return $requestForm;
     }
 
     public function deleteRequestForm(RequestForm $requestForm): void
     {
         $requestForm->delete();
+        UserActivityService::createUserActivity($requestForm,ActivityType::DELETE);
     }
 
     protected function applyFilters($query, array $filters)

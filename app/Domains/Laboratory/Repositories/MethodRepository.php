@@ -3,6 +3,8 @@
 namespace App\Domains\Laboratory\Repositories;
 
 use App\Domains\Laboratory\Models\Method;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class MethodRepository
@@ -20,20 +22,25 @@ class MethodRepository
 
     public function creatMethod(array $methodData): Method
     {
-        return Method::query()->create($methodData);
+        $method= Method::query()->create($methodData);
+        UserActivityService::createUserActivity($method,ActivityType::CREATE);
+        return $method;
     }
 
     public function updateMethod(Method $method, array $methodData): Method
     {
         $method->fill($methodData);
-        if ($method->isDirty())
+        if ($method->isDirty()) {
             $method->save();
+            UserActivityService::createUserActivity($method,ActivityType::UPDATE);
+        }
         return $method;
     }
 
     public function deleteMethod(Method $method): void
     {
         $method->delete();
+        UserActivityService::createUserActivity($method,ActivityType::DELETE);
     }
 
     public function findMethodById($id):?Method

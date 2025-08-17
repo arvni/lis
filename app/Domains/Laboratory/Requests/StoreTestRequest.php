@@ -32,7 +32,7 @@ class StoreTestRequest extends FormRequest
         $isService = $this->input('type') === TestType::SERVICE->value;
 
         $baseRules = [
-            "test_groups" => ["required", "array","min:1"],
+            "test_groups" => ["required", "array", "min:1"],
             "test_groups.*.id" => ["required", "exists:test_groups,id"],
             "name" => ["required", "string", "max:255", "unique:tests,name"],
             "description" => ["nullable", "string", "max:1000"],
@@ -41,15 +41,21 @@ class StoreTestRequest extends FormRequest
             "type" => ["required", Rule::enum(TestType::class)],
             "status" => ["nullable", "boolean"],
             "method_tests" => ["required", "array", "min:1"],
+            "request_form" => ["nullable", "array", "min:1"],
+            "request_form.id" => ["exists:request_forms,id"],
+            "consent_form" => ["nullable", "array", "min:1"],
+            "consent_form.id" => ["exists:consent_forms,id"],
+            "instruction" => ["nullable", "array", "min:1"],
+            "instruction.id" => ["exists:instructions,id"],
         ];
 
         $panelRules = [
             "price" => ["required_if:type," . TestType::PANEL->value, "numeric", "min:0"],
             "referrer_price" => ["required_if:type," . TestType::PANEL->value, "numeric", "min:0"],
-            "price_type"=>["required", Rule::in(MethodPriceType::values())],
-            "referrer_price_type"=>["required", Rule::in(MethodPriceType::values())],
-            "extra"=>["nullable", "array"],
-            "referrer_extra"=>["nullable", "array"],
+            "price_type" => ["required", Rule::in(MethodPriceType::values())],
+            "referrer_price_type" => ["required", Rule::in(MethodPriceType::values())],
+            "extra" => ["nullable", "array"],
+            "referrer_extra" => ["nullable", "array"],
             "method_tests.*.method.id" => ["required", "exists:methods,id"],
             "method_tests.*.status" => ["nullable", "boolean"],
         ];

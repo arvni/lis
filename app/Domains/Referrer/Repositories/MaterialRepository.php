@@ -3,6 +3,8 @@
 namespace App\Domains\Referrer\Repositories;
 
 use App\Domains\Referrer\Models\Material;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use DB;
 use Exception;
@@ -59,21 +61,24 @@ class MaterialRepository
     {
         $material = Material::query()->make($materialData);
         $material->save();
-
+        UserActivityService::createUserActivity($material,ActivityType::CREATE);
         return $material;
     }
 
     public function updateMaterial(Material $material, array $materialData): Material
     {
         $material->fill($materialData);
-        if ($material->isDirty())
+        if ($material->isDirty()) {
             $material->save();
+            UserActivityService::createUserActivity($material,ActivityType::UPDATE);
+        }
         return $material;
     }
 
     public function deleteMaterial(Material $material): void
     {
         $material->delete();
+        UserActivityService::createUserActivity($material,ActivityType::DELETE);
     }
 
     protected function applyFilters($query, array $filters)

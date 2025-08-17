@@ -3,6 +3,8 @@
 namespace App\Domains\Referrer\Repositories;
 
 use App\Domains\Referrer\Models\Referrer;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Ramsey\Collection\Collection;
 
@@ -21,20 +23,25 @@ class ReferrerRepository
 
     public function createReferrer(array $data): Referrer
     {
-        return Referrer::create($data);
+        $referrer= Referrer::create($data);
+        UserActivityService::createUserActivity($referrer,ActivityType::CREATE);
+        return $referrer;
     }
 
     public function updateReferrer(Referrer $referrer, array $data): Referrer
     {
         $referrer->fill($data);
-        if ($referrer->isDirty())
+        if ($referrer->isDirty()) {
             $referrer->save();
+            UserActivityService::createUserActivity($referrer,ActivityType::UPDATE);
+        }
         return $referrer;
     }
 
     public function deleteReferrer(Referrer $referrer): void
     {
         $referrer->delete();
+        UserActivityService::createUserActivity($referrer,ActivityType::DELETE);
     }
 
 

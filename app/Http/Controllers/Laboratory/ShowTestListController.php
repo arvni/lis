@@ -41,12 +41,14 @@ class ShowTestListController extends Controller
                     $query->active();
                     $query->with(["method"]);
                 },
-                "testGroups:name,id"
+                "testGroups:name,id",
+                "consentForm.document",
+                "requestForm.document",
+                "instruction.document",
             ]
         ];
 
         $tests = $this->testService->listTests($serviceParams);
-
         return Inertia::render('TestList', [
             'tests' => $tests,
             'requestInputs' => $requestData

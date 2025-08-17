@@ -3,6 +3,8 @@
 namespace App\Domains\Laboratory\Repositories;
 
 use App\Domains\Laboratory\Models\SampleType;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class SampleTypeRepository
@@ -22,20 +24,24 @@ class SampleTypeRepository
     {
         $sampleType = SampleType::query()->make($sampleTypeData);
         $sampleType->save();
+        UserActivityService::createUserActivity($sampleType,ActivityType::CREATE);
         return $sampleType;
     }
 
     public function updateSampleType(SampleType $sampleType, array $sampleTypeData): SampleType
     {
         $sampleType->fill($sampleTypeData);
-        if ($sampleType->isDirty())
+        if ($sampleType->isDirty()) {
             $sampleType->save();
+            UserActivityService::createUserActivity($sampleType,ActivityType::UPDATE);
+        }
         return $sampleType;
     }
 
     public function deleteSampleType(SampleType $sampleType): void
     {
         $sampleType->delete();
+        UserActivityService::createUserActivity($sampleType,ActivityType::DELETE);
     }
 
     protected function applyFilters($query, array $filters)

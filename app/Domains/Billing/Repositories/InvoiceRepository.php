@@ -4,6 +4,8 @@ namespace App\Domains\Billing\Repositories;
 
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\Statement;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -32,20 +34,25 @@ class InvoiceRepository
 
     public function creatInvoice(array $invoiceData): Invoice
     {
-        return Invoice::query()->create($invoiceData);
+        $invoice= Invoice::query()->create($invoiceData);
+        UserActivityService::createUserActivity($invoice,ActivityType::CREATE);
+        return $invoice;
     }
 
     public function updateInvoice(Invoice $invoice, array $invoiceData): Invoice
     {
         $invoice->fill($invoiceData);
-        if ($invoice->isDirty())
+        if ($invoice->isDirty()) {
             $invoice->save();
+            UserActivityService::createUserActivity($invoice,ActivityType::UPDATE);
+        }
         return $invoice;
     }
 
     public function deleteInvoice(Invoice $invoice): void
     {
         $invoice->delete();
+        UserActivityService::createUserActivity($invoice,ActivityType::DELETE);
     }
 
     public function findInvoiceById($id): ?Invoice

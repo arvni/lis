@@ -3,6 +3,8 @@
 namespace App\Domains\Laboratory\Repositories;
 
 use App\Domains\Laboratory\Models\SectionGroup;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class SectionGroupRepository
@@ -25,6 +27,7 @@ class SectionGroupRepository
         $sectionGroup = SectionGroup::query()->make($sectionGroupData);
         $sectionGroup->parent()->associate($sectionGroupData["section_group_id"]);
         $sectionGroup->save();
+        UserActivityService::createUserActivity($sectionGroup,ActivityType::CREATE);
         return $sectionGroup;
     }
 
@@ -32,14 +35,17 @@ class SectionGroupRepository
     {
         $sectionGroup->fill($sectionGroupData);
         $sectionGroup->parent()->associate($sectionGroupData["section_group_id"]);
-        if ($sectionGroup->isDirty())
+        if ($sectionGroup->isDirty()) {
             $sectionGroup->save();
+            UserActivityService::createUserActivity($sectionGroup,ActivityType::UPDATE);
+        }
         return $sectionGroup;
     }
 
     public function deleteSectionGroup(SectionGroup $sectionGroup): void
     {
         $sectionGroup->delete();
+        UserActivityService::createUserActivity($sectionGroup,ActivityType::DELETE);
     }
 
     protected function applyFilters($query, array $filters)

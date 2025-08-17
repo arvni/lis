@@ -110,6 +110,9 @@ class TestController extends Controller
             "sampleTypeTests.sampleType:name,id",
             "reportTemplates:name,id",
             "testGroups",
+            "instruction:name,id",
+            "consentForm:name,id",
+            "requestForm:name,id",
         ]);
         return Inertia::render('Test/Edit', compact("test"));
     }

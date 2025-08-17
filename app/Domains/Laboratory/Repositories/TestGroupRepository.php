@@ -3,6 +3,8 @@
 namespace App\Domains\Laboratory\Repositories;
 
 use App\Domains\Laboratory\Models\TestGroup;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class TestGroupRepository
@@ -20,20 +22,25 @@ class TestGroupRepository
 
     public function creatTestGroup(array $testGroupData): TestGroup
     {
-        return TestGroup::query()->create($testGroupData);
+        $testGroup = TestGroup::query()->create($testGroupData);
+        UserActivityService::createUserActivity($testGroup, ActivityType::CREATE);
+        return $testGroup;
     }
 
     public function updateTestGroup(TestGroup $testGroup, array $testGroupData): TestGroup
     {
         $testGroup->fill($testGroupData);
-        if ($testGroup->isDirty())
+        if ($testGroup->isDirty()) {
             $testGroup->save();
+            UserActivityService::createUserActivity($testGroup,ActivityType::UPDATE);
+        }
         return $testGroup;
     }
 
     public function deleteTestGroup(TestGroup $testGroup): void
     {
         $testGroup->delete();
+        UserActivityService::createUserActivity($testGroup,ActivityType::DELETE);
     }
 
     protected function applyFilters($query, array $filters)

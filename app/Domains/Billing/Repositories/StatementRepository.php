@@ -3,6 +3,8 @@
 namespace App\Domains\Billing\Repositories;
 
 use App\Domains\Billing\Models\Statement;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 
 class StatementRepository
@@ -18,20 +20,25 @@ class StatementRepository
 
     public function creatStatement(array $statementData): Statement
     {
-        return Statement::query()->create([...$statementData, "no" => $this->generateStatementNumber($statementData["issue_date"])]);
+        $statement= Statement::query()->create([...$statementData, "no" => $this->generateStatementNumber($statementData["issue_date"])]);
+        UserActivityService::createUserActivity($statement,ActivityType::CREATE);
+        return $statement;
     }
 
     public function updateStatement(Statement $statement, array $statementData): Statement
     {
         $statement->fill($statementData);
-        if ($statement->isDirty())
+        if ($statement->isDirty()) {
             $statement->save();
+            UserActivityService::createUserActivity($statement,ActivityType::UPDATE);
+        }
         return $statement;
     }
 
     public function deleteStatement(Statement $statement): void
     {
         $statement->delete();
+        UserActivityService::createUserActivity($statement,ActivityType::DELETE);
     }
 
     public function findStatementById($id): ?Statement

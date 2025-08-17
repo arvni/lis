@@ -3,6 +3,8 @@
 namespace App\Domains\Referrer\Repositories;
 
 use App\Domains\Referrer\Models\ReferrerOrder;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Ramsey\Collection\Collection;
 
@@ -26,14 +28,17 @@ class ReferrerOrderRepository
     public function updateReferrerOrder(ReferrerOrder $referrer, array $data): ReferrerOrder
     {
         $referrer->fill($data);
-        if ($referrer->isDirty())
+        if ($referrer->isDirty()) {
             $referrer->save();
+            UserActivityService::createUserActivity($referrer,ActivityType::UPDATE);
+        }
         return $referrer;
     }
 
     public function deleteReferrerOrder(ReferrerOrder $referrer): void
     {
         $referrer->delete();
+        UserActivityService::createUserActivity($referrer,ActivityType::DELETE);
     }
 
 

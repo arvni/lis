@@ -2,7 +2,9 @@
 
 namespace App\Domains\User\Repositories;
 
+use App\Domains\User\Enums\ActivityType;
 use App\Domains\User\Models\Role;
+use App\Domains\User\Services\UserActivityService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Spatie\Permission\Models\Permission;
@@ -23,6 +25,7 @@ class RoleRepository
     {
         $role = Role::create($data);
         $role->syncPermissions($data['permissions'] ?? []);
+        UserActivityService::createUserActivity($role,ActivityType::CREATE);
         return $role;
     }
 
@@ -30,12 +33,14 @@ class RoleRepository
     {
         $role->update($data);
         $role->syncPermissions($data['permissions'] ?? []);
+        UserActivityService::createUserActivity($role,ActivityType::UPDATE);
         return $role;
     }
 
     public function delete(Role $role): void
     {
         $role->delete();
+        UserActivityService::createUserActivity($role,ActivityType::DELETE);
     }
 
     public function getAdminRole():?Role

@@ -3,6 +3,8 @@
 namespace App\Domains\Referrer\Repositories;
 
 use App\Domains\Referrer\Models\OrderMaterial;
+use App\Domains\User\Enums\ActivityType;
+use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -26,8 +28,10 @@ class OrderMaterialRepository
     public function updateOrderMaterial(OrderMaterial $orderMaterial, array $orderMaterialData): OrderMaterial
     {
         $orderMaterial->fill($orderMaterialData);
-        if ($orderMaterial->isDirty())
+        if ($orderMaterial->isDirty()) {
             $orderMaterial->save();
+            UserActivityService::createUserActivity($orderMaterial,ActivityType::UPDATE);
+        }
         return $orderMaterial;
     }
 
