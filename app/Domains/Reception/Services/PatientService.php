@@ -51,7 +51,7 @@ readonly class PatientService
                 $query->latest()->limit(5);
             },
             "acceptances" => function ($query) {
-                $query->latest()->limit(5);
+                $query->latest()->distinct()->limit(5);
             },
             "consultations" => function ($query) {
                 $query

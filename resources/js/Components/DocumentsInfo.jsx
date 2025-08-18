@@ -55,14 +55,27 @@ import Document from "@/Pages/Document.jsx";
 
 // Define tags for DocumentsInfo
 const tags = [
+    {label: "Acceptance Item States", value: "ACCEPTANCE_ITEM_STATES"},
+    {label: "Temporary", value: "TEMP"},
+    {label: "Prescription", value: "PRESCRIPTION"},
+    {label: "Report", value: "REPORTED"},
+    {label: "Published Report", value: "PUBLISHED"},
+    {label: "Referrer Order", value: "REFERRER_ORDER"},
+    {label: "Avatar", value: "AVATAR"},
+    {label: "Clinical Comment", value: "CLINICAL_COMMENT"},
+    {label: "Latest", value: "LATEST"},
+    {label: "Approved", value: "APPROVED"},
+    {label: "Image", value: "IMAGE"},
+    {label: "Document", value: "DOCUMENT"},
+    {label: "Signature", value: "SIGNATURE"},
+    {label: "Stamp", value: "STAMP"},
+    {label: "Setting", value: "SETTING"},
+    {label: "Additional Report Files", value: "ADDITIONAL"},
     {label: "Medical History", value: "MEDICAL_HISTORY"},
     {label: "ID Card", value: "ID_CARD"},
     {label: "Consent Form", value: "CONSENT_FORM"},
     {label: "Acceptance Form", value: "ACCEPTANCE_FORM"},
-    {label: "Acceptance Item States", value: "ACCEPTANCE_ITEM_STATES"},
-    {label: "Prescription", value: "PRESCRIPTION"},
-    {label: "Request Form", value: "REQUEST_FORM"},
-    {label: "Document", value: "DOCUMENT"},
+    {label: "Request Form", value: "REQUEST_FORM"}
 ];
 const DocumentsInfo = ({
                            documents = [],
@@ -292,14 +305,14 @@ const DocumentsInfo = ({
                                                         {doc.originalName || doc.name}
                                                     </Typography>
                                                     {doc.tag && (<>
-                                                        <Chip
-                                                            label={tags.find(item => item.value === doc.tag)?.label}
-                                                            size="small"
-                                                            color="primary"
-                                                            variant="outlined"
-                                                            sx={{mt: 0.5, mb: 0.5, textTransform: 'capitalize'}}
-                                                        />
-                                                        <br/>
+                                                            <Chip
+                                                                label={tags.find(item => item.value === doc.tag)?.label}
+                                                                size="small"
+                                                                color="primary"
+                                                                variant="outlined"
+                                                                sx={{mt: 0.5, mb: 0.5, textTransform: 'capitalize'}}
+                                                            />
+                                                            <br/>
                                                         </>
                                                     )}
                                                     <Typography variant="caption" color="text.secondary">

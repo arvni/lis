@@ -2,6 +2,7 @@
 
 namespace App\Domains\Reception\Repositories;
 
+use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\User\Enums\ActivityType;
 use App\Domains\User\Services\UserActivityService;
@@ -29,14 +30,14 @@ class PatientRepository
         $patient = new Patient($data);
         $patient->registrar()->associate(auth()->user()->id);
         $patient->save();
-        UserActivityService::createUserActivity($patient,ActivityType::CREATE);
+        UserActivityService::createUserActivity($patient, ActivityType::CREATE);
         return $patient;
     }
 
     public function updatePatient(Patient $patient, array $data): Patient
     {
         $patient->update($data);
-        UserActivityService::createUserActivity($patient,ActivityType::UPDATE);
+        UserActivityService::createUserActivity($patient, ActivityType::UPDATE);
         return $patient;
     }
 
@@ -51,7 +52,8 @@ class PatientRepository
 
     public function getPatientDocuments(Patient $patient): array
     {
-        return $patient->ownedDocuments()->whereNotIn('tag', ['temp', 'avatar'])
+        return $patient->ownedDocuments()
+            ->allowedTag()
             ->get()
             ->map(fn($doc) => ['id' => $doc->hash, 'originalName' => $doc->originalName, "tag" => $doc->tag, "created_at" => $doc->created_at, "ext" => $doc->ext])
             ->toArray();
@@ -60,7 +62,7 @@ class PatientRepository
     public function deletePatient(Patient $patient): void
     {
         $patient->delete();
-        UserActivityService::createUserActivity($patient,ActivityType::DELETE);
+        UserActivityService::createUserActivity($patient, ActivityType::DELETE);
     }
 
     public function findPatientByIdNo($idNo)

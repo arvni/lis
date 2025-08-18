@@ -123,7 +123,7 @@ class AcceptanceItemRepository
         $acceptanceItem->load([
             "patients" => function ($q) {
                 $q->with(["ownedDocuments" => function ($q) {
-                    $q->whereIn("tag", [DocumentTag::DOCUMENT, DocumentTag::PRESCRIPTION]);
+                    $q->allowedTag();
                 }]);
             },
             "acceptanceItemStates.section",

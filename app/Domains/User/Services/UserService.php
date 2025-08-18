@@ -9,6 +9,7 @@ use App\Domains\User\Models\User;
 use App\Domains\User\Repositories\UserRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class UserService
 {
@@ -61,5 +62,18 @@ class UserService
         }
         if ($user->isDirty())
             $user->save();
+    }
+
+    public static function getAllowedDocumentTags($user)
+    {
+        return $user->getAllPermissions()
+            ->filter(fn($item) => Str::startsWith($item->name, "Documents."))
+            ->pluck("name")
+            ->map(fn($item) => strtoupper(Str::snake(substr($item, strlen("Documents.")))))
+            ->reject(fn($item) => in_array($item, [
+                DocumentTag::TEMP->value,
+                DocumentTag::AVATAR->value
+            ]))
+            ->toArray();
     }
 }

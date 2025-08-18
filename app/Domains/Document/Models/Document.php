@@ -3,6 +3,7 @@
 namespace App\Domains\Document\Models;
 
 use App\Domains\Document\Enums\DocumentTag;
+use App\Domains\User\Services\UserService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -35,6 +36,17 @@ class Document extends Model
         'file_name',
         'address'
     ];
+
+    public function scopeAllowedTag($q)
+    {
+        $user = auth()->user();
+        $tags=[];
+        if ($user)
+            $tags = UserService::getAllowedDocumentTags($user);
+        else
+            $tags = DocumentTag::values();
+        return $q->whereIn('tag', $tags);
+    }
 
 
     public function getFileNameAttribute()
