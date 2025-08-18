@@ -143,7 +143,6 @@ class ReportController extends Controller
     {
         $user = auth()->user();
         $parameters = $request->get('parameters', []);
-
         if ($parameters && count($parameters) > 0) {
             if ($parameters && count($parameters) > 0) {
                 foreach (($request->file("parameters")??[]) as $parameter => $value) {
@@ -153,9 +152,9 @@ class ReportController extends Controller
             }
         }
         else{
+
             $doc=$this->documentService->getDocument($request->input("reported_document.id"));
         }
-
 
         $report = $this->reportService->updateReport(
             $report,

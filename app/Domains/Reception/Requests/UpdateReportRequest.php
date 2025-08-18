@@ -15,7 +15,7 @@ class UpdateReportRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update",$this->route()->parameter("report"));
+        return Gate::allows("update", $this->route()->parameter("report"));
     }
 
     /**
@@ -40,10 +40,15 @@ class UpdateReportRequest extends FormRequest
 
             'reported_document' => [
                 Rule::excludeIf(fn() => $template && $template->parameters_count > 0),
-                'required', 'array'
+                'required',
+                'array'
             ], // 10MB max
             'reported_document.id' => [
-                Rule::excludeIf(fn() => $template && $template->parameters_count > 0),
+                Rule::excludeIf(fn() => ($template && $template->parameters_count > 0) || $this->input("reported_document.hash")),
+                'required', 'exists:documents,hash'
+            ],
+            'reported_document.hash' => [
+                Rule::excludeIf(fn() => ($template && $template->parameters_count > 0) || $this->input("reported_document.id")),
                 'required', 'exists:documents,hash'
             ],
 
