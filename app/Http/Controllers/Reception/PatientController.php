@@ -9,6 +9,7 @@ use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Requests\StorePatientRequest;
 use App\Domains\Reception\Requests\UpdatePatientRequest;
 use App\Domains\Reception\Services\PatientService;
+use App\Domains\User\Services\UserService;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -68,6 +69,7 @@ class PatientController extends Controller
         $data = $this->patientService->getPatientDetails($patient);
         return Inertia::render('Patient/Show', [
             ...$data,
+            "allowedTags" => UserService::getAllowedDocumentTags(),
             "canEdit" => Gate::allows("update", $patient),
             "canCreateAcceptance" => Gate::allows("create", Acceptance::class),
             "canCreateConsultation" => Gate::allows("create", Consultation::class)

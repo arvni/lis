@@ -64,8 +64,10 @@ class UserService
             $user->save();
     }
 
-    public static function getAllowedDocumentTags($user)
+    public static function getAllowedDocumentTags(?User $user = null)
     {
+        if (!$user)
+            $user = auth()->user();
         return $user->getAllPermissions()
             ->filter(fn($item) => Str::startsWith($item->name, "Documents."))
             ->pluck("name")
@@ -74,6 +76,7 @@ class UserService
                 DocumentTag::TEMP->value,
                 DocumentTag::AVATAR->value
             ]))
+            ->values()
             ->toArray();
     }
 }

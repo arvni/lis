@@ -144,6 +144,7 @@ const Show = ({
                   canEdit = false,
                   canCreateAcceptance = false,
                   canCreateConsultation = false,
+    allowedTags=[]
               }) => {
     const theme = useTheme();
     const {enqueueSnackbar} = useSnackbar();
@@ -564,6 +565,7 @@ const Show = ({
                                 ownerId: patient.id,
                                 ownerClass: "patient"
                             }}
+                            allowedTags={allowedTags}
                             url={route("documents.batchUpdate")} // Assuming this handles uploads/updates
                         />
                     )}

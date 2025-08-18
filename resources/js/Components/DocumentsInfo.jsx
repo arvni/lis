@@ -54,22 +54,15 @@ import Document from "@/Pages/Document.jsx";
  */
 
 // Define tags for DocumentsInfo
-const tags = [
-    {label: "Acceptance Item States", value: "ACCEPTANCE_ITEM_STATES"},
-    {label: "Temporary", value: "TEMP"},
+const allTags = [
+    {label: "Sections Documents", value: "ACCEPTANCE_ITEM_STATES"},
     {label: "Prescription", value: "PRESCRIPTION"},
     {label: "Report", value: "REPORTED"},
     {label: "Published Report", value: "PUBLISHED"},
-    {label: "Referrer Order", value: "REFERRER_ORDER"},
-    {label: "Avatar", value: "AVATAR"},
     {label: "Clinical Comment", value: "CLINICAL_COMMENT"},
-    {label: "Latest", value: "LATEST"},
     {label: "Approved", value: "APPROVED"},
-    {label: "Image", value: "IMAGE"},
     {label: "Document", value: "DOCUMENT"},
     {label: "Signature", value: "SIGNATURE"},
-    {label: "Stamp", value: "STAMP"},
-    {label: "Setting", value: "SETTING"},
     {label: "Additional Report Files", value: "ADDITIONAL"},
     {label: "Medical History", value: "MEDICAL_HISTORY"},
     {label: "ID Card", value: "ID_CARD"},
@@ -84,8 +77,14 @@ const DocumentsInfo = ({
                            titleVariant = "h6",
                            editable = true,
                            url = "",
+                           allowedTags = allTags.map((tag) => tag.value),
                        }) => {
     const theme = useTheme();
+    const tags = allowedTags.reduce((acc, tag) => {
+        const allowedTag = allTags.find(item => item.value === tag);
+        if (allowedTag) acc.push(allowedTag);
+        return acc;
+    }, []);
 
     // Initialize form with documents data
     const {data, setData, post, processing, reset} = useForm({
