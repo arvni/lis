@@ -35,6 +35,7 @@ import TestTypeSelector from './TestTypeSelector';
 import TestDetails from './TestDetails';
 import RegularTestForm from './forms/RegularTestForm';
 import ServiceTestForm from './forms/ServiceTestForm';
+import {makeId} from "@/Services/helper.js";
 
 // Constants
 const TEST_TYPES = {
@@ -53,6 +54,7 @@ const STEPS = [
 const createDefaultData = (initialData) => {
     const safeData = initialData || {};
     return {
+        ic:makeId(6),
         method_test: {
             test: {
                 type: safeData?.method_test?.test?.type || ''

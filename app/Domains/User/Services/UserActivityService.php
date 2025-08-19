@@ -15,7 +15,7 @@ class UserActivityService
             'ip_address' => request()->header('X-Forwarded-For')
                 ?? request()->header('X-Real-IP')
                     ?? request()->ip(),
-            'payload' => request()->all(),
+            'payload' => ["value" => $model->toArray(), "request" => request()->all()],
         ]);
         $userActivity->related()->associate($model);
         $userActivity->user()->associate(auth()->user());

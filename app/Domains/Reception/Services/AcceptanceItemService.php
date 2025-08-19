@@ -38,7 +38,7 @@ readonly class AcceptanceItemService
 
     public function storeAcceptanceItem(AcceptanceItemDTO $acceptanceItemDTO): AcceptanceItem
     {
-        return $this->acceptanceItemRepository->creatAcceptanceItem(Arr::except($acceptanceItemDTO->toArray(), "id"));
+        return $this->acceptanceItemRepository->creatAcceptanceItem(Arr::except($acceptanceItemDTO->toArray(), ["id"]));
     }
 
     public function showAcceptanceItem(AcceptanceItem $acceptanceItem): AcceptanceItem

@@ -84,7 +84,7 @@ class AcceptanceItemRepository
 
     public function creatAcceptanceItem(array $acceptanceItemData): AcceptanceItem
     {
-        $acceptanceItem = AcceptanceItem::query()->create(Arr::except($acceptanceItemData, "patients"));
+        $acceptanceItem = AcceptanceItem::create(Arr::except($acceptanceItemData, ["patients","id"]));
         if (isset($acceptanceItemData["customParameters"]["samples"])) {
             $patients=Arr::flatten(array_map(fn($item)=>$item["patients"]??[],$acceptanceItemData["customParameters"]["samples"]),1);
             $this->syncPatients($acceptanceItem, $patients);
@@ -95,7 +95,7 @@ class AcceptanceItemRepository
 
     public function updateAcceptanceItem(AcceptanceItem $acceptanceItem, array $acceptanceItemData): AcceptanceItem
     {
-        $acceptanceItem->fill(Arr::except($acceptanceItemData, "patients"));
+        $acceptanceItem->fill(Arr::except($acceptanceItemData, ["patients","id"]));
         if ($acceptanceItem->isDirty()) {
             $acceptanceItem->save();
         }
