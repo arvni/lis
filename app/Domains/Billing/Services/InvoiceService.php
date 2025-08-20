@@ -84,17 +84,19 @@ readonly class InvoiceService
             )
             , 1);
         $uniqueTests = collect($output["acceptance_items"])->unique("test.id");
-        $output["acceptance_items"] = $uniqueTests->map(function ($item, $key) use ($output) {
-            $items = collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["id"] == $testItem["test"]["id"]);
-            $qty = $items->count() ?? $items->first()["customParameters"]["qty"] ?? 1;
-            return [
-                ...$item,
-                "qty" => $qty,
-                "price" => $items->sum("price"),
-                "unit_price" => $item["price"],
-                "discount" => $items->sum("discount"),
-            ];
-        });
+        $output["acceptance_items"] = $uniqueTests
+            ->map(function ($item, $key) use ($output) {
+                $items = collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["id"] == $testItem["test"]["id"]);
+                $qty = $items->count() ?? $items->first()["customParameters"]["qty"] ?? 1;
+                return [
+                    ...$item,
+                    "qty" => $qty,
+                    "price" => $items->sum("price"),
+                    "unit_price" => $item["price"],
+                    "discount" => $items->sum("discount"),
+                ];
+            })
+            ->values();
 
         return $output;
     }
