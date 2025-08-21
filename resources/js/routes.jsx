@@ -19,7 +19,7 @@ import InterpreterModeIcon from '@mui/icons-material/InterpreterMode';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BusinessIcon from '@mui/icons-material/Business';
 import ReceiptIcon from "@mui/icons-material/Receipt";
-import {Analytics, FactCheck, Payments} from "@mui/icons-material";
+import {Analytics, FactCheck, Payments, Publish} from "@mui/icons-material";
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import {PercentDiamond, Stethoscope as Doctor, Hospital, PillBottle, ClipboardList} from "lucide-react";
 
@@ -135,6 +135,12 @@ const routes = (sections = []) => {
                     route: "reports.approvingList",
                     permission: 'Report.Approve Report',
                     icon: <FactCheck/>
+                },
+                {
+                    title: "Waiting For Publishing",
+                    route: "reports.publishing",
+                    permission: 'Report.Publish Report',
+                    icon: <Publish/>
                 },
                 {
                     title: "List",
