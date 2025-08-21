@@ -52,7 +52,7 @@ const PublishForm = ({onSubmit, open, onCancel, data, setData, processing = fals
     const validateForm = () => {
         const newErrors = {};
 
-        if (!data?.published_document?.id) {
+        if (!data?.published_document?.id && !data?.published_document?.hash) {
             newErrors.published_document = "A PDF document is required to publish the report";
         }
 
@@ -193,7 +193,7 @@ const PublishForm = ({onSubmit, open, onCancel, data, setData, processing = fals
                     onClick={handleSubmit}
                     variant="contained"
                     color="primary"
-                    disabled={processing || (hasAttemptedSubmit && Object.keys(errors).length > 0)}
+                    disabled={processing}
                     startIcon={processing ? <CircularProgress size={20} color="inherit"/> : <Share/>}
                 >
                     {processing ? 'Publishing...' : 'Publish Report'}

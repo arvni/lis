@@ -231,7 +231,7 @@ const BarcodeComponent = ({barcodes}) => {
                                         <BarcodeText>
                                             <Box component="span"
                                                  sx={{display: 'inline-flex', alignItems: 'center'}}>
-                                                {formatDate(barcode.collection_date || barcode.created_at)}
+                                                {formatDate(barcode.created_at)}
                                             </Box>
                                             {barcode.patient && <>
                                                 |

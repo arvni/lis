@@ -38,8 +38,8 @@ class AcceptanceRepository
      */
     private function getPayableAmountSql(): string
     {
-        return 'COALESCE((SELECT SUM(acceptance_items.price) FROM acceptance_items WHERE acceptances.id = acceptance_items.acceptance_id), 0) -
-                COALESCE((SELECT SUM(acceptance_items.discount) FROM acceptance_items WHERE acceptances.id = acceptance_items.acceptance_id), 0)';
+        return 'COALESCE((SELECT SUM(acceptance_items.price) FROM acceptance_items WHERE acceptances.id = acceptance_items.acceptance_id AND acceptance_items.deleted_at IS NULL), 0) -
+                COALESCE((SELECT SUM(acceptance_items.discount) FROM acceptance_items WHERE acceptances.id = acceptance_items.acceptance_id AND acceptance_items.deleted_at IS NULL), 0)';
     }
 
     public function listAcceptances(array $queryData): LengthAwarePaginator
@@ -99,7 +99,7 @@ class AcceptanceRepository
                     $query->addSelect([
                             'id',
                             'created_at',
-                        DB::raw('CONCAT(
+                            DB::raw('CONCAT(
                     DATE_FORMAT(created_at, "%Y-%m"),
                     "/",
                     (SELECT COUNT(*)
@@ -124,14 +124,14 @@ class AcceptanceRepository
                     });
             })
             ->where("referrer_id", $referrerId)
-            ->whereRelation("invoice","statement_id","=",null)
+            ->whereRelation("invoice", "statement_id", "=", null)
             ->get();
     }
 
     public function createAcceptance(array $acceptanceData): Acceptance
     {
-        $acceptance= Acceptance::create($acceptanceData);
-        UserActivityService::createUserActivity($acceptance,ActivityType::CREATE);
+        $acceptance = Acceptance::create($acceptanceData);
+        UserActivityService::createUserActivity($acceptance, ActivityType::CREATE);
         return $acceptance;
     }
 
@@ -140,7 +140,7 @@ class AcceptanceRepository
         $acceptance->fill($acceptanceData);
         if ($acceptance->isDirty()) {
             $acceptance->save();
-            UserActivityService::createUserActivity($acceptance,ActivityType::UPDATE);
+            UserActivityService::createUserActivity($acceptance, ActivityType::UPDATE);
         }
         return $acceptance;
     }
@@ -162,7 +162,7 @@ class AcceptanceRepository
     {
         // Consider adding logic here if deletion has side effects or requires checks
         $acceptance->delete();
-        UserActivityService::createUserActivity($acceptance,ActivityType::DELETE);
+        UserActivityService::createUserActivity($acceptance, ActivityType::DELETE);
     }
 
     public function listSampleCollection(array $queryData): LengthAwarePaginator
@@ -186,10 +186,11 @@ class AcceptanceRepository
 
                 // Use whereRaw to properly reference the table columns in the subquery context
                 $itemQuery->whereRaw('(select count(*) from `samples`
-    inner join `acceptance_item_samples` on `samples`.`id` = `acceptance_item_samples`.`sample_id`
-    where `acceptance_items`.`id` = `acceptance_item_samples`.`acceptance_item_id`
-    and `acceptance_item_samples`.`active` = 1
-) < `acceptance_items`.`no_sample`');
+                    inner join `acceptance_item_samples` on `samples`.`id` = `acceptance_item_samples`.`sample_id`
+                    where `acceptance_items`.`id` = `acceptance_item_samples`.`acceptance_item_id`
+                    and `acceptance_item_samples`.`active` = 1
+                    and `acceptance_items`.`deleted_at` IS NULL
+                ) < `acceptance_items`.`no_sample`');
             })
             ->selectRaw("({$this->getPayableAmountSql()}) as payable_amount")
             ->groupBy('acceptances.id')
@@ -366,6 +367,7 @@ class AcceptanceRepository
                     ->join('method_tests', 'acceptance_items.method_test_id', '=', 'method_tests.id')
                     ->join('tests', 'method_tests.test_id', '=', 'tests.id')
                     ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id')
+                    ->whereNull('acceptance_items.deleted_at')
                     ->whereNot('tests.type', TestType::SERVICE);
             })
             ->whereNotExists(function ($query) {
@@ -375,6 +377,7 @@ class AcceptanceRepository
                         $join->on('acceptance_items.id', '=', 'acceptance_item_samples.acceptance_item_id')
                             ->where('acceptance_item_samples.active', true); // Adjust status condition as needed
                     })
+                    ->whereNull('acceptance_items.deleted_at')
                     ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id');
             })
             ->whereExists(function ($query) {
@@ -386,6 +389,7 @@ class AcceptanceRepository
                     SELECT COALESCE(SUM(ai.price - ai.discount), 0)
                     FROM acceptance_items ai
                     WHERE ai.acceptance_id = acceptances.id
+                    AND ai.deleted_at IS NULL
                 )');
             })
             ->count();

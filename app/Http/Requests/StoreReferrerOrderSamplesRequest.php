@@ -33,6 +33,7 @@ class StoreReferrerOrderSamplesRequest extends FormRequest
             "barcodes.*.sampleLocation" => ["required"],
             "barcodes.*.barcodeGroup" => ["required", "array"],
             "barcodes.*.barcode" => ["nullable", "string"],
+            "barcodes.*.received_at" => ["required"],
         ];
     }
 }

@@ -3,7 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Filter from "./Components/Filter";
 import TableLayout from "@/Layouts/TableLayout";
 import PageHeader from "@/Components/PageHeader.jsx";
-import {router} from "@inertiajs/react";
+import {router, Link} from "@inertiajs/react";
 import {
     IconButton,
     Chip,
@@ -21,23 +21,10 @@ import {
     Person as PersonIcon,
     Assignment as AssignmentIcon
 } from "@mui/icons-material";
+import {formatDate} from "@/Services/helper.js";
 
 const Index = ({samples, status, requestInputs}) => {
-    const formatDate = (dateString) => {
-        if (!dateString) return "N/A";
-        let date;
-        if (typeof dateString === 'string')
-            date = new Date(dateString);
-        else date = dateString;
-        return new Intl.DateTimeFormat('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        }).format(date);
-    };
+
 
     const columns = [
         {
@@ -59,16 +46,18 @@ const Index = ({samples, status, requestInputs}) => {
             headerName: 'Acceptance ID',
             type: "string",
             sortable: false,
+            display:"flex",
             width: 140,
             renderCell: ({row}) => (
-                <Chip
+                row.acceptance_items?.[0]?.acceptance_id &&
+                <Link href={route("acceptances.show", row.acceptance_items?.[0]?.acceptance_id)}><Chip
                     icon={<AssignmentIcon/>}
                     label={row.acceptance_items?.[0]?.acceptance_id || "N/A"}
                     variant="outlined"
                     color="primary"
                     size="small"
                     sx={{fontWeight: 500}}
-                />
+                /></Link>
             )
         },
         {
@@ -138,6 +127,30 @@ const Index = ({samples, status, requestInputs}) => {
                         />
                     ))}
                 </Stack>
+            )
+        },
+        {
+            field: 'received_at',
+            headerName: 'Received Date',
+            width: 170,
+            type: "datetime",
+            valueGetter: (value) => value && new Date(value),
+            renderCell: ({value}) => (
+                <Typography variant="body2" color="text.secondary">
+                    {formatDate(value)}
+                </Typography>
+            )
+        },
+        {
+            field: 'collection_date',
+            headerName: 'Collection Date',
+            width: 170,
+            type: "datetime",
+            valueGetter: (value) => value && new Date(value),
+            renderCell: ({value}) => (
+                <Typography variant="body2" color="text.secondary">
+                    {formatDate(value)}
+                </Typography>
             )
         },
         {

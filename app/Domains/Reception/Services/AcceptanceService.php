@@ -18,7 +18,6 @@ use App\Domains\Reception\Events\AcceptanceDeletedEvent;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Notifications\PatientReportPublished;
-use App\Domains\Reception\Notifications\SendPublishedReportByWhatsapp;
 use App\Domains\Reception\Repositories\AcceptanceRepository;
 use App\Domains\Referrer\Services\ReferrerOrderService;
 use App\Domains\Setting\Repositories\SettingRepository;
@@ -31,6 +30,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use Throwable;
 
 class AcceptanceService
 {
@@ -87,7 +87,8 @@ class AcceptanceService
 
         $acceptanceItems = $this->prepareAcceptanceItems($acceptance, $acceptanceDTO->acceptanceItems);
         foreach ($acceptanceItems as $acceptanceItem) {
-            $this->acceptanceItemService->storeAcceptanceItem($acceptanceItem);
+            if (!$acceptanceItem->deleted)
+                $this->acceptanceItemService->storeAcceptanceItem($acceptanceItem);
         }
         return $acceptance;
     }
@@ -120,7 +121,7 @@ class AcceptanceService
     }
 
     /**
-     * @throws Exception
+     * @throws Exception|Throwable
      */
     public function updateAcceptance(Acceptance $acceptance, array $data): Acceptance
     {
@@ -172,10 +173,10 @@ class AcceptanceService
 
                 case 5: // Final Review - process everything
                 default:
-                    // Process all data for final submission using original method
-                    if ($acceptance->status === AcceptanceStatus::PENDING)
-                        $acceptanceDTO->status = AcceptanceStatus::WAITING_FOR_PAYMENT;
-                    $acceptance = $this->update($acceptance, $acceptanceDTO);
+                    $acceptance = $this->acceptanceRepository->updateAcceptance($acceptance, [
+                        "step" => 5,
+                        "status" => $acceptance->status === AcceptanceStatus::PENDING ? AcceptanceStatus::WAITING_FOR_PAYMENT : $acceptance->status
+                    ]);
                     break;
             }
 
@@ -186,39 +187,6 @@ class AcceptanceService
             DB::rollBack();
             throw $e;
         }
-    }
-
-    /**
-     * Update acceptance (original method)
-     *
-     * @param Acceptance $acceptance
-     * @param AcceptanceDTO $acceptanceDTO
-     * @return Acceptance
-     */
-    public function update(Acceptance $acceptance, AcceptanceDTO $acceptanceDTO): Acceptance
-    {
-        if (!isset($acceptanceDTO->doctor["id"]) && isset($acceptanceDTO->doctor["name"]))
-            $acceptanceDTO->doctorId = $this->laboratoryAdapter->createOrGetDoctor($acceptanceDTO->doctor)->id;
-        if ($acceptanceDTO->status == AcceptanceStatus::PENDING) {
-            $acceptanceDTO->step = max($acceptanceDTO->step, $acceptanceDTO->step);
-        } else
-            $acceptanceDTO->step = 5;
-        $acceptance = $this->acceptanceRepository
-            ->updateAcceptance($acceptance, Arr::except($acceptanceDTO->toArray(), ["acceptance_items", "doctor"]));
-
-        $acceptanceItems = $this->prepareAcceptanceItems($acceptance, $acceptanceDTO->acceptanceItems);
-        $updatedAcceptanceItems = [];
-
-        foreach ($acceptanceItems as $acceptanceItemData) {
-            $acceptanceItem = $this->acceptanceItemService->findAcceptanceItemById($acceptanceItemData->id);
-            if ($acceptanceItem)
-                $updatedAcceptanceItems[] = $this->acceptanceItemService->updateAcceptanceItem($acceptanceItem, $acceptanceItemData);
-            else
-                $updatedAcceptanceItems[] = $this->acceptanceItemService->storeAcceptanceItem($acceptanceItemData);
-        }
-
-        $acceptance->acceptanceItems()->whereNotIn("id", collect($updatedAcceptanceItems)->pluck("id")->toArray())->delete();
-        return $acceptance;
     }
 
     /**
@@ -278,13 +246,14 @@ class AcceptanceService
         $acceptanceItems = $this->prepareAcceptanceItems($acceptance, $acceptanceDTO->acceptanceItems);
         $updatedAcceptanceItems = [];
         foreach ($acceptanceItems as $acceptanceItemData) {
-            $acceptanceItem = $this->acceptanceItemService->findAcceptanceItemById($acceptanceItemData->id);
-            if ($acceptanceItem)
-                $updatedAcceptanceItems[] = $this->acceptanceItemService->updateAcceptanceItem($acceptanceItem, $acceptanceItemData);
-            else
-                $updatedAcceptanceItems[] = $this->acceptanceItemService->storeAcceptanceItem($acceptanceItemData);
+            if (!$acceptanceItemData->deleted) {
+                $acceptanceItem = $this->acceptanceItemService->findAcceptanceItemById($acceptanceItemData->id);
+                if ($acceptanceItem)
+                    $updatedAcceptanceItems[] = $this->acceptanceItemService->updateAcceptanceItem($acceptanceItem, $acceptanceItemData);
+                else
+                    $updatedAcceptanceItems[] = $this->acceptanceItemService->storeAcceptanceItem($acceptanceItemData);
+            }
         }
-
         // Remove items not in the update
         $acceptance->acceptanceItems()->whereNotIn("id", collect($updatedAcceptanceItems)->pluck("id")->toArray())->delete();
     }
@@ -405,7 +374,9 @@ class AcceptanceService
                         Carbon::now()->format("Y-m-d H:i:s") => "Edited By " . auth()->user()->name,
                     ],
                     $acceptance_item["no_sample"] ?? (count($acceptance_item["samples"] ?? [1]) || 1),
-                    $acceptance_item["id"] ?? null
+                    $acceptance_item["id"] ?? null,
+                    null,
+                    $acceptance_item["deleted"] ?? false,
                 );
             }
         }
@@ -429,6 +400,7 @@ class AcceptanceService
                             $item["no_sample"] ?? (count($item["samples"] ?? [1]) || 1),
                             $item["id"] ?? null,
                             $panelID,
+                            $panelData["deleted"] ?? false,
                         );
                     }
                 }
@@ -545,7 +517,8 @@ class AcceptanceService
         $acceptance->load([
             "patient",
             "referrer",
-            "acceptanceItems" => fn($q) => $q->whereHas("test", fn($testQuery) => $testQuery->whereNot("type", TestType::SERVICE))->with("report.publishedDocument", "test")
+            "acceptanceItems" => fn($q) => $q->whereHas("test", fn($testQuery) => $testQuery->whereNot("type", TestType::SERVICE))
+                ->with("report.publishedDocument","report.clinicalCommentDocument", "test")
         ]);
         $patient = $acceptance->patient;
         $referrer = $acceptance->referrer;
@@ -554,7 +527,6 @@ class AcceptanceService
             // Send notification to patient
             if (!$silent) {
                 Notification::send($patient, new PatientReportPublished($acceptance));
-
                 if ($howReport["whatsappNumber"] ?? null) {
                     $to = $this->formatNumber($howReport["whatsappNumber"]);
                     foreach ($acceptance->acceptanceItems as $acceptanceItem) {
@@ -562,8 +534,8 @@ class AcceptanceService
                             'contentSid' => config('services.twilio.templates.send_report_file'),
                             'to' => 'whatsapp:' . $to,
                             'contentVariables' => [
-                                "1" => $acceptanceItem->test->name, // {{1}} - Customer name
-                                "2" => $acceptanceItem->report->publishedDocument->hash, // {{2}} - Report File
+                                "1" => $acceptanceItem->test->name, // {{1}} - Caption
+                                "2" => $acceptanceItem->report->publishedDocument->hash, // {{2}} - File
                             ]
                         ];
                         $whatsappMessage = new WhatsappMessage([
@@ -575,6 +547,27 @@ class AcceptanceService
                         ]);
                         $whatsappMessage->messageable()->associate($patient);
                         $whatsappMessage->save();
+
+                        if ($acceptanceItem?->report?->clinicalCommentDocument) {
+                            $data = [
+                                'contentSid' => config('services.twilio.templates.send_report_file'),
+                                'to' => 'whatsapp:' . $to,
+                                'contentVariables' => [
+                                    "1" => $acceptanceItem->test->name."( Clinical Comment )", // {{1}} - Caption
+                                    "2" => $acceptanceItem->report->clinicalCommentDocument->hash, // {{2}} -  File
+                                ]
+                            ];
+                            $whatsappMessage = new WhatsappMessage([
+                                "data" => $data,
+                                "status" => "initial",
+                                "waId" => Str::startsWith($to, "+") ? Str::substr($to, 1) : $to,
+                                'type' => WhatsappMessageType::OUTBOUND,
+                                'written' => WhatsappMessageWritten::TEMPLATE,
+                            ]);
+                            $whatsappMessage->messageable()->associate($patient);
+                            $whatsappMessage->save();
+                        }
+
                     }
                 }
             }

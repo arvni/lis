@@ -24,8 +24,10 @@ const TestsTable = ({
                         onDeleteTest,
                         onEditPanel,
                         onDeletePanel,
-    showButton=false,
-    showTotal=true
+                        onRestoreTest,
+                        onRestorePanel,
+                        showButton = false,
+                        showTotal = true
                     }) => {
     const {totalDiscount, totalPrice, hasItems} = useTotalCalculations(tests, panels);
 
@@ -60,6 +62,7 @@ const TestsTable = ({
                             testTypes={TEST_TYPE}
                             onEdit={onEditPanel ? () => onEditPanel(panel.id) : null}
                             onDelete={onDeletePanel ? () => onDeletePanel(panel.id) : null}
+                            onRestore={onRestorePanel ? () => onRestorePanel(panel.id) : null}
                         />
                     ))}
 
@@ -71,10 +74,11 @@ const TestsTable = ({
                             testTypes={TEST_TYPE}
                             onEdit={onEditTest ? () => onEditTest(test.id) : null}
                             onDelete={onDeleteTest ? () => onDeleteTest(test.id) : null}
+                            onRestore={onRestoreTest ? () => onRestoreTest(test.id) : null}
                         />
                     ))}
                 </TableBody>
-                {showTotal&&<TableFooter>
+                {showTotal && <TableFooter>
                     <TableRow>
                         <TableCell colSpan={7} align="right">
                             <Typography variant="subtitle1" fontWeight="bold">Total:</Typography>

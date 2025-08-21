@@ -50,6 +50,7 @@ class Acceptance extends Model
         "referenceCode",
         "patient.fullName",
         "patient.idNo",
+        "patient.phone",
         "samples.barcode"
     ];
 

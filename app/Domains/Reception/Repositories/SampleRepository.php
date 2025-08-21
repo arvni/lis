@@ -43,7 +43,7 @@ class SampleRepository
                     $q->wherePivot("active", true);
                     if (isset($filters["acceptance_id"]))
                         $q->where("acceptance_id", $filters["acceptance_id"]);
-                    $q->with("test","method.test");
+                    $q->with("test", "method.test");
                 }
             ])
             ->get();
@@ -57,10 +57,11 @@ class SampleRepository
             "status" => "sampled",
             "collection_date" => isset($sampleData["collection_date"]) ? Carbon::parse($sampleData["collection_date"]) : Carbon::now(),
             "sampler_id" => auth()->user()->id,
-            "patient_id" => $sampleData["patient_id"]
+            "patient_id" => $sampleData["patient_id"],
+            "received_at" => isset($sampleData["received_at"]) ? Carbon::parse($sampleData["received_at"]) : Carbon::now(),
         ]);
-        $this->syncAcceptanceItems($sample, collect($sampleData["acceptance_items"])->pluck( "id")->unique()->toArray());
-        UserActivityService::createUserActivity($sample,ActivityType::CREATE);
+        $this->syncAcceptanceItems($sample, collect($sampleData["acceptance_items"])->pluck("id")->unique()->toArray());
+        UserActivityService::createUserActivity($sample, ActivityType::CREATE);
         return $sample;
     }
 
@@ -69,7 +70,7 @@ class SampleRepository
         $sample->fill(Arr::except($sampleData, "acceptance_items"));
         if ($sample->isDirty()) {
             $sample->save();
-            UserActivityService::createUserActivity($sample,ActivityType::UPDATE);
+            UserActivityService::createUserActivity($sample, ActivityType::UPDATE);
         }
         $this->syncAcceptanceItems($sample, $sampleData["acceptance_items"]);
         return $sample;
@@ -78,7 +79,7 @@ class SampleRepository
     public function deleteSample(Sample $sample): void
     {
         $sample->delete();
-        UserActivityService::createUserActivity($sample,ActivityType::DELETE);
+        UserActivityService::createUserActivity($sample, ActivityType::DELETE);
 
     }
 
@@ -91,24 +92,24 @@ class SampleRepository
     {
         $sample->acceptanceItems()->sync($acceptanceItems);
         foreach ($acceptanceItems as $acceptanceItem) {
-            SampleCollectedEvent::dispatch($acceptanceItem, $sample->barcode,$sample->id);
+            SampleCollectedEvent::dispatch($acceptanceItem, $sample->barcode, $sample->id);
         }
     }
 
-    public function findActiveSample($acceptanceItemIds,$patientId, $sampleType): ?Sample
+    public function findActiveSample($acceptanceItemIds, $patientId, $sampleType): ?Sample
     {
         return Sample::whereHas("acceptanceItems", fn($q) => $q->whereIn("acceptance_items.id", $acceptanceItemIds)
             ->where("active", true))
-            ->where("patient_id",$patientId)
+            ->where("patient_id", $patientId)
             ->where("sample_type_id", $sampleType)
             ->first();
     }
 
-    public function findDeactivatedSample($acceptanceItemIds,$patientId, $sampleType): ?Sample
+    public function findDeactivatedSample($acceptanceItemIds, $patientId, $sampleType): ?Sample
     {
         return Sample::whereHas("acceptanceItems", fn($q) => $q->whereIn("acceptance_items.id", $acceptanceItemIds)
             ->where("active", false))
-            ->where("patient_id",$patientId)
+            ->where("patient_id", $patientId)
             ->where("sample_type_id", $sampleType)
             ->latest()
             ->first();

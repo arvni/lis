@@ -252,7 +252,7 @@ const AddTest = ({
 
             const testData = response.data.data;
             const discounts = testData.offers?.map(offer => ({
-                id: Date.now(),
+                id: makeId(6),
                 type: offer.type,
                 value: offer.amount,
                 reason: offer.title

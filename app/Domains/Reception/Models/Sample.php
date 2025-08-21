@@ -22,7 +22,8 @@ class Sample extends Model
         "patient_id",
         "collection_date",
         "sampler_id",
-        "material_id"
+        "material_id",
+        "received_at"
     ];
 
     protected $searchable = [

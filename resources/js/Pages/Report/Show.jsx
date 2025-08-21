@@ -109,7 +109,10 @@ const Show = ({
 
     // Handle approval dialog open
     const handleApprove = () => {
-        setData("clinical_comment", report.clinical_comment);
+        setData(previousData => ({
+            ...previousData,
+            clinical_comment: report.clinical_comment,
+        }));
         setOpenApprove(true);
     };
 
@@ -118,6 +121,8 @@ const Show = ({
         setData({
             clinical_comment: report.clinical_comment,
             approver: report.approver,
+            clinical_comment_document: report.clinical_comment_document,
+            published_report_document: report.published_document,
             _method: "put"
         });
         setOpenApprove(true);
@@ -146,18 +151,12 @@ const Show = ({
 
     // Submit approval
     const approve = () => {
-        post(
-            report.approver
-                ? route("reports.clinicalReport.update", report.id)
-                : route("reports.approve", report.id)
-        );
-        setOpenApprove(false);
+        post(route("reports.approve", report.id), {onSuccess: () => setOpenApprove(false)});
     };
 
     // Submit rejection
     const reject = () => {
-        setOpenReject(false);
-        post(route("reports.reject", report.id));
+        post(route("reports.reject", report.id), {onSuccess: () => setOpenReject(false)});
     };
 
     // Submit publish
@@ -175,7 +174,10 @@ const Show = ({
 
     // Open dialog handlers
     const handleReject = () => setOpenReject(true);
-    const handlePublish = () => setOpenPublish(true);
+    const handlePublish = () => {
+        setData(previousData => ({...previousData, published_document: report.published_document,}))
+        setOpenPublish(true);
+    }
     const handleUnpublish = () => setOpenUnpublish(true);
 
     // Handle form field changes
@@ -458,26 +460,24 @@ const Show = ({
                             )}
 
                             {/* Published By */}
-                            {report.publisher && (
-                                <Stack direction={{xs: 'column', sm: 'row'}} spacing={2} alignItems={{sm: 'center'}}
-                                       justifyContent="space-between">
-                                    <Typography>
-                                        Published
-                                        by <strong>{report.publisher.name}</strong> at {formatDate(report.published_at)}
-                                    </Typography>
-                                    {report.published_document && canPrint && (
-                                        <Button
-                                            variant="outlined"
-                                            size="small"
-                                            startIcon={<DownloadOutlined/>}
-                                            target="_blank"
-                                            href={route("documents.show", report?.published_document?.id || report?.published_document?.hash)}
-                                        >
-                                            Download Published Version
-                                        </Button>
-                                    )}
-                                </Stack>
-                            )}
+                            <Stack direction={{xs: 'column', sm: 'row'}} spacing={2} alignItems={{sm: 'center'}}
+                                   justifyContent="space-between">
+                                {report.publisher && (<Typography>
+                                    Published
+                                    by <strong>{report.publisher.name}</strong> at {formatDate(report.published_at)}
+                                </Typography>)}
+                                {report.published_document && canPrint && (
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        startIcon={<DownloadOutlined/>}
+                                        target="_blank"
+                                        href={route("documents.show", report?.published_document?.id || report?.published_document?.hash)}
+                                    >
+                                        Download Published Version
+                                    </Button>
+                                )}
+                            </Stack>
                         </Stack>
                     </Box>
 
@@ -498,79 +498,77 @@ const Show = ({
             </Accordion>
 
             {/* Clinical Report */}
-            {(report.clinical_comment || report.clinical_comment_document) && report.approver ? (
-                <Accordion
-                    defaultExpanded={true}
-                    expanded={activeAccordions.clinicalReport}
-                    onChange={handleAccordionChange('clinicalReport')}
-                    elevation={2}
-                    sx={{
-                        mb: 2,
-                        borderRadius: 1,
-                        overflow: 'hidden',
-                        '&:before': {display: 'none'},
-                    }}
-                >
-                    <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                        <Stack direction="row" spacing={2} alignItems="center">
-                            <MedicalServices color="primary"/>
-                            <Typography variant="h6">Clinical Report</Typography>
-                        </Stack>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <Paper
-                            variant="outlined"
-                            sx={{
-                                p: 2,
-                                borderRadius: 1,
-                                "& img": {maxWidth: "100%"}
-                            }}
-                        >
-                            {report.clinical_comment ? (
-                                <Box
-                                    sx={{
-                                        overflow: "auto",
-                                        maxWidth: "100%",
-                                        "& table": {borderCollapse: "collapse"},
-                                        "& td, & th": {border: "1px solid #ddd", padding: "8px"}
-                                    }}
-                                    dangerouslySetInnerHTML={{__html: report.clinical_comment}}
-                                />
-                            ) : (
-                                <Typography variant="body2" color="text.secondary" fontStyle="italic">
-                                    No clinical comment content available
-                                </Typography>
-                            )}
 
-                            {report.clinical_comment_document && (
-                                <Box sx={{mt: 2}}>
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
-                                        startIcon={<DownloadOutlined/>}
-                                        target="_blank"
-                                        href={route("documents.download", (report.clinical_comment_document.id ?? report.clinical_comment_document.hash))}
-                                    >
-                                        Download Clinical Report
-                                    </Button>
-                                </Box>
-                            )}
-                        </Paper>
-                    </AccordionDetails>
-                    {canEdit && report.approver && (
-                        <AccordionActions>
-                            <Button
-                                onClick={handleEditClinicalReport}
-                                startIcon={<Edit/>}
-                                size="small"
-                                color="primary"
-                            >
-                                Edit Clinical Report
-                            </Button>
-                        </AccordionActions>
-                    )}
-                </Accordion>
-            ) : null}
+            <Accordion
+                expanded={activeAccordions.clinicalReport}
+                onChange={handleAccordionChange('clinicalReport')}
+                elevation={2}
+                sx={{
+                    mb: 2,
+                    borderRadius: 1,
+                    overflow: 'hidden',
+                    '&:before': {display: 'none'},
+                }}
+            >
+                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <MedicalServices color="primary"/>
+                        <Typography variant="h6">Clinical Report</Typography>
+                    </Stack>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Paper
+                        variant="outlined"
+                        sx={{
+                            p: 2,
+                            borderRadius: 1,
+                            "& img": {maxWidth: "100%"}
+                        }}
+                    >
+                        {report.clinical_comment ? (
+                            <Box
+                                sx={{
+                                    overflow: "auto",
+                                    maxWidth: "100%",
+                                    "& table": {borderCollapse: "collapse"},
+                                    "& td, & th": {border: "1px solid #ddd", padding: "8px"}
+                                }}
+                                dangerouslySetInnerHTML={{__html: report.clinical_comment}}
+                            />
+                        ) : (
+                            <Typography variant="body2" color="text.secondary" fontStyle="italic">
+                                No clinical comment content available
+                            </Typography>
+                        )}
+
+                        {report.clinical_comment_document && (
+                            <Box sx={{mt: 2}}>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<DownloadOutlined/>}
+                                    target="_blank"
+                                    href={route("documents.download", (report.clinical_comment_document.id ?? report.clinical_comment_document.hash))}
+                                >
+                                    Download Clinical Report
+                                </Button>
+                            </Box>
+                        )}
+                    </Paper>
+                </AccordionDetails>
+                {canEdit && report.approver && (
+                    <AccordionActions>
+                        <Button
+                            onClick={handleEditClinicalReport}
+                            startIcon={<Edit/>}
+                            size="small"
+                            color="primary"
+                        >
+                            Edit Clinical Report
+                        </Button>
+                    </AccordionActions>
+                )}
+            </Accordion>
 
             {/* Signers */}
             {signers && (
@@ -597,6 +595,7 @@ const Show = ({
                 setData={setData}
                 onSubmit={approve}
                 data={data}
+                documents={report.documents.filter(item => item.ext === 'pdf')}
                 clinicalCommentTemplateUrl={clinicalCommentTemplateUrl}
             />
 

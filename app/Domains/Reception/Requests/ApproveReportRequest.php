@@ -25,6 +25,7 @@ class ApproveReportRequest extends FormRequest
     {
         return [
             "clinical_comment_document.id" => "exists:documents,hash",
+            "published_report_document.hash" => "required|exists:documents,hash",
         ];
     }
 }

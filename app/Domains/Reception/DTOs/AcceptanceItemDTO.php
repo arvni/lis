@@ -15,7 +15,8 @@ class AcceptanceItemDTO
         public ?array          $timeline,
         public int             $noSample = 1,
         public int|string|null $id = null,
-        public int|string|null $panelId = null
+        public int|string|null $panelId = null,
+        public bool            $deleted = false
     )
     {
     }
@@ -32,6 +33,7 @@ class AcceptanceItemDTO
             'no_sample' => $this->noSample,
             "id" => $this->id,
             "panel_id" => $this->panelId,
+            "deleted" => $this->deleted,
         ];
         return $data;
     }

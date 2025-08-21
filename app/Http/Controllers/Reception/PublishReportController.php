@@ -25,7 +25,7 @@ class PublishReportController extends Controller
         if ($report->publisher_id)
             return back()->withErrors("this report published before");
         $user = auth()->user();
-        $this->reportService->publishReport($report, $user, $request->input("published_document.id"),$request->input("silently_publish",false));
+        $this->reportService->publishReport($report, $user,$request->input("silently_publish",false));
 
         return redirect()->back()->with([
             "success" => true,

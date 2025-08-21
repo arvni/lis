@@ -88,6 +88,7 @@ use App\Http\Controllers\Reception\SampleController;
 use App\Http\Controllers\Reception\ShowAcceptanceItemController;
 use App\Http\Controllers\Reception\UnPublishReportController;
 use App\Http\Controllers\Reception\UpdatePatientMetaController;
+use App\Http\Controllers\Reception\WaitingForPublishController;
 use App\Http\Controllers\Referrer\Api\CheckMaterialBarcodeIsAvailableController;
 use App\Http\Controllers\Referrer\CopyReferrerTestsFromOtherReferrerController;
 use App\Http\Controllers\Referrer\ExportReferrerTestsController;
@@ -153,6 +154,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("reports/waiting-list", ListAcceptanceItemReadyReportController::class)->name("reports.waitingList");
         Route::get("reports/approving-ist", ListApprovingReportController::class)->name("reports.approvingList");
         Route::get("acceptanceItems/{acceptanceItem}/create-report", CreateReportController::class)->name("acceptanceItems.createReport");
+        Route::get("reports/publishing", WaitingForPublishController::class)->name("reports.publishing");
         Route::resource("reports", ReportController::class)->except("create");
         Route::get("reports/{report}/download", DownloadReportController::class)->name("reports.download");
         Route::put("reports/{report}/approve", ApproveReportController::class)->name("reports.approve");

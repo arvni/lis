@@ -111,6 +111,8 @@ const TestsSection = ({
                                 onEditTest={handlers.handleEditTest}
                                 onDeleteTest={handlers.handleDeleteTest}
                                 onEditPanel={handlers.handleEditPanel}
+                                onRestoreTest={handlers.restoreDeleteTest}
+                                onRestorePanel={handlers.handleRestorePanel}
                                 onDeletePanel={handlers.handleDeletePanel}
                             />
                         </Paper>

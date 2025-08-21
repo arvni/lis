@@ -53,10 +53,32 @@ class ReportRepository
         return $query->paginate($queryData["pageSize"] ?? 10);
     }
 
+    public function listWaitingForPublish($queryData)
+    {
+        $query = Report::query()
+            ->whereNotNull("reports.approved_at")
+            ->whereNull("reports.published_at")
+            ->isActive()
+            ->with([
+                "acceptanceItem.method",
+                "acceptanceItem.test",
+                "acceptanceItem.patients:id,fullName",
+                "acceptanceItem.acceptance.referrer"
+            ])
+            ->withAggregate("reporter", "name")
+            ->withAggregate("approver", "name");
+        if (isset($queryData["filters"]))
+            $this->applyFilters($query, $queryData["filters"]);
+
+        if (isset($queryData["sort"]))
+            $query->orderBy($queryData['sort']['field'] ?? 'id', $queryData['sort']['sort'] ?? 'asc');
+        return $query->paginate($queryData["pageSize"] ?? 10);
+    }
+
     public function create($data)
     {
-        $report= Report::create($data);
-        UserActivityService::createUserActivity($report,ActivityType::CREATE);
+        $report = Report::create($data);
+        UserActivityService::createUserActivity($report, ActivityType::CREATE);
         return $report;
     }
 
@@ -73,7 +95,7 @@ class ReportRepository
         $report->fill($data);
         if ($report->isDirty()) {
             $report->save();
-            UserActivityService::createUserActivity($report,ActivityType::UPDATE);
+            UserActivityService::createUserActivity($report, ActivityType::UPDATE);
         }
 
         return $report;
@@ -158,7 +180,9 @@ class ReportRepository
                     "test.testGroups"
                 ]);
             },
-            "signers"
+            "signers",
+            "reportTemplate.template",
+            "reportTemplate.parameters"
         ]);
 
         return $report;

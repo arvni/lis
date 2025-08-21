@@ -26,7 +26,8 @@ class ApproveReportController extends Controller
         $this->reportService->approveReport(
             $report,
             $user,
-            $request->get('clinical_comment_document')
+            $request->get('published_report_document'),
+            $request->get('clinical_comment_document'),
         );
 
         return back()->with(["success"=>true, "status" => "Report approved successfully"]);

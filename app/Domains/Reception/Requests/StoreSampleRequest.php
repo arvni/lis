@@ -32,6 +32,7 @@ class StoreSampleRequest extends FormRequest
             "barcodes.*.items"=>["required", "array"],
             "barcodes.*.items.*.id" => ["required", "exists:acceptance_items,id"],
             "barcodes.*.collection_date" => ["required"],
+            "barcodes.*.received_at" => ["required"],
             "barcodes.*.sampleLocation" => ["required"],
             "barcodes.*.barcodeGroup" => ["required","array"],
 

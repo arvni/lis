@@ -11,11 +11,12 @@ use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Referrer\Models\Referrer;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 class AcceptanceItem extends Model
 {
-    use HasRelationships;
+    use HasRelationships, SoftDeletes;
 
     protected $fillable = [
         'acceptance_id',
@@ -25,15 +26,22 @@ class AcceptanceItem extends Model
         'timeline',
         'customParameters',
         'panel_id',
-        'no_sample'
+        'no_sample',
+        'deleted_at'
     ];
     protected $casts = [
         "customParameters" => "json",
         "timeline" => "json"
     ];
     protected $appends = [
-        "status"
+        "status",
+        "deleted"
     ];
+
+    public function getDeletedAttribute()
+    {
+        return (bool)$this->deleted_at;
+    }
 
     public function getStatusAttribute()
     {
@@ -184,9 +192,9 @@ class AcceptanceItem extends Model
     where `acceptance_items`.`id` = `acceptance_item_samples`.`acceptance_item_id`
     and `acceptance_item_samples`.`active` = 1
 ) >= `acceptance_items`.`no_sample`")
-        ->whereHas("acceptance", function ($q) {
-            $q->whereIn("status", [AcceptanceStatus::PROCESSING]);
-        })
+            ->whereHas("acceptance", function ($q) {
+                $q->whereIn("status", [AcceptanceStatus::PROCESSING]);
+            })
             ->whereDoesntHave("reports", function ($q) {
                 $q->where("status", true);
             });

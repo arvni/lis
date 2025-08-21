@@ -73,6 +73,11 @@ class ReportService
         return $this->reportRepository->listWaitingForApproving($queryData);
     }
 
+    public function listWaitingForPublishReports($queryData): LengthAwarePaginator
+    {
+        return $this->reportRepository->listWaitingForPublish($queryData);
+    }
+
     /**
      * @throws Exception
      * @throws ConnectionException
@@ -148,7 +153,7 @@ class ReportService
                 'reporter_id' => $user->id,
                 'acceptance_item_id' => $acceptanceItemId,
                 'report_template_id' => $reportTemplateId,
-                'approver' => null,
+                'approver_id' => null,
                 'approved_at' => null,
             ]);
         // Create signer
@@ -314,15 +319,18 @@ class ReportService
     public function approveReport(
         Report $report,
         User   $approver,
+        array $publishedReportDocument,
         ?array $clinicalCommentDocument = null
     ): Report
     {
         // Update report with approval information
         $report = $this->markReportAsApproved($report, $approver);
 
+        $this->processDocument($publishedReportDocument['id'] ?? $publishedReportDocument['hash'], $report, DocumentTag::PUBLISHED);
+
         // Process clinical comment document if provided
-        if ($clinicalCommentDocument && isset($clinicalCommentDocument['id'])) {
-            $this->processDocument($clinicalCommentDocument['id'], $report, DocumentTag::CLINICAL_COMMENT);
+        if ($clinicalCommentDocument && (isset($clinicalCommentDocument['id']) || isset($clinicalCommentDocument['hash']))) {
+            $this->processDocument($clinicalCommentDocument['id'] ?? $clinicalCommentDocument['hash'], $report, DocumentTag::CLINICAL_COMMENT);
         }
 
         // Create approver signer record
@@ -330,8 +338,7 @@ class ReportService
 
         // Update acceptance item timeline
         $report->loadMissing("acceptanceItem");
-        $this->acceptanceItemService->updateAcceptanceItemTimeline($report->acceptanceItem, "Report Approver By $approver->name");
-
+        $this->acceptanceItemService->updateAcceptanceItemTimeline($report->acceptanceItem, "Report Approved By $approver->name");
         return $report;
     }
 
@@ -365,16 +372,13 @@ class ReportService
      *
      * @param Report $report
      * @param User $publisher
-     * @param string $publishedDocumentId
+     * @param bool $silentlyPublish
      * @return Report
      */
-    public function publishReport(Report $report, User $publisher, string $publishedDocumentId, $silentlyPublish = false): Report
+    public function publishReport(Report $report, User $publisher, bool $silentlyPublish = false): Report
     {
         // Mark report as published
         $report = $this->markReportAsPublished($report, $publisher);
-
-        // Attach published document if provided
-        $this->processDocument($publishedDocumentId, $report, DocumentTag::PUBLISHED);
 
         // Update acceptance item timeline and check if all tests are published
         $this->processPublishedReport($report, $silentlyPublish);
@@ -464,9 +468,11 @@ class ReportService
      */
     private function createApproverSignerRecord(Report $report, User $approver): void
     {
-        // Create signer
-        $signer = $this->signerFactory->createFromUser($approver, $report);
-        $this->signerRepository->save($signer);
+        if (!$report->signers()->where("user_id", $approver->id)->exists()) {
+            // Create signer
+            $signer = $this->signerFactory->createFromUser($approver, $report);
+            $this->signerRepository->save($signer);
+        }
 
     }
 

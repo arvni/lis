@@ -38,7 +38,6 @@ class SampleService
             if (!$sampleDTO->barcode) {
                 $sampleDTO->barcode = $this->generateBarcode($sampleDTO->barcodeGroup, $index);
             }
-
             $sample = $this->sampleRepository->creatSample(Arr::except($sampleDTO->toArray(), "id"));
         } else
             $this->sampleRepository->syncAcceptanceItems($sample, Arr::pluck($sampleDTO->acceptanceItems, "id"));

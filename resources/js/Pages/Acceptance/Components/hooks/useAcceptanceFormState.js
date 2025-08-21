@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { makeId } from "@/Services/helper";
+import {useState, useCallback} from "react";
+import {makeId} from "@/Services/helper";
 
 const useAcceptanceFormState = (initialData, maxDiscount) => {
     const [data, setData] = useState(initialData);
@@ -8,7 +8,8 @@ const useAcceptanceFormState = (initialData, maxDiscount) => {
     const [testModalState, setTestModalState] = useState({
         open: false,
         item: {
-            method_test: { test: { type: '' } }, // Initialize with proper structure
+            id: makeId(6),
+            method_test: {test: {type: ''}}, // Initialize with proper structure
             details: "",
             discount: 0,
             price: 0,
@@ -21,6 +22,7 @@ const useAcceptanceFormState = (initialData, maxDiscount) => {
     const [panelModalState, setPanelModalState] = useState({
         open: false,
         panel: {
+            id: makeId(6),
             acceptanceItems: [],
             panel: "",
             price: 0,
@@ -91,7 +93,7 @@ const useAcceptanceFormState = (initialData, maxDiscount) => {
         setTestModalState({
             open: false,
             item: {
-                method_test: { test: { type: '' } },
+                method_test: {test: {type: ''}},
                 details: "",
                 discount: 0,
                 price: 0,
@@ -136,11 +138,35 @@ const useAcceptanceFormState = (initialData, maxDiscount) => {
         }
     }, [data?.acceptanceItems?.tests]);
 
+    const restoreDeleteTest = useCallback(id => {
+        console.log("here",id)
+        const updatedTests = data.acceptanceItems.tests.map(
+            item => {
+                if (item.id === id && item.deleted)
+                    item["deleted"] = false;
+                return item;
+            }
+        );
+
+        setData(prevData => ({
+            ...prevData,
+            acceptanceItems: {
+                ...prevData.acceptanceItems,
+                tests: updatedTests
+            }
+        }));
+
+    }, [data?.acceptanceItems?.tests]);
+
     const confirmDeleteTest = useCallback(() => {
         if (!deleteConfirmState.item || !data?.acceptanceItems?.tests) return;
 
-        const updatedTests = data.acceptanceItems.tests.filter(
-            item => item.id !== deleteConfirmState.item.id
+        const updatedTests = data.acceptanceItems.tests.map(
+            item => {
+                if (item.id === deleteConfirmState.item.id)
+                    item["deleted"] = true;
+                return item;
+            }
         );
 
         setData(prevData => ({
@@ -180,7 +206,7 @@ const useAcceptanceFormState = (initialData, maxDiscount) => {
     }, []);
 
     const submitTest = useCallback(() => {
-        const { item } = testModalState;
+        const {item} = testModalState;
 
         // Safely get the current tests array
         const currentTests = data?.acceptanceItems?.tests || [];
@@ -241,7 +267,30 @@ const useAcceptanceFormState = (initialData, maxDiscount) => {
     const handleDeletePanel = useCallback(id => {
         // Safely get the current panels array
         const currentPanels = data?.acceptanceItems?.panels || [];
-        const updatedPanels = currentPanels.filter(panel => panel.id !== id);
+        const updatedPanels = currentPanels.map(panel => {
+            if (panel.id === id) {
+                panel["deleted"] = true;
+            }
+            return panel;
+        });
+
+        setData(prevData => ({
+            ...prevData,
+            acceptanceItems: {
+                ...(prevData?.acceptanceItems || {}),
+                panels: updatedPanels
+            }
+        }));
+    }, [data?.acceptanceItems?.panels]);
+    const handleRestorePanel = useCallback(id => {
+        // Safely get the current panels array
+        const currentPanels = data?.acceptanceItems?.panels || [];
+        const updatedPanels = currentPanels.map(panel => {
+            if (panel.id === id && panel.deleted) {
+                panel["deleted"] = false;
+            }
+            return panel;
+        });
 
         setData(prevData => ({
             ...prevData,
@@ -263,7 +312,7 @@ const useAcceptanceFormState = (initialData, maxDiscount) => {
     }, []);
 
     const submitPanel = useCallback(() => {
-        const { panel } = panelModalState;
+        const {panel} = panelModalState;
 
         // Safely get the current panels array
         const currentPanels = data?.acceptanceItems?.panels || [];
@@ -313,6 +362,8 @@ const useAcceptanceFormState = (initialData, maxDiscount) => {
             handleDeletePanel,
             handlePanelChange,
             submitPanel,
+            restoreDeleteTest,
+            handleRestorePanel
         }
     };
 };

@@ -22,6 +22,7 @@ class ListTestsController extends Controller
     {
         $queryData = $request->all();
         $queryData["filters"]["status"] = true;
+        $queryData["pageSize"] = 100;
         $tests = $this->testService->listTests($queryData);
         return ListResource::collection($tests);
     }

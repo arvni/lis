@@ -85,6 +85,7 @@ class UpdateAcceptanceRequest extends FormRequest
                 $rules['acceptanceItems.tests.*.customParameters.sampleType'] = 'nullable|exists:sample_types,id';
                 $rules['acceptanceItems.tests.*.customParameters.price'] = 'nullable|array';
                 $rules['acceptanceItems.tests.*.price'] = 'required|numeric|min:0';
+                $rules['acceptanceItems.tests.*.deleted'] = 'nullable|boolean';
                 $rules['acceptanceItems.tests.*.discount'] = [
                     'nullable',
                     'numeric',
@@ -148,6 +149,7 @@ class UpdateAcceptanceRequest extends FormRequest
                 $rules['acceptanceItems.panels.*.id'] = 'nullable|string';
                 $rules['acceptanceItems.panels.*.panel.id'] = 'required|exists:tests,id';
                 $rules['acceptanceItems.panels.*.price'] = 'nullable|numeric|min:0';
+                $rules['acceptanceItems.panels.*.deleted'] = 'nullable|boolean';
                 $rules['acceptanceItems.panels.*.discount'] = [
                     'nullable',
                     'numeric',
@@ -185,7 +187,7 @@ class UpdateAcceptanceRequest extends FormRequest
             case 4: // Sampling & Delivery
                 // Sampling Information
                 $rules['samplerGender'] = [
-                    $this->checkIstthereAnyTestOnRequest()?'nullable':'required',
+                    $this->checkIstthereAnyTestOnRequest() ? 'nullable' : 'required',
                     'in:0,1'];
                 $rules['out_patient'] = 'boolean';
 
@@ -194,7 +196,7 @@ class UpdateAcceptanceRequest extends FormRequest
 
                 // Ensure at least one delivery method is selected when not referred
                 $rules['howReport'] = [
-                    $this->checkIstthereAnyTestOnRequest()?'nullable': 'required_if:referred,false',
+                    $this->checkIstthereAnyTestOnRequest() ? 'nullable' : 'required_if:referred,false',
                     function ($attribute, $value, $fail) {
                         if ($this->input('referred') === false &&
                             (!isset($value['print']) && !isset($value['email']) && !isset($value['whatsapp']))) {

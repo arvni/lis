@@ -349,6 +349,7 @@ const AcceptanceForm = ({
                                 data={data}
                                 errors={errors}
                                 onChange={handlers.handleFormChange}
+                                referrer={data.referrer}
                             />
                         </FormAccordion>
                     </Suspense>
@@ -468,21 +469,22 @@ const AcceptanceForm = ({
                                     justifyContent: "space-between"
                                 }}>
                                     <Box>
-                                    <Typography variant="body1">
-                                        <strong>Out Patient:</strong> {data.out_patient ? "Yes" : "No"}
-                                    </Typography>
-                                    <Typography variant="body1">
-                                        <strong>Sampler Gender:</strong> {data.samplerGender === 0 ? "Female" : "Male"}
-                                    </Typography>
-                                    {!data.referred && (
-                                        <>
-                                            {data?.howReport && <Typography variant="body1">
-                                                <strong>Report
-                                                    Method:</strong> {Object.keys(data?.howReport).filter(method => data.howReport[method] && ["print", "email", "whatsapp", "sendToReferrer"].includes(method)).map(method => method.toUpperCase()).join(", ")}
-                                            </Typography>}
-                                        </>
-                                    )}
-                                </Box>
+                                        <Typography variant="body1">
+                                            <strong>Out Patient:</strong> {data.out_patient ? "Yes" : "No"}
+                                        </Typography>
+                                        <Typography variant="body1">
+                                            <strong>Sampler
+                                                Gender:</strong> {data.samplerGender === 0 ? "Female" : "Male"}
+                                        </Typography>
+                                        {!data.referred && (
+                                            <>
+                                                {data?.howReport && <Typography variant="body1">
+                                                    <strong>Report
+                                                        Method:</strong> {Object.keys(data?.howReport).filter(method => data.howReport[method] && ["print", "email", "whatsapp", "sendToReferrer"].includes(method)).map(method => method.toUpperCase()).join(", ")}
+                                                </Typography>}
+                                            </>
+                                        )}
+                                    </Box>
                                     <IconButton onClick={handleChangeStep(4)}><EditIcon/></IconButton>
                                 </Box>
                             </Box>
@@ -500,19 +502,19 @@ const AcceptanceForm = ({
                                     justifyContent: "space-between"
                                 }}>
                                     <Box>
-                                    <Typography variant="body1">
-                                        <strong>Tests:</strong> {(data.acceptanceItems?.tests || []).length}
-                                    </Typography>
-                                    <Typography variant="body1">
-                                        <strong>Panels:</strong> {(data.acceptanceItems?.panels || []).length}
-                                    </Typography>
-                                    <Typography variant="body1" color="error">
-                                        <strong>Total Price:</strong> {
-                                        (data.acceptanceItems?.tests || []).reduce((sum, item) => sum + (Number(item.price) || 0), 0) +
-                                        (data.acceptanceItems?.panels || []).reduce((sum, item) => sum + (Number(item.price) || 0), 0)
-                                    }
-                                    </Typography>
-                                </Box>
+                                        <Typography variant="body1">
+                                            <strong>Tests:</strong> {(data.acceptanceItems?.tests || []).length}
+                                        </Typography>
+                                        <Typography variant="body1">
+                                            <strong>Panels:</strong> {(data.acceptanceItems?.panels || []).length}
+                                        </Typography>
+                                        <Typography variant="body1" color="error">
+                                            <strong>Total Price:</strong> {
+                                            (data.acceptanceItems?.tests || []).reduce((sum, item) => sum + (Number(item.price) || 0), 0) +
+                                            (data.acceptanceItems?.panels || []).reduce((sum, item) => sum + (Number(item.price) || 0), 0)
+                                        }
+                                        </Typography>
+                                    </Box>
                                     <IconButton onClick={handleChangeStep(3)}><EditIcon/></IconButton>
                                 </Box>
                             </Box>

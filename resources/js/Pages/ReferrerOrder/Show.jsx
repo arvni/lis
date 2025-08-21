@@ -290,6 +290,14 @@ const Show = ({referrerOrder, errors = {}}) => {
                                                 <Typography variant="body2" color="text.secondary"
                                                             sx={{display: 'flex', alignItems: 'center'}}>
                                                     <Fingerprint fontSize="small" sx={{mr: 1}}/>
+                                                    ID No.: {referrerOrder.orderInformation.patient?.id_no || "Not specified"}
+                                                </Typography>
+                                            </Grid>
+
+                                            <Grid size={{xs: 12}}>
+                                                <Typography variant="body2" color="text.secondary"
+                                                            sx={{display: 'flex', alignItems: 'center'}}>
+                                                    <Fingerprint fontSize="small" sx={{mr: 1}}/>
                                                     Reference
                                                     ID: {referrerOrder.orderInformation.patient?.reference_id || "Not specified"}
                                                 </Typography>
@@ -600,7 +608,7 @@ const Show = ({referrerOrder, errors = {}}) => {
             />
 
             <PatientAddForm
-                defaultValues={patient}
+                defaultValues={{...patient, idNo: patient.id_no}}
                 id={referrerOrder.id}
                 open={openAddPatient}
                 onClose={handleCloseAddPatient}
