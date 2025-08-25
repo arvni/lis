@@ -805,7 +805,7 @@ const PanelTestForm = ({
                                         <Table>
                                             <TableHead sx={{backgroundColor: 'primary.50'}}>
                                                 <TableRow>
-                                                    <TableCell>Test Name >> Method Name</TableCell>
+                                                    <TableCell>{"Test Name >> Method Name"}</TableCell>
                                                     <TableCell align="center">
                                                         <Box display="flex" alignItems="center" justifyContent="center">
                                                             <AccessTimeIcon fontSize="small" sx={{mr: 0.5}}/>
