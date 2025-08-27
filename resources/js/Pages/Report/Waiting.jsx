@@ -97,7 +97,7 @@ const Waiting = () => {
             display: "flex",
             renderCell: ({row}) => (
                 <Box>
-                    <Tooltip title={row.patient.fullName || "Unknown"} placement="top">
+                    <Tooltip title={row?.patient?.fullName || "Unknown"} placement="top">
                         <Typography
                             variant="body2"
                             sx={{
@@ -107,7 +107,7 @@ const Waiting = () => {
                                 whiteSpace: 'nowrap'
                             }}
                         >
-                            {row.patient.fullName || "Unknown"}
+                            {row?.patient?.fullName || "Unknown"}
                         </Typography>
                     </Tooltip>
                 </Box>
