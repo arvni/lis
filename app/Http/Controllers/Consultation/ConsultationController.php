@@ -54,19 +54,20 @@ class ConsultationController extends Controller
     {
         $validated = $request->validated();
         $consultation = $this->consultationService->createConsultation(ConsultationDTO::fromRequest($validated));
-
-        $dueDate = Carbon::parse($consultation->dueDate, "Asia/Muscat");
-        $this->timeService->storeTime(
-            new TimeDTO(
-                $dueDate->format("H:i"),
-                $consultation->consultant_id,
-                $dueDate,
-                $dueDate->copy()->addMinutes(30),
-                true,
-                "consultation",
-                $consultation->id
-            )
-        );
+        if ($request->has("time")) {
+            $dueDate = Carbon::parse($consultation->dueDate, "Asia/Muscat");
+            $this->timeService->storeTime(
+                new TimeDTO(
+                    $dueDate->format("H:i"),
+                    $consultation->consultant_id,
+                    $dueDate,
+                    $dueDate->copy()->addMinutes(30),
+                    true,
+                    "consultation",
+                    $consultation->id
+                )
+            );
+        }
 
         return back()->with(["success" => true, "status" => "Consultation created successfully.", "consultation" => $consultation]);
     }

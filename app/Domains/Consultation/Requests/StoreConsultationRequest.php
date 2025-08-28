@@ -37,7 +37,7 @@ class StoreConsultationRequest extends FormRequest
                 }
             ],
             "time" => [
-                "required",
+                "nullable",
                 "date_format:H:i",
                 new TimeSlotAvailable($this->input('consultant.id'), $this->input('dueDate')),
             ],

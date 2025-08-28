@@ -8,29 +8,25 @@ import {
     Container,
     Grid2 as Grid,
     FormGroup,
-    FormHelperText,
-    Radio,
-    RadioGroup,
-    FormControlLabel,
     CircularProgress,
     Typography,
     TextField,
     Paper,
     Box,
     Alert,
-    Snackbar
+    Snackbar,
+    Chip
 } from "@mui/material";
 
 // Icons
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import PersonIcon from "@mui/icons-material/Person";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 // Components
 import SelectSearch from "@/Components/SelectSearch";
 
-const ConsultationForm = ({ patientId,consultation, embedded = false,onNext }) => {
+const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
     const [times, setTimes] = useState([]);
     const [waiting, setWaiting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -49,7 +45,7 @@ const ConsultationForm = ({ patientId,consultation, embedded = false,onNext }) =
     const { data, setData, reset, processing, post, errors, setError } = useForm({
         consultant: "",
         dueDate: formattedDate,
-        time: null,
+        time: null, // Keep this but don't require it
         patient_id: patientId
     });
 
@@ -108,10 +104,11 @@ const ConsultationForm = ({ patientId,consultation, embedded = false,onNext }) =
             isValid = false;
         }
 
-        if (!data.time) {
-            setError("time", "Please select a time slot");
-            isValid = false;
-        }
+        // Remove time validation - no longer required
+        // if (!data.time) {
+        //     setError("time", "Please select a time slot");
+        //     isValid = false;
+        // }
 
         return isValid;
     };
@@ -152,7 +149,7 @@ const ConsultationForm = ({ patientId,consultation, embedded = false,onNext }) =
                 </Grid>
 
                 {/* Date Selection */}
-                <Grid  size={{ xs: 12, md: 6 }}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
                         <Box display="flex" alignItems="center" mb={1}>
                             <CalendarTodayIcon color="primary" sx={{ mr: 1 }} />
@@ -168,7 +165,7 @@ const ConsultationForm = ({ patientId,consultation, embedded = false,onNext }) =
                                 value={data.dueDate}
                                 onChange={handleChange}
                                 fullWidth
-                                slotProps={{ InputLabel:{shrink: true}, input:{ min: formattedDate }}}
+                                slotProps={{ InputLabel: { shrink: true }, input: { min: formattedDate } }}
                                 error={errors.hasOwnProperty("dueDate")}
                                 helperText={errors?.dueDate}
                             />
@@ -176,9 +173,9 @@ const ConsultationForm = ({ patientId,consultation, embedded = false,onNext }) =
                     </Paper>
                 </Grid>
 
-                {/* Time Selection */}
+                {/* Available Times Display (Read-only) */}
                 {(times.length > 0 || waiting) && (
-                    <Grid  size={{ xs: 12}} md={embedded ? 12 : 6}>
+                    <Grid size={{ xs: 12 }}>
                         <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
                             <Box display="flex" alignItems="center" mb={2}>
                                 <AccessTimeIcon color="primary" sx={{ mr: 1 }} />
@@ -195,46 +192,25 @@ const ConsultationForm = ({ patientId,consultation, embedded = false,onNext }) =
                                     </Typography>
                                 </Box>
                             ) : times.length > 0 ? (
-                                <>
-                                    <RadioGroup
-                                        name="time"
-                                        value={data.time}
-                                        onChange={handleChange}
-                                        sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}
-                                    >
-                                        {times.map((item, index) => (
-                                            <FormControlLabel
-                                                key={index}
-                                                value={item.value}
-                                                label={item.label}
-                                                control={
-                                                    <Radio
-                                                        color="primary"
-                                                        checkedIcon={<CheckCircleIcon />}
-                                                    />
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                    {times.map((item, index) => (
+                                        <Chip
+                                            key={index}
+                                            label={item.label}
+                                            variant="outlined"
+                                            color="primary"
+                                            sx={{
+                                                borderRadius: '8px',
+                                                px: 1,
+                                                py: 0.5,
+                                                bgcolor: 'action.selected',
+                                                '&:hover': {
+                                                    bgcolor: 'action.hover'
                                                 }
-                                                sx={{
-                                                    border: "1px solid",
-                                                    borderColor: data.time === item.value ? "primary.main" : "divider",
-                                                    borderRadius: "8px",
-                                                    m: 0.5,
-                                                    p: 0.5,
-                                                    pr: 1.5,
-                                                    transition: "all 0.2s",
-                                                    bgcolor: data.time === item.value ? "action.selected" : "background.paper",
-                                                    "&:hover": {
-                                                        bgcolor: "action.hover",
-                                                        borderColor: "primary.light"
-                                                    }
-                                                }}
-                                            />
-                                        ))}
-                                    </RadioGroup>
-
-                                    {errors.time && (
-                                        <FormHelperText error>{errors.time}</FormHelperText>
-                                    )}
-                                </>
+                                            }}
+                                        />
+                                    ))}
+                                </Box>
                             ) : (
                                 <Typography variant="body2" color="text.secondary" textAlign="center" py={2}>
                                     No available time slots. Please try another date or consultant.
