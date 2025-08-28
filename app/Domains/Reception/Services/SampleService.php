@@ -4,6 +4,7 @@ namespace App\Domains\Reception\Services;
 
 
 use App\Domains\Reception\DTOs\SampleDTO;
+use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Sample;
 use App\Domains\Reception\Repositories\SampleRepository;
 use Carbon\Carbon;
@@ -36,7 +37,7 @@ class SampleService
             }
 
             if (!$sampleDTO->barcode) {
-                $sampleDTO->barcode = $this->generateBarcode($sampleDTO->barcodeGroup, $index);
+                $sampleDTO->barcode = $this->generateBarcode($sampleDTO, $index);
             }
             $sample = $this->sampleRepository->creatSample(Arr::except($sampleDTO->toArray(), "id"));
         } else
@@ -66,9 +67,20 @@ class SampleService
     }
 
 
-    public function generateBarcode(array $barcodeGroup, int $index): string
+    public function generateBarcode(SampleDTO $sampleDto, int $index): string
     {
-        return $barcodeGroup["abbr"] . (Carbon::now()->getTimestamp() + $index);
+        $suffix = (Carbon::now()->getTimestamp() + $index);
+
+        $acceptance = Acceptance::whereHas("acceptanceItems", function ($query) use ($sampleDto) {
+            $query->whereIn("acceptance_items.id", Arr::pluck($sampleDto->acceptanceItems, "id"));
+        })->first();
+        $sample = Sample::whereHas("acceptanceItems", function ($query) use ($acceptance) {
+            $query->where("acceptance_id", $acceptance->id);
+        })
+            ->first();
+        if ($sample)
+            $suffix = filter_var($sample->barcode, FILTER_SANITIZE_NUMBER_INT);
+        return $sampleDto->barcodeGroup["abbr"] . $suffix;
     }
 
 }

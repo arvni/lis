@@ -124,12 +124,17 @@ const AddForm = ({ open, onClose, defaultValue }) => {
     }, [data, setData]);
 
     const handleQuickFill = useCallback(() => {
-        const newBarcodes = (data?.barcodes || []).map(barcode => ({
-            ...barcode,
-            collection_date: barcode.collection_date || now,
-            received_at: barcode.received_at || now,
-            sampleLocation: barcode.sampleLocation || "In Lab"
-        }));
+        const newBarcodes = (data?.barcodes || []).map(barcode => {
+            // Use existing collection_date or set to now
+            const collectionDate = barcode.collection_date || now;
+
+            return {
+                ...barcode,
+                collection_date: collectionDate,
+                received_at: barcode.received_at || collectionDate, // Set received_at to same as collection_date
+                sampleLocation: barcode.sampleLocation || "In Lab"
+            };
+        });
         setData({ barcodes: newBarcodes });
     }, [data, setData, now]);
 

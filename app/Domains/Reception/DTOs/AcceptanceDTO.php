@@ -15,12 +15,13 @@ class AcceptanceDTO
         public ?int              $referrerId,
         public ?int              $acceptorId,
         public ?string           $referenceCode,
-        public ?string           $samplerGender,
+        public ?string           $samplerGender = null,
         public array|string|null $howReport = null,
         public array|string|null $doctor = null,
         public ?array            $acceptanceItems,
         public ?AcceptanceStatus $status,
         public bool              $outPatient = false,
+        public ?int              $samplerId = null,
 
     )
     {
@@ -35,10 +36,12 @@ class AcceptanceDTO
         $step = $data['step'] ?? null;
 
         // Extract consultation ID
-        $consultationId =$data["consultation"]["id"]?? $data['consultation_id'] ??null;
+        $consultationId = $data["consultation"]["id"] ?? $data['consultation_id'] ?? null;
 
         // Doctor ID will be handled in processing methods
-        $doctorId =$data["doctor"]["id"]?? $data["doctor_id"]?? null;
+        $doctorId = $data["doctor"]["id"] ?? $data["doctor_id"] ?? null;
+        // Doctor ID will be handled in processing methods
+        $samplerId = $data["sampler"]["id"] ?? $data["sampler_id"] ?? null;
 
         // These may not be in the request data but required by DTO
         $invoiceId = $data["invoice_id"] ?? null;
@@ -81,7 +84,8 @@ class AcceptanceDTO
             $doctor,
             $acceptanceItems,
             $status,
-            $outPatient
+            $outPatient,
+            $samplerId
         );
 
     }
@@ -102,6 +106,7 @@ class AcceptanceDTO
             'doctor' => $this->doctor,
             'status' => $this->status,
             'out_patient' => $this->outPatient,
+            'sampler_id' => $this->samplerId,
         ];
     }
 }

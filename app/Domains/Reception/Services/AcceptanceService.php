@@ -115,7 +115,8 @@ class AcceptanceService
             "consultation.consultant",
             "doctor",
             "referrer",
-            "acceptor"
+            "acceptor",
+            "sampler:name,id"
         ]);
         return $acceptance;
     }
@@ -279,6 +280,7 @@ class AcceptanceService
             'step' => min($acceptanceDTO->step + 1, 5),
             'samplerGender' => $acceptanceDTO->samplerGender,
             'out_patient' => $acceptanceDTO->outPatient,
+            'sampler_id'=>$acceptanceDTO->samplerId,
         ];
 
         // Process reporting method if it exists

@@ -472,10 +472,9 @@ const AcceptanceForm = ({
                                         <Typography variant="body1">
                                             <strong>Out Patient:</strong> {data.out_patient ? "Yes" : "No"}
                                         </Typography>
-                                        <Typography variant="body1">
-                                            <strong>Sampler
-                                                Gender:</strong> {data.samplerGender === 0 ? "Female" : "Male"}
-                                        </Typography>
+                                        {data.sampler && <Typography variant="body1">
+                                            <strong>Sampler</strong> {data.sampler.name}
+                                        </Typography>}
                                         {!data.referred && (
                                             <>
                                                 {data?.howReport && <Typography variant="body1">

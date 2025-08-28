@@ -31,13 +31,14 @@ class Acceptance extends Model
         "out_patient",
         "invoice_id",
         "referrer_id",
+        "sampler_id",
         "acceptor_id",
         "doctor_id",
         "referenceCode",
         "samplerGender",
         "howReport",
         "status",
-        "step"
+        "step",
     ];
 
     protected $casts = [
@@ -103,6 +104,12 @@ class Acceptance extends Model
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
+    }
+
+
+    public function sampler(): BelongsTo
+    {
+        return $this->belongsTo(User::class,"sampler_id");
     }
 
     public function consultation(): BelongsTo

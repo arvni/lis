@@ -62,7 +62,7 @@ class Sample extends Model
             'id',                 // local key on acceptances
             'sample_id'           // local key on acceptance_item_sample pivot
         )
-            ->where("acceptance_item_sample.active", true)
+            ->where("acceptance_item_samples.active", true)
             ->distinct();
     }
 

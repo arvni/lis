@@ -355,22 +355,17 @@ const Show = ({
                             />
                         </Grid>
 
-                        <Grid size={{xs: 12, sm: 6, md: 4, lg: 3}}>
+                        {acceptance?.sampler && <Grid size={{xs: 12, sm: 6, md: 4, lg: 3}}>
                             <InfoItem
-                                label="Sampler Gender"
+                                label="Sampler"
                                 valueComponent={
-                                    acceptance.samplerGender === 0 ?
-                                        <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                            <Woman2 color="secondary"/>
-                                            <Typography variant="body2" sx={{ml: 0.5}}>Female</Typography>
-                                        </Box> :
-                                        <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                            <Man2 color="primary"/>
-                                            <Typography variant="body2" sx={{ml: 0.5}}>Male</Typography>
-                                        </Box>
+                                    <Box sx={{display: 'flex', alignItems: 'center'}}>
+                                        <Typography variant="body2"
+                                                    sx={{ml: 0.5}}>{acceptance?.sampler?.name}</Typography>
+                                    </Box>
                                 }
                             />
-                        </Grid>
+                        </Grid>}
 
                         <Grid size={{xs: 12, sm: 6, md: 4, lg: 3}}>
                             <InfoItem

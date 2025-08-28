@@ -185,10 +185,12 @@ class UpdateAcceptanceRequest extends FormRequest
                 break;
 
             case 4: // Sampling & Delivery
-                // Sampling Information
-                $rules['samplerGender'] = [
+                $rules['sampler'] = [
                     $this->checkIstthereAnyTestOnRequest() ? 'nullable' : 'required',
-                    'in:0,1'];
+                    'array'];
+                $rules['sampler.id'] = [
+                    $this->checkIstthereAnyTestOnRequest() ? 'nullable' : 'required',
+                    'exists:users,id'];
                 $rules['out_patient'] = 'boolean';
 
                 // Report Information
@@ -246,12 +248,6 @@ class UpdateAcceptanceRequest extends FormRequest
             default:
                 $rules['patient_id'] = 'required';
                 $rules['acceptor_id'] = 'nullable';
-                // Sampling Information
-                $rules['samplerGender'] = [
-                    Rule::excludeIf(fn() => $this->checkIstthereAnyTestOnRequest()),
-                    'required',
-                    'in:0,1'
-                ];
                 $rules['out_patient'] = 'boolean';
 
                 // Report Information
@@ -414,7 +410,6 @@ class UpdateAcceptanceRequest extends FormRequest
     public function attributes()
     {
         return [
-            'samplerGender' => 'sampler gender',
             'howReport.way' => 'reporting method',
             'howReport.who' => 'report receiver',
             'doctor.name' => 'doctor name',
