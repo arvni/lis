@@ -77,6 +77,7 @@ class SampleService
         $sample = Sample::whereHas("acceptanceItems", function ($query) use ($acceptance) {
             $query->where("acceptance_id", $acceptance->id);
         })
+            ->where("patient_id", $sampleDto->patientId)
             ->first();
         if ($sample)
             $suffix = filter_var($sample->barcode, FILTER_SANITIZE_NUMBER_INT);
