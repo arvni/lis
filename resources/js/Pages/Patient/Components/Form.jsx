@@ -48,11 +48,6 @@ export default function ({data, setData, back, edit, next, step, ...rest}) {
             tmp = {...tmp, nationality: "Please Select Nationality"};
         if (!data.dateOfBirth)
             tmp = {...tmp, dateOfBirth: "Please Select Date Of Birth"};
-        if (!data.phone)
-            tmp = {
-                ...tmp,
-                phone: "Please Enter a Valid Phone Number",
-            };
         if (!data.avatar)
             tmp = {...tmp, avatar: "Please Upload IDCard Or Passport"};
         if (!data.gender)

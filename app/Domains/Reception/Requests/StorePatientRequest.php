@@ -55,10 +55,9 @@ class StorePatientRequest extends FormRequest
                 Rule::requiredIf(!$id),
             ],
             "phone" => [
-                Rule::requiredIf(!$id),
+                'nullable',
                 "string",
                 "max:255",
-                "unique:patients,phone" . ($id ? ",$id" : ''),
             ],
             "tribe" => [
                 "nullable",

@@ -11,7 +11,7 @@ class PatientDTO
         public string       $dateOfBirth,
         public string       $gender,
         public string|array $avatar,
-        public string       $phone,
+        public ?string       $phone=null,
         public ?string      $tribe,
         public ?string      $wilayat,
         public ?string      $village,
@@ -29,7 +29,7 @@ class PatientDTO
             $validatedRequest['dateOfBirth'],
             $validatedRequest['gender'],
             $validatedRequest['avatar'],
-            $validatedRequest['phone'],
+            $validatedRequest['phone']??null,
             $validatedRequest['tribe'] ?? null,
             $validatedRequest['wilayat'] ?? null,
             $validatedRequest['village'] ?? null
@@ -45,7 +45,7 @@ class PatientDTO
             "dateOfBirth" => $this->dateOfBirth,
             "gender" => $this->gender,
             "avatar" => $this->avatar,
-            "phone" => $this->phone,
+            "phone" => $this->phone??null,
             "tribe" => $this->tribe,
             "wilayat" => $this->wilayat,
             "village" => $this->village
