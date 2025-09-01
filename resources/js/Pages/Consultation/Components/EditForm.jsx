@@ -68,6 +68,7 @@ const EditForm = ({openEdit, onClose, reservation}) => {
             minute: '2-digit'
         }) : null,
         customer: {
+            id: reservation?.reservable?.id || "",
             phone: reservation?.reservable?.phone || "",
             name: reservation?.reservable?.name || "",
             email: reservation?.reservable?.email || ""

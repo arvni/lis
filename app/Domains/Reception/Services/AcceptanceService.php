@@ -280,7 +280,7 @@ class AcceptanceService
             'step' => min($acceptanceDTO->step + 1, 5),
             'samplerGender' => $acceptanceDTO->samplerGender,
             'out_patient' => $acceptanceDTO->outPatient,
-            'sampler_id'=>$acceptanceDTO->samplerId,
+            'sampler_id' => $acceptanceDTO->samplerId,
         ];
 
         // Process reporting method if it exists
@@ -324,6 +324,10 @@ class AcceptanceService
     public function updateAcceptanceStatus(Acceptance $acceptance, AcceptanceStatus $status): void
     {
         $this->acceptanceRepository->updateAcceptance($acceptance, ["status" => $status]);
+        if ($acceptance->referrer_order_id && $status == AcceptanceStatus::PROCESSING) {
+            $acceptance->load("referrerOrder");
+            $this->referrerOrderService->updateReferrerOrderStatus($acceptance->referrerOrder, 'processing');
+        }
     }
 
     public function listBarcodes(Acceptance $acceptance)
@@ -520,7 +524,7 @@ class AcceptanceService
             "patient",
             "referrer",
             "acceptanceItems" => fn($q) => $q->whereHas("test", fn($testQuery) => $testQuery->whereNot("type", TestType::SERVICE))
-                ->with("report.publishedDocument","report.clinicalCommentDocument", "test")
+                ->with("report.publishedDocument", "report.clinicalCommentDocument", "test")
         ]);
         $patient = $acceptance->patient;
         $referrer = $acceptance->referrer;
@@ -555,7 +559,7 @@ class AcceptanceService
                                 'contentSid' => config('services.twilio.templates.send_report_file'),
                                 'to' => 'whatsapp:' . $to,
                                 'contentVariables' => [
-                                    "1" => $acceptanceItem->test->name."( Clinical Comment )", // {{1}} - Caption
+                                    "1" => $acceptanceItem->test->name . "( Clinical Comment )", // {{1}} - Caption
                                     "2" => $acceptanceItem->report->clinicalCommentDocument->hash, // {{2}} -  File
                                 ]
                             ];
