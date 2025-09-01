@@ -324,8 +324,8 @@ class AcceptanceService
     public function updateAcceptanceStatus(Acceptance $acceptance, AcceptanceStatus $status): void
     {
         $this->acceptanceRepository->updateAcceptance($acceptance, ["status" => $status]);
-        if ($acceptance->referrer_order_id && $status == AcceptanceStatus::PROCESSING) {
-            $acceptance->load("referrerOrder");
+        $acceptance->load("referrerOrder");
+        if ($acceptance->referrerOrder && $status == AcceptanceStatus::PROCESSING) {
             $this->referrerOrderService->updateReferrerOrderStatus($acceptance->referrerOrder, 'processing');
         }
     }
@@ -663,6 +663,27 @@ class AcceptanceService
         }
 
         return $number;
+    }
+
+    public function checkAcceptanceStatus(Acceptance $acceptance): void
+    {
+        if ($acceptance->status==AcceptanceStatus::REPORTED)
+            return;
+        $reportableTest=$this->acceptanceRepository->countReportableTests($acceptance);
+        if ($reportableTest) {
+            $publishedTest=$this->acceptanceRepository->countPublishedTests($acceptance);
+            if ($publishedTest==$reportableTest) {
+                $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+            } else{
+                $startedItems=$this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
+                if ($startedItems){
+                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::PROCESSING);
+                }
+            }
+        }else{
+            $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+        }
+
     }
 
 

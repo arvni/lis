@@ -3,6 +3,7 @@
 namespace App\Domains\Reception\Repositories;
 
 use App\Domains\Laboratory\Enums\TestType;
+use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
@@ -222,6 +223,19 @@ class AcceptanceRepository
         return $acceptance->acceptanceItems() // Assuming 'acceptanceItems' is the relationship method
         ->whereHas('report', function (Builder $q) { // Assuming 'report' is the relationship method
             $q->whereNotNull('published_at');
+        })
+            ->count();
+    }
+
+
+    /**
+     * Count published tests for an acceptance.
+     */
+    public function countStartedAcceptanceItems(Acceptance $acceptance): int
+    {
+        return $acceptance->acceptanceItems() // Assuming 'acceptanceItems' is the relationship method
+        ->whereHas('acceptanceItemStates', function ($query) {
+            $query->whereNot("status", AcceptanceItemStateStatus::WAITING);
         })
             ->count();
     }
