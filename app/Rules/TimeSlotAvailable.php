@@ -22,6 +22,7 @@ class TimeSlotAvailable implements ValidationRule
      * @var string
      */
     protected string $dueDate;
+    protected string $exceptID;
 
     /**
      * Create a new rule instance.
@@ -30,10 +31,11 @@ class TimeSlotAvailable implements ValidationRule
      * @param string $dueDate
      * @return void
      */
-    public function __construct(int|string $consultantId, string $dueDate)
+    public function __construct(int|string $consultantId, string $dueDate,$exceptID=null)
     {
         $this->consultantId = $consultantId;
         $this->dueDate = $dueDate;
+        $this->exceptID = $exceptID;
     }
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
@@ -45,6 +47,7 @@ class TimeSlotAvailable implements ValidationRule
             ->where("consultant_id", $this->consultantId)
             ->where("started_at", "<=", $dateTime)
             ->where("ended_at", ">", $dateTime)
+            ->whereNot("id",$this->exceptID)
             ->exists();
         if ($exists)
             $fail("The time slot is already booked.");

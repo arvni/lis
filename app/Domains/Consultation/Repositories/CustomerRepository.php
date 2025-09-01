@@ -57,7 +57,7 @@ class CustomerRepository
 
     public function findById($id)
     {
-        return Customer::query()->findOrFail($id);
+        return Customer::find($id);
     }
 
 }
