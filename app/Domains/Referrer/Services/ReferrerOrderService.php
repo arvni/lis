@@ -2,6 +2,8 @@
 
 namespace App\Domains\Referrer\Services;
 
+use App\Domains\Reception\Enums\AcceptanceStatus;
+use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Referrer\DTOs\ReferrerOrderDTO;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Referrer\Repositories\ReferrerOrderRepository;
@@ -49,6 +51,14 @@ class ReferrerOrderService
             $this->referrerRepository->deleteReferrerOrder($referrer);
         } else {
             throw new Exception("ReferrerOrder has associated acceptances or Orders.");
+        }
+    }
+
+    public function checkStatus(ReferrerOrder $referrerOrder): void
+    {
+        $referrerOrder->load("acceptance");
+        if ($referrerOrder->acceptance && ($referrerOrder->acceptance?->status == AcceptanceStatus::PROCESSING || $referrerOrder->acceptance?->status == AcceptanceStatus::REPORTED)) {
+            $this->referrerRepository->updateReferrerOrder($referrerOrder, ["status" => "processing"]);
         }
     }
 }
