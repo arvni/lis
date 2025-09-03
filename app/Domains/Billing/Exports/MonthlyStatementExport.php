@@ -64,9 +64,9 @@ class MonthlyStatementExport implements
             'total_samples' => 0,
             'total_amount' => 0,
             'generated_at' => now()->format('M d, Y H:i'),
-            'company_name' => config('app.name', 'Medical Laboratory Services'),
+            'company_name' => "Muscat Medical Center",
             'company_address' => config('company.address', 'Muscat, Sultanate of Oman'),
-            'company_phone' => config('company.phone', '+968 XXXX XXXX'),
+            'company_phone' => config('company.phone', '+968 2207 3671'),
             'currency' => self::CURRENCY,
         ];
     }

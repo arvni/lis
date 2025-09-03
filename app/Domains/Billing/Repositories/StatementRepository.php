@@ -76,7 +76,7 @@ class StatementRepository
     private function generateStatementNumber($date)
     {
         $date = Carbon::parse($date);
-        return 'A440-' . $date->format('Ym') . '-' . $this->countStatementOfMonth($date);
+        return 'B-' . $date->format('Ym') . '-' . $this->countStatementOfMonth($date);
     }
 
     private function countStatementOfMonth(Carbon $date)
