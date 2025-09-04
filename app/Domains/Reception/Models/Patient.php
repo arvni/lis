@@ -44,7 +44,8 @@ class Patient extends Model
     protected $searchable = [
         "fullName",
         "idNo",
-        "phone"
+        "phone",
+        "samples.barcode"
     ];
 
     public function getNameAttribute()
