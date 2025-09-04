@@ -78,7 +78,7 @@ class PatientRepository
     public function applyFilters($query, array $filters)
     {
         if (isset($filters["search"]))
-            $query->search(["fullName", "idNo", "phone"], $filters["search"]);
+            $query->search($filters["search"]);
         if (isset($filters["patient"]))
             $query->where("patients.id", $filters["patient"])
                 ->orWhereHas("relatives", fn($q) => $q->where("relatives.patient_id", $filters["patient"]))
