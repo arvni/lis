@@ -14,7 +14,7 @@ class StoreDocumentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => ['required', 'file', 'max:20480'], // 20MB max size
+            'file' => ['required', 'file'],
             'tag' => ['nullable', 'string'],
             'ownerClass'=>[ 'nullable', 'string'],
             'ownerId'=>[ 'nullable', 'string'],
