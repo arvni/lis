@@ -50,10 +50,9 @@ class UpdatePatientRequest extends FormRequest
                 "required",
             ],
             "phone" => [
-                "required",
+                "nullable",
                 "string",
                 "max:255",
-                "unique:patients,phone,".$this->route()->parameter("patient")->id
             ],
             "tribe" => [
                 "nullable",
