@@ -174,6 +174,7 @@ class AcceptanceRepository
         DB::statement('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,"ONLY_FULL_GROUP_BY",""))');
 
         $query = Acceptance::query()
+            ->whereDoesntHave("referrerOrder")
             ->withSum('acceptanceItems as acceptance_items_sum_price', 'price')
             ->withSum('acceptanceItems as acceptance_items_sum_discount', 'discount')
             ->withSum('payments as payments_sum_price', 'price')
