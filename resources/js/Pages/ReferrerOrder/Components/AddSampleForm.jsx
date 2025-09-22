@@ -16,14 +16,10 @@ import {
     Chip,
     Alert,
     CircularProgress,
-    Tooltip,
-    IconButton
 } from "@mui/material";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
 import Stack from "@mui/material/Stack";
 import MenuItem from "@mui/material/MenuItem";
-import InfoIcon from "@mui/icons-material/Info";
 import React, { useState, useMemo } from "react";
 import { useForm } from "@inertiajs/react";
 
@@ -84,7 +80,7 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder }) => {
             updatedBarcodes[index] = {
                 ...updatedBarcodes[index],
                 sample: selectedSample,
-                collectionDate: selectedSample.collection_date,
+                collection_date: selectedSample.collectionDate,
                 barcode: selectedSample.sampleId ?? null,
                 // Reset received_at if collection date changed to avoid validation errors
                 received_at: updatedBarcodes[index].received_at || ""
@@ -125,7 +121,7 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder }) => {
     // Filter samples based on selected sample type
     const getFilteredSamples = (selectedSampleType) => {
         if (!selectedSampleType) return samples;
-        return samples.filter(sample => sample.sample_type?.id === selectedSampleType);
+        return samples.filter(sample => sample.sample_type?.server_id === selectedSampleType);
     };
 
     if (!data?.barcodes?.length) return null;
