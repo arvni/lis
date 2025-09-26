@@ -237,6 +237,9 @@ const Print = ({invoice}) => {
                                 <TableCell>
                                     Net Amount
                                 </TableCell>
+                                <TableCell>
+                                    Description
+                                </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody sx={{"& td": {paddingY: "1mm"}}}>
@@ -252,6 +255,8 @@ const Print = ({invoice}) => {
                                 <TableCell sx={{textAlign: "center"}}>0</TableCell>
                                 <TableCell
                                     sx={{textAlign: "center"}}>{Math.floor(item.price - item.discount)}</TableCell>
+                                <TableCell
+                                    sx={{textAlign: "left"}}>{item.description}</TableCell>
                             </TableRow>)}
                             <TableRow>
                                 <TableCell colSpan={3} sx={{fontWeight: "900", textAlign: "center"}}>Total</TableCell>
@@ -264,30 +269,31 @@ const Print = ({invoice}) => {
                                 <TableCell sx={{textAlign: "center"}}>0</TableCell>
                                 <TableCell
                                     sx={{textAlign: "center"}}>{Math.floor(invoice.acceptance_items_sum_price * 1 - invoice.acceptance_items_sum_discount * 1)}</TableCell>
+                                <TableCell/>
                             </TableRow>
                         </TableBody>
                         <TableFooter sx={{"& td": {border: "none", color: "#000", fontWeight: "500"}}}>
                             <TableRow>
                                 <TableCell colSpan={5}/>
                                 <TableCell colSpan={3}>Total Rate (incl.Vat)(OMR):</TableCell>
-                                <TableCell
+                                <TableCell colspan={2}
                                     sx={{textAlign: "center"}}>{Math.floor(invoice.acceptance_items_sum_price * 1)}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell colSpan={5}/>
                                 <TableCell colSpan={3}>Total Discount (OMR):</TableCell>
-                                <TableCell
+                                <TableCell colspan={2}
                                     sx={{textAlign: "center"}}>{Math.ceil(invoice.acceptance_items_sum_discount * 1)}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell colSpan={5}/>
                                 <TableCell colSpan={3}>Total VAT(OMR):</TableCell>
-                                <TableCell sx={{textAlign: "center"}}>0</TableCell>
+                                <TableCell colspan={2} sx={{textAlign: "center"}}>0</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell colSpan={5}/>
                                 <TableCell colSpan={3}>Total Net Amount (OMR):</TableCell>
-                                <TableCell
+                                <TableCell colspan={2}
                                     sx={{textAlign: "center"}}>{Math.floor(invoice.acceptance_items_sum_price * 1 - invoice.acceptance_items_sum_discount * 1)}</TableCell>
                             </TableRow>
                         </TableFooter>

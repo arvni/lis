@@ -13,6 +13,7 @@ use App\Domains\Billing\Repositories\InvoiceRepository;
 use App\Domains\Laboratory\Enums\TestType;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 readonly class InvoiceService
 {
@@ -76,7 +77,7 @@ readonly class InvoiceService
                                         "price" => $item->sum("price"),
                                         "discount" => $item->sum("discount"),
                                         "test" => $item->first()->test,
-                                        "items" => $item
+                                        "items" => $item,
                                     ]);
                                 })->toArray());
                     })
@@ -88,12 +89,18 @@ readonly class InvoiceService
             ->map(function ($item, $key) use ($output) {
                 $items = collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["id"] == $testItem["test"]["id"]);
                 $qty = $items->count() ?? $items->first()["customParameters"]["qty"] ?? 1;
+                $description = [];
+                collect($items->first()["customParameters"]["price"] ?? [])->each(function ($value, $key) use (&$description) {
+                    $newKey = Str::title(implode(" ", (Str::ucsplit($key))));
+                    $description[] = "$newKey=$value";
+                });
                 return [
                     ...$item,
                     "qty" => $qty,
                     "price" => $items->sum("price"),
                     "unit_price" => $item["price"],
                     "discount" => $items->sum("discount"),
+                    "description" => implode(", ", $description),
                 ];
             })
             ->values();
