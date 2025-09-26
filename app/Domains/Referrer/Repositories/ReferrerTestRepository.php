@@ -37,20 +37,21 @@ class ReferrerTestRepository
 
     public function store($data): ReferrerTest
     {
-        $referrerTest= ReferrerTest::create($data);
-        UserActivityService::createUserActivity($referrerTest,ActivityType::CREATE);
+        $referrerTest = ReferrerTest::create($data);
+        UserActivityService::createUserActivity($referrerTest, ActivityType::CREATE);
+        return $referrerTest;
     }
 
-    public function update(ReferrerTest $referrerTest,  $data)
+    public function update(ReferrerTest $referrerTest, $data)
     {
         $referrerTest->update($data);
-        UserActivityService::createUserActivity($referrerTest,ActivityType::DELETE);
+        UserActivityService::createUserActivity($referrerTest, ActivityType::DELETE);
         return $referrerTest;
     }
 
     public function delete(ReferrerTest $referrerTest): bool
     {
-        UserActivityService::createUserActivity($referrerTest,ActivityType::DELETE);
+        UserActivityService::createUserActivity($referrerTest, ActivityType::DELETE);
         return $referrerTest->delete();
     }
 
