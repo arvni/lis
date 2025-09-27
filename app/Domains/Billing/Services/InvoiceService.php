@@ -78,6 +78,7 @@ readonly class InvoiceService
                                         "discount" => $item->sum("discount"),
                                         "test" => $item->first()->test,
                                         "items" => $item,
+                                        "customParameters"=>$item->first()["customParameters"],
                                     ]);
                                 })->toArray());
                     })
@@ -90,7 +91,7 @@ readonly class InvoiceService
                 $items = collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["id"] == $testItem["test"]["id"]);
                 $qty = $items->count() ?? $items->first()["customParameters"]["qty"] ?? 1;
                 $description = [];
-                collect($items->first()["customParameters"]["price"] ?? [])->each(function ($value, $key) use (&$description) {
+                collect($item["customParameters"]["price"] ?? [])->each(function ($value, $key) use (&$description) {
                     $newKey = Str::title(implode(" ", (Str::ucsplit($key))));
                     $description[] = "$newKey=$value";
                 });

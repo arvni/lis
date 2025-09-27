@@ -86,13 +86,12 @@ class WelcomeNotification extends Notification implements ShouldQueue
     public function toWhatsAppTemplate($notifiable): array
     {
         // The template name should be the Content SID from your Twilio Console
-        // Example: HXabcdef1234567890abcdef1234567890
         return [
             'name' => config('services.twilio.templates.welcome_message'),
             'to' => $this->acceptance->howReport["whatsappNumber"],
             'parameters' => [
                 "1" => $notifiable->fullName,                      // {{1}} - Customer name
-                "2" => $this->getEstimatedCompletionDateAttribute()->format("d/m/Y")// {{2}} -
+//                "2" => $this->getEstimatedCompletionDateAttribute()->format("d/m/Y")// {{2}} -
             ]
         ];
     }
