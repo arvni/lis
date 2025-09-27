@@ -47,6 +47,10 @@ const printStyles = `
       display: none !important;
     }
 
+    .show-print {
+      display: block !important;
+    }
+
     /* Override any other elements that might affect printing */
     #root, main, div[role="main"] {
       margin: 0 !important;

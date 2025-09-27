@@ -21,6 +21,7 @@ import {
     AccessTime
 } from '@mui/icons-material';
 import {calculateBusinessDays} from "@/Services/helper.js";
+import ReportDaysInput from "@/Pages/Acceptance/Components/ReportDaysInput.jsx";
 
 // A5 paper dimensions - optimized for printing
 const A5_WIDTH = '148mm';
@@ -466,12 +467,9 @@ const OptimizedInvoiceReceipt = ({acceptance, onPrint, showLogo}) => {
 
                     <Box sx={{mt: 1, p: 1, bgcolor: 'grey.50', borderRadius: 1, display: 'flex', alignItems: 'center'}}>
                         <AccessTime color="primary" sx={{mr: 1, fontSize: '0.75rem'}}/>
-                        <Typography variant="caption">
-                            The report will be available at
-                            <Box component="span" sx={{ml: 1, fontWeight: 'bold', color: 'primary.main'}}>
-                                {calculateBusinessDays(acceptance.created_at, reportDays).toDateString()}
-                            </Box>.
-                        </Typography>
+                        {/*<Typography variant="caption">*/}
+                            <ReportDaysInput initialDays={reportDays}/>
+                        {/*</Typography>*/}
                     </Box>
 
                     <InvoiceFooter>

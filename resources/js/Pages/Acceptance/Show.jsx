@@ -15,8 +15,6 @@ import {
     Check,
     Close,
     ExpandMore as ExpandMoreIcon,
-    Man2,
-    Woman2,
     LocalHospital,
     Person,
     Email,
