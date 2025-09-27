@@ -78,7 +78,7 @@ readonly class InvoiceService
                                         "discount" => $item->sum("discount"),
                                         "test" => $item->first()->test,
                                         "items" => $item,
-                                        "customParameters"=>$item->first()["customParameters"],
+                                        "customParameters"=>$item->first()->customParameters,
                                     ]);
                                 })->toArray());
                     })
