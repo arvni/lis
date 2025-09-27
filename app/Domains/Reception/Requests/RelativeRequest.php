@@ -55,7 +55,7 @@ class RelativeRequest extends FormRequest
                 "required",
             ],
             "phone" => [
-                "required",
+                "nullable",
                 "string",
                 "max:255",
             ],
