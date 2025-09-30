@@ -77,7 +77,7 @@ const PublishForm = ({open, onCancel, report}) => {
 
     // Get recipients from report data
     const getRecipients = () => {
-        const recipients = [];
+        let recipients = [];
         const howReport = report.acceptance_item?.acceptance?.howReport;
 
         if (howReport?.whatsapp && howReport?.whatsappNumber) {
@@ -105,6 +105,15 @@ const PublishForm = ({open, onCancel, report}) => {
                 value: report.acceptance_item.acceptance.referrer.email,
                 icon: <Person />
             });
+            if(report.acceptance_item.acceptance.referrer.reportReceivers&& report.acceptance_item.acceptance.referrer.reportReceivers.length){
+                let reportReceivers=report.acceptance_item.acceptance.referrer.reportReceivers.map(report=>({
+                    type: 'referrer',
+                    label: 'Referrer Email',
+                    value: report,
+                    icon: <Person />
+                }))
+                recipients=[...recipients,...reportReceivers]
+            }qq
         }
 
         return recipients;
