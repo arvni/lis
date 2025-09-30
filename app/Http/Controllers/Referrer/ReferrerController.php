@@ -56,6 +56,7 @@ class ReferrerController extends Controller
             $validatedData['phoneNo'],
             $validatedData['billingInfo'],
             $validatedData['isActive'],
+            $validatedData["reportReceivers"]
         );
         $referrer = $this->referrerService->createReferrer($referrerDTO);
         return redirect()->route("referrers.show", $referrer->id);
@@ -89,6 +90,7 @@ class ReferrerController extends Controller
             $validatedData['phoneNo'],
             $validatedData['billingInfo'],
             $validatedData['isActive'],
+            $validatedData["reportReceivers"]
         );
         $this->referrerService->updateReferrer($referrer, $referrerDTO);
         return redirect()->route("referrers.show", $referrer->id)

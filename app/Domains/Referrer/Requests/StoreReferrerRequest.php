@@ -36,6 +36,7 @@ class StoreReferrerRequest extends FormRequest
             "billingInfo.city" => ["nullable", "string", "max:255"],
             "billingInfo.country" => ["nullable", "string", "max:255"],
             "isActive"=>["nullable", "boolean"],
+            "reportReceivers" => ["nullable", "array"],
         ];
     }
 }

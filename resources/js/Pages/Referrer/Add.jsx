@@ -16,6 +16,7 @@ const Add = () => {
             city: "",
             country: "",
         },
+        reportReceivers: [],
         isActive: true,
     });
     const handleSubmit = () => post(route('referrers.store'))

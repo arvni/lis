@@ -19,6 +19,7 @@ use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Notifications\PatientReportPublished;
 use App\Domains\Reception\Repositories\AcceptanceRepository;
+use App\Domains\Referrer\Models\Referrer;
 use App\Domains\Referrer\Services\ReferrerOrderService;
 use App\Domains\Setting\Repositories\SettingRepository;
 use App\Notifications\ReferrerReportPublished;
@@ -581,8 +582,17 @@ class AcceptanceService
             if ($referrer) {
                 //if ($howReport["sendToReferrer"] ?? false) {
                 // Send notification to referrer
-                if (!$silent)
-                    Notification::send($referrer, new ReferrerReportPublished($acceptance));
+                if (!$silent) {
+                    $recipients[] = $referrer;
+                    if (count($referrer->reportReceivers)) {
+                        foreach ($referrer->reportReceivers as $reportReceiver) {
+                            $newReferrer = new Referrer();
+                            $newReferrer->email = $reportReceiver;
+                            $recipients[] = $newReferrer;
+                        }
+                    }
+                    Notification::send($recipients, new ReferrerReportPublished($acceptance));
+                }
                 $acceptance->load("referrerOrder");
                 // Update referrer order status
                 if ($acceptance->referrerOrder)
@@ -667,20 +677,20 @@ class AcceptanceService
 
     public function checkAcceptanceStatus(Acceptance $acceptance): void
     {
-        if ($acceptance->status==AcceptanceStatus::REPORTED)
+        if ($acceptance->status == AcceptanceStatus::REPORTED)
             return;
-        $reportableTest=$this->acceptanceRepository->countReportableTests($acceptance);
+        $reportableTest = $this->acceptanceRepository->countReportableTests($acceptance);
         if ($reportableTest) {
-            $publishedTest=$this->acceptanceRepository->countPublishedTests($acceptance);
-            if ($publishedTest==$reportableTest) {
+            $publishedTest = $this->acceptanceRepository->countPublishedTests($acceptance);
+            if ($publishedTest == $reportableTest) {
                 $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
-            } else{
-                $startedItems=$this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
-                if ($startedItems){
+            } else {
+                $startedItems = $this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
+                if ($startedItems) {
                     $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::PROCESSING);
                 }
             }
-        }else{
+        } else {
             $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
         }
 

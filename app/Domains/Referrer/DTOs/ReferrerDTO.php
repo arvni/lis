@@ -9,7 +9,8 @@ class ReferrerDTO
         public string       $email,
         public string       $phoneNo,
         public string|array $billingInfo,
-        public bool         $isActive = true
+        public bool         $isActive = true,
+        public array        $reportReceivers = []
     )
     {
     }
@@ -22,6 +23,7 @@ class ReferrerDTO
             "phoneNo" => $this->phoneNo,
             "billingInfo" => $this->billingInfo,
             "isActive" => $this->isActive,
+            "reportReceivers" => $this->reportReceivers,
         ];
     }
 }
