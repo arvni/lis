@@ -113,7 +113,7 @@ const PublishForm = ({open, onCancel, report}) => {
                     icon: <Person />
                 }))
                 recipients=[...recipients,...reportReceivers]
-            }qq
+            }
         }
 
         return recipients;
