@@ -330,7 +330,7 @@ const PublishForm = ({open, onCancel, report}) => {
                     onClick={handleSubmit}
                     variant="contained"
                     color="primary"
-                    disabled={processing || !hasRecipients}
+                    disabled={processing}
                     size="large"
                     startIcon={
                         processing ?

@@ -579,10 +579,9 @@ class AcceptanceService
                 }
             }
 
-            if ($referrer) {
-                //if ($howReport["sendToReferrer"] ?? false) {
-                // Send notification to referrer
-                if (!$silent) {
+            if (!$silent && $referrer) {
+                if ($howReport["sendToReferrer"] ?? false) {
+                    // Send notification to referrer
                     $recipients[] = $referrer;
                     if (count($referrer->reportReceivers)) {
                         foreach ($referrer->reportReceivers as $reportReceiver) {
@@ -592,12 +591,11 @@ class AcceptanceService
                         }
                     }
                     Notification::send($recipients, new ReferrerReportPublished($acceptance));
+                    $acceptance->load("referrerOrder");
+                    // Update referrer order status
+                    if ($acceptance->referrerOrder)
+                        $this->referrerOrderService->updateReferrerOrderStatus($acceptance->referrerOrder, 'reported');
                 }
-                $acceptance->load("referrerOrder");
-                // Update referrer order status
-                if ($acceptance->referrerOrder)
-                    $this->referrerOrderService->updateReferrerOrderStatus($acceptance->referrerOrder, 'reported');
-                // }
             }
         }
     }
