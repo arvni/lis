@@ -29,7 +29,7 @@ class CheckReferrerOrder extends Command
     {
         ReferrerOrder::withoutEvents(function () {
             ReferrerOrder::query()
-                ->where("status", "waiting")
+                ->whereIn("status", ["waiting", "processing"])
                 ->chunk(100, function ($referrerOrders) {
                     $service = resolve(ReferrerOrderService::class);
                     foreach ($referrerOrders as $referrerOrder) {

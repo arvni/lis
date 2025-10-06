@@ -58,7 +58,7 @@ class ReferrerOrderService
     {
         $referrerOrder->load("acceptance");
         if ($referrerOrder->acceptance && ($referrerOrder->acceptance?->status == AcceptanceStatus::PROCESSING || $referrerOrder->acceptance?->status == AcceptanceStatus::REPORTED)) {
-            $this->referrerRepository->updateReferrerOrder($referrerOrder, ["status" => "processing"]);
+            $this->referrerRepository->updateReferrerOrder($referrerOrder, ["status" => $referrerOrder->acceptance?->status->value]);
         }
     }
 }
