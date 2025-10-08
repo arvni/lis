@@ -49,7 +49,7 @@ class ReferrerReportPublished extends Notification
                 $query->whereDoesntHave("test", function ($testQuery) {
                     $testQuery->where("type", TestType::SERVICE);
                 });
-                $query->with("report.publishedDocument");
+                $query->with(["report.publishedDocument","report.clinicalCommentDocument"]);
             }
         ]);
 
@@ -78,6 +78,22 @@ class ReferrerReportPublished extends Notification
                 } else {
                     Log::error("Report file not found: {$filePath}");
                 }
+                if($acceptanceItem->report->clinicalCommentDocument) {
+                    $clinicalCommentDocument = $acceptanceItem->report->clinicalCommentDocument;
+                    $clinicalCommentDocumentFilePath = $clinicalCommentDocument->path;
+                    // Get the actual file path and check if it exists
+                    $clinicalCommentDocumentActualFilePath = $this->getActualFilePath($clinicalCommentDocumentFilePath);
+                    if ($clinicalCommentDocumentActualFilePath) {
+                        $clinicalCommentDocumentFileName = $this->generateFileName($clinicalCommentDocument, $acceptanceItem);
+                        $clinicalCommentDocumentMimeType = $this->getMimeType($clinicalCommentDocument);
+
+                        $message->attach($clinicalCommentDocumentActualFilePath, [
+                            'as' => $clinicalCommentDocumentFileName,
+                            'mime' => $clinicalCommentDocumentMimeType,
+                        ]);
+                    }
+                }
+
             } catch (Exception $e) {
                 Log::error("Failed to attach report file for acceptance item {$acceptanceItem->id}: " . $e->getMessage());
             }
