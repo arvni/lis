@@ -96,18 +96,36 @@ class AcceptanceService
 
     public function showAcceptance(Acceptance $acceptance): Acceptance
     {
+        $referrerId = $acceptance->referrer_id;
         $acceptance->load([
             "patient" => function ($query) {
-                $query->with(["ownedDocuments" => function ($q) {
-                    $q->where("Tag", DocumentTag::DOCUMENT);
-                }]);
+                $query->with([
+                    "ownedDocuments" => function ($q) {
+                        $q->where("Tag", DocumentTag::DOCUMENT);
+                    }]);
             },
-            "acceptanceItems.patients",
-            "acceptanceItems.methodTest.test.methodTests.method",
-            "acceptanceItems.methodTest.method.test.sampleTypes",
-            "acceptanceItems.patients",
-            "acceptanceItems.latestState",
-            "acceptanceItems.activeSamples",
+            "acceptanceItems" => function ($q) use ($referrerId) {
+                $q->with([
+                    "methodTest" => function ($methodTestQuery) use ($referrerId) {
+                        $methodTestQuery
+                            ->with([
+                                "test" => function ($testQuery) use ($referrerId) {
+                                    $with = ["methodTests.method"];
+                                    if ($referrerId) {
+                                        $with["referrerTests"] = function ($query) use ($referrerId) {
+                                            $query->where("referrer_id", $referrerId);
+                                        };
+                                    }
+                                    $testQuery->with($with);
+                                },
+                                "method.test.sampleTypes",
+                            ]);
+                    },
+                    "patients",
+                    "latestState",
+                    "activeSamples",
+                ]);
+            },
             "invoice.payments.cashier",
             "invoice.payments.payer",
             "invoice.owner",

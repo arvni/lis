@@ -15,6 +15,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 
 // Added for type hinting
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -312,6 +313,49 @@ class AcceptanceRepository
     public function groupItemsByTestType(array $acceptanceItemsData): Collection
     {
         return collect($acceptanceItemsData)
+            ->map(function ($defaultItem) {
+                $item=[...$defaultItem];
+
+                if (count($item["method_test"]["test"]["referrer_tests"]??[])) {
+                    $referrerTestMethodsIds = Arr::pluck($item["method_test"]["test"]["referrer_tests"][0]["methods"], 'method_id');
+                    $item["methodTest"]["test"] = [
+                        ...$item["method_test"]["test"],
+                        "method_tests" => Arr::map($item["method_test"]["test"]["method_tests"], function ($methodTest) use ($referrerTestMethodsIds, $item) {
+                            if (in_array($methodTest["method_id"], $referrerTestMethodsIds)) {
+                                $referrerTestMethod = Arr::where($item["method_test"]["test"]["referrer_tests"][0]["methods"], fn($method) => $method["method_id"] == $methodTest["method_id"]);
+                                if (count($referrerTestMethod)) {
+                                    $method = Arr::first($referrerTestMethod);
+                                    $methodTest["method"] = [
+                                        ...$methodTest["method"],
+                                        "extra" => $method["extra"],
+                                        "price" => $method["price"],
+                                        "price_type" => $method["price_type"],
+                                        "referrer_extra" => $method["extra"],
+                                        "referrer_price" => $method["price"],
+                                        "referrer_price_type" => $method["price_type"],
+
+                                    ];
+                                }
+                            }
+                            return $methodTest;
+                        })
+                    ];
+                    if (in_array($item["method_test"]["method_id"], $referrerTestMethodsIds)) {
+                        $referrerTestMethod = Arr::where($item["method_test"]["test"]["referrer_tests"][0]["methods"], fn($method) => $method["method_id"] == $item["method_test"]["method_id"]);
+                        $method = Arr::first($referrerTestMethod);
+                        $item["method_test"]["method"] = [
+                            ...$item["method_test"]["method"],
+                            "extra" => $method["extra"],
+                            "price" => $method["price"],
+                            "price_type" => $method["price_type"],
+                            "referrer_extra" => $method["extra"],
+                            "referrer_price" => $method["price"],
+                            "referrer_price_type" => $method["price_type"],
+                        ];
+                    }
+                }
+                return $item;
+            })
             ->groupBy(function ($item) {
                 // Accessing nested properties. Ensure 'method_test' and 'test' are loaded if $item is a model,
                 // or that the array structure is as expected.
