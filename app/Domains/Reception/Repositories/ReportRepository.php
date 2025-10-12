@@ -181,6 +181,7 @@ class ReportRepository
                 ]);
             },
             "signers",
+            "parameters.parameter",
             "reportTemplate.template",
             "reportTemplate.parameters"
         ]);

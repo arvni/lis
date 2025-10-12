@@ -14,6 +14,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -49,13 +50,12 @@ class ReportController extends Controller
         $user = auth()->user();
         $parameters = $request->get('parameters', []);
         if ($parameters && count($parameters) > 0) {
-            foreach (($request->file("parameters")??[]) as $parameter => $value) {
+            foreach (($request->file("parameters") ?? []) as $parameter => $value) {
                 $doc = $this->documentService->storeDocument("patient", $request->get("patient_id"), $value, DocumentTag::IMAGE->value);
                 $parameters[$parameter] = $doc;
             }
-        }
-        else{
-            $doc=$this->documentService->getDocument($request->input("reported_document.id"));
+        } else {
+            $doc = $this->documentService->getDocument($request->input("reported_document.id"));
         }
 
 
@@ -125,10 +125,14 @@ class ReportController extends Controller
 
         // Get template URL
         $templates = $this->reportService->getTemplates($reportData->acceptanceItem);
+        $data=$reportData->toArray();
+        if (count($reportData->parameters)) {
+            $data["parameters"] = $this->convertParameters($reportData->parameters);
+        }
 
         return Inertia::render('Report/Edit', [
             "templates" => $templates,
-            "report" => $reportData,
+            "report" => $data,
             "signers" => $reportData->signers,
             "acceptanceItem" => $reportData->acceptanceItem,
             "history" => $history,
@@ -145,15 +149,14 @@ class ReportController extends Controller
         $parameters = $request->get('parameters', []);
         if ($parameters && count($parameters) > 0) {
             if ($parameters && count($parameters) > 0) {
-                foreach (($request->file("parameters")??[]) as $parameter => $value) {
+                foreach (($request->file("parameters") ?? []) as $parameter => $value) {
                     $doc = $this->documentService->storeDocument("patient", $request->get("patient_id"), $value, DocumentTag::IMAGE->value);
                     $parameters[$parameter] = $doc;
                 }
             }
-        }
-        else{
+        } else {
 
-            $doc=$this->documentService->getDocument($request->input("reported_document.id"));
+            $doc = $this->documentService->getDocument($request->input("reported_document.id"));
         }
 
         $report = $this->reportService->updateReport(
@@ -174,6 +177,18 @@ class ReportController extends Controller
      */
     public function destroy(Report $report)
     {
-        //
+
+    }
+
+    private function convertParameters(Collection $parameters)
+    {
+        $output = [];
+        foreach ($parameters->sortByDesc("created_at") as $parameter) {
+            $slug = strtolower(preg_replace('/\s+/', '_', $parameter->parameter->title));
+
+            // Concatenate with parameter ID
+            $output[$slug . '_' . $parameter->parameter_id] = $parameter["value"];
+        }
+        return $output;
     }
 }
