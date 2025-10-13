@@ -1,5 +1,8 @@
 <?php
 
+use App\Domains\Billing\Models\Invoice;
+use App\Domains\Laboratory\Enums\TestType;
+use App\Domains\Reception\Models\AcceptanceItem;
 use App\Http\Controllers\Api\Billing\GetInvoiceController;
 use App\Http\Controllers\Api\Laboratory\GetMethodController;
 use App\Http\Controllers\Api\Laboratory\ListActiveSectionsController;
@@ -107,6 +110,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ShowSectionController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
 
 
@@ -288,5 +292,67 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
     Route::get("test-list", ShowTestListController::class)->name("test-list");
 
+});
+
+Route::get("/tester", function () {
+    Invoice::query()
+        ->with([
+            "acceptanceItems.test",
+        ])
+        ->chunk(100, function ($invoices) {
+            foreach ($invoices as $invoice) {
+
+                $output = $invoice->toArray();
+
+                $output["acceptance_items"] = Arr::flatten(
+                    array_values(
+                        $invoice->acceptanceItems
+                            ->groupBy("test.type")
+                            ->map(function ($item, $key) {
+                                if ($key !== TestType::PANEL->value)
+                                    return $item;
+                                else
+                                    return array_values($item
+                                        ->groupBy("panel_id")
+                                        ->map(function ($item, $key) {
+                                            return collect([
+                                                "id" => $key,
+                                                "price" => $item->sum("price"),
+                                                "discount" => $item->sum("discount"),
+                                                "test" => $item->first()->test,
+                                                "items" => $item,
+                                                "customParameters" => $item->first()->customParameters,
+                                            ]);
+                                        })->toArray());
+                            })
+                            ->toArray()
+                    )
+                    , 1);
+                $uniqueTests = collect($output["acceptance_items"])->unique("test.id");
+                $uniqueTests
+                    ->each(function ($item, $key) use ($output, $invoice) {
+                        $items = collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["id"] == $testItem["test"]["id"]);
+                        if ($item["test"]["type"] == TestType::PANEL->value)
+                            $ids = $items->pluck("items")->flatten(1)->pluck("id");
+                        else
+                            $ids = $items->pluck("id");
+                        $qty = $items->count() ?? $items->first()["customParameters"]["qty"] ?? 1;
+                        $customParameters=$item["customParameters"];
+                        echo json_encode($customParameters["price"]??"$key");
+                        echo "<br>";
+//                        $invoiceItem=InvoiceItem::create( [
+//                            'invoice_id'=>$invoice->id,
+//                            'unit_price' => $item["price"],
+//                            'title'=>$item["test"]["fullName"],
+//                            "details"=>$item->customParameters["price"]??null,
+//                            'code'=>$item["test"]["code"],
+//                            'net_price' => $items->sum("price"),
+//                            'qty' => $qty,
+//                            'discount' => $items->sum("discount"),
+//                        ]);
+//                        AcceptanceItem::whereIn("id",$items->pluck("id")->flatten(1)->pluck("id"));
+                    });
+            }
+        });
 });
 require __DIR__ . '/auth.php';

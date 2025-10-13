@@ -30,7 +30,8 @@ class Test extends Model
         "referrer_extra",
         "consent_form_id",
         "request_form_id",
-        "instruction_id"
+        "instruction_id",
+        "can_merge"
     ];
 
     protected $searchable = [

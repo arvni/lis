@@ -25,6 +25,7 @@ class TestDTO
         public MethodPriceType $referrerPriceType = MethodPriceType::FIX,
         public ?array          $extra = null,
         public ?array          $referrerExtra = null,
+        public ?bool           $canMerge = true,
     )
     {
     }
@@ -47,7 +48,8 @@ class TestDTO
             self::resolvePriceType($data["price_type"] ?? null),
             self::resolvePriceType($data["referrer_price_type"] ?? null),
             $data["extra"] ?? null,
-            $data["referrer_extra"] ?? null,);
+            $data["referrer_extra"] ?? null,
+            $data["can_merge"] ?? null,);
     }
 
     public function toArray()
@@ -69,6 +71,7 @@ class TestDTO
             "referrer_price_type" => $this->referrerPriceType,
             "extra" => $this->extra,
             "referrer_extra" => $this->referrerExtra,
+            "can_merge" => $this->canMerge,
         ];
     }
 

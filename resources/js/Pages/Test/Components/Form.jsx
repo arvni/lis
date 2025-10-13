@@ -420,7 +420,7 @@ export default function TestForm({
                         </Box>
                     </Grid>
 
-                    <Grid size={{xs: 12, md: 6}}>
+                    <Grid size={{xs: 12, sm: 6, md: 2}}>
                         <FormControlLabel
                             name="status"
                             control={
@@ -437,6 +437,29 @@ export default function TestForm({
                                         label={data.status ? "Active" : "Inactive"}
                                         size="small"
                                         color={data.status ? "success" : "default"}
+                                    />
+                                </Box>
+                            }
+                            sx={{mt: 1}}
+                        />
+                    </Grid>
+                    <Grid size={{xs: 12, sm: 6, md: 4}}>
+                        <FormControlLabel
+                            name="can_merge"
+                            control={
+                                <Switch
+                                    checked={Boolean(data.can_merge)}
+                                    onChange={handleChange}
+                                    color="success"
+                                />
+                            }
+                            label={
+                                <Box sx={{display: 'flex', alignItems: 'center'}}>
+                                    <Typography sx={{mr: 1}}>Combine matching items on invoice</Typography>
+                                    <Chip
+                                        label={data.can_merge ? "Yes" : "No"}
+                                        size="small"
+                                        color={data.can_merge ? "success" : "default"}
                                     />
                                 </Box>
                             }
@@ -594,14 +617,14 @@ export default function TestForm({
                     Next: {data.type === '1' ? "Sample Types" : "Methods"}
                 </Button>
                     {edit ? <Button
-                    variant="contained"
-                    color="success"
-                    sx={{ml: 1}}
-                    onClick={handleSubmit}
-                    startIcon={<Save/>}
-                >
-                    Update
-                </Button> : null}
+                        variant="contained"
+                        color="success"
+                        sx={{ml: 1}}
+                        onClick={handleSubmit}
+                        startIcon={<Save/>}
+                    >
+                        Update
+                    </Button> : null}
                 </Box>
             </Box>
         </Box>

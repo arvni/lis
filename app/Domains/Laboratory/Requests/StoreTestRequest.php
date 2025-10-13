@@ -47,6 +47,7 @@ class StoreTestRequest extends FormRequest
             "consent_form.id" => ["exists:consent_forms,id"],
             "instruction" => ["nullable", "array", "min:1"],
             "instruction.id" => ["exists:instructions,id"],
+            "can_merge" => ["nullable", "boolean"],
         ];
 
         $panelRules = [

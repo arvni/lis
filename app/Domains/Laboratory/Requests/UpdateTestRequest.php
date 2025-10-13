@@ -4,6 +4,7 @@ namespace App\Domains\Laboratory\Requests;
 
 use App\Domains\Laboratory\Enums\MethodPriceType;
 use App\Domains\Laboratory\Enums\TestType;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -21,7 +22,7 @@ class UpdateTestRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -30,39 +31,40 @@ class UpdateTestRequest extends FormRequest
         $isService = $this->input('type') === TestType::SERVICE->value;
 
         $baseRules = [
-            "test_groups" => ["required", "array","min:1"],
+            "test_groups" => ["required", "array", "min:1"],
             "test_groups.*.id" => ["required", "exists:test_groups,id"],
-            "name" => ["required", "string", "max:255", "unique:tests,name,".$this->route()->parameter("test")->id],
+            "name" => ["required", "string", "max:255", "unique:tests,name," . $this->route()->parameter("test")->id],
             "description" => ["nullable", "string", "max:1000"],
             "fullName" => ["required", "string", "max:255"],
-            "code" => ["required", "string", "max:50", "unique:tests,code,".$this->route()->parameter("test")->id],
+            "code" => ["required", "string", "max:50", "unique:tests,code," . $this->route()->parameter("test")->id],
             "type" => ["required", Rule::enum(TestType::class)],
             "status" => ["nullable", "boolean"],
             "method_tests" => ["required", "array", "min:1"],
-            "method_tests.*.id"=>["nullable"],
-            "method_tests.*.status"=>["boolean"],
+            "method_tests.*.id" => ["nullable"],
+            "method_tests.*.status" => ["boolean"],
             "request_form" => ["nullable", "array", "min:1"],
             "request_form.id" => ["exists:request_forms,id"],
             "consent_form" => ["nullable", "array", "min:1"],
             "consent_form.id" => ["exists:consent_forms,id"],
             "instruction" => ["nullable", "array", "min:1"],
             "instruction.id" => ["exists:instructions,id"],
+            "can_merge" => ["nullable", "boolean"],
         ];
 
         $panelRules = [
             "price" => ["required_if:type," . TestType::PANEL->value, "numeric", "min:0"],
             "referrer_price" => ["required_if:type," . TestType::PANEL->value, "numeric", "min:0"],
-            "price_type"=>["required", Rule::in(MethodPriceType::values())],
-            "referrer_price_type"=>["required", Rule::in(MethodPriceType::values())],
-            "extra"=>["nullable", "array"],
-            "referrer_extra"=>["nullable", "array"],
+            "price_type" => ["required", Rule::in(MethodPriceType::values())],
+            "referrer_price_type" => ["required", Rule::in(MethodPriceType::values())],
+            "extra" => ["nullable", "array"],
+            "referrer_extra" => ["nullable", "array"],
             "method_tests.*.id" => ["nullable"],
             "method_tests.*.method.id" => ["required", "exists:methods,id"],
-            "method_tests.*.status" => ["nullable","boolean"],
+            "method_tests.*.status" => ["nullable", "boolean"],
         ];
 
         $testRules = [
-            "sample_type_tests"=>["required","array","min:1"],
+            "sample_type_tests" => ["required", "array", "min:1"],
             "sample_type_tests.*.sample_type.id" => ["required", "exists:sample_types,id"],
             "sample_type_tests.*.description" => ["required", "string", "max:255"],
             "sample_type_tests.*.defaultType" => ["nullable", "boolean"],

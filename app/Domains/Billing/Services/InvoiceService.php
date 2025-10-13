@@ -78,17 +78,23 @@ readonly class InvoiceService
                                         "discount" => $item->sum("discount"),
                                         "test" => $item->first()->test,
                                         "items" => $item,
-                                        "customParameters"=>$item->first()->customParameters,
+                                        "customParameters" => $item->first()->customParameters,
                                     ]);
                                 })->toArray());
                     })
                     ->toArray()
             )
             , 1);
-        $uniqueTests = collect($output["acceptance_items"])->unique("test.id");
+        $uniqueTests = collect($output["acceptance_items"])->unique(function ($item) {
+            if ($item['test']['can_merge'])
+                $postfix = "";
+            else
+                $postfix = "-".uuid_create(4);
+            return $item['test']['id'] . $postfix;
+        });
         $output["acceptance_items"] = $uniqueTests
             ->map(function ($item, $key) use ($output) {
-                $items = collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["id"] == $testItem["test"]["id"]);
+                $items = collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["can_merge"] && ($item["test"]["id"] == $testItem["test"]["id"]));
                 $qty = $items->count() ?? $items->first()["customParameters"]["qty"] ?? 1;
                 $description = [];
                 collect($item["customParameters"]["price"] ?? [])->each(function ($value, $key) use (&$description) {

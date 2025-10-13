@@ -8,29 +8,30 @@ const Add = () => {
         fullName: "",
         code: "",
         sample_type_tests: [],
-        type:'TEST',
+        type: 'TEST',
         method_tests: [],
         test_groups: [],
         report_templates: [],
         description: "",
         status: true,
-        price:0,
-        price_type:"Fix",
-        extra:{},
-        referrer_price:0,
-        referrer_price_type:"Fix",
-        referrer_extra:{},
+        price: 0,
+        price_type: "Fix",
+        extra: {},
+        referrer_price: 0,
+        referrer_price_type: "Fix",
+        referrer_extra: {},
+        can_merge: true
     });
     const handleSubmit = () => post(route('tests.store'))
     const handleCancel = () => router.visit(route('tests.index'));
     return (
-            <AddForm data={data}
-                     setData={setData}
-                     submit={handleSubmit}
-                     cancel={handleCancel}
-                     errors={errors}
-                     setError={setError}
-                     clearErrors={clearErrors}/>
+        <AddForm data={data}
+                 setData={setData}
+                 submit={handleSubmit}
+                 cancel={handleCancel}
+                 errors={errors}
+                 setError={setError}
+                 clearErrors={clearErrors}/>
     );
 }
 
