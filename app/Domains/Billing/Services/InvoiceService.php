@@ -89,7 +89,7 @@ readonly class InvoiceService
             if ($item['test']['can_merge'])
                 $postfix = "";
             else
-                $postfix = "-".uuid_create(4);
+                $postfix = "-" . uuid_create(4);
             return $item['test']['id'] . $postfix;
         });
         $output["acceptance_items"] = $uniqueTests
@@ -141,10 +141,12 @@ readonly class InvoiceService
             $invoice->update(["status" => InvoiceStatus::WAITING_FOR_PAYMENT]);
     }
 
-    public function updateInvoiceItems($items): void
+    public function updateInvoiceItems($invoiceItems): void
     {
-        foreach ($items as $item) {
-            $this->receptionAdapter->updateAcceptanceItem($item);
+        foreach ($invoiceItems as $type => $items) {
+            foreach ($items as $item) {
+                $this->receptionAdapter->updateAcceptanceItem($item, $type);
+            }
         }
     }
 

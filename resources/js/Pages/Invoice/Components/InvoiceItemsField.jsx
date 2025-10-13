@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
     Box,
     Table,
@@ -135,7 +135,8 @@ const AdvancedDiscountManager = ({
                     Discounts
                 </Typography>
                 <Box>
-                    <Tooltip title={`Remaining available discount: ${remainingDiscountPercentage.toFixed(2)}% (${remainingDiscountAmount.toFixed(2)} OMR)`}>
+                    <Tooltip
+                        title={`Remaining available discount: ${remainingDiscountPercentage.toFixed(2)}% (${remainingDiscountAmount.toFixed(2)} OMR)`}>
                         <Chip
                             label={`Available: ${remainingDiscountPercentage.toFixed(2)}%`}
                             color={remainingDiscountPercentage > 0 ? "success" : "error"}
@@ -223,7 +224,8 @@ const AdvancedDiscountManager = ({
                                 />
                             </Grid>
 
-                            <Grid size={{xs: 12, sm: 2}} sx={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                            <Grid size={{xs: 12, sm: 2}}
+                                  sx={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                                 <Tooltip title="Remove discount">
                                     <IconButton
                                         color="error"
@@ -280,7 +282,7 @@ const AdvancedDiscountManager = ({
     );
 };
 
-const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
+const InvoiceItemsField = ({items = [], onChange, maxDiscount = 100}) => {
     const [editingItem, setEditingItem] = useState(null);
     const [editValues, setEditValues] = useState({});
     const [errors, setErrors] = useState({});
@@ -289,17 +291,36 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
     const [tempDiscounts, setTempDiscounts] = useState([]);
 
     // Group items by type
-    const tests = items.TEST;
-    const services = items.SERVICE;
-    const panels = items.PANEL;
+    const tests = items?.TEST || [];
+    const services = items?.SERVICE || [];
+    const panels = items?.PANEL || [];
 
     // Calculate totals
     const calculateTotals = (itemsList) => {
-        return itemsList.reduce((acc, item) => ({
+        // Group items by type
+        const tests = itemsList?.TEST || [];
+        const services = itemsList?.SERVICE || [];
+        const panels = itemsList?.PANEL || [];
+        const testsTotals = tests.reduce((acc, item) => ({
             totalPrice: acc.totalPrice + (parseFloat(item.price) || 0),
             totalDiscount: acc.totalDiscount + (parseFloat(item.discount) || 0),
             netAmount: acc.netAmount + ((parseFloat(item.price) || 0) - (parseFloat(item.discount) || 0))
-        }), { totalPrice: 0, totalDiscount: 0, netAmount: 0 });
+        }), {totalPrice: 0, totalDiscount: 0, netAmount: 0});
+        const servicesTotals = services.reduce((acc, item) => ({
+            totalPrice: acc.totalPrice + (parseFloat(item.price) || 0),
+            totalDiscount: acc.totalDiscount + (parseFloat(item.discount) || 0),
+            netAmount: acc.netAmount + ((parseFloat(item.price) || 0) - (parseFloat(item.discount) || 0))
+        }), {totalPrice: 0, totalDiscount: 0, netAmount: 0});
+        const panelsTotals = panels.reduce((acc, item) => ({
+            totalPrice: acc.totalPrice + (parseFloat(item.price) || 0),
+            totalDiscount: acc.totalDiscount + (parseFloat(item.discount) || 0),
+            netAmount: acc.netAmount + ((parseFloat(item.price) || 0) - (parseFloat(item.discount) || 0))
+        }), {totalPrice: 0, totalDiscount: 0, netAmount: 0});
+        return {
+            totalPrice: testsTotals.totalPrice + servicesTotals.totalPrice + panelsTotals.totalPrice,
+            totalDiscount: testsTotals.totalDiscount + servicesTotals.totalDiscount + panelsTotals.totalDiscount,
+            netAmount: testsTotals.netAmount + servicesTotals.netAmount + panelsTotals.netAmount,
+        };
     };
 
     const grandTotals = calculateTotals(items);
@@ -316,12 +337,13 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
     };
 
     // Handle edit start
-    const handleEdit = (itemId) => {
-        const item = items.find(i => i.id === itemId);
+    const handleEdit = (itemId, type) => {
+
+        const item = items?.[type].find(i => i.id === itemId);
         if (item) {
-            setEditingItem(itemId);
+            setEditingItem({id: itemId, type});
             setEditValues({
-                price: item.price || 0
+                price: item.price || 0,
             });
             // Get existing discounts from customParameters or create empty array
             const existingDiscounts = item.customParameters?.discounts || [];
@@ -333,11 +355,11 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
     // Handle input changes during editing
     const handleEditChange = (field, value) => {
         const numValue = parseFloat(value) || 0;
-        setEditValues(prev => ({ ...prev, [field]: numValue }));
+        setEditValues(prev => ({...prev, [field]: numValue}));
 
         // Clear errors when user starts typing
         if (errors[field]) {
-            setErrors(prev => ({ ...prev, [field]: null }));
+            setErrors(prev => ({...prev, [field]: null}));
         }
     };
 
@@ -378,8 +400,8 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
 
         const totalDiscount = calculateDiscountFromArray(tempDiscounts, editValues.price);
 
-        const updatedItems = items.map(item =>
-            item.id === editingItem
+        const updatedItems = items?.[editingItem?.type]?.map(item =>
+            item.id === editingItem?.id
                 ? {
                     ...item,
                     ...editValues,
@@ -392,7 +414,10 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
                 : item
         );
 
-        onChange("acceptance_items",updatedItems);
+        onChange("acceptance_items", {
+            ...items,
+            [editingItem.type]: updatedItems
+        });
         setEditingItem(null);
         setEditValues({});
         setErrors({});
@@ -417,7 +442,7 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
 
     // Render price cell (editable)
     const renderPriceCell = (item) => {
-        const isEditing = editingItem === item.id;
+        const isEditing = editingItem?.id === item.id;
 
         if (!isEditing) {
             return (
@@ -439,13 +464,13 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
                     error={Boolean(errors.price)}
                     helperText={errors.price}
                     slotProps={{
-                        htmlInput:{
+                        htmlInput: {
                             min: 0,
                             step: 0.01,
-                            style: { textAlign: 'right' }
+                            style: {textAlign: 'right'}
                         }
                     }}
-                    sx={{ width: 100 }}
+                    sx={{width: 100}}
                 />
             </TableCell>
         );
@@ -453,7 +478,7 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
 
     // Render discount cell (advanced)
     const renderDiscountCell = (item) => {
-        const isEditing = editingItem === item.id;
+        const isEditing = editingItem?.id === item.id;
         const totalDiscount = isEditing
             ? calculateDiscountFromArray(tempDiscounts, editValues.price)
             : item.discount;
@@ -469,7 +494,7 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
                             size="small"
                             variant="outlined"
                             onClick={handleDiscountDialog}
-                            sx={{ ml: 1, minWidth: 'auto', px: 1 }}
+                            sx={{ml: 1, minWidth: 'auto', px: 1}}
                         >
                             Edit
                         </Button>
@@ -481,7 +506,7 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
 
     // Render action buttons
     const renderActions = (item) => {
-        const isEditing = editingItem === item.id;
+        const isEditing = editingItem?.id === item.id;
 
         return (
             <TableCell align="center">
@@ -493,7 +518,7 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
                                 color="primary"
                                 onClick={handleSave}
                             >
-                                <SaveIcon fontSize="small" />
+                                <SaveIcon fontSize="small"/>
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="Cancel editing">
@@ -502,7 +527,7 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
                                 color="inherit"
                                 onClick={handleCancel}
                             >
-                                <CancelIcon fontSize="small" />
+                                <CancelIcon fontSize="small"/>
                             </IconButton>
                         </Tooltip>
                     </Box>
@@ -511,9 +536,9 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
                         <IconButton
                             size="small"
                             color="primary"
-                            onClick={() => handleEdit(item.id)}
+                            onClick={() => handleEdit(item.id, item.method_test.test.type)}
                         >
-                            <EditIcon fontSize="small" />
+                            <EditIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
                 )}
@@ -527,23 +552,23 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
             key={item.id}
             sx={{
                 backgroundColor: isSubItem ? 'grey.50' : 'inherit',
-                '&:hover': { backgroundColor: isSubItem ? 'grey.100' : 'grey.50' }
+                '&:hover': {backgroundColor: isSubItem ? 'grey.100' : 'grey.50'}
             }}
         >
-            <TableCell sx={{ pl: isSubItem ? 4 : 2 }}>
+            <TableCell sx={{pl: isSubItem ? 4 : 2}}>
                 <Box display="flex" alignItems="center" gap={1}>
                     {!isSubItem && (
                         <Chip
-                            label={item.test?.type || 'Unknown'}
+                            label={item.method_test.test?.type || 'Unknown'}
                             size="small"
                             color={
-                                item.test?.type === 'TEST' ? 'primary' :
+                                item.method_test?.test?.type === 'TEST' ? 'primary' :
                                     item.test?.type === 'SERVICE' ? 'secondary' : 'default'
                             }
                         />
                     )}
                     <Typography variant="body2" fontWeight={isSubItem ? 'normal' : 'medium'}>
-                        {item.test?.name || 'Unknown Test'}
+                        {item.method_test?.test?.name || 'Unknown Test'}
                     </Typography>
                 </Box>
             </TableCell>
@@ -575,21 +600,20 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
     const renderPanelRow = (panel) => {
         const isExpanded = expandedPanels[panel.id];
         const subItems = panel.acceptance_items || [];
-
         return (
             <React.Fragment key={panel.id}>
-                <TableRow sx={{ backgroundColor: 'primary.light', opacity: 0.1 }}>
+                <TableRow>
                     <TableCell>
                         <Box display="flex" alignItems="center" gap={1}>
-                            <Chip label="PANEL" size="small" color="default" />
-                            <Typography variant="body2" fontWeight="medium">
-                                {panel.panel?.name || panel.test?.name || 'Unknown Panel'}
+                            <Chip label="PANEL" size="small" color="default"/>
+                            <Typography fontWeight="medium">
+                                {panel.test?.name || panel.method_test.test?.name || 'Unknown Panel'}
                             </Typography>
                             {subItems.length > 0 && (
                                 <Button
                                     size="small"
                                     onClick={() => togglePanel(panel.id)}
-                                    endIcon={isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                    endIcon={isExpanded ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
                                 >
                                     {subItems.length} tests
                                 </Button>
@@ -598,8 +622,8 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
                     </TableCell>
 
                     <TableCell>
-                        <Typography variant="body2" color="text.secondary">
-                            {panel.patients?.map(patient => patient.fullName || patient.name).join(", ") || 'No patients'}
+                        <Typography variant="body2">
+                            {subItems.reduce((a,item)=>[...a,...item.patients?.map(patient => patient.fullName || patient.name)],[]).join(", ") || 'No patients'}
                         </Typography>
                     </TableCell>
 
@@ -622,7 +646,7 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
                 {/* Sub-items collapse */}
                 {subItems.length > 0 && (
                     <TableRow>
-                        <TableCell colSpan={6} sx={{ p: 0, border: 'none' }}>
+                        <TableCell colSpan={6} sx={{p: 0, border: 'none'}}>
                             <Collapse in={isExpanded}>
                                 <Table size="small">
                                     <TableBody>
@@ -639,8 +663,8 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
 
     if (items.length === 0) {
         return (
-            <Paper elevation={0} sx={{ p: 4, textAlign: 'center', backgroundColor: 'grey.50' }}>
-                <ReceiptIcon sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
+            <Paper elevation={0} sx={{p: 4, textAlign: 'center', backgroundColor: 'grey.50'}}>
+                <ReceiptIcon sx={{fontSize: 48, color: 'grey.400', mb: 2}}/>
                 <Typography variant="h6" color="text.secondary">
                     No items in invoice
                 </Typography>
@@ -656,7 +680,7 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
             <TableContainer component={Paper} elevation={1}>
                 <Table size="small">
                     <TableHead>
-                        <TableRow sx={{ backgroundColor: 'grey.100' }}>
+                        <TableRow sx={{backgroundColor: 'grey.100'}}>
                             <TableCell>
                                 <Typography variant="subtitle2" fontWeight="bold">
                                     Test/Service
@@ -703,7 +727,7 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
 
                     {/* Totals footer */}
                     <TableFooter>
-                        <TableRow sx={{ backgroundColor: 'primary.light', opacity: 0.1 }}>
+                        <TableRow>
                             <TableCell colSpan={2}>
                                 <Typography variant="subtitle1" fontWeight="bold">
                                     Grand Total
@@ -711,20 +735,20 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
                             </TableCell>
                             <TableCell align="right">
                                 <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
-                                    {grandTotals.totalPrice.toFixed(2)}
+                                    {grandTotals?.totalPrice?.toFixed(2)}
                                 </Typography>
                             </TableCell>
                             <TableCell align="right">
                                 <Typography variant="subtitle1" fontWeight="bold" color="success.main">
-                                    {grandTotals.totalDiscount.toFixed(2)}
+                                    {grandTotals?.totalDiscount?.toFixed(2)}
                                 </Typography>
                             </TableCell>
                             <TableCell align="right">
                                 <Typography variant="subtitle1" fontWeight="bold" color="primary.main">
-                                    {grandTotals.netAmount.toFixed(2)}
+                                    {grandTotals?.netAmount?.toFixed(2)}
                                 </Typography>
                             </TableCell>
-                            <TableCell />
+                            <TableCell/>
                         </TableRow>
                     </TableFooter>
                 </Table>
@@ -743,7 +767,7 @@ const InvoiceItemsField = ({ items = [], onChange, maxDiscount = 100 }) => {
                             Manage Discounts
                         </Typography>
                         <IconButton onClick={handleDiscountDialogClose}>
-                            <CloseIcon />
+                            <CloseIcon/>
                         </IconButton>
                     </Box>
                 </DialogTitle>

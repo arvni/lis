@@ -84,33 +84,33 @@ class AcceptanceItemRepository
 
     public function creatAcceptanceItem(array $acceptanceItemData): AcceptanceItem
     {
-        $acceptanceItem = AcceptanceItem::create(Arr::except($acceptanceItemData, ["patients","id"]));
+        $acceptanceItem = AcceptanceItem::create(Arr::except($acceptanceItemData, ["patients", "id"]));
         if (isset($acceptanceItemData["customParameters"]["samples"])) {
-            $patients=Arr::flatten(array_map(fn($item)=>$item["patients"]??[],$acceptanceItemData["customParameters"]["samples"]),1);
+            $patients = Arr::flatten(array_map(fn($item) => $item["patients"] ?? [], $acceptanceItemData["customParameters"]["samples"]), 1);
             $this->syncPatients($acceptanceItem, $patients);
         }
-        UserActivityService::createUserActivity($acceptanceItem,ActivityType::CREATE);
+        UserActivityService::createUserActivity($acceptanceItem, ActivityType::CREATE);
         return $acceptanceItem;
     }
 
     public function updateAcceptanceItem(AcceptanceItem $acceptanceItem, array $acceptanceItemData): AcceptanceItem
     {
-        $acceptanceItem->fill(Arr::except($acceptanceItemData, ["patients","id"]));
+        $acceptanceItem->fill(Arr::except($acceptanceItemData, ["patients", "id"]));
         if ($acceptanceItem->isDirty()) {
             $acceptanceItem->save();
         }
         if (isset($acceptanceItemData["customParameters"]["samples"])) {
-            $patients=Arr::flatten(array_map(fn($item)=>$item["patients"]??[],$acceptanceItemData["customParameters"]["samples"]),1);
+            $patients = Arr::flatten(array_map(fn($item) => $item["patients"] ?? [], $acceptanceItemData["customParameters"]["samples"]), 1);
             $this->syncPatients($acceptanceItem, $patients);
         }
-        UserActivityService::createUserActivity($acceptanceItem,ActivityType::UPDATE);
+        UserActivityService::createUserActivity($acceptanceItem, ActivityType::UPDATE);
         return $acceptanceItem;
     }
 
     public function deleteAcceptanceItem(AcceptanceItem $acceptanceItem): void
     {
         $acceptanceItem->delete();
-        UserActivityService::createUserActivity($acceptanceItem,ActivityType::DELETE);
+        UserActivityService::createUserActivity($acceptanceItem, ActivityType::DELETE);
     }
 
     public function findAcceptanceItemById($id): ?AcceptanceItem
@@ -166,7 +166,6 @@ class AcceptanceItemRepository
         }
     }
 
-
     public function applyFilters($query, $filters = [])
     {
         if (isset($filters["search"])) {
@@ -215,5 +214,15 @@ class AcceptanceItemRepository
             ->count();
     }
 
+    public function getPanelItems($panelId, $acceptanceId = null)
+    {
+        $query = AcceptanceItem::query()
+            ->where("panel_id", $panelId)
+            ->whereRelation("test", "type", TestType::PANEL);
+        if ($acceptanceId) {
+            $query->where("acceptance_id", $acceptanceId);
+        }
+        return $query->get();
+    }
 
 }

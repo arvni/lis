@@ -15,18 +15,34 @@ class ReceptionAdapter
         $this->acceptanceItemRepository = $acceptanceItemRepository;
     }
 
-    public function updateAcceptanceItem($acceptanceItemData): void
+    public function updateAcceptanceItem($acceptanceItemData, $type = null): void
     {
-        $acceptanceItem = $this->acceptanceItemRepository->findAcceptanceItemById($acceptanceItemData['id']);
-        if ($acceptanceItem)
-            $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, [
-                "price" => $acceptanceItemData['price'],
-                "discount" => $acceptanceItemData['discount'],
-                "customParameters" => [
-                    ...[$acceptanceItem->customParameters ?? []],
-                    ...[$acceptanceItemData['customParameters'] ?? []]
-                ]
-            ]);
+        if ($type === 'PANEL') {
+            $acceptanceItems = $this->acceptanceItemRepository->getPanelItems($acceptanceItemData["id"], $acceptanceItemData["acceptance_items"][0]["acceptance_id"]);
+            foreach ($acceptanceItems as $acceptanceItem) {
+                $this->acceptanceItemRepository->updateAcceptanceItem(
+                    $acceptanceItem,
+                    [
+                        "price" => $acceptanceItemData['price'] / count($acceptanceItems),
+                        "discount" => $acceptanceItemData['discount'] / count($acceptanceItems),
+                        "customParameters" => [
+                            ...($acceptanceItem->customParameters ?? []),
+                            ...($acceptanceItemData['customParameters'] ?? [])
+                        ]
+                    ]);
+            }
+        } else {
+            $acceptanceItem = $this->acceptanceItemRepository->findAcceptanceItemById($acceptanceItemData['id']);
+            if ($acceptanceItem)
+                $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, [
+                    "price" => $acceptanceItemData['price'],
+                    "discount" => $acceptanceItemData['discount'],
+                    "customParameters" => [
+                        ...($acceptanceItem->customParameters ?? []),
+                        ...($acceptanceItemData['customParameters'] ?? [])
+                    ]
+                ]);
+        }
     }
 
 }
