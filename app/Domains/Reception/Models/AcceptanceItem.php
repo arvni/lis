@@ -27,7 +27,6 @@ class AcceptanceItem extends Model
         'customParameters',
         'panel_id',
         'no_sample',
-        'deleted_at'
     ];
     protected $casts = [
         "customParameters" => "json",
