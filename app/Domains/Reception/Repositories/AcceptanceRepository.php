@@ -314,44 +314,57 @@ class AcceptanceRepository
     {
         return collect($acceptanceItemsData)
             ->map(function ($defaultItem) {
-                $item=[...$defaultItem];
+                $item = [...$defaultItem];
 
-                if (count($item["method_test"]["test"]["referrer_tests"]??[])) {
-                    $referrerTestMethodsIds = Arr::pluck($item["method_test"]["test"]["referrer_tests"][0]["methods"], 'method_id');
-                    $item["methodTest"]["test"] = [
-                        ...$item["method_test"]["test"],
-                        "method_tests" => Arr::map($item["method_test"]["test"]["method_tests"], function ($methodTest) use ($referrerTestMethodsIds, $item) {
-                            if (in_array($methodTest["method_id"], $referrerTestMethodsIds)) {
-                                $referrerTestMethod = Arr::where($item["method_test"]["test"]["referrer_tests"][0]["methods"], fn($method) => $method["method_id"] == $methodTest["method_id"]);
-                                if (count($referrerTestMethod)) {
-                                    $method = Arr::first($referrerTestMethod);
-                                    $methodTest["method"] = [
-                                        ...$methodTest["method"],
-                                        "extra" => $method["extra"],
-                                        "price" => $method["price"],
-                                        "price_type" => $method["price_type"],
-                                        "referrer_extra" => $method["extra"],
-                                        "referrer_price" => $method["price"],
-                                        "referrer_price_type" => $method["price_type"],
-
-                                    ];
-                                }
-                            }
-                            return $methodTest;
-                        })
-                    ];
-                    if (in_array($item["method_test"]["method_id"], $referrerTestMethodsIds)) {
-                        $referrerTestMethod = Arr::where($item["method_test"]["test"]["referrer_tests"][0]["methods"], fn($method) => $method["method_id"] == $item["method_test"]["method_id"]);
-                        $method = Arr::first($referrerTestMethod);
-                        $item["method_test"]["method"] = [
-                            ...$item["method_test"]["method"],
-                            "extra" => $method["extra"],
-                            "price" => $method["price"],
-                            "price_type" => $method["price_type"],
-                            "referrer_extra" => $method["extra"],
-                            "referrer_price" => $method["price"],
-                            "referrer_price_type" => $method["price_type"],
+                if (count($item["method_test"]["test"]["referrer_tests"] ?? [])) {
+                    if ($item["method_test"]["test"]["type"] == TestType::PANEL->value) {
+                        $panel = $item["method_test"]["test"];
+                        $item["method_test"]["test"] = [
+                            ...$item["method_test"]["test"],
+                            "price_type" => $panel["referrer_tests"][0]["price_type"],
+                            "price" => $panel["referrer_tests"][0]["price"],
+                            "extra" => $panel["referrer_tests"][0]["extra"],
+                            "referrer_price_type" => $panel["referrer_tests"][0]["price_type"],
+                            "referrer_price" => $panel["referrer_tests"][0]["price"],
+                            "referrer_extra" => $panel["referrer_tests"][0]["extra"]
                         ];
+                    } else {
+                        $referrerTestMethodsIds = Arr::pluck($item["method_test"]["test"]["referrer_tests"][0]["methods"], 'method_id');
+                        $item["methodTest"]["test"] = [
+                            ...$item["method_test"]["test"],
+                            "method_tests" => Arr::map($item["method_test"]["test"]["method_tests"], function ($methodTest) use ($referrerTestMethodsIds, $item) {
+                                if (in_array($methodTest["method_id"], $referrerTestMethodsIds)) {
+                                    $referrerTestMethod = Arr::where($item["method_test"]["test"]["referrer_tests"][0]["methods"], fn($method) => $method["method_id"] == $methodTest["method_id"]);
+                                    if (count($referrerTestMethod)) {
+                                        $method = Arr::first($referrerTestMethod);
+                                        $methodTest["method"] = [
+                                            ...$methodTest["method"],
+                                            "extra" => $method["extra"],
+                                            "price" => $method["price"],
+                                            "price_type" => $method["price_type"],
+                                            "referrer_extra" => $method["extra"],
+                                            "referrer_price" => $method["price"],
+                                            "referrer_price_type" => $method["price_type"],
+
+                                        ];
+                                    }
+                                }
+                                return $methodTest;
+                            })
+                        ];
+                        if (in_array($item["method_test"]["method_id"], $referrerTestMethodsIds)) {
+                            $referrerTestMethod = Arr::where($item["method_test"]["test"]["referrer_tests"][0]["methods"], fn($method) => $method["method_id"] == $item["method_test"]["method_id"]);
+                            $method = Arr::first($referrerTestMethod);
+                            $item["method_test"]["method"] = [
+                                ...$item["method_test"]["method"],
+                                "extra" => $method["extra"],
+                                "price" => $method["price"],
+                                "price_type" => $method["price_type"],
+                                "referrer_extra" => $method["extra"],
+                                "referrer_price" => $method["price"],
+                                "referrer_price_type" => $method["price_type"],
+                            ];
+                        }
                     }
                 }
                 return $item;
@@ -388,11 +401,12 @@ class AcceptanceRepository
             ->groupBy('panel_id') // Group by the panel's main test ID
             ->map(function (Collection $panelItems) { // Type hint $panelItems as Collection
                 $firstItem = $panelItems->first();
+                $panel = $firstItem['method_test']['test'];
                 // Ensure 'method_test' and 'test' are available in the structure of $firstItem
                 return [
                     // 'panel' should represent the panel itself, not just one of its items' test
                     'id' => $firstItem["panel_id"],
-                    'panel' => $firstItem['method_test']['test'], // This assumes the 'test' here is the panel definition
+                    'panel' => $panel, // This assumes the 'test' here is the panel definition
                     'acceptanceItems' => $panelItems->map(fn($item) => [...$item, "samples" => $item["customParameters"]["samples"] ?? [], "discounts" => $item["customParameters"]["discounts"] ?? [], "details" => $item["customParameters"]["details"] ?? ""]),
                     'price' => $panelItems->sum('price'),
                     'discount' => $panelItems->sum('discount'),
