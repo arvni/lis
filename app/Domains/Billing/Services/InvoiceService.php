@@ -96,6 +96,10 @@ readonly class InvoiceService
             ->map(function ($item, $key) use ($output) {
                 $items = collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["can_merge"] && ($item["test"]["id"] == $testItem["test"]["id"]));
                 $qty = $items->count() ?? $items->first()["customParameters"]["qty"] ?? 1;
+                if ($qty < 1) {
+                    $qty = 1;
+                    $items = collect([$item]);
+                }
                 $description = [];
                 collect($item["customParameters"]["price"] ?? [])->each(function ($value, $key) use (&$description) {
                     $newKey = Str::title(implode(" ", (Str::ucsplit($key))));
