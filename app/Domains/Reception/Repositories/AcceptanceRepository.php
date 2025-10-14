@@ -357,10 +357,10 @@ class AcceptanceRepository
                             $method = Arr::first($referrerTestMethod);
                             $item["method_test"]["method"] = [
                                 ...$item["method_test"]["method"],
-                                "extra" => $method["extra"],
+                                "extra" => $method["extra"]??[],
                                 "price" => $method["price"],
                                 "price_type" => $method["price_type"],
-                                "referrer_extra" => $method["extra"],
+                                "referrer_extra" => $method["extra"]??[],
                                 "referrer_price" => $method["price"],
                                 "referrer_price_type" => $method["price_type"],
                             ];
