@@ -52,8 +52,14 @@ use App\Domains\Referrer\Models\Material;
 use App\Domains\Referrer\Models\OrderMaterial;
 use App\Domains\Referrer\Models\Referrer;
 use App\Domains\Referrer\Models\ReferrerOrder;
+use App\Domains\Referrer\Models\CollectRequest;
+use App\Domains\Referrer\Models\SampleCollector;
 use App\Domains\Referrer\Policies\MaterialPolicy;
 use App\Domains\Referrer\Policies\OrderMaterialPolicy;
+use App\Domains\Referrer\Policies\ReferrerPolicy;
+use App\Domains\Referrer\Policies\ReferrerOrderPolicy;
+use App\Domains\Referrer\Policies\CollectRequestPolicy;
+use App\Domains\Referrer\Policies\SampleCollectorPolicy;
 use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
 use App\Domains\User\Policies\RolePolicy;
@@ -141,8 +147,12 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Consultant::class, ConsultantPolicy::class);
         Gate::policy(Time::class, TimePolicy::class);
 
+        Gate::policy(Referrer::class, ReferrerPolicy::class);
+        Gate::policy(ReferrerOrder::class, ReferrerOrderPolicy::class);
         Gate::policy(OrderMaterial::class, OrderMaterialPolicy::class);
         Gate::policy(Material::class, MaterialPolicy::class);
+        Gate::policy(CollectRequest::class, CollectRequestPolicy::class);
+        Gate::policy(SampleCollector::class, SampleCollectorPolicy::class);
 
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);

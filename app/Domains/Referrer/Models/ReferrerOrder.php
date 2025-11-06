@@ -14,6 +14,7 @@ class ReferrerOrder extends Model
     protected $fillable = [
         "received_at",
         "referrer_id",
+        "collect_request_id",
         "order_id",
         "orderInformation",
         "status",
@@ -39,6 +40,11 @@ class ReferrerOrder extends Model
     public function referrer()
     {
         return $this->belongsTo(Referrer::class);
+    }
+
+    public function collectRequest()
+    {
+        return $this->belongsTo(CollectRequest::class);
     }
 
     public function acceptance()

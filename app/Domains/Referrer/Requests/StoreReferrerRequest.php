@@ -37,6 +37,10 @@ class StoreReferrerRequest extends FormRequest
             "billingInfo.country" => ["nullable", "string", "max:255"],
             "isActive"=>["nullable", "boolean"],
             "reportReceivers" => ["nullable", "array"],
+            "logisticInfo"=>["nullable", "array"],
+            "logisticInfo.address" => ["nullable", "string", "max:255"],
+            'logisticInfo.latitude' => 'nullable|numeric|between:-90,90',
+            'logisticInfo.longitude' => 'nullable|numeric|between:-180,180',
         ];
     }
 }

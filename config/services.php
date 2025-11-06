@@ -63,6 +63,11 @@ return [
     'whatsapp'=>[
         'callback-server'=>env('WHATSAPP_CALLBACK_SERVER'),
         'callback-url'=>env('WHATSAPP_CALLBACK_URL','/api/whatsapp-messages/callback'),
-    ]
+    ],
+    'logistics_app' => [
+        'webhook_domain' => env('LOGISTICS_APP_WEBHOOK_DOMAIN', 'http://localhost:8004'),
+        'webhook_secret' => env('LOGISTICS_APP_WEBHOOK_SECRET'),
+        'collect_request_webhook_url' => env('LOGISTICS_APP_COLLECT_REQUEST_WEBHOOK_URL', '/api/collect-requests/webhook'),
+    ],
 
 ];

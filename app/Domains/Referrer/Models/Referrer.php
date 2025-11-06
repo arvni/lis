@@ -23,11 +23,13 @@ class Referrer extends Model
         "phoneNo",
         "billingInfo",
         "isActive",
-        "reportReceivers"
+        "reportReceivers",
+        "logisticInfo"
     ];
 
     protected $casts = [
         "billingInfo" => "json",
+        "logisticInfo" => "json",
         "reportReceivers" => "json",
         "isActive" => "boolean"
     ];

@@ -36,6 +36,20 @@ class RoleAndPermissionSeeder extends Seeder
                     "Add Acceptance",
                     "Add Samples"
                 ],
+                "Collect Request" => [
+                    "View Collect Request",
+                    "Edit Collect Request",
+                    "Delete Collect Request",
+                    "List Collect Requests",
+                    "Create Collect Request",
+                ],
+                "Sample Collector" => [
+                    "View Sample Collector",
+                    "Edit Sample Collector",
+                    "Delete Sample Collector",
+                    "List Sample Collectors",
+                    "Create Sample Collector",
+                ],
                 "Materials" => [
                     "Create Material",
                     "Edit Material",

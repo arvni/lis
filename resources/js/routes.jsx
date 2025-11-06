@@ -291,6 +291,18 @@ const routes = (sections = []) => {
                     permission: 'Referrer.Referrer Orders.List Referrer Orders',
                 },
                 {
+                    title: "Collect Requests",
+                    icon: <PillBottle/>,
+                    route: "collect-requests.index",
+                    permission: 'Referrer.Collect Request.List Collect Requests',
+                },
+                {
+                    title: "Sample Collector",
+                    icon: <PillBottle/>,
+                    route: "sample-collectors.index",
+                    permission: 'Referrer.Sample Collector.List Sample Collectors',
+                },
+                {
                     title: "Materials",
                     icon: <PillBottle/>,
                     route: "materials.index",

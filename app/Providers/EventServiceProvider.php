@@ -20,6 +20,7 @@ use App\Domains\Notification\Listeners\NotifyProviderOfInstructionUpdate;
 use App\Domains\Notification\Listeners\NotifyProviderOfOrderMaterialUpdate;
 use App\Domains\Notification\Listeners\NotifyProviderOfRequestFormUpdate;
 use App\Domains\Notification\Listeners\NotifyProviderOfSampleTypeUpdate;
+use App\Domains\Notification\Listeners\NotifyLogisticsAppOfCollectRequestUpdate;
 use App\Domains\Reception\Events\AcceptanceDeletedEvent;
 use App\Domains\Reception\Events\PatientDocumentUpdateEvent;
 use App\Domains\Reception\Events\ReportPublishedEvent;
@@ -29,6 +30,7 @@ use App\Domains\Reception\Listeners\AcceptancePaymentListener;
 use App\Domains\Reception\Listeners\AcceptanceReportedListener;
 use App\Domains\Reception\Listeners\SampleCollectedListener;
 use App\Domains\Referrer\Events\OrderMaterialUpdated;
+use App\Domains\Referrer\Events\CollectRequestEvent;
 use App\Domains\User\Events\UserDocumentUpdateEvent;
 use App\Domains\User\Listeners\SectionPermissionsListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -92,5 +94,6 @@ class EventServiceProvider extends ServiceProvider
         Event::listen(ConsentFormUpdated::class, [NotifyProviderOfConsentFormUpdate::class, 'handle']);
         Event::listen(InstructionUpdated::class, [NotifyProviderOfInstructionUpdate::class, 'handle']);
         Event::listen(SampleTypeUpdated::class, [NotifyProviderOfSampleTypeUpdate::class, 'handle']);
+        Event::listen(CollectRequestEvent::class, [NotifyLogisticsAppOfCollectRequestUpdate::class, 'handle']);
     }
 }

@@ -16,6 +16,11 @@ const Add = () => {
             city: "",
             country: "",
         },
+        logisticInfo: {
+            address: "",
+            latitude: null,
+            longitude: null,
+        },
         reportReceivers: [],
         isActive: true,
     });

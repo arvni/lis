@@ -106,6 +106,8 @@ use App\Http\Controllers\Referrer\ReferrerTestController;
 use App\Http\Controllers\Referrer\StoreReferrerOrderAcceptanceController;
 use App\Http\Controllers\Referrer\StoreReferrerOrderPatientController;
 use App\Http\Controllers\Referrer\StoreReferrerOrderSamplesController;
+use App\Http\Controllers\Referrer\CollectRequestController;
+use App\Http\Controllers\Referrer\SampleCollectorController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ShowSectionController;
@@ -218,6 +220,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get("referrers", ListReferrersController::class)->name("referrers.list");
             Route::get("check-materials", CheckMaterialBarcodeIsAvailableController::class)->name("materials.check");
             Route::get("order-materials/{orderMaterial}", [OrderMaterialController::class, "show"])->name("orderMaterials.show");
+            Route::get("sample-collectors", [\App\Http\Controllers\Referrer\SampleCollectorController::class, "index"])->name("sampleCollectors.list");
+            Route::get("collect-requests", [\App\Http\Controllers\Referrer\CollectRequestController::class, "index"])->name("collectRequests.list");
         });
         Route::group(["prefix" => "consultation"], function () {
             Route::get("customers", ListCustomersController::class)->name("customers.list");
@@ -227,7 +231,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get("daily-cash-report", DailyCashReportController::class)->name("dailyCashReport.export");
         });
         Route::get("documents/{document}", [DocumentController::class, "download"])->name("api.documents.show");
-
         Route::group(["prefix" => "notifications"], function () {
             Route::get("/", ListNotificationController::class)->name("notifications.index");
             Route::get("/unread", GetUnreadNotificationsController::class)->name("notifications.unread");
@@ -283,6 +286,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->except("create", "edit", "show");
         Route::get("orderMaterials/{orderMaterial}/print", PrintOrderMaterialController::class)
             ->name("orderMaterials.print");
+        Route::resource("sample-collectors", SampleCollectorController::class);
+        Route::resource("collect-requests", CollectRequestController::class);
 
     });
     Route::post("upload-public", UploadPublicDocumentController::class)->name("upload-public");
@@ -294,65 +299,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 });
 
-Route::get("/tester", function () {
-    Invoice::query()
-        ->with([
-            "acceptanceItems.test",
-        ])
-        ->chunk(100, function ($invoices) {
-            foreach ($invoices as $invoice) {
-
-                $output = $invoice->toArray();
-
-                $output["acceptance_items"] = Arr::flatten(
-                    array_values(
-                        $invoice->acceptanceItems
-                            ->groupBy("test.type")
-                            ->map(function ($item, $key) {
-                                if ($key !== TestType::PANEL->value)
-                                    return $item;
-                                else
-                                    return array_values($item
-                                        ->groupBy("panel_id")
-                                        ->map(function ($item, $key) {
-                                            return collect([
-                                                "id" => $key,
-                                                "price" => $item->sum("price"),
-                                                "discount" => $item->sum("discount"),
-                                                "test" => $item->first()->test,
-                                                "items" => $item,
-                                                "customParameters" => $item->first()->customParameters,
-                                            ]);
-                                        })->toArray());
-                            })
-                            ->toArray()
-                    )
-                    , 1);
-                $uniqueTests = collect($output["acceptance_items"])->unique("test.id");
-                $uniqueTests
-                    ->each(function ($item, $key) use ($output, $invoice) {
-                        $items = collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["id"] == $testItem["test"]["id"]);
-                        if ($item["test"]["type"] == TestType::PANEL->value)
-                            $ids = $items->pluck("items")->flatten(1)->pluck("id");
-                        else
-                            $ids = $items->pluck("id");
-                        $qty = $items->count() ?? $items->first()["customParameters"]["qty"] ?? 1;
-                        $customParameters=$item["customParameters"];
-                        echo json_encode($customParameters["price"]??"$key");
-                        echo "<br>";
-//                        $invoiceItem=InvoiceItem::create( [
-//                            'invoice_id'=>$invoice->id,
-//                            'unit_price' => $item["price"],
-//                            'title'=>$item["test"]["fullName"],
-//                            "details"=>$item->customParameters["price"]??null,
-//                            'code'=>$item["test"]["code"],
-//                            'net_price' => $items->sum("price"),
-//                            'qty' => $qty,
-//                            'discount' => $items->sum("discount"),
-//                        ]);
-//                        AcceptanceItem::whereIn("id",$items->pluck("id")->flatten(1)->pluck("id"));
-                    });
-            }
-        });
-});
 require __DIR__ . '/auth.php';

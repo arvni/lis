@@ -14,6 +14,7 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import AddIcon from "@mui/icons-material/Add";
+import LogisticsMap from "@/Components/LogisticsMap";
 
 // Email validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -34,6 +35,22 @@ export default function ReferrerForm({ data, setData, submit, cancel, errors, se
             [name]: value
         });
     }, [data.billingInfo]);
+
+    const handleLogisticInfoChange = useCallback((e) => {
+        const { name, value } = e.target;
+        onChange("logisticInfo", {
+            ...data.logisticInfo,
+            [name]: value
+        });
+    }, [data.logisticInfo]);
+
+    const handleLocationChange = useCallback(({ latitude, longitude }) => {
+        onChange("logisticInfo", {
+            ...data.logisticInfo,
+            latitude,
+            longitude
+        });
+    }, [data.logisticInfo]);
 
     const onChange = useCallback((key, value) => {
         setData(prevState => ({ ...prevState, [key]: value }));
@@ -304,6 +321,62 @@ export default function ReferrerForm({ data, setData, submit, cancel, errors, se
                             onChange={handleBillingInfoChange}
                             error={!!errors?.["billingInfo.address"]}
                             helperText={errors?.["billingInfo.address"]}
+                        />
+                    </Grid>
+                    {/* Logistic Information Section */}
+                    <Grid size={{ xs: 12 }}>
+                        <Divider>Logistic Information</Divider>
+                    </Grid>
+
+                    <Grid size={{ xs: 12 }}>
+                        <TextField
+                            multiline
+                            rows={3}
+                            value={data.logisticInfo?.address || ""}
+                            fullWidth
+                            name="address"
+                            label="Logistics Address"
+                            onChange={handleLogisticInfoChange}
+                            error={!!errors?.["logisticInfo.address"]}
+                            helperText={errors?.["logisticInfo.address"]}
+                        />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                        <TextField
+                            value={data.logisticInfo?.latitude || ""}
+                            fullWidth
+                            type="number"
+                            name="latitude"
+                            label="Latitude"
+                            onChange={handleLogisticInfoChange}
+                            error={!!errors?.["logisticInfo.latitude"]}
+                            helperText={errors?.["logisticInfo.latitude"]}
+                            inputProps={{ step: "any", min: -90, max: 90 }}
+                        />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                        <TextField
+                            value={data.logisticInfo?.longitude || ""}
+                            fullWidth
+                            type="number"
+                            name="longitude"
+                            label="Longitude"
+                            onChange={handleLogisticInfoChange}
+                            error={!!errors?.["logisticInfo.longitude"]}
+                            helperText={errors?.["logisticInfo.longitude"]}
+                            inputProps={{ step: "any", min: -180, max: 180 }}
+                        />
+                    </Grid>
+
+                    <Grid size={{ xs: 12 }}>
+                        <LogisticsMap
+                            latitude={data.logisticInfo?.latitude}
+                            longitude={data.logisticInfo?.longitude}
+                            onLocationChange={handleLocationChange}
+                            editable={true}
+                            height={400}
                         />
                     </Grid>
 
