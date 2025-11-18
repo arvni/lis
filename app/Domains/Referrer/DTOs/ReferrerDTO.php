@@ -11,7 +11,7 @@ class ReferrerDTO
         public string|array $billingInfo,
         public bool         $isActive = true,
         public array        $reportReceivers = [],
-        public array        $logisticInfo = [],
+        public array|null        $logisticInfo = [],
     )
     {
     }
