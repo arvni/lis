@@ -69,6 +69,9 @@ class RelativeRequest extends FormRequest
                 "integer",
                 "exists:patients,id"
             ],
+            "reference_id" => [
+                "nullable",
+            ],
             "patient_id" => [
                 "required",
                 "integer",

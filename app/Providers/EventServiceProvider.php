@@ -32,6 +32,8 @@ use App\Domains\Reception\Listeners\SampleCollectedListener;
 use App\Domains\Referrer\Events\OrderMaterialUpdated;
 use App\Domains\Referrer\Events\CollectRequestEvent;
 use App\Domains\User\Events\UserDocumentUpdateEvent;
+use App\Events\ReferrerOrderPatientCreated;
+use App\Listeners\SendPatientToProviderWebhook;
 use App\Domains\User\Listeners\SectionPermissionsListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
@@ -95,5 +97,6 @@ class EventServiceProvider extends ServiceProvider
         Event::listen(InstructionUpdated::class, [NotifyProviderOfInstructionUpdate::class, 'handle']);
         Event::listen(SampleTypeUpdated::class, [NotifyProviderOfSampleTypeUpdate::class, 'handle']);
         Event::listen(CollectRequestEvent::class, [NotifyLogisticsAppOfCollectRequestUpdate::class, 'handle']);
+        Event::listen(ReferrerOrderPatientCreated::class, [SendPatientToProviderWebhook::class, 'handle']);
     }
 }

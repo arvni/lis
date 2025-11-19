@@ -10,6 +10,7 @@ use App\Domains\Reception\Services\PatientService;
 use App\Domains\Referrer\DTOs\ReferrerOrderDTO;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Referrer\Services\ReferrerOrderService;
+use App\Events\ReferrerOrderPatientCreated;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
@@ -44,6 +45,48 @@ class StoreReferrerOrderPatientController extends Controller
         $referrerOrderDto->patientId = $patient->id;
 
         $this->referrerOrderService->updateReferrerOrder($referrerOrder, $referrerOrderDto);
+
+        // Update orderInformation to add server_id to main patient
+        $orderInformation = $referrerOrder->orderInformation;
+
+        // Update main patient
+        if (isset($orderInformation['patient'])) {
+            $orderInformation['patient']['server_id'] = $patient->id;
+        }
+
+        // Update in patients array (if main patient)
+        if (isset($orderInformation['patients'])) {
+            foreach ($orderInformation['patients'] as &$patientData) {
+                if ($patientData['is_main'] ?? false) {
+                    $patientData['server_id'] = $patient->id;
+                    break;
+                }
+            }
+            unset($patientData);
+        }
+
+        // Update in orderItems patients
+        if (isset($orderInformation['orderItems'])) {
+            foreach ($orderInformation['orderItems'] as &$orderItem) {
+                if (isset($orderItem['patients'])) {
+                    foreach ($orderItem['patients'] as &$patientData) {
+                        if ($patientData['is_main'] ?? false) {
+                            $patientData['server_id'] = $patient->id;
+                        }
+                    }
+                    unset($patientData);
+                }
+            }
+            unset($orderItem);
+        }
+
+        // Save updated orderInformation
+        $referrerOrder->orderInformation = $orderInformation;
+        $referrerOrder->save();
+
+        // Fire event for webhook
+        event(new ReferrerOrderPatientCreated($referrerOrder, $patient, true));
+
         if ($referrerOrder->ownedDocuments()->count()) {
             $referrerOrder->load("ownedDocuments");
             foreach ($referrerOrder->ownedDocuments as $document) {

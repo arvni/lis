@@ -64,6 +64,10 @@ class CollectRequestService
         $sampleCollectorChanged = isset($data['sample_collector_id']) &&
             $data['sample_collector_id'] != $collectRequest->sample_collector_id;
 
+        if ($sampleCollectorChanged) {
+            $data["status"] = CollectRequestStatus::PENDING->value;
+        }
+
         $updatedCollectRequest = $this->collectRequestRepository->updateCollectRequest($collectRequest, $data);
 
         // Dispatch event to notify logistics app

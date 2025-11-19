@@ -8,12 +8,14 @@ use App\Domains\Reception\Models\Relative;
 use App\Domains\Reception\Requests\RelativeRequest;
 use App\Domains\Reception\Services\PatientService;
 use App\Domains\Reception\Services\RelativeService;
+use App\Domains\Referrer\Models\ReferrerOrder;
+use App\Events\ReferrerOrderPatientCreated;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class RelativeController extends Controller
 {
-    public function __construct(private readonly PatientService $patientService,
+    public function __construct(private readonly PatientService  $patientService,
                                 private readonly RelativeService $relativeService)
     {
     }
@@ -21,9 +23,9 @@ class RelativeController extends Controller
     public function store(RelativeRequest $request)
     {
         $validatedData = $request->validated();
-        if ($validatedData['patient_id'] == $validatedData['relative_id'])
+        if ($validatedData['patient_id'] == ($validatedData['relative_id'] ?? null))
             return back()->with(["success" => false, "status" => "You can't add yourself as a relative"]);
-        $relative=$this->patientService->getPatientByIdNo($validatedData["idNo"]);
+        $relative = $this->patientService->getPatientByIdNo($validatedData["idNo"]);
 
         $patientDTO = PatientDTO::fromRequest($validatedData);
         if (!$relative) {
@@ -40,6 +42,53 @@ class RelativeController extends Controller
             $request->get("relationship"),
         );
         $this->relativeService->makeRelative($relativeDto);
+
+        // If this is from a referrer order, update orderInformation and fire event
+        if ($request->has('referrer_order_id')) {
+            $referrerOrder = ReferrerOrder::find($request->get('referrer_order_id'));
+
+            if ($referrerOrder) {
+                // Update orderInformation JSON to add server_id to the patient
+                $orderInformation = $referrerOrder->orderInformation;
+
+                // Find and update the patient in patients array
+                if (isset($orderInformation['patients'])) {
+                    foreach ($orderInformation['patients'] as &$patient) {
+                        // Match by reference_id or id_no
+                        if (($patient['reference_id'] ?? null) === ($validatedData['reference_id']??0) ||
+                            ($patient['id_no'] ?? null) === $validatedData['idNo']) {
+                            $patient['server_id'] = $relative->id;
+                            break;
+                        }
+                    }
+                    unset($patient); // Break reference
+                }
+
+                // Also update in orderItems patients if exists
+                if (isset($orderInformation['orderItems'])) {
+                    foreach ($orderInformation['orderItems'] as &$orderItem) {
+                        if (isset($orderItem['patients'])) {
+                            foreach ($orderItem['patients'] as &$patient) {
+                                if (($patient['reference_id'] ?? null) === ($validatedData['reference_id']??0) ||
+                                    ($patient['id_no'] ?? null) === $validatedData['idNo']) {
+                                    $patient['server_id'] = $relative->id;
+                                }
+                            }
+                            unset($patient);
+                        }
+                    }
+                    unset($orderItem);
+                }
+
+                // Save updated orderInformation
+                $referrerOrder->orderInformation = $orderInformation;
+                $referrerOrder->save();
+
+                // Fire event for webhook
+                event(new ReferrerOrderPatientCreated($referrerOrder, $relative, false));
+            }
+        }
+
         return back()->with(["success" => true, "status" => "Relative added successfully"]);
 
     }
