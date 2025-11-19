@@ -195,7 +195,7 @@ class SendAcceptanceWebhook implements ShouldQueue
         return [
             'order' => [
                 'id' => $acceptance->id,
-                'status' => $acceptance->status !== AcceptanceStatus::REPORTED ? AcceptanceStatus::REPORTED : AcceptanceStatus::REPORTED,
+                'status' => $acceptance->status !== AcceptanceStatus::REPORTED ? AcceptanceStatus::PROCESSING : AcceptanceStatus::REPORTED,
                 'orderForms' => null,
                 'consents' => null,
                 'files' => null,
@@ -222,7 +222,9 @@ class SendAcceptanceWebhook implements ShouldQueue
                 ])->toArray(),
 
                 // Order items
-                'orderItems' => $orderItems
+                'orderItems' => $orderItems,
+                "created_at" => $acceptance->created_at,
+                "updated_at" => $acceptance->updated_at,
             ],
 
             // Referrer ID (required by validation)
