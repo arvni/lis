@@ -51,14 +51,6 @@ const Index = () => {
             )
         },
         {
-            field: 'user.name',
-            headerName: 'Registered By',
-            type: "string",
-            width: 200,
-            flex: 1,
-            renderCell: ({ row }) => row?.user?.name || 'N/A'
-        },
-        {
             field: 'status',
             headerName: 'Status',
             type: "string",

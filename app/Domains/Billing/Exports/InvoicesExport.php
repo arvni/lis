@@ -22,10 +22,36 @@ class InvoicesExport implements FromCollection
     , WithStyles
 {
     protected Collection $invoices;
+    protected array $dynamicColumns = [];
 
     public function __construct(Collection $invoices)
     {
         $this->invoices = $invoices;
+        $this->extractDynamicColumns();
+    }
+
+    /**
+     * Extract all unique custom parameter keys from acceptance items
+     */
+    private function extractDynamicColumns(): void
+    {
+        $customKeys = [];
+
+        foreach ($this->invoices as $invoice) {
+            foreach ($invoice->acceptanceItems as $item) {
+                if ($item->customParameters && isset($item->customParameters['price'])) {
+                    $priceParams = $item->customParameters['price'];
+                    if (is_array($priceParams)) {
+                        foreach (array_keys($priceParams) as $key) {
+                            $customKeys[$key] = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        $this->dynamicColumns = array_keys($customKeys);
+        sort($this->dynamicColumns); // Sort alphabetically for consistency
     }
 
     public function collection()
@@ -35,7 +61,11 @@ class InvoicesExport implements FromCollection
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->setAutoFilter('A1:O1');
+        // Calculate the last column dynamically
+        $totalColumns = 18 + count($this->dynamicColumns); // 18 base columns + dynamic columns
+        $lastColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($totalColumns);
+        $sheet->setAutoFilter("A1:{$lastColumn}1");
+
         return [
             1 => [
                 'font' => [
@@ -65,7 +95,9 @@ class InvoicesExport implements FromCollection
             $discount=$acceptanceItem["discount"]??"0";
             $price=$acceptanceItem["price"]??"0";
             $patient=(object)$acceptanceItem["patient"]??[];
-            $rows[] = [
+
+            // Base row data
+            $row = [
                 Carbon::parse($invoice->created_at)->toDate(),
                 $invoice->invoiceNo,
                 (string)optional($patient)->fullName,
@@ -85,13 +117,64 @@ class InvoicesExport implements FromCollection
                 optional($patient)->age,
                 ucfirst((string)optional(optional($invoice->payments)[0])->paymentMethod?->value)
             ];
+
+            // Add dynamic columns from customParameters
+            foreach ($this->dynamicColumns as $columnKey) {
+                $value = $this->getCustomParameterValue($acceptanceItem, $columnKey);
+                $row[] = $value;
+            }
+
+            $rows[] = $row;
         }
         return $rows;
     }
 
+    /**
+     * Get custom parameter value from acceptance item
+     * Returns 0 if not found
+     */
+    private function getCustomParameterValue($acceptanceItem, string $key)
+    {
+        // Handle collection items (from panels)
+        if ($acceptanceItem instanceof \Illuminate\Support\Collection) {
+            if (isset($acceptanceItem["items"])) {
+                // For panel items, sum up the values from all items
+                $sum = 0;
+                foreach ($acceptanceItem["items"] as $item) {
+                    $itemValue = $this->extractValueFromItem($item, $key);
+                    if (is_numeric($itemValue)) {
+                        $sum += (float)$itemValue;
+                    }
+                }
+                return $sum > 0 ? $sum : "0";
+            }
+        }
+
+        // Handle regular acceptance items
+        return $this->extractValueFromItem($acceptanceItem, $key);
+    }
+
+    /**
+     * Extract value from a single acceptance item
+     */
+    private function extractValueFromItem($item, string $key)
+    {
+        if (is_array($item)) {
+            $customParams = $item['customParameters'] ?? null;
+        } else {
+            $customParams = $item->customParameters ?? null;
+        }
+
+        if ($customParams && isset($customParams['price'][$key])) {
+            return $customParams['price'][$key];
+        }
+
+        return "0";
+    }
+
     public function headings(): array
     {
-        return [
+        $baseHeadings = [
             "Date",
             "Invoice No.",
             "Patient Name",
@@ -111,6 +194,33 @@ class InvoicesExport implements FromCollection
             "Age",
             "Payment Method",
         ];
+
+        // Add dynamic column headings
+        foreach ($this->dynamicColumns as $columnKey) {
+            // Convert camelCase to Title Case with spaces
+            $heading = $this->formatColumnHeading($columnKey);
+            $baseHeadings[] = $heading;
+        }
+
+        return $baseHeadings;
+    }
+
+    /**
+     * Format column key to readable heading
+     * Example: "noEmbryos" -> "No. Embryos"
+     */
+    private function formatColumnHeading(string $key): string
+    {
+        // Convert camelCase to words
+        $heading = preg_replace('/([a-z])([A-Z])/', '$1 $2', $key);
+
+        // Capitalize first letter of each word
+        $heading = ucwords($heading);
+
+        // Special formatting for "no" prefix (number)
+        $heading = preg_replace('/^No\b/', 'No.', $heading);
+
+        return $heading;
     }
     private function getAcceptanceItems($invoice){
 

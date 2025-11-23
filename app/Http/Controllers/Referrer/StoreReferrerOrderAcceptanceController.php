@@ -49,7 +49,7 @@ class StoreReferrerOrderAcceptanceController extends Controller
             $user->id,
             $referrerOrder->orderInformation["reference_id"] ?? null,
             0,
-            $validated["howToOrder"] ?? null,
+            $validated["howReport"] ?? null,
             null,
             $validated["acceptanceItems"],
             AcceptanceStatus::SAMPLING,

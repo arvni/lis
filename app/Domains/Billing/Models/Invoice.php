@@ -26,7 +26,6 @@ class Invoice extends Model
     ];
 
     protected $searchable = [
-        'owner.fullName',
         'patient.fullName',
         'patient.idNo',
     ];
