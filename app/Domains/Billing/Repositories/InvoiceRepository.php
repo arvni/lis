@@ -81,13 +81,40 @@ class InvoiceRepository
 
     private function applyFilters($query, array $filters)
     {
+        // Owner type filter (polymorphic)
         if (isset($filters["owner_type"])) {
             $query->where("owner_type", strtolower($filters["owner_type"]));
             if (isset($filters["owner_id"]))
                 $query->where(Str::lower($filters["owner_type"]) . "s.id", $filters["owner_id"]);
         }
+
+        // Owner ID filter (when owner_type is not specified)
+        if (isset($filters["owner_id"]) && !isset($filters["owner_type"])) {
+            $query->where("owner_id", $filters["owner_id"]);
+        }
+
+        // Single date filtering
+        if (isset($filters["date"])) {
+            $date = Carbon::parse($filters["date"]);
+            $dateRange = [$date->copy()->startOfDay(), $date->copy()->endOfDay()];
+            $query->whereBetween('invoices.created_at', $dateRange);
+        }
+
+        // Date range filtering
+        if (!empty($filters["from_date"]) || !empty($filters["to_date"])) {
+            $startDate = !empty($filters["from_date"])
+                ? Carbon::parse($filters["from_date"])->startOfDay()
+                : Carbon::createFromTimestamp(0);
+            $endDate = !empty($filters["to_date"])
+                ? Carbon::parse($filters["to_date"])->endOfDay()
+                : Carbon::now();
+            $query->whereBetween('invoices.created_at', [$startDate, $endDate]);
+        }
+
+        // Search filter
         if (isset($filters["search"]))
             $query->search($filters["search"] ?? "");
+
         return $query;
     }
 
