@@ -85,17 +85,12 @@ class InvoiceRepository
         if (isset($filters["owner_type"])) {
             $query->where("owner_type", strtolower($filters["owner_type"]));
             if (isset($filters["owner_id"]))
-                $query->where(Str::lower($filters["owner_type"]) . "s.id", $filters["owner_id"]);
-        }
-
-        // Owner ID filter (when owner_type is not specified)
-        if (isset($filters["owner_id"]) && !isset($filters["owner_type"])) {
-            $query->where("owner_id", $filters["owner_id"]);
+                $query->where("owner_id", $filters["owner_id"]);
         }
 
         // Single date filtering
         if (isset($filters["date"])) {
-            $date = Carbon::parse($filters["date"]);
+            $date = Carbon::parse($filters["date"],"Asia/Muscat");
             $dateRange = [$date->copy()->startOfDay(), $date->copy()->endOfDay()];
             $query->whereBetween('invoices.created_at', $dateRange);
         }
@@ -103,7 +98,7 @@ class InvoiceRepository
         // Date range filtering
         if (!empty($filters["from_date"]) || !empty($filters["to_date"])) {
             $startDate = !empty($filters["from_date"])
-                ? Carbon::parse($filters["from_date"])->startOfDay()
+                ? Carbon::parse($filters["from_date"],"Asia/Muscat")->startOfDay()
                 : Carbon::createFromTimestamp(0);
             $endDate = !empty($filters["to_date"])
                 ? Carbon::parse($filters["to_date"])->endOfDay()

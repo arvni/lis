@@ -20,24 +20,36 @@ import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
+import SearchIcon from '@mui/icons-material/Search';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PersonIcon from '@mui/icons-material/Person';
 import SelectSearch from "@/Components/SelectSearch.jsx";
 
 const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
     const [filters, setFilters] = useState({
+        search: defaultValues.search || '',
         owner_type: defaultValues.owner_type || '',
         owner_id: defaultValues.owner_id || null,
+        owner_object: defaultValues.owner_object || null, // Store the full object for SelectSearch
         from_date: defaultValues.from_date || null,
         to_date: defaultValues.to_date || null,
     });
     const [dateError, setDateError] = useState("");
     const [activeFilters, setActiveFilters] = useState(0);
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date(Date.now() + 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0];
 
     // Count active filters for better UX
     useEffect(() => {
-        const count = Object.values(filters).filter(value => {
+        const filterValues = {
+            search: filters.search,
+            owner_type: filters.owner_type,
+            owner_id: filters.owner_id,
+            from_date: filters.from_date,
+            to_date: filters.to_date,
+        };
+        const count = Object.values(filterValues).filter(value => {
             if (Array.isArray(value)) {
                 return value.length > 0;
             }
@@ -56,8 +68,6 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                 setDateError("Start date cannot be after end date");
             } else if (fromDate > new Date(today)) {
                 setDateError("Start date cannot be in the future");
-            } else if (toDate > new Date(today)) {
-                setDateError("End date cannot be in the future");
             } else {
                 setDateError("");
             }
@@ -73,9 +83,10 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                 [field]: value
             };
 
-            // Reset owner_id when owner_type changes
+            // Reset owner_id and owner_object when owner_type changes
             if (field === 'owner_type') {
                 newFilters.owner_id = null;
+                newFilters.owner_object = null;
             }
 
             return newFilters;
@@ -86,15 +97,38 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
         handleFilterChange('owner_type', e.target.value);
     }, []);
 
+    const handleOwnerChange = useCallback((e) => {
+        const ownerObject = e.target.value;
+        setFilters(prev => ({
+            ...prev,
+            owner_object: ownerObject,
+            owner_id: ownerObject?.id || null
+        }));
+    }, []);
+
+    const handleSearchChange = useCallback((e) => {
+        handleFilterChange('search', e.target.value);
+    }, []);
+
+    const handleClearSearch = useCallback(() => {
+        setFilters(prevState => ({...prevState, search: ""}));
+    }, []);
+
     const handleApplyFilters = useCallback(() => {
         if (dateError) {
             return;
         }
 
         // Clean up filters before sending
-        const cleanedFilters = {...filters};
+        const cleanedFilters = {
+            search: filters.search,
+            owner_type: filters.owner_type,
+            owner_id: filters.owner_id,
+            from_date: filters.from_date,
+            to_date: filters.to_date,
+        };
 
-        // Remove null, undefined, and empty string values
+        // Remove null, undefined, and empty string values, but keep owner_object out of the API call
         Object.keys(cleanedFilters).forEach(key => {
             if (cleanedFilters[key] === null || cleanedFilters[key] === '' || cleanedFilters[key] === undefined) {
                 delete cleanedFilters[key];
@@ -106,8 +140,10 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
 
     const handleClearFilters = useCallback(() => {
         const clearedFilters = {
+            search: '',
             owner_type: '',
             owner_id: null,
+            owner_object: null,
             from_date: null,
             to_date: null,
         };
@@ -119,6 +155,12 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
     const handleClearDate = useCallback((fieldName) => {
         setFilters(prevState => ({...prevState, [fieldName]: null}));
     }, []);
+
+    const handleKeyPress = useCallback((e) => {
+        if (e.key === 'Enter' && !dateError) {
+            handleApplyFilters();
+        }
+    }, [handleApplyFilters, dateError]);
 
     const handleQuickDatePreset = useCallback((preset) => {
         const today = new Date();
@@ -165,22 +207,12 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
         }));
     }, []);
 
-    const handleKeyPress = useCallback((e) => {
-        if (e.key === 'Enter' && !dateError) {
-            handleApplyFilters();
-        }
-    }, [handleApplyFilters, dateError]);
-
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <Paper elevation={0} sx={{p: 3, mb: 2, bgcolor: 'background.paper'}}>
                 <Stack spacing={3}>
                     {/* Header with filter icon and active count */}
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                        <FilterListIcon color="primary"/>
-                        <Typography variant="h6" component="h2">
-                            Filters
-                        </Typography>
                         {activeFilters > 0 && (
                             <Chip
                                 label={`${activeFilters} active`}
@@ -192,6 +224,39 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                     </Box>
 
                     <Grid container spacing={2}>
+                        {/* Patient Search Field */}
+                        <Grid size={{xs: 12}}>
+                            <TextField
+                                fullWidth
+                                name="search"
+                                label="Search Patient"
+                                placeholder="Search by patient name or ID..."
+                                value={filters.search}
+                                onChange={handleSearchChange}
+                                onKeyDown={handleKeyPress}
+                                slotProps={{
+                                    input: {
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <SearchIcon color="action"/>
+                                            </InputAdornment>
+                                        ),
+                                        endAdornment: filters.search && (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={handleClearSearch}
+                                                    edge="end"
+                                                >
+                                                    <ClearIcon fontSize="small"/>
+                                                </IconButton>
+                                            </InputAdornment>
+                                        )
+                                    }
+                                }}
+                            />
+                        </Grid>
+
                         {/* Owner Type Selector */}
                         <Grid size={{xs: 12, md: 6}}>
                             <FormControl fullWidth>
@@ -219,26 +284,33 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
 
                         {/* Owner (Referrer/Patient) Filter */}
                         <Grid size={{xs: 12, md: 6}}>
-                            <SelectSearch
-                                fullWidth
-                                label={
-                                    filters.owner_type === 'referrer'
-                                        ? "Select Referrer"
-                                        : filters.owner_type === 'patient'
-                                        ? "Select Patient"
-                                        : "Select Owner"
-                                }
-                                url={
-                                    filters.owner_type === 'referrer'
-                                        ? route("api.referrers.list")
-                                        : filters.owner_type === 'patient'
-                                        ? route("api.patients.list")
-                                        : ""
-                                }
-                                value={filters.owner_id}
-                                onChange={(e, value) => handleFilterChange('owner_id', value)}
-                                disabled={!filters.owner_type}
-                            />
+                            {filters.owner_type ? (
+                                <SelectSearch
+                                    key={filters.owner_type}
+                                    fullWidth
+                                    label={
+                                        filters.owner_type === 'referrer'
+                                            ? "Select Referrer"
+                                            : "Select Patient"
+                                    }
+                                    url={
+                                        filters.owner_type === 'referrer'
+                                            ? route("api.referrers.list")
+                                            : route("api.patients.list")
+                                    }
+                                    value={filters.owner_object}
+                                    name="owner_id"
+                                    onChange={handleOwnerChange}
+                                />
+                            ) : (
+                                <TextField
+                                    fullWidth
+                                    label="Select Owner"
+                                    disabled
+                                    placeholder="Select owner type first"
+                                    helperText="Please select an owner type first"
+                                />
+                            )}
                         </Grid>
 
                         {/* Date Range Section */}
