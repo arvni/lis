@@ -133,8 +133,8 @@ class DailyCashReportExport implements
         $sheet->getColumnDimension('J')->setWidth(15);
         $sheet->getColumnDimension('K')->setWidth(20);
 
-        // Style the header row
-        $headerRow = 6;
+        // Style the header row (row 7 is where headings start due to startCell B7)
+        $headerRow = 7;
         $sheet->getStyle("B{$headerRow}:K{$headerRow}")->applyFromArray([
             'font' => [
                 'bold' => true,
@@ -146,7 +146,7 @@ class DailyCashReportExport implements
             ],
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'E0E0E0']
+                'startColor' => ['rgb' => 'D3D3D3']
             ],
             'borders' => [
                 'allBorders' => [
@@ -217,7 +217,7 @@ class DailyCashReportExport implements
                     ]
                 ]);
 
-                // Apply borders to data area
+                // Apply borders to data area (including headers at row 7)
                 $dataEndRow = $lastRow;
                 $sheet->getStyle("B7:K{$dataEndRow}")->applyFromArray([
                     'borders' => [
@@ -227,10 +227,10 @@ class DailyCashReportExport implements
                     ]
                 ]);
 
-                // Format currency columns
-                $sheet->getStyle("E7:E{$dataEndRow}")->getNumberFormat()
+                // Format currency columns (data starts from row 8)
+                $sheet->getStyle("E8:E{$dataEndRow}")->getNumberFormat()
                     ->setFormatCode('#,##0.00');
-                $sheet->getStyle("G7:I{$dataEndRow}")->getNumberFormat()
+                $sheet->getStyle("G8:I{$dataEndRow}")->getNumberFormat()
                     ->setFormatCode('#,##0.00');
             }
         ];

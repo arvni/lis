@@ -96,11 +96,35 @@ class PaymentRepository
         if (isset($filters["search"]))
             $query->search($filters["search"] ?? "");
 
+        // Single date filter
         if(isset($filters["date"])){
             $date=Carbon::parse($filters["date"]);
             $dateRange=[$date->startOfDay(),$date->copy()->endOfDay()];
             $query->whereBetween("created_at",$dateRange);
         }
+
+        // Date range filter
+        if (isset($filters["dateFrom"]) && isset($filters["dateTo"])) {
+            $dateFrom = Carbon::parse($filters["dateFrom"])->startOfDay();
+            $dateTo = Carbon::parse($filters["dateTo"])->endOfDay();
+            $query->whereBetween("created_at", [$dateFrom, $dateTo]);
+        } elseif (isset($filters["dateFrom"])) {
+            $dateFrom = Carbon::parse($filters["dateFrom"])->startOfDay();
+            $query->where("created_at", ">=", $dateFrom);
+        } elseif (isset($filters["dateTo"])) {
+            $dateTo = Carbon::parse($filters["dateTo"])->endOfDay();
+            $query->where("created_at", "<=", $dateTo);
+        }
+
+        // Amount range filter
+        if (isset($filters["amountFrom"]) && isset($filters["amountTo"])) {
+            $query->whereBetween("price", [(float)$filters["amountFrom"], (float)$filters["amountTo"]]);
+        } elseif (isset($filters["amountFrom"])) {
+            $query->where("price", ">=", (float)$filters["amountFrom"]);
+        } elseif (isset($filters["amountTo"])) {
+            $query->where("price", "<=", (float)$filters["amountTo"]);
+        }
+
         return $query;
     }
 

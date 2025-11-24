@@ -1,8 +1,5 @@
 <?php
 
-use App\Domains\Billing\Models\Invoice;
-use App\Domains\Laboratory\Enums\TestType;
-use App\Domains\Reception\Models\AcceptanceItem;
 use App\Http\Controllers\Api\Billing\GetInvoiceController;
 use App\Http\Controllers\Api\Laboratory\GetMethodController;
 use App\Http\Controllers\Api\Laboratory\ListActiveSectionsController;

@@ -196,6 +196,14 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                 fromDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
                 toDate = new Date(today.getFullYear(), today.getMonth(), 0);
                 break;
+            case 'thisYear':
+                fromDate = new Date(today.getFullYear(), 0, 1);
+                toDate = new Date(today);
+                break;
+            case 'lastYear':
+                fromDate = new Date(today.getFullYear() - 1, 0, 1);
+                toDate = new Date(today.getFullYear() - 1, 11, 31);
+                break;
             default:
                 return;
         }
@@ -363,6 +371,20 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                     <Chip
                                         label="Last Month"
                                         onClick={() => handleQuickDatePreset('lastMonth')}
+                                        size="small"
+                                        variant="outlined"
+                                        clickable
+                                    />
+                                    <Chip
+                                        label="This Year"
+                                        onClick={() => handleQuickDatePreset('thisYear')}
+                                        size="small"
+                                        variant="outlined"
+                                        clickable
+                                    />
+                                    <Chip
+                                        label="Last Year"
+                                        onClick={() => handleQuickDatePreset('lastYear')}
                                         size="small"
                                         variant="outlined"
                                         clickable
