@@ -34,7 +34,8 @@ class SendAcceptancesWithoutReferrerOrder extends Command
 
         $query = Acceptance::query()
             ->whereNotNull('referrer_id')
-            ->whereDoesntHave('referrerOrder')->whereHas('AcceptanceItems', function ($q) {
+            ->whereDoesntHave('referrerOrder')
+            ->whereHas('AcceptanceItems', function ($q) {
                 $q->whereRelation("test", "type", "!=", TestType::SERVICE);
             });
 

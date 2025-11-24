@@ -132,8 +132,6 @@ class StoreReferrerOrderAcceptanceRequest extends FormRequest
         $rules['acceptanceItems.panels.*.acceptanceItems.*.details'] = 'nullable|string|max:500';
         $rules['acceptanceItems.panels.*.acceptanceItems.*.customParameters.price'] = 'nullable|array';
         $rules['acceptanceItems.panels.*.acceptanceItems.*.customParameters.discounts'] = 'nullable|array';
-
-
         $rules['howReport.sendToReferrer'] = [
             'boolean',
             'nullable'

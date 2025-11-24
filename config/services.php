@@ -60,7 +60,7 @@ return [
         'instruction_webhook_url' => env('PROVIDER_APP_INSTRUCTION_WEBHOOK_URL', '/instructions/'),
         'sample_type_webhook_url' => env('PROVIDER_APP_SAMPLE_TYPE_WEBHOOK_URL', '/sample-types/'),
         'acceptance_webhook_url' => env('PROVIDER_APP_ACCEPTANCE_WEBHOOK_URL', '/webhooks/orders/import'),
-        'patient_webhook_url' => env('PROVIDER_APP_PATIENT_WEBHOOK_URL', '/api/patients/webhook'),
+        'patient_webhook_url' => env('PROVIDER_APP_PATIENT_WEBHOOK_URL', '/patients/webhook'),
     ],
     'whatsapp'=>[
         'callback-server'=>env('WHATSAPP_CALLBACK_SERVER'),
