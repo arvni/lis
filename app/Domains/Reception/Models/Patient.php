@@ -27,10 +27,10 @@ class Patient extends Model
         "gender",
         "avatar",
         "phone",
-        "research",
         "tribe",
         "wilayat",
         "village",
+        "registrar_id"
     ];
     protected $casts = [
         "dateOfBirth" => "date:Y-m-d",

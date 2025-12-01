@@ -40,6 +40,7 @@ use App\Http\Controllers\Document\DownloadReportController;
 use App\Http\Controllers\Document\UpdateBatchDocumentsController;
 use App\Http\Controllers\Document\UploadPublicDocumentController;
 use App\Http\Controllers\GetUserDetailsController;
+use App\Http\Controllers\ImportController;
 use App\Http\Controllers\Laboratory\BarcodeGroupController;
 use App\Http\Controllers\Laboratory\ConsentFormController;
 use App\Http\Controllers\Laboratory\DoctorController;
@@ -293,6 +294,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource("whatsappMessages", WhatsappMessageController::class);
     });
     Route::get("test-list", ShowTestListController::class)->name("test-list");
+
+    Route::get("import", [ImportController::class, "create"])->name("import");
+    Route::post("import", [ImportController::class, "store"])->name("import.store");
 
 });
 
