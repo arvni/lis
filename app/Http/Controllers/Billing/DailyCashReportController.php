@@ -60,7 +60,13 @@ class DailyCashReportController extends Controller
         $todaysPayments = Payment::where("created_at", ">=", $date->copy()->startOfDay())
             ->where("created_at", "<=", $date->endOfDay())
             ->where("paymentMethod", '!=', PaymentMethod::CREDIT)
-            ->with("invoice.acceptance.acceptanceItems.test", "invoice.acceptance.acceptanceItems.patients", "invoice.acceptance.patient", "invoice.acceptance.referrer")
+            ->with(
+                "invoice.acceptance.acceptanceItems.test",
+                "invoice.acceptance.acceptanceItems.patients",
+                "invoice.acceptance.patient",
+                "invoice.acceptance.referrer",
+                "invoice.acceptance.payments",
+            )
             ->get();
 
         // Process payments for acceptances not yet included
