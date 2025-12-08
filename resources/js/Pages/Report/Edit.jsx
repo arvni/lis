@@ -3,9 +3,11 @@ import PatientInfo from "@/Pages/Patient/Components/PatientInfo";
 import SectionsInfo from "@/Pages/AcceptanceItem/Components/SectionsInfo";
 import TestInfo from "@/Pages/AcceptanceItem/Components/TestInfo";
 import ReportForm from "@/Pages/Report/Components/ReportForm";
-import {useForm} from "@inertiajs/react";
+import {useForm, Link} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 import {useMemo, useCallback} from "react";
+import {Button, Tooltip} from "@mui/material";
+import {Visibility as VisibilityIcon} from "@mui/icons-material";
 
 /**
  * Edit Report Page Component
@@ -47,7 +49,29 @@ const Edit = ({patients, acceptanceItem, report, signers, templates}) => {
 
     return (
         <>
-            <PageHeader title="Edit Report"/>
+            <PageHeader
+                title="Edit Report"
+                actions={[
+                    <Tooltip title="View Acceptance Item" key="view-acceptance-item">
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            component={Link}
+                            href={route("acceptanceItems.show", {
+                                acceptance: acceptanceItem.acceptance_id,
+                                acceptanceItem: acceptanceItem.id
+                            })}
+                            startIcon={<VisibilityIcon />}
+                            sx={{
+                                textTransform: 'none',
+                                fontWeight: 'medium'
+                            }}
+                        >
+                            View Acceptance Item
+                        </Button>
+                    </Tooltip>
+                ]}
+            />
 
             {/* Patient Information Section */}
             <section className="patient-info-section">

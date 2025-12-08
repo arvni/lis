@@ -2,6 +2,8 @@
 
 namespace App\Domains\Reception\Policies;
 
+use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
+use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Report;
 use App\Domains\User\Models\User;
 
@@ -18,9 +20,26 @@ class ReportPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $authUser): bool
+    public function create(User $authUser, ?AcceptanceItem $acceptanceItem = null): bool
     {
-        return $authUser->can("Report.Create Report");
+        // Check if user has basic create report permission
+        if (!$authUser->can("Report.Create Report")) {
+            return false;
+        }
+
+        // If no acceptance item provided, just check the basic permission
+        if (!$acceptanceItem) {
+            return true;
+        }
+
+        // Check if user has admin override permission to create reports even if workflow hasn't ended
+        if ($authUser->can("Report.Admin Create Report")) {
+            return true;
+        }
+
+        // Otherwise, check if workflow has ended (latest state is FINISHED)
+        $acceptanceItem->loadMissing('latestState');
+        return $acceptanceItem->latestState?->status === AcceptanceItemStateStatus::FINISHED;
     }
 
     /**

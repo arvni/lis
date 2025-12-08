@@ -119,6 +119,7 @@ class AcceptanceController extends Controller
             abort(403, "This Acceptance Didnt Completely Registered Yet");
         }
         $acceptance = $this->acceptanceService->showAcceptance($acceptance);
+
         $data = [
             "acceptance" => array_merge(Arr::except($acceptance->toArray(), [
                 "acceptance_items",

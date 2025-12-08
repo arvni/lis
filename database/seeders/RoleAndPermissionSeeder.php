@@ -101,6 +101,7 @@ class RoleAndPermissionSeeder extends Seeder
                 "Print Report",
                 "Publish Report",
                 "Unpublish Report",
+                "Admin Create Report",
             ],
             "Billing" => [
                 "Invoices" => [

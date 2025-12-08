@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Reception;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
+use App\Domains\Reception\Models\Report;
 use App\Domains\Reception\Services\AcceptanceItemService;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class ShowAcceptanceItemController extends Controller
@@ -25,6 +27,10 @@ class ShowAcceptanceItemController extends Controller
             return redirect()->route('acceptances.show', $acceptanceItem->acceptance_id);
         }
         $acceptanceItem = $this->acceptanceItemService->showAcceptanceItem($acceptanceItem);
-        return Inertia::render("AcceptanceItem/Show", compact("acceptanceItem"));
+
+        // Check if user can create report for this acceptance item
+        $canCreateReport = Gate::allows('create', [Report::class, $acceptanceItem]);
+
+        return Inertia::render("AcceptanceItem/Show", compact("acceptanceItem", "canCreateReport"));
     }
 }

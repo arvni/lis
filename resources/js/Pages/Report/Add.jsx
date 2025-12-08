@@ -7,7 +7,9 @@ import TestInfo from "@/Pages/AcceptanceItem/Components/TestInfo";
 import ReportForm from "@/Pages/Report/Components/ReportForm";
 import History from "@/Pages/Report/Components/History";
 import PageHeader from "@/Components/PageHeader.jsx";
-import {useForm} from "@inertiajs/react";
+import {useForm, Link} from "@inertiajs/react";
+import {Button, Tooltip} from "@mui/material";
+import {Visibility as VisibilityIcon} from "@mui/icons-material";
 
 const Add = ({patients, acceptanceItem, templates, history, test, method}) => {
     const {post, data, setData, reset, processing,} = useForm({
@@ -22,7 +24,29 @@ const Add = ({patients, acceptanceItem, templates, history, test, method}) => {
 
     return (
         <>
-            <PageHeader title="Add Report"/>
+            <PageHeader
+                title="Add Report"
+                actions={[
+                    <Tooltip title="View Acceptance Item" key="view-acceptance-item">
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            component={Link}
+                            href={route("acceptanceItems.show", {
+                                acceptance: acceptanceItem.acceptance_id,
+                                acceptanceItem: acceptanceItem.id
+                            })}
+                            startIcon={<VisibilityIcon />}
+                            sx={{
+                                textTransform: 'none',
+                                fontWeight: 'medium'
+                            }}
+                        >
+                            View Acceptance Item
+                        </Button>
+                    </Tooltip>
+                ]}
+            />
             {patients.map(patient => <React.Fragment key={patient.id}>
                 <PatientInfo patient={patient} defaultExpanded={false}/>
                 <DocumentsInfo documents={patient.owned_documents}

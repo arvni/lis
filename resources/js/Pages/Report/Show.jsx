@@ -33,7 +33,8 @@ import {
     HistoryOutlined,
     Description,
     MedicalServices,
-    Report as ReportIcon
+    Report as ReportIcon,
+    Visibility as VisibilityIcon
 } from "@mui/icons-material";
 
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
@@ -50,7 +51,7 @@ import Signers from "./Components/Signers";
 import PublishForm from "./Components/PublishForm";
 
 import DialogContent from "@mui/material/DialogContent";
-import {router, useForm} from "@inertiajs/react";
+import {router, useForm, Link} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 
 const formatDate = (date) => {
@@ -240,8 +241,26 @@ const Show = ({
                             size="small"
                         />}
                         actions={[
+                            <Tooltip title="View Acceptance Item" key="view-acceptance-item">
+                                <Button
+                                    size="small"
+                                    variant="outlined"
+                                    component={Link}
+                                    href={route("acceptanceItems.show", {
+                                        acceptance: report.acceptance_item.acceptance_id,
+                                        acceptanceItem: report.acceptance_item.id
+                                    })}
+                                    startIcon={<VisibilityIcon />}
+                                    sx={{
+                                        textTransform: 'none',
+                                        fontWeight: 'medium'
+                                    }}
+                                >
+                                    View Acceptance Item
+                                </Button>
+                            </Tooltip>,
                             canEdit ?
-                                <Tooltip title="Edit Report">
+                                <Tooltip title="Edit Report" key="edit-report">
                                     <Button
                                         size="small"
                                         color="warning"

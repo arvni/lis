@@ -57,7 +57,7 @@ readonly class AcceptanceItemService
             },
             "method.workflow.sections",
             "test.testGroups",
-            "report:id,reported_at,approved_at,printed_at,approver_id,reporter_id",
+            "report:id,acceptance_item_id,reported_at,approved_at,printed_at,approver_id,reporter_id",
             "report.reporter:id,name",
             "report.approver:id,name"
         ]);

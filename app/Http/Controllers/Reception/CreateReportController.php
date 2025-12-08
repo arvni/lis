@@ -31,9 +31,11 @@ class CreateReportController extends Controller
     {
         $this->authorize("create", [Report::class, $acceptanceItem]);
 
-        // Check if report already exists
+        // Check if report already exists and redirect to it
         if ($this->reportService->hasReport($acceptanceItem)) {
-            return redirect()->back()->withErrors("This Test Reported Before");
+            $acceptanceItem->load("report");
+            return redirect()->route("reports.show", $acceptanceItem->report->id)
+                ->with(["info" => "This test already has a report. Redirected to existing report."]);
         }
 
         // Load all required data using repository
