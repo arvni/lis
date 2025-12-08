@@ -6,7 +6,6 @@ use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Exports\DailyCashReportExport;
 use App\Domains\Billing\Models\Payment;
 use App\Domains\Reception\Models\Acceptance;
-use App\Domains\Reception\Models\AcceptanceItem;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
