@@ -61,7 +61,7 @@ readonly class SampleCollectedListener
         }
 
         // Check if acceptance has referrer but no referrerOrder, then fire event
-        if ($acceptance->referrer_id && !$acceptance->referrer_order_id) {
+        if ($acceptance->referrer_id && !$acceptance->referrerOrder()->count()) {
             event(new AcceptanceWithReferrerSampleCollected($acceptance));
         }
     }
