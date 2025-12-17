@@ -16,7 +16,7 @@ const Show = ({acceptanceItem, canCreateReport = false}) => {
         {acceptanceItem.patients.map(patient => <PatientInfo patient={patient} key={patient.id}/>)}
         <TestInfo method={acceptanceItem.method} test={acceptanceItem.test}/>
         <SectionsInfo acceptanceItemStates={acceptanceItem.acceptance_item_states}/>
-        <TimeLine timeline={acceptanceItem.timeline}/>
+        {/*<TimeLine timeline={acceptanceItem.timeline}/>*/}
         {acceptanceItem.report ? <ReportInfo report={acceptanceItem.report}/> : <Box sx={{mt: 3}}>
             <Stack direction="row" spacing={2}>
                 <Button
