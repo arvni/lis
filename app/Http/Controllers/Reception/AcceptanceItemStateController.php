@@ -35,10 +35,10 @@ class AcceptanceItemStateController extends Controller
 
         foreach ($request["parameters"] as $parameter) {
             if ($parameter["type"] == "file" && isset($parameter["value"])) {
-                $acceptanceItemState->loadMissing("acceptanceItem.patient");
+                $acceptanceItemState->loadMissing("sample");
                 PatientDocumentUpdateEvent::dispatch(
                     $parameter["value"]["id"],
-                    $acceptanceItemState->acceptanceItem->patient->id,
+                    $acceptanceItemState->sample->patient_id,
                     DocumentTag::ACCEPTANCE_ITEM_STATES->value,
                     "acceptance_item_state",
                     $acceptanceItemState->id
