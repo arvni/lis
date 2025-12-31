@@ -197,7 +197,8 @@ class AcceptanceRepository
             })
             ->selectRaw("({$this->getPayableAmountSql()}) as payable_amount")
             ->groupBy('acceptances.id')
-            ->havingRaw("COALESCE(payments_sum_price + invoice_discount, 0) >= ((payable_amount) * ? / 100)", [$minAllowablePaymentPercentage]);
+            ->havingRaw('acceptances.referrer_id IS NOT NULL')
+            ->orHavingRaw("COALESCE(payments_sum_price + invoice_discount, 0) >= ((payable_amount) * ? / 100)", [$minAllowablePaymentPercentage]);
         if (isset($queryData['filters'])) {
             $this->applyFilters($query, $queryData['filters']);
         }
@@ -339,10 +340,10 @@ class AcceptanceRepository
                                         $method = Arr::first($referrerTestMethod);
                                         $methodTest["method"] = [
                                             ...$methodTest["method"],
-                                            "extra" => $method["extra"]??[],
+                                            "extra" => $method["extra"] ?? [],
                                             "price" => $method["price"],
                                             "price_type" => $method["price_type"],
-                                            "referrer_extra" => $method["extra"]??[],
+                                            "referrer_extra" => $method["extra"] ?? [],
                                             "referrer_price" => $method["price"],
                                             "referrer_price_type" => $method["price_type"],
 
@@ -357,10 +358,10 @@ class AcceptanceRepository
                             $method = Arr::first($referrerTestMethod);
                             $item["method_test"]["method"] = [
                                 ...$item["method_test"]["method"],
-                                "extra" => $method["extra"]??[],
+                                "extra" => $method["extra"] ?? [],
                                 "price" => $method["price"],
                                 "price_type" => $method["price_type"],
-                                "referrer_extra" => $method["extra"]??[],
+                                "referrer_extra" => $method["extra"] ?? [],
                                 "referrer_price" => $method["price"],
                                 "referrer_price_type" => $method["price_type"],
                             ];
