@@ -8,6 +8,7 @@ use App\Domains\Reception\Models\Report;
 use App\Domains\Reception\Requests\StoreReportRequest;
 use App\Domains\Reception\Requests\UpdateReportRequest;
 use App\Domains\Reception\Services\AcceptanceItemService;
+use App\Domains\Reception\Services\AcceptanceService;
 use App\Domains\Reception\Services\ReportService;
 use App\Domains\Setting\Repositories\SettingRepository;
 use App\Http\Controllers\Controller;
@@ -24,6 +25,7 @@ class ReportController extends Controller
     public function __construct(
         private readonly ReportService         $reportService,
         private readonly AcceptanceItemService $acceptanceItemService,
+        private readonly AcceptanceService     $acceptanceService,
         private readonly SettingRepository     $settingRepository,
         private readonly DocumentService       $documentService,
     )
@@ -67,6 +69,12 @@ class ReportController extends Controller
             $parameters,
             $request->get('files', []),
         );
+
+        // Check and update acceptance status
+        $report->loadMissing('acceptanceItem.acceptance');
+        if ($report->acceptanceItem && $report->acceptanceItem->acceptance) {
+            $this->acceptanceService->checkAndUpdateAcceptanceStatus($report->acceptanceItem->acceptance);
+        }
 
         return redirect()->route('reports.show', $report);
     }
@@ -168,6 +176,12 @@ class ReportController extends Controller
             $parameters,
             $request->get('files', []),
         );
+
+        // Check and update acceptance status
+        $report->loadMissing('acceptanceItem.acceptance');
+        if ($report->acceptanceItem && $report->acceptanceItem->acceptance) {
+            $this->acceptanceService->checkAndUpdateAcceptanceStatus($report->acceptanceItem->acceptance);
+        }
 
         return redirect()->route('reports.show', $report);
     }

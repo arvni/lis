@@ -27,10 +27,12 @@ class AcceptanceItem extends Model
         'customParameters',
         'panel_id',
         'no_sample',
+        'reportless',
     ];
     protected $casts = [
         "customParameters" => "json",
-        "timeline" => "json"
+        "timeline" => "json",
+        "reportless" => "boolean"
     ];
     protected $appends = [
         "status",
@@ -180,6 +182,7 @@ class AcceptanceItem extends Model
     public function scopeReportLess($query)
     {
         return $query
+            ->where("reportless", false)
             ->whereHas("latestState", function ($q) {
                 $q->where("status", AcceptanceItemStateStatus::FINISHED);
             })

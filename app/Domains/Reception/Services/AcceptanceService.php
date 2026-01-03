@@ -62,6 +62,32 @@ class AcceptanceService
         return $this->acceptanceRepository->listSampleCollection($queryData);
     }
 
+    public function listWaitingForPublish($queryData): LengthAwarePaginator
+    {
+        return $this->acceptanceRepository->listWaitingForPublish($queryData);
+    }
+
+    public function listWaitingForFinancialCheck($queryData): LengthAwarePaginator
+    {
+        return $this->acceptanceRepository->listWaitingForFinancialCheck($queryData);
+    }
+
+    /**
+     * Approve financial check for an acceptance
+     *
+     * @param Acceptance $acceptance
+     * @param int $userId
+     * @return Acceptance
+     */
+    public function approveFinancial(Acceptance $acceptance, int $userId): Acceptance
+    {
+        return $this->acceptanceRepository->updateAcceptance($acceptance, [
+            'financial_approved' => true,
+            'financial_approved_by' => $userId,
+            'financial_approved_at' => Carbon::now("Asia/Muscat")
+        ]);
+    }
+
     public function storeAcceptance(AcceptanceDTO $acceptanceDTO): Acceptance
     {
         $acceptance = $this->acceptanceRepository
@@ -362,6 +388,114 @@ class AcceptanceService
         return ["barcodes" => $barcodes, "patient" => $acceptance->patient];
     }
 
+    /**
+     * Publish all unpublished reports for an acceptance
+     *
+     * @param Acceptance $acceptance
+     * @param int $publisherId
+     * @param bool $silentlyPublish
+     * @return Acceptance
+     */
+    public function publishAcceptance(Acceptance $acceptance, int $publisherId, bool $silentlyPublish = false): Acceptance
+    {
+        DB::beginTransaction();
+        try {
+            // Load acceptance items with reports
+            $acceptance->load([
+                'acceptanceItems' => function ($q) {
+                    $q->where('reportless', false)
+                        ->with('report');
+                }
+            ]);
+
+            $publishedAt = Carbon::now("Asia/Muscat");
+
+            // Publish all unpublished reports
+            foreach ($acceptance->acceptanceItems as $acceptanceItem) {
+                if ($acceptanceItem->report && !$acceptanceItem->report->published_at) {
+                    $acceptanceItem->report->update([
+                        'published_at' => $publishedAt,
+                        'publisher_id' => $publisherId
+                    ]);
+
+                    // Update timeline
+                    $publisher = \App\Domains\User\Models\User::find($publisherId);
+                    $this->acceptanceItemService->updateAcceptanceItemTimeline(
+                        $acceptanceItem,
+                        "Report Published By {$publisher->name}"
+                    );
+                }
+            }
+
+            DB::commit();
+
+            // Check if all tests are published and send notifications
+            $this->checkAcceptanceReport($acceptance, $silentlyPublish);
+
+            return $acceptance->fresh();
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Check and update acceptance status based on report states
+     * Called after report creation or approval
+     *
+     * @param Acceptance $acceptance
+     * @return void
+     */
+    public function checkAndUpdateAcceptanceStatus(Acceptance $acceptance): void
+    {
+        // Load acceptance items with reports
+        $acceptance->load([
+            'acceptanceItems' => function ($q) {
+                $q->where('reportless', false)
+                    ->with('report');
+            }
+        ]);
+
+        $reportableItems = $acceptance->acceptanceItems;
+
+        // If no reportable items, do nothing
+        if ($reportableItems->isEmpty()) {
+            $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+            return;
+        }
+        // Check if all reportable items have reports
+        $allHaveReports = $reportableItems->every(function ($item) {
+            return $item->report !== null;
+        });
+        if (!$allHaveReports) {
+            // Not all items have reports yet, keep current status
+            return;
+        }
+        // Check if all reports are approved
+        $allApproved = $reportableItems->every(function ($item) {
+            return $item->report && $item->report->approved_at !== null;
+        });
+
+        if ($allApproved) {
+            // Check if all are published
+            $allPublished = $reportableItems->every(function ($item) {
+                return $item->report && $item->report->published_at !== null;
+            });
+
+            if ($allPublished) {
+                // All reports are published
+                if ($acceptance->status !== AcceptanceStatus::REPORTED) {
+                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+                }
+            } else {
+                // All approved but not all published
+                if ($acceptance->status !== AcceptanceStatus::WAITING_FOR_PUBLISHING) {
+                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
+                }
+            }
+        }
+    }
+
     public function checkAcceptanceReport(Acceptance $acceptance, $silent = false): void
     {
         // Check if all tests are published and update acceptance status if needed
@@ -542,7 +676,7 @@ class AcceptanceService
         $acceptance->load([
             "patient",
             "referrer",
-            "acceptanceItems" => fn($q) => $q->whereHas("test", fn($testQuery) => $testQuery->whereNot("type", TestType::SERVICE))
+            "acceptanceItems" => fn($q) => $q->where("reportless", false)
                 ->with("report.publishedDocument", "report.clinicalCommentDocument", "test")
         ]);
         $patient = $acceptance->patient;

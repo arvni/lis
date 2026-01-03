@@ -13,6 +13,7 @@ enum AcceptanceStatus: string
     case SAMPLING='sampling';
     case WAITING_FOR_ENTERING='waiting for entering';
     case PROCESSING='processing';
+    case WAITING_FOR_PUBLISHING='waiting for publishing';
     case REPORTED='reported';
     case CANCELLED='Canceled';
 

@@ -24,7 +24,8 @@ import {
     RequestQuote,
     Science,
     PlaylistAddCheck,
-    WhatsApp
+    WhatsApp,
+    Sync
 } from "@mui/icons-material";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid2";
@@ -33,7 +34,7 @@ import PatientInfo from "@/Pages/Patient/Components/PatientInfo";
 import Prescription from "./Components/Prescription";
 import Payment from "./Components/Payment";
 import Button from "@mui/material/Button";
-import {Link} from "@inertiajs/react";
+import {Link, router} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 import {BarcodeIcon} from "lucide-react";
 import TestsTable from "@/Pages/Acceptance/Components/TestsSection/TestsTable.jsx";
@@ -174,7 +175,8 @@ const Show = ({
                   minAllowablePayment = 0,
                   canEdit,
                   status,
-                  canPrintBarcode
+                  canPrintBarcode,
+                  canCheckStatus
               }) => {
 
     // State
@@ -265,7 +267,22 @@ const Show = ({
 
             <PageHeader title={`Acceptance #${acceptance.id}`}
                         subtitle={`Created: ${new Date(acceptance.created_at).toLocaleString()}`} actions={[
-                <StatusChip status={acceptance.status}/>
+                <StatusChip status={acceptance.status}/>,
+                canCheckStatus && (
+                    <Button
+                        key="check-status"
+                        variant="outlined"
+                        startIcon={<Sync />}
+                        onClick={() => {
+                            router.put(route('acceptances.checkStatus', acceptance.id), {}, {
+                                preserveState: true,
+                                only: ['acceptance', 'success', 'status']
+                            });
+                        }}
+                    >
+                        Check Status
+                    </Button>
+                )
             ]}/>
 
             {/* Header with status and basic info */}

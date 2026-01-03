@@ -60,4 +60,28 @@ class AcceptancePolicy
     {
         return $authUser->can("Sample Collection");
     }
+
+    /**
+     * Determine whether the user can view financial check page.
+     */
+    public function financialCheck(User $authUser): bool
+    {
+        return $authUser->can("Report.Financial Check");
+    }
+
+    /**
+     * Determine whether the user can approve financial for the acceptance.
+     */
+    public function approveFinancial(User $authUser, Acceptance $acceptance): bool
+    {
+        return $authUser->can("Report.Approve Financial");
+    }
+
+    /**
+     * Determine whether the user can check and update acceptance status.
+     */
+    public function checkStatus(User $authUser, Acceptance $acceptance): bool
+    {
+        return $authUser->can("Reception.Acceptances.Check Status");
+    }
 }

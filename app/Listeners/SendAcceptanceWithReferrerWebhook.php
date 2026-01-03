@@ -111,8 +111,8 @@ class SendAcceptanceWithReferrerWebhook implements ShouldQueue
         $orderItems = [];
         foreach ($acceptance->acceptanceItems as $item) {
             $test = $item->methodTest?->test;
-            if (!$test || $test->type == TestType::SERVICE) {
-                continue; // Skip items without test
+            if (!$test || $item->reportless) {
+                continue; // Skip reportless items
             }
 
             // Get samples for this item

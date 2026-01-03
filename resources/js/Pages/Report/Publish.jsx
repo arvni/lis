@@ -73,7 +73,7 @@ const getDeliveryMethods = (report) => {
 const PublishingQueue = () => {
     // Destructure page props
     const {
-        reports,
+        acceptances,
         status,
         errors,
         success,
@@ -83,116 +83,117 @@ const PublishingQueue = () => {
     } = usePage().props;
 
     const [openPublishForm, setOpenPublishForm] = useState(false);
-    const [selectedReport, setSelectedReport] = useState(null);
-    const [publishingReports, setPublishingReports] = useState(new Set());
+    const [selectedAcceptance, setSelectedAcceptance] = useState(null);
+    const [publishingAcceptances, setPublishingAcceptances] = useState(new Set());
 
     // Optimized handlers with useCallback
     const handleClosePublishForm = useCallback(() => {
         setOpenPublishForm(false);
-        setSelectedReport(null);
+        setSelectedAcceptance(null);
     }, []);
 
-    const handleOpenPublishForm = useCallback((report) => {
-        setSelectedReport(report);
+    const handleOpenPublishForm = useCallback((acceptance) => {
+        setSelectedAcceptance(acceptance);
         setOpenPublishForm(true);
     }, []);
 
-    const handleQuickPublish = useCallback((reportId) => {
-        setPublishingReports(prev => new Set([...prev, reportId]));
+    const handleQuickPublish = useCallback((acceptanceId) => {
+        setPublishingAcceptances(prev => new Set([...prev, acceptanceId]));
 
-        router.put(route('reports.publish', reportId), {
+        router.put(route('acceptances.publish', acceptanceId), {
             silently_publish: false
         }, {
             onFinish: () => {
-                setPublishingReports(prev => {
+                setPublishingAcceptances(prev => {
                     const newSet = new Set(prev);
-                    newSet.delete(reportId);
+                    newSet.delete(acceptanceId);
                     return newSet;
                 });
             },
             preserveState: true,
-            only: ['reports', 'success', 'errors']
+            only: ['acceptances', 'success', 'errors']
         });
     }, []);
 
     // Memoized columns with enhanced rendering
     const columns = useMemo(() => [
         {
+            field: 'acceptance_id',
+            headerName: 'Acceptance ID',
+            flex: 0.5,
+            renderCell: ({row}) => (
+                <Box>
+                    <Typography variant="body2" fontWeight="600">
+                        #{row.id}
+                    </Typography>
+                </Box>
+            )
+        },
+        {
             field: 'patient_info',
             headerName: 'Patient Information',
             flex: 1.2,
             sortable: false,
             renderCell: ({row}) => {
-                const patients = row.acceptance_item?.patients || [];
-                const patientNames = patients.map(p => p.fullName).join(", ");
+                const patient = row.patient;
 
                 return (
                     <Box>
                         <Typography variant="body2" fontWeight="500" noWrap>
-                            {patientNames || 'N/A'}
+                            {patient?.fullName || 'N/A'}
                         </Typography>
                         <Typography variant="caption" color="text.secondary" noWrap>
-                            ID: {row.acceptance_item?.id || 'N/A'}
+                            ID: {patient?.idNo || 'N/A'}
                         </Typography>
                     </Box>
                 );
             }
         },
         {
-            field: 'test_info',
-            headerName: 'Test & Method',
+            field: 'tests_info',
+            headerName: 'Tests',
             flex: 1.3,
             sortable: false,
             renderCell: ({row}) => {
-                const testName = row.acceptance_item?.test?.name || 'Unknown Test';
-                const methodName = row.acceptance_item?.method?.name || 'Unknown Method';
+                const testCount = row.acceptance_items?.length || 0;
+                const testNames = row.acceptance_items?.map(item => item.test?.name).join(', ') || 'No tests';
 
                 return (
                     <Box>
                         <Typography variant="body2" fontWeight="500" noWrap>
-                            {testName}
+                            {testCount} Test{testCount !== 1 ? 's' : ''}
                         </Typography>
-                        <Chip
-                            label={methodName}
-                            size="small"
-                            variant="outlined"
-                            sx={{ mt: 0.5, maxWidth: '100%' }}
-                        />
+                        <Tooltip title={testNames}>
+                            <Typography variant="caption" color="text.secondary" noWrap>
+                                {testNames.length > 30 ? testNames.substring(0, 30) + '...' : testNames}
+                            </Typography>
+                        </Tooltip>
                     </Box>
                 );
             }
         },
         {
-            field: 'reporter_info',
-            headerName: 'Reporter',
+            field: 'approval_status',
+            headerName: 'Reports Status',
             flex: 0.8,
-            renderCell: ({row}) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem' }}>
-                        {row.reporter_name?.charAt(0) || 'R'}
-                    </Avatar>
-                    <Typography variant="body2" noWrap>
-                        {row.reporter_name || 'Unknown'}
-                    </Typography>
-                </Box>
-            )
-        },
-        {
-            field: 'reported_at',
-            headerName: 'Reported',
-            type: "datetime",
-            flex: 0.8,
-            valueGetter: (value) => value && new Date(value),
-            renderCell: ({value}) => (
-                <Box>
-                    <Typography variant="body2">
-                        {formatDate(value)}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                        {value ? new Date(value).toLocaleTimeString() : 'N/A'}
-                    </Typography>
-                </Box>
-            )
+            sortable: false,
+            renderCell: ({row}) => {
+                const items = row.acceptance_items || [];
+                const totalItems = items.length;
+                const approvedItems = items.filter(item => item.report?.approved_at).length;
+                const publishedItems = items.filter(item => item.report?.published_at).length;
+
+                return (
+                    <Box>
+                        <Typography variant="body2" fontWeight="500">
+                            {approvedItems}/{totalItems} Approved
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                            {publishedItems}/{totalItems} Published
+                        </Typography>
+                    </Box>
+                );
+            }
         },
         {
             field: 'delivery_methods',
@@ -200,8 +201,18 @@ const PublishingQueue = () => {
             flex: 1,
             sortable: false,
             renderCell: ({row}) => {
-                const methods = getDeliveryMethods(row);
-                const howReport = row.acceptance_item?.acceptance?.howReport;
+                const howReport = row.howReport;
+
+                const methods = [];
+                if (howReport?.whatsapp) {
+                    methods.push({ type: 'whatsapp', icon: <WhatsApp />, color: '#25D366', value: howReport.whatsappNumber });
+                }
+                if (howReport?.email) {
+                    methods.push({ type: 'email', icon: <Email />, color: '#1976d2', value: howReport.emailAddress });
+                }
+                if (howReport?.sendToReferrer && row.referrer?.email) {
+                    methods.push({ type: 'referrer', icon: <Person />, color: '#9c27b0', value: 'To Referrer' });
+                }
 
                 return (
                     <Stack spacing={0.5}>
@@ -211,9 +222,7 @@ const PublishingQueue = () => {
                                     {method.icon}
                                 </Box>
                                 <Typography variant="caption" color="text.secondary">
-                                    {method.type === 'whatsapp' && howReport?.whatsappNumber}
-                                    {method.type === 'email' && howReport?.emailAddress}
-                                    {method.type === 'referrer' && 'To Referrer'}
+                                    {method.value}
                                 </Typography>
                             </Box>
                         ))}
@@ -230,38 +239,6 @@ const PublishingQueue = () => {
             }
         },
         {
-            field: 'approval_info',
-            headerName: 'Approval Status',
-            flex: 1,
-            sortable: false,
-            renderCell: ({row}) => {
-                const reportStatus = getReportStatus(row);
-
-                return (
-                    <Box>
-                        <Chip
-                            icon={reportStatus.status === 'approved' ? <CheckCircle /> : <Schedule />}
-                            label={reportStatus.label}
-                            size="small"
-                            color={reportStatus.color}
-                            variant="filled"
-                            sx={{ mb: 0.5 }}
-                        />
-                        {row.approver_name && (
-                            <Typography variant="caption" color="text.secondary" display="block">
-                                by {row.approver_name}
-                            </Typography>
-                        )}
-                        {row.approved_at && (
-                            <Typography variant="caption" color="text.secondary" display="block">
-                                {formatDate(row.approved_at)}
-                            </Typography>
-                        )}
-                    </Box>
-                );
-            }
-        },
-        {
             field: 'actions',
             headerName: 'Actions',
             type: 'actions',
@@ -269,8 +246,9 @@ const PublishingQueue = () => {
             flex: 0.3,
             getActions: (params) => {
                 const actions = [];
-                const isPublishing = publishingReports.has(params.row.id);
-                const hasDeliveryMethods = getDeliveryMethods(params.row).length > 0;
+                const isPublishing = publishingAcceptances.has(params.row.id);
+                const howReport = params.row.howReport;
+                const hasDeliveryMethods = (howReport?.whatsapp || howReport?.email || howReport?.sendToReferrer);
 
                 // View/Configure action
                 actions.push(
@@ -284,7 +262,7 @@ const PublishingQueue = () => {
                 );
 
                 // Quick publish action (only if delivery methods exist and user can edit)
-                if (canEdit && hasDeliveryMethods && !params.row.published_at) {
+                if (canEdit && hasDeliveryMethods) {
                     actions.push(
                         <GridActionsCellItem
                             key={`publish-${params.row.id}`}
@@ -300,41 +278,40 @@ const PublishingQueue = () => {
                 return actions;
             }
         }
-    ], [canEdit, publishingReports, handleOpenPublishForm, handleQuickPublish]);
+    ], [canEdit, publishingAcceptances, handleOpenPublishForm, handleQuickPublish]);
 
     // Optimized page reload handler
     const handlePageReload = useCallback((page, filters, sort, pageSize) => {
         router.visit(route('reports.publishing'), {
             data: {page, filters, sort, pageSize},
-            only: ["reports", "status", "success", "requestInputs", "stats"],
+            only: ["acceptances", "status", "success", "requestInputs", "stats"],
             preserveState: true
         });
     }, []);
 
     // Calculate summary stats
     const summaryStats = useMemo(() => {
-        const totalReports = reports?.data?.length || 0;
-        const readyToPublish = reports?.data?.filter(r => r.approved_at && !r.published_at).length || 0;
-        const published = reports?.data?.filter(r => r.published_at).length || 0;
+        const totalAcceptances = acceptances?.data?.length || 0;
+        const withDeliveryMethods = acceptances?.data?.filter(a =>
+            a.howReport?.whatsapp || a.howReport?.email || a.howReport?.sendToReferrer
+        ).length || 0;
 
         return {
-            total: totalReports,
-            ready: readyToPublish,
-            published: published,
-            pending: totalReports - readyToPublish - published
+            total: totalAcceptances,
+            withDelivery: withDeliveryMethods,
+            noDelivery: totalAcceptances - withDeliveryMethods
         };
-    }, [reports?.data]);
+    }, [acceptances?.data]);
 
     return (
         <>
             <PageHeader
                 title="Publishing Queue"
-                subtitle="Manage report publishing and delivery"
+                subtitle="Manage acceptance publishing and delivery"
                 stats={[
-                    { label: 'Total Reports', value: summaryStats.total, color: 'primary' },
-                    { label: 'Ready to Publish', value: summaryStats.ready, color: 'success' },
-                    { label: 'Published', value: summaryStats.published, color: 'info' },
-                    { label: 'Pending', value: summaryStats.pending, color: 'warning' }
+                    { label: 'Total Acceptances', value: summaryStats.total, color: 'primary' },
+                    { label: 'With Delivery', value: summaryStats.withDelivery, color: 'success' },
+                    { label: 'No Delivery', value: summaryStats.noDelivery, color: 'warning' }
                 ]}
             />
 
@@ -344,22 +321,22 @@ const PublishingQueue = () => {
                 status={status}
                 reload={handlePageReload}
                 columns={columns}
-                data={reports}
+                data={acceptances}
                 Filter={Filter}
                 errors={errors}
-                loading={publishingReports.size > 0}
+                loading={publishingAcceptances.size > 0}
                 emptyStateProps={{
-                    title: "No Reports in Publishing Queue",
-                    description: "Reports will appear here once they are approved and ready for publishing.",
+                    title: "No Acceptances in Publishing Queue",
+                    description: "Acceptances will appear here once all their reports are approved and ready for publishing.",
                     icon: <Publish sx={{ fontSize: 64, color: 'text.disabled' }} />
                 }}
             />
 
-            {openPublishForm && selectedReport && (
+            {openPublishForm && selectedAcceptance && (
                 <OnlyPublish
                     open={openPublishForm}
                     onCancel={handleClosePublishForm}
-                    report={selectedReport}
+                    acceptance={selectedAcceptance}
                 />
             )}
         </>

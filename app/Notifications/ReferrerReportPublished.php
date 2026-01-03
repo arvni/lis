@@ -46,9 +46,7 @@ class ReferrerReportPublished extends Notification
         // Load acceptance with related data
         $acceptance = $this->acceptance->load([
             "acceptanceItems" => function ($query) {
-                $query->whereDoesntHave("test", function ($testQuery) {
-                    $testQuery->where("type", TestType::SERVICE);
-                });
+                $query->where("reportless", false);
                 $query->with(["report.publishedDocument","report.clinicalCommentDocument"]);
             }
         ]);

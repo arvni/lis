@@ -183,10 +183,7 @@ class AcceptanceRepository
             ->withAggregate('patient', 'fullName')
             ->withAggregate('patient', 'idNo')
             ->whereHas('acceptanceItems', function (Builder $itemQuery) {
-                $itemQuery->whereHas('methodTest.test', function (Builder $testQuery) {
-                    $testQuery->where('type', '!=', TestType::SERVICE);
-                });
-
+                $itemQuery->where('reportless', false);
                 // Use whereRaw to properly reference the table columns in the subquery context
                 $itemQuery->whereRaw('(select count(*) from `samples`
                     inner join `acceptance_item_samples` on `samples`.`id` = `acceptance_item_samples`.`sample_id`
@@ -244,19 +241,14 @@ class AcceptanceRepository
     }
 
     /**
-     * Count reportable (non-service) tests for an acceptance.
+     * Count reportable tests for an acceptance.
+     * A test is reportable if it's not marked as reportless.
      */
     public function countReportableTests(Acceptance $acceptance): int
     {
         return $acceptance->acceptanceItems()
-            // Assuming AcceptanceItem model has an 'isTest' scope or similar logic here:
-            // This might be better as:
-            ->whereHas('methodTest.test', function (Builder $q) {
-                $q->where('type', '!=', TestType::SERVICE);
-            })
+            ->where('reportless', false)
             ->count();
-        // If `isTest()` scope exists on AcceptanceItems and correctly filters non-service types, original is fine.
-        // return $acceptance->acceptanceItems()->isTest()->count();
     }
 
     protected function applyFilters(Builder $query, array $filters): void // Changed $query type to Builder
@@ -438,11 +430,9 @@ class AcceptanceRepository
             ->whereExists(function ($query) {
                 $query->select(DB::raw(1))
                     ->from('acceptance_items')
-                    ->join('method_tests', 'acceptance_items.method_test_id', '=', 'method_tests.id')
-                    ->join('tests', 'method_tests.test_id', '=', 'tests.id')
                     ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id')
                     ->whereNull('acceptance_items.deleted_at')
-                    ->whereNot('tests.type', TestType::SERVICE);
+                    ->where('acceptance_items.reportless', false);
             })
             ->whereNotExists(function ($query) {
                 $query->select(DB::raw(1))
@@ -467,5 +457,85 @@ class AcceptanceRepository
                 )');
             })
             ->count();
+    }
+
+    /**
+     * List acceptances waiting for financial check.
+     * Returns acceptances with status WAITING_FOR_PUBLISHING and not financially approved.
+     */
+    public function listWaitingForFinancialCheck(array $queryData): LengthAwarePaginator
+    {
+        $query = Acceptance::query()
+            ->where('status', AcceptanceStatus::WAITING_FOR_PUBLISHING)
+            ->where('financial_approved', false)
+            ->with([
+                'patient',
+                'referrer',
+                'invoice',
+                'financialApprovedBy',
+                'acceptanceItems' => function ($q) {
+                    $q->where('reportless', false)
+                        ->with([
+                            'test',
+                            'method'
+                        ]);
+                }
+            ]);
+
+        if (isset($queryData['filters'])) {
+            $this->applyFilters($query, $queryData['filters']);
+        }
+
+        if (isset($queryData['sort'])) {
+            $query->orderBy(
+                $queryData['sort'][self::SORT_FIELD] ?? 'acceptances.id',
+                $queryData['sort'][self::SORT_DIRECTION] ?? 'desc'
+            );
+        } else {
+            $query->orderBy('acceptances.id', 'desc');
+        }
+
+        return $query->paginate($queryData['pageSize'] ?? 10);
+    }
+
+    /**
+     * List acceptances waiting for publishing.
+     * Returns acceptances with status WAITING_FOR_PUBLISHING and financially approved.
+     */
+    public function listWaitingForPublish(array $queryData): LengthAwarePaginator
+    {
+        $query = Acceptance::query()
+            ->where('status', AcceptanceStatus::WAITING_FOR_PUBLISHING)
+            ->where('financial_approved', true)
+            ->with([
+                'patient:id,fullName,idNo',
+                'referrer:id,fullName,email,reportReceivers',
+                'acceptanceItems' => function ($q) {
+                    $q->where('reportless', false)
+                        ->with([
+                            'report',
+                            'report.approver',
+                            'report.publisher',
+                            'test',
+                            'method',
+                            'patients'
+                        ]);
+                }
+            ]);
+
+        if (isset($queryData['filters'])) {
+            $this->applyFilters($query, $queryData['filters']);
+        }
+
+        if (isset($queryData['sort'])) {
+            $query->orderBy(
+                $queryData['sort'][self::SORT_FIELD] ?? 'acceptances.id',
+                $queryData['sort'][self::SORT_DIRECTION] ?? 'desc'
+            );
+        } else {
+            $query->orderBy('acceptances.id', 'desc');
+        }
+
+        return $query->paginate($queryData['pageSize'] ?? 10);
     }
 }

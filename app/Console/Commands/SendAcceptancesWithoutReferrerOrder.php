@@ -36,7 +36,7 @@ class SendAcceptancesWithoutReferrerOrder extends Command
             ->whereNotNull('referrer_id')
             ->whereDoesntHave('referrerOrder')
             ->whereHas('AcceptanceItems', function ($q) {
-                $q->whereRelation("test", "type", "!=", TestType::SERVICE);
+                $q->where("reportless", false);
             });
 
         // Apply date filter if --month-ago option is provided

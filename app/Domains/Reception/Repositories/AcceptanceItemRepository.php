@@ -85,6 +85,13 @@ class AcceptanceItemRepository
     public function creatAcceptanceItem(array $acceptanceItemData): AcceptanceItem
     {
         $acceptanceItem = AcceptanceItem::create(Arr::except($acceptanceItemData, ["patients", "id"]));
+
+        // Automatically set reportless to true for SERVICE type tests
+        $acceptanceItem->load('test');
+        if ($acceptanceItem->test && $acceptanceItem->test->type === TestType::SERVICE) {
+            $acceptanceItem->update(['reportless' => true]);
+        }
+
         if (isset($acceptanceItemData["customParameters"]["samples"])) {
             $patients = Arr::flatten(array_map(fn($item) => $item["patients"] ?? [], $acceptanceItemData["customParameters"]["samples"]), 1);
             $this->syncPatients($acceptanceItem, $patients);

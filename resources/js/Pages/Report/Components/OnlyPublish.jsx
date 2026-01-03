@@ -41,14 +41,14 @@ import {
 import {useForm} from "@inertiajs/react";
 
 /**
- * PublishForm Component - A dialog for publishing reports with document upload
+ * PublishForm Component - A dialog for publishing acceptance reports
  *
  * @param {Object} props - Component props
  * @param {boolean} props.open - Whether the dialog is open
  * @param {Function} props.onCancel - Function to handle dialog close/cancel
- * @param {Object} props.report - Form data
+ * @param {Object} props.acceptance - Acceptance data
  */
-const PublishForm = ({open, onCancel, report}) => {
+const PublishForm = ({open, onCancel, acceptance}) => {
     const [showRecipients, setShowRecipients] = useState(true);
     const [publishSuccess, setPublishSuccess] = useState(false);
 
@@ -59,7 +59,7 @@ const PublishForm = ({open, onCancel, report}) => {
 
     // Handle form submission
     const handleSubmit = () => {
-        post(route("reports.publish", report.id), {
+        post(route("acceptances.publish", acceptance.id), {
             onSuccess: () => {
                 setPublishSuccess(true);
                 setTimeout(() => {
@@ -75,10 +75,10 @@ const PublishForm = ({open, onCancel, report}) => {
         silently_publish: e.target.checked
     }));
 
-    // Get recipients from report data
+    // Get recipients from acceptance data
     const getRecipients = () => {
         let recipients = [];
-        const howReport = report.acceptance_item?.acceptance?.howReport;
+        const howReport = acceptance?.howReport;
 
         if (howReport?.whatsapp && howReport?.whatsappNumber) {
             recipients.push({
@@ -98,21 +98,21 @@ const PublishForm = ({open, onCancel, report}) => {
             });
         }
 
-        if (howReport?.sendToReferrer && report?.acceptance_item?.acceptance?.referrer?.email) {
+        if (howReport?.sendToReferrer && acceptance?.referrer?.email) {
             recipients.push({
                 type: 'referrer',
                 label: 'Referrer Email',
-                value: report.acceptance_item.acceptance.referrer.email,
+                value: acceptance.referrer.email,
                 icon: <Person />
             });
-            if(report.acceptance_item.acceptance.referrer.reportReceivers&& report.acceptance_item.acceptance.referrer.reportReceivers.length){
-                let reportReceivers=report.acceptance_item.acceptance.referrer.reportReceivers.map(report=>({
+            if(acceptance.referrer.reportReceivers && acceptance.referrer.reportReceivers.length){
+                let reportReceivers = acceptance.referrer.reportReceivers.map(email => ({
                     type: 'referrer',
                     label: 'Referrer Email',
-                    value: report,
+                    value: email,
                     icon: <Person />
                 }))
-                recipients=[...recipients,...reportReceivers]
+                recipients = [...recipients, ...reportReceivers]
             }
         }
 
@@ -121,6 +121,11 @@ const PublishForm = ({open, onCancel, report}) => {
 
     const recipients = getRecipients();
     const hasRecipients = recipients.length > 0;
+
+    // Get acceptance items info
+    const acceptanceItems = acceptance?.acceptance_items || [];
+    const totalTests = acceptanceItems.length;
+    const testsToPublish = acceptanceItems.filter(item => !item.report?.published_at).length;
 
     // Reset success state when dialog closes
     useEffect(() => {
@@ -158,10 +163,10 @@ const PublishForm = ({open, onCancel, report}) => {
                     <Share />
                     <Box>
                         <Typography variant="h6" fontWeight="600">
-                            Publish Report
+                            Publish Acceptance #{acceptance?.id}
                         </Typography>
                         <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                            Share your report with recipients
+                            Publishing {testsToPublish} of {totalTests} report{totalTests !== 1 ? 's' : ''}
                         </Typography>
                     </Box>
                 </Stack>
@@ -190,7 +195,28 @@ const PublishForm = ({open, onCancel, report}) => {
                         icon={<CheckCircle />}
                         sx={{ m: 3, mb: 0, borderRadius: 2 }}
                     >
-                        Report published successfully!
+                        All reports for acceptance #{acceptance?.id} published successfully!
+                    </Alert>
+                )}
+
+                {/* Tests Info */}
+                {testsToPublish > 0 && (
+                    <Alert
+                        severity="info"
+                        sx={{ m: 3, mb: 0, borderRadius: 2 }}
+                    >
+                        <Typography variant="body2" fontWeight="500" gutterBottom>
+                            Tests to be published:
+                        </Typography>
+                        <Box component="ul" sx={{ mt: 1, mb: 0, pl: 2 }}>
+                            {acceptanceItems.filter(item => !item.report?.published_at).map((item, index) => (
+                                <li key={index}>
+                                    <Typography variant="body2">
+                                        {item.test?.name || 'Unknown Test'}
+                                    </Typography>
+                                </li>
+                            ))}
+                        </Box>
                     </Alert>
                 )}
 
@@ -293,7 +319,7 @@ const PublishForm = ({open, onCancel, report}) => {
                                         Publish Silently
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
-                                        Recipients won't receive notifications about this publication
+                                        Recipients won't receive notifications for these {testsToPublish} report{testsToPublish !== 1 ? 's' : ''}
                                     </Typography>
                                 </Box>
                             }

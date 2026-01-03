@@ -99,6 +99,8 @@ class RoleAndPermissionSeeder extends Seeder
                 "Access All Reports",
                 "Approve Report",
                 "Print Report",
+                "Financial Check",
+                "Approve Financial",
                 "Publish Report",
                 "Unpublish Report",
                 "Admin Create Report",
@@ -163,6 +165,8 @@ class RoleAndPermissionSeeder extends Seeder
                     "Edit Acceptance",
                     "Delete Acceptance",
                     "List Acceptance",
+                    "Toggle Reportless Acceptance Item",
+                    "Check Status",
                 ],
             ],
             "Advance Settings" => [

@@ -31,6 +31,9 @@ class ShowAcceptanceItemController extends Controller
         // Check if user can create report for this acceptance item
         $canCreateReport = Gate::allows('create', [Report::class, $acceptanceItem]);
 
-        return Inertia::render("AcceptanceItem/Show", compact("acceptanceItem", "canCreateReport"));
+        // Check if user can toggle reportless status
+        $canToggleReportless = Gate::allows('Reception.Acceptances.Toggle Reportless Acceptance Item');
+
+        return Inertia::render("AcceptanceItem/Show", compact("acceptanceItem", "canCreateReport", "canToggleReportless"));
     }
 }

@@ -39,6 +39,9 @@ class Acceptance extends Model
         "howReport",
         "status",
         "step",
+        "financial_approved",
+        "financial_approved_by",
+        "financial_approved_at",
     ];
 
     protected $casts = [
@@ -115,6 +118,11 @@ class Acceptance extends Model
     public function consultation(): BelongsTo
     {
         return $this->belongsTo(Consultation::class);
+    }
+
+    public function financialApprovedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, "financial_approved_by");
     }
 
     public function acceptanceItems(): HasMany

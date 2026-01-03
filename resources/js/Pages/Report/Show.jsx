@@ -26,7 +26,6 @@ import {
     ExpandMore as ExpandMoreIcon,
     ThumbDownAlt,
     ThumbUpAlt,
-    Share,
     Close,
     DownloadOutlined,
     VisibilityOffOutlined,
@@ -48,7 +47,6 @@ import ApproveForm from "./Components/ApproveForm";
 import RejectForm from "./Components/RejectForm";
 import History from "./Components/History";
 import Signers from "./Components/Signers";
-import PublishForm from "./Components/PublishForm";
 
 import DialogContent from "@mui/material/DialogContent";
 import {router, useForm, Link} from "@inertiajs/react";
@@ -99,7 +97,6 @@ const Show = ({
     const {post, data, setData, wasSuccessful, hasErrors, errors, reset, processing} = useForm({_method: "put"});
     const [openApprove, setOpenApprove] = useState(false);
     const [openReject, setOpenReject] = useState(false);
-    const [openPublish, setOpenPublish] = useState(false);
     const [openUnpublish, setOpenUnpublish] = useState(false);
     const {enqueueSnackbar} = useSnackbar();
     const [activeAccordions, setActiveAccordions] = useState({
@@ -133,7 +130,6 @@ const Show = ({
     const cancel = () => {
         setOpenApprove(false);
         setOpenReject(false);
-        setOpenPublish(false);
         setOpenUnpublish(false);
         reset();
     };
@@ -160,13 +156,6 @@ const Show = ({
         post(route("reports.reject", report.id), {onSuccess: () => setOpenReject(false)});
     };
 
-    // Submit publish
-    const publish = () => {
-        post(route("reports.publish", report.id), {
-            onSuccess: () => setOpenPublish(false)
-        });
-    };
-
     // Submit unpublish
     const unpublish = () =>
         post(route("reports.unpublish", report.id), {
@@ -175,10 +164,6 @@ const Show = ({
 
     // Open dialog handlers
     const handleReject = () => setOpenReject(true);
-    const handlePublish = () => {
-        setData(previousData => ({...previousData, published_document: report.published_document,}))
-        setOpenPublish(true);
-    }
     const handleUnpublish = () => setOpenUnpublish(true);
 
     // Handle form field changes
@@ -294,18 +279,6 @@ const Show = ({
                                     </Button>
                                 </Tooltip>
                             </> : null,
-                            canPublish && report.approver && report.status && !report.publisher ?
-                                <Tooltip title="Publish Report">
-                                    <Button
-                                        size="small"
-                                        variant="contained"
-                                        color="success"
-                                        onClick={handlePublish}
-                                        startIcon={<Share/>}
-                                    >
-                                        Publish
-                                    </Button>
-                                </Tooltip> : null,
                             canUnpublish && report.publisher ?
                                 <Tooltip title="Unpublish Report">
                                     <Button
@@ -624,14 +597,6 @@ const Show = ({
                 onChange={handleChange}
                 onSubmit={reject}
                 data={data}
-            />
-
-            <PublishForm
-                open={openPublish}
-                onCancel={cancel}
-                onSubmit={publish}
-                data={data}
-                setData={setData}
             />
 
             <Dialog

@@ -29,7 +29,7 @@ class PublishReportController extends Controller
 
         return redirect()->back()->with([
             "success" => true,
-            "status" => "Report successfully unpublished"
+            "status" => "Report successfully published"
         ]);
     }
 }
