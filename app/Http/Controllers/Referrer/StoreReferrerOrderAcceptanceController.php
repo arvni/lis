@@ -37,14 +37,12 @@ class StoreReferrerOrderAcceptanceController extends Controller
             return back()->withErrors("it has Acceptance Currently");
         $user = auth()->user();
         $validated = $request->validated();
-        $invoiceDto = new InvoiceDTO("referrer", $referrerOrder->referrer_id, $user->id);
-        $invoice = $this->invoiceService->storeInvoice($invoiceDto);
         $acceptanceDto = new AcceptanceDto(
             $referrerOrder->patient_id,
             5,
             null,
             null,
-            $invoice->id,
+            null,
             $referrerOrder->referrer_id,
             $user->id,
             $referrerOrder->orderInformation["reference_id"] ?? null,
@@ -56,12 +54,6 @@ class StoreReferrerOrderAcceptanceController extends Controller
             $validated["outPatient"] ?? true,
         );
         $acceptance = $this->acceptanceService->storeAcceptance($acceptanceDto);
-        $acceptance
-            ->loadSum("AcceptanceItems", "price")
-            ->loadSum("AcceptanceItems", "discount");
-        $price = $acceptance->acceptance_items_sum_price - $acceptance->acceptance_items_sum_discount;
-        $paymentDto = new PaymentDto($invoice->id, $user->id, "referrer", $referrerOrder->referrer_id, $price, PaymentMethod::CREDIT, null);
-        $this->paymentService->storePayment($paymentDto);
         $referrerOrderDto = ReferrerOrderDTO::fromArray($referrerOrder->toArray());
         $referrerOrderDto->acceptanceId = $acceptance->id;
         $this->referrerOrderService->updateReferrerOrder($referrerOrder, $referrerOrderDto);
