@@ -18,7 +18,9 @@ class AcceptanceItemStateRepository
             "acceptanceItem.test",
             "acceptanceItem.method.test",
             "sample.patient"
-        ]);
+        ])
+        ->whereHas('acceptanceItem'); // Exclude acceptance item states where acceptance item is soft deleted
+
         if (isset($queryData["filters"]))
             $this->applyFilters($query, $queryData["filters"]);
         $query->orderBy($queryData['sort']['field'] ?? 'id', $queryData['sort']['sort'] ?? 'asc');
