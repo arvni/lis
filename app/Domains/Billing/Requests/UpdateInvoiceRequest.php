@@ -45,7 +45,7 @@ class UpdateInvoiceRequest extends FormRequest
             "acceptance_items.PANEL.*.price" => ["required", "numeric", "gt:0"],
             "acceptance_items.PANEL.*.discount" => ["required", "numeric"],
             "acceptance_items.PANEL.*.customParameters.discounts" => ["nullable", "array"],
-            "payments" => ["required", "array"],
+            "payments" => ["nullable","array"],
             "payments.*.id" => ["nullable", Rule::exists("payments", "id")],
             "payments.*.price" => ["required", "numeric"],
             "payments.*.payer_id" => ["required"],
