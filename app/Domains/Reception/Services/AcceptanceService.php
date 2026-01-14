@@ -17,11 +17,13 @@ use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Events\AcceptanceDeletedEvent;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
+use App\Domains\Reception\Models\Report;
 use App\Domains\Reception\Notifications\PatientReportPublished;
 use App\Domains\Reception\Repositories\AcceptanceRepository;
 use App\Domains\Referrer\Models\Referrer;
 use App\Domains\Referrer\Services\ReferrerOrderService;
 use App\Domains\Setting\Repositories\SettingRepository;
+use App\Domains\User\Models\User;
 use App\Notifications\ReferrerReportPublished;
 use Carbon\Carbon;
 use Exception;
@@ -412,14 +414,16 @@ class AcceptanceService
 
             // Publish all unpublished reports
             foreach ($acceptance->acceptanceItems as $acceptanceItem) {
-                if ($acceptanceItem->report && !$acceptanceItem->report->published_at) {
-                    $acceptanceItem->report->update([
+                if (!$acceptanceItem->reportless && $acceptanceItem->report && !$acceptanceItem->report->published_at) {
+                    $report=$acceptanceItem->report;
+                    Report::where("id",$report->id)
+                        ->update([
                         'published_at' => $publishedAt,
                         'publisher_id' => $publisherId
                     ]);
 
                     // Update timeline
-                    $publisher = \App\Domains\User\Models\User::find($publisherId);
+                    $publisher = User::find($publisherId);
                     $this->acceptanceItemService->updateAcceptanceItemTimeline(
                         $acceptanceItem,
                         "Report Published By {$publisher->name}"
