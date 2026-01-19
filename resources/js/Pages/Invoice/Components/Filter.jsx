@@ -114,6 +114,16 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
         setFilters(prevState => ({...prevState, search: ""}));
     }, []);
 
+    const formatDateForBackend = (date) => {
+        if (!date) return null;
+        // Format date as YYYY-MM-DD to avoid timezone issues
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     const handleApplyFilters = useCallback(() => {
         if (dateError) {
             return;
@@ -124,8 +134,8 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
             search: filters.search,
             owner_type: filters.owner_type,
             owner_id: filters.owner_id,
-            from_date: filters.from_date,
-            to_date: filters.to_date,
+            from_date: formatDateForBackend(filters.from_date),
+            to_date: formatDateForBackend(filters.to_date),
         };
 
         // Remove null, undefined, and empty string values, but keep owner_object out of the API call

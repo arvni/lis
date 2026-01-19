@@ -101,8 +101,8 @@ class InvoiceRepository
                 ? Carbon::parse($filters["from_date"],"Asia/Muscat")->startOfDay()
                 : Carbon::createFromTimestamp(0);
             $endDate = !empty($filters["to_date"])
-                ? Carbon::parse($filters["to_date"])->endOfDay()
-                : Carbon::now();
+                ? Carbon::parse($filters["to_date"],"Asia/Muscat")->endOfDay()
+                : Carbon::now("Asia/Muscat");
             $query->whereBetween('invoices.created_at', [$startDate, $endDate]);
         }
 

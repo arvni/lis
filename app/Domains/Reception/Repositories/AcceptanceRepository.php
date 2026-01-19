@@ -271,19 +271,19 @@ class AcceptanceRepository
         }
 
         if (isset($filters["date"])) {
-            $date = Carbon::parse($filters["date"]);
+            $date = Carbon::parse($filters["date"],"Asia/Muscat");
             $dateRange = [$date->copy()->startOfDay(), $date->copy()->endOfDay()];
             $query->whereBetween('acceptances.created_at', $dateRange);
         }
         if (!empty($filters["from_date"]) || !empty($filters["to_date"])) {
             // Set default values for the date range
             $startDate = !empty($filters["from_date"])
-                ? Carbon::parse($filters["from_date"])->startOfDay()
+                ? Carbon::parse($filters["from_date"],"Asia/Muscat")->startOfDay()
                 : Carbon::createFromTimestamp(0);
 
             $endDate = !empty($filters["to_date"])
-                ? Carbon::parse($filters["to_date"])->endOfDay()
-                : Carbon::now(); // Current time
+                ? Carbon::parse($filters["to_date"],"Asia/Muscat")->endOfDay()
+                : Carbon::now("Asia/Muscat"); // Current time
 
             $query->whereBetween('created_at', [$startDate, $endDate]);
         }

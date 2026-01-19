@@ -98,21 +98,21 @@ class PaymentRepository
 
         // Single date filter
         if(isset($filters["date"])){
-            $date=Carbon::parse($filters["date"]);
+            $date=Carbon::parse($filters["date"],"Asia/Muscat");
             $dateRange=[$date->startOfDay(),$date->copy()->endOfDay()];
             $query->whereBetween("created_at",$dateRange);
         }
 
         // Date range filter
         if (isset($filters["dateFrom"]) && isset($filters["dateTo"])) {
-            $dateFrom = Carbon::parse($filters["dateFrom"])->startOfDay();
-            $dateTo = Carbon::parse($filters["dateTo"])->endOfDay();
+            $dateFrom = Carbon::parse($filters["dateFrom"],"Asia/Muscat")->startOfDay();
+            $dateTo = Carbon::parse($filters["dateTo"],"Asia/Muscat")->endOfDay();
             $query->whereBetween("created_at", [$dateFrom, $dateTo]);
         } elseif (isset($filters["dateFrom"])) {
-            $dateFrom = Carbon::parse($filters["dateFrom"])->startOfDay();
+            $dateFrom = Carbon::parse($filters["dateFrom"],"Asia/Muscat")->startOfDay();
             $query->where("created_at", ">=", $dateFrom);
         } elseif (isset($filters["dateTo"])) {
-            $dateTo = Carbon::parse($filters["dateTo"])->endOfDay();
+            $dateTo = Carbon::parse($filters["dateTo"],"Asia/Muscat")->endOfDay();
             $query->where("created_at", "<=", $dateTo);
         }
 

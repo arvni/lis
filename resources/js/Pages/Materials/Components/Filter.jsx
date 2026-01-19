@@ -49,12 +49,28 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
         }));
     };
 
+    const formatDateForBackend = (date) => {
+        if (!date) return null;
+        // Format date as YYYY-MM-DD to avoid timezone issues
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     const handleApplyFilters = () => {
         // Clean up filters before sending
         const cleanedFilters = {
             ...filters,
-            expire_date: (filters.expire_date.from || filters.expire_date.to) ? filters.expire_date : null,
-            assigned_at: (filters.assigned_at.from || filters.assigned_at.to) ? filters.assigned_at : null,
+            expire_date: (filters.expire_date.from || filters.expire_date.to) ? {
+                from: formatDateForBackend(filters.expire_date.from),
+                to: formatDateForBackend(filters.expire_date.to)
+            } : null,
+            assigned_at: (filters.assigned_at.from || filters.assigned_at.to) ? {
+                from: formatDateForBackend(filters.assigned_at.from),
+                to: formatDateForBackend(filters.assigned_at.to)
+            } : null,
         };
 
         // Remove null values
