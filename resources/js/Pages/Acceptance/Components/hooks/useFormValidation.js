@@ -8,7 +8,7 @@ export const useFormValidation = (data, maxDiscount) => {
         if (!data.panel) {
             newErrors.panel = "Please Select A Panel";
         }
-        if (data.panel.price * 1 < data.discount) {
+        if (data.price * maxDiscount/100 < data.discount) {
             newErrors.discount = "Please Enter A lower discount";
         }
         for (let i = 0; i < data.acceptanceItems.length; i++) {

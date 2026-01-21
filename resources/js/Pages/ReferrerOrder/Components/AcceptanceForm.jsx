@@ -161,6 +161,7 @@ const AcceptanceFormDialog = ({
                         panelModalState={panelModalState}
                         deleteConfirmState={deleteConfirmState}
                         handlers={handlers}
+                        maxDiscount={maxDiscount}
                         requestedTests={requestedTests}
                     />
                 );

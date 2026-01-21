@@ -422,6 +422,7 @@ const PanelTestForm = ({
                            panel,
                            maxDiscount = 0,
                        }) => {
+    console.log("mx:",maxDiscount);
     const [currentTab, setCurrentTab] = useState(0);
 
     // Memoized calculations

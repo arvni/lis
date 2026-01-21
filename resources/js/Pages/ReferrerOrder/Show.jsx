@@ -1035,7 +1035,7 @@ const Show = ({referrerOrder, errors = {}}) => {
                             ? orderItems.map(item => item.test)
                             : referrerOrder?.orderInformation?.tests
                     }
-                    maxDiscount={0}
+                    maxDiscount={100}
                 />
             )}
 

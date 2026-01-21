@@ -364,7 +364,7 @@ const AddPanel = ({
                         onClick={handleSubmit}
                         variant="contained"
                         color="secondary"
-                        disabled={isLoading || hasErrors}
+                        disabled={isLoading}
                         startIcon={isSubmitting && <CircularProgress size={16} color="inherit" />}
                     >
                         {isSubmitting ? "Processing..." : "Submit"}

@@ -26,7 +26,6 @@ const PriceField = ({
                               values = {},
                               errors = {}
                           }) => {
-     console.log(values);
     // Memoized price calculation to optimize performance
     const {calculatedPrice, formula, selectedCondition, isValid} = useMemo(() => {
         const price = calcPrice(

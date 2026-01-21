@@ -330,7 +330,6 @@ const AddTest = ({
     }, [fetchTestDetails]);
 
     const handleSubmit = useCallback(() => {
-        console.log("here");
         if (validateForm()) {
             try {
                 onSubmit(data);

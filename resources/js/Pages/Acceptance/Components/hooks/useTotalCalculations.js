@@ -19,7 +19,7 @@ const useTotalCalculations = (tests, panels) => {
     );
 
     const panelPrice = useMemo(() =>
-            panels.reduce((sum, item) => sum + (Number(item.panel.price) || 0), 0),
+            panels.reduce((sum, item) => sum + (Number(item.price) || 0), 0),
         [panels]
     );
 
