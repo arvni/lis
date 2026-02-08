@@ -107,12 +107,6 @@ readonly class DashboardService
                 'Total Transfer Payments',
                 'OMR ' . $this->paymentRepository->getTotalTransferPaymentsForDateRange($dateRange)
             ));
-
-            $dashboardData->addItem(new DashboardItem(
-                'Today',
-                'Total Credit Payments',
-                'OMR ' . $this->paymentRepository->getTotalCreditPaymentsForDateRange($dateRange)
-            ));
         }
 
         // Reporting domain metrics

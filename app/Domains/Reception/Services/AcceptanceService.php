@@ -464,9 +464,15 @@ class AcceptanceService
 
         $reportableItems = $acceptance->acceptanceItems;
 
-        // If no reportable items, do nothing
+        // If no reportable items, check financial approval before setting to REPORTED
         if ($reportableItems->isEmpty()) {
-            $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+            if ($acceptance->financial_approved) {
+                $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+            } else {
+                if ($acceptance->status !== AcceptanceStatus::WAITING_FOR_PUBLISHING) {
+                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
+                }
+            }
             return;
         }
         // Check if all reportable items have reports
@@ -489,9 +495,16 @@ class AcceptanceService
             });
 
             if ($allPublished) {
-                // All reports are published
-                if ($acceptance->status !== AcceptanceStatus::REPORTED) {
-                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+                // All reports are published, check financial approval before setting to REPORTED
+                if ($acceptance->financial_approved) {
+                    if ($acceptance->status !== AcceptanceStatus::REPORTED) {
+                        $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+                    }
+                } else {
+                    // Stay at WAITING_FOR_PUBLISHING until financial is approved
+                    if ($acceptance->status !== AcceptanceStatus::WAITING_FOR_PUBLISHING) {
+                        $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
+                    }
                 }
             } else {
                 // All approved but not all published
@@ -504,13 +517,19 @@ class AcceptanceService
 
     public function checkAcceptanceReport(Acceptance $acceptance, $silent = false): void
     {
-        // Check if all tests are published and update acceptance status if needed
+        // Check if all tests are published and financial is approved
         if ($this->areAllTestsPublished($acceptance)) {
-            $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
-            // Send notifications
-            $this->sendPublishedNotifications($acceptance, $silent);
+            if ($acceptance->financial_approved) {
+                $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+                // Send notifications
+                $this->sendPublishedNotifications($acceptance, $silent);
+            } else {
+                // Stay at WAITING_FOR_PUBLISHING until financial is approved
+                if ($acceptance->status !== AcceptanceStatus::WAITING_FOR_PUBLISHING) {
+                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
+                }
+            }
         }
-
     }
 
     /**
@@ -842,11 +861,21 @@ class AcceptanceService
     {
         if ($acceptance->status == AcceptanceStatus::REPORTED)
             return;
+
         $reportableTest = $this->acceptanceRepository->countReportableTests($acceptance);
+
         if ($reportableTest) {
             $publishedTest = $this->acceptanceRepository->countPublishedTests($acceptance);
             if ($publishedTest == $reportableTest) {
-                $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+                // All tests are published, check financial approval before setting to REPORTED
+                if ($acceptance->financial_approved) {
+                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+                } else {
+                    // Stay at WAITING_FOR_PUBLISHING until financial is approved
+                    if ($acceptance->status !== AcceptanceStatus::WAITING_FOR_PUBLISHING) {
+                        $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
+                    }
+                }
             } else {
                 $startedItems = $this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
                 if ($startedItems) {
@@ -854,9 +883,15 @@ class AcceptanceService
                 }
             }
         } else {
-            $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+            // No reportable tests, check financial approval before setting to REPORTED
+            if ($acceptance->financial_approved) {
+                $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+            } else {
+                if ($acceptance->status !== AcceptanceStatus::WAITING_FOR_PUBLISHING) {
+                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
+                }
+            }
         }
-
     }
 
 

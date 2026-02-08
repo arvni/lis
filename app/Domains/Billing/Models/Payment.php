@@ -26,7 +26,7 @@ class Payment extends Model
     protected $casts=[
         "information" => "json",
         "price" => "float",
-        "paymentMethod" => PaymentMethod::class
+        "paymentMethod" => PaymentMethod::class,
     ];
 
     public function invoice()

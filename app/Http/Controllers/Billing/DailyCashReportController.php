@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Billing;
 use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Exports\DailyCashReportExport;
 use App\Domains\Billing\Models\Payment;
+use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Reception\Models\AcceptanceItem;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -20,32 +22,48 @@ class DailyCashReportController extends Controller
     public function __invoke(Request $request)
     {
         $date = Carbon::parse($request->get("date"));
-
-        // Get acceptances created on the specified date
-        $acceptances = Acceptance::where("created_at", ">=", $date->copy()->startOfDay())
-            ->where("created_at", "<=", $date->endOfDay())
-            ->with("acceptanceItems.test", "acceptanceItems.patients", "patient", "payments", "referrer")
-            ->get();
+        $dateRange = [$date->copy()->startOfDay(), $date->copy()->endOfDay()];
 
         $data = [];
         $processedAcceptanceIds = [];
 
-        // Process acceptances created on the specified date
-        foreach ($acceptances as $acceptance) {
-            $processedAcceptanceIds[] = $acceptance->id;
+        // Get acceptance items created on the specified date, excluding SERVICE type tests
+        $acceptanceItems = AcceptanceItem::whereBetween("created_at", $dateRange)
+            ->whereHas("test", function ($q) {
+                $q->whereNot("type", TestType::SERVICE);
+            })
+            ->with("test", "patients", "acceptance.patient", "acceptance.payments", "acceptance.referrer")
+            ->get();
 
-            $totalPaid = $acceptance->payments->where("paymentMethod", '!=', PaymentMethod::CREDIT)->sum('price');
-            $total = $acceptance->acceptanceItems->map(fn($item) => $item->price)->sum();
-            $totalDiscount = $acceptance->acceptanceItems->map(fn($item) => $item->discount)->sum();
+        // Group by acceptance_id
+        $itemsByAcceptance = $acceptanceItems->groupBy('acceptance_id');
+
+        // Process acceptance items created on the specified date
+        foreach ($itemsByAcceptance as $acceptanceId => $items) {
+            $acceptance = $items->first()->acceptance;
+            if (!$acceptance) {
+                continue;
+            }
+
+            $processedAcceptanceIds[] = $acceptanceId;
+
+            // Only count payments excluding credit
+            $paymentsExcludingCredit = $acceptance->payments->where("paymentMethod", '!=', PaymentMethod::CREDIT);
+            $totalPaid = $paymentsExcludingCredit->sum('price');
+
+            // Calculate totals only for items created on this date
+            $total = $items->sum('price');
+            $totalDiscount = $items->sum('discount');
+
             $data[] = [
-                "test_name" => $this->extractTests($acceptance->acceptanceItems),
-                "patient_name" => $this->extractPatients($acceptance),
+                "test_name" => $this->extractTestsFromItems($items),
+                "patient_name" => $this->extractPatientsFromItems($items, $acceptance),
                 "test_price" => $total,
-                "payment_method" => $acceptance->payments->map(fn($item) => $item->paymentMethod->name)->join(", "),
+                "payment_method" => $paymentsExcludingCredit->map(fn($item) => $item->paymentMethod->name)->unique()->join(", "),
                 "discount" => $totalDiscount,
                 "prepayment" => $totalPaid,
                 "remaining" => $total - $totalPaid - $totalDiscount,
-                "receipt_no" => $acceptance->payments
+                "receipt_no" => $paymentsExcludingCredit
                     ->whereIn("paymentMethod", [PaymentMethod::CARD, PaymentMethod::TRANSFER])
                     ->map(fn($item) => $item->information["transferReference"] ?? $item->information["receiptReferenceCode"] ?? "")
                     ->filter()
@@ -55,9 +73,8 @@ class DailyCashReportController extends Controller
             ];
         }
 
-        // Get payments made on the specified date for acceptances from other dates
-        $todaysPayments = Payment::where("created_at", ">=", $date->copy()->startOfDay())
-            ->where("created_at", "<=", $date->endOfDay())
+        // Get payments made on the specified date for acceptances not already processed
+        $todaysPayments = Payment::whereBetween("created_at", $dateRange)
             ->where("paymentMethod", '!=', PaymentMethod::CREDIT)
             ->with(
                 "invoice.acceptance.acceptanceItems.test",
@@ -78,21 +95,21 @@ class DailyCashReportController extends Controller
 
             $processedAcceptanceIds[] = $acceptance->id;
 
-            // Get all payments for this acceptance
-            $allPayments = $acceptance->payments;
-            $totalPaid = $allPayments->where("paymentMethod", '!=', PaymentMethod::CREDIT)->sum('price');
-            $total = $acceptance->acceptanceItems->map(fn($item) => $item->price)->sum();
-            $totalDiscount = $acceptance->acceptanceItems->map(fn($item) => $item->discount)->sum();
+            // Get all payments excluding credit
+            $paymentsExcludingCredit = $acceptance->payments->where("paymentMethod", '!=', PaymentMethod::CREDIT);
+            $totalPaid = $paymentsExcludingCredit->sum('price');
+            $total = $acceptance->acceptanceItems->sum('price');
+            $totalDiscount = $acceptance->acceptanceItems->sum('discount');
 
             $data[] = [
                 "test_name" => $this->extractTests($acceptance->acceptanceItems),
                 "patient_name" => $this->extractPatients($acceptance),
                 "test_price" => $total,
-                "payment_method" => $allPayments->map(fn($item) => $item->paymentMethod->name)->join(", "),
+                "payment_method" => $paymentsExcludingCredit->map(fn($item) => $item->paymentMethod->name)->unique()->join(", "),
                 "discount" => $totalDiscount,
                 "prepayment" => $totalPaid,
                 "remaining" => $total - $totalPaid - $totalDiscount,
-                "receipt_no" => $allPayments
+                "receipt_no" => $paymentsExcludingCredit
                     ->whereIn("paymentMethod", [PaymentMethod::CARD, PaymentMethod::TRANSFER])
                     ->map(fn($item) => $item->information["transferReference"] ?? $item->information["receiptReferenceCode"] ?? "")
                     ->filter()
@@ -118,8 +135,22 @@ class DailyCashReportController extends Controller
             ->implode(', ');
     }
 
+    private function extractTestsFromItems(Collection $items): string
+    {
+        return $items
+            ->pluck("test.name")
+            ->filter()
+            ->unique()
+            ->implode(', ');
+    }
+
     private function extractPatients(Acceptance $acceptance)
     {
         return $acceptance->acceptanceItems->reduce(fn($a, $b) => $a->merge($b->patients), collect([]))->merge([$acceptance->patient])->unique("id")->map(fn($item) => $item->fullName ?? "")->implode(", ");
+    }
+
+    private function extractPatientsFromItems(Collection $items, Acceptance $acceptance)
+    {
+        return $items->reduce(fn($a, $b) => $a->merge($b->patients), collect([]))->merge([$acceptance->patient])->unique("id")->map(fn($item) => $item->fullName ?? "")->implode(", ");
     }
 }
