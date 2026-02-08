@@ -16,16 +16,34 @@ import {
     Chip,
     Alert,
     CircularProgress,
+    Checkbox,
+    FormControlLabel,
+    FormGroup,
+    Collapse,
+    IconButton,
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import MenuItem from "@mui/material/MenuItem";
-import React, { useState, useMemo } from "react";
-import { useForm } from "@inertiajs/react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useForm, router } from "@inertiajs/react";
+import { ExpandMore, ExpandLess, MergeType } from "@mui/icons-material";
 
-const Form = ({ barcodes, samples, open, onClose, referrerOrder }) => {
+const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = false, allAcceptanceItems = [] }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { data, setData, errors, post, reset } = useForm({ barcodes });
+    const [expandedRows, setExpandedRows] = useState({});
+    const { data, setData, errors, reset } = useForm({ barcodes });
+
+    // Initialize barcodes with selectedItems for pooling mode
+    useEffect(() => {
+        if (isPooling && barcodes?.length > 0) {
+            const initializedBarcodes = barcodes.map(barcode => ({
+                ...barcode,
+                selectedItems: barcode.items?.map(item => item.id) || [],
+            }));
+            setData({ barcodes: initializedBarcodes });
+        }
+    }, [isPooling, barcodes]);
 
     // Get current datetime in local timezone format
     const now = useMemo(() => {
@@ -36,13 +54,46 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder }) => {
 
     // Validation helper
     const isFormValid = useMemo(() => {
-        return data?.barcodes?.every(barcode =>
-            barcode.sample &&
-            barcode.sampleType &&
-            barcode.received_at &&
-            (!barcode.collectionDate || new Date(barcode.collectionDate) <= new Date(barcode.received_at))
+        return data?.barcodes?.every(barcode => {
+            const baseValid = barcode.sample &&
+                barcode.sampleType &&
+                barcode.received_at &&
+                (!barcode.collectionDate || new Date(barcode.collectionDate) <= new Date(barcode.received_at));
+
+            // For pooling, also check that at least one item is selected
+            if (isPooling) {
+                return baseValid && barcode.selectedItems?.length > 0;
+            }
+            return baseValid;
+        });
+    }, [data?.barcodes, isPooling]);
+
+    // Toggle row expansion for item selection
+    const toggleRowExpansion = (index) => {
+        setExpandedRows(prev => ({
+            ...prev,
+            [index]: !prev[index]
+        }));
+    };
+
+    // Handle acceptance item selection change
+    const handleItemSelectionChange = (barcodeIndex, itemId) => {
+        const updatedBarcodes = [...data.barcodes];
+        const currentSelected = updatedBarcodes[barcodeIndex].selectedItems || [];
+
+        if (currentSelected.includes(itemId)) {
+            updatedBarcodes[barcodeIndex].selectedItems = currentSelected.filter(id => id !== itemId);
+        } else {
+            updatedBarcodes[barcodeIndex].selectedItems = [...currentSelected, itemId];
+        }
+
+        // Also update the items array to match selected items
+        updatedBarcodes[barcodeIndex].items = allAcceptanceItems.filter(
+            item => updatedBarcodes[barcodeIndex].selectedItems.includes(item.id)
         );
-    }, [data?.barcodes]);
+
+        setData({ barcodes: updatedBarcodes });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -50,7 +101,27 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder }) => {
 
         setIsSubmitting(true);
 
-        post(route('referrerOrders.samples', referrerOrder), {
+        // Clean up data to only send what's needed
+        const cleanedBarcodes = data.barcodes.map(barcode => ({
+            patient: { id: barcode.patient?.id },
+            sampleType: barcode.sampleType,
+            sampleLocation: barcode.sampleLocation || 'In Lab',
+            collection_date: barcode.collection_date,
+            items: (barcode.selectedItems || barcode.items?.map(i => i.id) || []).map(id =>
+                typeof id === 'object' ? { id: id.id } : { id }
+            ),
+            barcodeGroup: {
+                id: barcode.barcodeGroup?.id,
+                name: barcode.barcodeGroup?.name,
+                abbr: barcode.barcodeGroup?.abbr
+            },
+            barcode: barcode.barcode,
+            material: barcode.sample?.material ? { id: barcode.sample.material.id } : null,
+            received_at: barcode.received_at
+        }));
+
+        // Use router.post directly with cleaned data
+        router.post(route('referrerOrders.samples', referrerOrder), { barcodes: cleanedBarcodes }, {
             onSuccess: () => {
                 window.open(route("acceptances.barcodes", referrerOrder.acceptance_id), "_blank");
                 handleClose();
@@ -134,11 +205,20 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder }) => {
             disableEscapeKeyDown={isSubmitting}
         >
             <DialogTitle>
-                <Typography variant="h6" component="div">
-                    Select Samples for Order #{referrerOrder?.id}
-                </Typography>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                    {isPooling && <MergeType color="info" />}
+                    <Typography variant="h6" component="div">
+                        Select Samples for Order #{referrerOrder?.id}
+                    </Typography>
+                    {isPooling && (
+                        <Chip label="Pooling Mode" size="small" color="info" />
+                    )}
+                </Stack>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    Please select appropriate samples and sample types for each barcode group
+                    {isPooling
+                        ? "Select which acceptance items each sample should be linked to"
+                        : "Please select appropriate samples and sample types for each barcode group"
+                    }
                 </Typography>
             </DialogTitle>
 
@@ -157,6 +237,11 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder }) => {
                                     <TableCell rowSpan={2} align="center" sx={{ fontWeight: 'bold', minWidth: 120 }}>
                                         Barcode Group
                                     </TableCell>
+                                    {isPooling && (
+                                        <TableCell rowSpan={2} align="center" sx={{ fontWeight: 'bold', minWidth: 200 }}>
+                                            Linked Tests *
+                                        </TableCell>
+                                    )}
                                     <TableCell colSpan={2} align="center" sx={{ fontWeight: 'bold', borderBottom: 1 }}>
                                         Test Information
                                     </TableCell>
@@ -201,15 +286,64 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder }) => {
                                             </Typography>
                                         </TableCell>
 
+                                        {isPooling && (
+                                            <TableCell sx={{ verticalAlign: 'top' }}>
+                                                <Box>
+                                                    <Stack direction="row" alignItems="center" spacing={1}>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            {barcode.selectedItems?.length || 0} items selected
+                                                        </Typography>
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => toggleRowExpansion(index)}
+                                                        >
+                                                            {expandedRows[index] ? <ExpandLess /> : <ExpandMore />}
+                                                        </IconButton>
+                                                    </Stack>
+                                                    <Collapse in={expandedRows[index]}>
+                                                        <FormGroup sx={{ mt: 1, maxHeight: 200, overflow: 'auto' }}>
+                                                            {allAcceptanceItems.map((item) => (
+                                                                <FormControlLabel
+                                                                    key={item.id}
+                                                                    control={
+                                                                        <Checkbox
+                                                                            size="small"
+                                                                            checked={barcode.selectedItems?.includes(item.id) || false}
+                                                                            onChange={() => handleItemSelectionChange(index, item.id)}
+                                                                        />
+                                                                    }
+                                                                    label={
+                                                                        <Box>
+                                                                            <Typography variant="body2">
+                                                                                {item.method?.test?.name || item.test?.name || 'Unknown Test'}
+                                                                            </Typography>
+                                                                            <Typography variant="caption" color="text.secondary">
+                                                                                Created: {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}
+                                                                            </Typography>
+                                                                        </Box>
+                                                                    }
+                                                                />
+                                                            ))}
+                                                        </FormGroup>
+                                                    </Collapse>
+                                                    {(!barcode.selectedItems || barcode.selectedItems.length === 0) && (
+                                                        <Typography variant="caption" color="error">
+                                                            Please select at least one test
+                                                        </Typography>
+                                                    )}
+                                                </Box>
+                                            </TableCell>
+                                        )}
+
                                         <TableCell sx={{ verticalAlign: 'top' }}>
                                             <Stack spacing={1}>
-                                                {barcode.items.map((item) => (
-                                                    <Box key={`test-${item.method.id}`}>
+                                                {barcode.items?.map((item) => (
+                                                    <Box key={`test-${item.id || item.method?.id}`}>
                                                         <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                                                            {item.method.test.name}
+                                                            {item.method?.test?.name || item.test?.name || 'Unknown'}
                                                         </Typography>
                                                         <Typography variant="caption" color="text.secondary">
-                                                            Method: {item.method.name}
+                                                            Method: {item.method?.name || 'N/A'}
                                                         </Typography>
                                                     </Box>
                                                 ))}

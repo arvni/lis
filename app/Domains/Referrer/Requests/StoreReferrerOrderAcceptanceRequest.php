@@ -25,6 +25,7 @@ class StoreReferrerOrderAcceptanceRequest extends FormRequest
     {
         $rules = [];
         $rules['referenceCode'] = 'nullable|string|max:255';
+        $rules['existing_acceptance_id'] = 'nullable|exists:acceptances,id';
         // Panel validations
         $rules['acceptanceItems'] = 'required|array';
         $rules['acceptanceItems.tests'] = 'nullable|array';
@@ -63,6 +64,7 @@ class StoreReferrerOrderAcceptanceRequest extends FormRequest
         $rules['acceptanceItems.tests.*.samples.*.sampleType'] = 'nullable|exists:sample_types,id';
         $rules['acceptanceItems.tests.*.details'] = 'nullable|string|max:500';
         $rules['acceptanceItems.tests.*.customParameters.discounts'] = 'nullable|array';
+        $rules['acceptanceItems.tests.*.sampleless'] = 'nullable|boolean';
 
 
         $rules['acceptanceItems.services'] = 'nullable|array';
@@ -93,6 +95,7 @@ class StoreReferrerOrderAcceptanceRequest extends FormRequest
         ];
         $rules['acceptanceItems.services.*.details'] = 'nullable|string|max:500';
         $rules['acceptanceItems.services.*.customParameters.discounts'] = 'nullable|array';
+        $rules['acceptanceItems.services.*.sampleless'] = 'nullable|boolean';
 
         // Panel validations
         $rules['acceptanceItems.panels'] = 'nullable|array';

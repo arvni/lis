@@ -27,22 +27,24 @@ class SampleService
         return $this->sampleRepository->listSampleBarcodes($filters);
     }
 
-    public function storeSample(SampleDTO $sampleDTO, $index = 0): Sample
+    public function storeSample(SampleDTO $sampleDTO, $index = 0, $pooling = false): Sample
     {
         $sample = $this->sampleRepository->findActiveSample(Arr::pluck($sampleDTO->acceptanceItems, "id"), $sampleDTO->patientId, $sampleDTO->sampleTypeId);
-        if (!$sample) {
+        if ($pooling || !$sample) {
             $deactivatedSample = $this->sampleRepository->findDeactivatedSample(Arr::pluck($sampleDTO->acceptanceItems, "id"), $sampleDTO->patientId, $sampleDTO->sampleTypeId);
             if ($deactivatedSample) {
                 $sampleDTO->barcode = $deactivatedSample->barcode . "R";
             }
 
-            if (!$sampleDTO->barcode) {
+            if (!($sampleDTO->barcode && $sampleDTO->materialId)) {
                 $sampleDTO->barcode = $this->generateBarcode($sampleDTO, $index);
             }
-            $sample = $this->sampleRepository->creatSample(Arr::except($sampleDTO->toArray(), "id"));
-        } else
+            $newSample = $this->sampleRepository->creatSample(Arr::except($sampleDTO->toArray(), "id"));
+        } else {
+            $newSample = $sample;
             $this->sampleRepository->syncAcceptanceItems($sample, Arr::pluck($sampleDTO->acceptanceItems, "id"));
-        return $sample;
+        }
+        return $newSample;
     }
 
     public function updateSample(Sample $sample, SampleDTO $sampleDTO): Sample

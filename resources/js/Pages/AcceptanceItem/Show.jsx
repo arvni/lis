@@ -10,7 +10,7 @@ import SectionsInfo from "./Components/SectionsInfo";
 import {router, Link} from "@inertiajs/react";
 import {Assignment as AssignmentIcon, Timeline as TimelineIcon} from "@mui/icons-material";
 
-const Show = ({acceptanceItem, canCreateReport = false, canToggleReportless = false}) => {
+const Show = ({acceptanceItem, canCreateReport = false, canToggleReportless = false, canToggleSampleless = false}) => {
     const handleCheckWorkflow = () => router.visit(route("acceptanceItems.check-workflow", acceptanceItem.id))
 
     const handleToggleReportless = () => {
@@ -23,11 +23,33 @@ const Show = ({acceptanceItem, canCreateReport = false, canToggleReportless = fa
         });
     };
 
+    const handleToggleSampleless = () => {
+        router.put(route("acceptanceItems.toggleSampleless", {
+            acceptance: acceptanceItem.acceptance_id,
+            acceptanceItem: acceptanceItem.id
+        }), {}, {
+            preserveState: false,
+            preserveScroll: true
+        });
+    };
+
     return <Container sx={{p: "1em"}}>
         {acceptanceItem.patients.map(patient => <PatientInfo patient={patient} key={patient.id}/>)}
         <TestInfo method={acceptanceItem.method} test={acceptanceItem.test}/>
-        {canToggleReportless && (
-            <Box sx={{mt: 2, mb: 2}}>
+        <Box sx={{mt: 2, mb: 2}}>
+            {canToggleSampleless && (
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={acceptanceItem.sampleless}
+                            onChange={handleToggleSampleless}
+                            color="warning"
+                        />
+                    }
+                    label="Sampleless (No Sample Required)"
+                />
+            )}
+            {canToggleReportless && (
                 <FormControlLabel
                     control={
                         <Switch
@@ -38,8 +60,8 @@ const Show = ({acceptanceItem, canCreateReport = false, canToggleReportless = fa
                     }
                     label="Reportless (No Report Required)"
                 />
-            </Box>
-        )}
+            )}
+        </Box>
         <SectionsInfo acceptanceItemStates={acceptanceItem.acceptance_item_states}/>
         {/*<TimeLine timeline={acceptanceItem.timeline}/>*/}
         {acceptanceItem.report ? <ReportInfo report={acceptanceItem.report}/> : <Box sx={{mt: 3}}>

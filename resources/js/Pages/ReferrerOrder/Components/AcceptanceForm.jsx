@@ -28,6 +28,7 @@ import {
     LocalHospital as LocalHospitalIcon,
     Science as ScienceIcon,
     Receipt as ReceiptIcon,
+    MergeType as MergeTypeIcon,
 } from "@mui/icons-material";
 
 // Transition component for dialog
@@ -91,7 +92,9 @@ const AcceptanceFormDialog = ({
                                   onSubmit,
                                   setData,
                                   maxDiscount = 0,
-                                  requestedTests = []
+                                  requestedTests = [],
+                                  existingAcceptanceId = null,
+                                  isPoolingMode = false,
                               }) => {
     const [activeStep, setActiveStep] = useState(0);
     const correctedInitialData = {
@@ -104,7 +107,8 @@ const AcceptanceFormDialog = ({
             tests: [],
             panels: []
         },
-        ...initialData
+        ...initialData,
+        existing_acceptance_id: existingAcceptanceId,
     };
 
     const steps = [
@@ -112,6 +116,9 @@ const AcceptanceFormDialog = ({
         {label: "Sampling & Delivery", icon: <LocalHospitalIcon/>},
         {label: "Review & Submit", icon: <ReceiptIcon/>}
     ];
+
+    const dialogTitle = isPoolingMode ? "Add Tests to Existing Acceptance" : "New Acceptance Form";
+    const submitButtonText = isPoolingMode ? "Add Tests" : "Submit Acceptance";
 
     const {
         data,
@@ -133,7 +140,11 @@ const AcceptanceFormDialog = ({
     };
 
     const handleSubmit = () => {
-        onSubmit && onSubmit(data);
+        const submitData = {
+            ...data,
+            existing_acceptance_id: existingAcceptanceId,
+        };
+        onSubmit && onSubmit(submitData);
     };
 
     const hasStepErrors = (step) => {
@@ -216,7 +227,10 @@ const AcceptanceFormDialog = ({
             fullWidth
         >
             <DialogTitle sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <Typography variant="h5">New Acceptance Form</Typography>
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                    {isPoolingMode && <MergeTypeIcon color="info"/>}
+                    <Typography variant="h5">{dialogTitle}</Typography>
+                </Box>
                 <IconButton onClick={onClose}>
                     <CloseIcon/>
                 </IconButton>
@@ -266,11 +280,11 @@ const AcceptanceFormDialog = ({
                     <Button
                         onClick={handleSubmit}
                         variant="contained"
-                        color="primary"
+                        color={isPoolingMode ? "info" : "primary"}
                         size="large"
-                        startIcon={<SaveIcon/>}
+                        startIcon={isPoolingMode ? <MergeTypeIcon/> : <SaveIcon/>}
                     >
-                        Submit Acceptance
+                        {submitButtonText}
                     </Button>
                 ) : (
                     <Button

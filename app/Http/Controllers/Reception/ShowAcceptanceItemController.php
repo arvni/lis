@@ -34,6 +34,9 @@ class ShowAcceptanceItemController extends Controller
         // Check if user can toggle reportless status
         $canToggleReportless = Gate::allows('Reception.Acceptances.Toggle Reportless Acceptance Item');
 
-        return Inertia::render("AcceptanceItem/Show", compact("acceptanceItem", "canCreateReport", "canToggleReportless"));
+        // Check if user can toggle sampleless status
+        $canToggleSampleless = Gate::allows('Reception.Acceptances.Toggle Sampleless Acceptance Item');
+
+        return Inertia::render("AcceptanceItem/Show", compact("acceptanceItem", "canCreateReport", "canToggleReportless", "canToggleSampleless"));
     }
 }

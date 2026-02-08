@@ -112,6 +112,7 @@ class UpdateAcceptanceRequest extends FormRequest
                 $rules['acceptanceItems.tests.*.samples.*.sampleType'] = 'nullable|exists:sample_types,id';
                 $rules['acceptanceItems.tests.*.details'] = 'nullable|string|max:500';
                 $rules['acceptanceItems.tests.*.customParameters.discounts'] = 'nullable|array';
+                $rules['acceptanceItems.tests.*.sampleless'] = 'nullable|boolean';
 
 
                 $rules['acceptanceItems.services'] = 'nullable|array';
@@ -181,6 +182,7 @@ class UpdateAcceptanceRequest extends FormRequest
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.details'] = 'nullable|string|max:500';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.customParameters.price'] = 'nullable|array';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.customParameters.discounts'] = 'nullable|array';
+                $rules['acceptanceItems.panels.*.acceptanceItems.*.sampleless'] = 'nullable|boolean';
                 break;
 
             case 4: // Sampling & Delivery

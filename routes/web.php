@@ -92,12 +92,14 @@ use App\Http\Controllers\Reception\SampleCollectionController;
 use App\Http\Controllers\Reception\SampleController;
 use App\Http\Controllers\Reception\ShowAcceptanceItemController;
 use App\Http\Controllers\Reception\ToggleReportlessAcceptanceItemController;
+use App\Http\Controllers\Reception\ToggleSamplelessAcceptanceItemController;
 use App\Http\Controllers\Reception\UnPublishReportController;
 use App\Http\Controllers\Reception\UpdatePatientMetaController;
 use App\Http\Controllers\Reception\WaitingForPublishController;
 use App\Http\Controllers\Referrer\Api\CheckMaterialBarcodeIsAvailableController;
 use App\Http\Controllers\Referrer\CopyReferrerTestsFromOtherReferrerController;
 use App\Http\Controllers\Referrer\ExportReferrerTestsController;
+use App\Http\Controllers\Referrer\GetPatientAcceptancesController;
 use App\Http\Controllers\Referrer\ListMaterialsBasedOnPackingSeriesController;
 use App\Http\Controllers\Referrer\MaterialController;
 use App\Http\Controllers\Referrer\OrderMaterialController;
@@ -162,6 +164,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("acceptanceItems/export", ExportAcceptanceItemsController::class)->name("acceptanceItems.export");
         Route::get("acceptanceItems/{acceptanceItem}/check-workflow", CheckAcceptanceItemWorkflowController::class)->name("acceptanceItems.check-workflow");
         Route::put("acceptances/{acceptance}/acceptance-items/{acceptanceItem}/toggle-reportless", ToggleReportlessAcceptanceItemController::class)->name("acceptanceItems.toggleReportless");
+        Route::put("acceptances/{acceptance}/acceptance-items/{acceptanceItem}/toggle-sampleless", ToggleSamplelessAcceptanceItemController::class)->name("acceptanceItems.toggleSampleless");
         Route::get("acceptanceItemStates/{acceptanceItemState}/prev-sections", GetPrevSectionsController::class)->name("acceptanceItemStates.prevSections");
         Route::get("reports/waiting-list", ListAcceptanceItemReadyReportController::class)->name("reports.waitingList");
         Route::get("reports/approving-ist", ListApprovingReportController::class)->name("reports.approvingList");
@@ -228,8 +231,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get("referrers", ListReferrersController::class)->name("referrers.list");
             Route::get("check-materials", CheckMaterialBarcodeIsAvailableController::class)->name("materials.check");
             Route::get("order-materials/{orderMaterial}", [OrderMaterialController::class, "show"])->name("orderMaterials.show");
-            Route::get("sample-collectors", [\App\Http\Controllers\Referrer\SampleCollectorController::class, "index"])->name("sampleCollectors.list");
-            Route::get("collect-requests", [\App\Http\Controllers\Referrer\CollectRequestController::class, "index"])->name("collectRequests.list");
+            Route::get("sample-collectors", [SampleCollectorController::class, "index"])->name("sampleCollectors.list");
+            Route::get("collect-requests", [CollectRequestController::class, "index"])->name("collectRequests.list");
+            Route::get("patient/{patient}/acceptances", GetPatientAcceptancesController::class)
+                ->name("referrer.patient.acceptances");
         });
         Route::group(["prefix" => "consultation"], function () {
             Route::get("customers", ListCustomersController::class)->name("customers.list");

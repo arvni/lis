@@ -26,9 +26,14 @@ class StoreReferrerOrderSamplesController extends Controller
     {
         if (!$referrerOrder->acceptance_id)
             return back()->withErrors(["This Order Must be Accepted"]);
-        $referrerOrder->load(["acceptance" => fn($q) => $q->withCount("samples")]);
-        if ($referrerOrder->acceptance->samples_count)
-            return back()->withErrors(["This Order Sampled Before"]);
+
+        // For pooling orders, we allow adding samples even if acceptance already has samples
+        if (!$referrerOrder->pooling) {
+            $referrerOrder->load(["acceptance" => fn($q) => $q->withCount("samples")]);
+            if ($referrerOrder->acceptance->samples_count)
+                return back()->withErrors(["This Order Sampled Before"]);
+        }
+
         foreach ($request->validated("barcodes") as $key => $barcode) {
             $material = $this->materialService->getMaterialByBarcode(strtoupper($barcode["barcode"]));
             if ($material) {
@@ -36,8 +41,12 @@ class StoreReferrerOrderSamplesController extends Controller
                 if ($material->referrer->id == $referrerOrder->referrer->id && !$material->sample_id)
                     $barcode["material"] = $material->toArray();
             }
-            $this->sampleService->storeSample(SampleDTO::fromArray($barcode), $key);
+            $this->sampleService->storeSample(SampleDTO::fromArray($barcode), $key,$referrerOrder->pooling);
         }
+
+        // Set needs_add_sample to false after successfully adding samples
+        $referrerOrder->update(['needs_add_sample' => false]);
+
         return redirect()->back()->with(["success" => true, "status" => "Sample created successfully."]);
     }
 }

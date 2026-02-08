@@ -27,6 +27,7 @@ import PatientAddForm from "./Components/Form";
 import AcceptanceForm from "./Components/AcceptanceForm";
 import AddSampleForm from "./Components/AddSampleForm";
 import AddFromExistPatientForm from "./Components/AddFromExistPatientForm";
+import SelectAcceptanceDialog from "./Components/SelectAcceptanceDialog";
 import {router} from "@inertiajs/react";
 import {
     Assignment,
@@ -54,7 +55,8 @@ import {
     ExpandLess,
     Biotech,
     LocalShipping,
-    AssignmentTurnedIn
+    AssignmentTurnedIn,
+    MergeType
 } from "@mui/icons-material";
 import axios from "axios";
 import PageHeader from "@/Components/PageHeader.jsx";
@@ -395,11 +397,26 @@ const TestOrderItem = ({orderItem, index}) => {
 
 // Status Timeline Component
 const StatusTimeline = ({referrerOrder}) => {
+    // Determine current step based on actual order state
+    const getCurrentStep = () => {
+        const samplesCollected = !referrerOrder.needs_add_sample;
+        const hasAcceptance = Boolean(referrerOrder.acceptance_id);
+        const hasPatient = Boolean(referrerOrder.patient_id);
+
+        if (samplesCollected) return 'samples_collected';
+        if (hasAcceptance) return 'acceptance_created';
+        if (hasPatient) return 'patient_added';
+        return 'finalize';
+    };
+
     const getStepStatus = (step) => {
         const steps = ['finalize', 'patient_added', 'acceptance_created', 'samples_collected'];
-        const currentStep = referrerOrder.orderInformation?.step || referrerOrder.step || 'finalize';
+        const currentStep = getCurrentStep();
         const currentStepIndex = steps.indexOf(currentStep);
         const stepIndex = steps.indexOf(step);
+
+        // If we're at the last step (samples_collected), mark it as completed
+        if (currentStep === 'samples_collected' && step === 'samples_collected') return 'completed';
 
         if (stepIndex < currentStepIndex) return 'completed';
         if (stepIndex === currentStepIndex) return 'active';
@@ -477,6 +494,10 @@ const Show = ({referrerOrder, errors = {}}) => {
     const [barcodes, setBarcodes] = useState([]);
     const [activeTab, setActiveTab] = useState(0);
     const [notification, setNotification] = useState({open: false, message: "", severity: "info"});
+    // Pooling state
+    const [openSelectAcceptance, setOpenSelectAcceptance] = useState(false);
+    const [selectedExistingAcceptance, setSelectedExistingAcceptance] = useState(null);
+    const [acceptanceItems, setAcceptanceItems] = useState([]);
 
     const acceptanceData = {
         patient: referrerOrder.patient,
@@ -491,11 +512,47 @@ const Show = ({referrerOrder, errors = {}}) => {
         },
         referenceCode: referrerOrder?.orderInformation?.patient?.reference_id,
         prescription: null,
+        existing_acceptance_id: selectedExistingAcceptance?.id || null,
     };
+
+    // Helper function to clean acceptance item data
+    const cleanAcceptanceItem = (item) => ({
+        method_test: { id: item.method_test?.id },
+        price: item.price,
+        discount: item.discount,
+        sampleless: item.sampleless || false,
+        no_sample: item.no_sample || 1,
+        samples: (item.samples || []).map(sample => ({
+            patients: (sample.patients || []).map(p => ({ id: p.id })),
+            sampleType: sample.sampleType
+        })),
+        customParameters: {
+            sampleType: item.customParameters?.sampleType,
+            discounts: item.customParameters?.discounts || [],
+            price: item.customParameters?.price
+        },
+        details: item.details,
+        deleted: item.deleted || false
+    });
 
     // Action handlers
     const handleSubmitAcceptance = (data) => {
-        router.post(route("referrerOrders.acceptance", referrerOrder.id), data, {
+        // Clean up data to only send what's needed
+        const cleanedData = {
+            referenceCode: data.referenceCode,
+            out_patient: data.out_patient,
+            howReport: data.howReport,
+            existing_acceptance_id: data.existing_acceptance_id,
+            acceptanceItems: {
+                tests: (data.acceptanceItems?.tests || []).map(cleanAcceptanceItem),
+                panels: (data.acceptanceItems?.panels || []).map(panel => ({
+                    ...cleanAcceptanceItem(panel),
+                    acceptanceItems: (panel.acceptanceItems || []).map(cleanAcceptanceItem)
+                }))
+            }
+        };
+
+        router.post(route("referrerOrders.acceptance", referrerOrder.id), cleanedData, {
             onSuccess: handleCloseAddAcceptance
         });
     };
@@ -507,6 +564,22 @@ const Show = ({referrerOrder, errors = {}}) => {
         axios.get(route("api.sampleCollection.list", referrerOrder.acceptance_id))
             .then(res => {
                 setBarcodes(res.data.barcodes);
+
+                // For pooling orders, extract all unique acceptance items
+                if (referrerOrder.pooling) {
+                    const allItems = [];
+                    const itemIds = new Set();
+                    res.data.barcodes.forEach(barcode => {
+                        barcode.items?.forEach(item => {
+                            if (!itemIds.has(item.id)) {
+                                itemIds.add(item.id);
+                                allItems.push(item);
+                            }
+                        });
+                    });
+                    setAcceptanceItems(allItems);
+                }
+
                 setOpenAddSample(true);
             })
             .catch(error => {
@@ -543,23 +616,41 @@ const Show = ({referrerOrder, errors = {}}) => {
         setOpenAddFromExist(true);
     };
 
-    const handleCloseAddAcceptance = () => setOpenAddAcceptance(false);
-    const handleAddSampleClose = () => setOpenAddSample(false);
+    const handleCloseAddAcceptance = () => {
+        setOpenAddAcceptance(false);
+        setSelectedExistingAcceptance(null);
+    };
+    const handleAddSampleClose = () => {
+        setOpenAddSample(false);
+        setAcceptanceItems([]);
+    };
     const handleAddFromExistsPatient = () => setOpenAddFromExist(true);
     const handleTabChange = (event, newValue) => setActiveTab(newValue);
     const gotoPage = url => () => router.visit(url);
     const handleCloseNotification = () => setNotification({...notification, open: false});
 
+    // Pooling handlers
+    const handleOpenSelectAcceptance = () => setOpenSelectAcceptance(true);
+    const handleCloseSelectAcceptance = () => setOpenSelectAcceptance(false);
+    const handleSelectExistingAcceptance = (acceptance) => {
+        setSelectedExistingAcceptance(acceptance);
+        setOpenAddAcceptance(true);
+    };
+    const handleCreateNewFromPooling = () => {
+        setSelectedExistingAcceptance(null);
+        setOpenAddAcceptance(true);
+    };
+
     // Determine completion status
     const hasPatient = Boolean(referrerOrder.patient_id);
     const hasAcceptance = Boolean(referrerOrder.acceptance_id);
-    const hasSamples = referrerOrder?.acceptance?.samples?.length > 0;
+    const samplesCollected = !referrerOrder.needs_add_sample;
 
     const getCompletionPercentage = () => {
         let percentage = 0;
         if (hasPatient) percentage += 50;
         if (hasAcceptance) percentage += 25;
-        if (hasSamples) percentage += 25;
+        if (samplesCollected) percentage += 25;
         return percentage;
     };
 
@@ -679,9 +770,19 @@ const Show = ({referrerOrder, errors = {}}) => {
                         {/* Tests & Samples Section */}
                         <Box>
                             <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-                                <Typography variant="h5" fontWeight={600}>
-                                    Tests & Samples ({orderItems.length})
-                                </Typography>
+                                <Stack direction="row" spacing={2} alignItems="center">
+                                    <Typography variant="h5" fontWeight={600}>
+                                        Tests & Samples ({orderItems.length})
+                                    </Typography>
+                                    {referrerOrder.pooling && (
+                                        <Chip
+                                            icon={<MergeType/>}
+                                            label="Pooling Order"
+                                            color="info"
+                                            size="small"
+                                        />
+                                    )}
+                                </Stack>
                                 {referrerOrder.patient_id && (
                                     <Stack direction="row" spacing={2}>
                                         {referrerOrder.acceptance_id ? (
@@ -694,7 +795,7 @@ const Show = ({referrerOrder, errors = {}}) => {
                                                 >
                                                     View Acceptance
                                                 </Button>
-                                                {referrerOrder?.acceptance?.samples?.length < 1 && (
+                                                {referrerOrder.needs_add_sample && (
                                                     <Button
                                                         variant="contained"
                                                         color="success"
@@ -706,6 +807,15 @@ const Show = ({referrerOrder, errors = {}}) => {
                                                     </Button>
                                                 )}
                                             </>
+                                        ) : referrerOrder.pooling ? (
+                                            <Button
+                                                variant="contained"
+                                                onClick={handleOpenSelectAcceptance}
+                                                startIcon={<MergeType/>}
+                                                color="info"
+                                            >
+                                                Select Existing Acceptance
+                                            </Button>
                                         ) : (
                                             <Button
                                                 variant="contained"
@@ -1036,6 +1146,19 @@ const Show = ({referrerOrder, errors = {}}) => {
                             : referrerOrder?.orderInformation?.tests
                     }
                     maxDiscount={100}
+                    existingAcceptanceId={selectedExistingAcceptance?.id}
+                    isPoolingMode={referrerOrder.pooling && !!selectedExistingAcceptance}
+                />
+            )}
+
+            {referrerOrder.pooling && referrerOrder.patient_id && (
+                <SelectAcceptanceDialog
+                    open={openSelectAcceptance}
+                    onClose={handleCloseSelectAcceptance}
+                    patientId={referrerOrder.patient_id}
+                    referrerId={referrerOrder.referrer_id}
+                    onSelectAcceptance={handleSelectExistingAcceptance}
+                    onCreateNew={handleCreateNewFromPooling}
                 />
             )}
 
@@ -1050,6 +1173,8 @@ const Show = ({referrerOrder, errors = {}}) => {
                     }
                     open={openAddSample}
                     barcodes={barcodes}
+                    isPooling={referrerOrder.pooling}
+                    allAcceptanceItems={acceptanceItems}
                 />
             )}
 

@@ -380,13 +380,15 @@ class AcceptanceService
     public function listBarcodes(Acceptance $acceptance)
     {
         $acceptance->load([
-            "acceptanceItems.method.barcodeGroup",
-            "acceptanceItems.method.test.sampleTypes",
-            "acceptanceItems.test",
-            "acceptanceItems.patients",
+            "acceptanceItems"=>function($query){
+                $query->where("sampleless", false);
+                $query->with(["method.barcodeGroup","method.test.sampleTypes","test","patients"]);
+            },
             "patient"
         ]);
-        $barcodes = $this->convertAcceptanceItems($acceptance->acceptanceItems->where("test.type", "!=", TestType::SERVICE));
+        // Filter out SERVICE type items and sampleless items
+        $filteredItems = $acceptance->acceptanceItems->where("test.type", "!=", TestType::SERVICE);
+        $barcodes = $this->convertAcceptanceItems($filteredItems);
         return ["barcodes" => $barcodes, "patient" => $acceptance->patient];
     }
 
@@ -529,7 +531,7 @@ class AcceptanceService
                     $acceptance_item['method_test']['id'],
                     $acceptance_item["price"],
                     $acceptance_item['discount'],
-                    array_merge(($acceptance_item["customParameters"] ?? []), Arr::except($acceptance_item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters"])),
+                    array_merge(($acceptance_item["customParameters"] ?? []), Arr::except($acceptance_item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters", "sampleless"])),
                     !($acceptance_item['timeLine'] ?? null) ? [
                         Carbon::now()->format("Y-m-d H:i:s") => "Created By " . auth()->user()->name,
                     ] : [
@@ -540,6 +542,7 @@ class AcceptanceService
                     $acceptance_item["id"] ?? null,
                     null,
                     $acceptance_item["deleted"] ?? false,
+                    $acceptance_item["sampleless"] ?? false,
                 );
             }
         }
@@ -553,7 +556,7 @@ class AcceptanceService
                             $item['method_test']['id'],
                             $panelData['price'] / count($panelData['acceptanceItems']), // Distribute price among items
                             $panelData['discount'] / count($panelData['acceptanceItems']), // Distribute discount among items
-                            array_merge(($item["customParameters"] ?? []), Arr::except($item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters"])),
+                            array_merge(($item["customParameters"] ?? []), Arr::except($item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters", "sampleless"])),
                             !($item['timeLine'] ?? null) ? [
                                 Carbon::now()->format("Y-m-d H:i:s") => "Created By " . auth()->user()->name,
                             ] : [
@@ -564,6 +567,7 @@ class AcceptanceService
                             $item["id"] ?? null,
                             $panelID,
                             $panelData["deleted"] ?? false,
+                            $item["sampleless"] ?? false,
                         );
                     }
                 }
@@ -580,6 +584,8 @@ class AcceptanceService
 
                 if (empty($samples)) {
                     $newModel = $item->replicate();
+                    $newModel->id = $item->id;
+                    $newModel->created_at = $item->created_at;
                     $newModel->patient = $item->patients->first();
                     return collect([$newModel]);
                 }
@@ -592,6 +598,7 @@ class AcceptanceService
                                 ->map(function ($patientData) use ($item) {
                                     $newModel = $item->replicate();
                                     $newModel->id = $item->id;
+                                    $newModel->created_at = $item->created_at;
                                     $patient = $item->patients->where('id', $patientData['id'])->first();
                                     $newModel->patient = $patient;
                                     return $newModel;
@@ -599,6 +606,8 @@ class AcceptanceService
                         } else {
                             // If $sample is a single patient object
                             $newModel = $item->replicate();
+                            $newModel->id = $item->id;
+                            $newModel->created_at = $item->created_at;
                             $patient = $item->patients->where('id', $sample['id'])->first();
                             $newModel->patient = $patient;
                             return $newModel;

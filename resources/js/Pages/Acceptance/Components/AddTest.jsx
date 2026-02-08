@@ -17,7 +17,10 @@ import {
     StepLabel,
     Tooltip,
     TextField,
-    Chip, Stack
+    Chip,
+    Stack,
+    FormControlLabel,
+    Switch
 } from "@mui/material";
 import {
     Close,
@@ -63,6 +66,7 @@ const createDefaultData = (initialData) => {
         price: safeData.price || 0,
         discount: safeData.discount || 0,
         details: safeData.details || '',
+        sampleless: safeData.sampleless || false,
         samples: Array.isArray(safeData?.customParameters?.samples) ? [...safeData.customParameters.samples] : [],
         customParameters: safeData?.customParameters || {sampleType: ""},
         ...safeData
@@ -122,13 +126,15 @@ const AddTest = ({
             newErrors.price = 'Price must be greater than 0';
         }
 
-        // Sample type validation for non-service tests
+        // Sample type validation for non-service, non-sampleless tests
         const isServiceTest = data?.method_test?.test?.type === "SERVICE";
+        const isSampleless = data?.sampleless;
         const hasMethod = data?.method_test?.method;
         const sampleType = data?.customParameters?.sampleType;
         const validSampleTypes = data?.method_test?.method?.test?.sample_types?.map(item => item.id) || [];
 
-        if (!isServiceTest && hasMethod && (!sampleType || !validSampleTypes.includes(sampleType))) {
+        // Skip sample validation for service tests or sampleless tests
+        if (!isServiceTest && !isSampleless && hasMethod && (!sampleType || !validSampleTypes.includes(sampleType))) {
             // Patient validation
             validatePatients(newErrors);
         }
@@ -492,6 +498,40 @@ const AddTest = ({
                     </Tooltip>
                 </Box>
 
+                {/* Sampleless Option - only for non-SERVICE tests */}
+                {testType !== TEST_TYPES.SERVICE && (
+                    <Box sx={{mb: 2}}>
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={data.sampleless || false}
+                                    onChange={(e) => {
+                                        const isSampleless = e.target.checked;
+                                        // When sampleless is enabled, set default patient (similar to SERVICE tests)
+                                        if (isSampleless && patient) {
+                                            handleChange({
+                                                sampleless: true,
+                                                samples: [{patients: [{id: patient.id, name: patient.fullName}]}]
+                                            });
+                                        } else {
+                                            handleChange({sampleless: isSampleless});
+                                        }
+                                    }}
+                                    color="warning"
+                                />
+                            }
+                            label={
+                                <Box>
+                                    <Typography variant="body1">Sampleless (No Sample Required)</Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Enable this if no physical sample is needed for this test
+                                    </Typography>
+                                </Box>
+                            }
+                        />
+                    </Box>
+                )}
+
                 <TextField
                     name="details"
                     multiline
@@ -533,6 +573,14 @@ const AddTest = ({
                             <Typography variant="body1">
                                 <strong>Method:</strong> {data?.method_test?.method?.name}
                             </Typography>
+                            {data.sampleless && (
+                                <Chip
+                                    label="Sampleless"
+                                    color="warning"
+                                    size="small"
+                                    sx={{mt: 1}}
+                                />
+                            )}
                         </Box>
                     </Paper>
                 </Grid>

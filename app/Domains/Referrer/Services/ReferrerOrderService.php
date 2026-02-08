@@ -3,7 +3,6 @@
 namespace App\Domains\Referrer\Services;
 
 use App\Domains\Reception\Enums\AcceptanceStatus;
-use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Referrer\DTOs\ReferrerOrderDTO;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Referrer\Repositories\ReferrerOrderRepository;
@@ -39,7 +38,12 @@ class ReferrerOrderService
 
     public function loadShowRequirementLoaded(ReferrerOrder $referrerOrder): ReferrerOrder
     {
-        return $referrerOrder->load(["OwnedDocuments", "Patient", "Referrer", "Acceptance.Samples"]);
+        return $referrerOrder->load([
+            "ownedDocuments",
+            "patient",
+            "referrer",
+            "acceptance.samples",
+        ]);
     }
 
     /**

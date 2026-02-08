@@ -28,11 +28,13 @@ class AcceptanceItem extends Model
         'panel_id',
         'no_sample',
         'reportless',
+        'sampleless',
     ];
     protected $casts = [
         "customParameters" => "json",
         "timeline" => "json",
-        "reportless" => "boolean"
+        "reportless" => "boolean",
+        "sampleless" => "boolean",
     ];
     protected $appends = [
         "status",

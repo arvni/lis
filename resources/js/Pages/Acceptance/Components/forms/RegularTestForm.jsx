@@ -47,7 +47,12 @@ import DiscountManager from '../DiscountManager';
 // Constants
 const TAB_CONFIGS = [
     {label: 'Method Selection', icon: ScienceIcon, key: 'methodSelection'},
-    {label: 'Patient Info', icon: PersonIcon, key: 'patientInfo'},
+    {label: 'Sample Config', icon: PersonIcon, key: 'patientInfo'},
+    {label: 'Pricing', icon: CalculateIcon, key: 'pricing'}
+];
+
+const TAB_CONFIGS_SAMPLELESS = [
+    {label: 'Method Selection', icon: ScienceIcon, key: 'methodSelection'},
     {label: 'Pricing', icon: CalculateIcon, key: 'pricing'}
 ];
 
@@ -344,8 +349,12 @@ const RegularTestForm = ({
         discount = 0,
         customParameters = {},
         samples = [],
-        no_sample = 1
+        no_sample = 1,
+        sampleless = false
     } = data;
+
+    // Use different tab config based on sampleless
+    const activeTabConfigs = sampleless ? TAB_CONFIGS_SAMPLELESS : TAB_CONFIGS;
     const [apiError, setApiError] = useState(null);
     const [currentTab, setCurrentTab] = useState(0);
 
@@ -700,11 +709,12 @@ const RegularTestForm = ({
         handleDiscountChange
     ]);
 
-    const tabRenderers = useMemo(() => [
-        renderMethodSelection,
-        renderPatientInformation,
-        renderPricingAndDiscounts
-    ], [renderMethodSelection, renderPatientInformation, renderPricingAndDiscounts]);
+    const tabRenderers = useMemo(() => {
+        if (sampleless) {
+            return [renderMethodSelection, renderPricingAndDiscounts];
+        }
+        return [renderMethodSelection, renderPatientInformation, renderPricingAndDiscounts];
+    }, [sampleless, renderMethodSelection, renderPatientInformation, renderPricingAndDiscounts]);
 
     return (
         <Box>
@@ -725,7 +735,7 @@ const RegularTestForm = ({
                     }}
                     variant="fullWidth"
                 >
-                    {TAB_CONFIGS.map((tab, index) => {
+                    {activeTabConfigs.map((tab, index) => {
                         const IconComponent = tab.icon;
                         const hasError = hasTabError(tabErrors, index);
                         const isMethodSelected = index === 0 && methodTest?.id;

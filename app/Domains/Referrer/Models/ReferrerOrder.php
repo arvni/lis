@@ -18,6 +18,8 @@ class ReferrerOrder extends Model
         "order_id",
         "orderInformation",
         "status",
+        "pooling",
+        "needs_add_sample",
         "reference_no",
         "user_id",
         "logisticInformation",
@@ -30,6 +32,8 @@ class ReferrerOrder extends Model
         "orderInformation" => "json",
         "logisticInformation" => "json",
         "received_at" => "datetime",
+        "pooling" => "boolean",
+        "needs_add_sample" => "boolean",
     ];
 
     public function ownedDocuments()
