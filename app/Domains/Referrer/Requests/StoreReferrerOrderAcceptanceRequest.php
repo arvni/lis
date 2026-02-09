@@ -100,7 +100,6 @@ class StoreReferrerOrderAcceptanceRequest extends FormRequest
         // Panel validations
         $rules['acceptanceItems.panels'] = 'nullable|array';
         $rules['acceptanceItems.panels.*.id'] = 'nullable|string';
-        $rules['acceptanceItems.panels.*.panel.id'] = 'required|exists:tests,id';
         $rules['acceptanceItems.panels.*.price'] = 'nullable|numeric|min:0';
         $rules['acceptanceItems.panels.*.deleted'] = 'nullable|boolean';
         $rules['acceptanceItems.panels.*.discount'] = [
