@@ -84,6 +84,7 @@ class AcceptanceItemsExport implements
                     'created_at' => $first->created_at,
                     'updated_at' => $first->updated_at,
                     'invoice' => $first->invoice,
+                    'acceptance' => $first->acceptance,
                     'is_merged' => true,
                 ];
 
@@ -174,7 +175,11 @@ class AcceptanceItemsExport implements
      */
     private function getClientName($row): ?string
     {
-        return optional(optional($row->invoice)->owner)->fullName;
+        $acceptance = $row->acceptance ?? null;
+        if ($acceptance && $acceptance->referrer) {
+            return $acceptance->referrer->fullName;
+        }
+        return optional($acceptance)->patient->fullName ?? null;
     }
 
     /**

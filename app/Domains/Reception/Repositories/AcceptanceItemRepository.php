@@ -41,6 +41,8 @@ class AcceptanceItemRepository
     {
         $query = AcceptanceItem::query()->with([
             "invoice.owner",
+            "acceptance.referrer",
+            "acceptance.patient",
             "latestState" => function ($q) {
                 $q->with([
                     "Section",
