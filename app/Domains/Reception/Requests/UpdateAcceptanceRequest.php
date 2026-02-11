@@ -193,6 +193,7 @@ class UpdateAcceptanceRequest extends FormRequest
                     $this->checkIstthereAnyTestOnRequest() ? 'nullable' : 'required',
                     'exists:users,id'];
                 $rules['out_patient'] = 'boolean';
+                $rules['waiting_for_pooling'] = 'boolean';
 
                 // Report Information
                 $rules['referred'] = 'boolean';
@@ -250,6 +251,7 @@ class UpdateAcceptanceRequest extends FormRequest
                 $rules['patient_id'] = 'required';
                 $rules['acceptor_id'] = 'nullable';
                 $rules['out_patient'] = 'boolean';
+                $rules['waiting_for_pooling'] = 'boolean';
 
                 // Report Information
                 $rules['referred'] = 'boolean';

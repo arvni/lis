@@ -144,6 +144,7 @@ class StoreAcceptanceRequest extends FormRequest
                 // Sampling Information
                 $rules['samplerGender'] = 'required|in:0,1';
                 $rules['out_patient'] = 'boolean';
+                $rules['waiting_for_pooling'] = 'boolean';
 
                 // Report Information
                 $rules['referred'] = 'boolean';
@@ -203,6 +204,7 @@ class StoreAcceptanceRequest extends FormRequest
                 // Sampling Information
                 $rules['samplerGender'] = 'required|in:0,1';
                 $rules['out_patient'] = 'boolean';
+                $rules['waiting_for_pooling'] = 'boolean';
 
                 // Report Information
                 $rules['referred'] = 'boolean';
