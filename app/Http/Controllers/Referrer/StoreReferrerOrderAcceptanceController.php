@@ -64,6 +64,8 @@ class StoreReferrerOrderAcceptanceController extends Controller
             $validated["acceptanceItems"],
             AcceptanceStatus::SAMPLING,
             $validated["outPatient"] ?? true,
+            null,
+            (bool) $referrerOrder->pooling,
         );
         $acceptance = $this->acceptanceService->storeAcceptance($acceptanceDto);
         $referrerOrderDto = ReferrerOrderDTO::fromArray($referrerOrder->toArray());
