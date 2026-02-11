@@ -1159,6 +1159,7 @@ const Show = ({referrerOrder, errors = {}}) => {
                     referrerId={referrerOrder.referrer_id}
                     onSelectAcceptance={handleSelectExistingAcceptance}
                     onCreateNew={handleCreateNewFromPooling}
+                    poolingOnly={Boolean(referrerOrder.pooling)}
                 />
             )}
 

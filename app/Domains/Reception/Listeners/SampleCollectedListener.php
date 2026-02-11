@@ -34,7 +34,10 @@ readonly class SampleCollectedListener
         $acceptanceItem = $this->acceptanceItemService->findAcceptanceItemById($event->acceptanceItemId);
         $this->acceptanceItemService->updateAcceptanceItemTimeline($acceptanceItem, "Sample Collected By $user->name with Barcode $barcode");
         $acceptance = $this->acceptanceService->getAcceptanceById($acceptanceItem->acceptance_id);
-        $this->acceptanceService->updateAcceptanceStatus($acceptance, AcceptanceStatus::WAITING_FOR_ENTERING);
+        $newStatus = $acceptance->waiting_for_pooling
+            ? AcceptanceStatus::POOLING
+            : AcceptanceStatus::WAITING_FOR_ENTERING;
+        $this->acceptanceService->updateAcceptanceStatus($acceptance, $newStatus);
         $hasState = $acceptanceItem->acceptanceItemStates()->where("sample_id", $event->sampleId)->exists();
         if ($acceptanceItem && !$hasState) {
             $acceptanceItem->load("method.workflow.firstSection");

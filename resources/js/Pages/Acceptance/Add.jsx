@@ -24,6 +24,7 @@ const Add = ({patient, canAddPrescription, maxDiscount}) => {
         patient,
         samplerGender: 1,
         out_patient: false,
+        waiting_for_pooling: false,
         howReport: {
             way: "print",
             who: patient?.fullName || ""

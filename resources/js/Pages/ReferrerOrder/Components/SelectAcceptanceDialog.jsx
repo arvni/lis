@@ -36,6 +36,7 @@ const SelectAcceptanceDialog = ({
     referrerId,
     onSelectAcceptance,
     onCreateNew,
+    poolingOnly = false,
 }) => {
     const [loading, setLoading] = useState(false);
     const [acceptances, setAcceptances] = useState([]);
@@ -54,7 +55,7 @@ const SelectAcceptanceDialog = ({
         try {
             const response = await axios.get(
                 route("api.referrer.patient.acceptances", patientId),
-                { params: { referrer_id: referrerId } }
+                { params: { referrer_id: referrerId, ...(poolingOnly ? { pooling_only: true } : {}) } }
             );
             setAcceptances(response.data.acceptances || []);
         } catch (err) {
@@ -92,6 +93,8 @@ const SelectAcceptanceDialog = ({
                 return "warning";
             case "processing":
                 return "info";
+            case "pooling":
+                return "secondary";
             default:
                 return "default";
         }

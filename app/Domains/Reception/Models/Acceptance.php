@@ -29,6 +29,7 @@ class Acceptance extends Model
         "patient_id",
         "consultation_id",
         "out_patient",
+        "waiting_for_pooling",
         "invoice_id",
         "referrer_id",
         "sampler_id",
@@ -46,6 +47,7 @@ class Acceptance extends Model
 
     protected $casts = [
         "out_patient" => "boolean",
+        "waiting_for_pooling" => "boolean",
         "howReport" => "json",
         "status" => AcceptanceStatus::class
     ];

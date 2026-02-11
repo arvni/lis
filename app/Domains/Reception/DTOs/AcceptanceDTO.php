@@ -22,6 +22,7 @@ class AcceptanceDTO
         public ?AcceptanceStatus $status,
         public bool              $outPatient = false,
         public ?int              $samplerId = null,
+        public bool              $waitingForPooling = false,
 
     )
     {
@@ -69,6 +70,9 @@ class AcceptanceDTO
         // Extract out patient status
         $outPatient = $data['out_patient'] ?? false;
 
+        // Extract waiting for pooling status
+        $waitingForPooling = $data['waiting_for_pooling'] ?? false;
+
         // Create and return the DTO with all parameters in the expected order
         return new self(
             $patientId,
@@ -85,7 +89,8 @@ class AcceptanceDTO
             $acceptanceItems,
             $status,
             $outPatient,
-            $samplerId
+            $samplerId,
+            $waitingForPooling
         );
 
     }
@@ -107,6 +112,7 @@ class AcceptanceDTO
             'status' => $this->status,
             'out_patient' => $this->outPatient,
             'sampler_id' => $this->samplerId,
+            'waiting_for_pooling' => $this->waitingForPooling,
         ];
     }
 }

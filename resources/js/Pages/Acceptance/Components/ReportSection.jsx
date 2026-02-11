@@ -31,6 +31,26 @@ const OutPatientToggle = ({ value, onChange }) => (
     </Box>
 );
 
+const WaitingForPoolingToggle = ({ value, onChange }) => (
+    <Box sx={{ display: "flex", alignItems: "center" }}>
+        <FormControlLabel
+            label="Waiting for Pooling"
+            control={
+                <Switch
+                    checked={Boolean(value)}
+                    name="waiting_for_pooling"
+                    onChange={(e, v) => onChange('waiting_for_pooling', v)}
+                    color="primary"
+                />
+            }
+            labelPlacement="start"
+        />
+        <Tooltip title="Select if this acceptance should wait for pooling by a referrer order">
+            <HelpOutlineIcon fontSize="small" color="action" sx={{ ml: 1 }} />
+        </Tooltip>
+    </Box>
+);
+
 /**
  * ReportOptions Component - Allows users to select and configure report delivery methods
  *
@@ -281,6 +301,12 @@ const ReportSection = ({ data, errors, onChange }) => {
                             value={data?.out_patient}
                             onChange={onChange}
                             errors={errors}
+                        />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                        <WaitingForPoolingToggle
+                            value={data?.waiting_for_pooling}
+                            onChange={onChange}
                         />
                     </Grid>
 

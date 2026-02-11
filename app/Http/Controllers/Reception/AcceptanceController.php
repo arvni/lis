@@ -141,7 +141,7 @@ class AcceptanceController extends Controller
             "invoice" => $acceptance->invoice,
             "minAllowablePayment",
             "canEdit" => Gate::allows("update", $acceptance),
-            "canPrintBarcode" => $acceptance->status === AcceptanceStatus::PROCESSING || $acceptance->status === AcceptanceStatus::REPORTED || $acceptance->status === AcceptanceStatus::WAITING_FOR_ENTERING,
+            "canPrintBarcode" => $acceptance->status === AcceptanceStatus::PROCESSING || $acceptance->status === AcceptanceStatus::REPORTED || $acceptance->status === AcceptanceStatus::WAITING_FOR_ENTERING || $acceptance->status === AcceptanceStatus::POOLING,
             "canCheckStatus" => Gate::allows("checkStatus", $acceptance),
         ];
         return Inertia::render('Acceptance/Show', $data);

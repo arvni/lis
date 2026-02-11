@@ -15,9 +15,15 @@ class GetPatientAcceptancesController extends Controller
     {
         $referrerId = $request->query('referrer_id');
 
+        $poolingOnly = filter_var($request->query('pooling_only'), FILTER_VALIDATE_BOOLEAN);
+
         $acceptances = Acceptance::where('patient_id', $patient->id)
             ->where('referrer_id', $referrerId)
-            ->whereNot('status', AcceptanceStatus::REPORTED)
+            ->when($poolingOnly, function ($query) {
+                $query->where('status', AcceptanceStatus::POOLING);
+            }, function ($query) {
+                $query->whereNot('status', AcceptanceStatus::REPORTED);
+            })
             ->with([
                 'acceptanceItems' => function ($query) {
                     $query->with(['methodTest.method.test', 'methodTest.method.barcodeGroup']);

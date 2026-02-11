@@ -328,6 +328,7 @@ class AcceptanceService
             'samplerGender' => $acceptanceDTO->samplerGender,
             'out_patient' => $acceptanceDTO->outPatient,
             'sampler_id' => $acceptanceDTO->samplerId,
+            'waiting_for_pooling' => $acceptanceDTO->waitingForPooling,
         ];
 
         // Process reporting method if it exists
