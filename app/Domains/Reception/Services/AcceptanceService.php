@@ -881,6 +881,8 @@ class AcceptanceService
                 $startedItems = $this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
                 if ($startedItems) {
                     $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::PROCESSING);
+                } elseif ($acceptance->waiting_for_pooling && $acceptance->status !== AcceptanceStatus::POOLING) {
+                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::POOLING);
                 }
             }
         } else {
