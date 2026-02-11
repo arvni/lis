@@ -223,7 +223,8 @@ class AcceptanceService
                 default:
                     $acceptance = $this->acceptanceRepository->updateAcceptance($acceptance, [
                         "step" => 5,
-                        "status" => $acceptance->status === AcceptanceStatus::PENDING ? AcceptanceStatus::WAITING_FOR_PAYMENT : $acceptance->status
+                        "status" => $acceptance->status === AcceptanceStatus::PENDING ? AcceptanceStatus::WAITING_FOR_PAYMENT : $acceptance->status,
+                        "waiting_for_pooling" => $acceptanceDTO->waitingForPooling,
                     ]);
                     break;
             }
