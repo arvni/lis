@@ -38,6 +38,7 @@ const statuses = [
     'pending',
     'waiting for payment',
     'sampling',
+    'pooling',
     'waiting for entering',
     'processing',
     'reported',

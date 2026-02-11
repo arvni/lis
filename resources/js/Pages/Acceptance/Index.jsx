@@ -39,7 +39,8 @@ import {
     Settings as SettingsIcon,
     Assignment as AssignmentIcon,
     HourglassEmpty as HourglassEmptyIcon,
-    Warning as WarningIcon
+    Warning as WarningIcon,
+    MergeType as MergeTypeIcon
 } from "@mui/icons-material";
 import {calculateBusinessDays, formatDate} from "@/Services/helper.js";
 
@@ -87,6 +88,11 @@ const Index = () => {
                 color: 'info',
                 icon: <ScienceIcon/>,
                 label: 'Sampling'
+            },
+            'pooling': {
+                color: 'secondary',
+                icon: <MergeTypeIcon/>,
+                label: 'Pooling'
             },
             'waiting for entering': {
                 color: 'warning',
