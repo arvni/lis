@@ -32,7 +32,7 @@ class CheckAcceptance extends Command
     {
         Acceptance::withoutEvents(function () {
             Acceptance::query()
-                ->whereIn("status", [AcceptanceStatus::WAITING_FOR_ENTERING->value, AcceptanceStatus::WAITING_FOR_PAYMENT->value])
+                ->whereIn("status", [AcceptanceStatus::WAITING_FOR_ENTERING->value, AcceptanceStatus::WAITING_FOR_PAYMENT->value, AcceptanceStatus::POOLING->value])
                 ->chunk(100, function ($acceptances) {
                     $acceptanceService = resolve(AcceptanceService::class);
                     foreach ($acceptances as $acceptance) {
