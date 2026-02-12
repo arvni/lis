@@ -482,7 +482,15 @@ class AcceptanceService
             return $item->report !== null;
         });
         if (!$allHaveReports) {
-            // Not all items have reports yet, keep current status
+            // Not all items have reports yet, check if items started or should be pooling
+            $startedItems = $this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
+            if ($startedItems) {
+                if ($acceptance->status !== AcceptanceStatus::PROCESSING) {
+                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::PROCESSING);
+                }
+            } elseif ($acceptance->waiting_for_pooling && $acceptance->status !== AcceptanceStatus::POOLING) {
+                $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::POOLING);
+            }
             return;
         }
         // Check if all reports are approved
