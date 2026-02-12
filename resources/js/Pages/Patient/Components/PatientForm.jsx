@@ -50,6 +50,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
     const [unknownAvatar, setUnknownAvatar] = useState(null);
     const [expandedSection, setExpandedSection] = useState('personal');
     const [age, setAge] = useState(calculateAge(data?.dateOfBirth));
+    const [customRelationship, setCustomRelationship] = useState('');
 
     // Calculate age from date of birth
     function calculateAge(dob) {
@@ -131,7 +132,6 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
     };
 
     const relationOptions = [
-        {value: "-", label: "-"},
         ...(data.gender === "male" ?
                 [
                     {value: "father", label: "Father"},
@@ -139,6 +139,8 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                     {value: "uncle", label: "Uncle"},
                     {value: "brother", label: "Brother"},
                     {value: "husband", label: "Husband"},
+                    {value: "father in law", label: "Father in Law"},
+                    {value: "brother in law", label: "Brother in Law"},
                 ]
                 :
                 [
@@ -147,12 +149,34 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                     {value: "wife", label: "Wife"},
                     {value: "grandmother", label: "Grandmother"},
                     {value: "aunt", label: "Aunt"},
+                    {value: "mother in law", label: "Mother in Law"},
+                    {value: "sister in law", label: "Sister in Law"},
                 ]
         ),
         {value: "child", label: "Child"},
         {value: "first cousin", label: "First Cousin"},
         {value: "second cousin", label: "Second Cousin"},
+        {value: "other", label: "Other"},
     ]
+
+    const currentRelationship = data.relationship ? (Array.isArray(data.relationship) ? data.relationship : data.relationship.split(",")) : [];
+    const showCustomInput = currentRelationship.includes("other");
+
+    const handleAddCustomRelationship = () => {
+        const trimmed = customRelationship.trim().toLowerCase();
+        if (trimmed && !currentRelationship.includes(trimmed)) {
+            const newRelationship = [...currentRelationship.filter(r => r !== "other"), trimmed, "other"];
+            onChange({target: {name: "relationship", value: newRelationship}});
+        }
+        setCustomRelationship('');
+    };
+
+    const handleCustomRelationshipKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleAddCustomRelationship();
+        }
+    };
 
     return (
         <Card elevation={3} sx={{borderRadius: 2, overflow: 'visible'}}>
@@ -734,7 +758,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                     <Select
                                         id="relationship"
                                         labelId="relationship-select-label"
-                                        value={data.relationship ? (Array.isArray(data.relationship) ? data.relationship : data.relationship.split(",")) : []}
+                                        value={currentRelationship}
                                         label="Relationship *"
                                         onChange={onChange}
                                         name="relationship"
@@ -742,6 +766,14 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                         variant="outlined"
                                         multiple
                                         startAdornment={<Info color="primary" sx={{mr: 1}}/>}
+                                        renderValue={(selected) => (
+                                            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
+                                                {selected.filter(v => v !== "other").map((value) => (
+                                                    <Chip key={value} label={value} size="small"/>
+                                                ))}
+                                                {selected.includes("other") && <Chip label="Other" size="small" color="warning"/>}
+                                            </Box>
+                                        )}
                                         MenuProps={{
                                             PaperProps: {
                                                 style: {
@@ -750,10 +782,32 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             },
                                         }}
                                     >
-                                        {relationOptions.map(relation => <MenuItem value={relation.value}
+                                        {relationOptions.map(relation => <MenuItem key={relation.value} value={relation.value}
                                                                                    role="option">{relation.label}</MenuItem>)}
                                     </Select>
                                 </FormControl>
+                                {showCustomInput && (
+                                    <Stack direction="row" spacing={1} sx={{mt: 2}}>
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            label="Custom Relationship"
+                                            placeholder="e.g. step mother, guardian..."
+                                            value={customRelationship}
+                                            onChange={(e) => setCustomRelationship(e.target.value)}
+                                            onKeyDown={handleCustomRelationshipKeyDown}
+                                            disabled={!editable}
+                                        />
+                                        <Button
+                                            variant="contained"
+                                            size="small"
+                                            onClick={handleAddCustomRelationship}
+                                            disabled={!customRelationship.trim() || !editable}
+                                        >
+                                            Add
+                                        </Button>
+                                    </Stack>
+                                )}
                             </Box>
                         </Collapse>
                     </Paper>

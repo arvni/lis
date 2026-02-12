@@ -35,6 +35,10 @@ const getRelationshipColor = (relationship) => {
         brother: 'info',
         sister: 'info',
         child: 'success',
+        'father in law': 'primary',
+        'mother in law': 'primary',
+        'brother in law': 'info',
+        'sister in law': 'info',
         default: 'default'
     };
 
