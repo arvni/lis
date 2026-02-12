@@ -3,7 +3,7 @@ import { GridActionsCellItem } from "@mui/x-data-grid";
 import Filter from "./Components/Filter";
 import TableLayout from "@/Layouts/TableLayout";
 import { useState, useEffect } from "react";
-import { RemoveRedEye, Assignment } from "@mui/icons-material";
+import { RemoveRedEye, Assignment, MergeType } from "@mui/icons-material";
 import { router, useForm, usePage } from "@inertiajs/react";
 import { Tooltip, Chip } from "@mui/material";
 
@@ -62,6 +62,23 @@ const Index = () => {
                     size="small"
                     variant="outlined"
                 />
+            )
+        },
+        {
+            field: 'pooling',
+            headerName: 'Pooling',
+            type: "boolean",
+            width: 100,
+            renderCell: ({ row }) => (
+                row.pooling ? (
+                    <Chip
+                        icon={<MergeType fontSize="small"/>}
+                        label="Pooling"
+                        color="info"
+                        size="small"
+                        variant="outlined"
+                    />
+                ) : null
             )
         },
         {

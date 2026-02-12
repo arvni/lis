@@ -264,6 +264,28 @@ const Index = () => {
             )
         },
         {
+            field: 'waiting_for_pooling',
+            headerName: 'Pooling',
+            type: "boolean",
+            flex: 0.25,
+            display: "flex",
+            renderCell: ({row}) => (
+                row.waiting_for_pooling ? (
+                    <Chip
+                        icon={<MergeTypeIcon fontSize="small"/>}
+                        label="Pooling"
+                        color="secondary"
+                        size="small"
+                        sx={{
+                            fontWeight: 500,
+                            fontSize: '0.7rem',
+                            borderRadius: 1
+                        }}
+                    />
+                ) : null
+            )
+        },
+        {
             field: 'remaining_amount',
             headerName: 'Remaining',
             flex: 0.3,
