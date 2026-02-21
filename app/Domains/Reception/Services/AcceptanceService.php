@@ -456,6 +456,16 @@ class AcceptanceService
      */
     public function checkAndUpdateAcceptanceStatus(Acceptance $acceptance): void
     {
+        // Mark SERVICE type items as reportless and sampleless
+        $acceptance->load(['acceptanceItems.test']);
+        foreach ($acceptance->acceptanceItems as $item) {
+            if ($item->test && $item->test->type === TestType::SERVICE) {
+                if (!$item->reportless || !$item->sampleless) {
+                    $item->update(['reportless' => true, 'sampleless' => true]);
+                }
+            }
+        }
+
         // Load acceptance items with reports
         $acceptance->load([
             'acceptanceItems' => function ($q) {
@@ -871,6 +881,16 @@ class AcceptanceService
     {
         if ($acceptance->status == AcceptanceStatus::REPORTED)
             return;
+
+        // Mark SERVICE type items as reportless and sampleless
+        $acceptance->load(['acceptanceItems.test']);
+        foreach ($acceptance->acceptanceItems as $item) {
+            if ($item->test && $item->test->type === TestType::SERVICE) {
+                if (!$item->reportless || !$item->sampleless) {
+                    $item->update(['reportless' => true, 'sampleless' => true]);
+                }
+            }
+        }
 
         $reportableTest = $this->acceptanceRepository->countReportableTests($acceptance);
 
