@@ -480,6 +480,44 @@ const AddTest = ({
 
     const renderTestConfiguration = () => (
         <>
+            {/* Test Options - Sampleless toggle (non-SERVICE tests only) */}
+            {testType !== TEST_TYPES.SERVICE && (
+                <Paper elevation={0} sx={{p: 2, mb: 2, backgroundColor: 'grey.50', borderRadius: 2}}>
+                    <Typography variant="subtitle2" fontWeight="medium" gutterBottom>
+                        Test Options
+                    </Typography>
+                    <Box sx={{display: 'flex', gap: 3}}>
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={data.sampleless || false}
+                                    onChange={(e) => {
+                                        const isSampleless = e.target.checked;
+                                        if (isSampleless && patient) {
+                                            handleChange({
+                                                sampleless: true,
+                                                samples: [{patients: [{id: patient.id, name: patient.fullName}]}]
+                                            });
+                                        } else {
+                                            handleChange({sampleless: isSampleless});
+                                        }
+                                    }}
+                                    color="warning"
+                                />
+                            }
+                            label={
+                                <Box>
+                                    <Typography variant="body2">Sampleless</Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                        No physical sample needed for this test
+                                    </Typography>
+                                </Box>
+                            }
+                        />
+                    </Box>
+                </Paper>
+            )}
+
             <Paper elevation={0} sx={{p: 3, backgroundColor: "grey.50", borderRadius: 2}}>
                 <Typography variant="subtitle1" fontWeight="medium" gutterBottom>
                     Configure Test Parameters
@@ -497,40 +535,6 @@ const AddTest = ({
                         <HelpOutline fontSize="small" color="action" sx={{ml: 1}}/>
                     </Tooltip>
                 </Box>
-
-                {/* Sampleless Option - only for non-SERVICE tests */}
-                {testType !== TEST_TYPES.SERVICE && (
-                    <Box sx={{mb: 2}}>
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={data.sampleless || false}
-                                    onChange={(e) => {
-                                        const isSampleless = e.target.checked;
-                                        // When sampleless is enabled, set default patient (similar to SERVICE tests)
-                                        if (isSampleless && patient) {
-                                            handleChange({
-                                                sampleless: true,
-                                                samples: [{patients: [{id: patient.id, name: patient.fullName}]}]
-                                            });
-                                        } else {
-                                            handleChange({sampleless: isSampleless});
-                                        }
-                                    }}
-                                    color="warning"
-                                />
-                            }
-                            label={
-                                <Box>
-                                    <Typography variant="body1">Sampleless (No Sample Required)</Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                        Enable this if no physical sample is needed for this test
-                                    </Typography>
-                                </Box>
-                            }
-                        />
-                    </Box>
-                )}
 
                 <TextField
                     name="details"
