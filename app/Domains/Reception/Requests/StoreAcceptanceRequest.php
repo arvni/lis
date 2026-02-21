@@ -116,7 +116,7 @@ class StoreAcceptanceRequest extends FormRequest
                     'min:0',
                     function ($attribute, $value, $fail) {
                         $index = explode('.', $attribute)[2];
-                        $price = $this->input("acceptanceItems.panels.{$index}.panel.price");
+                        $price = $this->input("acceptanceItems.panels.{$index}.price");
 
                         if ($value > $price) {
                             $fail('The discount cannot be greater than the price.');
@@ -131,6 +131,8 @@ class StoreAcceptanceRequest extends FormRequest
                         }
                     },
                 ];
+                $rules['acceptanceItems.panels.*.sampleless'] = 'nullable|boolean';
+                $rules['acceptanceItems.panels.*.reportless'] = 'nullable|boolean';
                 $rules['acceptanceItems.panels.*.acceptanceItems'] = 'required|array';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.id'] = 'nullable';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.method_test.id'] = 'required|exists:method_tests,id';
@@ -322,7 +324,7 @@ class StoreAcceptanceRequest extends FormRequest
                     'min:0',
                     function ($attribute, $value, $fail) {
                         $index = explode('.', $attribute)[2];
-                        $price = $this->input("acceptanceItems.panels.{$index}.panel.price");
+                        $price = $this->input("acceptanceItems.panels.{$index}.price");
 
                         if ($value > $price) {
                             $fail('The discount cannot be greater than the price.');
@@ -337,6 +339,8 @@ class StoreAcceptanceRequest extends FormRequest
                         }
                     },
                 ];
+                $rules['acceptanceItems.panels.*.sampleless'] = 'nullable|boolean';
+                $rules['acceptanceItems.panels.*.reportless'] = 'nullable|boolean';
                 $rules['acceptanceItems.panels.*.acceptanceItems'] = 'required|array';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.id'] = 'nullable';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.method_test.id'] = 'required|exists:method_tests,id';

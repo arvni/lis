@@ -403,6 +403,8 @@ class AcceptanceRepository
                     'acceptanceItems' => $panelItems->map(fn($item) => [...$item, "samples" => $item["customParameters"]["samples"] ?? [], "discounts" => $item["customParameters"]["discounts"] ?? [], "details" => $item["customParameters"]["details"] ?? ""]),
                     'price' => $panelItems->sum('price'),
                     'discount' => $panelItems->sum('discount'),
+                    'sampleless' => $panelItems->every('sampleless', true),
+                    'reportless' => $panelItems->every('reportless', true),
                 ];
             })
             ->values() // Reset keys to a simple indexed array

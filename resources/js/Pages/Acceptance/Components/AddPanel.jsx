@@ -12,7 +12,9 @@ import {
     Paper,
     CircularProgress,
     Alert,
-    Tooltip
+    Tooltip,
+    FormControlLabel,
+    Switch,
 } from "@mui/material";
 import {
     Close,
@@ -247,6 +249,51 @@ const AddPanel = ({
         }
     }, [referrer, onChange, setErrors, createAcceptanceItems]);
 
+    // Panel-level sampleless/reportless handlers
+    const handleSamplelessChange = useCallback((e) => {
+        const isSampleless = e.target.checked;
+        const updates = { sampleless: isSampleless };
+
+        if (data.acceptanceItems?.length) {
+            if (isSampleless && patient) {
+                // When sampleless is enabled, mark sub-items sampleless and set default patient
+                updates.acceptanceItems = data.acceptanceItems.map(item => ({
+                    ...item,
+                    sampleless: true,
+                    samples: [{ patients: [{ id: patient.id, name: patient.fullName }], sampleType: '' }],
+                }));
+            } else if (!isSampleless) {
+                // When sampleless is disabled, reset sub-items sampleless flag
+                updates.acceptanceItems = data.acceptanceItems.map(item => ({
+                    ...item,
+                    sampleless: false,
+                }));
+            }
+        }
+
+        // Sampleless implies reportless
+        if (isSampleless) {
+            updates.reportless = true;
+        }
+
+        onChange?.(updates);
+    }, [onChange, patient, data.acceptanceItems]);
+
+    const handleReportlessChange = useCallback((e) => {
+        const isReportless = e.target.checked;
+        const updates = { reportless: isReportless };
+
+        // Propagate reportless to sub-items
+        if (data.acceptanceItems?.length) {
+            updates.acceptanceItems = data.acceptanceItems.map(item => ({
+                ...item,
+                reportless: isReportless,
+            }));
+        }
+
+        onChange?.(updates);
+    }, [onChange, data.acceptanceItems]);
+
     // Event handlers
     const handleTestSelect = useCallback((e) => {
         const selectedTest = e.target.value;
@@ -334,15 +381,60 @@ const AddPanel = ({
                 />
 
                 {hasPanelData && !isFetching && (
-                    <PanelTestForm
-                        panel={data.panel}
-                        acceptanceItems={data.acceptanceItems || []}
-                        onChange={handleFormChange}
-                        errors={errors}
-                        maxDiscount={maxDiscount}
-                        referrer={referrer}
-                        patient={patient}
-                    />
+                    <>
+                        <Paper elevation={0} sx={{ p: 2, mb: 2, backgroundColor: 'grey.50', borderRadius: 2 }}>
+                            <Typography variant="subtitle2" fontWeight="medium" gutterBottom>
+                                Panel Options
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 3 }}>
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={data.sampleless || false}
+                                            onChange={handleSamplelessChange}
+                                            color="warning"
+                                        />
+                                    }
+                                    label={
+                                        <Box>
+                                            <Typography variant="body2">Sampleless</Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                No physical sample needed for this panel
+                                            </Typography>
+                                        </Box>
+                                    }
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={data.reportless || data.sampleless || false}
+                                            onChange={handleReportlessChange}
+                                            color="info"
+                                            disabled={data.sampleless}
+                                        />
+                                    }
+                                    label={
+                                        <Box>
+                                            <Typography variant="body2">Reportless</Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                No report needed for this panel
+                                            </Typography>
+                                        </Box>
+                                    }
+                                />
+                            </Box>
+                        </Paper>
+                        <PanelTestForm
+                            panel={data.panel}
+                            acceptanceItems={data.acceptanceItems || []}
+                            onChange={handleFormChange}
+                            errors={errors}
+                            maxDiscount={maxDiscount}
+                            referrer={referrer}
+                            patient={patient}
+                            sampleless={data.sampleless || false}
+                        />
+                    </>
                 )}
 
                 {!hasPanelData && !isFetching && <EmptyPanelState />}

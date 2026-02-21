@@ -145,7 +145,10 @@ class StoreReferrerOrderAcceptanceController extends Controller
                         continue;
                     }
                     $panelID = Str::uuid();
+                    $panelSampleless = $panelData['sampleless'] ?? false;
+                    $panelReportless = $panelData['reportless'] ?? false;
                     foreach ($panelData['acceptanceItems'] as $item) {
+                        $itemSampleless = $panelSampleless || ($item['sampleless'] ?? false);
                         $dto = new AcceptanceItemDTO(
                             $acceptance->id,
                             $item['method_test']['id'],
@@ -160,9 +163,9 @@ class StoreReferrerOrderAcceptanceController extends Controller
                             null,
                             $panelID,
                             false,
-                            $item['sampleless'] ?? false
+                            $itemSampleless,
+                            $panelReportless || ($item['reportless'] ?? false),
                         );
-                        dd($dto);
                         $this->acceptanceItemService->storeAcceptanceItem($dto);
                     }
                 }

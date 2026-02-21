@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
     FormControl,
     FormHelperText,
@@ -53,6 +53,12 @@ import DiscountManager from "@/Pages/Acceptance/Components/DiscountManager.jsx";
 const TAB_CONFIGS = [
     {label: 'Panel Information', icon: Details, key: 'panelInformation'},
     {label: 'Sample Config', icon: PersonIcon, key: 'patientAssignment'},
+    {label: 'Price Config', icon: CalculateIcon, key: 'priceConfig'},
+    {label: 'Test Details', icon: SettingsIcon, key: 'testDetails'}
+];
+
+const TAB_CONFIGS_SAMPLELESS = [
+    {label: 'Panel Information', icon: Details, key: 'panelInformation'},
     {label: 'Price Config', icon: CalculateIcon, key: 'priceConfig'},
     {label: 'Test Details', icon: SettingsIcon, key: 'testDetails'}
 ];
@@ -421,9 +427,15 @@ const PanelTestForm = ({
                            patient,
                            panel,
                            maxDiscount = 0,
+                           sampleless = false,
                        }) => {
-    console.log("mx:",maxDiscount);
     const [currentTab, setCurrentTab] = useState(0);
+    const activeTabConfigs = sampleless ? TAB_CONFIGS_SAMPLELESS : TAB_CONFIGS;
+
+    // Reset tab when sampleless changes to avoid out-of-bounds index
+    useEffect(() => {
+        setCurrentTab(0);
+    }, [sampleless]);
 
     // Memoized calculations
     const tabErrors = useMemo(() => getTabErrors(errors), [errors]);
@@ -857,12 +869,12 @@ const PanelTestForm = ({
         </Box>
     ), [panel, acceptanceItems.length]);
 
-    const tabRenderers = useMemo(() => [
-        renderPanelInformation,
-        renderPatientAssignment,
-        renderPriceConfiguration,
-        renderTestDetails
-    ], [renderPanelInformation, renderPatientAssignment, renderPriceConfiguration, renderTestDetails]);
+    const tabRenderers = useMemo(() => {
+        if (sampleless) {
+            return [renderPanelInformation, renderPriceConfiguration, renderTestDetails];
+        }
+        return [renderPanelInformation, renderPatientAssignment, renderPriceConfiguration, renderTestDetails];
+    }, [sampleless, renderPanelInformation, renderPatientAssignment, renderPriceConfiguration, renderTestDetails]);
 
     // Early return for empty state
     if (!acceptanceItems?.length) {
@@ -882,7 +894,7 @@ const PanelTestForm = ({
                     }}
                     variant="fullWidth"
                 >
-                    {TAB_CONFIGS.map((tab, index) => {
+                    {activeTabConfigs.map((tab, index) => {
                         const IconComponent = tab.icon;
                         const hasError = hasTabError(tabErrors, index);
 

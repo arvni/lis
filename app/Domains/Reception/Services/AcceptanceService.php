@@ -589,7 +589,10 @@ class AcceptanceService
             foreach ($acceptanceItems['panels'] as $panelData) {
                 if (isset($panelData["acceptanceItems"]) && is_array($panelData["acceptanceItems"])) {
                     $panelID = Str::uuid();
+                    $panelSampleless = $panelData["sampleless"] ?? false;
+                    $panelReportless = $panelData["reportless"] ?? false;
                     foreach ($panelData["acceptanceItems"] as $item) {
+                        $itemSampleless = $panelSampleless || ($item["sampleless"] ?? false);
                         $output[] = new AcceptanceItemDTO(
                             $acceptance->id,
                             $item['method_test']['id'],
@@ -606,7 +609,8 @@ class AcceptanceService
                             $item["id"] ?? null,
                             $panelID,
                             $panelData["deleted"] ?? false,
-                            $item["sampleless"] ?? false,
+                            $itemSampleless,
+                            $panelReportless || ($item["reportless"] ?? false),
                         );
                     }
                 }

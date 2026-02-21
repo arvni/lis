@@ -123,6 +123,8 @@ class StoreReferrerOrderAcceptanceRequest extends FormRequest
                 }
             },
         ];
+        $rules['acceptanceItems.panels.*.sampleless'] = 'nullable|boolean';
+        $rules['acceptanceItems.panels.*.reportless'] = 'nullable|boolean';
         $rules['acceptanceItems.panels.*.acceptanceItems'] = 'required|array';
         $rules['acceptanceItems.panels.*.acceptanceItems.*.id'] = 'nullable';
         $rules['acceptanceItems.panels.*.acceptanceItems.*.no_sample'] = 'nullable';

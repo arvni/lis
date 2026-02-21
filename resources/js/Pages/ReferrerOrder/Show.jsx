@@ -547,6 +547,8 @@ const Show = ({referrerOrder, errors = {}}) => {
                 tests: (data.acceptanceItems?.tests || []).map(cleanAcceptanceItem),
                 panels: (data.acceptanceItems?.panels || []).map(panel => ({
                     ...cleanAcceptanceItem(panel),
+                    sampleless: panel.sampleless || false,
+                    reportless: panel.reportless || false,
                     acceptanceItems: (panel.acceptanceItems || []).map(cleanAcceptanceItem)
                 }))
             }

@@ -183,6 +183,8 @@ class UpdateAcceptanceRequest extends FormRequest
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.customParameters.price'] = 'nullable|array';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.customParameters.discounts'] = 'nullable|array';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.sampleless'] = 'nullable|boolean';
+                $rules['acceptanceItems.panels.*.sampleless'] = 'nullable|boolean';
+                $rules['acceptanceItems.panels.*.reportless'] = 'nullable|boolean';
                 break;
 
             case 4: // Sampling & Delivery
@@ -372,7 +374,7 @@ class UpdateAcceptanceRequest extends FormRequest
                     'min:0',
                     function ($attribute, $value, $fail) {
                         $index = explode('.', $attribute)[2];
-                        $price = $this->input("acceptanceItems.panels.{$index}.panel.price");
+                        $price = $this->input("acceptanceItems.panels.{$index}.price");
 
                         if ($value > $price) {
                             $fail('The discount cannot be greater than the price.');
@@ -387,6 +389,8 @@ class UpdateAcceptanceRequest extends FormRequest
                         }
                     },
                 ];
+                $rules['acceptanceItems.panels.*.sampleless'] = 'nullable|boolean';
+                $rules['acceptanceItems.panels.*.reportless'] = 'nullable|boolean';
                 $rules['acceptanceItems.panels.*.acceptanceItems'] = 'required|array';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.id'] = 'nullable';
                 $rules['acceptanceItems.panels.*.acceptanceItems.*.method_test.id'] = 'required|exists:method_tests,id';

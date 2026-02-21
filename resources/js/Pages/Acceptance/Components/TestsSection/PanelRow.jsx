@@ -307,11 +307,19 @@ const PanelRow = ({
                                                 <Typography fontWeight="600" color="primary.main">
                                                     {panel?.panel?.name}
                                                 </Typography>
-                                                {hasMultipleItems && (
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        {acceptanceItems.length} tests
-                                                    </Typography>
-                                                )}
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
+                                                    {hasMultipleItems && (
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            {acceptanceItems.length} tests
+                                                        </Typography>
+                                                    )}
+                                                    {panel?.sampleless && (
+                                                        <Chip label="Sampleless" size="small" color="warning" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
+                                                    )}
+                                                    {(panel?.reportless || panel?.sampleless) && (
+                                                        <Chip label="Reportless" size="small" color="info" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
+                                                    )}
+                                                </Box>
                                             </Box>
                                         </Box>
                                         {hasMultipleItems && (

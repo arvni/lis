@@ -11,19 +11,23 @@ export const useFormValidation = (data, maxDiscount) => {
         if (data.price * maxDiscount/100 < data.discount) {
             newErrors.discount = "Please Enter A lower discount";
         }
+        const panelSampleless = data.sampleless || false;
         for (let i = 0; i < data.acceptanceItems.length; i++) {
+            const itemSampleless = panelSampleless || data.acceptanceItems[i]?.sampleless;
+            // Skip sample validation for sampleless items
+            if (itemSampleless) continue;
+
             if (data?.acceptanceItems[i]?.samples?.length<1||data?.acceptanceItems[i]?.samples?.length > data.acceptanceItems[i].method_test?.method?.no_sample)
                 newErrors[`acceptanceItems.${i}.samples`] = "Please Enter Samples Data";
-            for (let j = 0; j < data.acceptanceItems[i].samples.length; j++) {
+            for (let j = 0; j < (data.acceptanceItems[i].samples || []).length; j++) {
                 if (!data.acceptanceItems[i].samples[j]?.sampleType)
                     newErrors[`acceptanceItems.${i}.samples.${j}.sampleType`] = "Please Select A Sample Type";
-                for (let k = 0; k < data.acceptanceItems[i].samples[j].patients.length; k++) {
-                    if (!data.acceptanceItems[i].samples[j]?.patients[k].id)
+                for (let k = 0; k < (data.acceptanceItems[i].samples[j]?.patients || []).length; k++) {
+                    if (!data.acceptanceItems[i].samples[j]?.patients[k]?.id)
                         newErrors[`acceptanceItems.${i}.samples.${j}.patients.${k}.id`] = "Please Select A Patient";
                 }
             }
         }
-        console.log(newErrors,data);
         setErrors(newErrors);
         return Object.keys(newErrors).length < 1;
     }
