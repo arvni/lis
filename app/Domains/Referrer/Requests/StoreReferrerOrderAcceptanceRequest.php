@@ -108,7 +108,7 @@ class StoreReferrerOrderAcceptanceRequest extends FormRequest
             'min:0',
             function ($attribute, $value, $fail) {
                 $index = explode('.', $attribute)[2];
-                $price = $this->input("acceptanceItems.panels.{$index}.panel.price");
+                $price = $this->input("acceptanceItems.panels.{$index}.price");
 
                 if ($value > $price) {
                     $fail('The discount cannot be greater than the price.');
