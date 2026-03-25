@@ -131,8 +131,9 @@ class ReportRepository
                     "test.testGroups:name,id",
                     "patients" => function ($qu) {
                         $qu->with([
-                            "OwnedDocuments" => function ($qur) {
-                                $qur->where("tag", DocumentTag::DOCUMENT);
+                            "OwnedDocuments"
+                            => function ($q) {
+                                $q->allowedTag();
                             },
                             "consultation"
                         ]);
