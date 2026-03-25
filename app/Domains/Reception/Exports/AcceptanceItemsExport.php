@@ -79,6 +79,7 @@ class AcceptanceItemsExport implements
                     'patient_dateofbirth' => $first->patient_dateofbirth,
                     'test_testsname' => $first->test_testsname,
                     'method_name' => $first->method_name,
+                    'method_turnaround_time' => $first->method_turnaround_time,
                     'activeSamples' => $first->activeSamples,
                     'status' => $first->status,
                     'created_at' => $first->created_at,
@@ -117,6 +118,7 @@ class AcceptanceItemsExport implements
             'Invoice Date',
             'Created At',
             'Last Updated',
+            'Est. Report Date',
         ];
     }
 
@@ -142,6 +144,7 @@ class AcceptanceItemsExport implements
             $this->getInvoiceDate($row),
             $this->formatDateTime($row->created_at),
             $this->formatDateTime($row->updated_at),
+            $this->formatEstimatedReportDate($row),
         ];
     }
 
@@ -150,7 +153,7 @@ class AcceptanceItemsExport implements
      */
     public function styles(Worksheet $sheet): array
     {
-        $sheet->setAutoFilter('A1:P1');
+        $sheet->setAutoFilter('A1:Q1');
 
         return [
             1 => [
@@ -256,6 +259,30 @@ class AcceptanceItemsExport implements
         }
 
         return $this->formatDate($invoice->created_at);
+    }
+
+    /**
+     * Computes the estimated report date by adding turnaround_time working days
+     * (skipping Friday and Saturday) to the acceptance item's created_at date.
+     */
+    private function formatEstimatedReportDate($row): string
+    {
+        $turnaroundTime = $row->method_turnaround_time ?? null;
+        if (!$turnaroundTime || !$row->created_at) {
+            return '';
+        }
+
+        $date = Carbon::parse($row->created_at, self::TIMEZONE);
+        $remaining = (int) $turnaroundTime;
+
+        while ($remaining > 0) {
+            $date->addDay();
+            if ($date->dayOfWeek !== Carbon::FRIDAY && $date->dayOfWeek !== Carbon::SATURDAY) {
+                $remaining--;
+            }
+        }
+
+        return $date->format('Y-m-d');
     }
 
     /**

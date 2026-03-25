@@ -24,6 +24,21 @@ import {Head, router, usePage} from "@inertiajs/react";
 import {useState, useCallback, useEffect} from "react";
 import {formatDate} from "@/Services/helper.js";
 
+// Adds N working days to a date, skipping Friday (5) and Saturday (6)
+const addWorkingDays = (dateStr, days) => {
+    if (!dateStr || !days) return null;
+    const date = new Date(dateStr);
+    let remaining = parseInt(days);
+    while (remaining > 0) {
+        date.setDate(date.getDate() + 1);
+        const day = date.getDay(); // 0=Sun,1=Mon,...,5=Fri,6=Sat
+        if (day !== 5 && day !== 6) {
+            remaining--;
+        }
+    }
+    return date;
+};
+
 const StatisticsIndex = () => {
     const {acceptanceItems, requestInputs} = usePage().props;
     const [loading, setLoading] = useState(false);
@@ -161,6 +176,15 @@ const StatisticsIndex = () => {
             valueGetter: (value) => value ? new Date(value) : null,
             flex: 0.4,
             renderCell: ({value}) => formatDate(value)
+        },
+        {
+            field: 'estimated_report_date',
+            headerName: 'Est. Report Date',
+            type: "date",
+            flex: 0.35,
+            sortable: false,
+            valueGetter: (value, row) => addWorkingDays(row.created_at, row.method_turnaround_time),
+            renderCell: ({value}) => value ? formatDate(value) : "—"
         },
         {
             field: 'action',

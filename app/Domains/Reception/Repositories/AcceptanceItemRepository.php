@@ -30,6 +30,7 @@ class AcceptanceItemRepository
             "activeSamples"
         ])
             ->withAggregate("method", "name")
+            ->withAggregate("method", "turnaround_time")
             ->withAggregate("test", "tests.name")
             ->withAggregate("patient", "fullName")
             ->withAggregate("patient", "dateOfBirth")
@@ -53,6 +54,7 @@ class AcceptanceItemRepository
             "activeSamples",
         ])
             ->withAggregate("method", "name")
+            ->withAggregate("method", "turnaround_time")
             ->withAggregate("test", "tests.name")
             ->withAggregate("patient", "fullName")
             ->withAggregate("patient", "dateOfBirth")
