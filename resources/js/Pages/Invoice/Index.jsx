@@ -27,12 +27,12 @@ import axios from "axios";
 export const INVOICE_STATUS = {
     WAITING_FOR_PAYMENT: {
         value: "Waiting",
-        color : "warning"
+        color: "warning"
     },
-    PAID: {value: "Paid",color :"success"},
-    CREDIT_PAID: {value: "Credit Paid",color : "warning"},
-    PARTIALLY_PAID: {value: "Partially Paid",color : "info"},
-    CANCELED: {value: "Canceled",color: "error"}
+    PAID: {value: "Paid", color: "success"},
+    CREDIT_PAID: {value: "Credit Paid", color: "warning"},
+    PARTIALLY_PAID: {value: "Partially Paid", color: "info"},
+    CANCELED: {value: "Canceled", color: "error"}
 }
 
 const InvoiceIndex = () => {
@@ -54,8 +54,8 @@ const InvoiceIndex = () => {
 
     // Status indicator with appropriate colors
     const StatusChip = ({status}) => {
-        let stat=INVOICE_STATUS?.[Object.keys(INVOICE_STATUS).find(item=>INVOICE_STATUS?.[item].value==status)];
-        return <Chip label={status} color={stat?.color||'default'} size="small"/>;
+        let stat = INVOICE_STATUS?.[Object.keys(INVOICE_STATUS).find(item => INVOICE_STATUS?.[item].value == status)];
+        return <Chip label={status} color={stat?.color || 'default'} size="small"/>;
     };
 
     // Table columns with improved readability
@@ -64,14 +64,14 @@ const InvoiceIndex = () => {
             field: 'invoiceNo',
             headerName: 'Invoice #',
             width: 110,
-            display:"flex"
+            display: "flex"
         },
         {
             field: 'owner',
             headerName: 'Owner',
             width: 200,
             sortable: false,
-            display:"flex",
+            display: "flex",
             renderCell: ({value}) => value?.fullName || "—"
         },
         {
@@ -80,7 +80,7 @@ const InvoiceIndex = () => {
             type: "string",
             width: 200,
             sortable: false,
-            display:"flex",
+            display: "flex",
             renderCell: ({row}) => row?.patient?.fullName || "—"
         },
         {
@@ -88,7 +88,7 @@ const InvoiceIndex = () => {
             headerName: 'Amount',
             type: "number",
             width: 100,
-            display:"flex",
+            display: "flex",
             renderCell: ({value}) => formatCurrency(value)
         },
         {
@@ -96,7 +96,7 @@ const InvoiceIndex = () => {
             headerName: 'Discount',
             type: "number",
             width: 100,
-            display:"flex",
+            display: "flex",
             renderCell: ({value}) => formatCurrency(Math.ceil(value))
         },
         {
@@ -111,14 +111,28 @@ const InvoiceIndex = () => {
             headerName: 'Status',
             type: "string",
             width: 120,
-            display:"flex",
+            display: "flex",
             renderCell: ({value}) => <StatusChip status={value}/>
+        },
+        {
+            field: 'statement',
+            headerName: 'Statement',
+            width: 130,
+            sortable: false,
+            display: "flex",
+            renderCell: ({value}) => value
+                ? <Link target="_blank"
+                        href={route("statements.export", value.id)}
+                        style={{textDecoration: 'none'}}>
+                    <Chip label={`#${value.no}`} size="small" color="primary" clickable/>
+                </Link>
+                : "—"
         },
         {
             field: 'created_at',
             headerName: 'Created Date',
             type: "date",
-            display:"flex",
+            display: "flex",
             valueGetter: (value) => value && new Date(value),
             width: 120,
             renderCell: ({value}) => value ? value.toLocaleDateString('en-US', {
@@ -132,7 +146,7 @@ const InvoiceIndex = () => {
             type: 'action',
             sortable: false,
             headerName: 'Actions',
-            display:"flex",
+            display: "flex",
             renderCell: ({row}) => {
                 return (
                     <Stack direction="row" spacing={1}>

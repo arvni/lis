@@ -17,7 +17,7 @@ class InvoiceRepository
     public function listInvoices(array $queryData)
     {
 
-        $query = $this->applyQuery(["owner", "acceptance", "patient"]);
+        $query = $this->applyQuery(["owner", "acceptance", "patient", "statement"]);
         $query = $this->applyFilters($query, $queryData["filters"] ?? []);
         $query = $this->applyOrderBy($query, $queryData["sort"]);
         return $this->applyPaginate($query, $queryData["pageSize"] ?? 10);
@@ -26,7 +26,7 @@ class InvoiceRepository
     public function listAllInvoices(array $queryData)
     {
 
-        $query = $this->applyQuery(["owner", "patient", "payments", "acceptanceItems.method", "acceptanceItems.patient", "acceptanceItems.test"]);
+        $query = $this->applyQuery(["owner", "patient", "payments", "acceptanceItems.method", "acceptanceItems.patient", "acceptanceItems.test", "statement"]);
         $query = $this->applyFilters($query, $queryData["filters"] ?? []);
         $query = $this->applyOrderBy($query, $queryData["sort"]);
         return $query->get();

@@ -62,7 +62,7 @@ class InvoicesExport implements FromCollection
     public function styles(Worksheet $sheet)
     {
         // Calculate the last column dynamically
-        $totalColumns = 18 + count($this->dynamicColumns); // 18 base columns + dynamic columns
+        $totalColumns = 19 + count($this->dynamicColumns); // 19 base columns + dynamic columns
         $lastColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($totalColumns);
         $sheet->setAutoFilter("A1:{$lastColumn}1");
 
@@ -100,6 +100,7 @@ class InvoicesExport implements FromCollection
             $row = [
                 Carbon::parse($invoice->created_at)->toDate(),
                 $invoice->invoiceNo,
+                $invoice->statement?->no ?? "",
                 (string)optional($patient)->fullName,
                 (string)optional($invoice->owner)->fullName,
                 $acceptanceItem["test"]["name"],
@@ -177,6 +178,7 @@ class InvoicesExport implements FromCollection
         $baseHeadings = [
             "Date",
             "Invoice No.",
+            "Statement",
             "Patient Name",
             "Client",
             "Test",
