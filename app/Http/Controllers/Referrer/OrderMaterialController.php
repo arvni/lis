@@ -6,6 +6,7 @@ use App\Domains\Referrer\DTOs\OrderMaterialDTO;
 use App\Domains\Referrer\Enums\OrderMaterialStatus;
 use App\Domains\Referrer\Events\OrderMaterialUpdated;
 use App\Domains\Referrer\Models\OrderMaterial;
+use App\Domains\Referrer\Requests\StoreOrderMaterialRequest;
 use App\Domains\Referrer\Requests\UpdateMaterialRequest;
 use App\Domains\Referrer\Requests\UpdateOrderMaterialRequest;
 use App\Domains\Referrer\Services\OrderMaterialService;
@@ -37,6 +38,25 @@ class OrderMaterialController extends Controller
         return Inertia::render('OrderMaterials/Index', compact("orderMaterials", "requestInputs"));
     }
 
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreOrderMaterialRequest $request): RedirectResponse
+    {
+        $validated = $request->validated();
+        $hasMaterials = !empty($validated['materials']);
+        $dto = new OrderMaterialDTO(
+            sampleTypeId: $validated['sample_type_id'],
+            referrerId:   $validated['referrer_id'],
+            serverId:     auth()->id(),
+            amount:       $validated['amount'],
+            status:       $hasMaterials ? OrderMaterialStatus::PROCESSED->value : OrderMaterialStatus::ORDERED->value,
+            materials:    $validated['materials'] ?? [],
+        );
+        $this->orderMaterialService->createOrderMaterial($dto);
+        return back()->with(['success' => true, 'status' => 'Order Material created successfully.']);
+    }
 
     /**
      * show the specified resource in storage.

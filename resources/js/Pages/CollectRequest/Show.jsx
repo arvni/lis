@@ -150,6 +150,17 @@ const Show = () => {
                         </Typography>
                     </Grid>
 
+                    {collectRequest?.barcode && (
+                        <Grid size={{ xs:12, sm:6}}>
+                            <Typography variant="subtitle2" color="text.secondary">
+                                Barcode
+                            </Typography>
+                            <Typography variant="body1">
+                                {collectRequest.barcode}
+                            </Typography>
+                        </Grid>
+                    )}
+
                     <Grid size={{ xs:12}}>
                         <Divider sx={{ my: 2 }}>Logistics Information</Divider>
                     </Grid>

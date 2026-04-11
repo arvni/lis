@@ -40,9 +40,11 @@ import {
     Assignment as AssignmentIcon,
     HourglassEmpty as HourglassEmptyIcon,
     Warning as WarningIcon,
-    MergeType as MergeTypeIcon
+    MergeType as MergeTypeIcon,
+    FileDownload as FileDownloadIcon,
 } from "@mui/icons-material";
 import {calculateBusinessDays, formatDate} from "@/Services/helper.js";
+import AddPoolingDialog from "@/Pages/Acceptance/Components/AddPoolingDialog.jsx";
 
 const Index = () => {
     const {
@@ -66,6 +68,8 @@ const Index = () => {
 
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const [openCancelForm, setOpenCancelForm] = useState(false);
+    const [openPoolingDialog, setOpenPoolingDialog] = useState(false);
+    const [poolingAcceptance, setPoolingAcceptance] = useState(null);
 
     // Format currency amounts
     const formatCurrency = (amount) => {
@@ -388,6 +392,15 @@ const Index = () => {
             renderCell:({value})=>formatDate(value)
         },
         {
+            field: 'published_at',
+            headerName: 'Published At',
+            flex: 0.4,
+            type: "datetime",
+            display: "flex",
+            valueGetter: (value) => value && new Date(value),
+            renderCell: ({value}) => value ? formatDate(value) : '-'
+        },
+        {
             field: 'id',
             headerName: 'Actions',
             type: 'actions',
@@ -452,6 +465,24 @@ const Index = () => {
                             label="Cancel"
                             showInMenu
                             onClick={cancelAcceptance(params.row)}
+                        />
+                    );
+                }
+
+                if (params.row.status?.toLowerCase() === 'pooling') {
+                    cols.push(
+                        <GridActionsCellItem
+                            icon={
+                                <Tooltip title="Add pooling sample">
+                                    <MergeTypeIcon color="secondary"/>
+                                </Tooltip>
+                            }
+                            label="Add Pooling"
+                            showInMenu
+                            onClick={() => {
+                                setPoolingAcceptance(params.row);
+                                setOpenPoolingDialog(true);
+                            }}
                         />
                     );
                 }
@@ -530,7 +561,7 @@ const Index = () => {
                 icon={<LocalHospitalIcon fontSize="large" color="primary"/>}
                 subtitle="Manage and view all patient acceptances"
                 actions={
-                    <Stack direction="row" spacing={2}>
+                    <Stack direction="row" spacing={2} alignItems="center">
                         <Chip
                             icon={<AssignmentIcon/>}
                             label="Reports Ready"
@@ -552,6 +583,14 @@ const Index = () => {
                             variant="outlined"
                             sx={{fontWeight: 500}}
                         />
+                        <Button
+                            variant="outlined"
+                            color="success"
+                            startIcon={<FileDownloadIcon/>}
+                            href={route('acceptances.export', requestInputs)}
+                        >
+                            Export Excel
+                        </Button>
                     </Stack>
                 }
             />
@@ -716,6 +755,12 @@ const Index = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <AddPoolingDialog
+                open={openPoolingDialog}
+                onClose={() => setOpenPoolingDialog(false)}
+                acceptance={poolingAcceptance}
+            />
         </>
     );
 };

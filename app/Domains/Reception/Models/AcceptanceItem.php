@@ -29,12 +29,14 @@ class AcceptanceItem extends Model
         'no_sample',
         'reportless',
         'sampleless',
+        'is_pooling',
     ];
     protected $casts = [
         "customParameters" => "json",
         "timeline" => "json",
         "reportless" => "boolean",
         "sampleless" => "boolean",
+        "is_pooling" => "boolean",
     ];
     protected $appends = [
         "status",

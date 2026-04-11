@@ -54,6 +54,11 @@ class AcceptanceService
         return $this->acceptanceRepository->ListAcceptances($queryData);
     }
 
+    public function exportAcceptances(array $queryData)
+    {
+        return $this->acceptanceRepository->exportAcceptances($queryData);
+    }
+
     public function getReferrerAcceptanceReported($referrer_id, $date)
     {
         return $this->acceptanceRepository->getReported($referrer_id, $date);
@@ -384,14 +389,20 @@ class AcceptanceService
         $acceptance->load([
             "acceptanceItems"=>function($query){
                 $query->where("sampleless", false);
+                $query->whereRaw("(select count(*) from `samples`
+                    inner join `acceptance_item_samples` on `samples`.`id` = `acceptance_item_samples`.`sample_id`
+                    where `acceptance_items`.`id` = `acceptance_item_samples`.`acceptance_item_id`
+                    and `acceptance_item_samples`.`active` = 1
+                ) < `acceptance_items`.`no_sample`");
                 $query->with(["method.barcodeGroup","method.test.sampleTypes","test","patients"]);
             },
-            "patient"
+            "patient",
+            "referrer"
         ]);
         // Filter out SERVICE type items and sampleless items
         $filteredItems = $acceptance->acceptanceItems->where("test.type", "!=", TestType::SERVICE);
         $barcodes = $this->convertAcceptanceItems($filteredItems);
-        return ["barcodes" => $barcodes, "patient" => $acceptance->patient];
+        return ["barcodes" => $barcodes, "patient" => $acceptance->patient, "referrer" => $acceptance->referrer, "out_patient" => $acceptance->out_patient];
     }
 
     /**

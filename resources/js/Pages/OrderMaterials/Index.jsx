@@ -8,13 +8,17 @@ import DeleteForm from "@/Components/DeleteForm";
 import PageHeader from "@/Components/PageHeader.jsx";
 import Filter from "./Components/Filter";
 import AddForm from "./Components/Form";
+import AddOrderMaterialForm from "./Components/AddOrderMaterialForm";
 import PrintIcon from "@mui/icons-material/Print";
+import AddIcon from "@mui/icons-material/Add";
+import Button from "@mui/material/Button";
 
 const OrderMaterialsIndex = () => {
     const {orderMaterials, status, errors, success, requestInputs} = usePage().props;
 
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const [openAddForm, setOpenAddForm] = useState(false);
+    const [openCreateForm, setOpenCreateForm] = useState(false);
     const [selectedOrderMaterial, setSelectedOrderMaterial] = useState(null);
 
     const [loading, setLoading] = useState(false);
@@ -138,6 +142,11 @@ const OrderMaterialsIndex = () => {
             <PageHeader
                 title="Order Materials Management"
                 subtitle="Create and manage discount order materials for tests and referrals"
+                actions={
+                    <Button variant="contained" startIcon={<AddIcon/>} onClick={() => setOpenCreateForm(true)}>
+                        Create Order
+                    </Button>
+                }
             />
 
             <TableLayout
@@ -176,6 +185,13 @@ const OrderMaterialsIndex = () => {
                     open={openAddForm}
                     defaultValue={selectedOrderMaterial}
                     onClose={handleCloseForm}
+                />
+            )}
+
+            {openCreateForm && (
+                <AddOrderMaterialForm
+                    open={openCreateForm}
+                    onClose={() => setOpenCreateForm(false)}
                 />
             )}
         </>

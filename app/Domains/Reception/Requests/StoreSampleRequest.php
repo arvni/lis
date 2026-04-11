@@ -35,7 +35,10 @@ class StoreSampleRequest extends FormRequest
             "barcodes.*.received_at" => ["required"],
             "barcodes.*.sampleLocation" => ["required"],
             "barcodes.*.barcodeGroup" => ["required","array"],
-
+            "barcodes.*.material" => ["nullable", "array"],
+            "barcodes.*.material.id" => ["nullable", "exists:materials,id"],
+            "barcodes.*.material.barcode" => ["nullable", "string"],
+            "collect_request.id" => ["nullable", "exists:collect_requests,id"],
         ];
     }
 }

@@ -25,6 +25,13 @@ class OrderMaterialRepository
         return $query->paginate($queryData["pageSize"] ?? 10);
     }
 
+    public function createOrderMaterial(array $data): OrderMaterial
+    {
+        $orderMaterial = OrderMaterial::create($data);
+        UserActivityService::createUserActivity($orderMaterial, ActivityType::CREATE);
+        return $orderMaterial;
+    }
+
     public function updateOrderMaterial(OrderMaterial $orderMaterial, array $orderMaterialData): OrderMaterial
     {
         $orderMaterial->fill($orderMaterialData);

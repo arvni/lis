@@ -21,6 +21,11 @@ class CollectRequestService
         return $this->collectRequestRepository->listCollectRequest($filters);
     }
 
+    public function listForCalendar(string $month): \Illuminate\Support\Collection
+    {
+        return $this->collectRequestRepository->listCollectRequestsForCalendar($month);
+    }
+
     public function createCollectRequest(CollectRequestDTO $collectRequestDTO): CollectRequest
     {
         $data = $collectRequestDTO->toArray();

@@ -16,12 +16,16 @@ class CollectRequest extends Model
         "sample_collector_id",
         "referrer_id",
         "status",
+        "barcode",
         "logistic_information",
+        "preferred_date",
+        "note",
     ];
 
     protected $casts = [
-        "status" => CollectRequestStatus::class,
+        "status"               => CollectRequestStatus::class,
         "logistic_information" => "json",
+        "preferred_date"       => "datetime",
     ];
 
     public function sampleCollector(): BelongsTo

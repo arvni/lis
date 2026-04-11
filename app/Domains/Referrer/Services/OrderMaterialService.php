@@ -3,6 +3,7 @@
 namespace App\Domains\Referrer\Services;
 
 use App\Domains\Referrer\DTOs\OrderMaterialDTO;
+use App\Domains\Referrer\Events\OrderMaterialCreated;
 use App\Domains\Referrer\Models\OrderMaterial;
 use App\Domains\Referrer\Repositories\MaterialRepository;
 use App\Domains\Referrer\Repositories\OrderMaterialRepository;
@@ -24,6 +25,28 @@ readonly class OrderMaterialService
     public function listOrderMaterials($queryData): LengthAwarePaginator
     {
         return $this->orderMaterialRepository->ListOrderMaterials($queryData);
+    }
+
+    public function createOrderMaterial(OrderMaterialDTO $dto): OrderMaterial
+    {
+        $orderMaterial = $this->orderMaterialRepository->createOrderMaterial(
+            Arr::except($dto->toArray(), 'materials')
+        );
+        if (!empty($dto->materials)) {
+            DB::transaction(function () use ($orderMaterial, $dto) {
+                foreach ($dto->materials as $materialData) {
+                    $material = $this->materialRepository->getById($materialData['id']);
+                    $this->materialRepository->updateMaterial($material, [
+                        'order_material_id' => $orderMaterial->id,
+                        'assigned_at'       => Carbon::now('Asia/Muscat'),
+                    ]);
+                }
+            });
+        }
+
+        OrderMaterialCreated::dispatch($orderMaterial);
+
+        return $orderMaterial;
     }
 
     public function updateOrderMaterial(OrderMaterial $orderMaterial, OrderMaterialDTO $orderMaterialDTO): OrderMaterial

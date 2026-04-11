@@ -23,7 +23,7 @@ class SendCollectRequestWebhook implements ShouldQueue
     protected string $action;
     protected $id;
 
-    public function __construct($id=null, string $action = "update")
+    public function __construct($id = null, string $action = "update")
     {
         $this->action = $action;
         $this->id = $id;
@@ -41,7 +41,7 @@ class SendCollectRequestWebhook implements ShouldQueue
 
         // Load relationships for webhook payload
         if ($this->action != 'delete') {
-            $collectRequest=CollectRequest::where('id',$this->id)->with(['sampleCollector', 'referrer'])->first();
+            $collectRequest = CollectRequest::where('id', $this->id)->with(['sampleCollector', 'referrer'])->first();
 
             $payload = [
                 'id' => $collectRequest->id,
@@ -52,12 +52,13 @@ class SendCollectRequestWebhook implements ShouldQueue
                     'name' => $collectRequest->sampleCollector?->name,
                     'email' => $collectRequest->sampleCollector?->email,
                 ],
+                'preferred_date' => $collectRequest->preferred_date,
                 'referrer' => [
                     'id' => $collectRequest->referrer?->id,
                     'name' => $collectRequest->referrer?->name ?? $collectRequest->referrer?->fullName,
                     'email' => $collectRequest->referrer?->email,
                     'phone' => $collectRequest->referrer?->phoneNo,
-                    ...($collectRequest->referrer?->logisticInfo??[]),
+                    ...($collectRequest->referrer?->logisticInfo ?? []),
                 ],
                 'logistic_information' => $collectRequest->logistic_information,
                 'created_at' => $collectRequest->created_at?->toISOString(),

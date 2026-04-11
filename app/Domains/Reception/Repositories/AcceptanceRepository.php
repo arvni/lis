@@ -46,21 +46,37 @@ class AcceptanceRepository
 
     public function listAcceptances(array $queryData): LengthAwarePaginator
     {
+        $query = $this->buildAcceptancesQuery($queryData);
+
+        return $query->paginate($queryData['pageSize'] ?? 10);
+    }
+
+    public function exportAcceptances(array $queryData): Collection
+    {
+        return $this->buildAcceptancesQuery($queryData)->get();
+    }
+
+    private function buildAcceptancesQuery(array $queryData): Builder
+    {
         $query = Acceptance::query()
             ->withCount('acceptanceItems')
-            ->with('samples:samples.id,barcode') // Be specific with selected columns for relationships
-            ->withSum('payments', 'price') // payment_sum_price
-            ->withAggregate('referrer', 'fullName') // referrer_full_name
-            ->withAggregate('patient', 'fullName')  // patient_full_name
-            ->withAggregate('patient', 'idNo')      // patient_id_no
+            ->with('samples:samples.id,barcode')
+            ->withSum('payments', 'price')
+            ->withAggregate('referrer', 'fullName')
+            ->withAggregate('patient', 'fullName')
+            ->withAggregate('patient', 'idNo')
             ->selectRaw("({$this->getPayableAmountSql()}) as payable_amount")
             ->addSelect([
                 'report_date' => DB::table('acceptance_items')
                     ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
                     ->join('methods', 'methods.id', '=', 'method_tests.method_id')
                     ->selectRaw('MAX(methods.turnaround_time)')
+                    ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id'),
+                'published_at' => DB::table('reports')
+                    ->join('acceptance_items', 'acceptance_items.id', '=', 'reports.acceptance_item_id')
+                    ->selectRaw('MAX(reports.published_at)')
                     ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id')
-                // Consider adding a default or COALESCE if no items exist, to avoid NULL report_date
+                    ->whereNull('acceptance_items.deleted_at'),
             ]);
 
         if (isset($queryData['filters'])) {
@@ -69,14 +85,14 @@ class AcceptanceRepository
 
         if (isset($queryData['sort'])) {
             $query->orderBy(
-                $queryData['sort'][self::SORT_FIELD] ?? 'acceptances.id', // Qualify column name
+                $queryData['sort'][self::SORT_FIELD] ?? 'acceptances.id',
                 $queryData['sort'][self::SORT_DIRECTION] ?? 'desc'
             );
         } else {
-            $query->orderBy('acceptances.id', 'asc'); // Default sort
+            $query->orderBy('acceptances.id', 'desc');
         }
 
-        return $query->paginate($queryData['pageSize'] ?? 10);
+        return $query;
     }
 
     public function getReported($referrerId, $date = null): Collection
@@ -175,7 +191,10 @@ class AcceptanceRepository
         DB::statement('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,"ONLY_FULL_GROUP_BY",""))');
 
         $query = Acceptance::query()
-            ->whereDoesntHave("referrerOrder")
+            ->where(function ($q) {
+                $q->whereDoesntHave("referrerOrder")
+                  ->orWhere('waiting_for_pooling', true);
+            })
             ->withSum('acceptanceItems as acceptance_items_sum_price', 'price')
             ->withSum('acceptanceItems as acceptance_items_sum_discount', 'discount')
             ->withSum('payments as payments_sum_price', 'price')

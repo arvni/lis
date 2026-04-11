@@ -2,8 +2,10 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
 import TableLayout from "@/Layouts/TableLayout.jsx";
 import React, {useCallback, useMemo, useState} from "react";
 import PrintIcon from "@mui/icons-material/Print";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import AddForm from "@/Pages/Sample/Components/AddForm";
 import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import {router, usePage} from "@inertiajs/react";
 import PageHeader from '@/Components/PageHeader';
 import Filter from './Components/Filter';
@@ -22,7 +24,7 @@ const Index = () => {
         if (id) {
             setLoading(true);
             axios.get(route("api.sampleCollection.list", id)).then(res => {
-                setBarcodes(res.data);
+                setBarcodes({...res.data, acceptanceId: id});
             }).then(() => {
                 setLoading(false);
                 setOpenPrint(true)
@@ -84,9 +86,18 @@ const Index = () => {
             headerName: 'Action',
             type: 'actions',
             display:"flex",
-            width: 100,
+            width: 130,
             sortable: false,
-            renderCell: (params) => <IconButton onClick={print(params.row.id)}><PrintIcon/></IconButton>,
+            renderCell: (params) => <>
+                <Tooltip title="View Acceptance">
+                    <IconButton component="a" href={route("acceptances.show", params.row.id)} target="_blank" rel="noopener noreferrer">
+                        <OpenInNewIcon/>
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Collect Sample">
+                    <IconButton onClick={print(params.row.id)}><PrintIcon/></IconButton>
+                </Tooltip>
+            </>,
         }
     ], [print]);
 

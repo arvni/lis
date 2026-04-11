@@ -60,6 +60,23 @@ class InvoiceRepository
         return Invoice::find($id);
     }
 
+    public function listReferrerInvoicesForStatement(int $referrerId, ?string $month = null)
+    {
+        $query = $this->applyQuery(['acceptance.patient'])
+            ->join('acceptances', 'acceptances.invoice_id', '=', 'invoices.id')
+            ->whereNull('invoices.statement_id')
+            ->where('acceptances.referrer_id', $referrerId)
+            ->groupBy('invoices.id', 'numberedInvoices.row_num');
+
+        if ($month) {
+            $start = Carbon::parse($month . '-01')->startOfMonth();
+            $end   = $start->copy()->endOfMonth();
+            $query->whereBetween('invoices.created_at', [$start, $end]);
+        }
+
+        return $query->orderBy('invoices.id', 'desc')->get();
+    }
+
     private function applyQuery($with = [])
     {
         $numberedInvoices = DB::table('invoices')

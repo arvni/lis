@@ -32,7 +32,6 @@ class StoreStatementRequest extends FormRequest
                 Rule::exists('invoices', 'id')
                     ->whereNull('statement_id')
             ],
-            "issue_date" => "required|date_format:Y-m-d",
             "referrer.id" => "required|exists:referrers,id",
         ];
     }

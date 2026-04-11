@@ -51,6 +51,18 @@ class CollectRequestRepository
         return CollectRequest::with(['sampleCollector', 'referrer'])->find($id);
     }
 
+    public function listCollectRequestsForCalendar(string $month): \Illuminate\Support\Collection
+    {
+        $start = \Carbon\Carbon::parse($month . '-01')->startOfMonth();
+        $end   = $start->copy()->endOfMonth();
+
+        return CollectRequest::query()
+            ->with(['sampleCollector:id,name', 'referrer:id,fullName'])
+            ->whereBetween('preferred_date', [$start, $end])
+            ->orderBy('preferred_date')
+            ->get(['id', 'preferred_date', 'note', 'status', 'logistic_information', 'sample_collector_id', 'referrer_id']);
+    }
+
     public function applyFilters($query, array $filters)
     {
         if (isset($filters["search"])) {

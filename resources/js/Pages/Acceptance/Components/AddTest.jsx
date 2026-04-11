@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useMemo} from 'react';
+import React, {useState, useCallback, useMemo, useEffect} from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -82,7 +82,8 @@ const AddTest = ({
                      referrer = null,
                      patient = null,
                      onChange,
-                     requestedTests = []
+                     requestedTests = [],
+                     initialStep = 0,
                  }) => {
     // State management
     const [data, setData] = useState(() => createDefaultData(initialData));
@@ -90,7 +91,17 @@ const AddTest = ({
     const [loading, setLoading] = useState(false);
     const [apiError, setApiError] = useState(null);
     const [selectedTest, setSelectedTest] = useState(data?.method_test?.test || null);
-    const [activeStep, setActiveStep] = useState(0);
+    const [activeStep, setActiveStep] = useState(initialStep);
+
+    useEffect(() => {
+        if (open) {
+            setData(createDefaultData(initialData));
+            setSelectedTest(initialData?.method_test?.test || null);
+            setErrors({});
+            setApiError(null);
+            setActiveStep(initialStep);
+        }
+    }, [open]);
 
     // Computed values
     const testType = useMemo(() =>

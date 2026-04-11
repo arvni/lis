@@ -5,6 +5,7 @@ namespace App\Domains\Reception\Services;
 
 use App\Domains\Reception\DTOs\SampleDTO;
 use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Sample;
 use App\Domains\Reception\Repositories\SampleRepository;
 use Carbon\Carbon;
@@ -29,7 +30,22 @@ class SampleService
 
     public function storeSample(SampleDTO $sampleDTO, $index = 0, $pooling = false): Sample
     {
-        $sample = $this->sampleRepository->findActiveSample(Arr::pluck($sampleDTO->acceptanceItems, "id"), $sampleDTO->patientId, $sampleDTO->sampleTypeId);
+        $itemIds = Arr::pluck($sampleDTO->acceptanceItems, "id");
+        $sample = $this->sampleRepository->findActiveSample($itemIds, $sampleDTO->patientId, $sampleDTO->sampleTypeId);
+
+        // Force a new sample when any linked item still needs more samples than it has
+        if ($sample && !$pooling) {
+            $needsMore = AcceptanceItem::whereIn('id', $itemIds)
+                ->whereRaw('(SELECT COUNT(*) FROM acceptance_item_samples ais
+                    JOIN samples s ON s.id = ais.sample_id
+                    WHERE ais.acceptance_item_id = acceptance_items.id AND ais.active = 1
+                ) < acceptance_items.no_sample')
+                ->exists();
+            if ($needsMore) {
+                $pooling = true;
+            }
+        }
+
         if ($pooling || !$sample) {
             $deactivatedSample = $this->sampleRepository->findDeactivatedSample(Arr::pluck($sampleDTO->acceptanceItems, "id"), $sampleDTO->patientId, $sampleDTO->sampleTypeId);
             if ($deactivatedSample) {

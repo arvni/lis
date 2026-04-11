@@ -19,9 +19,9 @@ import InterpreterModeIcon from '@mui/icons-material/InterpreterMode';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BusinessIcon from '@mui/icons-material/Business';
 import ReceiptIcon from "@mui/icons-material/Receipt";
-import {Analytics, AttachMoney, FactCheck, Payments, Publish} from "@mui/icons-material";
+import {Analytics, AttachMoney, FactCheck, Payments, Publish, BugReport} from "@mui/icons-material";
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import {PercentDiamond, Stethoscope as Doctor, Hospital, PillBottle, ClipboardList} from "lucide-react";
+import {PercentDiamond, Stethoscope as Doctor, Hospital, ClipboardCheck, Truck, FlaskConical, Package, ShoppingCart} from "lucide-react";
 
 export const refactorRoute = (addr) => {
     if (!addr)
@@ -292,33 +292,46 @@ const routes = (sections = []) => {
             child: [
                 {
                     title: "Referrer Orders",
-                    icon: <ReceiptIcon/>,
+                    icon: <ClipboardCheck size={20}/>,
                     route: "referrer-orders.index",
                     permission: 'Referrer.Referrer Orders.List Referrer Orders',
                 },
                 {
                     title: "Collect Requests",
-                    icon: <PillBottle/>,
+                    icon: <Truck size={20}/>,
                     route: "collect-requests.index",
                     permission: 'Referrer.Collect Request.List Collect Requests',
                 },
                 {
                     title: "Sample Collector",
-                    icon: <PillBottle/>,
+                    icon: <FlaskConical size={20}/>,
                     route: "sample-collectors.index",
                     permission: 'Referrer.Sample Collector.List Sample Collectors',
                 },
                 {
                     title: "Materials",
-                    icon: <PillBottle/>,
+                    icon: <Package size={20}/>,
                     route: "materials.index",
                     permission: 'Referrer.Materials.List Materials',
                 },
                 {
                     title: "Order Materials",
-                    icon: <ClipboardList/>,
+                    icon: <ShoppingCart size={20}/>,
                     route: "orderMaterials.index",
                     permission: 'Referrer.Order Materials.List Order Materials',
+                },
+            ]
+        },
+        {
+            title: "System",
+            permission: 'System',
+            icon: <BugReport/>,
+            child: [
+                {
+                    title: "Failed Jobs",
+                    route: "system.failed-jobs",
+                    permission: 'System.Failed Jobs.List Failed Jobs',
+                    icon: <BugReport fontSize="small"/>,
                 },
             ]
         },

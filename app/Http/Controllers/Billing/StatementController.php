@@ -42,7 +42,8 @@ class StatementController extends Controller
      */
     public function store(StoreStatementRequest $request)
     {
-        $this->statementService->storeStatement(StatementDTO::fromRequest($request->validated()));
+        $data = array_merge($request->validated(), ['issue_date' => now()->toDateString()]);
+        $this->statementService->storeStatement(StatementDTO::fromRequest($data));
         return redirect()->back()->with(["success" => true, "status" => "Statement created successfully."]);
     }
 

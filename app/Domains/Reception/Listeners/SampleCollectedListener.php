@@ -8,7 +8,6 @@ use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Services\AcceptanceItemService;
 use App\Domains\Reception\Services\AcceptanceItemStateService;
 use App\Domains\Reception\Services\AcceptanceService;
-use App\Events\AcceptanceWithReferrerSampleCollected;
 
 readonly class SampleCollectedListener
 {
@@ -61,11 +60,6 @@ readonly class SampleCollectedListener
                     )
                 );
             }
-        }
-
-        // Check if acceptance has referrer but no referrerOrder, then fire event
-        if ($acceptance->referrer_id && !$acceptance->referrerOrder()->count()) {
-            event(new AcceptanceWithReferrerSampleCollected($acceptance));
         }
     }
 }

@@ -53,24 +53,25 @@ const SelectSearch = ({
             ...defaultData,
             search: e?.target?.value ?? ""
         })).toString(),).then((result) => {
+            const items = Array.isArray(result.data.data) ? result.data.data : [];
             if (multiple && Array.isArray(value)) {
-                setData([...result.data.data, ...value].reduce((a, b) => {
+                setData([...items, ...value].reduce((a, b) => {
                     let index = a.findIndex((item) => item.id === b.id);
                     if (index < 0)
                         a.push(b);
                     return a
                 }, []))
             } else if (!multiple && value)
-                setData([...result.data.data, value].reduce((a, b) => {
+                setData([...items, value].reduce((a, b) => {
                     let index = a.findIndex((item) => item.id === b.id);
                     if (index < 0)
                         a.push(b);
                     return a
                 }, []));
             else
-                setData(result.data.data)
+                setData(items)
             setLoading(false);
-        });
+        }).catch(() => setLoading(false));
     }
     const handleChange = (_, v) => onChange({target: {name, value: v}});
     const finalValue = value ? value : (multiple ? [] : null);

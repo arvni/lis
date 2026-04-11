@@ -31,7 +31,9 @@ class SampleDTO
             acceptanceItems: $data['items'] ?? null,
             status: $data['status'] ?? null,
             barcodeGroup: $data['barcodeGroup'] ?? null,
-            barcode: ($data['barcode'] ?? null) ? strtoupper($data['barcode']) : null,
+            barcode: ($data['barcode'] ?? null)
+                ? strtoupper($data['barcode'])
+                : (($data['material']['barcode'] ?? null) ? strtoupper($data['material']['barcode']) : null),
             materialId: $data['material']['id'] ?? null,
             receivedAt: $data['received_at'] ?? null,
         );

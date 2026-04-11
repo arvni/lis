@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Domains\Billing\Models\Invoice;
+use App\Domains\System\Policies\FailedJobPolicy;
 use App\Domains\Billing\Models\Payment;
 use App\Domains\Billing\Models\Statement;
 use App\Domains\Billing\Policies\InvoicePolicy;
@@ -153,6 +154,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Material::class, MaterialPolicy::class);
         Gate::policy(CollectRequest::class, CollectRequestPolicy::class);
         Gate::policy(SampleCollector::class, SampleCollectorPolicy::class);
+
+        $failedJobPolicy = new FailedJobPolicy();
+        Gate::define('failed-jobs.list',   fn($user) => $failedJobPolicy->viewAny($user));
+        Gate::define('failed-jobs.retry',  fn($user) => $failedJobPolicy->retry($user));
+        Gate::define('failed-jobs.delete', fn($user) => $failedJobPolicy->delete($user));
 
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);

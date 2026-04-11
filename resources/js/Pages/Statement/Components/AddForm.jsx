@@ -33,12 +33,9 @@ import {
 import {
     CalendarToday,
     Person,
-    CheckCircle,
-    Schedule,
     SelectAll,
     Deselect as DeselectAll,
     Search,
-    FilterList,
     MonetizationOn,
     Receipt,
     Close,
@@ -53,33 +50,38 @@ import {useState, useEffect, useCallback, useMemo} from "react";
 import axios from "axios";
 
 const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) => {
-    const {data, setData, reset, errors, clearErrors, post, processing} = useForm({
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+
+    const {data, setData, reset, errors, clearErrors, post, processing, transform} = useForm({
         referrer: defaultValue.referrer || "",
-        issue_date: defaultValue.issue_date || new Date().toISOString().split('T')[0],
+        month: defaultValue.month || currentMonth,
         invoices: defaultValue.invoices || [],
         _method: editMode ? "put" : "post"
     });
 
     // Enhanced state management
-    const [acceptanceList, setAcceptanceList] = useState(defaultValue?.acceptances || []);
+    const [invoiceList, setInvoiceList] = useState(defaultValue?.invoices?.map(inv => ({
+        id: inv.id, invoice_no: inv.invoice_no, created_at: inv.created_at,
+        patient_name: inv.patient_name, payable_amount: inv.payable_amount,
+    })) || []);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [filterStatus, setFilterStatus] = useState("all");
     const [showSummary, setShowSummary] = useState(true);
     const [validationErrors, setValidationErrors] = useState({});
+    const [filterStatus, setFilterStatus] = useState("all");
 
     // Initialize form data when defaultValue changes
     useEffect(() => {
         if (open) {
             setData({
                 referrer: defaultValue.referrer || "",
-                issue_date: defaultValue.issue_date || new Date().toISOString().split('T')[0],
+                month: defaultValue.month || new Date().toISOString().slice(0, 7),
                 invoices: defaultValue.invoices || [],
                 _method: editMode ? "put" : "post"
             });
-            setAcceptanceList(defaultValue.acceptances || []);
+            setInvoiceList([]);
             setError(null);
             setSuccess(null);
             setValidationErrors({});
@@ -94,25 +96,17 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
             newErrors.referrer = "Please select a referrer";
         }
 
-        if (!data.issue_date) {
-            newErrors.issue_date = "Please select an issue date";
-        }
-
-        if (data.issue_date && new Date(data.issue_date) > new Date()) {
-            newErrors.issue_date = "Issue date cannot be in the future";
-        }
-
-        if (data.invoices.length === 0 && acceptanceList.length > 0) {
+if (data.invoices.length === 0 && invoiceList.length > 0) {
             newErrors.invoices = "Please select at least one invoice";
         }
 
         setValidationErrors(newErrors);
         return Object.keys(newErrors).length === 0;
-    }, [data, acceptanceList]);
+    }, [data, invoiceList]);
 
     // Debounced fetch function with better error handling
     const fetchData = useCallback(async () => {
-        if (!data.referrer || !data.issue_date) {
+        if (!data.referrer || !data.month) {
             return;
         }
 
@@ -120,33 +114,27 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
         setError(null);
 
         try {
-            const response = await axios.get(
-                route("api.acceptances.reported", {
-                    referrer: data.referrer,
-                    date: data.issue_date
-                })
-            );
+            const response = await axios.get(route("api.invoices.forStatement"), {
+                params: {
+                    referrer_id: data.referrer?.id ?? data.referrer,
+                    month: data.month,
+                }
+            });
 
-            const acceptances = [
-                ...(response.data.data || []),
-                ...acceptanceList.filter(item =>
-                    data.invoices.some(invoice => invoice.id === item.invoice_id)
-                )
-            ];
+            const invoices = response.data.data || [];
+            setInvoiceList(invoices);
 
-            setAcceptanceList(acceptances);
-
-            if (acceptances.length === 0) {
-                setSuccess("No invoices found for the selected criteria. Try adjusting the referrer or date.");
+            if (invoices.length === 0) {
+                setSuccess("No uninvoiced statements found for this referrer up to the selected date.");
             }
         } catch (err) {
             console.error('Fetch error:', err);
-            setError("Failed to fetch invoice data. Please check your connection and try again.");
-            setAcceptanceList([]);
+            setError("Failed to fetch invoices. Please check your connection and try again.");
+            setInvoiceList([]);
         } finally {
             setLoading(false);
         }
-    }, [data.referrer, data.issue_date]);
+    }, [data.referrer, data.month]);
 
     // Enhanced debounce effect
     useEffect(() => {
@@ -172,20 +160,20 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
             });
         }
 
-        // Reset invoices when referrer or date changes
-        if (name === 'referrer') {
+        // Reset invoices when referrer or month changes
+        if (name === 'referrer' || name === 'month') {
             setData(prevData => ({...prevData, invoices: []}));
             setSuccess(null);
         }
     };
 
     // Enhanced invoice toggle with validation
-    const handleInvoiceToggle = useCallback((acceptance) => {
+    const handleInvoiceToggle = useCallback((invoice) => {
         setData(prevData => {
-            const existingIndex = prevData.invoices.findIndex(item => item.id === acceptance.invoice_id);
+            const existingIndex = prevData.invoices.findIndex(item => item.id === invoice.id);
             const newInvoices = existingIndex >= 0
-                ? prevData.invoices.filter(item => item.id !== acceptance.invoice_id)
-                : [...prevData.invoices, {id: acceptance.invoice_id}];
+                ? prevData.invoices.filter(item => item.id !== invoice.id)
+                : [...prevData.invoices, {id: invoice.id}];
 
             return {...prevData, invoices: newInvoices};
         });
@@ -201,7 +189,7 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
     }, [setData, validationErrors]);
 
     const handleSelectAll = () => {
-        const allIds = filteredAcceptances.map(acceptance => ({id: acceptance.invoice_id}));
+        const allIds = filteredInvoices.map(inv => ({id: inv.id}));
         setData(prevData => ({...prevData, invoices: allIds}));
     };
 
@@ -211,7 +199,7 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
 
     const handleClose = () => {
         reset();
-        setAcceptanceList([]);
+        setInvoiceList([]);
         setError(null);
         setSuccess(null);
         setValidationErrors({});
@@ -232,13 +220,13 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
             ? route("statements.update", defaultValue.id)
             : route("statements.store");
 
-        const requestData = {
-            ...data,
-            _method: defaultValue.id ? "PUT" : "POST"
-        };
+        // `month` is only a UI filter — strip it before sending; issue_date is set server-side
+        transform(d => {
+            const {month, issue_date, ...rest} = d;
+            return {...rest, _method: defaultValue.id ? "PUT" : "POST"};
+        });
 
         post(url, {
-            data: requestData,
             onSuccess: () => {
                 setSuccess(editMode ? "Statement updated successfully!" : "Statement created successfully!");
                 setTimeout(handleClose, 1500);
@@ -250,42 +238,26 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
         });
     };
 
-    // Enhanced filtering and search
-    const filteredAcceptances = useMemo(() => {
-        return acceptanceList.filter(acceptance => {
-            const matchesSearch = searchTerm === "" ||
-                acceptance.invoice?.invoice_no?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                acceptance.patient_fullname?.toLowerCase().includes(searchTerm.toLowerCase());
-
-            const matchesFilter = filterStatus === "all" ||
-                acceptance.status === filterStatus;
-
-            return matchesSearch && matchesFilter;
+    // Filtering and search
+    const filteredInvoices = useMemo(() => {
+        return invoiceList.filter(inv => {
+            return searchTerm === "" ||
+                inv.invoice_no?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                inv.patient_name?.toLowerCase().includes(searchTerm.toLowerCase());
         });
-    }, [acceptanceList, searchTerm, filterStatus]);
+    }, [invoiceList, searchTerm]);
 
-    // Enhanced computed values
+    // Computed values
     const selectedCount = data.invoices.length;
     const totalAmount = useMemo(() => {
-        return acceptanceList
-            .filter(acceptance => data.invoices.some(invoice => invoice.id === acceptance.invoice_id))
-            .reduce((sum, acceptance) => sum + parseFloat(acceptance.payable_amount || 0), 0);
-    }, [acceptanceList, data.invoices]);
+        return invoiceList
+            .filter(inv => data.invoices.some(i => i.id === inv.id))
+            .reduce((sum, inv) => sum + parseFloat(inv.payable_amount || 0), 0);
+    }, [invoiceList, data.invoices]);
 
-    const allSelected = filteredAcceptances.length > 0 &&
-        filteredAcceptances.every(acceptance =>
-            data.invoices.some(invoice => invoice.id === acceptance.invoice_id)
-        );
+    const allSelected = filteredInvoices.length > 0 &&
+        filteredInvoices.every(inv => data.invoices.some(i => i.id === inv.id));
     const someSelected = selectedCount > 0 && !allSelected;
-
-    // Status statistics
-    const statusStats = useMemo(() => {
-        const stats = acceptanceList.reduce((acc, acceptance) => {
-            acc[acceptance.status] = (acc[acceptance.status] || 0) + 1;
-            return acc;
-        }, {});
-        return stats;
-    }, [acceptanceList]);
 
     return (
         <Dialog
@@ -348,24 +320,24 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
                                         />
 
                                         <TextField
-                                            label="Issue Date"
-                                            type="date"
-                                            name="issue_date"
-                                            value={data.issue_date}
+                                            label="Month"
+                                            type="month"
+                                            name="month"
+                                            value={data.month}
                                             onChange={handleChange}
-                                            error={Boolean(errors?.issue_date || validationErrors?.issue_date)}
-                                            helperText={errors?.issue_date || validationErrors?.issue_date || "Date when the statement is issued"}
+                                            error={Boolean(errors?.month)}
+                                            helperText={errors?.month || "Filter invoices by month"}
                                             disabled={processing}
                                             required
                                             slotProps={{
                                                 inputLabel: {shrink: true},
                                                 input: {
-                                                    startAdornment: <CalendarToday
-                                                        sx={{mr: 1, color: 'action.active'}}/>,
-                                                    inputProps: {max: new Date().toISOString().split('T')[0]}
+                                                    startAdornment: <CalendarToday sx={{mr: 1, color: 'action.active'}}/>,
+                                                    inputProps: {max: new Date().toISOString().slice(0, 7)}
                                                 }
                                             }}
                                         />
+
 
                                         {/* Enhanced Summary */}
                                         <Fade in={selectedCount > 0}>
@@ -410,27 +382,6 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
                                             </Card>
                                         </Fade>
 
-                                        {/* Status Statistics */}
-                                        {Object.keys(statusStats).length > 0 && (
-                                            <Card variant="outlined">
-                                                <CardContent sx={{p: 2, '&:last-child': {pb: 2}}}>
-                                                    <Typography variant="subtitle2" gutterBottom>
-                                                        Invoice Status Overview
-                                                    </Typography>
-                                                    <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap'}}>
-                                                        {Object.entries(statusStats).map(([status, count]) => (
-                                                            <Chip
-                                                                key={status}
-                                                                label={`${status}: ${count}`}
-                                                                size="small"
-                                                                color={status === 'reported' ? 'success' : 'warning'}
-                                                                variant="outlined"
-                                                            />
-                                                        ))}
-                                                    </Box>
-                                                </CardContent>
-                                            </Card>
-                                        )}
                                     </Box>
                                 </CardContent>
                             </Card>
@@ -452,21 +403,21 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
                                                 <Typography variant="h6" sx={{display: 'flex', alignItems: 'center'}}>
                                                     <Receipt sx={{mr: 1}} color="primary"/>
                                                     Available Invoices
-                                                    {acceptanceList.length > 0 && (
-                                                        <Badge badgeContent={acceptanceList.length} color="primary"
+                                                    {invoiceList.length > 0 && (
+                                                        <Badge badgeContent={invoiceList.length} color="primary"
                                                                sx={{ml: 1}}>
                                                             <Chip size="small" label="Total" variant="outlined"/>
                                                         </Badge>
                                                     )}
                                                 </Typography>
-                                                {filteredAcceptances.length !== acceptanceList.length && (
+                                                {filteredInvoices.length !== invoiceList.length && (
                                                     <Typography variant="body2" color="text.secondary">
-                                                        Showing {filteredAcceptances.length} of {acceptanceList.length} invoices
+                                                        Showing {filteredInvoices.length} of {invoiceList.length} invoices
                                                     </Typography>
                                                 )}
                                             </Box>
 
-                                            {acceptanceList.length > 0 && (
+                                            {invoiceList.length > 0 && (
                                                 <Box sx={{display: 'flex', gap: 1}}>
                                                     <Tooltip title="Select All Visible">
                                                         <IconButton
@@ -492,36 +443,19 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
                                             )}
                                         </Box>
 
-                                        {/* Search and Filter Controls */}
-                                        {acceptanceList.length > 0 && (
+                                        {/* Search */}
+                                        {invoiceList.length > 0 && (
                                             <Box sx={{display: 'flex', gap: 2, mb: 2}}>
                                                 <TextField
                                                     placeholder="Search by invoice number or patient name..."
                                                     value={searchTerm}
                                                     onChange={(e) => setSearchTerm(e.target.value)}
                                                     size="small"
-                                                    sx={{flex: 1}}
+                                                    fullWidth
                                                     InputProps={{
                                                         startAdornment: <Search sx={{mr: 1, color: 'action.active'}}/>
                                                     }}
                                                 />
-                                                <TextField
-                                                    select
-                                                    label="Status Filter"
-                                                    value={filterStatus}
-                                                    onChange={(e) => setFilterStatus(e.target.value)}
-                                                    size="small"
-                                                    sx={{minWidth: 120}}
-                                                    SelectProps={{native: true}}
-                                                    InputProps={{
-                                                        startAdornment: <FilterList
-                                                            sx={{mr: 1, color: 'action.active'}}/>
-                                                    }}
-                                                >
-                                                    <option value="all">All Status</option>
-                                                    <option value="reported">Reported</option>
-                                                    <option value="pending">Pending</option>
-                                                </TextField>
                                             </Box>
                                         )}
                                     </Box>
@@ -575,8 +509,8 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
                                         </Box>
                                     )}
 
-                                    {/* Enhanced Table */}
-                                    {!loading && filteredAcceptances.length > 0 && (
+                                    {/* Invoice Table */}
+                                    {!loading && filteredInvoices.length > 0 && (
                                         <TableContainer component={Paper} sx={{maxHeight: 450, flex: 1}}>
                                             <Table stickyHeader size="small">
                                                 <TableHead>
@@ -593,95 +527,41 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
                                                         <TableCell><strong>Invoice No</strong></TableCell>
                                                         <TableCell><strong>Date</strong></TableCell>
                                                         <TableCell><strong>Patient</strong></TableCell>
-                                                        <TableCell><strong>Tests</strong></TableCell>
-                                                        <TableCell align="right"><strong>Amount
-                                                            (OMR)</strong></TableCell>
-                                                        <TableCell><strong>Status</strong></TableCell>
-                                                        <TableCell><strong>Report Date</strong></TableCell>
+                                                        <TableCell align="right"><strong>Amount (OMR)</strong></TableCell>
                                                     </TableRow>
                                                 </TableHead>
                                                 <TableBody>
-                                                    {filteredAcceptances.map((acceptance) => {
-                                                        const isSelected = data.invoices.some(item => item.id === acceptance.invoice_id);
-                                                        const testNames = acceptance?.acceptance_items
-                                                            ?.map(item => item.test?.fullName)
-                                                            ?.filter(Boolean)
-                                                            ?.join(", ") || "N/A";
-
+                                                    {filteredInvoices.map((inv) => {
+                                                        const isSelected = data.invoices.some(i => i.id === inv.id);
                                                         return (
                                                             <TableRow
-                                                                key={acceptance.invoice_id}
+                                                                key={inv.id}
                                                                 hover
                                                                 selected={isSelected}
-                                                                sx={{
-                                                                    cursor: 'pointer',
-                                                                    '&:hover': {backgroundColor: 'action.hover'}
-                                                                }}
-                                                                onClick={() => handleInvoiceToggle(acceptance)}
+                                                                sx={{cursor: 'pointer'}}
+                                                                onClick={() => handleInvoiceToggle(inv)}
                                                             >
                                                                 <TableCell padding="checkbox">
-                                                                    <Checkbox
-                                                                        checked={isSelected}
-                                                                        disabled={processing}
-                                                                        color="primary"
-                                                                    />
+                                                                    <Checkbox checked={isSelected} disabled={processing} color="primary"/>
                                                                 </TableCell>
                                                                 <TableCell>
                                                                     <Typography variant="body2" fontWeight="medium">
-                                                                        {acceptance.invoice?.invoice_no || 'N/A'}
+                                                                        {inv.invoice_no || '—'}
                                                                     </Typography>
                                                                 </TableCell>
                                                                 <TableCell>
                                                                     <Typography variant="body2">
-                                                                        {new Date(acceptance.created_at).toLocaleDateString('en-US', {
-                                                                            month: 'short',
-                                                                            day: 'numeric',
-                                                                            year: 'numeric'
-                                                                        })}
+                                                                        {new Date(inv.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}
                                                                     </Typography>
                                                                 </TableCell>
                                                                 <TableCell>
                                                                     <Typography variant="body2" noWrap>
-                                                                        {acceptance.patient_fullname || 'N/A'}
+                                                                        {inv.patient_name || '—'}
                                                                     </Typography>
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <Tooltip title={testNames} arrow>
-                                                                        <Typography
-                                                                            variant="body2"
-                                                                            noWrap
-                                                                            sx={{maxWidth: 200}}
-                                                                        >
-                                                                            {testNames}
-                                                                        </Typography>
-                                                                    </Tooltip>
                                                                 </TableCell>
                                                                 <TableCell align="right">
                                                                     <Typography variant="body2" fontWeight="medium">
-                                                                        {parseFloat(acceptance.payable_amount || 0).toFixed(2)}
-                                                                    </Typography>
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <Chip
-                                                                        label={acceptance.status}
-                                                                        color={acceptance.status === 'reported' ? 'success' : 'warning'}
-                                                                        size="small"
-                                                                        icon={acceptance.status === 'reported' ?
-                                                                            <CheckCircle/> : <Schedule/>}
-                                                                    />
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <Typography variant="body2">
-                                                                        {acceptance.status === "reported"
-                                                                            ? new Date(acceptance.updated_at).toLocaleDateString('en-US', {
-                                                                                month: 'short',
-                                                                                day: 'numeric'
-                                                                            })
-                                                                            : new Date(acceptance.report_date).toLocaleDateString('en-US', {
-                                                                                month: 'short',
-                                                                                day: 'numeric'
-                                                                            })
-                                                                        }
+                                                                        {parseFloat(inv.payable_amount || 0).toFixed(2)}
                                                                     </Typography>
                                                                 </TableCell>
                                                             </TableRow>
@@ -693,7 +573,7 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
                                     )}
 
                                     {/* Enhanced Empty States */}
-                                    {!loading && acceptanceList.length === 0 && data.referrer && data.issue_date && (
+                                    {!loading && invoiceList.length === 0 && data.referrer && data.month && (
                                         <Box sx={{textAlign: 'center', py: 6}}>
                                             <Receipt sx={{fontSize: 64, color: 'text.disabled', mb: 2}}/>
                                             <Typography variant="h6" color="text.secondary" gutterBottom>
@@ -707,19 +587,19 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
                                         </Box>
                                     )}
 
-                                    {!loading && (!data.referrer || !data.issue_date) && (
+                                    {!loading && (!data.referrer || !data.month) && (
                                         <Box sx={{textAlign: 'center', py: 6}}>
                                             <Info sx={{fontSize: 64, color: 'text.disabled', mb: 2}}/>
                                             <Typography variant="h6" color="text.secondary" gutterBottom>
                                                 Ready to Get Started
                                             </Typography>
                                             <Typography variant="body2" color="text.secondary">
-                                                Please select a referrer and issue date to load available invoices.
+                                                Please select a referrer and month to load available invoices.
                                             </Typography>
                                         </Box>
                                     )}
 
-                                    {!loading && filteredAcceptances.length === 0 && acceptanceList.length > 0 && (
+                                    {!loading && filteredInvoices.length === 0 && invoiceList.length > 0 && (
                                         <Box sx={{textAlign: 'center', py: 4}}>
                                             <Search sx={{fontSize: 48, color: 'text.disabled', mb: 1}}/>
                                             <Typography variant="body1" color="text.secondary">

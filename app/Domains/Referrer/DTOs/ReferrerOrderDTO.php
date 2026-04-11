@@ -15,6 +15,9 @@ class ReferrerOrderDTO
         public ?string           $receivedAt = null,
         public ?int              $patientId = null,
         public ?int              $acceptanceId = null,
+        public ?int              $collectRequestId = null,
+        public ?bool             $needsAddSample = true,
+        public ?bool             $pooling = false,
     )
     {
     }
@@ -48,6 +51,9 @@ class ReferrerOrderDTO
             "user_id" => $this->userId,
             "referrer_id" => $this->referrerId,
             "patient_id" => $this->patientId,
+            "collect_request_id" => $this->collectRequestId,
+            "pooling" => $this->pooling,
+            "needs_add_sample" => $this->needsAddSample,
         ];
     }
 }

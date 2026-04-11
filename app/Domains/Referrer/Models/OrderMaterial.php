@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 class OrderMaterial extends Model
 {
     protected $fillable = [
+        "referrer_id",
+        "sample_type_id",
         "amount",
         "server_id",
         "status",

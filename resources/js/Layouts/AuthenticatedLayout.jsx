@@ -31,6 +31,7 @@ import Drawer from './Components/Drawer';
 import Copyright from './Components/Copyright';
 import Header from './Components/Header';
 import Notification from './Components/Notification';
+import ConnectionCheck from './Components/ConnectionCheck';
 
 // Initialize Inertia Progress Bar
 InertiaProgress.init({
@@ -442,6 +443,7 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
 
     return (
         <ThemeProvider theme={theme}>
+            <ConnectionCheck>
             {title && <Head title={title}/>}
             <Box sx={{display: 'flex'}}>
                 <CssBaseline/>
@@ -673,6 +675,7 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
                     </Typography>
                 </Box>
             </Backdrop>
+            </ConnectionCheck>
         </ThemeProvider>
     );
 };

@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Referrer\Jobs\SendAcceptanceWebhook;
 use Exception;

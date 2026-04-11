@@ -8,7 +8,8 @@ const Add = () => {
     const {data, setData, post, errors, setError, clearErrors} = useForm({
         sample_collector_id: null,
         referrer_id: null,
-        logistic_information: {},
+        preferred_date: null,
+        note: "",
     });
 
     const handleSubmit = () => post(route('collect-requests.store'));

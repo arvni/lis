@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Billing\GetInvoiceController;
+use App\Http\Controllers\Api\Billing\ListReferrerInvoicesController;
 use App\Http\Controllers\Api\Laboratory\GetMethodController;
 use App\Http\Controllers\Api\Laboratory\ListActiveSectionsController;
 use App\Http\Controllers\Api\Laboratory\ListBarcodeGroupsController;
@@ -73,6 +74,7 @@ use App\Http\Controllers\Reception\CheckAcceptanceStatusController;
 use App\Http\Controllers\Reception\CreateReportController;
 use App\Http\Controllers\Reception\EnterSectionSampleController;
 use App\Http\Controllers\Reception\ExportAcceptanceItemsController;
+use App\Http\Controllers\Reception\ExportAcceptancesController;
 use App\Http\Controllers\Reception\FinancialCheckController;
 use App\Http\Controllers\Reception\GetPatientWithIdNoController;
 use App\Http\Controllers\Reception\GetPrevSectionsController;
@@ -95,8 +97,11 @@ use App\Http\Controllers\Reception\ToggleReportlessAcceptanceItemController;
 use App\Http\Controllers\Reception\ToggleSamplelessAcceptanceItemController;
 use App\Http\Controllers\Reception\UnPublishReportController;
 use App\Http\Controllers\Reception\UpdatePatientMetaController;
+use App\Http\Controllers\Reception\AddPoolingController;
+use App\Http\Controllers\Reception\Api\GetAcceptancePoolingItemsController;
 use App\Http\Controllers\Reception\WaitingForPublishController;
 use App\Http\Controllers\Referrer\Api\CheckMaterialBarcodeIsAvailableController;
+use App\Http\Controllers\Referrer\Api\CheckMaterialForReferrerController;
 use App\Http\Controllers\Referrer\CopyReferrerTestsFromOtherReferrerController;
 use App\Http\Controllers\Referrer\ExportReferrerTestsController;
 use App\Http\Controllers\Referrer\GetPatientAcceptancesController;
@@ -112,9 +117,11 @@ use App\Http\Controllers\Referrer\StoreReferrerOrderAcceptanceController;
 use App\Http\Controllers\Referrer\StoreReferrerOrderPatientController;
 use App\Http\Controllers\Referrer\StoreReferrerOrderSamplesController;
 use App\Http\Controllers\Referrer\CollectRequestController;
+use App\Http\Controllers\Referrer\ListCollectRequestsController;
 use App\Http\Controllers\Referrer\SampleCollectorController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\System\FailedJobController;
 use App\Http\Controllers\ShowSectionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Arr;
@@ -128,9 +135,8 @@ Route::get('/', function () {
         return redirect()->route("login");
 });
 
-
+Route::get('ping', fn() => response()->json(['status' => 'ok']))->name('ping');
 Route::middleware(['auth', 'verified'])->group(function () {
-
     Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::group(["prefix" => "user-management"], function () {
         Route::resource("users", UserController::class);
@@ -143,10 +149,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name("patients.updateMetas");
         Route::resource("relatives", RelativeController::class)->only(["store", "update", "destroy"]);
         Route::get("acceptances/financial-check", FinancialCheckController::class)->name("acceptances.financialCheck");
+        Route::get("acceptances/export", ExportAcceptancesController::class)->name("acceptances.export");
         Route::resource("acceptances", AcceptanceController::class)->except("create", "store");
         Route::get("acceptances/{acceptance}/print", PrintAcceptanceController::class)->name("acceptances.print");
         Route::get("acceptances/{acceptance}/barcodes", PrintAcceptanceBarcodeController::class)->name("acceptances.barcodes");
         Route::put("acceptances/{acceptance}/cancel", CancelAcceptanceController::class)->name("acceptances.cancel");
+        Route::post("acceptances/{acceptance}/pooling", AddPoolingController::class)->name("acceptances.addPooling");
         Route::put("acceptances/{acceptance}/check-status", CheckAcceptanceStatusController::class)->name("acceptances.checkStatus");
         Route::post("acceptances/{acceptance}/prescription", AcceptancePrescriptionController::class)
             ->name("acceptances.prescription");
@@ -226,13 +234,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get("patients/{idNo}", GetPatientWithIdNoController::class)->name("patients.getByIdNo");
             Route::get("patients", ListPatientsController::class)->name("patients.list");
             Route::get("sample-collection/{acceptance}", ListBarcodesController::class)->name("sampleCollection.list");
+            Route::get("acceptances/{acceptance}/pooling-items", GetAcceptancePoolingItemsController::class)->name("acceptances.poolingItems");
         });
         Route::group(["prefix" => "referrer"], function () {
             Route::get("referrers", ListReferrersController::class)->name("referrers.list");
             Route::get("check-materials", CheckMaterialBarcodeIsAvailableController::class)->name("materials.check");
+            Route::get("check-materials-referrer", CheckMaterialForReferrerController::class)->name("materials.checkForReferrer");
             Route::get("order-materials/{orderMaterial}", [OrderMaterialController::class, "show"])->name("orderMaterials.show");
             Route::get("sample-collectors", [SampleCollectorController::class, "index"])->name("sampleCollectors.list");
-            Route::get("collect-requests", [CollectRequestController::class, "index"])->name("collectRequests.list");
+            Route::get("collect-requests", ListCollectRequestsController::class)->name("collectRequests.list");
             Route::get("patient/{patient}/acceptances", GetPatientAcceptancesController::class)
                 ->name("referrer.patient.acceptances");
         });
@@ -241,6 +251,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
         Route::group(["prefix" => "billing"], function () {
             Route::get("invoices/{invoice}", GetInvoiceController::class)->name("invoices.show");
+            Route::get("invoices-for-statement", ListReferrerInvoicesController::class)->name("invoices.forStatement");
             Route::get("daily-cash-report", DailyCashReportController::class)->name("dailyCashReport.export");
         });
         Route::get("documents/{document}", [DocumentController::class, "download"])->name("api.documents.show");
@@ -309,6 +320,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource("whatsappMessages", WhatsappMessageController::class);
     });
     Route::get("test-list", ShowTestListController::class)->name("test-list");
+
+    Route::group(["prefix" => "system", "as" => "system."], function () {
+        Route::middleware("indexProvider")->get("failed-jobs", [FailedJobController::class, "index"])->name("failed-jobs");
+        Route::post("failed-jobs/{uuid}/retry", [FailedJobController::class, "retry"])->name("failed-jobs.retry");
+        Route::delete("failed-jobs/{uuid}", [FailedJobController::class, "destroy"])->name("failed-jobs.destroy");
+        Route::post("failed-jobs/retry-all", [FailedJobController::class, "retryAll"])->name("failed-jobs.retryAll");
+        Route::post("failed-jobs/flush", [FailedJobController::class, "destroyAll"])->name("failed-jobs.flush");
+    });
 
     Route::get("import", [ImportController::class, "create"])->name("import");
     Route::post("import", [ImportController::class, "store"])->name("import.store");

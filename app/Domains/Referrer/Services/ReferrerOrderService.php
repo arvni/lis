@@ -4,6 +4,7 @@ namespace App\Domains\Referrer\Services;
 
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Referrer\DTOs\ReferrerOrderDTO;
+use App\Domains\Referrer\Events\ReferrerOrderCreated;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Referrer\Repositories\ReferrerOrderRepository;
 use Exception;
@@ -22,7 +23,9 @@ class ReferrerOrderService
 
     public function createReferrerOrder(ReferrerOrderDTO $referrerDTO): ReferrerOrder
     {
-        return $this->referrerRepository->createReferrerOrder($referrerDTO->toArray());
+        $referrerOrder = $this->referrerRepository->createReferrerOrder($referrerDTO->toArray());
+        ReferrerOrderCreated::dispatch($referrerOrder);
+        return $referrerOrder;
     }
 
     public function updateReferrerOrder(ReferrerOrder $referrerOrder, ReferrerOrderDTO $referrerDTO): ReferrerOrder

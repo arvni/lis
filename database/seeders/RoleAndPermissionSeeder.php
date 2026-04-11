@@ -262,7 +262,14 @@ class RoleAndPermissionSeeder extends Seeder
                 "Total Payments",
                 "Total Reports Waiting For Approving",
             ],
-            "Statistics"
+            "Statistics",
+            "System" => [
+                "Failed Jobs" => [
+                    "List Failed Jobs",
+                    "Retry Failed Job",
+                    "Delete Failed Job",
+                ],
+            ],
         ];
 
         $sectionPermissions = $this->getSectionsPermissions();

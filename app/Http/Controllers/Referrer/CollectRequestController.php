@@ -33,7 +33,9 @@ class CollectRequestController extends Controller
         $this->authorize("viewAny", CollectRequest::class);
         $requestInputs = $request->all();
         $collectRequests = $this->collectRequestService->listCollectRequests($requestInputs);
-        return Inertia::render('CollectRequest/Index', compact("collectRequests", "requestInputs"));
+        $calendarMonth = $request->input('calendar_month', now()->format('Y-m'));
+        $calendarEvents = $this->collectRequestService->listForCalendar($calendarMonth);
+        return Inertia::render('CollectRequest/Index', compact("collectRequests", "requestInputs", "calendarEvents", "calendarMonth"));
     }
 
     /**
@@ -52,17 +54,23 @@ class CollectRequestController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validatedData = $request->validate([
-            'sample_collector_id' => 'required|exists:sample_collectors,id',
-            'referrer_id' => 'required|exists:referrers,id',
+            'sample_collector_id'  => 'required|exists:sample_collectors,id',
+            'referrer_id'          => 'required|exists:referrers,id',
+            'preferred_date'       => 'nullable|date',
+            'note'                 => 'nullable|string',
             'logistic_information' => 'nullable|array',
-            'status' => ['nullable', 'string', Rule::in(CollectRequestStatus::values())],
+            'status'               => ['nullable', 'string', Rule::in(CollectRequestStatus::values())],
+            'barcode'              => 'nullable|string|unique:collect_requests,barcode',
         ]);
 
         $collectRequestDTO = new CollectRequestDTO(
             $validatedData['sample_collector_id'],
             $validatedData['referrer_id'],
+            $validatedData['preferred_date'] ?? null,
+            $validatedData['note'] ?? null,
             $validatedData['logistic_information'] ?? [],
-            $validatedData['status'] ?? null
+            $validatedData['status'] ?? null,
+            $validatedData['barcode'] ?? null,
         );
 
         $collectRequest = $this->collectRequestService->createCollectRequest($collectRequestDTO);
@@ -99,17 +107,23 @@ class CollectRequestController extends Controller
     public function update(Request $request, CollectRequest $collectRequest): RedirectResponse
     {
         $validatedData = $request->validate([
-            'sample_collector_id' => 'required|exists:sample_collectors,id',
-            'referrer_id' => 'required|exists:referrers,id',
+            'sample_collector_id'  => 'required|exists:sample_collectors,id',
+            'referrer_id'          => 'required|exists:referrers,id',
+            'preferred_date'       => 'nullable|date',
+            'note'                 => 'nullable|string',
             'logistic_information' => 'nullable|array',
-            'status' => ['nullable', 'string', Rule::in(CollectRequestStatus::values())],
+            'status'               => ['nullable', 'string', Rule::in(CollectRequestStatus::values())],
+            'barcode'              => ['nullable', 'string', Rule::unique('collect_requests', 'barcode')->ignore($collectRequest->id)],
         ]);
 
         $collectRequestDTO = new CollectRequestDTO(
             $validatedData['sample_collector_id'],
             $validatedData['referrer_id'],
+            $validatedData['preferred_date'] ?? null,
+            $validatedData['note'] ?? null,
             $validatedData['logistic_information'] ?? [],
-            $validatedData['status'] ?? null
+            $validatedData['status'] ?? null,
+            $validatedData['barcode'] ?? null,
         );
 
         $this->collectRequestService->updateCollectRequest($collectRequest, $collectRequestDTO);
