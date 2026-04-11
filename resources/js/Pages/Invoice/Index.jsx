@@ -121,11 +121,11 @@ const InvoiceIndex = () => {
             sortable: false,
             display: "flex",
             renderCell: ({value}) => value
-                ? <Link target="_blank"
+                ? <a target="_blank"
                         href={route("statements.export", value.id)}
                         style={{textDecoration: 'none'}}>
                     <Chip label={`#${value.no}`} size="small" color="primary" clickable/>
-                </Link>
+                </a>
                 : "—"
         },
         {
