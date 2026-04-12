@@ -72,10 +72,10 @@ class WelcomeNotification extends Notification implements ShouldQueue
         $workingDays = (int) $this->reportDate;
 
         if ($workingDays > 0) {
-            $daysLabel   = $workingDays === 1 ? ‘1 working day’ : "{$workingDays} working days";
+            $daysLabel   = $workingDays === 1 ? '1 working day' : "{$workingDays} working days";
             $reportLine  = " Your report will be ready in {$daysLabel}.";
         } else {
-            $reportLine  = ‘’;
+            $reportLine  = '';
         }
 
         return [$notifiable->phone, "Welcome, {$notifiable->fullName}!{$reportLine} Thank you for trusting Bion Genetic Laboratory!"];
