@@ -94,7 +94,7 @@ class StatementController extends Controller
      */
     public function update(UpdateStatementRequest $request, Statement $statement)
     {
-        $this->statementService->updateStatement($statement, StatementDTO::fromRequest([...$request->validated(),"referrer_id"=>$statement->referrer_id]));
+        $this->statementService->updateStatement($statement, StatementDTO::fromRequest([...$request->validated(),"referrer_id"=>$statement->referrer_id,"issue_date"=>$statement->issue_date]));
         return redirect()->back()->with(["success" => true, "status" => "Statement updated successfully."]);
     }
 

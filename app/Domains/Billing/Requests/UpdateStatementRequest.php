@@ -34,7 +34,6 @@ class UpdateStatementRequest extends FormRequest
                             ->orWhere('statement_id', '=', $this->route('statement')->id);
                     })
             ],
-            "issue_date" => "required|date_format:Y-m-d",
         ];
     }
 }

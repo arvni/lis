@@ -145,7 +145,7 @@ class StatementExportController extends Controller
             'statement_date' => Carbon::parse($statement->issue_date)->format('M d, Y'),
             'total_samples' => $statement->invoices->count(),
             'total_amount' => $this->calculateTotalAmount($statement->invoices),
-            'generated_at' => now()->format('M d, Y H:i'),
+            'generated_at' => $statement->updated_at?->format('M d, Y H:i'),
         ];
     }
 

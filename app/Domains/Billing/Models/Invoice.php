@@ -15,6 +15,8 @@ class Invoice extends Model
 {
     use Searchable;
 
+    protected $touches = ['statement'];
+
     protected $fillable = [
         'statement_id',
         'user_id',

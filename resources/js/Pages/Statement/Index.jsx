@@ -134,16 +134,16 @@ const StatementIndex = () => {
             renderCell: ({ row }) => {
                 return (
                     <Stack direction="row" spacing={0.5}>
-                        {/*<Tooltip title="View Statement Details">*/}
-                        {/*    <IconButton*/}
-                        {/*        onClick={() => viewStatement(row)}*/}
-                        {/*        size="small"*/}
-                        {/*        color="info"*/}
-                        {/*        aria-label={`View statement for ${row.referrer?.fullName || 'unknown referrer'}`}*/}
-                        {/*    >*/}
-                        {/*        <ViewIcon />*/}
-                        {/*    </IconButton>*/}
-                        {/*</Tooltip>*/}
+                        <Tooltip title="View Statement">
+                            <IconButton
+                                onClick={() => router.visit(route("statements.view", row.id))}
+                                size="small"
+                                color="info"
+                                aria-label={`View statement for ${row.referrer?.fullName || 'unknown referrer'}`}
+                            >
+                                <ViewIcon />
+                            </IconButton>
+                        </Tooltip>
 
                         {canEdit && (
                             <Tooltip title="Edit Statement">
@@ -235,18 +235,9 @@ const StatementIndex = () => {
         }
     };
 
-    // const viewStatement = (statement) => {
-    //     // You can implement a view-only modal or navigate to a detail page
-    //     setSnackbar({
-    //         open: true,
-    //         message: `Viewing statement for ${statement.referrer?.fullName || 'unknown referrer'}`,
-    //         severity: 'info'
-    //     });
-    // };
-
     const fetchData = async (id) => {
         try {
-            const response = await axios.get(route("statements.show", id));
+            const response = await axios.get(route("api.billing.statements.show", id));
             setData(response.data.data);
             return response.data.data;
         } catch (error) {

@@ -24,6 +24,7 @@ use App\Http\Controllers\Billing\ExportInvoicesController;
 use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentController;
 use App\Http\Controllers\Billing\StatementController;
+use App\Http\Controllers\Billing\ShowStatementController;
 use App\Http\Controllers\Billing\StatementExportController;
 use App\Http\Controllers\Consultation\BookAnAppointmentController;
 use App\Http\Controllers\Consultation\ConsultantController;
@@ -253,6 +254,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get("invoices/{invoice}", GetInvoiceController::class)->name("invoices.show");
             Route::get("invoices-for-statement", ListReferrerInvoicesController::class)->name("invoices.forStatement");
             Route::get("daily-cash-report", DailyCashReportController::class)->name("dailyCashReport.export");
+            Route::get("statements/{statement}", [StatementController::class, "show"])->name("statements.show");
         });
         Route::get("documents/{document}", [DocumentController::class, "download"])->name("api.documents.show");
         Route::group(["prefix" => "notifications"], function () {
@@ -265,7 +267,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("invoices/export", ExportInvoicesController::class)->name("invoices.export");
         Route::resource("invoices", InvoiceController::class);
         Route::get("statements/{statement}/export", StatementExportController::class)->name("statements.export");
-        Route::resource("statements", StatementController::class);
+        Route::get("statements/{statement}/view", ShowStatementController::class)->name("statements.view");
+        Route::resource("statements", StatementController::class)->except("show");
         Route::resource("payments", PaymentController::class);
     });
     Route::group(["prefix" => "laboratory"], function () {
