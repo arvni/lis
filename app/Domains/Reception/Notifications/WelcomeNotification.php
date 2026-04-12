@@ -69,12 +69,10 @@ class WelcomeNotification extends Notification implements ShouldQueue
      */
     public function toSms($notifiable): array
     {
-        $date=$this->getEstimatedCompletionDateAttribute()->format("d/m/Y");
-        // SMS content should be concise due to character limitations
-        return [$notifiable->phone, "Welcome, $notifiable->fullName!\n
-         We’re glad to have you with us.\n
-         Your report will be ready on $date .\n
-         Thank you for trusting Bion Genetic Laboratory!"];
+        $workingDays = (int) $this->reportDate;
+        $daysLabel   = $workingDays === 1 ? ‘1 working day’ : "{$workingDays} working days";
+
+        return [$notifiable->phone, "Welcome, {$notifiable->fullName}! Your report will be ready in {$daysLabel}. Thank you for trusting Bion Genetic Laboratory!"];
     }
 
     /**
