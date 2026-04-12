@@ -237,7 +237,7 @@ const StatementIndex = () => {
 
     const fetchData = async (id) => {
         try {
-            const response = await axios.get(route("api.billing.statements.show", id));
+            const response = await axios.get(route("api.statements.show", id));
             setData(response.data.data);
             return response.data.data;
         } catch (error) {
