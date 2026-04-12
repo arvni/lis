@@ -387,21 +387,25 @@ class AcceptanceService
     public function listBarcodes(Acceptance $acceptance)
     {
         $acceptance->load([
-            "acceptanceItems"=>function($query){
+            "acceptanceItems" => function ($query) {
                 $query->where("sampleless", false);
                 $query->whereRaw("(select count(*) from `samples`
                     inner join `acceptance_item_samples` on `samples`.`id` = `acceptance_item_samples`.`sample_id`
                     where `acceptance_items`.`id` = `acceptance_item_samples`.`acceptance_item_id`
                     and `acceptance_item_samples`.`active` = 1
-                ) < `acceptance_items`.`no_sample`");
-                $query->with(["method.barcodeGroup","method.test.sampleTypes","test","patients"]);
+                ) < IF(
+                    (SELECT `tests`.`type` FROM `tests`
+                     INNER JOIN `method_tests` ON `method_tests`.`test_id` = `tests`.`id`
+                     WHERE `method_tests`.`id` = `acceptance_items`.`method_test_id`) = 'service',
+                    0,
+                    `acceptance_items`.`no_sample`
+                )");
+                $query->with(["method.barcodeGroup", "method.test.sampleTypes", "test", "patients"]);
             },
             "patient",
             "referrer"
         ]);
-        // Filter out SERVICE type items and sampleless items
-        $filteredItems = $acceptance->acceptanceItems->where("test.type", "!=", TestType::SERVICE);
-        $barcodes = $this->convertAcceptanceItems($filteredItems);
+        $barcodes = $this->convertAcceptanceItems($acceptance->acceptanceItems);
         return ["barcodes" => $barcodes, "patient" => $acceptance->patient, "referrer" => $acceptance->referrer, "out_patient" => $acceptance->out_patient];
     }
 
@@ -576,6 +580,7 @@ class AcceptanceService
         $output = [];
         if (isset($acceptanceItems['tests']) && $acceptanceItems['tests'] && is_array($acceptanceItems['tests']) && count($acceptanceItems["tests"])) {
             foreach ($acceptanceItems["tests"] as $acceptance_item) {
+                $isService = ($acceptance_item['method_test']['test']['type'] ?? null) === TestType::SERVICE->value;
                 $output[] = new AcceptanceItemDTO(
                     $acceptance->id,
                     $acceptance_item['method_test']['id'],
@@ -588,7 +593,7 @@ class AcceptanceService
                         ...$acceptance_item['timeLine'],
                         Carbon::now()->format("Y-m-d H:i:s") => "Edited By " . auth()->user()->name,
                     ],
-                    $acceptance_item["no_sample"] ?? (count($acceptance_item["samples"] ?? [1]) || 1),
+                    $isService ? 0 : ($acceptance_item["no_sample"] ?? (count($acceptance_item["samples"] ?? [1]) || 1)),
                     $acceptance_item["id"] ?? null,
                     null,
                     $acceptance_item["deleted"] ?? false,
@@ -604,6 +609,7 @@ class AcceptanceService
                     $panelReportless = $panelData["reportless"] ?? false;
                     foreach ($panelData["acceptanceItems"] as $item) {
                         $itemSampleless = $panelSampleless || ($item["sampleless"] ?? false);
+                        $isService = ($item['method_test']['test']['type'] ?? null) === TestType::SERVICE->value;
                         $output[] = new AcceptanceItemDTO(
                             $acceptance->id,
                             $item['method_test']['id'],
@@ -616,7 +622,7 @@ class AcceptanceService
                                 ...$item['timeLine'],
                                 Carbon::now()->format("Y-m-d H:i:s") => "Edited By " . auth()->user()->name,
                             ],
-                            $item["no_sample"] ?? (count($item["samples"] ?? [1]) || 1),
+                            $isService ? 0 : ($item["no_sample"] ?? (count($item["samples"] ?? [1]) || 1)),
                             $item["id"] ?? null,
                             $panelID,
                             $panelData["deleted"] ?? false,
@@ -641,29 +647,33 @@ class AcceptanceService
                     $newModel->id = $item->id;
                     $newModel->created_at = $item->created_at;
                     $newModel->patient = $item->patients->first();
+                    $newModel->_sampleTypeId = $item->customParameters['sampleType'] ?? null;
                     return collect([$newModel]);
                 }
 
                 return collect($samples)->flatMap(function ($sample, $sampleIndex) use ($item) {
                     try {
-                        // If $sample is an array of patient data
+                        // Per-sample sampleType takes precedence over item-level sampleType
+                        $sampleTypeId = $sample['sampleType'] ?? $item->customParameters['sampleType'] ?? null;
+
                         if (is_array($sample["patients"])) {
                             return collect($sample["patients"])
-                                ->map(function ($patientData) use ($item) {
+                                ->map(function ($patientData) use ($item, $sampleTypeId) {
                                     $newModel = $item->replicate();
                                     $newModel->id = $item->id;
                                     $newModel->created_at = $item->created_at;
                                     $patient = $item->patients->where('id', $patientData['id'])->first();
                                     $newModel->patient = $patient;
+                                    $newModel->_sampleTypeId = $sampleTypeId;
                                     return $newModel;
                                 });
                         } else {
-                            // If $sample is a single patient object
                             $newModel = $item->replicate();
                             $newModel->id = $item->id;
                             $newModel->created_at = $item->created_at;
                             $patient = $item->patients->where('id', $sample['id'])->first();
                             $newModel->patient = $patient;
+                            $newModel->_sampleTypeId = $sampleTypeId;
                             return $newModel;
                         }
                     } catch (Exception $exception) {
@@ -672,22 +682,22 @@ class AcceptanceService
                 });
             })
             ->groupBy(function ($item) {
-                // Get barcode group ID
                 $barcodeGroupId = $item->method->barcode_group_id ?? 'no_barcode_group';
-                // Return composite key
-                return $barcodeGroupId . '_' . $item->patient->id;
+                $sampleTypeId   = $item->_sampleTypeId ?? 'no_sample_type';
+                return $barcodeGroupId . '_' . $item->patient->id . '_' . $sampleTypeId;
             })
             ->map(function ($item, $key) {
+                $sampleTypeId = $item->first()->_sampleTypeId;
+                $sampleTypes  = $item->first()->method->test->sampleTypes;
                 return [
-                    "id" => $key,
-                    "barcodeGroup" => $item->first()->method->barcodeGroup,
-                    "patient" => $item->first()->patient,
-                    "items" => $item,
-                    "sampleType" => $item->first()->method->test->sampleTypes
-                        ->where('id', $item->first()->customParameters['sampleType'] ?? $item?->first()?->method?->test?->sampleTypes?->first()?->id)
-                        ->first(),
+                    "id"             => $key,
+                    "barcodeGroup"   => $item->first()->method->barcodeGroup,
+                    "patient"        => $item->first()->patient,
+                    "items"          => $item,
+                    "sampleType"     => $sampleTypes->where('id', $sampleTypeId)->first()
+                                        ?? $sampleTypes->first(),
                     "collection_date" => Carbon::now("Asia/Muscat")->format("Y-m-d H:i:s"),
-                    "sampleLocation" => "In Lab"
+                    "sampleLocation"  => "In Lab"
                 ];
             })
             ->values();
