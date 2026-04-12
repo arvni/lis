@@ -16,10 +16,10 @@ class OmantelSmsServiceProvider extends ServiceProvider
             $config = $app['config']['services.omantel'];
 
             return new OmantelIsmartSmsChannel(
-                $config['api_url'],
-                $config['username'],
-                $config['password'],
-                $config['sender_id']
+                $config['api_url']   ?? '',
+                $config['username']  ?? '',
+                $config['password']  ?? '',
+                $config['sender_id'] ?? ''
             );
         });
     }
