@@ -20,9 +20,9 @@ class WelcomeNotification extends Notification implements ShouldQueue
      */
 
     public Acceptance $acceptance;
-    public string $reportDate;
+    public ?string $reportDate;
 
-    public function __construct(Acceptance $acceptance, string $reportDate)
+    public function __construct(Acceptance $acceptance, ?string $reportDate)
     {
         $this->acceptance = $acceptance;
         $this->reportDate = $reportDate;
@@ -70,9 +70,15 @@ class WelcomeNotification extends Notification implements ShouldQueue
     public function toSms($notifiable): array
     {
         $workingDays = (int) $this->reportDate;
-        $daysLabel   = $workingDays === 1 ? ‘1 working day’ : "{$workingDays} working days";
 
-        return [$notifiable->phone, "Welcome, {$notifiable->fullName}! Your report will be ready in {$daysLabel}. Thank you for trusting Bion Genetic Laboratory!"];
+        if ($workingDays > 0) {
+            $daysLabel   = $workingDays === 1 ? ‘1 working day’ : "{$workingDays} working days";
+            $reportLine  = " Your report will be ready in {$daysLabel}.";
+        } else {
+            $reportLine  = ‘’;
+        }
+
+        return [$notifiable->phone, "Welcome, {$notifiable->fullName}!{$reportLine} Thank you for trusting Bion Genetic Laboratory!"];
     }
 
     /**
