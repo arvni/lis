@@ -253,6 +253,48 @@ class RoleAndPermissionSeeder extends Seeder
                     "List Tests",
                 ],
             ],
+            "Inventory" => [
+                "Items" => [
+                    "List Items",
+                    "View Item",
+                    "Create Item",
+                    "Edit Item",
+                    "Delete Item",
+                ],
+                "Suppliers" => [
+                    "List Suppliers",
+                    "View Supplier",
+                    "Create Supplier",
+                    "Edit Supplier",
+                    "Delete Supplier",
+                ],
+                "Stores" => [
+                    "List Stores",
+                    "View Store",
+                    "Create Store",
+                    "Edit Store",
+                    "Delete Store",
+                ],
+                "Transactions" => [
+                    "List Transactions",
+                    "View Transaction",
+                    "Create Transaction",
+                    "Approve Transaction",
+                    "Cancel Transaction",
+                ],
+                "PurchaseRequests" => [
+                    "List Purchase Requests",
+                    "Create Purchase Request",
+                    "Approve Purchase Request",
+                ],
+                "Stock" => [
+                    "View Stock",
+                ],
+                "ReorderAlerts" => [
+                    "View Reorder Alerts",
+                    "Resolve Reorder Alert",
+                ],
+            ],
             "Dashboard" => [
                 "Total Acceptances",
                 "Total Tests",

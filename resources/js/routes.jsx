@@ -19,13 +19,15 @@ import InterpreterModeIcon from '@mui/icons-material/InterpreterMode';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BusinessIcon from '@mui/icons-material/Business';
 import ReceiptIcon from "@mui/icons-material/Receipt";
-import {Analytics, AttachMoney, FactCheck, Payments, Publish, BugReport} from "@mui/icons-material";
+import {Analytics, AttachMoney, FactCheck, Payments, Publish, BugReport, Inventory as InventoryIcon} from "@mui/icons-material";
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import {PercentDiamond, Stethoscope as Doctor, Hospital, ClipboardCheck, Truck, FlaskConical, Package, ShoppingCart} from "lucide-react";
 
 export const refactorRoute = (addr) => {
     if (!addr)
         return null;
+    if (route().has(addr))
+        return route(addr);
     let id = null;
     let splitAddr = addr.split(".");
     if (splitAddr.length > 2) {
@@ -178,6 +180,61 @@ const routes = (sections = []) => {
                     icon: <ReceiptLongIcon/>,
                     route: "statements.index",
                     permission: 'Billing.Statements.List Statements',
+                },
+            ]
+        },
+        {
+            title: "Inventory",
+            permission: 'Inventory.Items.List Items',
+            icon: <InventoryIcon/>,
+            child: [
+                {
+                    title: "Items",
+                    route: "inventory.items.index",
+                    permission: 'Inventory.Items.List Items',
+                    icon: null,
+                },
+                {
+                    title: "Current Stock",
+                    route: "inventory.stock.index",
+                    permission: 'Inventory.Stock.View Stock',
+                    icon: null,
+                },
+                {
+                    title: "Transactions",
+                    route: "inventory.transactions.index",
+                    permission: 'Inventory.Transactions.List Transactions',
+                    icon: null,
+                },
+                {
+                    title: "Purchase Requests",
+                    route: "inventory.purchase-requests.index",
+                    permission: 'Inventory.PurchaseRequests.List Purchase Requests',
+                    icon: null,
+                },
+                {
+                    title: "Reorder Alerts",
+                    route: "inventory.reorder-alerts.index",
+                    permission: 'Inventory.ReorderAlerts.View Reorder Alerts',
+                    icon: null,
+                },
+                {
+                    title: "Suppliers",
+                    route: "inventory.suppliers.index",
+                    permission: 'Inventory.Suppliers.List Suppliers',
+                    icon: null,
+                },
+                {
+                    title: "Stores",
+                    route: "inventory.stores.index",
+                    permission: 'Inventory.Stores.List Stores',
+                    icon: null,
+                },
+                {
+                    title: "Units",
+                    route: "inventory.units.index",
+                    permission: null,
+                    icon: null,
                 },
             ]
         },

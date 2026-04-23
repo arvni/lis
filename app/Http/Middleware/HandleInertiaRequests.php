@@ -54,9 +54,12 @@ class HandleInertiaRequests extends Middleware
                     'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
                 ],
                 'sectionRoutes' => Cache::rememberForever("user-$user->id-section-routes", fn() => $this->sectionGroupService->getTransformedSectionGroups()),
-
             ];
         }
+
+        $data['success'] = $request->session()->get('success');
+        $data['status']  = $request->session()->get('status');
+
         return $data;
     }
 }

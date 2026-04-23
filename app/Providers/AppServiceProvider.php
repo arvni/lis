@@ -61,6 +61,16 @@ use App\Domains\Referrer\Policies\ReferrerPolicy;
 use App\Domains\Referrer\Policies\ReferrerOrderPolicy;
 use App\Domains\Referrer\Policies\CollectRequestPolicy;
 use App\Domains\Referrer\Policies\SampleCollectorPolicy;
+use App\Domains\Inventory\Models\Item;
+use App\Domains\Inventory\Models\Supplier;
+use App\Domains\Inventory\Models\Store;
+use App\Domains\Inventory\Models\StockTransaction;
+use App\Domains\Inventory\Models\PurchaseRequest;
+use App\Domains\Inventory\Policies\ItemPolicy;
+use App\Domains\Inventory\Policies\SupplierPolicy;
+use App\Domains\Inventory\Policies\StorePolicy;
+use App\Domains\Inventory\Policies\StockTransactionPolicy;
+use App\Domains\Inventory\Policies\PurchaseRequestPolicy;
 use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
 use App\Domains\User\Policies\RolePolicy;
@@ -163,5 +173,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);
         Gate::policy(Statement::class, StatementPolicy::class);
+
+        Gate::policy(Item::class, ItemPolicy::class);
+        Gate::policy(Supplier::class, SupplierPolicy::class);
+        Gate::policy(Store::class, StorePolicy::class);
+        Gate::policy(StockTransaction::class, StockTransactionPolicy::class);
+        Gate::policy(PurchaseRequest::class, PurchaseRequestPolicy::class);
     }
 }

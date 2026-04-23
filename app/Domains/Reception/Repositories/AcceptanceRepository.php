@@ -191,10 +191,6 @@ class AcceptanceRepository
         DB::statement('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,"ONLY_FULL_GROUP_BY",""))');
 
         $query = Acceptance::query()
-            ->where(function ($q) {
-                $q->whereDoesntHave("referrerOrder")
-                  ->orWhere('waiting_for_pooling', true);
-            })
             ->withSum('acceptanceItems as acceptance_items_sum_price', 'price')
             ->withSum('acceptanceItems as acceptance_items_sum_discount', 'discount')
             ->withSum('payments as payments_sum_price', 'price')
@@ -202,7 +198,7 @@ class AcceptanceRepository
             ->withAggregate('patient', 'fullName')
             ->withAggregate('patient', 'idNo')
             ->whereHas('acceptanceItems', function (Builder $itemQuery) {
-                $itemQuery->where('reportless', false);
+                $itemQuery->where('sampleless', false);
                 // Use whereRaw to properly reference the table columns in the subquery context
                 $itemQuery->whereRaw('(select count(*) from `samples`
                     inner join `acceptance_item_samples` on `samples`.`id` = `acceptance_item_samples`.`sample_id`
@@ -453,7 +449,7 @@ class AcceptanceRepository
                     ->from('acceptance_items')
                     ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id')
                     ->whereNull('acceptance_items.deleted_at')
-                    ->where('acceptance_items.reportless', false);
+                    ->where('acceptance_items.sampleless', false);
             })
             ->whereNotExists(function ($query) {
                 $query->select(DB::raw(1))

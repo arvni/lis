@@ -131,7 +131,11 @@ const TableLayout = ({
                      }) => {
     const theme = useTheme();
     const [success, setSuccess] = useState(null);
-    const [filterOpen, setFilterOpen] = useState(Object.keys(defaultValues?.filters).length > 0);
+
+    // Merge caller-supplied defaultValues with safe fallbacks
+    defaultValues = {filters: {}, sort: {field: 'id', sort: 'desc'}, pageSize: 10, page: 1, ...defaultValues};
+
+    const [filterOpen, setFilterOpen] = useState(Object.keys(defaultValues.filters).length > 0);
 
     // Process columns to ensure they're formatted correctly
     const processedColumns = useMemo(() => {
@@ -339,7 +343,7 @@ const TableLayout = ({
                         filterMode="server"
                         disableColumnFilter
                         sortingMode="server"
-                        sortModel={[defaultValues.sort]}
+                        sortModel={defaultValues.sort ? [defaultValues.sort] : []}
                         paginationMode="server"
                         pageSizeOptions={[10, 20, 50, 100]}
                         paginationModel={{

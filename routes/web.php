@@ -120,6 +120,30 @@ use App\Http\Controllers\Referrer\StoreReferrerOrderSamplesController;
 use App\Http\Controllers\Referrer\CollectRequestController;
 use App\Http\Controllers\Referrer\ListCollectRequestsController;
 use App\Http\Controllers\Referrer\SampleCollectorController;
+use App\Http\Controllers\Inventory\Api\ItemStockController as InventoryItemStockController;
+use App\Http\Controllers\Inventory\Api\ItemLotsController as InventoryItemLotsController;
+use App\Http\Controllers\Inventory\Api\ItemUnitsController as InventoryItemUnitsController;
+use App\Http\Controllers\Inventory\Api\StoreLocationsController as InventoryStoreLocationsController;
+use App\Http\Controllers\Inventory\Api\LookupItemController as InventoryLookupItemController;
+use App\Http\Controllers\Inventory\Api\LookupLotController as InventoryLookupLotController;
+use App\Http\Controllers\Inventory\Api\LookupSupplierController as InventoryLookupSupplierController;
+use App\Http\Controllers\Inventory\Api\BrandSuggestionsController as InventoryBrandSuggestionsController;
+use App\Http\Controllers\Inventory\Api\BarcodeScanController as InventoryBarcodeScanController;
+use App\Http\Controllers\Inventory\ApproveTransactionController;
+use App\Http\Controllers\Inventory\CancelTransactionController;
+use App\Http\Controllers\Inventory\SubmitTransactionController;
+use App\Http\Controllers\Inventory\CurrentStockController;
+use App\Http\Controllers\Inventory\ItemController as InventoryItemController;
+use App\Http\Controllers\Inventory\PurchaseRequestController;
+use App\Http\Controllers\Inventory\ReorderAlertController;
+use App\Http\Controllers\Inventory\StockCardController;
+use App\Http\Controllers\Inventory\StockTransactionController;
+use App\Http\Controllers\Inventory\StoreController as InventoryStoreController;
+use App\Http\Controllers\Inventory\StoreLocationController;
+use App\Http\Controllers\Inventory\RevertTransactionController;
+use App\Http\Controllers\Inventory\ReturnToRequesterController;
+use App\Http\Controllers\Inventory\SupplierController as InventorySupplierController;
+use App\Http\Controllers\Inventory\UnitController as InventoryUnitController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\System\FailedJobController;
@@ -334,6 +358,48 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get("import", [ImportController::class, "create"])->name("import");
     Route::post("import", [ImportController::class, "store"])->name("import.store");
+
+    // Inventory Domain
+    Route::group(["prefix" => "inventory", "as" => "inventory."], function () {
+        Route::resource("items", InventoryItemController::class);
+        Route::resource("suppliers", InventorySupplierController::class);
+        Route::resource("stores", InventoryStoreController::class);
+        Route::post("stores/{store}/locations", [StoreLocationController::class, 'store'])->name("stores.locations.store");
+        Route::delete("stores/{store}/locations/{location}", [StoreLocationController::class, 'destroy'])->name("stores.locations.destroy");
+        Route::post("stores/{store}/locations/{location}/toggle", [StoreLocationController::class, 'toggle'])->name("stores.locations.toggle");
+        Route::resource("units", InventoryUnitController::class)->except("create", "show", "edit");
+        Route::resource("transactions", StockTransactionController::class);
+        Route::post("transactions/{transaction}/submit", SubmitTransactionController::class)->name("transactions.submit");
+        Route::post("transactions/{transaction}/approve", ApproveTransactionController::class)->name("transactions.approve");
+        Route::post("transactions/{transaction}/cancel", CancelTransactionController::class)->name("transactions.cancel");
+        Route::post("transactions/{transaction}/revise", RevertTransactionController::class)->name("transactions.revise");
+        Route::post("transactions/{transaction}/return", ReturnToRequesterController::class)->name("transactions.return");
+        Route::resource("purchase-requests", PurchaseRequestController::class)->except("destroy");
+        Route::post("purchase-requests/{purchaseRequest}/order",   [PurchaseRequestController::class, "order"])->name("purchase-requests.order");
+        Route::post("purchase-requests/{purchaseRequest}/pay",     [PurchaseRequestController::class, "pay"])->name("purchase-requests.pay");
+        Route::post("purchase-requests/{purchaseRequest}/ship",    [PurchaseRequestController::class, "ship"])->name("purchase-requests.ship");
+        Route::get("purchase-requests/{purchaseRequest}/receive",  [PurchaseRequestController::class, "receiveItems"])->name("purchase-requests.receive");
+        Route::post("purchase-requests/{purchaseRequest}/receive", [PurchaseRequestController::class, "storeReceipt"])->name("purchase-requests.store-receipt");
+        Route::post("purchase-requests/{purchaseRequest}/cancel",     [PurchaseRequestController::class, "cancel"])->name("purchase-requests.cancel");
+        Route::post("purchase-requests/{purchaseRequest}/set-brands", [PurchaseRequestController::class, "setBrands"])->name("purchase-requests.set-brands");
+        Route::get("stock", CurrentStockController::class)->name("stock.index");
+        Route::get("stock-card/{item}", StockCardController::class)->name("stock.card");
+        Route::get("reorder-alerts", ReorderAlertController::class)->name("reorder-alerts.index");
+        Route::post("reorder-alerts/{reorderAlert}/resolve", [ReorderAlertController::class, "resolve"])->name("reorder-alerts.resolve");
+    });
+
+    // Inventory API
+    Route::group(["prefix" => "api/inventory", "as" => "api.inventory."], function () {
+        Route::get("items/lookup",     InventoryLookupItemController::class)->name("items.lookup");
+        Route::get("suppliers/lookup", InventoryLookupSupplierController::class)->name("suppliers.lookup");
+        Route::get("brands/suggestions", InventoryBrandSuggestionsController::class)->name("brands.suggestions");
+        Route::get("lots/lookup", InventoryLookupLotController::class)->name("lots.lookup");
+        Route::get("barcode-scan", InventoryBarcodeScanController::class)->name("barcode.scan");
+        Route::get("items/{item}/units", InventoryItemUnitsController::class)->name("items.units");
+        Route::get("items/{item}/stock", InventoryItemStockController::class)->name("items.stock");
+        Route::get("items/{item}/lots", InventoryItemLotsController::class)->name("items.lots");
+        Route::get("stores/{store}/locations", InventoryStoreLocationsController::class)->name("stores.locations");
+    });
 
 });
 
