@@ -1,9 +1,9 @@
-import {useState} from "react";
+import React, {useState} from "react";
 import {router, usePage, useForm} from "@inertiajs/react";
 import {
     Box, Button, Card, CardContent, CardHeader, CircularProgress,
     Grid, IconButton, MenuItem, Table, TableBody, TableCell, TableHead,
-    TableRow, TextField, Typography, Alert, Chip,
+    TableRow, TextField, Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -267,8 +267,8 @@ const TransactionAdd = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {lineItems.map((line, idx) => (
-                                        <TableRow key={idx} sx={line._barcode_locked ? {bgcolor: "action.hover"} : {}}>
+                                    {lineItems.map((line, idx) => (<React.Fragment key={idx}>
+                                        <TableRow sx={line._barcode_locked ? {bgcolor: "action.hover"} : {}}>
                                             <TableCell>
                                                 <Box sx={{display: "flex", alignItems: "center", gap: 0.5}}>
                                                     <BarcodeInput
@@ -402,7 +402,7 @@ const TransactionAdd = () => {
                                                 </TableCell>
                                             </TableRow>
                                         )}
-                                    ))}
+                                    </React.Fragment>))}
                                 </TableBody>
                             </Table>
                         )}

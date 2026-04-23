@@ -202,7 +202,7 @@ const Show = () => {
                             }
                         />
                         <CardContent>
-                            <Grid container spacing={0}>
+                            <Grid container spacing={2}>
                                 <Grid item xs={12} sm={6}>
                                     <InfoRow label="Requested By">{pr.requested_by?.name}</InfoRow>
                                     <InfoRow label="Approved By">{pr.approved_by?.name}</InfoRow>
