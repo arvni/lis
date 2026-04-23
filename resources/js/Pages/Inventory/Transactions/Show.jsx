@@ -61,7 +61,12 @@ const Show = () => {
     const txStatus = transaction.status;
     const txType   = transaction.transaction_type;
     const histories = transaction.histories ?? [];
-    const canPrintLabels = ["ENTRY", "RETURN"].includes(txType) && txStatus === "APPROVED";
+    const canPrintLabels    = ["ENTRY", "RETURN"].includes(txType) && txStatus === "APPROVED";
+    const canConfirmReceipt = txType === "TRANSFER" && txStatus === "APPROVED" && !transaction.transfer_received_at;
+    const receiptConfirmed  = txType === "TRANSFER" && !!transaction.transfer_received_at;
+
+    const handleConfirmReceipt = () =>
+        router.post(route("inventory.transactions.confirm-receipt", transaction.id));
 
     return (
         <>
@@ -77,6 +82,12 @@ const Show = () => {
                             <Button startIcon={<PrintIcon/>} size="small" variant="outlined" color="secondary"
                                 onClick={() => router.visit(route("inventory.transactions.labels", transaction.id))}>
                                 Print Labels
+                            </Button>
+                        )}
+                        {canConfirmReceipt && (
+                            <Button startIcon={<TaskAltIcon/>} size="small" variant="contained" color="success"
+                                onClick={handleConfirmReceipt}>
+                                Confirm Receipt
                             </Button>
                         )}
                         {txStatus === "DRAFT" && (
@@ -118,6 +129,20 @@ const Show = () => {
             {status && (
                 <Alert severity={success ? "success" : "error"} sx={{mb: 2, whiteSpace: "pre-line"}}>
                     {status}
+                </Alert>
+            )}
+
+            {canConfirmReceipt && (
+                <Alert severity="warning" sx={{mb: 2}}>
+                    This transfer has been approved but the destination store has not yet confirmed receipt.
+                    Lots are in <strong>QUARANTINE</strong> and unavailable for export until confirmed.
+                </Alert>
+            )}
+
+            {receiptConfirmed && (
+                <Alert severity="success" icon={<TaskAltIcon/>} sx={{mb: 2}}>
+                    Receipt confirmed on {transaction.transfer_received_at?.substring(0, 10)}.
+                    Lots are now <strong>ACTIVE</strong> in the destination store.
                 </Alert>
             )}
 

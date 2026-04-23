@@ -172,7 +172,7 @@ readonly class StockMutationService
                 if ((float) $lot->fresh()->quantity_base_units <= 0)
                     $lot->update(['status' => LotStatus::CONSUMED->value]);
 
-                // Create corresponding lot in destination store
+                // Create corresponding lot in destination store as QUARANTINE until receipt confirmed
                 StockLot::create([
                     'item_id'             => $lot->item_id,
                     'lot_number'          => $lot->lot_number,
@@ -184,7 +184,7 @@ readonly class StockMutationService
                     'unit_price_base'     => $lot->unit_price_base,
                     'store_id'            => $tx->destination_store_id,
                     'store_location_id'   => $line->store_location_id,
-                    'status'              => LotStatus::ACTIVE->value,
+                    'status'              => LotStatus::QUARANTINE->value,
                 ]);
 
                 $needed -= $take;

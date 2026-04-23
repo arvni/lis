@@ -16,13 +16,15 @@ class StockTransaction extends Model
         'store_id', 'destination_store_id', 'supplier_id',
         'requested_by_user_id', 'approved_by_user_id',
         'status', 'notes', 'attachment', 'total_value',
+        'transfer_received_at', 'transfer_received_by_user_id',
     ];
 
     protected $casts = [
-        'transaction_type' => TransactionType::class,
-        'status'           => TransactionStatus::class,
-        'transaction_date' => 'date:Y-m-d',
-        'total_value'      => 'decimal:4',
+        'transaction_type'      => TransactionType::class,
+        'status'                => TransactionStatus::class,
+        'transaction_date'      => 'date:Y-m-d',
+        'total_value'           => 'decimal:4',
+        'transfer_received_at'  => 'datetime',
     ];
 
     public function store(): BelongsTo

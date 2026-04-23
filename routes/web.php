@@ -141,6 +141,7 @@ use App\Http\Controllers\Inventory\StockTransactionController;
 use App\Http\Controllers\Inventory\StoreController as InventoryStoreController;
 use App\Http\Controllers\Inventory\StoreLocationController;
 use App\Http\Controllers\Inventory\RevertTransactionController;
+use App\Http\Controllers\Inventory\ConfirmTransferReceiptController;
 use App\Http\Controllers\Inventory\ExpiryDashboardController;
 use App\Http\Controllers\Inventory\InventoryReportController;
 use App\Http\Controllers\Inventory\ItemImportController;
@@ -382,6 +383,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post("transactions/{transaction}/cancel", CancelTransactionController::class)->name("transactions.cancel");
         Route::post("transactions/{transaction}/revise", RevertTransactionController::class)->name("transactions.revise");
         Route::post("transactions/{transaction}/return", ReturnToRequesterController::class)->name("transactions.return");
+        Route::post("transactions/{transaction}/confirm-receipt", ConfirmTransferReceiptController::class)->name("transactions.confirm-receipt");
         Route::resource("purchase-requests", PurchaseRequestController::class)->except("destroy");
         Route::post("purchase-requests/{purchaseRequest}/order",   [PurchaseRequestController::class, "order"])->name("purchase-requests.order");
         Route::post("purchase-requests/{purchaseRequest}/pay",     [PurchaseRequestController::class, "pay"])->name("purchase-requests.pay");
