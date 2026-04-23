@@ -219,6 +219,12 @@ const routes = (sections = []) => {
                     icon: null,
                 },
                 {
+                    title: "Expiry Dashboard",
+                    route: "inventory.expiry.index",
+                    permission: 'Inventory.Transactions.List Transactions',
+                    icon: null,
+                },
+                {
                     title: "Suppliers",
                     route: "inventory.suppliers.index",
                     permission: 'Inventory.Suppliers.List Suppliers',
