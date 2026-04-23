@@ -15,6 +15,7 @@ import SendIcon from "@mui/icons-material/Send";
 import EditIcon from "@mui/icons-material/Edit";
 import ReplayIcon from "@mui/icons-material/Replay";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import PrintIcon from "@mui/icons-material/Print";
 import UndoIcon from "@mui/icons-material/Undo";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
@@ -58,7 +59,9 @@ const Show = () => {
     };
 
     const txStatus = transaction.status;
+    const txType   = transaction.transaction_type;
     const histories = transaction.histories ?? [];
+    const canPrintLabels = ["ENTRY", "RETURN"].includes(txType) && txStatus === "APPROVED";
 
     return (
         <>
@@ -70,6 +73,12 @@ const Show = () => {
                             onClick={() => router.visit(route("inventory.transactions.create", {repeat_from: transaction.id}))}>
                             Repeat
                         </Button>
+                        {canPrintLabels && (
+                            <Button startIcon={<PrintIcon/>} size="small" variant="outlined" color="secondary"
+                                onClick={() => router.visit(route("inventory.transactions.labels", transaction.id))}>
+                                Print Labels
+                            </Button>
+                        )}
                         {txStatus === "DRAFT" && (
                             <Button startIcon={<EditIcon/>} size="small" variant="outlined"
                                 onClick={() => router.visit(route("inventory.transactions.edit", transaction.id))}>

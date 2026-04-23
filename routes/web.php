@@ -142,6 +142,7 @@ use App\Http\Controllers\Inventory\StoreController as InventoryStoreController;
 use App\Http\Controllers\Inventory\StoreLocationController;
 use App\Http\Controllers\Inventory\RevertTransactionController;
 use App\Http\Controllers\Inventory\ReturnToRequesterController;
+use App\Http\Controllers\Inventory\StockLotLabelController;
 use App\Http\Controllers\Inventory\SupplierController as InventorySupplierController;
 use App\Http\Controllers\Inventory\UnitController as InventoryUnitController;
 use App\Http\Controllers\RoleController;
@@ -386,6 +387,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("stock-card/{item}", StockCardController::class)->name("stock.card");
         Route::get("reorder-alerts", ReorderAlertController::class)->name("reorder-alerts.index");
         Route::post("reorder-alerts/{reorderAlert}/resolve", [ReorderAlertController::class, "resolve"])->name("reorder-alerts.resolve");
+        Route::get("lots/{lot}/label", [StockLotLabelController::class, "single"])->name("lots.label");
+        Route::get("transactions/{transaction}/labels", [StockLotLabelController::class, "byTransaction"])->name("transactions.labels");
     });
 
     // Inventory API
