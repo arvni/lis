@@ -409,6 +409,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("items/{item}/stock", InventoryItemStockController::class)->name("items.stock");
         Route::get("items/{item}/lots", InventoryItemLotsController::class)->name("items.lots");
         Route::get("stores/{store}/locations", InventoryStoreLocationsController::class)->name("stores.locations");
+        Route::get("fifo-preview", \App\Http\Controllers\Inventory\Api\FifoPreviewController::class)->name("fifo.preview");
     });
 
 });

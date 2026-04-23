@@ -17,6 +17,7 @@ import LotSelect from "@/Pages/Inventory/Components/LotSelect";
 import BarcodeInput from "@/Pages/Inventory/Components/BarcodeInput";
 import SupplierSelect from "@/Pages/Inventory/Components/SupplierSelect";
 import BrandInput from "@/Pages/Inventory/Components/BrandInput";
+import FifoPreview from "@/Pages/Inventory/Components/FifoPreview";
 
 const USES_EXISTING_LOTS = ["EXPORT", "RETURN", "EXPIRED_REMOVAL", "TRANSFER"];
 
@@ -156,6 +157,7 @@ const TransactionAdd = () => {
     const isEntry = ["ENTRY", "RETURN"].includes(data.transaction_type);
     const usesExistingLots = USES_EXISTING_LOTS.includes(data.transaction_type);
     const showExpiry = !usesExistingLots;
+    const showFifo = ["EXPORT", "TRANSFER"].includes(data.transaction_type);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -387,6 +389,19 @@ const TransactionAdd = () => {
                                                 </IconButton>
                                             </TableCell>
                                         </TableRow>
+                                        {showFifo && line._item && line.quantity && (
+                                            <TableRow>
+                                                <TableCell colSpan={99} sx={{pt: 0, pb: 1, borderBottom: "2px solid", borderColor: "divider"}}>
+                                                    <FifoPreview
+                                                        itemId={line._item?.id}
+                                                        storeId={data.store_id}
+                                                        quantityBaseUnits={line._unit?.conversion_to_base
+                                                            ? parseFloat(line.quantity) * parseFloat(line._unit.conversion_to_base)
+                                                            : null}
+                                                    />
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
                                     ))}
                                 </TableBody>
                             </Table>
