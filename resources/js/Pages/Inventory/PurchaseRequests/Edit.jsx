@@ -13,6 +13,7 @@ import ItemSelect from "@/Pages/Inventory/Components/ItemSelect";
 import UnitSelect from "@/Pages/Inventory/Components/UnitSelect";
 import SupplierSelect from "@/Pages/Inventory/Components/SupplierSelect";
 import BrandInput from "@/Pages/Inventory/Components/BrandInput";
+import PriceHint from "@/Pages/Inventory/Components/PriceHint";
 
 const URGENCY_OPTIONS = ["NORMAL", "URGENT"];
 
@@ -153,6 +154,10 @@ const Edit = () => {
                                                     required
                                                     error={!!errors[`lines.${idx}.item_id`]}
                                                     helperText={errors[`lines.${idx}.item_id`]}
+                                                />
+                                                <PriceHint
+                                                    itemId={line._item?.id}
+                                                    supplierId={line._preferred_supplier?.id}
                                                 />
                                             </TableCell>
                                             <TableCell>
