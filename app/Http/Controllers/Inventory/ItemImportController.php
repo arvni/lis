@@ -27,7 +27,12 @@ class ItemImportController extends Controller
         $this->authorize('create', Item::class);
 
         $request->validate([
-            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+            'file' => [
+                'required', 'file', 'max:10240',
+                'mimetypes:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,'
+                    . 'application/vnd.ms-excel,'
+                    . 'text/csv,text/plain,application/csv,application/octet-stream',
+            ],
         ]);
 
         $import = new ItemsImport($this->itemCodeService);
