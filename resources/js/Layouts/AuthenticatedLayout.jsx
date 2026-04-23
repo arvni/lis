@@ -224,7 +224,8 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
     const [changePasswordOpen, setChangePasswordOpen] = useRemember(false, "change-password-open");
     const [routes, setRoutes] = useState([]);
     const [loading, setLoading] = useState(false);
-    const sections = usePage().props.sectionRoutes;
+    const sections           = usePage().props.sectionRoutes;
+    const reorderAlertCount  = usePage().props.reorderAlertCount ?? 0;
     const currentRoute = usePage().url;
     const [mobileOpen, setMobileOpen] = useState(false);
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -235,8 +236,17 @@ const Authenticated = ({auth, breadcrumbs, children, title}) => {
     // Fetch routes
     const fetchRoutes = useCallback(() => {
         const fetchedRoutes = routesFunction(sections);
-        setRoutes(fetchedRoutes);
-    }, [sections]);
+        // Inject badge count into Reorder Alerts nav item
+        const patched = fetchedRoutes.map((group) => ({
+            ...group,
+            child: (group.child ?? []).map((item) =>
+                item.route === "inventory.reorder-alerts.index" && reorderAlertCount > 0
+                    ? {...item, badge: reorderAlertCount}
+                    : item
+            ),
+        }));
+        setRoutes(patched);
+    }, [sections, reorderAlertCount]);
 
     // Lifecycle: Fetch routes and manage loading state
     useEffect(() => {

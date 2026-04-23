@@ -53,7 +53,10 @@ class HandleInertiaRequests extends Middleware
                     ],
                     'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
                 ],
-                'sectionRoutes' => Cache::rememberForever("user-$user->id-section-routes", fn() => $this->sectionGroupService->getTransformedSectionGroups()),
+                'sectionRoutes'        => Cache::rememberForever("user-$user->id-section-routes", fn() => $this->sectionGroupService->getTransformedSectionGroups()),
+                'reorderAlertCount'    => $user->can('Inventory.ReorderAlerts.View Reorder Alerts')
+                    ? \App\Domains\Inventory\Models\ReorderAlert::where('status', 'OPEN')->count()
+                    : 0,
             ];
         }
 

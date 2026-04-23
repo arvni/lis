@@ -4,6 +4,7 @@ import React, {useState, useCallback, memo, useEffect} from "react";
 import PropTypes from "prop-types";
 import {
     Avatar,
+    Badge,
     Collapse,
     List,
     ListItemButton,
@@ -53,7 +54,8 @@ const MenuItem = memo(({item, permissions, onNavigate, isNested = false}) => {
         icon: item?.icon || null,
         permission: item?.permission || null,
         child: Array.isArray(item?.child) ? item.child : [],
-        selected: item?.selected || false
+        selected: item?.selected || false,
+        badge: item?.badge || null,
     };
 
     // Check permissions - but after hooks have been called
@@ -237,7 +239,13 @@ const MenuItem = memo(({item, permissions, onNavigate, isNested = false}) => {
                 {renderIcon()}
             </ListItemIcon>
             <ListItemText
-                primary={safeItem.title}
+                primary={
+                    safeItem.badge ? (
+                        <Badge badgeContent={safeItem.badge} color="error" sx={{"& .MuiBadge-badge": {right: -14, top: 4}}}>
+                            {safeItem.title}
+                        </Badge>
+                    ) : safeItem.title
+                }
                 primaryTypographyProps={{
                     sx: styles.itemText,
                     noWrap: true
