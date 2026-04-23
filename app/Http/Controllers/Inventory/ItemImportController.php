@@ -36,15 +36,20 @@ class ItemImportController extends Controller
         ]);
 
         $import = new ItemsImport($this->itemCodeService);
-        Excel::import($import, $request->file('file'));
 
-        $msg = "Imported {$import->imported} items.";
-        if ($import->skipped > 0) $msg .= " Skipped {$import->skipped}.";
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Throwable $e) {
+            return back()->withErrors(['file' => 'Import failed: ' . $e->getMessage()]);
+        }
 
-        return redirect()->route('inventory.items.index')
+        $msg = "Imported {$import->imported} item(s).";
+        if ($import->skipped > 0) $msg .= " Skipped {$import->skipped} row(s) due to errors.";
+
+        return redirect()->route('inventory.items.import.create')
             ->with([
-                'success' => $import->skipped === 0,
-                'status'  => $msg,
+                'success'       => $import->imported > 0 && $import->skipped === 0,
+                'status'        => $msg,
                 'import_errors' => $import->errors,
             ]);
     }
