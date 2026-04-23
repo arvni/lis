@@ -36,19 +36,20 @@ readonly class StockCardService
             $runningBal += $delta;
 
             $entries[] = [
-                'date'          => $tx->transaction_date->format('Y-m-d'),
-                'reference'     => $tx->reference_number,
-                'type'          => $type,
-                'store'         => $tx->store->name,
-                'location'      => $line->location?->label,
-                'lot_number'    => $line->lot_number,
-                'brand'         => $line->brand,
-                'quantity'      => $line->quantity,
-                'unit'          => $line->unit->name,
-                'base_units'    => abs($delta),
-                'direction'     => $isOut ? 'OUT' : 'IN',
-                'balance_base'  => $runningBal,
-                'balance_fmt'   => $this->conversionService->formatStock($itemId, max(0, $runningBal)),
+                'date'           => $tx->transaction_date->format('Y-m-d'),
+                'reference'      => $tx->reference_number,
+                'transaction_id' => $tx->id,
+                'type'           => $type,
+                'store'          => $tx->store->name,
+                'location'       => $line->location?->label,
+                'lot_number'     => $line->lot_number,
+                'brand'          => $line->brand,
+                'quantity'       => $line->quantity,
+                'unit'           => $line->unit->name,
+                'base_units'     => abs($delta),
+                'direction'      => $isOut ? 'OUT' : 'IN',
+                'balance_base'   => $runningBal,
+                'balance_fmt'    => $this->conversionService->formatStock($itemId, max(0, $runningBal)),
             ];
         }
 

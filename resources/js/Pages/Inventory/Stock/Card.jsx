@@ -5,6 +5,8 @@ import {
 } from "@mui/material";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+import PrintIcon from "@mui/icons-material/Print";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageHeader from "@/Components/PageHeader";
 import {StockBadge} from "../Components/StockBadge";
@@ -183,6 +185,7 @@ const StockCard = () => {
                                         <TableCell>Expiry</TableCell>
                                         <TableCell align="right">Qty</TableCell>
                                         <TableCell>Location</TableCell>
+                                        <TableCell sx={{width: 64}}/>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -192,9 +195,10 @@ const StockCard = () => {
                                         const isExpiring = daysLeft !== null && daysLeft <= 30 && daysLeft > 0;
                                         const isExpired  = daysLeft !== null && daysLeft <= 0;
                                         return (
-                                            <TableRow key={lot.id}>
+                                            <TableRow key={lot.id} hover sx={{cursor: "pointer"}}
+                                                onClick={() => router.visit(route("inventory.lots.show", lot.id))}>
                                                 <TableCell>
-                                                    <Typography variant="body2" sx={{fontFamily: "monospace"}}>{lot.lot_number}</Typography>
+                                                    <Typography variant="body2" sx={{fontFamily: "monospace", color: "primary.main"}}>{lot.lot_number}</Typography>
                                                 </TableCell>
                                                 <TableCell>{lot.brand || "—"}</TableCell>
                                                 <TableCell>
@@ -215,6 +219,12 @@ const StockCard = () => {
                                                     <Typography variant="body2" sx={{fontFamily: "monospace"}}>
                                                         {lot.location?.label || lot.store?.name || "—"}
                                                     </Typography>
+                                                </TableCell>
+                                                <TableCell onClick={(e) => e.stopPropagation()}>
+                                                    <Box sx={{display: "flex", gap: 0.5}}>
+                                                        <PrintIcon fontSize="small" color="action" sx={{cursor: "pointer"}}
+                                                            onClick={() => router.visit(route("inventory.lots.label", lot.id))}/>
+                                                    </Box>
                                                 </TableCell>
                                             </TableRow>
                                         );
