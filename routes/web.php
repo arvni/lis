@@ -142,6 +142,7 @@ use App\Http\Controllers\Inventory\StoreController as InventoryStoreController;
 use App\Http\Controllers\Inventory\StoreLocationController;
 use App\Http\Controllers\Inventory\RevertTransactionController;
 use App\Http\Controllers\Inventory\ExpiryDashboardController;
+use App\Http\Controllers\Inventory\InventoryReportController;
 use App\Http\Controllers\Inventory\ReturnToRequesterController;
 use App\Http\Controllers\Inventory\StockLotLabelController;
 use App\Http\Controllers\Inventory\SupplierController as InventorySupplierController;
@@ -391,6 +392,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("lots/{lot}/label", [StockLotLabelController::class, "single"])->name("lots.label");
         Route::get("transactions/{transaction}/labels", [StockLotLabelController::class, "byTransaction"])->name("transactions.labels");
         Route::get("expiry", ExpiryDashboardController::class)->name("expiry.index");
+        Route::get("reports", [InventoryReportController::class, "index"])->name("reports.index");
+        Route::get("reports/export", [InventoryReportController::class, "export"])->name("reports.export");
     });
 
     // Inventory API

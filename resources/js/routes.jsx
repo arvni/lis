@@ -225,6 +225,12 @@ const routes = (sections = []) => {
                     icon: null,
                 },
                 {
+                    title: "Reports",
+                    route: "inventory.reports.index",
+                    permission: 'Inventory.Transactions.List Transactions',
+                    icon: null,
+                },
+                {
                     title: "Suppliers",
                     route: "inventory.suppliers.index",
                     permission: 'Inventory.Suppliers.List Suppliers',
