@@ -3,6 +3,7 @@ import {router, usePage} from "@inertiajs/react";
 import {Box, Button, Chip, Grid, MenuItem, TextField} from "@mui/material";
 import {GridActionsCellItem} from "@mui/x-data-grid";
 import AddIcon from "@mui/icons-material/Add";
+import UploadIcon from "@mui/icons-material/Upload";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -138,14 +139,23 @@ const ItemsIndex = () => {
             <PageHeader
                 title="Inventory Items"
                 actions={
-                    <Button
-                        startIcon={<AddIcon/>}
-                        variant="contained"
-                        color="success"
-                        onClick={() => router.visit(route("inventory.items.create"))}
-                    >
-                        New Item
-                    </Button>
+                    <Box sx={{display: "flex", gap: 1}}>
+                        <Button
+                            startIcon={<UploadIcon/>}
+                            variant="outlined"
+                            onClick={() => router.visit(route("inventory.items.import.create"))}
+                        >
+                            Bulk Import
+                        </Button>
+                        <Button
+                            startIcon={<AddIcon/>}
+                            variant="contained"
+                            color="success"
+                            onClick={() => router.visit(route("inventory.items.create"))}
+                        >
+                            New Item
+                        </Button>
+                    </Box>
                 }
             />
             <TableLayout

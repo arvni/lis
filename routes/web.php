@@ -143,6 +143,7 @@ use App\Http\Controllers\Inventory\StoreLocationController;
 use App\Http\Controllers\Inventory\RevertTransactionController;
 use App\Http\Controllers\Inventory\ExpiryDashboardController;
 use App\Http\Controllers\Inventory\InventoryReportController;
+use App\Http\Controllers\Inventory\ItemImportController;
 use App\Http\Controllers\Inventory\StockLotController;
 use App\Http\Controllers\Inventory\ReturnToRequesterController;
 use App\Http\Controllers\Inventory\StockLotLabelController;
@@ -366,6 +367,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Inventory Domain
     Route::group(["prefix" => "inventory", "as" => "inventory."], function () {
         Route::resource("items", InventoryItemController::class);
+        Route::get("items-import",          [ItemImportController::class, "create"])->name("items.import.create");
+        Route::post("items-import",         [ItemImportController::class, "store"])->name("items.import.store");
+        Route::get("items-import/template", [ItemImportController::class, "template"])->name("items.import.template");
         Route::resource("suppliers", InventorySupplierController::class);
         Route::resource("stores", InventoryStoreController::class);
         Route::post("stores/{store}/locations", [StoreLocationController::class, 'store'])->name("stores.locations.store");
