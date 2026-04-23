@@ -115,12 +115,11 @@ const ItemImport = () => {
                 <Typography variant="subtitle2" gutterBottom>Column Reference</Typography>
                 <Typography variant="body2" color="text.secondary" component="ul" sx={{pl: 2}}>
                     <li><strong>name</strong> (required) — item display name</li>
-                    <li><strong>department</strong> — LAB, ADM, MNT, CLN, IT, FAC</li>
-                    <li><strong>material_type</strong> — CHM, SLD, LQD, ELC, CSM, BIO, GLS, PPE, RGT, OTH</li>
-                    <li><strong>storage_condition</strong> — ROOM_TEMP, REFRIGERATED, FROZEN, ULTRA_FROZEN, DRY_COOL, FLAMMABLE_CABINET</li>
-                    <li><strong>default_unit</strong> — must match an existing unit name or abbreviation</li>
-                    <li><strong>extra_unit_1 / conversion_1</strong> — optional secondary unit and its conversion ratio to base</li>
-                    <li><strong>is_hazardous / requires_lot_tracking</strong> — yes/no or 1/0</li>
+                    <li><strong>department, material_type, storage_condition</strong> — dropdown in the template; select from the list</li>
+                    <li><strong>default_unit / extra_unit_1 / extra_unit_2</strong> — dropdown populated from your existing units</li>
+                    <li><strong>conversion_1 / conversion_2</strong> — how many base units the extra unit equals (e.g. Box = 100 Tablets → 100)</li>
+                    <li><strong>is_hazardous / requires_lot_tracking</strong> — select yes or no from dropdown</li>
+                    <li><strong>minimum_stock_level / maximum_stock_level / lead_time_days</strong> — numeric, optional</li>
                 </Typography>
             </Box>
         </>
