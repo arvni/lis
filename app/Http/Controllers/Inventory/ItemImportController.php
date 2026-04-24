@@ -58,6 +58,7 @@ class ItemImportController extends Controller
                 'required', 'file', 'max:10240',
                 'mimetypes:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,'
                     . 'application/vnd.ms-excel,'
+                    . 'application/vnd.ms-excel.sheet.macroEnabled.12,'
                     . 'text/csv,text/plain,application/csv,application/octet-stream',
             ],
         ]);
@@ -88,6 +89,61 @@ class ItemImportController extends Controller
         $units     = Unit::orderBy('name')->pluck('name')->toArray();
         $unitCount = count($units);
 
+        $basePath = resource_path('templates/items-import-base.xlsm');
+
+        if (file_exists($basePath)) {
+            return $this->xlsmTemplate($basePath, $units, $unitCount);
+        }
+
+        return $this->xlsxTemplate($units, $unitCount);
+    }
+
+    private function xlsmTemplate(string $basePath, array $units, int $unitCount): StreamedResponse
+    {
+        $reader      = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        $spreadsheet = $reader->load($basePath);
+
+        $sheet     = $spreadsheet->getSheetByName('Items');
+        $unitSheet = $spreadsheet->getSheetByName('_units');
+
+        // Repopulate _units with fresh data from the database
+        $oldHighest = $unitSheet->getHighestRow();
+        for ($r = 1; $r <= $oldHighest; $r++) {
+            $unitSheet->setCellValue("A{$r}", '');
+        }
+        foreach ($units as $i => $unit) {
+            $unitSheet->setCellValue('A' . ($i + 1), $unit);
+        }
+
+        // Refresh named range
+        try { $spreadsheet->removeNamedRange('UnitsList'); } catch (\Throwable) {}
+        if ($unitCount > 0) {
+            $spreadsheet->addNamedRange(new \PhpOffice\PhpSpreadsheet\NamedRange(
+                'UnitsList', $unitSheet, "\$A\$1:\$A\${$unitCount}"
+            ));
+        }
+
+        // Re-apply unit dropdown validations with the correct row count
+        $dataRows = '2:500';
+        if ($unitCount > 0) {
+            $this->addListValidation($sheet, 'F', $dataRows, '_units!$A$1:$A$' . $unitCount, 'Default Unit', false);
+            $this->addListValidation($sheet, 'M', $dataRows, '_units!$A$1:$A$' . $unitCount, 'Extra Unit 1', false);
+            $this->addListValidation($sheet, 'O', $dataRows, '_units!$A$1:$A$' . $unitCount, 'Extra Unit 2', false);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+
+        return response()->stream(function () use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type'        => 'application/vnd.ms-excel.sheet.macroEnabled.12',
+            'Content-Disposition' => 'attachment; filename="items-import-template.xlsm"',
+            'Cache-Control'       => 'max-age=0',
+        ]);
+    }
+
+    private function xlsxTemplate(array $units, int $unitCount): StreamedResponse
+    {
         $spreadsheet = new Spreadsheet();
 
         // ── Sheet 1: Data ──────────────────────────────────────────────────────
@@ -137,11 +193,8 @@ class ItemImportController extends Controller
         }
         $unitSheet->setSheetState(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet::SHEETSTATE_HIDDEN);
 
-        // Name the units range so we can reference it in validation
         $spreadsheet->addNamedRange(new \PhpOffice\PhpSpreadsheet\NamedRange(
-            'UnitsList',
-            $unitSheet,
-            "\$A\$1:\$A\${$unitCount}"
+            'UnitsList', $unitSheet, "\$A\$1:\$A\${$unitCount}"
         ));
 
         // ── Apply data validation to rows 2–500 ───────────────────────────────
@@ -153,7 +206,6 @@ class ItemImportController extends Controller
         $this->addListValidation($sheet, 'J', $dataRows, '"yes,no"', 'Is Hazardous');
         $this->addListValidation($sheet, 'K', $dataRows, '"yes,no"', 'Requires Lot Tracking');
 
-        // Unit columns reference the named range (works across sheets)
         if ($unitCount > 0) {
             $this->addListValidation($sheet, 'F', $dataRows, '_units!$A$1:$A$' . $unitCount, 'Default Unit', false);
             $this->addListValidation($sheet, 'M', $dataRows, '_units!$A$1:$A$' . $unitCount, 'Extra Unit 1', false);

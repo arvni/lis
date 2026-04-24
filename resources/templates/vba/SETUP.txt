@@ -1,0 +1,99 @@
+HOW TO BUILD THE XLSM TEMPLATE
+==============================
+
+Goal: create resources/templates/items-import-base.xlsm
+      (the PHP controller loads this, injects live units, and serves it as the download)
+
+STEP 1 – Open Excel and download the current template
+  - Go to the app's Import Items page and click "Download Template"
+  - Open the downloaded items-import-template.xlsx in Excel
+
+STEP 2 – Save as Macro-Enabled Workbook
+  - File > Save As > choose "Excel Macro-Enabled Workbook (*.xlsm)"
+  - Save anywhere temporarily (e.g. Desktop)
+
+STEP 3 – Open the VBA Editor
+  - Press Alt+F11
+
+STEP 4 – Paste ThisWorkbook code
+  - In the Project tree, double-click "ThisWorkbook"
+  - Paste the contents of ThisWorkbook_code.bas
+
+STEP 5 – Insert a standard module
+  - Insert > Module
+  - In the Properties window (F4) set Name = modItemForm
+  - Paste the contents of modItemForm.bas
+
+STEP 6 – Insert a UserForm
+  - Insert > UserForm
+  - In the Properties window set Name = frmAddItem
+  - Set Caption = "Add Inventory Item"
+  - Set Width = 570, Height = 660
+
+STEP 7 – Add controls to the form
+  Use the Toolbox (View > Toolbox) to add each control.
+  Set the Name property (in Properties window) EXACTLY as listed.
+
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ LABELS (just display text, no Name required except these two):          │
+  │   lblStatus  – Left=6, Top=8,  Width=550, Height=18  (leave caption="")│
+  │   lblCount   – Left=6, Top=30, Width=550, Height=16  (leave caption="")│
+  │                                                                         │
+  │ You can add plain Label controls for field descriptions. These have no  │
+  │ special Name; just set Caption to the field label text.                 │
+  │                                                                         │
+  │ SUGGESTED LAYOUT (Left column labels at Left=6, inputs at Left=150):    │
+  │                                                                         │
+  │  Row  Top   Label text           Control name & type                   │
+  │  ──────────────────────────────────────────────────────────────────     │
+  │   1    54   "Name *"             txtName        TextBox   W=200        │
+  │   2    80   "Scientific Name"    txtScientificName TextBox W=200       │
+  │   3   106   "Department"         cmbDepartment  ComboBox  W=200        │
+  │   4   132   "Material Type"      cmbMaterialType ComboBox W=200        │
+  │   5   158   "Storage Condition"  cmbStorageCondition ComboBox W=200    │
+  │   6   184   "Default Unit *"     cmbDefaultUnit ComboBox  W=200        │
+  │   7   210   "Is Hazardous"       cmbIsHazardous ComboBox  W=80         │
+  │   8   236   "Lot Tracking"       cmbRequiresLotTracking ComboBox W=80  │
+  │   9   262   "Notes"              txtNotes TextBox W=200 H=36 MultiLine │
+  │                                                                         │
+  │  Right column labels at Left=358, inputs at Left=472:                  │
+  │   R1    54   "Min Stock"         txtMinStock  TextBox W=80             │
+  │   R2    80   "Max Stock"         txtMaxStock  TextBox W=80             │
+  │   R3   106   "Lead Time (Days)"  txtLeadTime  TextBox W=80             │
+  │                                                                         │
+  │  Extra Units section (Top=310 onward):                                  │
+  │   E1   310   "Extra Unit 1"      cmbExtraUnit1 ComboBox W=150          │
+  │              "Factor 1"          txtConversion1 TextBox Left=310 W=70  │
+  │   E2   338   "Extra Unit 2"      cmbExtraUnit2 ComboBox W=150          │
+  │              "Factor 2"          txtConversion2 TextBox Left=310 W=70  │
+  │                                                                         │
+  │  Buttons (Top=374):                                                     │
+  │   btnAdd   Left=6,   W=130, H=28  Caption="Add Item"                   │
+  │   btnClear Left=144, W=100, H=28  Caption="Clear Form"                 │
+  │   btnClose Left=252, W=80,  H=28  Caption="Close"                      │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+  For txtNotes: in Properties set MultiLine=True, ScrollBars=2
+
+STEP 8 – Paste the form code
+  - Double-click the form canvas (not a control) to open its code window
+  - Paste the entire contents of frmAddItem_code.bas
+
+STEP 9 – Save the file
+  - Save as "items-import-base.xlsm" in:
+    resources/templates/items-import-base.xlsm
+    (relative to project root: D:\Projects\mmc\lis-2\resources\templates\)
+
+STEP 10 – Test
+  - Re-download the template from the app
+  - The downloaded file will be items-import-template.xlsm
+  - Open it; the form should appear automatically
+  - Fill in items; each "Add Item" click writes a row to the Items sheet
+  - Upload the saved file on the Import Items page
+
+NOTES
+-----
+- The _units sheet is repopulated by PHP on every download, so unit dropdowns
+  in the form always reflect the current database contents.
+- You can also upload the filled .xlsm directly (PHP now accepts it).
+- If units list is empty, the unit dropdowns in the form will be empty too.

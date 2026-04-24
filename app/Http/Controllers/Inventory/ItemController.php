@@ -111,7 +111,8 @@ class ItemController extends Controller
         ]);
 
         $this->itemService->updateItem($item, $data);
-        return back()->with(['success' => true, 'status' => "Item updated successfully."]);
+        return redirect()->route('inventory.items.show', $item->id)
+            ->with(['success' => true, 'status' => "Item updated successfully."]);
     }
 
     public function destroy(Item $item): RedirectResponse
