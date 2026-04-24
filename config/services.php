@@ -71,5 +71,9 @@ return [
         'webhook_secret' => env('LOGISTICS_APP_WEBHOOK_SECRET'),
         'collect_request_webhook_url' => env('LOGISTICS_APP_COLLECT_REQUEST_WEBHOOK_URL', '/api/collect-requests/webhook'),
     ],
+    'mocreo' => [
+        'username' => env('MOCREO_USERNAME'),
+        'password' => env('MOCREO_PASSWORD'),
+    ],
 
 ];

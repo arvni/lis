@@ -73,6 +73,12 @@ class SettingsSeeder extends Seeder
                 "key" => "defaultConsultationMethod",
                 "class" => "Acceptance",
                 "value" => ["value" => "", "type" => "selectSearch", "url" => relative_route("api.tests.list")]
+            ],
+            [
+                "title" => "Monitoring Sample Interval (minutes)",
+                "key"   => "monitoringSampleInterval",
+                "class" => "Monitoring",
+                "value" => ["value" => "10", "type" => "number", "min" => 1]
             ]
         ];
         foreach ($settings as $settingData) {

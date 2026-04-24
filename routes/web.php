@@ -120,6 +120,8 @@ use App\Http\Controllers\Referrer\StoreReferrerOrderSamplesController;
 use App\Http\Controllers\Referrer\CollectRequestController;
 use App\Http\Controllers\Referrer\ListCollectRequestsController;
 use App\Http\Controllers\Referrer\SampleCollectorController;
+use App\Http\Controllers\Monitoring\NodeController as MonitoringNodeController;
+use App\Http\Controllers\Monitoring\NodeSamplesExportController as MonitoringNodeSamplesExportController;
 use App\Http\Controllers\Inventory\Api\ItemStockController as InventoryItemStockController;
 use App\Http\Controllers\Inventory\Api\ItemLotsController as InventoryItemLotsController;
 use App\Http\Controllers\Inventory\Api\ItemUnitsController as InventoryItemUnitsController;
@@ -403,6 +405,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("expiry", ExpiryDashboardController::class)->name("expiry.index");
         Route::get("reports", [InventoryReportController::class, "index"])->name("reports.index");
         Route::get("reports/export", [InventoryReportController::class, "export"])->name("reports.export");
+    });
+
+    // Monitoring Domain
+    Route::group(["prefix" => "monitoring", "as" => "monitoring."], function () {
+        Route::get("nodes", [MonitoringNodeController::class, "index"])->name("nodes.index");
+        Route::post("nodes/fetch-all", [MonitoringNodeController::class, "fetchAll"])->name("nodes.fetchAll");
+        Route::get("nodes/{nodeId}", [MonitoringNodeController::class, "show"])->name("nodes.show");
+        Route::put("nodes/{nodeId}/section", [MonitoringNodeController::class, "updateSection"])->name("nodes.updateSection");
+        Route::post("nodes/{nodeId}/fetch", [MonitoringNodeController::class, "fetchNode"])->name("nodes.fetch");
+        Route::get("nodes/{nodeId}/samples/export", MonitoringNodeSamplesExportController::class)->name("nodes.samples.export");
     });
 
     // Inventory API

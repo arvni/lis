@@ -61,6 +61,8 @@ use App\Domains\Referrer\Policies\ReferrerPolicy;
 use App\Domains\Referrer\Policies\ReferrerOrderPolicy;
 use App\Domains\Referrer\Policies\CollectRequestPolicy;
 use App\Domains\Referrer\Policies\SampleCollectorPolicy;
+use App\Domains\Monitoring\Models\MonitoringNode;
+use App\Domains\Monitoring\Policies\MonitoringNodePolicy;
 use App\Domains\Inventory\Models\Item;
 use App\Domains\Inventory\Models\Supplier;
 use App\Domains\Inventory\Models\Store;
@@ -173,6 +175,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);
         Gate::policy(Statement::class, StatementPolicy::class);
+
+        Gate::policy(MonitoringNode::class, MonitoringNodePolicy::class);
 
         Gate::policy(Item::class, ItemPolicy::class);
         Gate::policy(Supplier::class, SupplierPolicy::class);

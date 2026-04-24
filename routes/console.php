@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('inventory:mark-expired-lots')->dailyAt('00:05');
+Schedule::command('monitoring:fetch-samples')->everyFiveMinutes();

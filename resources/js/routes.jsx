@@ -21,7 +21,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import {Analytics, AttachMoney, FactCheck, Payments, Publish, BugReport, Inventory as InventoryIcon} from "@mui/icons-material";
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import {PercentDiamond, Stethoscope as Doctor, Hospital, ClipboardCheck, Truck, FlaskConical, Package, ShoppingCart} from "lucide-react";
+import {PercentDiamond, Stethoscope as Doctor, Hospital, ClipboardCheck, Truck, FlaskConical, Package, ShoppingCart, Thermometer} from "lucide-react";
 
 export const refactorRoute = (addr) => {
     if (!addr)
@@ -246,6 +246,19 @@ const routes = (sections = []) => {
                     title: "Units",
                     route: "inventory.units.index",
                     permission: null,
+                    icon: null,
+                },
+            ]
+        },
+        {
+            title: "Monitoring",
+            permission: 'Monitoring.Nodes.List Nodes',
+            icon: <Thermometer size={20}/>,
+            child: [
+                {
+                    title: "Sensor Nodes",
+                    route: "monitoring.nodes.index",
+                    permission: 'Monitoring.Nodes.List Nodes',
                     icon: null,
                 },
             ]

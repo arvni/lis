@@ -295,6 +295,13 @@ class RoleAndPermissionSeeder extends Seeder
                     "Resolve Reorder Alert",
                 ],
             ],
+            "Monitoring" => [
+                "Nodes" => [
+                    "List Nodes",
+                    "View Node",
+                    "Update Node",
+                ],
+            ],
             "Dashboard" => [
                 "Total Acceptances",
                 "Total Tests",
