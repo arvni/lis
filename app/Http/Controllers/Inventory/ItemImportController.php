@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Inventory;
 
+use App\Domains\Inventory\Enums\ItemDepartment;
+use App\Domains\Inventory\Enums\ItemMaterialType;
+use App\Domains\Inventory\Enums\StorageCondition;
 use App\Domains\Inventory\Imports\ItemsImport;
 use App\Domains\Inventory\Models\Item;
 use App\Domains\Inventory\Models\Unit;
@@ -46,7 +49,12 @@ class ItemImportController extends Controller
     public function create(): Response
     {
         $this->authorize('create', Item::class);
-        return Inertia::render('Inventory/Items/Import');
+        return Inertia::render('Inventory/Items/Import', [
+            'departments'       => enumMap(ItemDepartment::cases()),
+            'materialTypes'     => enumMap(ItemMaterialType::cases()),
+            'storageConditions' => enumMap(StorageCondition::cases()),
+            'units'             => Unit::orderBy('name')->pluck('name')->toArray(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -73,6 +81,31 @@ class ItemImportController extends Controller
 
         $msg = "Imported {$import->imported} item(s).";
         if ($import->skipped > 0) $msg .= " Skipped {$import->skipped} row(s) due to errors.";
+
+        return redirect()->route('inventory.items.import.create')
+            ->with([
+                'success'       => $import->imported > 0 && $import->skipped === 0,
+                'status'        => $msg,
+                'import_errors' => $import->errors,
+            ]);
+    }
+
+    public function storeRows(Request $request): RedirectResponse
+    {
+        $this->authorize('create', Item::class);
+
+        $request->validate([
+            'rows'        => 'required|array|min:1',
+            'rows.*.name' => 'required|string|max:255',
+        ]);
+
+        $import = new ItemsImport($this->itemCodeService);
+        $import->collection(collect($request->input('rows')));
+
+        $msg = "Imported {$import->imported} item(s).";
+        if ($import->skipped > 0) {
+            $msg .= " Skipped {$import->skipped} row(s) due to errors.";
+        }
 
         return redirect()->route('inventory.items.import.create')
             ->with([

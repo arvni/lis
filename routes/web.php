@@ -368,9 +368,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Inventory Domain
     Route::group(["prefix" => "inventory", "as" => "inventory."], function () {
         Route::resource("items", InventoryItemController::class);
-        Route::get("items-import",          [ItemImportController::class, "create"])->name("items.import.create");
-        Route::post("items-import",         [ItemImportController::class, "store"])->name("items.import.store");
-        Route::get("items-import/template", [ItemImportController::class, "template"])->name("items.import.template");
+        Route::get("items-import",           [ItemImportController::class, "create"])->name("items.import.create");
+        Route::post("items-import",          [ItemImportController::class, "store"])->name("items.import.store");
+        Route::post("items-import/rows",     [ItemImportController::class, "storeRows"])->name("items.import.rows");
+        Route::get("items-import/template",  [ItemImportController::class, "template"])->name("items.import.template");
         Route::resource("suppliers", InventorySupplierController::class);
         Route::resource("stores", InventoryStoreController::class);
         Route::post("stores/{store}/locations", [StoreLocationController::class, 'store'])->name("stores.locations.store");
