@@ -2,277 +2,278 @@
 
 A comprehensive Laboratory Information Management System built with Laravel, React, and Inertia.js for modern medical laboratories and diagnostic centers.
 
-## 📋 Overview
+## Overview
 
-This LIS provides end-to-end management of laboratory operations, from patient registration through sample collection, testing, reporting, and billing. The system is designed to streamline laboratory workflows, ensure quality control, and improve operational efficiency.
+This LIS provides end-to-end management of laboratory operations: patient registration, sample collection and tracking, test ordering, result reporting, billing, inventory management, and external integrations. The system is organized around Domain-Driven Design principles and is designed for production deployment in regulated healthcare environments.
 
-## 🎯 Key Features
+## Key Features
 
-### Patient Management
-- Complete patient registration and profile management
-- Patient relationship tracking (family connections)
-- Medical history and metadata storage
-- Multi-patient sample processing support
+### Patient & Reception
+- Patient registration, profile management, and family relationship tracking
+- Test order (acceptance) creation with multi-patient support
+- Barcode-based sample collection and tracking
+- Sample pooling support
 
 ### Laboratory Operations
-- **Sample Management**: Barcode-based sample tracking and storage
-- **Test Catalog**: Comprehensive test and panel management
-- **Workflow Engine**: Customizable multi-step laboratory workflows
-- **Quality Control**: Built-in QC processes and approval mechanisms
-- **Section Management**: Organize laboratory into logical sections/departments
+- Test catalog and panel management with method-level granularity
+- Multi-step configurable workflow engine per test section
+- Section and department organization
+- Quality control approval mechanisms
 
-### Clinical Services
-- Consultant management and scheduling
-- Appointment booking system
-- Time slot management
-- Consultation tracking
-
-### Reporting System
-- Customizable report templates
-- Parameter-based reporting
-- Multi-level approval workflow (Report → Approve → Publish)
+### Reporting
+- Customizable report templates with parameter-based outputs
+- Multi-level approval workflow: Report → Approve → Publish
 - Digital signatures and stamps
-- Batch reporting capabilities
+- Batch reporting
 
 ### Billing & Finance
-- Flexible pricing models (Fixed, Formulated, Conditional)
-- Invoice generation and management
-- Multiple payment method support
-- Discount and offer management
-- VAT calculation support
+- Flexible pricing models: Fixed, Formulated, and Conditional
+- Invoice generation with VAT and discount support
+- Multiple payment methods and daily cash reporting
+- Offer and pricing package management
 
-### External Integration
-- Referrer (external doctors/clinics) management
-- API support for external order placement
-- WhatsApp notification integration
-- Document management system
+### Inventory Management
+- Item and unit management with conversion rules
+- FIFO stock tracking with lot-level traceability
+- Supplier and supplier-item pricing catalog
+- Purchase request and receipt workflow
+- Expiry tracking and reorder alerts
+- Bulk import via Excel templates
+
+### Consultation
+- Consultant management and appointment scheduling
+- Time slot configuration and booking
+- Consultation session tracking
+
+### Referrer & External Integration
+- External doctor/clinic referrer management
+- REST API for external order placement
+- Sample collection request tracking
+- Material and consumable assignment
+
+### Monitoring
+- Mocreo sensor node integration for environmental monitoring
+- Temperature and humidity sample recording
+- Section-level sensor assignment
+
+### Notifications
+- WhatsApp messaging via Twilio
+- SMS via Omantel
+- Report delivery and appointment reminders
 
 ### Security & Compliance
-- Role-based access control (RBAC)
-- Comprehensive audit logging
-- User activity tracking
-- Section-specific permissions
+- Role-based access control via Spatie Laravel Permission
+- Comprehensive audit logging via user activity records
+- Document management system
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Backend**: Laravel 11.x
-- **Frontend**: React 18.x with Inertia.js
-- **Database**: MySQL/PostgreSQL
-- **Authentication**: Laravel Sanctum
-- **Permissions**: Spatie Laravel Permission
-- **Development Tools**: Laravel Telescope for debugging
+| Layer | Technology |
+|---|---|
+| Backend | Laravel 12.x, PHP 8.2+ |
+| Frontend | React 18, Inertia.js 2.0, Material-UI 6 |
+| Build | Vite 6 |
+| Database | MySQL 8.0+ / PostgreSQL 13+ |
+| Auth | Laravel Sanctum 4 |
+| Permissions | Spatie Laravel Permission 6 |
+| Charts | Recharts 3 |
+| Export | Maatwebsite Excel 3.1, PHPOffice PhpWord 1.3 |
+| Barcodes | Milon Barcode 12 |
+| Messaging | Twilio SDK 8.5 (WhatsApp), Omantel SMS |
+| Debugging | Laravel Telescope 5.5 |
+| Containers | Docker (PHP 8.2 Alpine, multi-stage build) |
 
-## 📦 Requirements
+## Requirements
 
 - PHP >= 8.2
 - Composer
-- Node.js >= 18.x
-- NPM or Yarn
+- Node.js >= 18
 - MySQL >= 8.0 or PostgreSQL >= 13
 
-## 🚀 Installation
+## Installation
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/your-username/laboratory-information-system.git
-cd laboratory-information-system
-```
+### 1. Clone and install dependencies
 
-### 2. Install PHP dependencies
 ```bash
+git clone <repository-url>
+cd lis-2
 composer install
-```
-
-### 3. Install JavaScript dependencies
-```bash
 npm install
-# or
-yarn install
 ```
 
-### 4. Environment Setup
+### 2. Environment setup
+
 ```bash
 cp .env.example .env
 ```
 
-Configure your database and other settings in the `.env` file:
+Edit `.env` with your database and service credentials:
+
 ```env
+APP_NAME="Lab System"
+APP_ENV=local
+APP_KEY=
+
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=lis_database
+DB_DATABASE=lis
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
 
-# Admin credentials
-ADMIN_EMAIL=admin@lis.com
-ADMIN_PASSWORD=your_secure_password
+SESSION_DRIVER=database
+QUEUE_CONNECTION=database
+CACHE_STORE=database
+
+# Admin account (used by seeder)
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=P@ssw0rd
+
+# WhatsApp (optional)
+TWILIO_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_WHATSAPP_FROM=
+
+# SMS (optional)
+OMANTEL_API_URL=
+OMANTEL_USERNAME=
+OMANTEL_PASSWORD=
 ```
 
-### 5. Generate application key
+### 3. Generate key and run migrations
+
 ```bash
 php artisan key:generate
-```
-
-### 6. Run database migrations and seeders
-```bash
 php artisan migrate --seed
 ```
 
-### 7. Build frontend assets
-```bash
-npm run build
-# or for development
-npm run dev
-```
+### 4. Start the development server
 
-### 8. Start the development server
-```bash
-php artisan serve
-```
-
-Visit `http://localhost:8000` in your browser.
-
-## 👤 Default Login
-
-- **Username**: admin
-- **Password**: (as set in your .env file, default: P@ssw0rd)
-
-## 📚 Usage
-
-### Quick Start Guide
-
-1. **Initial Setup**
-    - Configure laboratory sections and workflows
-    - Set up test catalog and pricing
-    - Create user accounts and assign roles
-    - Configure report templates
-
-2. **Daily Operations**
-    - Register new patients
-    - Create test orders (acceptances)
-    - Collect and process samples
-    - Enter test results
-    - Approve and publish reports
-    - Process payments
-
-3. **Administration**
-    - Manage users and permissions
-    - Configure billing settings
-    - Set up referrers and offers
-    - Monitor system activity
-
-## 🏗️ Project Structure
-
-```
-├── app/
-│   ├── Domains/          # Domain-driven design structure
-│   │   ├── Billing/      # Billing and payment logic
-│   │   ├── Consultation/ # Consultation management
-│   │   ├── Laboratory/   # Core laboratory operations
-│   │   ├── Reception/    # Patient reception and orders
-│   │   ├── Referrer/     # External referrer management
-│   │   ├── Setting/      # System settings
-│   │   └── User/         # User management
-│   └── Http/
-│       ├── Controllers/  # HTTP controllers
-│       └── Resources/    # API resources
-├── database/
-│   ├── migrations/       # Database migrations
-│   └── seeders/         # Database seeders
-├── resources/
-│   ├── js/              # React components
-│   └── views/           # Blade templates
-└── routes/              # Application routes
-```
-
-## 🔧 Configuration
-
-### Key Configuration Files
-
-- `config/permission.php` - Role and permission settings
-- `config/telescope.php` - Debugging tool configuration
-- `.env` - Environment variables
-
-### Important Settings
-
-The system includes configurable settings for:
-- Maximum discount percentage
-- Minimum payment requirements
-- Consultation scheduling
-- VAT rates
-- Report templates
-- Default services
-
-## 🔌 API Documentation
-
-The system provides RESTful APIs for:
-- Patient management
-- Test orders
-- Sample tracking
-- Report generation
-- External integrations
-
-API documentation can be accessed at `/api/documentation` (if configured).
-
-## 🧪 Testing
+Run all services together:
 
 ```bash
-# Run PHP tests
-php artisan test
-
-# Run JavaScript tests
-npm run test
+composer dev
 ```
 
-## 🚢 Deployment
+This starts `artisan serve`, `queue:listen`, `pail` (log viewer), and `npm run dev` concurrently.
 
-### Production Deployment
+Or start them individually:
 
-1. **Optimize for production**
+```bash
+php artisan serve       # App server on :8000
+npm run dev             # Vite dev server
+php artisan queue:listen
+```
+
+### 5. Default login
+
+- **Email**: as set in `ADMIN_EMAIL` (default: `admin@example.com`)
+- **Password**: as set in `ADMIN_PASSWORD` (default: `P@ssw0rd`)
+
+## Docker Deployment
+
+The included `Dockerfile` produces a multi-stage production image. The entrypoint supports three container roles via `CONTAINER_ROLE`.
+
+### Build
+
+```bash
+docker build -t lis:latest .
+```
+
+### Run
+
+**App server:**
+```bash
+docker run --env-file .env \
+  -e CONTAINER_ROLE=app \
+  -e MIGRATE_ON_STARTUP=true \
+  -p 8000:8000 lis:latest
+```
+
+**Queue worker:**
+```bash
+docker run --env-file .env -e CONTAINER_ROLE=queue lis:latest
+```
+
+**Scheduler:**
+```bash
+docker run --env-file .env -e CONTAINER_ROLE=scheduler lis:latest
+```
+
+### Key Docker environment variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `CONTAINER_ROLE` | `app` | `app`, `queue`, or `scheduler` |
+| `MIGRATE_ON_STARTUP` | `false` | Run `migrate` before starting |
+| `CLEAR_CACHES_ON_STARTUP` | `false` | Clear all Laravel caches on start |
+
+### Production optimization (non-Docker)
+
 ```bash
 composer install --optimize-autoloader --no-dev
 npm run build
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
-```
-
-2. **Set up queue workers**
-```bash
 php artisan queue:work
 ```
 
-3. **Configure web server** (Nginx/Apache)
+## Project Structure
 
-4. **Set up SSL certificates**
+```
+app/
+├── Domains/
+│   ├── Auth/           # Authentication services and DTOs
+│   ├── Billing/        # Invoices, payments, statements
+│   ├── Consultation/   # Consultants, appointments, time slots
+│   ├── Dashboard/      # KPI aggregation
+│   ├── Document/       # File storage and management
+│   ├── Inventory/      # Items, stock, suppliers, purchase requests
+│   ├── Laboratory/     # Tests, sections, workflows, templates
+│   ├── Monitoring/     # Environmental sensor nodes
+│   ├── Notification/   # WhatsApp and SMS messaging
+│   ├── Reception/      # Patients, acceptances, samples, reports
+│   ├── Referrer/       # External doctors, orders, collection
+│   ├── Setting/        # System configuration
+│   ├── System/         # System-level policies
+│   └── User/           # Users, roles, audit log
+├── Http/
+│   └── Controllers/    # 170+ HTTP controllers
+resources/
+├── js/
+│   ├── Components/     # Shared React components
+│   ├── Layouts/        # Page layouts
+│   ├── Pages/          # Inertia page components (per domain)
+│   └── Services/       # API client helpers
+database/
+├── migrations/         # 137+ migrations
+└── seeders/
+routes/
+├── web.php             # All web and internal API routes
+└── auth.php            # Authentication routes
+docker/
+├── entrypoint.sh       # Role-based startup script
+└── php/                # PHP configuration (OPCache, limits)
+```
 
-5. **Configure backup strategies**
+## Configuration
 
-## 🤝 Contributing
+| File | Purpose |
+|---|---|
+| `config/permission.php` | Spatie RBAC settings |
+| `config/telescope.php` | Debugging tool (disable in production) |
+| `config/barcode.php` | Barcode generation settings |
+| `.env` | All runtime environment variables |
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+System settings (VAT rate, discount limits, default services) are stored in the database and editable through the Settings UI.
 
-## 📝 License
+## Testing
 
-This project is licensed under the [MIT License](LICENSE).
-
-## 🆘 Support
-
-For support and questions:
-- Create an issue in the GitHub repository
-- Contact the development team at support@yourdomain.com
-
-## 🙏 Acknowledgments
-
-- Built with [Laravel](https://laravel.com/)
-- UI powered by [React](https://reactjs.org/) and [Inertia.js](https://inertiajs.com/)
-- Permission management by [Spatie Laravel Permission](https://github.com/spatie/laravel-permission)
+```bash
+php artisan test
+```
 
 ---
 
-**Note**: This is a medical software system. Ensure compliance with local healthcare regulations and data protection laws (HIPAA, GDPR, etc.) before deployment in production environments.
+**Note**: This is a medical software system. Ensure compliance with applicable healthcare regulations and data protection laws (HIPAA, GDPR, etc.) before deploying in a production environment.
