@@ -68,7 +68,7 @@ class AcceptancesExport implements
             $barcodes,
             $row->out_patient ? 'Out-Patient' : 'In-Patient',
             number_format((float) $remaining, 3),
-            $row->status,
+            $row->status instanceof \BackedEnum ? $row->status->value : $row->status,
             $reportDate ?? '',
             $this->formatDateTime($row->created_at),
             $row->published_at ? $this->formatDateTime($row->published_at) : '',
