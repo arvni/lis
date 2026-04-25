@@ -597,7 +597,8 @@ class AcceptanceService
                     $acceptance_item["id"] ?? null,
                     null,
                     $acceptance_item["deleted"] ?? false,
-                    $acceptance_item["sampleless"] ?? false,
+                    $isService || ($acceptance_item["sampleless"] ?? false),
+                    $isService || ($acceptance_item["reportless"] ?? false),
                 );
             }
         }
@@ -626,8 +627,8 @@ class AcceptanceService
                             $item["id"] ?? null,
                             $panelID,
                             $panelData["deleted"] ?? false,
-                            $itemSampleless,
-                            $panelReportless || ($item["reportless"] ?? false),
+                            $isService || $itemSampleless,
+                            $isService || $panelReportless || ($item["reportless"] ?? false),
                         );
                     }
                 }

@@ -90,10 +90,9 @@ class AcceptanceItemRepository
     {
         $acceptanceItem = AcceptanceItem::create(Arr::except($acceptanceItemData, ["patients", "id"]));
 
-        // Automatically set reportless to true for SERVICE type tests
         $acceptanceItem->load('test');
         if ($acceptanceItem->test && $acceptanceItem->test->type === TestType::SERVICE) {
-            $acceptanceItem->update(['reportless' => true]);
+            $acceptanceItem->update(['no_sample' => 0, 'sampleless' => true, 'reportless' => true]);
         }
 
         if (isset($acceptanceItemData["customParameters"]["samples"])) {
