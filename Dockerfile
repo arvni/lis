@@ -68,7 +68,7 @@ RUN composer dump-autoload --optimize --no-dev
 # ═══════════════════════════════════════════════════════════
 # Stage 2: Production image
 # ═══════════════════════════════════════════════════════════
-FROM php:8.2-fpm-alpine
+FROM php:8.2-alpine
 
 LABEL maintainer="Bion Genetic Laboratory"
 
@@ -77,7 +77,7 @@ ENV PHP_MEMORY_LIMIT=256M \
     POST_MAX_SIZE=128M \
     CONTAINER_ROLE=app \
     APP_ENV=production \
-    PORT=9000 \
+    PORT=8000 \
     PSYSH_HISTORY_FILE=/dev/null \
     PSYSH_CONFIG_FILE=/dev/null \
     PSYSH_MANUAL_DB_FILE=/dev/null
@@ -110,9 +110,6 @@ WORKDIR /app
 # Copy built application from builder
 COPY --from=builder /app /app
 
-# PHP-FPM pool config
-COPY docker/php-fpm/www.conf /usr/local/etc/php-fpm.d/www.conf
-
 # Storage directories — owned by www-data, no world-write
 RUN mkdir -p \
         /app/storage/app/public \
@@ -131,7 +128,7 @@ RUN mkdir -p \
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint
 RUN chmod +x /usr/local/bin/entrypoint
 
-EXPOSE 9000
+EXPOSE 8000
 
 ENTRYPOINT ["entrypoint"]
-CMD ["php-fpm"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
