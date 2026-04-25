@@ -15,6 +15,15 @@ class Setting extends Model
     ];
 
     protected $casts = [
-        'value' => 'json', // If the value is stored as JSON
+        'value' => 'json',
     ];
+
+    public function toArray(): array
+    {
+        $array = parent::toArray();
+        if (($array['value']['type'] ?? null) === 'password') {
+            $array['value']['value'] = '';
+        }
+        return $array;
+    }
 }

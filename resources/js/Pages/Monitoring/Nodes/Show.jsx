@@ -5,14 +5,20 @@ import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {DateTimePicker} from "@mui/x-date-pickers/DateTimePicker";
 import {
-    Alert, Box, Button, Card, CardContent, CardHeader, Chip,
-    Divider, FormControl, Grid, InputLabel, MenuItem, Select,
-    TextField, Typography,
+    Alert, Box, Button, ButtonGroup, Card, CardContent, CardHeader, Chip,
+    Divider, FormControl, Grid, InputLabel, ListItemIcon, Menu, MenuItem,
+    Select, TextField, Typography,
 } from "@mui/material";
 import {useTheme} from "@mui/material/styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import DownloadIcon from "@mui/icons-material/Download";
 import SyncIcon from "@mui/icons-material/Sync";
+import TodayIcon from "@mui/icons-material/Today";
+import DateRangeIcon from "@mui/icons-material/DateRange";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import TuneIcon from "@mui/icons-material/Tune";
 import SignalCellularAltIcon from "@mui/icons-material/SignalCellularAlt";
 import BatteryChargingFullIcon from "@mui/icons-material/BatteryChargingFull";
 import WifiIcon from "@mui/icons-material/Wifi";
@@ -26,6 +32,14 @@ import {
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageHeader from "@/Components/PageHeader";
 
+const PERIODS = [
+    {key: "today", label: "Today",      icon: <TodayIcon fontSize="small"/>},
+    {key: "week",  label: "This Week",  icon: <DateRangeIcon fontSize="small"/>},
+    {key: "month", label: "This Month", icon: <CalendarMonthIcon fontSize="small"/>},
+    {key: "year",  label: "This Year",  icon: <CalendarTodayIcon fontSize="small"/>},
+    {key: "custom",label: "Custom",     icon: <TuneIcon fontSize="small"/>},
+];
+
 const Field = ({label, children}) => (
     <Box sx={{py: 0.75}}>
         <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
@@ -35,39 +49,36 @@ const Field = ({label, children}) => (
 
 const formatTime = (ts) => ts ? new Date(ts * 1000).toLocaleString() : "—";
 
-const tickTime = (ts) =>
-    new Date(ts * 1000).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
+const tickFormatter = (ts, period) => {
+    const d = new Date(ts * 1000);
+    if (period === "year")  return d.toLocaleDateString([], {month: "short", day: "numeric"});
+    if (period === "month") return d.toLocaleDateString([], {month: "short", day: "numeric"});
+    if (period === "week")  return d.toLocaleDateString([], {weekday: "short", hour: "2-digit", minute: "2-digit"});
+    return d.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
+};
 
-const SensorChart = ({samples, hasHumidity}) => {
+const SensorChart = ({samples, hasHumidity, period}) => {
     const theme = useTheme();
 
-    const chartData = useMemo(() =>
-        [...samples].reverse().map((s) => ({
-            time:     s.time,
-            temp:     s.data?.tm != null ? parseFloat((s.data.tm / 100).toFixed(2)) : null,
-            humidity: s.data?.hu != null ? parseFloat((s.data.hu / 100).toFixed(2)) : null,
-        })),
-        [samples],
-    );
-
-    if (chartData.length === 0) {
+    if (samples.length === 0) {
         return (
             <Box sx={{py: 4, textAlign: "center"}}>
-                <Typography color="text.secondary">No data to chart.</Typography>
+                <Typography color="text.secondary">No data for this period.</Typography>
             </Box>
         );
     }
 
     return (
-        <ResponsiveContainer width="100%" height={260}>
-            <ComposedChart data={chartData} margin={{top: 8, right: hasHumidity ? 40 : 16, left: 0, bottom: 4}}>
+        <ResponsiveContainer width="100%" height={280}>
+            <ComposedChart data={samples} margin={{top: 8, right: hasHumidity ? 40 : 16, left: 0, bottom: 4}}>
                 <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider}/>
                 <XAxis
                     dataKey="time"
-                    tickFormatter={tickTime}
+                    tickFormatter={(ts) => tickFormatter(ts, period)}
                     tick={{fontSize: 11, fill: theme.palette.text.secondary}}
                     tickLine={false}
                     axisLine={{stroke: theme.palette.divider}}
+                    minTickGap={40}
                 />
                 <YAxis
                     yAxisId="temp"
@@ -98,18 +109,18 @@ const SensorChart = ({samples, hasHumidity}) => {
                     }}
                     labelFormatter={(ts) => formatTime(ts)}
                     formatter={(value, key) =>
-                        key === "temp"
+                        key === "temperature"
                             ? [`${value} °C`, "Temperature"]
                             : [`${value} %`, "Humidity"]
                     }
                 />
                 <Legend
-                    formatter={(key) => key === "temp" ? "Temperature" : "Humidity"}
+                    formatter={(key) => key === "temperature" ? "Temperature" : "Humidity"}
                     wrapperStyle={{fontSize: 12}}
                 />
                 <Line
                     yAxisId="temp"
-                    dataKey="temp"
+                    dataKey="temperature"
                     type="monotone"
                     stroke={theme.palette.error.main}
                     strokeWidth={2}
@@ -132,50 +143,98 @@ const SensorChart = ({samples, hasHumidity}) => {
     );
 };
 
-const SamplesFilter = ({nodeId, limit, beginTime, endTime}) => {
-    const [begin, setBegin] = useState(beginTime ? dayjs.unix(beginTime) : null);
-    const [end,   setEnd]   = useState(endTime   ? dayjs.unix(endTime)   : null);
+const PeriodBar = ({nodeId, activePeriod, beginTime, endTime}) => {
+    const [showCustom, setShowCustom] = useState(activePeriod === "custom");
+    const [begin, setBegin]           = useState(beginTime ? dayjs.unix(beginTime) : null);
+    const [end,   setEnd]             = useState(endTime   ? dayjs.unix(endTime)   : null);
 
-    const apply = () => {
-        const params = {offset: 0};
+    const navigate = (period) => {
+        if (period === "custom") {
+            setShowCustom(true);
+            return;
+        }
+        setShowCustom(false);
+        router.visit(route("monitoring.nodes.show", nodeId), {data: {period}});
+    };
+
+    const applyCustom = () => {
+        const params = {period: "custom"};
         if (begin) params.beginTime = begin.unix();
         if (end)   params.endTime   = end.unix();
-        params.limit = (begin || end) ? 5000 : 50;
         router.visit(route("monitoring.nodes.show", nodeId), {data: params});
     };
 
-    const reset = () => {
-        setBegin(null);
-        setEnd(null);
-        router.visit(route("monitoring.nodes.show", nodeId), {data: {limit: 50, offset: 0}});
+    return (
+        <Box sx={{mb: 2}}>
+            <ButtonGroup size="small" variant="outlined" sx={{mb: showCustom ? 1.5 : 0}}>
+                {PERIODS.map(({key, label, icon}) => (
+                    <Button
+                        key={key}
+                        startIcon={icon}
+                        variant={activePeriod === key ? "contained" : "outlined"}
+                        onClick={() => navigate(key)}
+                    >
+                        {label}
+                    </Button>
+                ))}
+            </ButtonGroup>
+
+            {showCustom && (
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <Box sx={{
+                        display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap",
+                        p: 1.5, bgcolor: "action.hover", borderRadius: 1,
+                    }}>
+                        <DateTimePicker
+                            label="From"
+                            value={begin}
+                            onChange={setBegin}
+                            maxDateTime={end ?? undefined}
+                            slotProps={{textField: {size: "small", sx: {minWidth: 200}}}}
+                        />
+                        <DateTimePicker
+                            label="To"
+                            value={end}
+                            onChange={setEnd}
+                            minDateTime={begin ?? undefined}
+                            slotProps={{textField: {size: "small", sx: {minWidth: 200}}}}
+                        />
+                        <Button variant="contained" size="small" onClick={applyCustom}>Apply</Button>
+                    </Box>
+                </LocalizationProvider>
+            )}
+        </Box>
+    );
+};
+
+const FetchButton = ({nodeId}) => {
+    const [anchor, setAnchor] = useState(null);
+
+    const fetch = (period) => {
+        setAnchor(null);
+        router.post(route("monitoring.nodes.fetch", nodeId), {period});
     };
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Box sx={{
-                display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap",
-                p: 1.5, bgcolor: "action.hover", borderRadius: 1, mb: 2,
-            }}>
-                <DateTimePicker
-                    label="From"
-                    value={begin}
-                    onChange={setBegin}
-                    maxDateTime={end ?? undefined}
-                    slotProps={{textField: {size: "small", sx: {minWidth: 200}}}}
-                />
-                <DateTimePicker
-                    label="To"
-                    value={end}
-                    onChange={setEnd}
-                    minDateTime={begin ?? undefined}
-                    slotProps={{textField: {size: "small", sx: {minWidth: 200}}}}
-                />
-                <Button variant="contained" size="small" onClick={apply}>Apply</Button>
-                {(begin || end) && (
-                    <Button variant="outlined" size="small" onClick={reset}>Reset</Button>
-                )}
-            </Box>
-        </LocalizationProvider>
+        <>
+            <ButtonGroup variant="contained" size="small">
+                <Button startIcon={<SyncIcon/>} onClick={() => fetch("today")}>
+                    Fetch Now
+                </Button>
+                <Button size="small" sx={{px: 0.5, minWidth: 28}} onClick={(e) => setAnchor(e.currentTarget)}>
+                    <ArrowDropDownIcon fontSize="small"/>
+                </Button>
+            </ButtonGroup>
+
+            <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)}>
+                {PERIODS.filter(p => p.key !== "custom").map(({key, label, icon}) => (
+                    <MenuItem key={key} onClick={() => fetch(key)} dense>
+                        <ListItemIcon>{icon}</ListItemIcon>
+                        {label}
+                    </MenuItem>
+                ))}
+            </Menu>
+        </>
     );
 };
 
@@ -220,16 +279,13 @@ const SectionForm = ({nodeId, sections, sectionId, notes}) => {
 };
 
 const Show = () => {
-    const {node, samples = [], sections = [], limit, offset, beginTime, endTime, success, status} = usePage().props;
+    const {node, samples = [], sections = [], period = "today", beginTime, endTime, success, status} = usePage().props;
 
     const hasHumidity = node.info?.humidity !== undefined
-        || samples.some((s) => s.data?.hu != null);
+        || samples.some((s) => s.humidity != null);
 
     const exportUrl = () => {
-        const params = new URLSearchParams({
-            limit:  beginTime || endTime ? 5000 : limit,
-            offset: 0,
-        });
+        const params = new URLSearchParams({period});
         if (beginTime) params.set("beginTime", beginTime);
         if (endTime)   params.set("endTime",   endTime);
         return route("monitoring.nodes.samples.export", node.nodeId) + "?" + params.toString();
@@ -240,15 +296,8 @@ const Show = () => {
             <PageHeader
                 title={node.name || node.nodeId}
                 actions={
-                    <Box sx={{display: "flex", gap: 1}}>
-                        <Button
-                            startIcon={<SyncIcon/>}
-                            variant="contained"
-                            size="small"
-                            onClick={() => router.post(route("monitoring.nodes.fetch", node.nodeId))}
-                        >
-                            Fetch Now
-                        </Button>
+                    <Box sx={{display: "flex", gap: 1, alignItems: "center"}}>
+                        <FetchButton nodeId={node.nodeId}/>
                         <Button startIcon={<ArrowBackIcon/>} variant="outlined" size="small"
                             onClick={() => router.visit(route("monitoring.nodes.index"))}>
                             All Nodes
@@ -281,9 +330,7 @@ const Show = () => {
                         <CardContent>
                             <Grid container spacing={0}>
                                 <Grid item xs={6}><Field label="Node ID">{node.nodeId}</Field></Grid>
-                                <Grid item xs={6}><Field label="Type">{node.type}</Field></Grid>
                                 <Grid item xs={6}><Field label="Model">{node.model}</Field></Grid>
-                                <Grid item xs={6}><Field label="Thing Name">{node.thingName}</Field></Grid>
                             </Grid>
                             <Divider sx={{my: 1}}/>
                             <Box sx={{display: "flex", gap: 3}}>
@@ -333,11 +380,11 @@ const Show = () => {
                     </Card>
                 </Grid>
 
-                {/* Right: filter + chart + download */}
+                {/* Right: period filter + chart + download */}
                 <Grid item xs={12} md={8}>
-                    <SamplesFilter
+                    <PeriodBar
                         nodeId={node.nodeId}
-                        limit={limit}
+                        activePeriod={period}
                         beginTime={beginTime}
                         endTime={endTime}
                     />
@@ -352,6 +399,7 @@ const Show = () => {
                                         <Chip icon={<WaterDropIcon fontSize="small"/>}
                                             label="Humidity" size="small" color="primary" variant="outlined"/>
                                     )}
+                                    <Chip label={`${samples.length} readings`} size="small" variant="outlined"/>
                                 </Box>
                             }
                             action={
@@ -369,7 +417,7 @@ const Show = () => {
                             }
                         />
                         <CardContent>
-                            <SensorChart samples={samples} hasHumidity={hasHumidity}/>
+                            <SensorChart samples={samples} hasHumidity={hasHumidity} period={period}/>
                         </CardContent>
                     </Card>
                 </Grid>

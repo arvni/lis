@@ -19,33 +19,53 @@ class FetchNodeSamplesJob implements ShouldQueue
     public int $tries   = 3;
     public array $backoff = [15, 60, 120];
 
-    public function __construct(public readonly string $nodeId) {}
+    public function __construct(
+        public readonly string $nodeId,
+        public ?int $forceBeginTime = null,
+        public ?int $forceEndTime   = null,
+    ) {}
 
     public function handle(MocreoService $mocreoService): void
     {
         $intervalSeconds = $this->intervalSeconds();
 
-        $lastSample = MonitoringSample::where('node_id', $this->nodeId)
-            ->orderByDesc('sampled_at')
-            ->first();
+        if ($this->forceBeginTime !== null) {
+            $beginTime = $this->forceBeginTime;
+            $endTime   = $this->forceEndTime ?? now()->timestamp;
+        } else {
+            $lastSample = MonitoringSample::where('node_id', $this->nodeId)
+                ->orderByDesc('sampled_at')
+                ->first();
 
-        // Start from the point where the next qualifying sample should begin
-        $beginTime = $lastSample
-            ? $lastSample->sampled_at->timestamp + $intervalSeconds
-            : now()->subSeconds($intervalSeconds)->timestamp;
+            // Start from the point where the next qualifying sample should begin
+            $beginTime = $lastSample
+                ? $lastSample->sampled_at->timestamp + $intervalSeconds
+                : now()->subSeconds($intervalSeconds)->timestamp;
 
-        // Nothing due yet
-        if ($beginTime > now()->timestamp) {
-            return;
+            // Nothing due yet
+            if ($beginTime > now()->timestamp) {
+                return;
+            }
+
+            $endTime = now()->timestamp;
         }
 
-        $samples = $mocreoService->getSamples(
-            nodeId:    $this->nodeId,
-            limit:     200,
-            offset:    0,
-            beginTime: $beginTime,
-            endTime:   now()->timestamp,
-        );
+        // Paginate through the API until a page comes back smaller than the page size
+        $pageSize = 200;
+        $offset   = 0;
+        $samples  = [];
+
+        do {
+            $page = $mocreoService->getSamples(
+                nodeId:    $this->nodeId,
+                limit:     $pageSize,
+                offset:    $offset,
+                beginTime: $beginTime,
+                endTime:   $endTime,
+            );
+            $samples = array_merge($samples, $page);
+            $offset += $pageSize;
+        } while (count($page) === $pageSize);
 
         if (empty($samples)) {
             return;
@@ -54,7 +74,7 @@ class FetchNodeSamplesJob implements ShouldQueue
         // API returns newest-first; process oldest-first so our interval check is sequential
         $samples = array_reverse($samples);
 
-        $lastSavedTimestamp = $lastSample?->sampled_at?->timestamp ?? 0;
+        $lastSavedTimestamp = isset($lastSample) ? ($lastSample->sampled_at->timestamp ?? 0) : 0;
         $saved = 0;
 
         foreach ($samples as $sample) {

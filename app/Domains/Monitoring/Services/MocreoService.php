@@ -2,6 +2,8 @@
 
 namespace App\Domains\Monitoring\Services;
 
+use App\Domains\Setting\Models\Setting;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -27,11 +29,20 @@ class MocreoService
 
     private function doAuthenticate(): string
     {
-        $username = config('services.mocreo.username');
-        $password = config('services.mocreo.password');
+        $usernameSetting = Setting::where('key', 'mocreoUsername')->first();
+        $passwordSetting = Setting::where('key', 'mocreoPassword')->first();
+
+        $username = $usernameSetting?->value['value'] ?? null;
+        $encryptedPassword = $passwordSetting?->value['value'] ?? null;
+
+        try {
+            $password = $encryptedPassword ? decrypt($encryptedPassword) : null;
+        } catch (DecryptException) {
+            throw new \RuntimeException('Mocreo password could not be decrypted. Re-save the password in Settings.');
+        }
 
         if (!$username || !$password) {
-            throw new \RuntimeException('Mocreo credentials not configured. Set MOCREO_USERNAME and MOCREO_PASSWORD in .env');
+            throw new \RuntimeException('Mocreo credentials not configured. Set mocreoUsername and mocreoPassword in Settings.');
         }
 
         $res = Http::post(self::BASE_URL . '/oauth/token', [

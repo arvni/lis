@@ -21,6 +21,21 @@ import BusinessIcon from '@mui/icons-material/Business';
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import {Analytics, AttachMoney, FactCheck, Payments, Publish, BugReport, Inventory as InventoryIcon} from "@mui/icons-material";
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import CategoryIcon from '@mui/icons-material/Category';
+import WarehouseIcon from '@mui/icons-material/Warehouse';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import EventBusyIcon from '@mui/icons-material/EventBusy';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import StoreIcon from '@mui/icons-material/Store';
+import StraightenIcon from '@mui/icons-material/Straighten';
+import SensorsIcon from '@mui/icons-material/Sensors';
+import GroupWorkIcon from '@mui/icons-material/GroupWork';
+import RequestPageIcon from '@mui/icons-material/RequestPage';
+import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 import {PercentDiamond, Stethoscope as Doctor, Hospital, ClipboardCheck, Truck, FlaskConical, Package, ShoppingCart, Thermometer} from "lucide-react";
 
 export const refactorRoute = (addr) => {
@@ -192,61 +207,61 @@ const routes = (sections = []) => {
                     title: "Items",
                     route: "inventory.items.index",
                     permission: 'Inventory.Items.List Items',
-                    icon: null,
+                    icon: <CategoryIcon fontSize="small"/>,
                 },
                 {
                     title: "Current Stock",
                     route: "inventory.stock.index",
                     permission: 'Inventory.Stock.View Stock',
-                    icon: null,
+                    icon: <WarehouseIcon fontSize="small"/>,
                 },
                 {
                     title: "Transactions",
                     route: "inventory.transactions.index",
                     permission: 'Inventory.Transactions.List Transactions',
-                    icon: null,
+                    icon: <SwapHorizIcon fontSize="small"/>,
                 },
                 {
                     title: "Purchase Requests",
                     route: "inventory.purchase-requests.index",
                     permission: 'Inventory.PurchaseRequests.List Purchase Requests',
-                    icon: null,
+                    icon: <AddShoppingCartIcon fontSize="small"/>,
                 },
                 {
                     title: "Reorder Alerts",
                     route: "inventory.reorder-alerts.index",
                     permission: 'Inventory.ReorderAlerts.View Reorder Alerts',
-                    icon: null,
+                    icon: <NotificationsActiveIcon fontSize="small"/>,
                 },
                 {
                     title: "Expiry Dashboard",
                     route: "inventory.expiry.index",
                     permission: 'Inventory.Transactions.List Transactions',
-                    icon: null,
+                    icon: <EventBusyIcon fontSize="small"/>,
                 },
                 {
                     title: "Reports",
                     route: "inventory.reports.index",
                     permission: 'Inventory.Transactions.List Transactions',
-                    icon: null,
+                    icon: <AssessmentIcon fontSize="small"/>,
                 },
                 {
                     title: "Suppliers",
                     route: "inventory.suppliers.index",
                     permission: 'Inventory.Suppliers.List Suppliers',
-                    icon: null,
+                    icon: <LocalShippingIcon fontSize="small"/>,
                 },
                 {
                     title: "Stores",
                     route: "inventory.stores.index",
                     permission: 'Inventory.Stores.List Stores',
-                    icon: null,
+                    icon: <StoreIcon fontSize="small"/>,
                 },
                 {
                     title: "Units",
                     route: "inventory.units.index",
                     permission: null,
-                    icon: null,
+                    icon: <StraightenIcon fontSize="small"/>,
                 },
             ]
         },
@@ -259,7 +274,7 @@ const routes = (sections = []) => {
                     title: "Sensor Nodes",
                     route: "monitoring.nodes.index",
                     permission: 'Monitoring.Nodes.List Nodes',
-                    icon: null,
+                    icon: <SensorsIcon fontSize="small"/>,
                 },
             ]
         },
@@ -314,25 +329,25 @@ const routes = (sections = []) => {
                     title: "Test Groups",
                     route: "testGroups.index",
                     permission: 'Advance Settings.Test Groups.List Test Groups',
-                    icon: <WorkspacesIcon/>
+                    icon: <GroupWorkIcon/>
                 },
                 {
                     title: "Request Forms",
                     route: "requestForms.index",
                     permission: 'Advance Settings.Request Form.List Request Forms',
-                    icon: <WorkspacesIcon/>
+                    icon: <RequestPageIcon/>
                 },
                 {
                     title: "Consent Forms",
                     route: "consentForms.index",
                     permission: 'Advance Settings.Consent Form.List Consent Forms',
-                    icon: <WorkspacesIcon/>
+                    icon: <HistoryEduIcon/>
                 },
                 {
                     title: "Instruction",
                     route: "instructions.index",
                     permission: 'Advance Settings.Instruction.List Instructions',
-                    icon: <WorkspacesIcon/>
+                    icon: <MenuBookIcon/>
                 },
                 {
                     title: "Report Templates",

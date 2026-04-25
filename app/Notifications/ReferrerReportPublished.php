@@ -6,12 +6,13 @@ use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Models\Acceptance;
 use Exception;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
-class ReferrerReportPublished extends Notification
+class ReferrerReportPublished extends Notification implements ShouldQueue
 {
     use Queueable;
 

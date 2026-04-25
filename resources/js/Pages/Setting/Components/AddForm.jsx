@@ -27,6 +27,7 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CodeIcon from "@mui/icons-material/Code";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import LockIcon from "@mui/icons-material/Lock";
 import SelectSearch from "@/Components/SelectSearch.jsx";
 
 const AddForm = ({value, onChange, submit, open, setOpen, title, loading, reset, id}) => {
@@ -50,6 +51,8 @@ const AddForm = ({value, onChange, submit, open, setOpen, title, loading, reset,
                 return <AttachFileIcon color="primary"/>;
             case "html":
                 return <CodeIcon color="primary"/>;
+            case "password":
+                return <LockIcon color="primary"/>;
             default:
                 return <TextFieldsIcon color="primary"/>;
         }
@@ -66,6 +69,8 @@ const AddForm = ({value, onChange, submit, open, setOpen, title, loading, reset,
                 return "Edit HTML content";
             case "selectSearch":
                 return "Select an option";
+            case "password":
+                return "Enter new password to update (leave blank to keep current)";
             default:
                 return "Enter text value";
         }
@@ -194,6 +199,35 @@ const AddForm = ({value, onChange, submit, open, setOpen, title, loading, reset,
                                       fullWidth
                                       label="Select "
                                       url={value.url}/>
+                    </Box>
+                );
+
+            case "password":
+                return (
+                    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                        <Chip
+                            icon={<LockIcon/>}
+                            label="Password"
+                            color="primary"
+                            variant="outlined"
+                            sx={{alignSelf: 'center', mb: 2}}
+                        />
+                        <TextField
+                            fullWidth
+                            type="password"
+                            variant="outlined"
+                            value={value?.value || ''}
+                            onChange={handleChange}
+                            placeholder="Enter new password..."
+                            slotProps={{
+                                Input: {
+                                    sx: {
+                                        borderRadius: 2,
+                                        '&:hover': {boxShadow: '0 2px 6px rgba(0,0,0,0.08)'}
+                                    }
+                                }
+                            }}
+                        />
                     </Box>
                 );
 

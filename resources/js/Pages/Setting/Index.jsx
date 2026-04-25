@@ -75,6 +75,14 @@ const renderValue = (value) => {
             );
         case "selectSearch":
             return value?.value?.name;
+        case "password":
+            return (
+                <Chip
+                    label="••••••••"
+                    variant="outlined"
+                    size="small"
+                />
+            );
         default:
             return (
                 <Chip

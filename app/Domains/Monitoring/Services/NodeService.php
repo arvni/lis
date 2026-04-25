@@ -3,6 +3,8 @@
 namespace App\Domains\Monitoring\Services;
 
 use App\Domains\Monitoring\Models\MonitoringNode;
+use App\Domains\Monitoring\Models\MonitoringSample;
+use Carbon\Carbon;
 
 class NodeService
 {
@@ -10,29 +12,40 @@ class NodeService
 
     public function getNodes(): array
     {
-        $apiNodes = $this->mocreoService->getNodes();
-        $local    = MonitoringNode::with('section')->get()->keyBy('node_id');
-
-        return collect($apiNodes)->map(fn($n) => array_merge($n, [
-            'id'           => $n['nodeId'],
-            'local_id'     => $local->get($n['nodeId'])?->id,
-            'section_id'   => $local->get($n['nodeId'])?->section_id,
-            'section_name' => $local->get($n['nodeId'])?->section?->name,
-            'notes'        => $local->get($n['nodeId'])?->notes,
-        ]))->values()->toArray();
+        return MonitoringNode::with('section')->get()->map(fn($node) => [
+            'id'           => $node->id,
+            'nodeId'       => $node->node_id,
+            'name'         => $node->name,
+            'model'        => $node->model,
+            'info'         => $node->info,
+            'onlined'      => $node->onlined,
+            'signalLevel'  => $node->signal_level,
+            'batteryLevel' => $node->battery_level,
+            'local_id'     => $node->id,
+            'section_id'   => $node->section_id,
+            'section_name' => $node->section?->name,
+            'notes'        => $node->notes,
+        ])->values()->toArray();
     }
 
     public function getNode(string $nodeId): array
     {
-        $apiNode = $this->mocreoService->getNode($nodeId);
-        $local   = MonitoringNode::with('section')->firstOrCreate(['node_id' => $nodeId]);
+        $node = MonitoringNode::with('section')->firstOrCreate(['node_id' => $nodeId]);
 
-        return array_merge($apiNode, [
-            'local_id'     => $local->id,
-            'section_id'   => $local->section_id,
-            'section_name' => $local->section?->name,
-            'notes'        => $local->notes,
-        ]);
+        return [
+            'id'           => $node->id,
+            'nodeId'       => $node->node_id,
+            'name'         => $node->name,
+            'model'        => $node->model,
+            'info'         => $node->info,
+            'onlined'      => $node->onlined,
+            'signalLevel'  => $node->signal_level,
+            'batteryLevel' => $node->battery_level,
+            'local_id'     => $node->id,
+            'section_id'   => $node->section_id,
+            'section_name' => $node->section?->name,
+            'notes'        => $node->notes,
+        ];
     }
 
     public function getSamples(
@@ -42,7 +55,22 @@ class NodeService
         ?int   $beginTime,
         ?int   $endTime,
     ): array {
-        return $this->mocreoService->getSamples($nodeId, $limit, $offset, $beginTime, $endTime);
+        $query = MonitoringSample::where('node_id', $nodeId)
+            ->orderBy('sampled_at');
+
+        if ($beginTime !== null) {
+            $query->where('sampled_at', '>=', Carbon::createFromTimestamp($beginTime));
+        }
+        if ($endTime !== null) {
+            $query->where('sampled_at', '<=', Carbon::createFromTimestamp($endTime));
+        }
+
+        return $query->offset($offset)->limit($limit)->get()
+            ->map(fn($s) => [
+                'time'        => $s->sampled_at->timestamp,
+                'temperature' => (float) $s->temperature,
+                'humidity'    => $s->humidity !== null ? (float) $s->humidity : null,
+            ])->toArray();
     }
 
     public function updateLocalNode(string $nodeId, array $data): MonitoringNode

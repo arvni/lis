@@ -8,7 +8,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MonitoringNode extends Model
 {
-    protected $fillable = ['node_id', 'section_id', 'notes'];
+    protected $fillable = [
+        'node_id', 'section_id', 'notes',
+        'name', 'model', 'info', 'onlined', 'signal_level', 'battery_level',
+    ];
+
+    protected $casts = [
+        'info'    => 'array',
+        'onlined' => 'boolean',
+    ];
 
     public function section(): BelongsTo
     {

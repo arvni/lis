@@ -20,10 +20,15 @@ class SettingService
     public function updateSetting(Setting $setting, $settingData): Setting
     {
         $value = $settingData["value"];
+        if ($setting->value["type"] === "password" && ($value["value"] === '' || $value["value"] === null)) {
+            return $setting;
+        }
+
         $v = match ($setting->value["type"]) {
-            "image" => (is_string($value["value"]) ? $value["value"] : route("documents.show", $value["value"]["id"])),
-            "file" => [...$value["value"], "url" => route("documents.show", $value["value"]["id"])],
-            default => $value["value"],
+            "image"    => (is_string($value["value"]) ? $value["value"] : route("documents.show", $value["value"]["id"])),
+            "file"     => [...$value["value"], "url" => route("documents.show", $value["value"]["id"])],
+            "password" => encrypt($value["value"]),
+            default    => $value["value"],
         };
 
         return $this->settingRepository->updateSetting($setting, $v);

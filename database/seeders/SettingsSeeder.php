@@ -79,6 +79,18 @@ class SettingsSeeder extends Seeder
                 "key"   => "monitoringSampleInterval",
                 "class" => "Monitoring",
                 "value" => ["value" => "10", "type" => "number", "min" => 1]
+            ],
+            [
+                "title" => "Mocreo Username",
+                "key"   => "mocreoUsername",
+                "class" => "Monitoring",
+                "value" => ["value" => env('MOCREO_USERNAME', ''), "type" => "text"]
+            ],
+            [
+                "title" => "Mocreo Password",
+                "key"   => "mocreoPassword",
+                "class" => "Monitoring",
+                "value" => ["value" => encrypt(env('MOCREO_PASSWORD', '')), "type" => "password"]
             ]
         ];
         foreach ($settings as $settingData) {
