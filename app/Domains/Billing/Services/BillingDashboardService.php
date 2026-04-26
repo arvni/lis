@@ -237,7 +237,9 @@ class BillingDashboardService
                                ELSE pt.non_inv_total / pt.distinct_tests END), 3) AS non_invoiced_income
             ')
             ->groupBy('tests.id', 'tests.name')
-            ->orderByRaw('(invoiced_income + non_invoiced_income) DESC')
+            ->orderByRaw('SUM(CASE WHEN acceptance_items.panel_id IS NULL
+                              THEN acceptance_items.price - acceptance_items.discount
+                              ELSE (pt.inv_total + pt.non_inv_total) / pt.distinct_tests END) DESC')
             ->limit(25)
             ->get();
 
@@ -267,7 +269,7 @@ class BillingDashboardService
                                THEN acceptance_items.price - acceptance_items.discount ELSE 0 END),3) AS non_invoiced_income
             ")
             ->groupBy('acceptances.referrer_id', 'referrers.fullName')
-            ->orderByRaw('(invoiced_income + non_invoiced_income) DESC')
+            ->orderByRaw('SUM(acceptance_items.price - acceptance_items.discount) DESC')
             ->limit(20)
             ->get();
 
