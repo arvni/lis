@@ -56,8 +56,8 @@ class TATService
                 'acceptance:id,priority,referenceCode',
                 'acceptance.patient:id,fullName,idNo',
                 'latestState.section:id,name',
-                'test:id,name',
-                'method:id,name,turnaround_time',
+                'test' => fn($q) => $q->select('tests.id', 'tests.name'),
+                'method' => fn($q) => $q->select('methods.id', 'methods.name', 'methods.turnaround_time'),
             ])
             ->whereDoesntHave('report')
             ->whereHas('acceptance');
@@ -128,7 +128,7 @@ class TATService
         $recentQuery = AcceptanceItem::query()
             ->whereHas('report')
             ->whereBetween('created_at', [Carbon::now()->subDays(30), Carbon::now()])
-            ->with('method:id,turnaround_time');
+            ->with(['method' => fn($q) => $q->select('methods.id', 'methods.turnaround_time')]);
 
         $recentItems = $recentQuery->get();
         $totalRecent = $recentItems->count();
