@@ -122,20 +122,30 @@ const Dashboard = () => {
         referrer_id: serverFilters?.referrer_id ?? '',
         has_invoice: serverFilters?.has_invoice ?? '',
         payment_method: serverFilters?.payment_method ?? '',
+        test_ids: [],
     });
     const [referrerObj, setReferrerObj] = useState(null);
+    const [testObjs, setTestObjs] = useState([]);
 
     const [chartsData, setChartsData] = useState(null);
     const [chartsLoading, setChartsLoading] = useState(true);
     const abortRef = useRef(null);
 
+    // Remove empty / empty-array params before sending
+    const cleanParams = (obj) => {
+        const p = {...obj};
+        Object.keys(p).forEach(k => {
+            if (p[k] === '' || p[k] == null) delete p[k];
+            if (Array.isArray(p[k]) && p[k].length === 0) delete p[k];
+        });
+        return p;
+    };
+
     const fetchCharts = useCallback((f = filters) => {
         abortRef.current?.abort();
         abortRef.current = new AbortController();
         setChartsLoading(true);
-        const params = {...f};
-        Object.keys(params).forEach(k => (params[k] === '' || params[k] == null) && delete params[k]);
-        axios.get(route('api.billing.dashboard.data'), {params, signal: abortRef.current.signal})
+        axios.get(route('api.billing.dashboard.data'), {params: cleanParams(f), signal: abortRef.current.signal})
             .then(r => { setChartsData(r.data); setChartsLoading(false); })
             .catch(e => { if (!axios.isCancel(e)) setChartsLoading(false); });
     }, []);
@@ -155,11 +165,11 @@ const Dashboard = () => {
     const [trendFilters, setTrendFilters] = useState({
         t_has_invoice: '',
         t_referrer_id: '',
-        t_test_id: '',
+        t_test_id: [],   // array of IDs
         t_months: '12',
     });
     const [trendReferrerObj, setTrendReferrerObj] = useState(null);
-    const [trendTestObj, setTrendTestObj] = useState(null);
+    const [trendTestObjs, setTrendTestObjs] = useState([]);  // array of {id,name}
     const [trendData, setTrendData] = useState([]);
     const [trendLoading, setTrendLoading] = useState(true);
     const trendAbortRef = useRef(null);
@@ -168,9 +178,7 @@ const Dashboard = () => {
         trendAbortRef.current?.abort();
         trendAbortRef.current = new AbortController();
         setTrendLoading(true);
-        const params = {...f};
-        Object.keys(params).forEach(k => (params[k] === '' || params[k] == null) && delete params[k]);
-        axios.get(route('api.billing.dashboard.trend'), {params, signal: trendAbortRef.current.signal})
+        axios.get(route('api.billing.dashboard.trend'), {params: cleanParams(f), signal: trendAbortRef.current.signal})
             .then(r => { setTrendData(r.data); setTrendLoading(false); })
             .catch(e => { if (!axios.isCancel(e)) setTrendLoading(false); });
     }, []);
@@ -284,6 +292,22 @@ const Dashboard = () => {
                                     <MenuItem value="credit">Credit</MenuItem>
                                 </Select>
                             </FormControl>
+                        </Grid>
+                        <Grid size={{xs: 12, sm: 6, md: 6}}>
+                            <SelectSearch
+                                value={testObjs}
+                                multiple
+                                onChange={(e) => {
+                                    const objs = e.target.value ?? [];
+                                    setTestObjs(objs);
+                                    applyFilters({test_ids: objs.map(o => o.id)});
+                                }}
+                                name="test_ids"
+                                label="Tests (leave empty for all)"
+                                url={route('api.tests.list')}
+                                fullWidth
+                                size="small"
+                            />
                         </Grid>
                     </Grid>
                 </Paper>
@@ -470,16 +494,17 @@ const Dashboard = () => {
                                     size="small"
                                 />
                             </Grid>
-                            <Grid size={{xs: 12, sm: 6, md: 3}}>
+                            <Grid size={{xs: 12, sm: 6, md: 6}}>
                                 <SelectSearch
-                                    value={trendTestObj}
+                                    value={trendTestObjs}
+                                    multiple
                                     onChange={(e) => {
-                                        const obj = e.target.value;
-                                        setTrendTestObj(obj ?? null);
-                                        applyTrendFilters({t_test_id: obj?.id ?? ''});
+                                        const objs = e.target.value ?? [];
+                                        setTrendTestObjs(objs);
+                                        applyTrendFilters({t_test_id: objs.map(o => o.id)});
                                     }}
                                     name="t_test"
-                                    label="Test"
+                                    label="Tests (leave empty for all)"
                                     url={route('api.tests.list')}
                                     fullWidth
                                     size="small"

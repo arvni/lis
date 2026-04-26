@@ -55,6 +55,16 @@ class BillingDashboardService
             }
         }
 
+        // test_ids: one or more test IDs (uses whereExists to avoid JOIN conflicts)
+        $testIds = array_filter((array) ($filters['test_ids'] ?? []));
+        if (!empty($testIds)) {
+            $q->whereExists(fn($sub) => $sub
+                ->from('method_tests')
+                ->whereColumn('method_tests.id', 'acceptance_items.method_test_id')
+                ->whereIn('method_tests.test_id', $testIds)
+            );
+        }
+
         return $q;
     }
 
@@ -129,9 +139,13 @@ class BillingDashboardService
             $q->where('acceptances.referrer_id', $filters['t_referrer_id']);
         }
 
-        if (!empty($filters['t_test_id'])) {
-            $q->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
-              ->where('method_tests.test_id', $filters['t_test_id']);
+        $trendTestIds = array_filter((array) ($filters['t_test_id'] ?? []));
+        if (!empty($trendTestIds)) {
+            $q->whereExists(fn($sub) => $sub
+                ->from('method_tests')
+                ->whereColumn('method_tests.id', 'acceptance_items.method_test_id')
+                ->whereIn('method_tests.test_id', $trendTestIds)
+            );
         }
 
         $rows = $q->selectRaw("
