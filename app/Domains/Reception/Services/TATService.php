@@ -100,7 +100,7 @@ class TATService
                 'test'   => fn($q) => $q->select('tests.id', 'tests.name'),
                 'method' => fn($q) => $q->select('methods.id', 'methods.name', 'methods.turnaround_time'),
             ])
-            // Sort: STAT first, then urgent, then routine; then oldest first
+            ->select('acceptance_items.*')
             ->selectSub(
                 DB::table('acceptances')
                     ->whereColumn('id', 'acceptance_items.acceptance_id')
