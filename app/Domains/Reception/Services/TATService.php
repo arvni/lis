@@ -5,6 +5,7 @@ namespace App\Domains\Reception\Services;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
+use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -44,80 +45,90 @@ class TATService
         return $count;
     }
 
-    // ── Shared acceptance constraint ──────────────────────────────────────────
-
-    private function baseAcceptanceConstraint(): \Closure
-    {
-        return fn($q) => $q
-            ->where('waiting_for_pooling', false)
-            ->where('status', '!=', AcceptanceStatus::REPORTED->value);
-    }
-
-    // ── Base Eloquent query (no eager loads — cheap for count) ────────────────
+    // ── Base acceptance query ─────────────────────────────────────────────────
+    // An acceptance is "active" for TAT purposes when:
+    //   • not waiting for pooling
+    //   • not in reported / cancelled status
+    //   • has at least one unreported non-SERVICE item
 
     private function buildBaseQuery(array $filters): Builder
     {
-        $query = AcceptanceItem::query()
-            ->whereDoesntHave('report')
-            ->whereHas('acceptance', $this->baseAcceptanceConstraint())
-            ->whereHas('test', fn($q) => $q->where('type', '!=', TestType::SERVICE->value));
+        $query = Acceptance::query()
+            ->where('waiting_for_pooling', false)
+            ->whereNotIn('status', [
+                AcceptanceStatus::REPORTED->value,
+                AcceptanceStatus::CANCELLED->value,
+            ])
+            ->whereHas('acceptanceItems', fn($q) => $q
+                ->whereDoesntHave('report')
+                ->whereHas('test', fn($tq) => $tq->where('type', '!=', TestType::SERVICE->value))
+            );
 
         if (!empty($filters['priority'])) {
-            $query->whereHas('acceptance', fn($q) => $q->where('priority', $filters['priority']));
+            $query->where('priority', $filters['priority']);
         }
         if (!empty($filters['section_id'])) {
-            $query->whereHas('latestState', fn($q) => $q->where('section_id', $filters['section_id']));
+            $query->whereHas('acceptanceItemStates', fn($q) => $q->where('section_id', $filters['section_id']));
         }
         if (!empty($filters['date_from'])) {
-            $query->whereDate('acceptance_items.created_at', '>=', $filters['date_from']);
+            $query->whereDate('created_at', '>=', $filters['date_from']);
         }
         if (!empty($filters['date_to'])) {
-            $query->whereDate('acceptance_items.created_at', '<=', $filters['date_to']);
+            $query->whereDate('created_at', '<=', $filters['date_to']);
         }
+
         return $query;
     }
 
-    // ── Count only (used by the initial page render) ──────────────────────────
+    // ── Eager-load spec for active items per acceptance ───────────────────────
+
+    private function activeItemsWith(): array
+    {
+        return [
+            'acceptanceItems' => fn($q) => $q
+                ->whereDoesntHave('report')
+                ->whereHas('test', fn($tq) => $tq->where('type', '!=', TestType::SERVICE->value))
+                ->with([
+                    'test'        => fn($tq) => $tq->select('tests.id', 'tests.name'),
+                    'method'      => fn($mq) => $mq->select('methods.id', 'methods.name', 'methods.turnaround_time'),
+                    'latestState' => fn($sq) => $sq->with('section:id,name'),
+                ]),
+        ];
+    }
+
+    // ── Count only ────────────────────────────────────────────────────────────
 
     public function getItemsCount(array $filters): int
     {
         return $this->buildBaseQuery($filters)->count();
     }
 
-    // ── Paginated items (used by the API endpoint) ────────────────────────────
+    // ── Paginated (API) ───────────────────────────────────────────────────────
 
     public function getItemsPaginated(array $filters, int $page = 1, int $perPage = 20): array
     {
         $base = $this->buildBaseQuery($filters);
-
         $total = $base->count();
 
-        $items = (clone $base)
-            ->with([
-                'acceptance:id,priority,referenceCode',
-                'acceptance.patient:id,fullName,idNo',
-                'latestState.section:id,name',
-                'test'   => fn($q) => $q->select('tests.id', 'tests.name'),
-                'method' => fn($q) => $q->select('methods.id', 'methods.name', 'methods.turnaround_time'),
-            ])
-            ->select('acceptance_items.*')
+        $acceptances = (clone $base)
+            ->with(['patient:id,fullName,idNo', ...$this->activeItemsWith()])
+            ->select('acceptances.*')
             ->selectSub(
-                DB::table('acceptances')
-                    ->whereColumn('id', 'acceptance_items.acceptance_id')
-                    ->selectRaw("FIELD(priority, 'stat', 'urgent', 'routine')"),
+                DB::table('acceptances as _a')
+                    ->whereColumn('_a.id', 'acceptances.id')
+                    ->selectRaw("FIELD(_a.priority, 'stat', 'urgent', 'routine')"),
                 'priority_order'
             )
             ->orderBy('priority_order')
-            ->orderBy('acceptance_items.created_at')
+            ->orderByDesc('acceptances.created_at')
             ->offset(($page - 1) * $perPage)
             ->limit($perPage)
             ->get();
 
         $now = Carbon::now();
-        $data = $items->map(fn($item) => $this->mapItem($item, $now))->values();
 
         return [
-            'data' => $data,
+            'data' => $acceptances->map(fn($a) => $this->mapAcceptance($a, $now))->values(),
             'meta' => [
                 'total'        => $total,
                 'per_page'     => $perPage,
@@ -127,53 +138,57 @@ class TATService
         ];
     }
 
-    // ── Full collection (used by getSummary) ──────────────────────────────────
+    // ── Full collection (for summary cards) ───────────────────────────────────
 
     public function getItems(array $filters = []): Collection
     {
-        $items = $this->buildBaseQuery($filters)
-            ->with([
-                'acceptance:id,priority,referenceCode',
-                'acceptance.patient:id,fullName,idNo',
-                'latestState.section:id,name',
-                'test'   => fn($q) => $q->select('tests.id', 'tests.name'),
-                'method' => fn($q) => $q->select('methods.id', 'methods.name', 'methods.turnaround_time'),
-            ])
+        $acceptances = $this->buildBaseQuery($filters)
+            ->with(['patient:id,fullName,idNo', ...$this->activeItemsWith()])
             ->get();
 
         $now = Carbon::now();
-        return $items->map(fn($item) => $this->mapItem($item, $now));
+        return $acceptances->map(fn($a) => $this->mapAcceptance($a, $now));
     }
 
-    private function mapItem(AcceptanceItem $item, Carbon $now): array
+    // ── Map one acceptance to TAT data ────────────────────────────────────────
+
+    private function mapAcceptance(Acceptance $acceptance, Carbon $now): array
     {
-        $tat = (int) ($item->method?->turnaround_time ?? 0);
-        $createdAt = Carbon::parse($item->created_at);
-        $deadline = $tat > 0 ? $this->addWorkingDays($createdAt, $tat) : null;
-        $elapsed = $this->elapsedWorkingDays($createdAt, $now);
-        $isFinished = $item->latestState?->status === AcceptanceItemStateStatus::FINISHED;
-        $isBreached = $deadline && $now->gt($deadline) && !$isFinished;
-        $progressPct = ($tat > 0 && $deadline) ? min(100, round(($elapsed / $tat) * 100)) : null;
+        $items = $acceptance->acceptanceItems;
+
+        // TAT start = datetime of the LAST item added to this acceptance
+        $lastItemAt = $items->max('created_at');
+        $startTime  = $lastItemAt ? Carbon::parse($lastItemAt) : Carbon::parse($acceptance->created_at);
+
+        // TAT = max turnaround_time across all active items
+        $maxTat = (int) $items->max(fn($i) => $i->method?->turnaround_time ?? 0);
+
+        $deadline    = $maxTat > 0 ? $this->addWorkingDays($startTime, $maxTat) : null;
+        $elapsed     = $this->elapsedWorkingDays($startTime, $now);
+        $isBreached  = $deadline && $now->gt($deadline);
+        $progressPct = ($maxTat > 0 && $deadline) ? min(100, round(($elapsed / $maxTat) * 100)) : null;
+
+        $statuses  = $items->map(fn($i) => $i->latestState?->status?->value)->filter()->unique()->values();
+        $sections  = $items->map(fn($i) => $i->latestState?->section?->name)->filter()->unique()->values();
+        $testNames = $items->map(fn($i) => $i->test?->name)->filter()->unique()->values();
 
         return [
-            'id'                   => $item->id,
-            'acceptance_id'        => $item->acceptance_id,
-            'reference_code'       => $item->acceptance?->referenceCode,
-            'patient_name'         => $item->acceptance?->patient?->fullName,
-            'patient_id_no'        => $item->acceptance?->patient?->idNo,
-            'test_name'            => $item->test?->name,
-            'method_name'          => $item->method?->name,
-            'section'              => $item->latestState?->section?->name,
-            'item_status'          => $item->latestState?->status?->value,
-            'priority'             => $item->acceptance?->priority?->value ?? 'routine',
-            'turnaround_time'      => $tat,
-            'created_at'           => $item->created_at,
+            'id'                   => $acceptance->id,
+            'reference_code'       => $acceptance->referenceCode,
+            'patient_name'         => $acceptance->patient?->fullName,
+            'patient_id_no'        => $acceptance->patient?->idNo,
+            'tests'                => $testNames,
+            'sections'             => $sections,
+            'statuses'             => $statuses,
+            'priority'             => $acceptance->priority?->value ?? 'routine',
+            'max_tat'              => $maxTat,
+            'start_time'           => $startTime->toDateTimeString(),
             'deadline'             => $deadline?->toDateTimeString(),
             'elapsed_working_days' => $elapsed,
             'progress_pct'         => $progressPct,
             'is_breached'          => $isBreached,
             'is_at_risk'           => !$isBreached && $progressPct !== null && $progressPct >= 70,
-            'is_finished'          => $isFinished,
+            'active_items_count'   => $items->count(),
         ];
     }
 
@@ -181,28 +196,25 @@ class TATService
 
     public function getSummary(array $filters = []): array
     {
-        $items = $this->getItems($filters);
-        $active = $items->where('is_finished', false);
+        $rows = $this->getItems($filters);
 
-        $onTimePct = $this->calcOnTimePct(Carbon::now()->subDays(30), Carbon::now());
-
-        $bySection = $active
-            ->whereNotNull('section')
+        $bySection = $rows
+            ->flatMap(fn($r) => collect($r['sections'])->map(fn($s) => ['section' => $s, 'row' => $r]))
             ->groupBy('section')
             ->map(fn($group) => [
                 'section'     => $group->first()['section'],
                 'count'       => $group->count(),
-                'avg_elapsed' => round($group->avg('elapsed_working_days'), 1),
-                'breached'    => $group->where('is_breached', true)->count(),
+                'avg_elapsed' => round($group->avg(fn($g) => $g['row']['elapsed_working_days']), 1),
+                'breached'    => $group->filter(fn($g) => $g['row']['is_breached'])->count(),
             ])
             ->values();
 
         return [
-            'total_active' => $active->count(),
-            'breached'     => $active->where('is_breached', true)->count(),
-            'at_risk'      => $active->where('is_at_risk', true)->count(),
-            'stat_active'  => $active->where('priority', 'stat')->count(),
-            'on_time_pct'  => $onTimePct,
+            'total_active' => $rows->count(),
+            'breached'     => $rows->where('is_breached', true)->count(),
+            'at_risk'      => $rows->where('is_at_risk', true)->count(),
+            'stat_active'  => $rows->where('priority', 'stat')->count(),
+            'on_time_pct'  => $this->calcOnTimePct(Carbon::now()->subDays(30), Carbon::now()),
             'by_section'   => $bySection,
         ];
     }
@@ -257,7 +269,7 @@ class TATService
 
     public function resolveAnalyticsDates(array $filters): array
     {
-        $tz = 'Asia/Muscat';
+        $tz  = 'Asia/Muscat';
         $now = Carbon::now($tz);
 
         return match ($filters['a_preset'] ?? null) {
@@ -294,7 +306,7 @@ class TATService
         $onTime = $items->filter(function (AcceptanceItem $item) {
             $tat = (int) ($item->method?->turnaround_time ?? 0);
             if ($tat === 0) return true;
-            $deadline = $this->addWorkingDays(Carbon::parse($item->created_at), $tat);
+            $deadline    = $this->addWorkingDays(Carbon::parse($item->created_at), $tat);
             $publishedAt = $item->report?->published_at ? Carbon::parse($item->report->published_at) : null;
             return $publishedAt && $publishedAt->lte($deadline);
         })->count();

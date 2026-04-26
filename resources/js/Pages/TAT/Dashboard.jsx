@@ -275,10 +275,10 @@ const Dashboard = () => {
                             <TableHead>
                                 <TableRow>
                                     <TableCell>Ref / Patient</TableCell>
-                                    <TableCell>Test</TableCell>
-                                    <TableCell>Section</TableCell>
+                                    <TableCell>Tests</TableCell>
+                                    <TableCell>Sections</TableCell>
                                     <TableCell>Priority</TableCell>
-                                    <TableCell>Status</TableCell>
+                                    <TableCell>Last Added</TableCell>
                                     <TableCell>Deadline</TableCell>
                                     <TableCell>TAT Progress</TableCell>
                                 </TableRow>
@@ -290,42 +290,57 @@ const Dashboard = () => {
                                         ? (
                                             <TableRow>
                                                 <TableCell colSpan={7} align="center" sx={{py: 4}}>
-                                                    <Typography color="text.secondary">No active items</Typography>
+                                                    <Typography color="text.secondary">No active acceptances</Typography>
                                                 </TableCell>
                                             </TableRow>
                                         )
-                                        : itemsData.data.map((item) => (
-                                            <TableRow key={item.id} sx={{
-                                                bgcolor: item.is_breached ? alpha(theme.palette.error.main, 0.06) : item.is_at_risk ? alpha(theme.palette.warning.main, 0.06) : undefined,
+                                        : itemsData.data.map((row) => (
+                                            <TableRow key={row.id} sx={{
+                                                bgcolor: row.is_breached ? alpha(theme.palette.error.main, 0.06) : row.is_at_risk ? alpha(theme.palette.warning.main, 0.06) : undefined,
                                                 '&:hover': {bgcolor: alpha(theme.palette.primary.main, 0.04)},
                                                 opacity: itemsLoading ? 0.5 : 1,
                                             }}>
                                                 <TableCell>
-                                                    <Typography variant="body2" fontWeight="medium">{item.reference_code ?? `#${item.acceptance_id}`}</Typography>
-                                                    <Typography variant="caption" color="text.secondary">{item.patient_name}</Typography>
+                                                    <Typography variant="body2" fontWeight="medium">
+                                                        {row.reference_code ?? `#${row.id}`}
+                                                    </Typography>
+                                                    <Typography variant="caption" color="text.secondary">{row.patient_name}</Typography>
+                                                </TableCell>
+                                                <TableCell sx={{maxWidth: 180}}>
+                                                    <Stack direction="row" flexWrap="wrap" gap={0.5}>
+                                                        {(row.tests ?? []).map((t, i) => (
+                                                            <Chip key={i} label={t} size="small" variant="outlined" sx={{fontSize: '0.65rem', height: 20}}/>
+                                                        ))}
+                                                    </Stack>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Typography variant="body2">{item.test_name}</Typography>
-                                                    <Typography variant="caption" color="text.secondary">{item.method_name}</Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {(row.sections ?? []).join(', ') || '—'}
+                                                    </Typography>
                                                 </TableCell>
-                                                <TableCell><Typography variant="body2">{item.section ?? '—'}</Typography></TableCell>
-                                                <TableCell><PriorityChip priority={item.priority}/></TableCell>
-                                                <TableCell><StatusChip status={item.item_status}/></TableCell>
+                                                <TableCell><PriorityChip priority={row.priority}/></TableCell>
                                                 <TableCell>
-                                                    {item.deadline ? (
-                                                        <Tooltip title={`${item.elapsed_working_days}d elapsed / ${item.turnaround_time}d TAT`}>
+                                                    <Tooltip title="TAT clock starts from when the last test was added">
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            {row.start_time ? new Date(row.start_time).toLocaleDateString() : '—'}
+                                                        </Typography>
+                                                    </Tooltip>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {row.deadline ? (
+                                                        <Tooltip title={`${row.elapsed_working_days}d elapsed / ${row.max_tat}d TAT · ${row.active_items_count} pending test(s)`}>
                                                             <Stack direction="row" spacing={0.5} alignItems="center">
-                                                                {item.is_breached && <ErrorOutline fontSize="small" color="error"/>}
-                                                                <Typography variant="body2" color={item.is_breached ? 'error.main' : 'text.primary'} fontWeight={item.is_breached ? 'bold' : 'normal'}>
-                                                                    {new Date(item.deadline).toLocaleDateString()}
+                                                                {row.is_breached && <ErrorOutline fontSize="small" color="error"/>}
+                                                                <Typography variant="body2" color={row.is_breached ? 'error.main' : 'text.primary'} fontWeight={row.is_breached ? 'bold' : 'normal'}>
+                                                                    {new Date(row.deadline).toLocaleDateString()}
                                                                 </Typography>
                                                             </Stack>
                                                         </Tooltip>
                                                     ) : '—'}
                                                 </TableCell>
                                                 <TableCell sx={{minWidth: 120}}>
-                                                    {item.turnaround_time > 0
-                                                        ? <TATBar pct={item.progress_pct} isBreached={item.is_breached}/>
+                                                    {row.max_tat > 0
+                                                        ? <TATBar pct={row.progress_pct} isBreached={row.is_breached}/>
                                                         : <Typography variant="caption" color="text.secondary">No TAT set</Typography>
                                                     }
                                                 </TableCell>
