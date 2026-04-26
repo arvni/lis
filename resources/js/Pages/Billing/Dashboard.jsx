@@ -129,7 +129,6 @@ const Dashboard = () => {
         from: serverFilters?.from ?? '',
         to: serverFilters?.to ?? '',
         referrer_id: serverFilters?.referrer_id ?? '',
-        payment_method: serverFilters?.payment_method ?? '',
         test_ids: [],
     });
     const [referrerObj, setReferrerObj] = useState(null);
@@ -275,19 +274,6 @@ const Dashboard = () => {
                                 fullWidth
                                 size="small"
                             />
-                        </Grid>
-                        <Grid size={{xs: 12, sm: 6, md: 3}}>
-                            <FormControl fullWidth size="small">
-                                <InputLabel>Payment Method</InputLabel>
-                                <Select label="Payment Method" value={filters.payment_method}
-                                    onChange={(e) => applyFilters({payment_method: e.target.value})}>
-                                    <MenuItem value="">All methods</MenuItem>
-                                    <MenuItem value="cash">Cash</MenuItem>
-                                    <MenuItem value="card">Card</MenuItem>
-                                    <MenuItem value="transfer">Transfer</MenuItem>
-                                    <MenuItem value="credit">Credit</MenuItem>
-                                </Select>
-                            </FormControl>
                         </Grid>
                         <Grid size={{xs: 12, sm: 6, md: 6}}>
                             <SelectSearch

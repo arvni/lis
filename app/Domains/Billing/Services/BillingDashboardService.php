@@ -106,9 +106,6 @@ class BillingDashboardService
             $paymentsQ->join('acceptances', 'acceptances.invoice_id', '=', 'invoices.id')
                       ->where('acceptances.referrer_id', $filters['referrer_id']);
         }
-        if (!empty($filters['payment_method'])) {
-            $paymentsQ->where('payments.paymentMethod', $filters['payment_method']);
-        }
 
         $collected = (float) $paymentsQ->sum('payments.price');
         $totalRevenue = (float) ($revenue->revenue ?? 0);

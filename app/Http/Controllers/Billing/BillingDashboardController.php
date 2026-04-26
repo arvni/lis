@@ -18,7 +18,7 @@ class BillingDashboardController extends Controller
     {
         Gate::authorize('Billing.Dashboard.View Dashboard');
 
-        $filters = $request->only(['preset', 'from', 'to', 'referrer_id', 'has_invoice', 'payment_method']);
+        $filters = $request->only(['preset', 'from', 'to', 'referrer_id']);
 
         return Inertia::render('Billing/Dashboard', [
             'summary' => $this->service->getSummary($filters),

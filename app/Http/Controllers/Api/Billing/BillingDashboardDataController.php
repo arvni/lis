@@ -18,7 +18,7 @@ class BillingDashboardDataController extends Controller
     {
         Gate::authorize('Billing.Dashboard.View Dashboard');
 
-        $filters = $request->only(['preset', 'from', 'to', 'referrer_id', 'has_invoice', 'payment_method', 'test_ids']);
+        $filters = $request->only(['preset', 'from', 'to', 'referrer_id', 'test_ids']);
 
         return response()->json([
             'by_test'           => $this->service->getByTest($filters),
