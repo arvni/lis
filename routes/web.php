@@ -97,6 +97,8 @@ use App\Http\Controllers\Reception\ShowAcceptanceItemController;
 use App\Http\Controllers\Reception\ToggleReportlessAcceptanceItemController;
 use App\Http\Controllers\Reception\ToggleSamplelessAcceptanceItemController;
 use App\Http\Controllers\Reception\UnPublishReportController;
+use App\Http\Controllers\Api\Reception\TATAnalyticsController;
+use App\Http\Controllers\Api\Reception\TATItemsController;
 use App\Http\Controllers\Reception\TATDashboardController;
 use App\Http\Controllers\Reception\UpdateAcceptancePriorityController;
 use App\Http\Controllers\Reception\UpdatePatientMetaController;
@@ -272,6 +274,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get("patients", ListPatientsController::class)->name("patients.list");
             Route::get("sample-collection/{acceptance}", ListBarcodesController::class)->name("sampleCollection.list");
             Route::get("acceptances/{acceptance}/pooling-items", GetAcceptancePoolingItemsController::class)->name("acceptances.poolingItems");
+            Route::get("tat/items", TATItemsController::class)->name("tat.items");
+            Route::get("tat/analytics", TATAnalyticsController::class)->name("tat.analytics");
         });
         Route::group(["prefix" => "referrer"], function () {
             Route::get("referrers", ListReferrersController::class)->name("referrers.list");

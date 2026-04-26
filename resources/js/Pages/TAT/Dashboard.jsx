@@ -1,76 +1,37 @@
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useEffect, useCallback, useRef} from 'react';
 import {Head, router, usePage} from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader.jsx';
+import axios from 'axios';
 import {
-    Box,
-    Card,
-    CardContent,
-    Chip,
-    FormControl,
-    Grid2 as Grid,
-    InputLabel,
-    LinearProgress,
-    MenuItem,
-    Paper,
-    Select,
-    Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TextField,
-    Tooltip,
-    Typography,
-    alpha,
-    useTheme,
-    Button,
-    Divider,
+    Box, Card, CardContent, Chip, FormControl, Grid2 as Grid,
+    InputLabel, LinearProgress, MenuItem, Paper, Select, Stack,
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    TextField, Tooltip, Typography, alpha, useTheme, Button, Divider,
+    Pagination, Skeleton, CircularProgress,
 } from '@mui/material';
 import {
-    CheckCircle,
-    FlashOn,
-    Warning,
-    ErrorOutline,
-    FilterList,
-    BarChart as BarChartIcon,
-    AccessTime,
+    CheckCircle, FlashOn, Warning, ErrorOutline, FilterList,
+    BarChart as BarChartIcon, Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid,
-    Tooltip as ReTooltip, ResponsiveContainer, ReferenceLine, Cell, Legend,
+    Tooltip as ReTooltip, ResponsiveContainer, Cell, Legend,
 } from 'recharts';
 
 // ── Summary card ──────────────────────────────────────────────────────────────
 const SummaryCard = ({title, value, icon: Icon, color, subtitle}) => {
     const theme = useTheme();
     return (
-        <Card elevation={2} sx={{
-            borderRadius: 2,
-            borderTop: `4px solid ${theme.palette[color]?.main ?? theme.palette.grey[400]}`,
-            height: '100%',
-        }}>
+        <Card elevation={2} sx={{borderRadius: 2, borderTop: `4px solid ${theme.palette[color]?.main ?? theme.palette.grey[400]}`, height: '100%'}}>
             <CardContent>
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
                     <Box>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                            {title}
-                        </Typography>
-                        <Typography variant="h3" fontWeight="bold" color={`${color}.main`}>
-                            {value ?? '—'}
-                        </Typography>
-                        {subtitle && (
-                            <Typography variant="caption" color="text.secondary">
-                                {subtitle}
-                            </Typography>
-                        )}
+                        <Typography variant="body2" color="text.secondary" gutterBottom>{title}</Typography>
+                        <Typography variant="h3" fontWeight="bold" color={`${color}.main`}>{value ?? '—'}</Typography>
+                        {subtitle && <Typography variant="caption" color="text.secondary">{subtitle}</Typography>}
                     </Box>
-                    <Box sx={{
-                        p: 1.5, borderRadius: 2,
-                        bgcolor: alpha(theme.palette[color]?.main ?? '#ccc', 0.12),
-                    }}>
+                    <Box sx={{p: 1.5, borderRadius: 2, bgcolor: alpha(theme.palette[color]?.main ?? '#ccc', 0.12)}}>
                         <Icon sx={{color: `${color}.main`, fontSize: 28}}/>
                     </Box>
                 </Stack>
@@ -79,21 +40,18 @@ const SummaryCard = ({title, value, icon: Icon, color, subtitle}) => {
     );
 };
 
-// ── Priority chip ─────────────────────────────────────────────────────────────
 const PriorityChip = ({priority}) => {
     const map = {stat: {label: 'STAT', color: 'error'}, urgent: {label: 'Urgent', color: 'warning'}, routine: {label: 'Routine', color: 'default'}};
     const cfg = map[priority] ?? map.routine;
     return <Chip label={cfg.label} color={cfg.color} size="small" variant="filled"/>;
 };
 
-// ── Status chip ───────────────────────────────────────────────────────────────
 const StatusChip = ({status}) => {
     const map = {waiting: {label: 'Waiting', color: 'default'}, processing: {label: 'Processing', color: 'info'}, finished: {label: 'Finished', color: 'success'}, rejected: {label: 'Rejected', color: 'error'}};
     const cfg = map[status] ?? {label: status ?? 'Unknown', color: 'default'};
     return <Chip label={cfg.label} color={cfg.color} size="small" variant="outlined"/>;
 };
 
-// ── TAT progress bar ──────────────────────────────────────────────────────────
 const TATBar = ({pct, isBreached}) => {
     const color = isBreached ? 'error' : pct >= 70 ? 'warning' : 'success';
     return (
@@ -104,21 +62,18 @@ const TATBar = ({pct, isBreached}) => {
     );
 };
 
-// ── Date preset buttons ───────────────────────────────────────────────────────
 const PRESETS = [
-    {key: 'today',        label: 'Today'},
-    {key: 'this_week',    label: 'This Week'},
-    {key: 'last_week',    label: 'Last Week'},
-    {key: 'this_month',   label: 'This Month'},
-    {key: 'last_month',   label: 'Last Month'},
-    {key: 'last_7_days',  label: 'Last 7 Days'},
+    {key: 'today', label: 'Today'},
+    {key: 'this_week', label: 'This Week'},
+    {key: 'last_week', label: 'Last Week'},
+    {key: 'this_month', label: 'This Month'},
+    {key: 'last_month', label: 'Last Month'},
+    {key: 'last_7_days', label: 'Last 7 Days'},
     {key: 'last_30_days', label: 'Last 30 Days'},
-    {key: 'last_3_months',label: 'Last 3 Months'},
+    {key: 'last_3_months', label: 'Last 3 Months'},
 ];
 
-// ── Custom recharts tooltip ───────────────────────────────────────────────────
 const AnalyticsTooltip = ({active, payload}) => {
-    const theme = useTheme();
     if (!active || !payload?.length) return null;
     const d = payload[0].payload;
     return (
@@ -136,59 +91,96 @@ const AnalyticsTooltip = ({active, payload}) => {
     );
 };
 
+// ── Row skeleton ──────────────────────────────────────────────────────────────
+const SkeletonRows = ({count = 5, cols = 7}) => (
+    <>
+        {Array.from({length: count}).map((_, i) => (
+            <TableRow key={i}>
+                {Array.from({length: cols}).map((__, j) => (
+                    <TableCell key={j}><Skeleton variant="text" width="80%"/></TableCell>
+                ))}
+            </TableRow>
+        ))}
+    </>
+);
+
 // ── Main component ────────────────────────────────────────────────────────────
 const Dashboard = () => {
-    const {summary, items, sections, filters: serverFilters, analytics, analyticsFilters: serverAF, analyticsDates, tests} = usePage().props;
+    const {summary, items_count, sections, filters: serverFilters, tests} = usePage().props;
     const theme = useTheme();
 
+    // ── Active items state ────────────────────────────────────────────────────
     const [filters, setFilters] = useState({
         priority: serverFilters?.priority ?? '',
         section_id: serverFilters?.section_id ?? '',
         date_from: serverFilters?.date_from ?? '',
         date_to: serverFilters?.date_to ?? '',
     });
+    const [itemsData, setItemsData] = useState({data: [], meta: {total: items_count, per_page: 20, current_page: 1, last_page: 1}});
+    const [itemsLoading, setItemsLoading] = useState(true);
 
-    const [af, setAf] = useState({
-        a_preset: serverAF?.a_preset ?? 'last_30_days',
-        a_from: serverAF?.a_from ?? '',
-        a_to: serverAF?.a_to ?? '',
-        a_test_id: serverAF?.a_test_id ?? '',
-    });
+    // ── Analytics state ───────────────────────────────────────────────────────
+    const [af, setAf] = useState({a_preset: 'last_30_days', a_from: '', a_to: '', a_test_id: ''});
+    const [analyticsData, setAnalyticsData] = useState([]);
+    const [analyticsDates, setAnalyticsDates] = useState(null);
+    const [analyticsLoading, setAnalyticsLoading] = useState(true);
+
+    // abort controllers
+    const itemsAbort = useRef(null);
+    const analyticsAbort = useRef(null);
+
+    // ── Fetch items ───────────────────────────────────────────────────────────
+    const fetchItems = useCallback((f = filters, page = 1) => {
+        itemsAbort.current?.abort();
+        itemsAbort.current = new AbortController();
+        setItemsLoading(true);
+        const params = {...f, page, per_page: 20};
+        Object.keys(params).forEach(k => !params[k] && delete params[k]);
+        axios.get(route('api.tat.items'), {params, signal: itemsAbort.current.signal})
+            .then(r => { setItemsData(r.data); setItemsLoading(false); })
+            .catch(e => { if (!axios.isCancel(e)) setItemsLoading(false); });
+    }, [filters]);
+
+    // ── Fetch analytics ───────────────────────────────────────────────────────
+    const fetchAnalytics = useCallback((a = af) => {
+        analyticsAbort.current?.abort();
+        analyticsAbort.current = new AbortController();
+        setAnalyticsLoading(true);
+        const params = {...a};
+        Object.keys(params).forEach(k => !params[k] && delete params[k]);
+        axios.get(route('api.tat.analytics'), {params, signal: analyticsAbort.current.signal})
+            .then(r => { setAnalyticsData(r.data.data); setAnalyticsDates(r.data.dates); setAnalyticsLoading(false); })
+            .catch(e => { if (!axios.isCancel(e)) setAnalyticsLoading(false); });
+    }, [af]);
+
+    // initial load
+    useEffect(() => { fetchItems(); fetchAnalytics(); }, []);
 
     const applyFilters = (newFilters) => {
         const f = {...filters, ...newFilters};
         setFilters(f);
-        router.get(route('tat.dashboard'), {...f, ...af}, {preserveState: true, replace: true});
+        // Also update URL params for summary refresh (Inertia)
+        router.get(route('tat.dashboard'), f, {preserveState: true, replace: true, only: ['summary', 'items_count', 'filters']});
+        fetchItems(f, 1);
     };
 
     const applyAnalytics = (newAf) => {
         const a = {...af, ...newAf};
         setAf(a);
-        router.get(route('tat.dashboard'), {...filters, ...a}, {preserveState: true, replace: true});
+        fetchAnalytics(a);
     };
 
-    const sortedItems = useMemo(() => {
-        return [...items].sort((a, b) => {
-            const po = {stat: 0, urgent: 1, routine: 2};
-            if (a.is_breached !== b.is_breached) return a.is_breached ? -1 : 1;
-            if (po[a.priority] !== po[b.priority]) return po[a.priority] - po[b.priority];
-            return (b.progress_pct ?? 0) - (a.progress_pct ?? 0);
-        });
-    }, [items]);
+    const handlePageChange = (_, page) => fetchItems(filters, page);
 
-    // Truncate long test names for x-axis
     const chartData = useMemo(() =>
-        analytics.map(d => ({...d, short_name: d.test_name.length > 18 ? d.test_name.slice(0, 16) + '…' : d.test_name}))
-    , [analytics]);
+        analyticsData.map(d => ({...d, short_name: d.test_name.length > 18 ? d.test_name.slice(0, 16) + '…' : d.test_name}))
+    , [analyticsData]);
 
     return (
         <>
             <Head title="TAT Dashboard"/>
             <Box sx={{p: {xs: 1, sm: 2, md: 3}}}>
-                <PageHeader
-                    title="TAT Dashboard"
-                    subtitle="Turnaround time monitoring for active lab items"
-                />
+                <PageHeader title="TAT Dashboard" subtitle="Turnaround time monitoring for active lab items"/>
 
                 {/* ── Summary cards ─────────────────────────────────────────── */}
                 <Grid container spacing={2} sx={{mb: 3}}>
@@ -266,8 +258,17 @@ const Dashboard = () => {
 
                 {/* ── Active items table ────────────────────────────────────── */}
                 <Paper elevation={1} sx={{borderRadius: 2, overflow: 'hidden', mb: 4}}>
-                    <Box sx={{p: 2, borderBottom: `1px solid ${theme.palette.divider}`}}>
-                        <Typography variant="subtitle1" fontWeight="bold">Active Items ({sortedItems.length})</Typography>
+                    <Box sx={{p: 2, borderBottom: `1px solid ${theme.palette.divider}`, display: 'flex', alignItems: 'center', gap: 1}}>
+                        <Typography variant="subtitle1" fontWeight="bold">
+                            Active Items
+                        </Typography>
+                        <Chip
+                            label={itemsLoading ? '…' : itemsData.meta.total}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                        />
+                        {itemsLoading && <CircularProgress size={16} sx={{ml: 'auto'}}/>}
                     </Box>
                     <TableContainer sx={{maxHeight: 500}}>
                         <Table stickyHeader size="small">
@@ -283,49 +284,70 @@ const Dashboard = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {sortedItems.length === 0 && (
-                                    <TableRow>
-                                        <TableCell colSpan={7} align="center" sx={{py: 4}}>
-                                            <Typography color="text.secondary">No active items</Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                                {sortedItems.map((item) => (
-                                    <TableRow key={item.id} sx={{bgcolor: item.is_breached ? alpha(theme.palette.error.main, 0.06) : item.is_at_risk ? alpha(theme.palette.warning.main, 0.06) : undefined, '&:hover': {bgcolor: alpha(theme.palette.primary.main, 0.04)}}}>
-                                        <TableCell>
-                                            <Typography variant="body2" fontWeight="medium">{item.reference_code ?? `#${item.acceptance_id}`}</Typography>
-                                            <Typography variant="caption" color="text.secondary">{item.patient_name}</Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body2">{item.test_name}</Typography>
-                                            <Typography variant="caption" color="text.secondary">{item.method_name}</Typography>
-                                        </TableCell>
-                                        <TableCell><Typography variant="body2">{item.section ?? '—'}</Typography></TableCell>
-                                        <TableCell><PriorityChip priority={item.priority}/></TableCell>
-                                        <TableCell><StatusChip status={item.item_status}/></TableCell>
-                                        <TableCell>
-                                            {item.deadline ? (
-                                                <Tooltip title={`${item.elapsed_working_days}d elapsed / ${item.turnaround_time}d TAT`}>
-                                                    <Stack direction="row" spacing={0.5} alignItems="center">
-                                                        {item.is_breached && <ErrorOutline fontSize="small" color="error"/>}
-                                                        <Typography variant="body2" color={item.is_breached ? 'error.main' : 'text.primary'} fontWeight={item.is_breached ? 'bold' : 'normal'}>
-                                                            {new Date(item.deadline).toLocaleDateString()}
-                                                        </Typography>
-                                                    </Stack>
-                                                </Tooltip>
-                                            ) : '—'}
-                                        </TableCell>
-                                        <TableCell sx={{minWidth: 120}}>
-                                            {item.turnaround_time > 0
-                                                ? <TATBar pct={item.progress_pct} isBreached={item.is_breached}/>
-                                                : <Typography variant="caption" color="text.secondary">No TAT set</Typography>
-                                            }
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                {itemsLoading && itemsData.data.length === 0
+                                    ? <SkeletonRows count={8} cols={7}/>
+                                    : itemsData.data.length === 0
+                                        ? (
+                                            <TableRow>
+                                                <TableCell colSpan={7} align="center" sx={{py: 4}}>
+                                                    <Typography color="text.secondary">No active items</Typography>
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                        : itemsData.data.map((item) => (
+                                            <TableRow key={item.id} sx={{
+                                                bgcolor: item.is_breached ? alpha(theme.palette.error.main, 0.06) : item.is_at_risk ? alpha(theme.palette.warning.main, 0.06) : undefined,
+                                                '&:hover': {bgcolor: alpha(theme.palette.primary.main, 0.04)},
+                                                opacity: itemsLoading ? 0.5 : 1,
+                                            }}>
+                                                <TableCell>
+                                                    <Typography variant="body2" fontWeight="medium">{item.reference_code ?? `#${item.acceptance_id}`}</Typography>
+                                                    <Typography variant="caption" color="text.secondary">{item.patient_name}</Typography>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Typography variant="body2">{item.test_name}</Typography>
+                                                    <Typography variant="caption" color="text.secondary">{item.method_name}</Typography>
+                                                </TableCell>
+                                                <TableCell><Typography variant="body2">{item.section ?? '—'}</Typography></TableCell>
+                                                <TableCell><PriorityChip priority={item.priority}/></TableCell>
+                                                <TableCell><StatusChip status={item.item_status}/></TableCell>
+                                                <TableCell>
+                                                    {item.deadline ? (
+                                                        <Tooltip title={`${item.elapsed_working_days}d elapsed / ${item.turnaround_time}d TAT`}>
+                                                            <Stack direction="row" spacing={0.5} alignItems="center">
+                                                                {item.is_breached && <ErrorOutline fontSize="small" color="error"/>}
+                                                                <Typography variant="body2" color={item.is_breached ? 'error.main' : 'text.primary'} fontWeight={item.is_breached ? 'bold' : 'normal'}>
+                                                                    {new Date(item.deadline).toLocaleDateString()}
+                                                                </Typography>
+                                                            </Stack>
+                                                        </Tooltip>
+                                                    ) : '—'}
+                                                </TableCell>
+                                                <TableCell sx={{minWidth: 120}}>
+                                                    {item.turnaround_time > 0
+                                                        ? <TATBar pct={item.progress_pct} isBreached={item.is_breached}/>
+                                                        : <Typography variant="caption" color="text.secondary">No TAT set</Typography>
+                                                    }
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                }
                             </TableBody>
                         </Table>
                     </TableContainer>
+                    {itemsData.meta.last_page > 1 && (
+                        <Box sx={{display: 'flex', justifyContent: 'center', p: 2, borderTop: `1px solid ${theme.palette.divider}`}}>
+                            <Pagination
+                                count={itemsData.meta.last_page}
+                                page={itemsData.meta.current_page}
+                                onChange={handlePageChange}
+                                color="primary"
+                                disabled={itemsLoading}
+                                showFirstButton
+                                showLastButton
+                            />
+                        </Box>
+                    )}
                 </Paper>
 
                 <Divider sx={{mb: 4}}/>
@@ -334,25 +356,32 @@ const Dashboard = () => {
                 <Stack direction="row" spacing={1} alignItems="center" mb={2}>
                     <BarChartIcon color="primary"/>
                     <Typography variant="h6" fontWeight="bold">Avg TAT by Test</Typography>
-                    {analyticsDates && (
+                    {analyticsDates && !analyticsLoading && (
                         <Typography variant="caption" color="text.secondary">
                             ({analyticsDates.from} → {analyticsDates.to})
                         </Typography>
                     )}
+                    {analyticsLoading && <CircularProgress size={16}/>}
+                    <Box sx={{ml: 'auto'}}>
+                        <Tooltip title="Refresh">
+                            <span>
+                                <Button size="small" startIcon={<RefreshIcon/>} onClick={() => fetchAnalytics(af)} disabled={analyticsLoading}>
+                                    Refresh
+                                </Button>
+                            </span>
+                        </Tooltip>
+                    </Box>
                 </Stack>
 
-                {/* Date presets */}
+                {/* Date presets + filters */}
                 <Paper elevation={1} sx={{p: 2, mb: 2, borderRadius: 2}}>
                     <Grid container spacing={2} alignItems="center">
                         <Grid size={{xs: 12}}>
                             <Stack direction="row" flexWrap="wrap" gap={1}>
                                 {PRESETS.map(p => (
-                                    <Button
-                                        key={p.key}
-                                        size="small"
+                                    <Button key={p.key} size="small"
                                         variant={af.a_preset === p.key ? 'contained' : 'outlined'}
-                                        onClick={() => applyAnalytics({a_preset: p.key, a_from: '', a_to: ''})}
-                                    >
+                                        onClick={() => applyAnalytics({a_preset: p.key, a_from: '', a_to: ''})}>
                                         {p.label}
                                     </Button>
                                 ))}
@@ -379,48 +408,49 @@ const Dashboard = () => {
                 </Paper>
 
                 {/* Bar chart */}
-                {chartData.length > 0 ? (
-                    <Paper elevation={1} sx={{p: 2, mb: 3, borderRadius: 2}}>
-                        <ResponsiveContainer width="100%" height={320}>
-                            <BarChart data={chartData} margin={{top: 8, right: 24, left: 0, bottom: 60}}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false}/>
-                                <XAxis dataKey="short_name" angle={-35} textAnchor="end" tick={{fontSize: 12}} interval={0}/>
-                                <YAxis unit="h" tick={{fontSize: 12}} label={{value: 'Hours', angle: -90, position: 'insideLeft', offset: 10}}/>
-                                <ReTooltip content={<AnalyticsTooltip/>}/>
-                                <Legend verticalAlign="top"/>
-                                <Bar dataKey="avg_hours" name="Avg TAT (hours)" radius={[4, 4, 0, 0]}>
-                                    {chartData.map((entry, i) => (
-                                        <Cell key={i} fill={
-                                            entry.on_target === false
-                                                ? theme.palette.error.main
-                                                : entry.on_target === true
-                                                    ? theme.palette.success.main
-                                                    : theme.palette.primary.main
-                                        }/>
-                                    ))}
-                                </Bar>
-                                {chartData.some(d => d.target_hours) && (
-                                    <ReferenceLine y={chartData.find(d => d.target_hours)?.target_hours} stroke={theme.palette.warning.main} strokeDasharray="6 3" label={{value: 'Target', fill: theme.palette.warning.main, fontSize: 11}}/>
-                                )}
-                            </BarChart>
-                        </ResponsiveContainer>
-                        <Stack direction="row" spacing={2} justifyContent="center" mt={1}>
-                            <Stack direction="row" spacing={0.5} alignItems="center"><Box sx={{width: 12, height: 12, borderRadius: 1, bgcolor: 'success.main'}}/><Typography variant="caption">On target</Typography></Stack>
-                            <Stack direction="row" spacing={0.5} alignItems="center"><Box sx={{width: 12, height: 12, borderRadius: 1, bgcolor: 'error.main'}}/><Typography variant="caption">Over target</Typography></Stack>
-                            <Stack direction="row" spacing={0.5} alignItems="center"><Box sx={{width: 12, height: 12, borderRadius: 1, bgcolor: 'primary.main'}}/><Typography variant="caption">No target set</Typography></Stack>
-                        </Stack>
-                    </Paper>
-                ) : (
-                    <Paper elevation={1} sx={{p: 4, mb: 3, borderRadius: 2, textAlign: 'center'}}>
-                        <Typography color="text.secondary">No published reports in this period.</Typography>
-                    </Paper>
-                )}
+                <Paper elevation={1} sx={{p: 2, mb: 3, borderRadius: 2}}>
+                    {analyticsLoading ? (
+                        <Box>
+                            <Skeleton variant="rectangular" height={320} sx={{borderRadius: 1}}/>
+                        </Box>
+                    ) : chartData.length === 0 ? (
+                        <Box sx={{py: 6, textAlign: 'center'}}>
+                            <Typography color="text.secondary">No published reports in this period.</Typography>
+                        </Box>
+                    ) : (
+                        <>
+                            <ResponsiveContainer width="100%" height={320}>
+                                <BarChart data={chartData} margin={{top: 8, right: 24, left: 0, bottom: 60}}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false}/>
+                                    <XAxis dataKey="short_name" angle={-35} textAnchor="end" tick={{fontSize: 12}} interval={0}/>
+                                    <YAxis unit="h" tick={{fontSize: 12}} label={{value: 'Hours', angle: -90, position: 'insideLeft', offset: 10}}/>
+                                    <ReTooltip content={<AnalyticsTooltip/>}/>
+                                    <Legend verticalAlign="top"/>
+                                    <Bar dataKey="avg_hours" name="Avg TAT (hours)" radius={[4, 4, 0, 0]}>
+                                        {chartData.map((entry, i) => (
+                                            <Cell key={i} fill={
+                                                entry.on_target === false ? theme.palette.error.main
+                                                : entry.on_target === true ? theme.palette.success.main
+                                                : theme.palette.primary.main
+                                            }/>
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                            <Stack direction="row" spacing={2} justifyContent="center" mt={1}>
+                                <Stack direction="row" spacing={0.5} alignItems="center"><Box sx={{width: 12, height: 12, borderRadius: 1, bgcolor: 'success.main'}}/><Typography variant="caption">On target</Typography></Stack>
+                                <Stack direction="row" spacing={0.5} alignItems="center"><Box sx={{width: 12, height: 12, borderRadius: 1, bgcolor: 'error.main'}}/><Typography variant="caption">Over target</Typography></Stack>
+                                <Stack direction="row" spacing={0.5} alignItems="center"><Box sx={{width: 12, height: 12, borderRadius: 1, bgcolor: 'primary.main'}}/><Typography variant="caption">No target set</Typography></Stack>
+                            </Stack>
+                        </>
+                    )}
+                </Paper>
 
                 {/* Analytics table */}
-                {analytics.length > 0 && (
+                {!analyticsLoading && analyticsData.length > 0 && (
                     <Paper elevation={1} sx={{borderRadius: 2, overflow: 'hidden'}}>
                         <Box sx={{p: 2, borderBottom: `1px solid ${theme.palette.divider}`}}>
-                            <Typography variant="subtitle1" fontWeight="bold">Details ({analytics.length} tests)</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold">Details ({analyticsData.length} tests)</Typography>
                         </Box>
                         <TableContainer>
                             <Table size="small">
@@ -437,7 +467,7 @@ const Dashboard = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {analytics.map((row) => (
+                                    {analyticsData.map((row) => (
                                         <TableRow key={row.test_id} sx={{'&:hover': {bgcolor: alpha(theme.palette.primary.main, 0.04)}}}>
                                             <TableCell><Typography variant="body2">{row.test_name}</Typography></TableCell>
                                             <TableCell align="right">{row.count}</TableCell>
