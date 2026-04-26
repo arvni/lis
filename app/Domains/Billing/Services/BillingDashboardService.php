@@ -166,17 +166,40 @@ class BillingDashboardService
     }
 
     // ── Income by test ────────────────────────────────────────────────────────
+    // Panel items: price may be unevenly stored across constituent items.
+    // We compute the panel total first (all items sharing the same panel_id),
+    // then attribute panel_total / distinct_tests to each test in the panel.
+    // Non-panel items use their own price - discount directly.
 
     public function getByTest(array $filters): array
     {
         [$from, $to] = $this->resolveDates($filters);
 
+        // Subquery: per-panel totals using the same base filters
+        $panelTotals = (clone $this->baseQuery($filters, $from, $to))
+            ->whereNotNull('acceptance_items.panel_id')
+            ->selectRaw('
+                acceptance_items.panel_id                                       AS panel_id,
+                SUM(acceptance_items.price - acceptance_items.discount)         AS panel_total,
+                COUNT(DISTINCT acceptance_items.method_test_id)                 AS distinct_tests
+            ')
+            ->groupBy('acceptance_items.panel_id');
+
         $rows = (clone $this->baseQuery($filters, $from, $to))
             ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
             ->join('tests',        'tests.id',        '=', 'method_tests.test_id')
-            ->selectRaw('tests.name                                                       as test_name,
-                          COUNT(*)                                                         as count,
-                          ROUND(SUM(acceptance_items.price - acceptance_items.discount),3) as income')
+            ->leftJoinSub($panelTotals, 'pt', 'pt.panel_id', '=', 'acceptance_items.panel_id')
+            ->selectRaw('
+                tests.id                                                        AS test_id,
+                tests.name                                                      AS test_name,
+                COUNT(*)                                                        AS count,
+                ROUND(SUM(
+                    CASE WHEN acceptance_items.panel_id IS NULL
+                         THEN acceptance_items.price - acceptance_items.discount
+                         ELSE pt.panel_total / pt.distinct_tests
+                    END
+                ), 3)                                                           AS income
+            ')
             ->groupBy('tests.id', 'tests.name')
             ->orderByDesc('income')
             ->limit(25)
