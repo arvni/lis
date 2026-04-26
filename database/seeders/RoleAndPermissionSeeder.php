@@ -326,6 +326,21 @@ class RoleAndPermissionSeeder extends Seeder
                     "Retry Failed Job",
                     "Delete Failed Job",
                 ],
+                "Audit Log" => [
+                    "View Audit Log",
+                ],
+            ],
+            "QC" => [
+                "Materials" => [
+                    "List Materials",
+                    "Create Material",
+                    "Edit Material",
+                    "Delete Material",
+                ],
+                "Runs" => [
+                    "List Runs",
+                    "Create Run",
+                ],
             ],
         ];
 

@@ -161,6 +161,10 @@ use App\Http\Controllers\Inventory\SupplierController as InventorySupplierContro
 use App\Http\Controllers\Inventory\UnitController as InventoryUnitController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\QC\QCMaterialController;
+use App\Http\Controllers\QC\QCRunController;
+use App\Http\Controllers\QC\QCTargetController;
+use App\Http\Controllers\System\AuditLogController;
 use App\Http\Controllers\System\FailedJobController;
 use App\Http\Controllers\ShowSectionController;
 use App\Http\Controllers\UserController;
@@ -370,7 +374,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
     Route::get("test-list", ShowTestListController::class)->name("test-list");
 
+    Route::group(["prefix" => "qc", "as" => "qc."], function () {
+        Route::resource("materials", QCMaterialController::class)->except("create", "edit", "show");
+        Route::get("materials/{qcMaterial}/targets", [QCTargetController::class, "index"])->name("targets.index");
+        Route::post("materials/{qcMaterial}/targets", [QCTargetController::class, "store"])->name("targets.store");
+        Route::delete("materials/{qcMaterial}/targets/{qcTarget}", [QCTargetController::class, "destroy"])->name("targets.destroy");
+        Route::get("runs", [QCRunController::class, "index"])->name("runs.index");
+        Route::post("runs", [QCRunController::class, "store"])->name("runs.store");
+    });
+
     Route::group(["prefix" => "system", "as" => "system."], function () {
+        Route::get("audit-log", AuditLogController::class)->name("auditLog");
         Route::middleware("indexProvider")->get("failed-jobs", [FailedJobController::class, "index"])->name("failed-jobs");
         Route::post("failed-jobs/{uuid}/retry", [FailedJobController::class, "retry"])->name("failed-jobs.retry");
         Route::delete("failed-jobs/{uuid}", [FailedJobController::class, "destroy"])->name("failed-jobs.destroy");

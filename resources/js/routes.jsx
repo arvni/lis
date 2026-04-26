@@ -19,7 +19,7 @@ import InterpreterModeIcon from '@mui/icons-material/InterpreterMode';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BusinessIcon from '@mui/icons-material/Business';
 import ReceiptIcon from "@mui/icons-material/Receipt";
-import {Analytics, AttachMoney, FactCheck, Payments, Publish, BugReport, Inventory as InventoryIcon, Speed as SpeedIcon} from "@mui/icons-material";
+import {Analytics, AttachMoney, FactCheck, Payments, Publish, BugReport, Inventory as InventoryIcon, Speed as SpeedIcon, Science as ScienceQCIcon, VerifiedUser as AuditIcon, Biotech as BiotechQCIcon, BarChart as AddChartIcon} from "@mui/icons-material";
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import CategoryIcon from '@mui/icons-material/Category';
 import WarehouseIcon from '@mui/icons-material/Warehouse';
@@ -432,10 +432,35 @@ const routes = (sections = []) => {
             ]
         },
         {
+            title: "Quality Control",
+            permission: 'QC',
+            icon: <ScienceQCIcon/>,
+            child: [
+                {
+                    title: "Control Materials",
+                    route: "qc.materials.index",
+                    permission: 'QC.Materials.List Materials',
+                    icon: <BiotechQCIcon fontSize="small"/>,
+                },
+                {
+                    title: "QC Runs",
+                    route: "qc.runs.index",
+                    permission: 'QC.Runs.List Runs',
+                    icon: <AddChartIcon fontSize="small"/>,
+                },
+            ]
+        },
+        {
             title: "System",
             permission: 'System',
             icon: <BugReport/>,
             child: [
+                {
+                    title: "Audit Log",
+                    route: "system.auditLog",
+                    permission: 'System.Audit Log.View Audit Log',
+                    icon: <AuditIcon fontSize="small"/>,
+                },
                 {
                     title: "Failed Jobs",
                     route: "system.failed-jobs",
