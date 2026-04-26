@@ -2,6 +2,7 @@ import React, {useState, useMemo, useEffect, useCallback, useRef} from 'react';
 import {Head, router, usePage} from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader.jsx';
+import SelectSearch from '@/Components/SelectSearch.jsx';
 import axios from 'axios';
 import {
     Box, Card, CardContent, Chip, FormControl, Grid2 as Grid,
@@ -106,7 +107,7 @@ const SkeletonRows = ({count = 5, cols = 7}) => (
 
 // ── Main component ────────────────────────────────────────────────────────────
 const Dashboard = () => {
-    const {summary, items_count, sections, filters: serverFilters, tests} = usePage().props;
+    const {summary, items_count, filters: serverFilters} = usePage().props;
     const theme = useTheme();
 
     // ── Active items state ────────────────────────────────────────────────────
@@ -116,11 +117,16 @@ const Dashboard = () => {
         date_from: serverFilters?.date_from ?? '',
         date_to: serverFilters?.date_to ?? '',
     });
+    // SelectSearch display object for section (holds {id, name})
+    const [sectionObj, setSectionObj] = useState(null);
+
     const [itemsData, setItemsData] = useState({data: [], meta: {total: items_count, per_page: 20, current_page: 1, last_page: 1}});
     const [itemsLoading, setItemsLoading] = useState(true);
 
     // ── Analytics state ───────────────────────────────────────────────────────
     const [af, setAf] = useState({a_preset: 'last_30_days', a_from: '', a_to: '', a_test_id: ''});
+    // SelectSearch display object for test (holds {id, name})
+    const [testObj, setTestObj] = useState(null);
     const [analyticsData, setAnalyticsData] = useState([]);
     const [analyticsDates, setAnalyticsDates] = useState(null);
     const [analyticsLoading, setAnalyticsLoading] = useState(true);
@@ -239,13 +245,19 @@ const Dashboard = () => {
                             </FormControl>
                         </Grid>
                         <Grid size={{xs: 12, sm: 6, md: 3}}>
-                            <FormControl fullWidth size="small">
-                                <InputLabel>Section</InputLabel>
-                                <Select label="Section" value={filters.section_id} onChange={(e) => applyFilters({section_id: e.target.value})}>
-                                    <MenuItem value="">All sections</MenuItem>
-                                    {sections.map((s) => (<MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>))}
-                                </Select>
-                            </FormControl>
+                            <SelectSearch
+                                value={sectionObj}
+                                onChange={(e) => {
+                                    const obj = e.target.value;
+                                    setSectionObj(obj ?? null);
+                                    applyFilters({section_id: obj?.id ?? ''});
+                                }}
+                                name="section"
+                                label="Section"
+                                url={route('api.sections.list')}
+                                fullWidth
+                                size="small"
+                            />
                         </Grid>
                         <Grid size={{xs: 12, sm: 6, md: 3}}>
                             <TextField label="From" type="date" size="small" fullWidth InputLabelProps={{shrink: true}} value={filters.date_from} onChange={(e) => applyFilters({date_from: e.target.value})}/>
@@ -403,13 +415,19 @@ const Dashboard = () => {
                             </Stack>
                         </Grid>
                         <Grid size={{xs: 12, sm: 4, md: 3}}>
-                            <FormControl fullWidth size="small">
-                                <InputLabel>Test</InputLabel>
-                                <Select label="Test" value={af.a_test_id} onChange={(e) => applyAnalytics({a_test_id: e.target.value})}>
-                                    <MenuItem value="">All Tests</MenuItem>
-                                    {tests.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
-                                </Select>
-                            </FormControl>
+                            <SelectSearch
+                                value={testObj}
+                                onChange={(e) => {
+                                    const obj = e.target.value;
+                                    setTestObj(obj ?? null);
+                                    applyAnalytics({a_test_id: obj?.id ?? ''});
+                                }}
+                                name="test"
+                                label="Test"
+                                url={route('api.tests.list')}
+                                fullWidth
+                                size="small"
+                            />
                         </Grid>
                         <Grid size={{xs: 12, sm: 4, md: 3}}>
                             <TextField label="Custom From" type="date" size="small" fullWidth InputLabelProps={{shrink: true}} value={af.a_from}
