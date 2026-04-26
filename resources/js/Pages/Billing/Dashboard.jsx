@@ -13,12 +13,13 @@ import {
 import {
     TrendingUp, Payments, AccountBalance, Receipt,
     FilterList, Refresh as RefreshIcon, BarChart as BarChartIcon,
-    DonutSmall,
+    DonutSmall, ShowChart,
 } from '@mui/icons-material';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell,
     Tooltip as ReTooltip, ResponsiveContainer, Legend,
-    PieChart, Pie, Sector,
+    PieChart, Pie,
+    ComposedChart, Line, Area,
 } from 'recharts';
 
 // ── Currency formatter ────────────────────────────────────────────────────────
@@ -148,6 +149,38 @@ const Dashboard = () => {
             preserveState: true, replace: true, only: ['summary', 'filters'],
         });
         fetchCharts(f);
+    };
+
+    // ── Trend chart state ──────────────────────────────────────────────────────
+    const [trendFilters, setTrendFilters] = useState({
+        t_has_invoice: '',
+        t_referrer_id: '',
+        t_test_id: '',
+        t_months: '12',
+    });
+    const [trendReferrerObj, setTrendReferrerObj] = useState(null);
+    const [trendTestObj, setTrendTestObj] = useState(null);
+    const [trendData, setTrendData] = useState([]);
+    const [trendLoading, setTrendLoading] = useState(true);
+    const trendAbortRef = useRef(null);
+
+    const fetchTrend = useCallback((f = trendFilters) => {
+        trendAbortRef.current?.abort();
+        trendAbortRef.current = new AbortController();
+        setTrendLoading(true);
+        const params = {...f};
+        Object.keys(params).forEach(k => (params[k] === '' || params[k] == null) && delete params[k]);
+        axios.get(route('api.billing.dashboard.trend'), {params, signal: trendAbortRef.current.signal})
+            .then(r => { setTrendData(r.data); setTrendLoading(false); })
+            .catch(e => { if (!axios.isCancel(e)) setTrendLoading(false); });
+    }, []);
+
+    useEffect(() => { fetchTrend(); }, []);
+
+    const applyTrendFilters = (patch) => {
+        const f = {...trendFilters, ...patch};
+        setTrendFilters(f);
+        fetchTrend(f);
     };
 
     const byTest     = chartsData?.by_test ?? [];
@@ -401,6 +434,120 @@ const Dashboard = () => {
                                     </Stack>
                                 </Grid>
                             </Grid>
+                        )
+                    }
+                </ChartSection>
+
+                {/* ── Monthly income trend ──────────────────────────────────── */}
+                <Divider sx={{mb: 3}}/>
+                <ChartSection title="Income Trend (by Month)" icon={ShowChart} loading={trendLoading}>
+                    {/* Trend filters */}
+                    <Paper variant="outlined" sx={{p: 2, mb: 2, borderRadius: 2}}>
+                        <Grid container spacing={2} alignItems="center">
+                            <Grid size={{xs: 12, sm: 6, md: 3}}>
+                                <FormControl fullWidth size="small">
+                                    <InputLabel>Invoiced</InputLabel>
+                                    <Select label="Invoiced" value={trendFilters.t_has_invoice}
+                                        onChange={(e) => applyTrendFilters({t_has_invoice: e.target.value})}>
+                                        <MenuItem value="">All (use acceptance date)</MenuItem>
+                                        <MenuItem value="1">Invoiced (use invoice date)</MenuItem>
+                                        <MenuItem value="0">Not invoiced (use acceptance date)</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid size={{xs: 12, sm: 6, md: 3}}>
+                                <SelectSearch
+                                    value={trendReferrerObj}
+                                    onChange={(e) => {
+                                        const obj = e.target.value;
+                                        setTrendReferrerObj(obj ?? null);
+                                        applyTrendFilters({t_referrer_id: obj?.id ?? ''});
+                                    }}
+                                    name="t_referrer"
+                                    label="Referrer"
+                                    url={route('api.referrers.list')}
+                                    fullWidth
+                                    size="small"
+                                />
+                            </Grid>
+                            <Grid size={{xs: 12, sm: 6, md: 3}}>
+                                <SelectSearch
+                                    value={trendTestObj}
+                                    onChange={(e) => {
+                                        const obj = e.target.value;
+                                        setTrendTestObj(obj ?? null);
+                                        applyTrendFilters({t_test_id: obj?.id ?? ''});
+                                    }}
+                                    name="t_test"
+                                    label="Test"
+                                    url={route('api.tests.list')}
+                                    fullWidth
+                                    size="small"
+                                />
+                            </Grid>
+                            <Grid size={{xs: 12, sm: 6, md: 3}}>
+                                <FormControl fullWidth size="small">
+                                    <InputLabel>Period</InputLabel>
+                                    <Select label="Period" value={trendFilters.t_months}
+                                        onChange={(e) => applyTrendFilters({t_months: e.target.value})}>
+                                        <MenuItem value="6">Last 6 months</MenuItem>
+                                        <MenuItem value="12">Last 12 months</MenuItem>
+                                        <MenuItem value="24">Last 24 months</MenuItem>
+                                        <MenuItem value="36">Last 36 months</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                        </Grid>
+                        {trendFilters.t_has_invoice === '1' && (
+                            <Typography variant="caption" color="info.main" sx={{mt: 1, display: 'block'}}>
+                                Dates are based on the invoice creation date.
+                            </Typography>
+                        )}
+                    </Paper>
+
+                    {trendData.length === 0
+                        ? <Typography color="text.secondary" textAlign="center" py={4}>No data</Typography>
+                        : (
+                            <>
+                                <ResponsiveContainer width="100%" height={320}>
+                                    <ComposedChart data={trendData} margin={{top: 8, right: 24, left: 8, bottom: 60}}>
+                                        <defs>
+                                            <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.25}/>
+                                                <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0}/>
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false}/>
+                                        <XAxis dataKey="label" angle={-40} textAnchor="end" tick={{fontSize: 11}} interval={0}/>
+                                        <YAxis tick={{fontSize: 11}} tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(1)}k` : v}
+                                            label={{value: 'OMR', angle: -90, position: 'insideLeft', offset: 10, fontSize: 11}}/>
+                                        <ReTooltip
+                                            formatter={(v, n) => [`OMR ${fmt(v)}`, n === 'income' ? 'Income' : 'Acceptances']}
+                                            labelFormatter={(l) => l}
+                                        />
+                                        <Legend verticalAlign="top"/>
+                                        <Area type="monotone" dataKey="income" name="income"
+                                            stroke={theme.palette.primary.main} strokeWidth={2}
+                                            fill="url(#incomeGrad)" dot={{r: 3}} activeDot={{r: 5}}/>
+                                        <Line type="monotone" dataKey="acceptance_count" name="acceptance_count"
+                                            stroke={theme.palette.secondary.main} strokeWidth={1.5}
+                                            dot={false} yAxisId={0} strokeDasharray="4 2"/>
+                                    </ComposedChart>
+                                </ResponsiveContainer>
+                                {/* Summary strip below chart */}
+                                <Stack direction="row" flexWrap="wrap" gap={2} mt={2} justifyContent="center">
+                                    <Typography variant="caption" color="text.secondary">
+                                        Total: <b>OMR {fmt(trendData.reduce((s, r) => s + r.income, 0))}</b>
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Peak: <b>{trendData.reduce((a, r) => r.income > a.income ? r : a, trendData[0])?.label}</b>
+                                        {' '}(OMR {fmt(Math.max(...trendData.map(r => r.income)))})
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Avg/month: <b>OMR {fmt(trendData.reduce((s,r) => s + r.income, 0) / trendData.length)}</b>
+                                    </Typography>
+                                </Stack>
+                            </>
                         )
                     }
                 </ChartSection>

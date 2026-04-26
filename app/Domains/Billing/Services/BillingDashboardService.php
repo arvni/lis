@@ -100,6 +100,74 @@ class BillingDashboardService
         ];
     }
 
+    // ── Monthly trend ─────────────────────────────────────────────────────────
+    // Filters: t_has_invoice ('1'=use invoice date, else acceptance date),
+    //          t_referrer_id, t_test_id, t_months (default 12, max 36)
+
+    public function getByMonth(array $filters): array
+    {
+        $tz     = 'Asia/Muscat';
+        $months = max(1, min(36, (int) ($filters['t_months'] ?? 12)));
+        $useInvoiceDate = ($filters['t_has_invoice'] ?? '') === '1';
+
+        $dateCol = $useInvoiceDate ? 'invoices.created_at' : 'acceptances.created_at';
+        $from    = Carbon::now($tz)->subMonths($months)->startOfMonth();
+        $to      = Carbon::now($tz)->endOfMonth();
+
+        $q = DB::table('acceptance_items')
+            ->join('acceptances', 'acceptances.id', '=', 'acceptance_items.acceptance_id')
+            ->leftJoin('invoices', 'invoices.id', '=', 'acceptances.invoice_id')
+            ->whereNull('acceptance_items.deleted_at')
+            ->whereNull('acceptances.deleted_at')
+            ->where('acceptances.status', '!=', 'Canceled')
+            ->whereBetween($dateCol, [$from, $to]);
+
+        if ($useInvoiceDate) {
+            $q->whereNotNull('acceptances.invoice_id');
+        } elseif (($filters['t_has_invoice'] ?? '') === '0') {
+            $q->whereNull('acceptances.invoice_id');
+        }
+
+        if (!empty($filters['t_referrer_id'])) {
+            $q->where('acceptances.referrer_id', $filters['t_referrer_id']);
+        }
+
+        if (!empty($filters['t_test_id'])) {
+            $q->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
+              ->where('method_tests.test_id', $filters['t_test_id']);
+        }
+
+        $rows = $q->selectRaw("
+                YEAR({$dateCol})                                                       AS year,
+                MONTH({$dateCol})                                                      AS month,
+                DATE_FORMAT({$dateCol}, '%Y-%m')                                       AS period,
+                ROUND(SUM(acceptance_items.price - acceptance_items.discount), 3)      AS income,
+                COUNT(DISTINCT acceptances.id)                                         AS acceptance_count
+            ")
+            ->groupByRaw("year, month, period")
+            ->orderByRaw("year, month")
+            ->get();
+
+        // Fill gaps so the chart has a point for every month in range
+        $map = $rows->keyBy('period');
+        $result = [];
+        $cursor = $from->copy()->startOfMonth();
+        while ($cursor->lte($to)) {
+            $key = $cursor->format('Y-m');
+            $row = $map->get($key);
+            $result[] = [
+                'period'           => $key,
+                'label'            => $cursor->format('M Y'),
+                'year'             => (int) $cursor->year,
+                'month'            => (int) $cursor->month,
+                'income'           => (float) ($row->income ?? 0),
+                'acceptance_count' => (int)   ($row->acceptance_count ?? 0),
+            ];
+            $cursor->addMonth();
+        }
+        return $result;
+    }
+
     // ── Income by test ────────────────────────────────────────────────────────
 
     public function getByTest(array $filters): array

@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\Reception\ListPatientsController;
 use App\Http\Controllers\Api\Reception\ListReferrerAcceptanceReportedOrExpectedToBeReportedController;
 use App\Http\Controllers\Api\Referrer\ListReferrersController;
 use App\Http\Controllers\Api\Billing\BillingDashboardDataController;
+use App\Http\Controllers\Api\Billing\BillingTrendController;
 use App\Http\Controllers\Billing\BillingDashboardController;
 use App\Http\Controllers\Billing\DailyCashReportController;
 use App\Http\Controllers\Billing\ExportInvoicesController;
@@ -298,6 +299,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get("daily-cash-report", DailyCashReportController::class)->name("dailyCashReport.export");
             Route::get("statements/{statement}", [StatementController::class, "show"])->name("statements.show");
             Route::get("dashboard-data", BillingDashboardDataController::class)->name("billing.dashboard.data");
+            Route::get("dashboard-trend", BillingTrendController::class)->name("billing.dashboard.trend");
         });
         Route::get("documents/{document}", [DocumentController::class, "download"])->name("api.documents.show");
         Route::group(["prefix" => "notifications"], function () {
