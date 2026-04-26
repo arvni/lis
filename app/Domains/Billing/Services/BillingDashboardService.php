@@ -31,31 +31,48 @@ class BillingDashboardService
         };
     }
 
-    // ── Shared base query (acceptance_items joined to acceptances + invoices) ─
+    // ── Shared base query ─────────────────────────────────────────────────────
+    // Date rules (acceptances.created_at is never used):
+    //   Invoiced items   → date = invoices.created_at
+    //   Non-invoiced items → date = acceptance_items.created_at
+    // has_invoice filter:
+    //   '1'  → invoiced only  (invoices.created_at in range)
+    //   '0'  → non-invoiced   (acceptance_items.created_at in range)
+    //   ''   → both (composite OR)
 
     private function baseQuery(array $filters, Carbon $from, Carbon $to)
     {
+        $hasInvoice = $filters['has_invoice'] ?? '';
+
         $q = DB::table('acceptance_items')
             ->join('acceptances', 'acceptances.id', '=', 'acceptance_items.acceptance_id')
             ->leftJoin('invoices', 'invoices.id', '=', 'acceptances.invoice_id')
             ->whereNull('acceptance_items.deleted_at')
-            ->where('acceptances.status', '!=', 'Canceled')
-            ->whereBetween('acceptances.created_at', [$from, $to]);
+            ->where('acceptances.status', '!=', 'Canceled');
+
+        if ($hasInvoice === '1') {
+            $q->whereNotNull('acceptances.invoice_id')
+              ->whereBetween('invoices.created_at', [$from, $to]);
+        } elseif ($hasInvoice === '0') {
+            $q->whereNull('acceptances.invoice_id')
+              ->whereBetween('acceptance_items.created_at', [$from, $to]);
+        } else {
+            // Both: invoiced row in range OR non-invoiced row in range
+            $q->where(function ($q) use ($from, $to) {
+                $q->where(function ($s) use ($from, $to) {
+                    $s->whereNotNull('acceptances.invoice_id')
+                      ->whereBetween('invoices.created_at', [$from, $to]);
+                })->orWhere(function ($s) use ($from, $to) {
+                    $s->whereNull('acceptances.invoice_id')
+                      ->whereBetween('acceptance_items.created_at', [$from, $to]);
+                });
+            });
+        }
 
         if (!empty($filters['referrer_id'])) {
             $q->where('acceptances.referrer_id', $filters['referrer_id']);
         }
 
-        // has_invoice: '1' = invoiced, '0' = not invoiced
-        if (isset($filters['has_invoice']) && $filters['has_invoice'] !== '') {
-            if ($filters['has_invoice'] === '1' || $filters['has_invoice'] === true) {
-                $q->whereNotNull('acceptances.invoice_id');
-            } else {
-                $q->whereNull('acceptances.invoice_id');
-            }
-        }
-
-        // test_ids: one or more test IDs (uses whereExists to avoid JOIN conflicts)
         $testIds = array_filter((array) ($filters['test_ids'] ?? []));
         if (!empty($testIds)) {
             $q->whereExists(fn($sub) => $sub
@@ -80,15 +97,14 @@ class BillingDashboardService
                           COUNT(DISTINCT acceptances.invoice_id)                  as invoice_count')
             ->first();
 
-        // Payments in the same window (join via acceptance → invoice → payment)
+        // Payments: filter by invoice creation date (not acceptance date)
         $paymentsQ = DB::table('payments')
             ->join('invoices', 'invoices.id', '=', 'payments.invoice_id')
-            ->join('acceptances', 'acceptances.invoice_id', '=', 'invoices.id')
-            ->where('acceptances.status', '!=', 'Canceled')
-            ->whereBetween('acceptances.created_at', [$from, $to]);
+            ->whereBetween('invoices.created_at', [$from, $to]);
 
         if (!empty($filters['referrer_id'])) {
-            $paymentsQ->where('acceptances.referrer_id', $filters['referrer_id']);
+            $paymentsQ->join('acceptances', 'acceptances.invoice_id', '=', 'invoices.id')
+                      ->where('acceptances.referrer_id', $filters['referrer_id']);
         }
         if (!empty($filters['payment_method'])) {
             $paymentsQ->where('payments.paymentMethod', $filters['payment_method']);
@@ -151,16 +167,16 @@ class BillingDashboardService
             ->get()
             ->keyBy('period');
 
-        // ② Non-invoiced — grouped by acceptance creation month
+        // ② Non-invoiced — grouped by acceptance_item creation month
         $nonInvQuery = DB::table('acceptance_items')
             ->join('acceptances', 'acceptances.id', '=', 'acceptance_items.acceptance_id')
             ->whereNull('acceptance_items.deleted_at')
             ->whereNull('acceptances.invoice_id')
             ->where('acceptances.status', '!=', 'Canceled')
-            ->whereBetween('acceptances.created_at', [$from, $to]);
+            ->whereBetween('acceptance_items.created_at', [$from, $to]);
         $applyCommon($nonInvQuery);
         $nonInvoicedMap = $nonInvQuery
-            ->selectRaw("DATE_FORMAT(acceptances.created_at, '%Y-%m') AS period,
+            ->selectRaw("DATE_FORMAT(acceptance_items.created_at, '%Y-%m') AS period,
                           ROUND(SUM(acceptance_items.price - acceptance_items.discount),3) AS income")
             ->groupBy('period')
             ->get()
@@ -270,13 +286,12 @@ class BillingDashboardService
         [$from, $to] = $this->resolveDates($filters);
 
         $q = DB::table('payments')
-            ->join('invoices',    'invoices.id',            '=', 'payments.invoice_id')
-            ->join('acceptances', 'acceptances.invoice_id', '=', 'invoices.id')
-            ->where('acceptances.status', '!=', 'Canceled')
-            ->whereBetween('acceptances.created_at', [$from, $to]);
+            ->join('invoices', 'invoices.id', '=', 'payments.invoice_id')
+            ->whereBetween('invoices.created_at', [$from, $to]);
 
         if (!empty($filters['referrer_id'])) {
-            $q->where('acceptances.referrer_id', $filters['referrer_id']);
+            $q->join('acceptances', 'acceptances.invoice_id', '=', 'invoices.id')
+              ->where('acceptances.referrer_id', $filters['referrer_id']);
         }
 
         $rows = $q->selectRaw('payments.paymentMethod as method,
