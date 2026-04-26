@@ -6,6 +6,7 @@ namespace App\Domains\Reception\Services;
 use App\Domains\Reception\Adapters\WorkflowAdapter;
 use App\Domains\Reception\DTOs\AcceptanceItemStateDTO;
 use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
+use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\AcceptanceItemState;
 use App\Domains\Reception\Repositories\AcceptanceItemRepository;
 use App\Domains\Reception\Repositories\AcceptanceItemStateRepository;
@@ -58,6 +59,34 @@ readonly class AcceptanceItemStateService
     public function deleteAcceptanceItemState(AcceptanceItemState $acceptanceItemState): void
     {
         $this->acceptanceItemStateRepository->deleteAcceptanceItemState($acceptanceItemState);
+    }
+
+    /**
+     * Create the first workflow state for an acceptance item + sample pair.
+     * Idempotent — skipped if a state already exists for that sample.
+     */
+    public function createFirstStateForAcceptanceItem(AcceptanceItem $acceptanceItem, int $sampleId): void
+    {
+        $hasState = $acceptanceItem->acceptanceItemStates()
+            ->where('sample_id', $sampleId)
+            ->exists();
+        if ($hasState) return;
+
+        $acceptanceItem->load('method.workflow.firstSection');
+        $firstSection = $acceptanceItem?->method?->workflow?->firstSection;
+
+        if ($firstSection) {
+            $this->storeAcceptanceItemState(new AcceptanceItemStateDTO(
+                $acceptanceItem->id,
+                $firstSection->id,
+                $firstSection->section_workflows_parameters,
+                AcceptanceItemStateStatus::WAITING,
+                $firstSection->section_workflows_order,
+                true,
+                null, null, null, null, null, null,
+                $sampleId
+            ));
+        }
     }
 
     /**

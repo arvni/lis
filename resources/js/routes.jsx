@@ -448,6 +448,12 @@ const routes = (sections = []) => {
                     permission: 'QC.Runs.List Runs',
                     icon: <AddChartIcon fontSize="small"/>,
                 },
+                {
+                    title: "Sample QC",
+                    route: "qc.samples.index",
+                    permission: 'QC.Samples.List Samples',
+                    icon: <ScienceQCIcon fontSize="small"/>,
+                },
             ]
         },
         {

@@ -17,13 +17,20 @@ class Sample extends Model
         "barcode",
         "status",
         "qc",
+        "qc_status",
+        "qc_approved_by_id",
+        "qc_approved_at",
         "storeAddress",
         "sample_type_id",
         "patient_id",
         "collection_date",
         "sampler_id",
         "material_id",
-        "received_at"
+        "received_at",
+    ];
+
+    protected $casts = [
+        "qc_approved_at" => "datetime",
     ];
 
     protected $searchable = [
@@ -98,6 +105,11 @@ class Sample extends Model
     public function qCPerson()
     {
         return $this->belongsTo(User::class, "qc_by_id");
+    }
+
+    public function qcApprovedBy()
+    {
+        return $this->belongsTo(User::class, "qc_approved_by_id");
     }
 
     public function samples()

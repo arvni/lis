@@ -36,27 +36,19 @@ class User extends Authenticatable
         'title',
         'stamp',
         'is_active',
+        'qc_auto_approve',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'email_verified_at'  => 'datetime',
         'mobile_verified_at' => 'datetime',
-        "is_active" => "boolean",
+        'is_active'          => 'boolean',
+        'qc_auto_approve'    => 'boolean',
     ];
 
     public function consultations()

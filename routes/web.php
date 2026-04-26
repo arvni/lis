@@ -161,9 +161,12 @@ use App\Http\Controllers\Inventory\SupplierController as InventorySupplierContro
 use App\Http\Controllers\Inventory\UnitController as InventoryUnitController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\QC\ApproveSampleQCController;
 use App\Http\Controllers\QC\QCMaterialController;
 use App\Http\Controllers\QC\QCRunController;
+use App\Http\Controllers\QC\QCSamplesController;
 use App\Http\Controllers\QC\QCTargetController;
+use App\Http\Controllers\QC\RejectSampleQCController;
 use App\Http\Controllers\System\AuditLogController;
 use App\Http\Controllers\System\FailedJobController;
 use App\Http\Controllers\ShowSectionController;
@@ -381,6 +384,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete("materials/{qcMaterial}/targets/{qcTarget}", [QCTargetController::class, "destroy"])->name("targets.destroy");
         Route::get("runs", [QCRunController::class, "index"])->name("runs.index");
         Route::post("runs", [QCRunController::class, "store"])->name("runs.store");
+        Route::get("samples", QCSamplesController::class)->name("samples.index");
+        Route::post("samples/{sample}/approve", ApproveSampleQCController::class)->name("samples.approve");
+        Route::post("samples/{sample}/reject", RejectSampleQCController::class)->name("samples.reject");
     });
 
     Route::group(["prefix" => "system", "as" => "system."], function () {

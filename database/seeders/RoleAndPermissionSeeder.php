@@ -341,6 +341,10 @@ class RoleAndPermissionSeeder extends Seeder
                     "List Runs",
                     "Create Run",
                 ],
+                "Samples" => [
+                    "List Samples",
+                    "Approve Sample",
+                ],
             ],
         ];
 
