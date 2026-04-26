@@ -1,7 +1,7 @@
 import React, {useState, useMemo} from 'react';
 import {Head, router, usePage} from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import PageHeader from '@/Components/PageHeader';
+import PageHeader from '@/Components/PageHeader.jsx';
 import {
     Box,
     Card,
@@ -145,7 +145,7 @@ const Dashboard = () => {
     }, [items]);
 
     return (
-        <AuthenticatedLayout>
+        <>
             <Head title="TAT Dashboard"/>
             <Box sx={{p: {xs: 1, sm: 2, md: 3}}}>
                 <PageHeader
@@ -397,8 +397,19 @@ const Dashboard = () => {
                     </TableContainer>
                 </Paper>
             </Box>
-        </AuthenticatedLayout>
+        </>
     );
 };
+
+Dashboard.layout = page => (
+    <AuthenticatedLayout
+        auth={page.props.auth}
+        children={page}
+        breadcrumbs={[
+            {title: 'Reception', link: route('acceptances.index'), icon: null},
+            {title: 'TAT Dashboard', link: '', icon: null},
+        ]}
+    />
+);
 
 export default Dashboard;
