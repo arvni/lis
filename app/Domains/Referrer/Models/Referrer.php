@@ -45,7 +45,7 @@ class Referrer extends Model
 
     public function getNameAttribute()
     {
-        return $this->attributes["fullName"];
+        return $this->attributes["fullName"] ?? null;
     }
 
     public function acceptances()

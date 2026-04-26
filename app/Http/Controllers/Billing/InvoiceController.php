@@ -83,7 +83,7 @@ class InvoiceController extends Controller
         $this->invoiceService->updateInvoice($invoice, $invoiceDto);
         $this->invoiceService->updateInvoiceItems($data["acceptance_items"]);
         $this->paymentService->updatePayments($invoice, $data["payments"]);
-        return redirect()->back()->with(["success" => true, "message" => "Invoice updated successfully."]);
+        return redirect()->back()->with(["success" => true, "status" => "Invoice updated successfully."]);
     }
 
     /**

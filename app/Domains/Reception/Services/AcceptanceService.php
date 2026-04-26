@@ -816,6 +816,7 @@ class AcceptanceService
                     if (count($referrer->reportReceivers)) {
                         foreach ($referrer->reportReceivers as $reportReceiver) {
                             $newReferrer = new Referrer();
+                            $newReferrer->fullName = $referrer->fullName;
                             $newReferrer->email = $reportReceiver;
                             $recipients[] = $newReferrer;
                         }

@@ -4,13 +4,14 @@ import {useSnackbar} from "notistack";
 const AlertComponent = ({success, status, errors}) => {
     const {enqueueSnackbar} = useSnackbar();
     useEffect(()=>{
-        if(success){
+        if(success && status){
             enqueueSnackbar(status, {variant :"success"});
         }else if(success!=null && status)
             enqueueSnackbar(status, {variant :"error"});
         if(errors && errors!={})
             for(let item in errors){
-                enqueueSnackbar(errors[item], {variant :"warning"});
+                const msg = Array.isArray(errors[item]) ? errors[item][0] : errors[item];
+                if(msg) enqueueSnackbar(msg, {variant :"warning"});
             }
     },[success,status, errors]);
     return (

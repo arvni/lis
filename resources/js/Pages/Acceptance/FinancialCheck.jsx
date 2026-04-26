@@ -71,7 +71,7 @@ const FinancialCheck = () => {
                 });
             },
             preserveState: true,
-            only: ['acceptances', 'success', 'errors']
+            only: ['acceptances', 'status', 'success', 'errors']
         });
     }, []);
 
