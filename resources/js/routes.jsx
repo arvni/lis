@@ -134,6 +134,12 @@ const routes = (sections = []) => {
                     icon: null,
                 },
                 {
+                    title: "Sample QC",
+                    route: "qc.samples.index",
+                    permission: 'QC.Samples.List Samples',
+                    icon: null,
+                },
+                {
                     title: "Samples List",
                     route: "samples.index",
                     permission: 'Sample Collection.Samples.List Samples',
@@ -428,31 +434,6 @@ const routes = (sections = []) => {
                     icon: <ShoppingCart size={20}/>,
                     route: "orderMaterials.index",
                     permission: 'Referrer.Order Materials.List Order Materials',
-                },
-            ]
-        },
-        {
-            title: "Quality Control",
-            permission: 'QC',
-            icon: <ScienceQCIcon/>,
-            child: [
-                {
-                    title: "Control Materials",
-                    route: "qc.materials.index",
-                    permission: 'QC.Materials.List Materials',
-                    icon: <BiotechQCIcon fontSize="small"/>,
-                },
-                {
-                    title: "QC Runs",
-                    route: "qc.runs.index",
-                    permission: 'QC.Runs.List Runs',
-                    icon: <AddChartIcon fontSize="small"/>,
-                },
-                {
-                    title: "Sample QC",
-                    route: "qc.samples.index",
-                    permission: 'QC.Samples.List Samples',
-                    icon: <ScienceQCIcon fontSize="small"/>,
                 },
             ]
         },
