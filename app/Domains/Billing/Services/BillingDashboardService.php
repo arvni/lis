@@ -39,7 +39,6 @@ class BillingDashboardService
             ->join('acceptances', 'acceptances.id', '=', 'acceptance_items.acceptance_id')
             ->leftJoin('invoices', 'invoices.id', '=', 'acceptances.invoice_id')
             ->whereNull('acceptance_items.deleted_at')
-            ->whereNull('acceptances.deleted_at')
             ->where('acceptances.status', '!=', 'Canceled')
             ->whereBetween('acceptances.created_at', [$from, $to]);
 
@@ -75,7 +74,6 @@ class BillingDashboardService
         $paymentsQ = DB::table('payments')
             ->join('invoices', 'invoices.id', '=', 'payments.invoice_id')
             ->join('acceptances', 'acceptances.invoice_id', '=', 'invoices.id')
-            ->whereNull('acceptances.deleted_at')
             ->where('acceptances.status', '!=', 'Canceled')
             ->whereBetween('acceptances.created_at', [$from, $to]);
 
@@ -118,7 +116,6 @@ class BillingDashboardService
             ->join('acceptances', 'acceptances.id', '=', 'acceptance_items.acceptance_id')
             ->leftJoin('invoices', 'invoices.id', '=', 'acceptances.invoice_id')
             ->whereNull('acceptance_items.deleted_at')
-            ->whereNull('acceptances.deleted_at')
             ->where('acceptances.status', '!=', 'Canceled')
             ->whereBetween($dateCol, [$from, $to]);
 
@@ -224,7 +221,6 @@ class BillingDashboardService
         $q = DB::table('payments')
             ->join('invoices',    'invoices.id',            '=', 'payments.invoice_id')
             ->join('acceptances', 'acceptances.invoice_id', '=', 'invoices.id')
-            ->whereNull('acceptances.deleted_at')
             ->where('acceptances.status', '!=', 'Canceled')
             ->whereBetween('acceptances.created_at', [$from, $to]);
 
