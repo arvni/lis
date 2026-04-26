@@ -109,70 +109,73 @@ class BillingDashboardService
     }
 
     // ── Monthly trend ─────────────────────────────────────────────────────────
-    // Filters: t_has_invoice ('1'=use invoice date, else acceptance date),
-    //          t_referrer_id, t_test_id, t_months (default 12, max 36)
+    // Always shows BOTH invoiced (using invoice date) and non-invoiced
+    // (using acceptance date) as separate series on the same x-axis.
+    // Filters: t_referrer_id, t_test_id, t_months (default 12, max 36)
 
     public function getByMonth(array $filters): array
     {
-        $tz     = 'Asia/Muscat';
+        $tz    = 'Asia/Muscat';
         $months = max(1, min(36, (int) ($filters['t_months'] ?? 12)));
-        $useInvoiceDate = ($filters['t_has_invoice'] ?? '') === '1';
-
-        $dateCol = $useInvoiceDate ? 'invoices.created_at' : 'acceptances.created_at';
-        $from    = Carbon::now($tz)->subMonths($months)->startOfMonth();
-        $to      = Carbon::now($tz)->endOfMonth();
-
-        $q = DB::table('acceptance_items')
-            ->join('acceptances', 'acceptances.id', '=', 'acceptance_items.acceptance_id')
-            ->leftJoin('invoices', 'invoices.id', '=', 'acceptances.invoice_id')
-            ->whereNull('acceptance_items.deleted_at')
-            ->where('acceptances.status', '!=', 'Canceled')
-            ->whereBetween($dateCol, [$from, $to]);
-
-        if ($useInvoiceDate) {
-            $q->whereNotNull('acceptances.invoice_id');
-        } elseif (($filters['t_has_invoice'] ?? '') === '0') {
-            $q->whereNull('acceptances.invoice_id');
-        }
-
-        if (!empty($filters['t_referrer_id'])) {
-            $q->where('acceptances.referrer_id', $filters['t_referrer_id']);
-        }
+        $from  = Carbon::now($tz)->subMonths($months)->startOfMonth();
+        $to    = Carbon::now($tz)->endOfMonth();
 
         $trendTestIds = array_filter((array) ($filters['t_test_id'] ?? []));
-        if (!empty($trendTestIds)) {
-            $q->whereExists(fn($sub) => $sub
-                ->from('method_tests')
-                ->whereColumn('method_tests.id', 'acceptance_items.method_test_id')
-                ->whereIn('method_tests.test_id', $trendTestIds)
-            );
-        }
 
-        $rows = $q->selectRaw("
-                YEAR({$dateCol})                                                       AS year,
-                MONTH({$dateCol})                                                      AS month,
-                DATE_FORMAT({$dateCol}, '%Y-%m')                                       AS period,
-                ROUND(SUM(acceptance_items.price - acceptance_items.discount), 3)      AS income,
-                COUNT(DISTINCT acceptances.id)                                         AS acceptance_count
-            ")
-            ->groupByRaw("year, month, period")
-            ->orderByRaw("year, month")
-            ->get();
+        // Helper closure to apply referrer + test filters
+        $applyCommon = function ($q) use ($filters, $trendTestIds) {
+            if (!empty($filters['t_referrer_id'])) {
+                $q->where('acceptances.referrer_id', $filters['t_referrer_id']);
+            }
+            if (!empty($trendTestIds)) {
+                $q->whereExists(fn($sub) => $sub
+                    ->from('method_tests')
+                    ->whereColumn('method_tests.id', 'acceptance_items.method_test_id')
+                    ->whereIn('method_tests.test_id', $trendTestIds)
+                );
+            }
+        };
 
-        // Fill gaps so the chart has a point for every month in range
-        $map = $rows->keyBy('period');
+        // ① Invoiced — grouped by invoice creation month
+        $invQuery = DB::table('acceptance_items')
+            ->join('acceptances', 'acceptances.id', '=', 'acceptance_items.acceptance_id')
+            ->join('invoices',    'invoices.id',    '=', 'acceptances.invoice_id')
+            ->whereNull('acceptance_items.deleted_at')
+            ->where('acceptances.status', '!=', 'Canceled')
+            ->whereBetween('invoices.created_at', [$from, $to]);
+        $applyCommon($invQuery);
+        $invoicedMap = $invQuery
+            ->selectRaw("DATE_FORMAT(invoices.created_at, '%Y-%m') AS period,
+                          ROUND(SUM(acceptance_items.price - acceptance_items.discount),3) AS income")
+            ->groupBy('period')
+            ->get()
+            ->keyBy('period');
+
+        // ② Non-invoiced — grouped by acceptance creation month
+        $nonInvQuery = DB::table('acceptance_items')
+            ->join('acceptances', 'acceptances.id', '=', 'acceptance_items.acceptance_id')
+            ->whereNull('acceptance_items.deleted_at')
+            ->whereNull('acceptances.invoice_id')
+            ->where('acceptances.status', '!=', 'Canceled')
+            ->whereBetween('acceptances.created_at', [$from, $to]);
+        $applyCommon($nonInvQuery);
+        $nonInvoicedMap = $nonInvQuery
+            ->selectRaw("DATE_FORMAT(acceptances.created_at, '%Y-%m') AS period,
+                          ROUND(SUM(acceptance_items.price - acceptance_items.discount),3) AS income")
+            ->groupBy('period')
+            ->get()
+            ->keyBy('period');
+
+        // Fill every month with both series (0 when no data)
         $result = [];
         $cursor = $from->copy()->startOfMonth();
         while ($cursor->lte($to)) {
             $key = $cursor->format('Y-m');
-            $row = $map->get($key);
             $result[] = [
-                'period'           => $key,
-                'label'            => $cursor->format('M Y'),
-                'year'             => (int) $cursor->year,
-                'month'            => (int) $cursor->month,
-                'income'           => (float) ($row->income ?? 0),
-                'acceptance_count' => (int)   ($row->acceptance_count ?? 0),
+                'period'              => $key,
+                'label'               => $cursor->format('M Y'),
+                'invoiced_income'     => (float) ($invoicedMap->get($key)?->income ?? 0),
+                'non_invoiced_income' => (float) ($nonInvoicedMap->get($key)?->income ?? 0),
             ];
             $cursor->addMonth();
         }
@@ -180,49 +183,53 @@ class BillingDashboardService
     }
 
     // ── Income by test ────────────────────────────────────────────────────────
-    // Panel items: price may be unevenly stored across constituent items.
-    // We compute the panel total first (all items sharing the same panel_id),
-    // then attribute panel_total / distinct_tests to each test in the panel.
-    // Non-panel items use their own price - discount directly.
 
     public function getByTest(array $filters): array
     {
         [$from, $to] = $this->resolveDates($filters);
+        // Charts always show both invoiced and non-invoiced — ignore has_invoice
+        $f = array_merge($filters, ['has_invoice' => '']);
 
-        // Subquery: per-panel totals using the same base filters
-        $panelTotals = (clone $this->baseQuery($filters, $from, $to))
+        // Panel subquery: split invoice totals per panel_id
+        $panelTotals = (clone $this->baseQuery($f, $from, $to))
             ->whereNotNull('acceptance_items.panel_id')
             ->selectRaw('
-                acceptance_items.panel_id                                       AS panel_id,
-                SUM(acceptance_items.price - acceptance_items.discount)         AS panel_total,
-                COUNT(DISTINCT acceptance_items.method_test_id)                 AS distinct_tests
+                acceptance_items.panel_id AS panel_id,
+                COUNT(DISTINCT acceptance_items.method_test_id) AS distinct_tests,
+                SUM(CASE WHEN acceptances.invoice_id IS NOT NULL
+                         THEN acceptance_items.price - acceptance_items.discount ELSE 0 END) AS inv_total,
+                SUM(CASE WHEN acceptances.invoice_id IS NULL
+                         THEN acceptance_items.price - acceptance_items.discount ELSE 0 END) AS non_inv_total
             ')
             ->groupBy('acceptance_items.panel_id');
 
-        $rows = (clone $this->baseQuery($filters, $from, $to))
+        $rows = (clone $this->baseQuery($f, $from, $to))
             ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
             ->join('tests',        'tests.id',        '=', 'method_tests.test_id')
             ->leftJoinSub($panelTotals, 'pt', 'pt.panel_id', '=', 'acceptance_items.panel_id')
             ->selectRaw('
-                tests.id                                                        AS test_id,
-                tests.name                                                      AS test_name,
-                COUNT(*)                                                        AS count,
-                ROUND(SUM(
-                    CASE WHEN acceptance_items.panel_id IS NULL
-                         THEN acceptance_items.price - acceptance_items.discount
-                         ELSE pt.panel_total / pt.distinct_tests
-                    END
-                ), 3)                                                           AS income
+                tests.id   AS test_id,
+                tests.name AS test_name,
+                COUNT(*)   AS count,
+                ROUND(SUM(CASE WHEN acceptance_items.panel_id IS NULL
+                               THEN (CASE WHEN acceptances.invoice_id IS NOT NULL
+                                         THEN acceptance_items.price - acceptance_items.discount ELSE 0 END)
+                               ELSE pt.inv_total / pt.distinct_tests END), 3) AS invoiced_income,
+                ROUND(SUM(CASE WHEN acceptance_items.panel_id IS NULL
+                               THEN (CASE WHEN acceptances.invoice_id IS NULL
+                                         THEN acceptance_items.price - acceptance_items.discount ELSE 0 END)
+                               ELSE pt.non_inv_total / pt.distinct_tests END), 3) AS non_invoiced_income
             ')
             ->groupBy('tests.id', 'tests.name')
-            ->orderByDesc('income')
+            ->orderByRaw('(invoiced_income + non_invoiced_income) DESC')
             ->limit(25)
             ->get();
 
         return $rows->map(fn($r) => [
-            'name'   => $r->test_name,
-            'income' => (float) $r->income,
-            'count'  => (int)   $r->count,
+            'name'               => $r->test_name,
+            'invoiced_income'    => (float) $r->invoiced_income,
+            'non_invoiced_income'=> (float) $r->non_invoiced_income,
+            'count'              => (int)   $r->count,
         ])->toArray();
     }
 
@@ -231,21 +238,28 @@ class BillingDashboardService
     public function getByReferrer(array $filters): array
     {
         [$from, $to] = $this->resolveDates($filters);
+        $f = array_merge($filters, ['has_invoice' => '']);
 
-        $rows = (clone $this->baseQuery($filters, $from, $to))
+        $rows = (clone $this->baseQuery($f, $from, $to))
             ->leftJoin('referrers', 'referrers.id', '=', 'acceptances.referrer_id')
-            ->selectRaw("COALESCE(referrers.fullName, 'Direct')                            as referrer_name,
-                          COUNT(DISTINCT acceptances.id)                                    as acceptance_count,
-                          ROUND(SUM(acceptance_items.price - acceptance_items.discount),3)  as income")
+            ->selectRaw("
+                COALESCE(referrers.fullName, 'Direct')                                          AS referrer_name,
+                COUNT(DISTINCT acceptances.id)                                                  AS acceptance_count,
+                ROUND(SUM(CASE WHEN acceptances.invoice_id IS NOT NULL
+                               THEN acceptance_items.price - acceptance_items.discount ELSE 0 END),3) AS invoiced_income,
+                ROUND(SUM(CASE WHEN acceptances.invoice_id IS NULL
+                               THEN acceptance_items.price - acceptance_items.discount ELSE 0 END),3) AS non_invoiced_income
+            ")
             ->groupBy('acceptances.referrer_id', 'referrers.fullName')
-            ->orderByDesc('income')
+            ->orderByRaw('(invoiced_income + non_invoiced_income) DESC')
             ->limit(20)
             ->get();
 
         return $rows->map(fn($r) => [
-            'name'             => $r->referrer_name,
-            'income'           => (float) $r->income,
-            'acceptance_count' => (int)   $r->acceptance_count,
+            'name'                => $r->referrer_name,
+            'invoiced_income'     => (float) $r->invoiced_income,
+            'non_invoiced_income' => (float) $r->non_invoiced_income,
+            'acceptance_count'    => (int)   $r->acceptance_count,
         ])->toArray();
     }
 

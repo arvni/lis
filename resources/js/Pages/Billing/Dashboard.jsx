@@ -63,14 +63,23 @@ const METHOD_COLORS = {card: '#4f46e5', cash: '#16a34a', credit: '#dc2626', tran
 const METHOD_LABELS = {card: 'Card', cash: 'Cash', credit: 'Credit', transfer: 'Transfer'};
 
 // ── Custom bar tooltip ────────────────────────────────────────────────────────
-const BarTooltip = ({active, payload, label}) => {
+const BarTooltip = ({active, payload}) => {
     if (!active || !payload?.length) return null;
     const d = payload[0].payload;
+    const total = (d.invoiced_income ?? 0) + (d.non_invoiced_income ?? 0);
     return (
-        <Paper elevation={3} sx={{p: 1.5, minWidth: 160}}>
+        <Paper elevation={3} sx={{p: 1.5, minWidth: 190}}>
             <Typography variant="body2" fontWeight="bold" gutterBottom>{d.name}</Typography>
-            <Typography variant="caption" display="block">Income: <b>OMR {fmt(d.income)}</b></Typography>
-            {d.count != null && <Typography variant="caption" display="block">Count: {d.count}</Typography>}
+            <Typography variant="caption" display="block" color="primary.main">
+                Invoiced: <b>OMR {fmt(d.invoiced_income)}</b>
+            </Typography>
+            <Typography variant="caption" display="block" color="warning.main">
+                Not invoiced: <b>OMR {fmt(d.non_invoiced_income)}</b>
+            </Typography>
+            <Typography variant="caption" display="block" color="text.secondary">
+                Total: OMR {fmt(total)}
+            </Typography>
+            {d.count != null && <Typography variant="caption" display="block">Items: {d.count}</Typography>}
             {d.acceptance_count != null && <Typography variant="caption" display="block">Acceptances: {d.acceptance_count}</Typography>}
         </Paper>
     );
@@ -163,9 +172,8 @@ const Dashboard = () => {
 
     // ── Trend chart state ──────────────────────────────────────────────────────
     const [trendFilters, setTrendFilters] = useState({
-        t_has_invoice: '',
         t_referrer_id: '',
-        t_test_id: [],   // array of IDs
+        t_test_id: [],
         t_months: '12',
     });
     const [trendReferrerObj, setTrendReferrerObj] = useState(null);
@@ -324,13 +332,11 @@ const Dashboard = () => {
                                     <BarChart data={byTest} margin={{top: 8, right: 16, left: 8, bottom: 80}}>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false}/>
                                         <XAxis dataKey="name" angle={-40} textAnchor="end" tick={{fontSize: 11}} interval={0}/>
-                                        <YAxis tick={{fontSize: 11}} tickFormatter={v => `${v}`}/>
+                                        <YAxis tick={{fontSize: 11}}/>
                                         <ReTooltip content={<BarTooltip/>}/>
-                                        <Bar dataKey="income" name="Income (OMR)" radius={[4,4,0,0]} fill={theme.palette.primary.main}>
-                                            {byTest.map((_, i) => (
-                                                <Cell key={i} fill={i % 2 === 0 ? theme.palette.primary.main : theme.palette.primary.light}/>
-                                            ))}
-                                        </Bar>
+                                        <Legend verticalAlign="top"/>
+                                        <Bar dataKey="invoiced_income" name="Invoiced" stackId="a" radius={[0,0,0,0]} fill={theme.palette.primary.main}/>
+                                        <Bar dataKey="non_invoiced_income" name="Not Invoiced" stackId="a" radius={[4,4,0,0]} fill={theme.palette.warning.main}/>
                                     </BarChart>
                                 </ResponsiveContainer>
                                 <TableContainer sx={{maxHeight: 260, mt: 2}}>
@@ -339,8 +345,10 @@ const Dashboard = () => {
                                             <TableRow>
                                                 <TableCell>#</TableCell>
                                                 <TableCell>Test</TableCell>
-                                                <TableCell align="right">Count</TableCell>
-                                                <TableCell align="right">Income (OMR)</TableCell>
+                                                <TableCell align="right">Items</TableCell>
+                                                <TableCell align="right" sx={{color: 'primary.main'}}>Invoiced</TableCell>
+                                                <TableCell align="right" sx={{color: 'warning.main'}}>Not Invoiced</TableCell>
+                                                <TableCell align="right">Total</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -349,7 +357,9 @@ const Dashboard = () => {
                                                     <TableCell>{i + 1}</TableCell>
                                                     <TableCell>{r.name}</TableCell>
                                                     <TableCell align="right">{r.count}</TableCell>
-                                                    <TableCell align="right"><b>{fmt(r.income)}</b></TableCell>
+                                                    <TableCell align="right">{fmt(r.invoiced_income)}</TableCell>
+                                                    <TableCell align="right">{fmt(r.non_invoiced_income)}</TableCell>
+                                                    <TableCell align="right"><b>{fmt(r.invoiced_income + r.non_invoiced_income)}</b></TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -366,17 +376,15 @@ const Dashboard = () => {
                         ? <Typography color="text.secondary" textAlign="center" py={4}>No data</Typography>
                         : (
                             <>
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <BarChart data={byReferrer} layout="vertical" margin={{top: 4, right: 80, left: 120, bottom: 4}}>
+                                <ResponsiveContainer width="100%" height={Math.max(260, byReferrer.length * 40)}>
+                                    <BarChart data={byReferrer} layout="vertical" margin={{top: 4, right: 100, left: 120, bottom: 4}}>
                                         <CartesianGrid strokeDasharray="3 3" horizontal={false}/>
-                                        <XAxis type="number" tick={{fontSize: 11}} tickFormatter={v => `${v}`}/>
+                                        <XAxis type="number" tick={{fontSize: 11}}/>
                                         <YAxis type="category" dataKey="name" tick={{fontSize: 11}} width={115}/>
                                         <ReTooltip content={<BarTooltip/>}/>
-                                        <Bar dataKey="income" name="Income (OMR)" radius={[0,4,4,0]}>
-                                            {byReferrer.map((_, i) => (
-                                                <Cell key={i} fill={i % 2 === 0 ? theme.palette.secondary.main : theme.palette.secondary.light}/>
-                                            ))}
-                                        </Bar>
+                                        <Legend verticalAlign="top"/>
+                                        <Bar dataKey="invoiced_income" name="Invoiced" stackId="a" fill={theme.palette.secondary.main} radius={[0,0,0,0]}/>
+                                        <Bar dataKey="non_invoiced_income" name="Not Invoiced" stackId="a" fill={theme.palette.warning.main} radius={[0,4,4,0]}/>
                                     </BarChart>
                                 </ResponsiveContainer>
                                 <TableContainer sx={{maxHeight: 220, mt: 2}}>
@@ -386,7 +394,9 @@ const Dashboard = () => {
                                                 <TableCell>#</TableCell>
                                                 <TableCell>Referrer</TableCell>
                                                 <TableCell align="right">Acceptances</TableCell>
-                                                <TableCell align="right">Income (OMR)</TableCell>
+                                                <TableCell align="right" sx={{color: 'secondary.main'}}>Invoiced</TableCell>
+                                                <TableCell align="right" sx={{color: 'warning.main'}}>Not Invoiced</TableCell>
+                                                <TableCell align="right">Total</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -395,7 +405,9 @@ const Dashboard = () => {
                                                     <TableCell>{i + 1}</TableCell>
                                                     <TableCell>{r.name}</TableCell>
                                                     <TableCell align="right">{r.acceptance_count}</TableCell>
-                                                    <TableCell align="right"><b>{fmt(r.income)}</b></TableCell>
+                                                    <TableCell align="right">{fmt(r.invoiced_income)}</TableCell>
+                                                    <TableCell align="right">{fmt(r.non_invoiced_income)}</TableCell>
+                                                    <TableCell align="right"><b>{fmt(r.invoiced_income + r.non_invoiced_income)}</b></TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -465,20 +477,11 @@ const Dashboard = () => {
                 {/* ── Monthly income trend ──────────────────────────────────── */}
                 <Divider sx={{mb: 3}}/>
                 <ChartSection title="Income Trend (by Month)" icon={ShowChart} loading={trendLoading}>
-                    {/* Trend filters */}
                     <Paper variant="outlined" sx={{p: 2, mb: 2, borderRadius: 2}}>
+                        <Typography variant="caption" color="text.secondary" display="block" mb={1.5}>
+                            Invoiced series uses invoice date · Not invoiced series uses acceptance date
+                        </Typography>
                         <Grid container spacing={2} alignItems="center">
-                            <Grid size={{xs: 12, sm: 6, md: 3}}>
-                                <FormControl fullWidth size="small">
-                                    <InputLabel>Invoiced</InputLabel>
-                                    <Select label="Invoiced" value={trendFilters.t_has_invoice}
-                                        onChange={(e) => applyTrendFilters({t_has_invoice: e.target.value})}>
-                                        <MenuItem value="">All (use acceptance date)</MenuItem>
-                                        <MenuItem value="1">Invoiced (use invoice date)</MenuItem>
-                                        <MenuItem value="0">Not invoiced (use acceptance date)</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Grid>
                             <Grid size={{xs: 12, sm: 6, md: 3}}>
                                 <SelectSearch
                                     value={trendReferrerObj}
@@ -523,11 +526,6 @@ const Dashboard = () => {
                                 </FormControl>
                             </Grid>
                         </Grid>
-                        {trendFilters.t_has_invoice === '1' && (
-                            <Typography variant="caption" color="info.main" sx={{mt: 1, display: 'block'}}>
-                                Dates are based on the invoice creation date.
-                            </Typography>
-                        )}
                     </Paper>
 
                     {trendData.length === 0
@@ -537,39 +535,38 @@ const Dashboard = () => {
                                 <ResponsiveContainer width="100%" height={320}>
                                     <ComposedChart data={trendData} margin={{top: 8, right: 24, left: 8, bottom: 60}}>
                                         <defs>
-                                            <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.25}/>
+                                            <linearGradient id="invGrad" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.3}/>
                                                 <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0}/>
+                                            </linearGradient>
+                                            <linearGradient id="nonInvGrad" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor={theme.palette.warning.main} stopOpacity={0.3}/>
+                                                <stop offset="95%" stopColor={theme.palette.warning.main} stopOpacity={0}/>
                                             </linearGradient>
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false}/>
                                         <XAxis dataKey="label" angle={-40} textAnchor="end" tick={{fontSize: 11}} interval={0}/>
                                         <YAxis tick={{fontSize: 11}} tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(1)}k` : v}
                                             label={{value: 'OMR', angle: -90, position: 'insideLeft', offset: 10, fontSize: 11}}/>
-                                        <ReTooltip
-                                            formatter={(v, n) => [`OMR ${fmt(v)}`, n === 'income' ? 'Income' : 'Acceptances']}
-                                            labelFormatter={(l) => l}
-                                        />
+                                        <ReTooltip formatter={(v, n) => [`OMR ${fmt(v)}`, n]} labelFormatter={l => l}/>
                                         <Legend verticalAlign="top"/>
-                                        <Area type="monotone" dataKey="income" name="income"
+                                        <Area type="monotone" dataKey="invoiced_income" name="Invoiced"
                                             stroke={theme.palette.primary.main} strokeWidth={2}
-                                            fill="url(#incomeGrad)" dot={{r: 3}} activeDot={{r: 5}}/>
-                                        <Line type="monotone" dataKey="acceptance_count" name="acceptance_count"
-                                            stroke={theme.palette.secondary.main} strokeWidth={1.5}
-                                            dot={false} yAxisId={0} strokeDasharray="4 2"/>
+                                            fill="url(#invGrad)" dot={{r: 3}} activeDot={{r: 5}}/>
+                                        <Area type="monotone" dataKey="non_invoiced_income" name="Not Invoiced"
+                                            stroke={theme.palette.warning.main} strokeWidth={2}
+                                            fill="url(#nonInvGrad)" dot={{r: 3}} activeDot={{r: 5}}/>
                                     </ComposedChart>
                                 </ResponsiveContainer>
-                                {/* Summary strip below chart */}
-                                <Stack direction="row" flexWrap="wrap" gap={2} mt={2} justifyContent="center">
-                                    <Typography variant="caption" color="text.secondary">
-                                        Total: <b>OMR {fmt(trendData.reduce((s, r) => s + r.income, 0))}</b>
+                                <Stack direction="row" flexWrap="wrap" gap={3} mt={2} justifyContent="center">
+                                    <Typography variant="caption" color="primary.main">
+                                        Invoiced total: <b>OMR {fmt(trendData.reduce((s,r) => s + r.invoiced_income, 0))}</b>
+                                    </Typography>
+                                    <Typography variant="caption" color="warning.main">
+                                        Not invoiced total: <b>OMR {fmt(trendData.reduce((s,r) => s + r.non_invoiced_income, 0))}</b>
                                     </Typography>
                                     <Typography variant="caption" color="text.secondary">
-                                        Peak: <b>{trendData.reduce((a, r) => r.income > a.income ? r : a, trendData[0])?.label}</b>
-                                        {' '}(OMR {fmt(Math.max(...trendData.map(r => r.income)))})
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                        Avg/month: <b>OMR {fmt(trendData.reduce((s,r) => s + r.income, 0) / trendData.length)}</b>
+                                        Grand total: <b>OMR {fmt(trendData.reduce((s,r) => s + r.invoiced_income + r.non_invoiced_income, 0))}</b>
                                     </Typography>
                                 </Stack>
                             </>
