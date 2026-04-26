@@ -272,8 +272,12 @@ class AcceptanceRepository
             // Assuming Acceptance model has a 'scopeSearch'
             $query->search($filters[self::FILTER_SEARCH]);
         }
-        if (isset($filters[self::FILTER_STATUS])) {
-            $query->where('acceptances.status', $filters[self::FILTER_STATUS]); // Qualify column name
+        if (isset($filters[self::FILTER_STATUS]) && !empty($filters[self::FILTER_STATUS])) {
+            $statuses = (array) $filters[self::FILTER_STATUS];
+            $query->whereIn('acceptances.status', $statuses);
+        }
+        if (!empty($filters['priority'])) {
+            $query->where('acceptances.priority', $filters['priority']);
         }
         if (isset($filters[self::FILTER_REFERRER_ID])) {
             $query->where('acceptances.referrer_id', $filters[self::FILTER_REFERRER_ID]); // Qualify column name

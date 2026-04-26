@@ -42,6 +42,8 @@ import {
     Warning as WarningIcon,
     MergeType as MergeTypeIcon,
     FileDownload as FileDownloadIcon,
+    FlashOn as FlashOnIcon,
+    PriorityHigh as PriorityHighIcon,
 } from "@mui/icons-material";
 import {calculateBusinessDays, formatDate} from "@/Services/helper.js";
 import AddPoolingDialog from "@/Pages/Acceptance/Components/AddPoolingDialog.jsx";
@@ -337,6 +339,32 @@ const Index = () => {
                             fontSize: '0.75rem',
                             borderRadius: 1
                         }}
+                    />
+                );
+            }
+        },
+        {
+            field: 'priority',
+            headerName: 'Priority',
+            type: "string",
+            flex: 0.25,
+            display: "flex",
+            renderCell: ({row}) => {
+                const map = {
+                    stat: {label: 'STAT', color: 'error', icon: <FlashOnIcon fontSize="small"/>},
+                    urgent: {label: 'Urgent', color: 'warning', icon: <PriorityHighIcon fontSize="small"/>},
+                    routine: {label: 'Routine', color: 'default', icon: null},
+                };
+                const cfg = map[row.priority] ?? map.routine;
+                if (row.priority === 'routine') return null;
+                return (
+                    <Chip
+                        icon={cfg.icon}
+                        label={cfg.label}
+                        color={cfg.color}
+                        size="small"
+                        variant="filled"
+                        sx={{fontWeight: 600, fontSize: '0.7rem'}}
                     />
                 );
             }

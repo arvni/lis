@@ -97,6 +97,8 @@ use App\Http\Controllers\Reception\ShowAcceptanceItemController;
 use App\Http\Controllers\Reception\ToggleReportlessAcceptanceItemController;
 use App\Http\Controllers\Reception\ToggleSamplelessAcceptanceItemController;
 use App\Http\Controllers\Reception\UnPublishReportController;
+use App\Http\Controllers\Reception\TATDashboardController;
+use App\Http\Controllers\Reception\UpdateAcceptancePriorityController;
 use App\Http\Controllers\Reception\UpdatePatientMetaController;
 use App\Http\Controllers\Reception\AddPoolingController;
 use App\Http\Controllers\Reception\Api\GetAcceptancePoolingItemsController;
@@ -187,6 +189,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("acceptances/{acceptance}/print", PrintAcceptanceController::class)->name("acceptances.print");
         Route::get("acceptances/{acceptance}/barcodes", PrintAcceptanceBarcodeController::class)->name("acceptances.barcodes");
         Route::put("acceptances/{acceptance}/cancel", CancelAcceptanceController::class)->name("acceptances.cancel");
+        Route::patch("acceptances/{acceptance}/priority", UpdateAcceptancePriorityController::class)->name("acceptances.updatePriority");
+        Route::get("tat-dashboard", TATDashboardController::class)->name("tat.dashboard");
         Route::post("acceptances/{acceptance}/pooling", AddPoolingController::class)->name("acceptances.addPooling");
         Route::put("acceptances/{acceptance}/check-status", CheckAcceptanceStatusController::class)->name("acceptances.checkStatus");
         Route::post("acceptances/{acceptance}/prescription", AcceptancePrescriptionController::class)

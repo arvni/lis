@@ -123,6 +123,10 @@ const Filter = ({defaultFilter, onFilter}) => {
         setFilter(prevState => ({...prevState, status: []}));
     }, []);
 
+    const handleClearPriority = useCallback(() => {
+        setFilter(prevState => ({...prevState, priority: ""}));
+    }, []);
+
     const handleKeyPress = useCallback((e) => {
         if (e.key === 'Enter' && !dateError) {
             handleSubmit(e);
@@ -205,6 +209,14 @@ const Filter = ({defaultFilter, onFilter}) => {
                             label={`Status: ${filter.status.length} selected`}
                             size="small"
                             onDelete={handleClearStatus}
+                            variant="outlined"
+                        />
+                    )}
+                    {filter?.priority && (
+                        <Chip
+                            label={`Priority: ${filter.priority}`}
+                            size="small"
+                            onDelete={handleClearPriority}
                             variant="outlined"
                         />
                     )}
@@ -306,6 +318,24 @@ const Filter = ({defaultFilter, onFilter}) => {
                                         {name}
                                     </MenuItem>
                                 ))}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+
+                    <Grid size={{xs: 12, sm: 6, md: 4}}>
+                        <FormControl fullWidth>
+                            <InputLabel id="priority-select-label">Priority</InputLabel>
+                            <Select
+                                labelId="priority-select-label"
+                                name="priority"
+                                label="Priority"
+                                value={filter?.priority || ""}
+                                onChange={handleChange}
+                            >
+                                <MenuItem value="">All</MenuItem>
+                                <MenuItem value="stat">STAT</MenuItem>
+                                <MenuItem value="urgent">Urgent</MenuItem>
+                                <MenuItem value="routine">Routine</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>

@@ -25,8 +25,11 @@ import {
     Science,
     PlaylistAddCheck,
     WhatsApp,
-    Sync
+    Sync,
+    FlashOn as FlashOnIcon,
+    PriorityHigh as PriorityHighIcon,
 } from "@mui/icons-material";
+import {FormControl, InputLabel, Select, MenuItem} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid2";
 import React, {useMemo, useState} from "react";
@@ -142,6 +145,51 @@ const SummaryCard = ({title, value, icon, color = "primary"}) => {
     );
 };
 
+const PRIORITY_CONFIG = {
+    stat:    {label: 'STAT',    color: 'error',   icon: FlashOnIcon},
+    urgent:  {label: 'Urgent',  color: 'warning',  icon: PriorityHighIcon},
+    routine: {label: 'Routine', color: 'default',  icon: null},
+};
+
+const PriorityChanger = ({acceptance, canUpdatePriority}) => {
+    const [open, setOpen] = React.useState(false);
+    const cfg = PRIORITY_CONFIG[acceptance.priority ?? 'routine'] ?? PRIORITY_CONFIG.routine;
+    const Icon = cfg.icon;
+
+    const handleChange = (e) => {
+        router.patch(route('acceptances.updatePriority', acceptance.id), {priority: e.target.value}, {
+            preserveState: true, only: ['acceptance']
+        });
+        setOpen(false);
+    };
+
+    return (
+        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+            <Chip
+                icon={Icon ? <Icon fontSize="small"/> : undefined}
+                label={cfg.label}
+                color={cfg.color}
+                variant="filled"
+                sx={{fontWeight: 'bold'}}
+            />
+            {canUpdatePriority && (
+                <FormControl size="small" sx={{minWidth: 110}}>
+                    <InputLabel>Priority</InputLabel>
+                    <Select
+                        label="Priority"
+                        value={acceptance.priority ?? 'routine'}
+                        onChange={handleChange}
+                    >
+                        <MenuItem value="routine">Routine</MenuItem>
+                        <MenuItem value="urgent">Urgent</MenuItem>
+                        <MenuItem value="stat">STAT</MenuItem>
+                    </Select>
+                </FormControl>
+            )}
+        </Box>
+    );
+};
+
 const ReportMethodItem = ({icon: Icon, color = "info", text}) => (
     <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
         <Icon color={color}/>
@@ -176,7 +224,8 @@ const Show = ({
                   canEdit,
                   status,
                   canPrintBarcode,
-                  canCheckStatus
+                  canCheckStatus,
+                  canUpdatePriority,
               }) => {
 
     // State
@@ -268,6 +317,7 @@ const Show = ({
             <PageHeader title={`Acceptance #${acceptance.id}`}
                         subtitle={`Created: ${new Date(acceptance.created_at).toLocaleString()}`} actions={[
                 <StatusChip status={acceptance.status}/>,
+                <PriorityChanger key="priority" acceptance={acceptance} canUpdatePriority={canUpdatePriority}/>,
                 canCheckStatus && (
                     <Button
                         key="check-status"

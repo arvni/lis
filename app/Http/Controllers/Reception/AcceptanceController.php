@@ -143,6 +143,7 @@ class AcceptanceController extends Controller
             "canEdit" => Gate::allows("update", $acceptance),
             "canPrintBarcode" => $acceptance->status === AcceptanceStatus::PROCESSING || $acceptance->status === AcceptanceStatus::REPORTED || $acceptance->status === AcceptanceStatus::WAITING_FOR_ENTERING || $acceptance->status === AcceptanceStatus::POOLING,
             "canCheckStatus" => Gate::allows("checkStatus", $acceptance),
+            "canUpdatePriority" => Gate::allows("Reception.Acceptances.Update Priority"),
         ];
         return Inertia::render('Acceptance/Show', $data);
     }

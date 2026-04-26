@@ -7,6 +7,7 @@ use App\Domains\Billing\Models\Payment;
 use App\Domains\Consultation\Models\Consultation;
 use App\Domains\Document\Models\Document;
 use App\Domains\Laboratory\Models\Doctor;
+use App\Domains\Reception\Enums\AcceptancePriority;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Referrer\Models\Referrer;
 use App\Domains\Referrer\Models\ReferrerOrder;
@@ -43,13 +44,15 @@ class Acceptance extends Model
         "financial_approved",
         "financial_approved_by",
         "financial_approved_at",
+        "priority",
     ];
 
     protected $casts = [
         "out_patient" => "boolean",
         "waiting_for_pooling" => "boolean",
         "howReport" => "json",
-        "status" => AcceptanceStatus::class
+        "status" => AcceptanceStatus::class,
+        "priority" => AcceptancePriority::class,
     ];
 
     protected $searchable = [
