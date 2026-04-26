@@ -166,7 +166,12 @@ class RoleAndPermissionSeeder extends Seeder
                     "Delete Acceptance",
                     "List Acceptance",
                     "Toggle Reportless Acceptance Item",
+                    "Toggle Sampleless Acceptance Item",
                     "Check Status",
+                    "Update Priority",
+                ],
+                "TAT" => [
+                    "View Dashboard",
                 ],
             ],
             "Advance Settings" => [
