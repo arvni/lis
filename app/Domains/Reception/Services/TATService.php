@@ -60,7 +60,7 @@ class TATService
                 'method' => fn($q) => $q->select('methods.id', 'methods.name', 'methods.turnaround_time'),
             ])
             ->whereDoesntHave('report')
-            ->whereHas('acceptance');
+            ->whereHas('acceptance', fn($q) => $q->where('waiting_for_pooling', false));
 
         if (!empty($filters['priority'])) {
             $query->whereHas('acceptance', fn($q) => $q->where('priority', $filters['priority']));
