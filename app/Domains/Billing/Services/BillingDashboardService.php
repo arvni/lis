@@ -1,0 +1,183 @@
+<?php
+
+namespace App\Domains\Billing\Services;
+
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+
+class BillingDashboardService
+{
+    // ── Date preset resolver ──────────────────────────────────────────────────
+
+    public function resolveDates(array $filters): array
+    {
+        $tz  = 'Asia/Muscat';
+        $now = Carbon::now($tz);
+
+        return match ($filters['preset'] ?? null) {
+            'today'         => [$now->copy()->startOfDay(),              $now->copy()->endOfDay()],
+            'this_week'     => [$now->copy()->startOfWeek(),             $now->copy()->endOfWeek()],
+            'last_week'     => [$now->copy()->subWeek()->startOfWeek(),  $now->copy()->subWeek()->endOfWeek()],
+            'this_month'    => [$now->copy()->startOfMonth(),            $now->copy()->endOfMonth()],
+            'last_month'    => [$now->copy()->subMonth()->startOfMonth(),$now->copy()->subMonth()->endOfMonth()],
+            'last_7_days'   => [$now->copy()->subDays(7),                $now],
+            'last_30_days'  => [$now->copy()->subDays(30),               $now],
+            'last_3_months' => [$now->copy()->subMonths(3),              $now],
+            'this_year'     => [$now->copy()->startOfYear(),             $now->copy()->endOfYear()],
+            default         => [
+                !empty($filters['from']) ? Carbon::parse($filters['from'], $tz)->startOfDay() : $now->copy()->subDays(30),
+                !empty($filters['to'])   ? Carbon::parse($filters['to'],   $tz)->endOfDay()   : $now,
+            ],
+        };
+    }
+
+    // ── Shared base query (acceptance_items joined to acceptances + invoices) ─
+
+    private function baseQuery(array $filters, Carbon $from, Carbon $to)
+    {
+        $q = DB::table('acceptance_items')
+            ->join('acceptances', 'acceptances.id', '=', 'acceptance_items.acceptance_id')
+            ->leftJoin('invoices', 'invoices.id', '=', 'acceptances.invoice_id')
+            ->whereNull('acceptance_items.deleted_at')
+            ->whereNull('acceptances.deleted_at')
+            ->where('acceptances.status', '!=', 'Canceled')
+            ->whereBetween('acceptances.created_at', [$from, $to]);
+
+        if (!empty($filters['referrer_id'])) {
+            $q->where('acceptances.referrer_id', $filters['referrer_id']);
+        }
+
+        // has_invoice: '1' = invoiced, '0' = not invoiced
+        if (isset($filters['has_invoice']) && $filters['has_invoice'] !== '') {
+            if ($filters['has_invoice'] === '1' || $filters['has_invoice'] === true) {
+                $q->whereNotNull('acceptances.invoice_id');
+            } else {
+                $q->whereNull('acceptances.invoice_id');
+            }
+        }
+
+        return $q;
+    }
+
+    // ── Summary cards ─────────────────────────────────────────────────────────
+
+    public function getSummary(array $filters): array
+    {
+        [$from, $to] = $this->resolveDates($filters);
+
+        $revenue = (clone $this->baseQuery($filters, $from, $to))
+            ->selectRaw('SUM(acceptance_items.price - acceptance_items.discount) as revenue,
+                          COUNT(DISTINCT acceptances.id)                          as acceptance_count,
+                          COUNT(DISTINCT acceptances.invoice_id)                  as invoice_count')
+            ->first();
+
+        // Payments in the same window (join via acceptance → invoice → payment)
+        $paymentsQ = DB::table('payments')
+            ->join('invoices', 'invoices.id', '=', 'payments.invoice_id')
+            ->join('acceptances', 'acceptances.invoice_id', '=', 'invoices.id')
+            ->whereNull('acceptances.deleted_at')
+            ->where('acceptances.status', '!=', 'Canceled')
+            ->whereBetween('acceptances.created_at', [$from, $to]);
+
+        if (!empty($filters['referrer_id'])) {
+            $paymentsQ->where('acceptances.referrer_id', $filters['referrer_id']);
+        }
+        if (!empty($filters['payment_method'])) {
+            $paymentsQ->where('payments.paymentMethod', $filters['payment_method']);
+        }
+
+        $collected = (float) $paymentsQ->sum('payments.price');
+        $totalRevenue = (float) ($revenue->revenue ?? 0);
+
+        return [
+            'revenue'          => round($totalRevenue, 3),
+            'collected'        => round($collected, 3),
+            'outstanding'      => round($totalRevenue - $collected, 3),
+            'acceptance_count' => (int) ($revenue->acceptance_count ?? 0),
+            'invoice_count'    => (int) ($revenue->invoice_count ?? 0),
+            'from'             => $from->toDateString(),
+            'to'               => $to->toDateString(),
+        ];
+    }
+
+    // ── Income by test ────────────────────────────────────────────────────────
+
+    public function getByTest(array $filters): array
+    {
+        [$from, $to] = $this->resolveDates($filters);
+
+        $rows = (clone $this->baseQuery($filters, $from, $to))
+            ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
+            ->join('tests',        'tests.id',        '=', 'method_tests.test_id')
+            ->selectRaw('tests.name                                                       as test_name,
+                          COUNT(*)                                                         as count,
+                          ROUND(SUM(acceptance_items.price - acceptance_items.discount),3) as income')
+            ->groupBy('tests.id', 'tests.name')
+            ->orderByDesc('income')
+            ->limit(25)
+            ->get();
+
+        return $rows->map(fn($r) => [
+            'name'   => $r->test_name,
+            'income' => (float) $r->income,
+            'count'  => (int)   $r->count,
+        ])->toArray();
+    }
+
+    // ── Income by referrer ────────────────────────────────────────────────────
+
+    public function getByReferrer(array $filters): array
+    {
+        [$from, $to] = $this->resolveDates($filters);
+
+        $rows = (clone $this->baseQuery($filters, $from, $to))
+            ->leftJoin('referrers', 'referrers.id', '=', 'acceptances.referrer_id')
+            ->selectRaw("COALESCE(referrers.fullName, 'Direct')                            as referrer_name,
+                          COUNT(DISTINCT acceptances.id)                                    as acceptance_count,
+                          ROUND(SUM(acceptance_items.price - acceptance_items.discount),3)  as income")
+            ->groupBy('acceptances.referrer_id', 'referrers.fullName')
+            ->orderByDesc('income')
+            ->limit(20)
+            ->get();
+
+        return $rows->map(fn($r) => [
+            'name'             => $r->referrer_name,
+            'income'           => (float) $r->income,
+            'acceptance_count' => (int)   $r->acceptance_count,
+        ])->toArray();
+    }
+
+    // ── Payments by method ────────────────────────────────────────────────────
+
+    public function getByPaymentMethod(array $filters): array
+    {
+        [$from, $to] = $this->resolveDates($filters);
+
+        $q = DB::table('payments')
+            ->join('invoices',    'invoices.id',            '=', 'payments.invoice_id')
+            ->join('acceptances', 'acceptances.invoice_id', '=', 'invoices.id')
+            ->whereNull('acceptances.deleted_at')
+            ->where('acceptances.status', '!=', 'Canceled')
+            ->whereBetween('acceptances.created_at', [$from, $to]);
+
+        if (!empty($filters['referrer_id'])) {
+            $q->where('acceptances.referrer_id', $filters['referrer_id']);
+        }
+
+        $rows = $q->selectRaw('payments.paymentMethod as method,
+                                COUNT(*)              as count,
+                                ROUND(SUM(payments.price),3) as total')
+            ->groupBy('payments.paymentMethod')
+            ->orderByDesc('total')
+            ->get();
+
+        $grandTotal = $rows->sum('total');
+
+        return $rows->map(fn($r) => [
+            'method'  => $r->method,
+            'total'   => (float) $r->total,
+            'count'   => (int)   $r->count,
+            'percent' => $grandTotal > 0 ? round(($r->total / $grandTotal) * 100, 1) : 0,
+        ])->toArray();
+    }
+}

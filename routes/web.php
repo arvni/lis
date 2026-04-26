@@ -19,6 +19,8 @@ use App\Http\Controllers\Api\ListRoleController;
 use App\Http\Controllers\Api\Reception\ListPatientsController;
 use App\Http\Controllers\Api\Reception\ListReferrerAcceptanceReportedOrExpectedToBeReportedController;
 use App\Http\Controllers\Api\Referrer\ListReferrersController;
+use App\Http\Controllers\Api\Billing\BillingDashboardDataController;
+use App\Http\Controllers\Billing\BillingDashboardController;
 use App\Http\Controllers\Billing\DailyCashReportController;
 use App\Http\Controllers\Billing\ExportInvoicesController;
 use App\Http\Controllers\Billing\InvoiceController;
@@ -295,6 +297,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get("invoices-for-statement", ListReferrerInvoicesController::class)->name("invoices.forStatement");
             Route::get("daily-cash-report", DailyCashReportController::class)->name("dailyCashReport.export");
             Route::get("statements/{statement}", [StatementController::class, "show"])->name("statements.show");
+            Route::get("dashboard-data", BillingDashboardDataController::class)->name("billing.dashboard.data");
         });
         Route::get("documents/{document}", [DocumentController::class, "download"])->name("api.documents.show");
         Route::group(["prefix" => "notifications"], function () {
@@ -304,6 +307,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     });
     Route::group(["prefix" => "billing"], function () {
+        Route::get("dashboard", BillingDashboardController::class)->name("billing.dashboard");
         Route::get("invoices/export", ExportInvoicesController::class)->name("invoices.export");
         Route::resource("invoices", InvoiceController::class);
         Route::get("statements/{statement}/export", StatementExportController::class)->name("statements.export");

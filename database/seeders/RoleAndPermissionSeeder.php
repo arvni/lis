@@ -106,6 +106,9 @@ class RoleAndPermissionSeeder extends Seeder
                 "Admin Create Report",
             ],
             "Billing" => [
+                "Dashboard" => [
+                    "View Dashboard",
+                ],
                 "Invoices" => [
                     "View Invoice",
                     "Create Invoice",

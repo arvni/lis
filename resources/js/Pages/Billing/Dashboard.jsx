@@ -1,0 +1,423 @@
+import React, {useState, useEffect, useRef, useCallback} from 'react';
+import {Head, router, usePage} from '@inertiajs/react';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PageHeader from '@/Components/PageHeader.jsx';
+import SelectSearch from '@/Components/SelectSearch.jsx';
+import axios from 'axios';
+import {
+    Box, Card, CardContent, Chip, FormControl, Grid2 as Grid,
+    InputLabel, MenuItem, Paper, Select, Skeleton, Stack,
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    TextField, Typography, alpha, useTheme, Button, Divider, CircularProgress, Tooltip,
+} from '@mui/material';
+import {
+    TrendingUp, Payments, AccountBalance, Receipt,
+    FilterList, Refresh as RefreshIcon, BarChart as BarChartIcon,
+    DonutSmall,
+} from '@mui/icons-material';
+import {
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell,
+    Tooltip as ReTooltip, ResponsiveContainer, Legend,
+    PieChart, Pie, Sector,
+} from 'recharts';
+
+// ── Currency formatter ────────────────────────────────────────────────────────
+const fmt = (n) => new Intl.NumberFormat('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3}).format(n ?? 0);
+
+// ── Summary card ──────────────────────────────────────────────────────────────
+const SummaryCard = ({title, value, icon: Icon, color, subtitle}) => {
+    const theme = useTheme();
+    return (
+        <Card elevation={2} sx={{borderRadius: 2, borderTop: `4px solid ${theme.palette[color]?.main ?? theme.palette.grey[400]}`, height: '100%'}}>
+            <CardContent>
+                <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                    <Box>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>{title}</Typography>
+                        <Typography variant="h4" fontWeight="bold" color={`${color}.main`}>{value}</Typography>
+                        {subtitle && <Typography variant="caption" color="text.secondary">{subtitle}</Typography>}
+                    </Box>
+                    <Box sx={{p: 1.5, borderRadius: 2, bgcolor: alpha(theme.palette[color]?.main ?? '#ccc', 0.12)}}>
+                        <Icon sx={{color: `${color}.main`, fontSize: 28}}/>
+                    </Box>
+                </Stack>
+            </CardContent>
+        </Card>
+    );
+};
+
+// ── Date presets ──────────────────────────────────────────────────────────────
+const PRESETS = [
+    {key: 'today',         label: 'Today'},
+    {key: 'this_week',     label: 'This Week'},
+    {key: 'last_week',     label: 'Last Week'},
+    {key: 'this_month',    label: 'This Month'},
+    {key: 'last_month',    label: 'Last Month'},
+    {key: 'last_7_days',   label: 'Last 7 Days'},
+    {key: 'last_30_days',  label: 'Last 30 Days'},
+    {key: 'last_3_months', label: 'Last 3 Months'},
+    {key: 'this_year',     label: 'This Year'},
+];
+
+const METHOD_COLORS = {card: '#4f46e5', cash: '#16a34a', credit: '#dc2626', transfer: '#d97706'};
+const METHOD_LABELS = {card: 'Card', cash: 'Cash', credit: 'Credit', transfer: 'Transfer'};
+
+// ── Custom bar tooltip ────────────────────────────────────────────────────────
+const BarTooltip = ({active, payload, label}) => {
+    if (!active || !payload?.length) return null;
+    const d = payload[0].payload;
+    return (
+        <Paper elevation={3} sx={{p: 1.5, minWidth: 160}}>
+            <Typography variant="body2" fontWeight="bold" gutterBottom>{d.name}</Typography>
+            <Typography variant="caption" display="block">Income: <b>OMR {fmt(d.income)}</b></Typography>
+            {d.count != null && <Typography variant="caption" display="block">Count: {d.count}</Typography>}
+            {d.acceptance_count != null && <Typography variant="caption" display="block">Acceptances: {d.acceptance_count}</Typography>}
+        </Paper>
+    );
+};
+
+// ── Custom pie label ──────────────────────────────────────────────────────────
+const PieLabel = ({cx, cy, midAngle, innerRadius, outerRadius, percent, name}) => {
+    if (percent < 0.04) return null;
+    const RADIAN = Math.PI / 180;
+    const r = innerRadius + (outerRadius - innerRadius) * 0.55;
+    const x = cx + r * Math.cos(-midAngle * RADIAN);
+    const y = cy + r * Math.sin(-midAngle * RADIAN);
+    return (
+        <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={12} fontWeight="bold">
+            {`${(percent * 100).toFixed(1)}%`}
+        </text>
+    );
+};
+
+// ── Section wrapper ───────────────────────────────────────────────────────────
+const ChartSection = ({title, icon: Icon, loading, children}) => {
+    const theme = useTheme();
+    return (
+        <Paper elevation={1} sx={{borderRadius: 2, overflow: 'hidden', mb: 3}}>
+            <Box sx={{p: 2, borderBottom: `1px solid ${theme.palette.divider}`, display: 'flex', alignItems: 'center', gap: 1}}>
+                <Icon fontSize="small" color="primary"/>
+                <Typography variant="subtitle1" fontWeight="bold">{title}</Typography>
+                {loading && <CircularProgress size={16} sx={{ml: 1}}/>}
+            </Box>
+            <Box sx={{p: 2}}>
+                {loading
+                    ? <Skeleton variant="rectangular" height={280} sx={{borderRadius: 1}}/>
+                    : children
+                }
+            </Box>
+        </Paper>
+    );
+};
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+const Dashboard = () => {
+    const {summary, filters: serverFilters} = usePage().props;
+    const theme = useTheme();
+
+    const [filters, setFilters] = useState({
+        preset: serverFilters?.preset ?? 'last_30_days',
+        from: serverFilters?.from ?? '',
+        to: serverFilters?.to ?? '',
+        referrer_id: serverFilters?.referrer_id ?? '',
+        has_invoice: serverFilters?.has_invoice ?? '',
+        payment_method: serverFilters?.payment_method ?? '',
+    });
+    const [referrerObj, setReferrerObj] = useState(null);
+
+    const [chartsData, setChartsData] = useState(null);
+    const [chartsLoading, setChartsLoading] = useState(true);
+    const abortRef = useRef(null);
+
+    const fetchCharts = useCallback((f = filters) => {
+        abortRef.current?.abort();
+        abortRef.current = new AbortController();
+        setChartsLoading(true);
+        const params = {...f};
+        Object.keys(params).forEach(k => (params[k] === '' || params[k] == null) && delete params[k]);
+        axios.get(route('api.billing.dashboard.data'), {params, signal: abortRef.current.signal})
+            .then(r => { setChartsData(r.data); setChartsLoading(false); })
+            .catch(e => { if (!axios.isCancel(e)) setChartsLoading(false); });
+    }, []);
+
+    useEffect(() => { fetchCharts(); }, []);
+
+    const applyFilters = (patch) => {
+        const f = {...filters, ...patch};
+        setFilters(f);
+        router.get(route('billing.dashboard'), f, {
+            preserveState: true, replace: true, only: ['summary', 'filters'],
+        });
+        fetchCharts(f);
+    };
+
+    const byTest     = chartsData?.by_test ?? [];
+    const byReferrer = chartsData?.by_referrer ?? [];
+    const byMethod   = chartsData?.by_payment_method ?? [];
+
+    return (
+        <>
+            <Head title="Billing Dashboard"/>
+            <Box sx={{p: {xs: 1, sm: 2, md: 3}}}>
+                <PageHeader
+                    title="Billing Dashboard"
+                    subtitle={summary ? `${summary.from} → ${summary.to}` : ''}
+                />
+
+                {/* ── Summary cards ─────────────────────────────────────────── */}
+                <Grid container spacing={2} sx={{mb: 3}}>
+                    <Grid size={{xs: 12, sm: 6, md: 3}}>
+                        <SummaryCard title="Total Revenue" value={`OMR ${fmt(summary?.revenue)}`} icon={TrendingUp} color="primary" subtitle="Price − discount"/>
+                    </Grid>
+                    <Grid size={{xs: 12, sm: 6, md: 3}}>
+                        <SummaryCard title="Collected" value={`OMR ${fmt(summary?.collected)}`} icon={Payments} color="success" subtitle="Sum of payments"/>
+                    </Grid>
+                    <Grid size={{xs: 12, sm: 6, md: 3}}>
+                        <SummaryCard title="Outstanding" value={`OMR ${fmt(summary?.outstanding)}`} icon={AccountBalance} color={summary?.outstanding > 0 ? 'warning' : 'success'} subtitle="Revenue − collected"/>
+                    </Grid>
+                    <Grid size={{xs: 12, sm: 6, md: 3}}>
+                        <SummaryCard title="Invoices" value={summary?.invoice_count ?? '—'} icon={Receipt} color="info" subtitle={`${summary?.acceptance_count ?? '—'} acceptances`}/>
+                    </Grid>
+                </Grid>
+
+                {/* ── Filter panel ──────────────────────────────────────────── */}
+                <Paper elevation={1} sx={{p: 2, mb: 3, borderRadius: 2}}>
+                    <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+                        <FilterList fontSize="small" color="action"/>
+                        <Typography variant="subtitle2" color="text.secondary">Filters</Typography>
+                        <Box sx={{ml: 'auto'}}>
+                            <Button size="small" startIcon={<RefreshIcon/>} onClick={() => fetchCharts(filters)} disabled={chartsLoading}>
+                                Refresh
+                            </Button>
+                        </Box>
+                    </Stack>
+
+                    {/* Date presets */}
+                    <Stack direction="row" flexWrap="wrap" gap={1} mb={2}>
+                        {PRESETS.map(p => (
+                            <Button key={p.key} size="small"
+                                variant={filters.preset === p.key ? 'contained' : 'outlined'}
+                                onClick={() => applyFilters({preset: p.key, from: '', to: ''})}>
+                                {p.label}
+                            </Button>
+                        ))}
+                    </Stack>
+
+                    <Grid container spacing={2}>
+                        <Grid size={{xs: 12, sm: 6, md: 3}}>
+                            <TextField label="Custom From" type="date" size="small" fullWidth
+                                InputLabelProps={{shrink: true}} value={filters.from}
+                                onChange={(e) => applyFilters({from: e.target.value, preset: ''})}/>
+                        </Grid>
+                        <Grid size={{xs: 12, sm: 6, md: 3}}>
+                            <TextField label="Custom To" type="date" size="small" fullWidth
+                                InputLabelProps={{shrink: true}} value={filters.to}
+                                onChange={(e) => applyFilters({to: e.target.value, preset: ''})}/>
+                        </Grid>
+                        <Grid size={{xs: 12, sm: 6, md: 3}}>
+                            <SelectSearch
+                                value={referrerObj}
+                                onChange={(e) => {
+                                    const obj = e.target.value;
+                                    setReferrerObj(obj ?? null);
+                                    applyFilters({referrer_id: obj?.id ?? ''});
+                                }}
+                                name="referrer"
+                                label="Referrer"
+                                url={route('api.referrers.list')}
+                                fullWidth
+                                size="small"
+                            />
+                        </Grid>
+                        <Grid size={{xs: 12, sm: 6, md: 3}}>
+                            <FormControl fullWidth size="small">
+                                <InputLabel>Invoiced</InputLabel>
+                                <Select label="Invoiced" value={filters.has_invoice}
+                                    onChange={(e) => applyFilters({has_invoice: e.target.value})}>
+                                    <MenuItem value="">All</MenuItem>
+                                    <MenuItem value="1">Invoiced</MenuItem>
+                                    <MenuItem value="0">Not invoiced</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid size={{xs: 12, sm: 6, md: 3}}>
+                            <FormControl fullWidth size="small">
+                                <InputLabel>Payment Method</InputLabel>
+                                <Select label="Payment Method" value={filters.payment_method}
+                                    onChange={(e) => applyFilters({payment_method: e.target.value})}>
+                                    <MenuItem value="">All methods</MenuItem>
+                                    <MenuItem value="cash">Cash</MenuItem>
+                                    <MenuItem value="card">Card</MenuItem>
+                                    <MenuItem value="transfer">Transfer</MenuItem>
+                                    <MenuItem value="credit">Credit</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                    </Grid>
+                </Paper>
+
+                <Divider sx={{mb: 3}}/>
+
+                {/* ── Income by test ────────────────────────────────────────── */}
+                <ChartSection title="Income by Test" icon={BarChartIcon} loading={chartsLoading}>
+                    {byTest.length === 0
+                        ? <Typography color="text.secondary" textAlign="center" py={4}>No data</Typography>
+                        : (
+                            <>
+                                <ResponsiveContainer width="100%" height={320}>
+                                    <BarChart data={byTest} margin={{top: 8, right: 16, left: 8, bottom: 80}}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false}/>
+                                        <XAxis dataKey="name" angle={-40} textAnchor="end" tick={{fontSize: 11}} interval={0}/>
+                                        <YAxis tick={{fontSize: 11}} tickFormatter={v => `${v}`}/>
+                                        <ReTooltip content={<BarTooltip/>}/>
+                                        <Bar dataKey="income" name="Income (OMR)" radius={[4,4,0,0]} fill={theme.palette.primary.main}>
+                                            {byTest.map((_, i) => (
+                                                <Cell key={i} fill={i % 2 === 0 ? theme.palette.primary.main : theme.palette.primary.light}/>
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                                <TableContainer sx={{maxHeight: 260, mt: 2}}>
+                                    <Table size="small" stickyHeader>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>#</TableCell>
+                                                <TableCell>Test</TableCell>
+                                                <TableCell align="right">Count</TableCell>
+                                                <TableCell align="right">Income (OMR)</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {byTest.map((r, i) => (
+                                                <TableRow key={i} sx={{'&:hover': {bgcolor: alpha(theme.palette.primary.main, 0.04)}}}>
+                                                    <TableCell>{i + 1}</TableCell>
+                                                    <TableCell>{r.name}</TableCell>
+                                                    <TableCell align="right">{r.count}</TableCell>
+                                                    <TableCell align="right"><b>{fmt(r.income)}</b></TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </>
+                        )
+                    }
+                </ChartSection>
+
+                {/* ── Income by referrer ────────────────────────────────────── */}
+                <ChartSection title="Income by Referrer" icon={BarChartIcon} loading={chartsLoading}>
+                    {byReferrer.length === 0
+                        ? <Typography color="text.secondary" textAlign="center" py={4}>No data</Typography>
+                        : (
+                            <>
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <BarChart data={byReferrer} layout="vertical" margin={{top: 4, right: 80, left: 120, bottom: 4}}>
+                                        <CartesianGrid strokeDasharray="3 3" horizontal={false}/>
+                                        <XAxis type="number" tick={{fontSize: 11}} tickFormatter={v => `${v}`}/>
+                                        <YAxis type="category" dataKey="name" tick={{fontSize: 11}} width={115}/>
+                                        <ReTooltip content={<BarTooltip/>}/>
+                                        <Bar dataKey="income" name="Income (OMR)" radius={[0,4,4,0]}>
+                                            {byReferrer.map((_, i) => (
+                                                <Cell key={i} fill={i % 2 === 0 ? theme.palette.secondary.main : theme.palette.secondary.light}/>
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                                <TableContainer sx={{maxHeight: 220, mt: 2}}>
+                                    <Table size="small" stickyHeader>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>#</TableCell>
+                                                <TableCell>Referrer</TableCell>
+                                                <TableCell align="right">Acceptances</TableCell>
+                                                <TableCell align="right">Income (OMR)</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {byReferrer.map((r, i) => (
+                                                <TableRow key={i} sx={{'&:hover': {bgcolor: alpha(theme.palette.secondary.main, 0.04)}}}>
+                                                    <TableCell>{i + 1}</TableCell>
+                                                    <TableCell>{r.name}</TableCell>
+                                                    <TableCell align="right">{r.acceptance_count}</TableCell>
+                                                    <TableCell align="right"><b>{fmt(r.income)}</b></TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </>
+                        )
+                    }
+                </ChartSection>
+
+                {/* ── Payment method breakdown ──────────────────────────────── */}
+                <ChartSection title="Payments by Method" icon={DonutSmall} loading={chartsLoading}>
+                    {byMethod.length === 0
+                        ? <Typography color="text.secondary" textAlign="center" py={4}>No payments</Typography>
+                        : (
+                            <Grid container spacing={3} alignItems="center">
+                                <Grid size={{xs: 12, md: 5}}>
+                                    <ResponsiveContainer width="100%" height={280}>
+                                        <PieChart>
+                                            <Pie data={byMethod} dataKey="total" nameKey="method"
+                                                cx="50%" cy="50%" outerRadius={110} innerRadius={50}
+                                                labelLine={false} label={<PieLabel/>}>
+                                                {byMethod.map((entry, i) => (
+                                                    <Cell key={i} fill={METHOD_COLORS[entry.method] ?? theme.palette.grey[400]}/>
+                                                ))}
+                                            </Pie>
+                                            <ReTooltip formatter={(v, n) => [`OMR ${fmt(v)}`, METHOD_LABELS[n] ?? n]}/>
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </Grid>
+                                <Grid size={{xs: 12, md: 7}}>
+                                    <Stack spacing={1.5}>
+                                        {byMethod.map((r, i) => (
+                                            <Box key={i}>
+                                                <Stack direction="row" justifyContent="space-between" mb={0.5}>
+                                                    <Stack direction="row" spacing={1} alignItems="center">
+                                                        <Box sx={{width: 12, height: 12, borderRadius: '50%', bgcolor: METHOD_COLORS[r.method] ?? theme.palette.grey[400]}}/>
+                                                        <Typography variant="body2" fontWeight="medium">
+                                                            {METHOD_LABELS[r.method] ?? r.method}
+                                                        </Typography>
+                                                        <Chip label={`${r.count} txn`} size="small" variant="outlined" sx={{fontSize: '0.65rem', height: 18}}/>
+                                                    </Stack>
+                                                    <Stack direction="row" spacing={2} alignItems="center">
+                                                        <Typography variant="body2" color="text.secondary">{r.percent}%</Typography>
+                                                        <Typography variant="body2" fontWeight="bold">OMR {fmt(r.total)}</Typography>
+                                                    </Stack>
+                                                </Stack>
+                                                <Box sx={{height: 6, borderRadius: 3, bgcolor: alpha(METHOD_COLORS[r.method] ?? theme.palette.grey[400], 0.15)}}>
+                                                    <Box sx={{height: '100%', borderRadius: 3, width: `${r.percent}%`, bgcolor: METHOD_COLORS[r.method] ?? theme.palette.grey[400], transition: 'width 0.6s ease'}}/>
+                                                </Box>
+                                            </Box>
+                                        ))}
+                                        <Divider/>
+                                        <Stack direction="row" justifyContent="space-between">
+                                            <Typography variant="body2" color="text.secondary">Total collected</Typography>
+                                            <Typography variant="body2" fontWeight="bold">
+                                                OMR {fmt(byMethod.reduce((s, r) => s + r.total, 0))}
+                                            </Typography>
+                                        </Stack>
+                                    </Stack>
+                                </Grid>
+                            </Grid>
+                        )
+                    }
+                </ChartSection>
+            </Box>
+        </>
+    );
+};
+
+Dashboard.layout = page => (
+    <AuthenticatedLayout
+        auth={page.props.auth}
+        children={page}
+        breadcrumbs={[
+            {title: 'Billing', link: route('invoices.index'), icon: null},
+            {title: 'Dashboard', link: '', icon: null},
+        ]}
+    />
+);
+
+export default Dashboard;

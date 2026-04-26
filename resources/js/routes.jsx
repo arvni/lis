@@ -185,6 +185,12 @@ const routes = (sections = []) => {
             icon: <ReceiptIcon/>,
             child: [
                 {
+                    title: "Dashboard",
+                    icon: <Analytics/>,
+                    route: "billing.dashboard",
+                    permission: 'Billing.Dashboard.View Dashboard',
+                },
+                {
                     title: "Invoices",
                     icon: <ReceiptIcon/>,
                     route: "invoices.index",
