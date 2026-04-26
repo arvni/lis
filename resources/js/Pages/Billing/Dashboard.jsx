@@ -129,7 +129,6 @@ const Dashboard = () => {
         from: serverFilters?.from ?? '',
         to: serverFilters?.to ?? '',
         referrer_id: serverFilters?.referrer_id ?? '',
-        has_invoice: serverFilters?.has_invoice ?? '',
         payment_method: serverFilters?.payment_method ?? '',
         test_ids: [],
     });
@@ -276,17 +275,6 @@ const Dashboard = () => {
                                 fullWidth
                                 size="small"
                             />
-                        </Grid>
-                        <Grid size={{xs: 12, sm: 6, md: 3}}>
-                            <FormControl fullWidth size="small">
-                                <InputLabel>Invoiced</InputLabel>
-                                <Select label="Invoiced" value={filters.has_invoice}
-                                    onChange={(e) => applyFilters({has_invoice: e.target.value})}>
-                                    <MenuItem value="">All</MenuItem>
-                                    <MenuItem value="1">Invoiced</MenuItem>
-                                    <MenuItem value="0">Not invoiced</MenuItem>
-                                </Select>
-                            </FormControl>
                         </Grid>
                         <Grid size={{xs: 12, sm: 6, md: 3}}>
                             <FormControl fullWidth size="small">
