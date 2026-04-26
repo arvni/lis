@@ -2,6 +2,7 @@
 
 namespace App\Domains\Reception\Services;
 
+use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Models\AcceptanceItem;
 use Carbon\Carbon;
@@ -60,7 +61,8 @@ class TATService
                 'method' => fn($q) => $q->select('methods.id', 'methods.name', 'methods.turnaround_time'),
             ])
             ->whereDoesntHave('report')
-            ->whereHas('acceptance', fn($q) => $q->where('waiting_for_pooling', false));
+            ->whereHas('acceptance', fn($q) => $q->where('waiting_for_pooling', false))
+            ->whereHas('test', fn($q) => $q->where('type', '!=', TestType::SERVICE->value));
 
         if (!empty($filters['priority'])) {
             $query->whereHas('acceptance', fn($q) => $q->where('priority', $filters['priority']));
