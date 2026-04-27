@@ -331,16 +331,6 @@ class RoleAndPermissionSeeder extends Seeder
                 ],
             ],
             "QC" => [
-                "Materials" => [
-                    "List Materials",
-                    "Create Material",
-                    "Edit Material",
-                    "Delete Material",
-                ],
-                "Runs" => [
-                    "List Runs",
-                    "Create Run",
-                ],
                 "Samples" => [
                     "List Samples",
                     "Approve Sample",

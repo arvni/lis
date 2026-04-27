@@ -162,10 +162,7 @@ use App\Http\Controllers\Inventory\UnitController as InventoryUnitController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\QC\ApproveSampleQCController;
-use App\Http\Controllers\QC\QCMaterialController;
-use App\Http\Controllers\QC\QCRunController;
 use App\Http\Controllers\QC\QCSamplesController;
-use App\Http\Controllers\QC\QCTargetController;
 use App\Http\Controllers\QC\RejectSampleQCController;
 use App\Http\Controllers\System\AuditLogController;
 use App\Http\Controllers\System\FailedJobController;
@@ -378,12 +375,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get("test-list", ShowTestListController::class)->name("test-list");
 
     Route::group(["prefix" => "qc", "as" => "qc."], function () {
-        Route::resource("materials", QCMaterialController::class)->except("create", "edit", "show");
-        Route::get("materials/{qcMaterial}/targets", [QCTargetController::class, "index"])->name("targets.index");
-        Route::post("materials/{qcMaterial}/targets", [QCTargetController::class, "store"])->name("targets.store");
-        Route::delete("materials/{qcMaterial}/targets/{qcTarget}", [QCTargetController::class, "destroy"])->name("targets.destroy");
-        Route::get("runs", [QCRunController::class, "index"])->name("runs.index");
-        Route::post("runs", [QCRunController::class, "store"])->name("runs.store");
         Route::get("samples", QCSamplesController::class)->name("samples.index");
         Route::post("samples/{sample}/approve", ApproveSampleQCController::class)->name("samples.approve");
         Route::post("samples/{sample}/reject", RejectSampleQCController::class)->name("samples.reject");
