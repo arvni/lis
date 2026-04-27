@@ -212,7 +212,9 @@ const Dashboard = () => {
                             {summary.by_section.map((s) => (
                                 <Grid key={s.section} size={{xs: 12, sm: 6, md: 4, lg: 3}}>
                                     <Box sx={{p: 1.5, borderRadius: 1.5, border: `1px solid ${theme.palette.divider}`, bgcolor: s.breached > 0 ? alpha(theme.palette.error.main, 0.06) : 'background.paper'}}>
-                                        <Typography variant="body2" fontWeight="medium" noWrap>{s.section}</Typography>
+                                        <Link href={route('sections.show', s.section_id)} style={{textDecoration: 'none', color: 'inherit'}}>
+                                            <Typography variant="body2" fontWeight="medium" noWrap color="primary.main" sx={{'&:hover': {textDecoration: 'underline'}}}>{s.section}</Typography>
+                                        </Link>
                                         <Stack direction="row" spacing={1} mt={0.5}>
                                             <Typography variant="caption" color="text.secondary">{s.count} active</Typography>
                                             <Typography variant="caption" color="text.secondary">·</Typography>

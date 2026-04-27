@@ -203,9 +203,10 @@ class TATService
         $rows = $this->getItems($filters);
 
         $bySection = $rows
-            ->flatMap(fn($r) => collect($r['sections'])->map(fn($s) => ['section' => $s['name'], 'row' => $r]))
+            ->flatMap(fn($r) => collect($r['sections'])->map(fn($s) => ['section_id' => $s['id'], 'section' => $s['name'], 'row' => $r]))
             ->groupBy('section')
             ->map(fn($group) => [
+                'section_id'  => $group->first()['section_id'],
                 'section'     => $group->first()['section'],
                 'count'       => $group->count(),
                 'avg_elapsed' => round($group->avg(fn($g) => $g['row']['elapsed_working_days']), 1),
