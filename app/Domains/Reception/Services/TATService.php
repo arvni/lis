@@ -239,32 +239,44 @@ class TATService
             ->select(
                 'tests.id as test_id',
                 'tests.name as test_name',
-                DB::raw('COUNT(*) as count'),
-                DB::raw('ROUND(AVG(TIMESTAMPDIFF(MINUTE, acceptance_items.created_at, reports.published_at)) / 60, 1) as avg_hours'),
-                DB::raw('ROUND(MIN(TIMESTAMPDIFF(MINUTE, acceptance_items.created_at, reports.published_at)) / 60, 1) as min_hours'),
-                DB::raw('ROUND(MAX(TIMESTAMPDIFF(MINUTE, acceptance_items.created_at, reports.published_at)) / 60, 1) as max_hours'),
-                DB::raw('methods.turnaround_time as target_days')
-            )
-            ->groupBy('tests.id', 'tests.name', 'methods.turnaround_time')
-            ->orderByDesc('avg_hours');
+                'methods.turnaround_time as target_days',
+                'acceptance_items.created_at as item_created_at',
+                'reports.published_at as report_published_at'
+            );
 
         if (!empty($filters['a_test_id'])) {
             $query->where('tests.id', $filters['a_test_id']);
         }
 
-        return $query->get()->map(fn($row) => [
-            'test_id'      => $row->test_id,
-            'test_name'    => $row->test_name,
-            'count'        => $row->count,
-            'avg_hours'    => (float) $row->avg_hours,
-            'avg_days'     => round($row->avg_hours / 24, 2),
-            'min_hours'    => (float) $row->min_hours,
-            'max_hours'    => (float) $row->max_hours,
-            'target_hours' => $row->target_days ? $row->target_days * 24 : null,
-            'on_target'    => $row->target_days
-                ? round($row->avg_hours / 24, 2) <= $row->target_days
-                : null,
-        ])->toArray();
+        return $query->get()
+            ->groupBy('test_id')
+            ->map(function ($items) {
+                $first = $items->first();
+
+                $workingDays = $items->map(fn($item) =>
+                    $this->elapsedWorkingDays(
+                        Carbon::parse($item->item_created_at),
+                        Carbon::parse($item->report_published_at)
+                    )
+                );
+
+                $avgDays    = round($workingDays->avg(), 1);
+                $targetDays = $first->target_days ? (int) $first->target_days : null;
+
+                return [
+                    'test_id'     => $first->test_id,
+                    'test_name'   => $first->test_name,
+                    'count'       => $items->count(),
+                    'avg_days'    => $avgDays,
+                    'min_days'    => $workingDays->min(),
+                    'max_days'    => $workingDays->max(),
+                    'target_days' => $targetDays,
+                    'on_target'   => $targetDays !== null ? $avgDays <= $targetDays : null,
+                ];
+            })
+            ->sortByDesc('avg_days')
+            ->values()
+            ->toArray();
     }
 
     public function resolveAnalyticsDates(array $filters): array

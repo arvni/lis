@@ -47,17 +47,20 @@ const Field = ({label, children}) => (
     </Box>
 );
 
-const formatTime = (ts) => ts ? new Date(ts * 1000).toLocaleString() : "—";
+const formatTime = (ts, tz) => ts
+    ? new Date(ts * 1000).toLocaleString([], {timeZone: tz})
+    : "—";
 
-const tickFormatter = (ts, period) => {
+const tickFormatter = (ts, period, tz) => {
     const d = new Date(ts * 1000);
-    if (period === "year")  return d.toLocaleDateString([], {month: "short", day: "numeric"});
-    if (period === "month") return d.toLocaleDateString([], {month: "short", day: "numeric"});
-    if (period === "week")  return d.toLocaleDateString([], {weekday: "short", hour: "2-digit", minute: "2-digit"});
-    return d.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
+    if (period === "year" || period === "month")
+        return d.toLocaleDateString([], {timeZone: tz, month: "short", day: "numeric"});
+    if (period === "week")
+        return d.toLocaleString([], {timeZone: tz, weekday: "short", hour: "2-digit", minute: "2-digit"});
+    return d.toLocaleTimeString([], {timeZone: tz, hour: "2-digit", minute: "2-digit"});
 };
 
-const SensorChart = ({samples, hasHumidity, period}) => {
+const SensorChart = ({samples, hasHumidity, period, tz}) => {
     const theme = useTheme();
 
     if (samples.length === 0) {
@@ -74,7 +77,7 @@ const SensorChart = ({samples, hasHumidity, period}) => {
                 <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider}/>
                 <XAxis
                     dataKey="time"
-                    tickFormatter={(ts) => tickFormatter(ts, period)}
+                    tickFormatter={(ts) => tickFormatter(ts, period, tz)}
                     tick={{fontSize: 11, fill: theme.palette.text.secondary}}
                     tickLine={false}
                     axisLine={{stroke: theme.palette.divider}}
@@ -107,7 +110,7 @@ const SensorChart = ({samples, hasHumidity, period}) => {
                         borderRadius: 8,
                         fontSize: 12,
                     }}
-                    labelFormatter={(ts) => formatTime(ts)}
+                    labelFormatter={(ts) => formatTime(ts, tz)}
                     formatter={(value, key) =>
                         key === "temperature"
                             ? [`${value} °C`, "Temperature"]
@@ -154,7 +157,17 @@ const PeriodBar = ({nodeId, activePeriod, beginTime, endTime}) => {
             return;
         }
         setShowCustom(false);
-        router.visit(route("monitoring.nodes.show", nodeId), {data: {period}});
+        const now = dayjs();
+        const ranges = {
+            today: [now.startOf("day"),   now.endOf("day")],
+            week:  [now.startOf("week"),  now.endOf("week")],
+            month: [now.startOf("month"), now.endOf("month")],
+            year:  [now.startOf("year"),  now.endOf("year")],
+        };
+        const [begin, end] = ranges[period] ?? ranges.today;
+        router.visit(route("monitoring.nodes.show", nodeId), {
+            data: {period, beginTime: begin.unix(), endTime: end.unix()},
+        });
     };
 
     const applyCustom = () => {
@@ -279,7 +292,7 @@ const SectionForm = ({nodeId, sections, sectionId, notes}) => {
 };
 
 const Show = () => {
-    const {node, samples = [], sections = [], period = "today", beginTime, endTime, success, status} = usePage().props;
+    const {node, samples = [], sections = [], period = "today", beginTime, endTime, success, status, appTimezone = "UTC"} = usePage().props;
 
     const hasHumidity = node.info?.humidity !== undefined
         || samples.some((s) => s.humidity != null);
@@ -417,7 +430,7 @@ const Show = () => {
                             }
                         />
                         <CardContent>
-                            <SensorChart samples={samples} hasHumidity={hasHumidity} period={period}/>
+                            <SensorChart samples={samples} hasHumidity={hasHumidity} period={period} tz={appTimezone}/>
                         </CardContent>
                     </Card>
                 </Grid>

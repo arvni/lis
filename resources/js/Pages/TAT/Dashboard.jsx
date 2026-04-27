@@ -80,12 +80,12 @@ const AnalyticsTooltip = ({active, payload}) => {
     return (
         <Paper elevation={3} sx={{p: 1.5, minWidth: 200}}>
             <Typography variant="body2" fontWeight="bold" gutterBottom>{d.test_name}</Typography>
-            <Typography variant="caption" display="block">Avg: <b>{d.avg_hours}h ({d.avg_days}d)</b></Typography>
-            <Typography variant="caption" display="block">Min: {d.min_hours}h — Max: {d.max_hours}h</Typography>
+            <Typography variant="caption" display="block">Avg: <b>{d.avg_days} working days</b></Typography>
+            <Typography variant="caption" display="block">Min: {d.min_days}d — Max: {d.max_days}d</Typography>
             <Typography variant="caption" display="block">Count: {d.count} reports</Typography>
-            {d.target_hours != null && (
+            {d.target_days != null && (
                 <Typography variant="caption" display="block" color={d.on_target ? 'success.main' : 'error.main'}>
-                    Target: {d.target_hours}h — {d.on_target ? '✓ On target' : '✗ Over target'}
+                    Target: {d.target_days}d — {d.on_target ? '✓ On target' : '✗ Over target'}
                 </Typography>
             )}
         </Paper>
@@ -456,10 +456,10 @@ const Dashboard = () => {
                                 <BarChart data={chartData} margin={{top: 8, right: 24, left: 0, bottom: 60}}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false}/>
                                     <XAxis dataKey="short_name" angle={-35} textAnchor="end" tick={{fontSize: 12}} interval={0}/>
-                                    <YAxis unit="h" tick={{fontSize: 12}} label={{value: 'Hours', angle: -90, position: 'insideLeft', offset: 10}}/>
+                                    <YAxis unit="d" tick={{fontSize: 12}} label={{value: 'Working Days', angle: -90, position: 'insideLeft', offset: 10}}/>
                                     <ReTooltip content={<AnalyticsTooltip/>}/>
                                     <Legend verticalAlign="top"/>
-                                    <Bar dataKey="avg_hours" name="Avg TAT (hours)" radius={[4, 4, 0, 0]}>
+                                    <Bar dataKey="avg_days" name="Avg TAT (working days)" radius={[4, 4, 0, 0]}>
                                         {chartData.map((entry, i) => (
                                             <Cell key={i} fill={
                                                 entry.on_target === false ? theme.palette.error.main
@@ -491,11 +491,10 @@ const Dashboard = () => {
                                     <TableRow>
                                         <TableCell>Test</TableCell>
                                         <TableCell align="right">Reports</TableCell>
-                                        <TableCell align="right">Avg (h)</TableCell>
-                                        <TableCell align="right">Avg (d)</TableCell>
-                                        <TableCell align="right">Min (h)</TableCell>
-                                        <TableCell align="right">Max (h)</TableCell>
-                                        <TableCell align="right">Target (h)</TableCell>
+                                        <TableCell align="right">Avg (days)</TableCell>
+                                        <TableCell align="right">Min (days)</TableCell>
+                                        <TableCell align="right">Max (days)</TableCell>
+                                        <TableCell align="right">Target (days)</TableCell>
                                         <TableCell align="center">Status</TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -504,11 +503,10 @@ const Dashboard = () => {
                                         <TableRow key={row.test_id} sx={{'&:hover': {bgcolor: alpha(theme.palette.primary.main, 0.04)}}}>
                                             <TableCell><Typography variant="body2">{row.test_name}</Typography></TableCell>
                                             <TableCell align="right">{row.count}</TableCell>
-                                            <TableCell align="right"><Typography variant="body2" fontWeight="medium">{row.avg_hours}</Typography></TableCell>
-                                            <TableCell align="right">{row.avg_days}</TableCell>
-                                            <TableCell align="right" sx={{color: 'text.secondary'}}>{row.min_hours}</TableCell>
-                                            <TableCell align="right" sx={{color: 'text.secondary'}}>{row.max_hours}</TableCell>
-                                            <TableCell align="right">{row.target_hours ?? '—'}</TableCell>
+                                            <TableCell align="right"><Typography variant="body2" fontWeight="medium">{row.avg_days}</Typography></TableCell>
+                                            <TableCell align="right" sx={{color: 'text.secondary'}}>{row.min_days}</TableCell>
+                                            <TableCell align="right" sx={{color: 'text.secondary'}}>{row.max_days}</TableCell>
+                                            <TableCell align="right">{row.target_days ?? '—'}</TableCell>
                                             <TableCell align="center">
                                                 {row.on_target === null
                                                     ? <Chip label="No target" size="small" variant="outlined"/>
