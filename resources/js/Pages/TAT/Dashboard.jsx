@@ -1,5 +1,5 @@
 import React, {useState, useMemo, useEffect, useCallback, useRef} from 'react';
-import {Head, router, usePage} from '@inertiajs/react';
+import {Head, Link, router, usePage} from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader.jsx';
 import SelectSearch from '@/Components/SelectSearch.jsx';
@@ -313,9 +313,11 @@ const Dashboard = () => {
                                                 opacity: itemsLoading ? 0.5 : 1,
                                             }}>
                                                 <TableCell>
-                                                    <Typography variant="body2" fontWeight="medium">
-                                                        {row.reference_code ?? `#${row.id}`}
-                                                    </Typography>
+                                                    <Link href={route('acceptances.show', row.id)} style={{textDecoration: 'none', color: 'inherit'}}>
+                                                        <Typography variant="body2" fontWeight="medium" color="primary.main" sx={{'&:hover': {textDecoration: 'underline'}}}>
+                                                            {row.reference_code ?? `#${row.id}`}
+                                                        </Typography>
+                                                    </Link>
                                                     <Typography variant="caption" color="text.secondary">{row.patient_name}</Typography>
                                                 </TableCell>
                                                 <TableCell sx={{maxWidth: 180}}>
