@@ -328,9 +328,15 @@ const Dashboard = () => {
                                                     </Stack>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        {(row.sections ?? []).join(', ') || '—'}
-                                                    </Typography>
+                                                    <Stack direction="row" flexWrap="wrap" gap={0.5}>
+                                                        {(row.sections ?? []).length === 0 ? (
+                                                            <Typography variant="body2" color="text.secondary">—</Typography>
+                                                        ) : (row.sections).map((s) => (
+                                                            <Link key={s.id} href={route('sections.show', s.id)} style={{textDecoration: 'none'}}>
+                                                                <Chip label={s.name} size="small" variant="outlined" color="primary" clickable sx={{fontSize: '0.7rem'}}/>
+                                                            </Link>
+                                                        ))}
+                                                    </Stack>
                                                 </TableCell>
                                                 <TableCell><PriorityChip priority={row.priority}/></TableCell>
                                                 <TableCell>

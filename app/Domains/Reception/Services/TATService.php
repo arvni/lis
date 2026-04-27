@@ -169,7 +169,11 @@ class TATService
         $progressPct = ($maxTat > 0 && $deadline) ? min(100, round(($elapsed / $maxTat) * 100)) : null;
 
         $statuses  = $items->map(fn($i) => $i->latestState?->status?->value)->filter()->unique()->values();
-        $sections  = $items->map(fn($i) => $i->latestState?->section?->name)->filter()->unique()->values();
+        $sections = $items->map(fn($i) => $i->latestState?->section)
+            ->filter()
+            ->unique('id')
+            ->map(fn($s) => ['id' => $s->id, 'name' => $s->name])
+            ->values();
         $testNames = $items->map(fn($i) => $i->test?->name)->filter()->unique()->values();
 
         return [
@@ -199,7 +203,7 @@ class TATService
         $rows = $this->getItems($filters);
 
         $bySection = $rows
-            ->flatMap(fn($r) => collect($r['sections'])->map(fn($s) => ['section' => $s, 'row' => $r]))
+            ->flatMap(fn($r) => collect($r['sections'])->map(fn($s) => ['section' => $s['name'], 'row' => $r]))
             ->groupBy('section')
             ->map(fn($group) => [
                 'section'     => $group->first()['section'],
