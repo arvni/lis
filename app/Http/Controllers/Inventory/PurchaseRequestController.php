@@ -21,6 +21,7 @@ class PurchaseRequestController extends Controller
     public function __construct(
         private PurchaseRequestService $prService,
         private PurchaseRequestWorkflowService $workflowService,
+        private \App\Domains\Inventory\Services\WorkflowTemplateMatcher $templateMatcher,
     ) {
         $this->middleware('indexProvider')->only('index');
     }
@@ -344,6 +345,80 @@ class PurchaseRequestController extends Controller
             return back()->with(['success' => false, 'status' => $e->getMessage()]);
         }
         return back()->with(['success' => true, 'status' => 'Step rejected. Request returned to draft.']);
+    }
+
+    public function matchTemplate(PurchaseRequest $purchaseRequest): \Illuminate\Http\JsonResponse
+    {
+        $this->authorize('viewAny', PurchaseRequest::class);
+
+        $purchaseRequest->load('lines', 'requestedBy');
+        $urgency        = $purchaseRequest->urgency;
+        $estimatedTotal = $purchaseRequest->estimatedTotal();
+        $requesterRoles = $purchaseRequest->requestedBy?->getRoleNames()->all() ?? [];
+
+        $templates = \App\Domains\Inventory\Models\WorkflowTemplate::with('steps')
+            ->orderBy('priority')
+            ->orderBy('id')
+            ->get();
+
+        $evaluated = $templates->map(function ($t) use ($urgency, $requesterRoles, $estimatedTotal) {
+            $conditions     = $t->conditions ?? [];
+            $urgencies      = $conditions['urgencies']       ?? [];
+            $requiredRoles  = $conditions['requester_roles'] ?? [];
+            $minTotal       = isset($conditions['min_total']) ? (float) $conditions['min_total'] : null;
+
+            $reasons = [];
+
+            if ($t->is_default) {
+                $result = 'default_fallback';
+            } elseif (empty($urgencies) && empty($requiredRoles) && $minTotal === null) {
+                $result  = 'skip';
+                $reasons[] = 'No conditions defined on a non-default template — never matches';
+            } else {
+                $result = 'match';
+                if (!empty($urgencies) && !in_array($urgency, $urgencies, true)) {
+                    $result    = 'no_match';
+                    $reasons[] = "Urgency "{$urgency}" not in [" . implode(', ', $urgencies) . "]";
+                }
+                if (!empty($requiredRoles) && empty(array_intersect($requiredRoles, $requesterRoles))) {
+                    $result    = 'no_match';
+                    $reasons[] = 'Requester roles [' . implode(', ', $requesterRoles) . '] don\'t intersect required [' . implode(', ', $requiredRoles) . ']';
+                }
+                if ($minTotal !== null && $estimatedTotal < $minTotal) {
+                    $result    = 'no_match';
+                    $reasons[] = "Estimated total {$estimatedTotal} < min_total {$minTotal}";
+                }
+            }
+
+            return [
+                'id'         => $t->id,
+                'name'       => $t->name,
+                'is_active'  => $t->is_active,
+                'is_default' => $t->is_default,
+                'priority'   => $t->priority,
+                'steps'      => $t->steps->count(),
+                'conditions' => [
+                    'urgencies'       => $urgencies,
+                    'requester_roles' => $requiredRoles,
+                    'min_total'       => $minTotal,
+                ],
+                'result'     => $result,   // match | no_match | skip | default_fallback
+                'reasons'    => $reasons,
+            ];
+        });
+
+        $matched = $this->templateMatcher
+            ->find($purchaseRequest->requestedBy, $urgency, $estimatedTotal);
+
+        return response()->json([
+            'pr' => [
+                'urgency'         => $urgency,
+                'estimated_total' => $estimatedTotal,
+                'requester_roles' => $requesterRoles,
+            ],
+            'matched_template' => $matched ? ['id' => $matched->id, 'name' => $matched->name] : null,
+            'evaluated'        => $evaluated,
+        ]);
     }
 
     public function cancel(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
