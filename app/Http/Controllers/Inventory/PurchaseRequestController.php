@@ -378,7 +378,7 @@ class PurchaseRequestController extends Controller
                 $result = 'match';
                 if (!empty($urgencies) && !in_array($urgency, $urgencies, true)) {
                     $result    = 'no_match';
-                    $reasons[] = "Urgency "{$urgency}" not in [" . implode(', ', $urgencies) . "]";
+                    $reasons[] = 'Urgency "' . $urgency . '" not in [' . implode(', ', $urgencies) . ']';
                 }
                 if (!empty($requiredRoles) && empty(array_intersect($requiredRoles, $requesterRoles))) {
                     $result    = 'no_match';
