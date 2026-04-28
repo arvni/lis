@@ -20,17 +20,77 @@ readonly class PurchaseRequestService
     public function __construct(
         private StockTransactionService $transactionService,
         private DocumentService $documentService,
+        private PurchaseRequestWorkflowService $workflowService,
+        private WorkflowTemplateMatcher $templateMatcher,
     ) {}
 
-    public function listRequests(array $filters): LengthAwarePaginator
+    public function listRequests(array $filters, bool $canViewAll = false): LengthAwarePaginator
     {
+        $user    = auth()->user();
+        $view    = $filters['filters']['view'] ?? ($canViewAll ? 'all' : 'mine');
+        $status  = $filters['filters']['status']  ?? '';
+        $urgency = $filters['filters']['urgency'] ?? '';
+
         $query = PurchaseRequest::with(['requestedBy', 'lines.item', 'lines.unit'])
+            ->withCount('lines')
             ->orderBy('created_at', 'desc');
-        if (isset($filters['filters']['status']) && $filters['filters']['status'] !== '')
-            $query->where('status', $filters['filters']['status']);
-        if (isset($filters['filters']['urgency']) && $filters['filters']['urgency'] !== '')
-            $query->where('urgency', $filters['filters']['urgency']);
+
+        // Scope by view
+        if ($view === 'mine' || (!$canViewAll && $view !== 'approval')) {
+            $query->where('requested_by_user_id', $user->id);
+        } elseif ($view === 'approval') {
+            $userRoles = $user->getRoleNames()->all();
+            $query->where('status', PurchaseRequestStatus::SUBMITTED)
+                ->whereHas('approvals', function ($q) use ($user, $userRoles) {
+                    $q->where('purchase_request_approvals.status', 'PENDING')
+                        ->join('workflow_steps as ws', 'ws.id', '=', 'purchase_request_approvals.workflow_step_id')
+                        ->whereRaw('ws.sort_order = (
+                            SELECT MIN(ws2.sort_order)
+                            FROM purchase_request_approvals pra2
+                            JOIN workflow_steps ws2 ON ws2.id = pra2.workflow_step_id
+                            WHERE pra2.purchase_request_id = purchase_request_approvals.purchase_request_id
+                            AND pra2.status = ?
+                        )', ['PENDING'])
+                        ->where(function ($q2) use ($user, $userRoles) {
+                            $q2->where('ws.approver_user_id', $user->id);
+                            if (!empty($userRoles)) {
+                                $q2->orWhereIn('ws.approver_role', $userRoles);
+                            }
+                        });
+                });
+        }
+        // 'all' → no extra scope (only reachable when $canViewAll)
+
+        if ($status  !== '') $query->where('status',  $status);
+        if ($urgency !== '') $query->where('urgency', $urgency);
+
         return $query->paginate($filters['pageSize'] ?? 15);
+    }
+
+    public function pendingApprovalCount(): int
+    {
+        $user      = auth()->user();
+        $userRoles = $user->getRoleNames()->all();
+
+        return PurchaseRequest::where('status', PurchaseRequestStatus::SUBMITTED)
+            ->whereHas('approvals', function ($q) use ($user, $userRoles) {
+                $q->where('purchase_request_approvals.status', 'PENDING')
+                    ->join('workflow_steps as ws', 'ws.id', '=', 'purchase_request_approvals.workflow_step_id')
+                    ->whereRaw('ws.sort_order = (
+                        SELECT MIN(ws2.sort_order)
+                        FROM purchase_request_approvals pra2
+                        JOIN workflow_steps ws2 ON ws2.id = pra2.workflow_step_id
+                        WHERE pra2.purchase_request_id = purchase_request_approvals.purchase_request_id
+                        AND pra2.status = ?
+                    )', ['PENDING'])
+                    ->where(function ($q2) use ($user, $userRoles) {
+                        $q2->where('ws.approver_user_id', $user->id);
+                        if (!empty($userRoles)) {
+                            $q2->orWhereIn('ws.approver_role', $userRoles);
+                        }
+                    });
+            })
+            ->count();
     }
 
     public function createRequest(array $data): PurchaseRequest
@@ -38,10 +98,20 @@ readonly class PurchaseRequestService
         return DB::transaction(function () use ($data) {
             $lines = $data['lines'] ?? [];
             unset($data['lines']);
-            $data['requested_by_user_id'] = auth()->id();
+            $requester = auth()->user();
+            $data['requested_by_user_id'] = $requester->id;
+            unset($data['workflow_template_id']); // determined after lines are saved
             $pr = PurchaseRequest::create($data);
             foreach ($lines as $line)
                 $pr->lines()->create($line);
+
+            // Match template after lines are persisted so estimated total is available
+            $pr->load('lines');
+            $templateId = $this->templateMatcher
+                ->find($requester, $data['urgency'], $pr->estimatedTotal())
+                ?->id;
+            $pr->update(['workflow_template_id' => $templateId]);
+
             $this->log($pr, 'CREATED');
             return $pr->load('lines.item', 'lines.unit');
         });
@@ -56,14 +126,35 @@ readonly class PurchaseRequestService
             $pr->lines()->delete();
             foreach ($lines as $line)
                 $pr->lines()->create($line);
+
+            // Re-match template in case urgency or estimated totals changed
+            $pr->load('lines', 'requestedBy');
+            $pr->update([
+                'workflow_template_id' => $this->templateMatcher
+                    ->find($pr->requestedBy, $pr->urgency, $pr->estimatedTotal())
+                    ?->id,
+            ]);
+
             return $pr;
         });
     }
 
-    public function submit(PurchaseRequest $pr): PurchaseRequest
+    public function submit(PurchaseRequest $pr, ?string $changeNotes = null): PurchaseRequest
     {
-        $pr->update(['status' => PurchaseRequestStatus::SUBMITTED->value]);
-        $this->log($pr, 'SUBMITTED');
+        $isResubmission = $pr->histories()->where('event', 'REJECTED')->exists();
+
+        // Re-match template on every submission so late-created templates are picked up
+        $pr->load('lines', 'requestedBy');
+        $templateId = $this->templateMatcher
+            ->find($pr->requestedBy, $pr->urgency, $pr->estimatedTotal())
+            ?->id;
+        $pr->update(['status' => PurchaseRequestStatus::SUBMITTED->value, 'workflow_template_id' => $templateId]);
+
+        $this->log($pr, $isResubmission ? 'RESUBMITTED' : 'SUBMITTED', null, $changeNotes);
+        if ($pr->workflow_template_id) {
+            $pr->load('workflowTemplate.steps');
+            $this->workflowService->initiate($pr);
+        }
         return $pr;
     }
 
@@ -228,13 +319,14 @@ readonly class PurchaseRequestService
         return $pr;
     }
 
-    private function log(PurchaseRequest $pr, string $event, ?string $notes = null): void
+    private function log(PurchaseRequest $pr, string $event, ?string $notes = null, ?string $changeNotes = null): void
     {
         PurchaseRequestHistory::create([
             'purchase_request_id' => $pr->id,
             'user_id'             => auth()->id(),
             'event'               => $event,
             'notes'               => $notes,
+            'change_notes'        => $changeNotes,
         ]);
     }
 }
