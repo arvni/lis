@@ -24,6 +24,7 @@ const emptyLine = () => ({
     item_id: null,
     unit_id: null,
     qty: "",
+    estimated_unit_price: "",
     preferred_supplier_id: "",
     cat_no: "",
     brand: "",
@@ -39,6 +40,7 @@ const lineFromSource = (line) => ({
     item_id: line.item_id,
     unit_id: line.unit_id,
     qty: line.qty ?? "",
+    estimated_unit_price: line.estimated_unit_price ?? "",
     preferred_supplier_id: line.preferred_supplier_id ?? "",
     cat_no: line.cat_no ?? "",
     brand: line.brand ?? "",
@@ -52,8 +54,8 @@ const Add = () => {
 
     const {data, setData, post, processing, errors} = useForm({
         urgency: defaults?.urgency ?? "NORMAL",
-        notes: defaults?.notes ?? "",
-        lines: defaults?.lines?.map(payloadFromSource) ?? [],
+        notes:   defaults?.notes ?? "",
+        lines:   defaults?.lines?.map(payloadFromSource) ?? [],
     });
 
     const [lineItems, setLineItems] = useState(() => defaults?.lines?.map(lineFromSource) ?? []);
@@ -138,6 +140,7 @@ const Add = () => {
                                         <TableCell sx={{minWidth: 260}}>Item</TableCell>
                                         <TableCell sx={{minWidth: 180}}>Unit</TableCell>
                                         <TableCell sx={{width: 100}}>Qty</TableCell>
+                                        <TableCell sx={{width: 120}}>Est. Unit Price</TableCell>
                                         <TableCell sx={{minWidth: 130}}>Cat No</TableCell>
                                         <TableCell sx={{minWidth: 140}}>Brand</TableCell>
                                         <TableCell sx={{minWidth: 160}}>Preferred Supplier</TableCell>
@@ -179,6 +182,13 @@ const Add = () => {
                                                     onChange={(e) => updateLine(idx, "qty", e.target.value)}
                                                     inputProps={{min: 0, step: "any"}} fullWidth
                                                     error={!!errors[`lines.${idx}.qty`]}/>
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField size="small" type="number" placeholder="0.00"
+                                                    value={line.estimated_unit_price}
+                                                    onChange={(e) => updateLine(idx, "estimated_unit_price", e.target.value)}
+                                                    inputProps={{min: 0, step: "any"}} fullWidth
+                                                    error={!!errors[`lines.${idx}.estimated_unit_price`]}/>
                                             </TableCell>
                                             <TableCell>
                                                 <TextField size="small" fullWidth placeholder="Cat No"
