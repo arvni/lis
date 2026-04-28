@@ -8,6 +8,7 @@ use App\Domains\Inventory\Models\PurchaseRequest;
 use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\Supplier;
 use App\Domains\Inventory\Services\PurchaseRequestService;
+use App\Domains\Inventory\Services\PurchaseRequestWorkflowService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,17 +18,21 @@ use RuntimeException;
 
 class PurchaseRequestController extends Controller
 {
-    public function __construct(private PurchaseRequestService $prService)
-    {
+    public function __construct(
+        private PurchaseRequestService $prService,
+        private PurchaseRequestWorkflowService $workflowService,
+    ) {
         $this->middleware('indexProvider')->only('index');
     }
 
     public function index(Request $request): Response
     {
         $this->authorize('viewAny', PurchaseRequest::class);
+        $canViewAll    = auth()->user()->can('Inventory.PurchaseRequests.View All Purchase Requests');
         $requestInputs = $request->all();
-        $requests = $this->prService->listRequests($requestInputs);
-        return Inertia::render('Inventory/PurchaseRequests/Index', compact('requests', 'requestInputs'));
+        $requests      = $this->prService->listRequests($requestInputs, $canViewAll);
+        $pendingCount  = $this->prService->pendingApprovalCount();
+        return Inertia::render('Inventory/PurchaseRequests/Index', compact('requests', 'requestInputs', 'canViewAll', 'pendingCount'));
     }
 
     public function create(Request $request): Response
@@ -50,13 +55,14 @@ class PurchaseRequestController extends Controller
     {
         $this->authorize('create', PurchaseRequest::class);
         $data = $request->validate([
-            'urgency'                         => 'required|string',
+            'urgency'                         => 'required|in:LOW,NORMAL,HIGH,URGENT',
             'notes'                           => 'nullable|string',
             'lines'                           => 'required|array|min:1',
             'lines.*.item_id'                 => 'required|exists:items,id',
             'lines.*.unit_id'                 => 'required|exists:units,id',
             'lines.*.qty'                     => 'required|numeric|min:0.000001',
             'lines.*.preferred_supplier_id'   => 'nullable|exists:suppliers,id',
+            'lines.*.estimated_unit_price'    => 'nullable|numeric|min:0',
             'lines.*.cat_no'                  => 'nullable|string',
             'lines.*.brand'                   => 'nullable|string',
             'lines.*.notes'                   => 'nullable|string',
@@ -71,15 +77,46 @@ class PurchaseRequestController extends Controller
         $this->authorize('viewAny', PurchaseRequest::class);
         $purchaseRequest->load([
             'requestedBy', 'approvedBy', 'supplier',
+            'workflowTemplate',
             'lines.item.defaultUnit', 'lines.unit', 'lines.preferredSupplier',
             'histories.user',
+            'comments.user',
             'receipts.transaction', 'receipts.lines.prLine.item', 'receipts.lines.location',
         ]);
+
+        // Load approvals ordered by step sort_order
+        $approvals = \App\Domains\Inventory\Models\PurchaseRequestApproval::where('purchase_request_id', $purchaseRequest->id)
+            ->join('workflow_steps', 'workflow_steps.id', '=', 'purchase_request_approvals.workflow_step_id')
+            ->orderBy('workflow_steps.sort_order')
+            ->select('purchase_request_approvals.*')
+            ->with(['step', 'step.approverUser', 'actedBy'])
+            ->get();
+
         $poDocument      = $purchaseRequest->po_file      ? Document::find($purchaseRequest->po_file)      : null;
         $paymentDocument = $purchaseRequest->payment_file  ? Document::find($purchaseRequest->payment_file) : null;
 
+        $canActOnWorkflow = $purchaseRequest->workflow_template_id
+            && $purchaseRequest->status->value === 'SUBMITTED'
+            && $this->workflowService->canAct($purchaseRequest, auth()->user());
+
+        $isRequester = $purchaseRequest->requested_by_user_id === auth()->id();
+
+        $canDirectApprove = !$purchaseRequest->workflow_template_id
+            && auth()->user()->can('Inventory.PurchaseRequests.Approve Purchase Request')
+            && !$isRequester;
+        $wasRejected = $purchaseRequest->histories()->where('event', 'REJECTED')->exists()
+            && $purchaseRequest->status->value === 'DRAFT';
+
         return Inertia::render('Inventory/PurchaseRequests/Show', [
             'purchaseRequest' => $purchaseRequest,
+            'approvals'       => $approvals,
+            'canActOnWorkflow' => $canActOnWorkflow,
+            'canDirectApprove' => $canDirectApprove,
+            'isRequester'      => $isRequester,
+            'wasRejected'     => $wasRejected,
+            'users'           => $canActOnWorkflow
+                ? \App\Domains\User\Models\User::where('is_active', true)->orderBy('name')->get(['id', 'name'])
+                : [],
             'poDocument'      => $poDocument,
             'paymentDocument' => $paymentDocument,
         ]);
@@ -117,6 +154,7 @@ class PurchaseRequestController extends Controller
                 'lines.*.unit_id'               => 'required|exists:units,id',
                 'lines.*.qty'                   => 'required|numeric|min:0.000001',
                 'lines.*.preferred_supplier_id' => 'nullable|exists:suppliers,id',
+                'lines.*.estimated_unit_price'  => 'nullable|numeric|min:0',
                 'lines.*.cat_no'                => 'nullable|string',
                 'lines.*.brand'                 => 'nullable|string',
                 'lines.*.notes'                 => 'nullable|string',
@@ -129,7 +167,7 @@ class PurchaseRequestController extends Controller
         }
 
         match ($action) {
-            'submit'  => $this->prService->submit($purchaseRequest),
+            'submit'  => $this->prService->submit($purchaseRequest, $request->input('change_notes')),
             'approve' => $this->prService->approve($purchaseRequest),
             default   => abort(400, "Unknown action: {$action}"),
         };
@@ -220,6 +258,92 @@ class PurchaseRequestController extends Controller
         ]);
         $this->prService->setBrands($purchaseRequest, $data['lines']);
         return back()->with(['success' => true, 'status' => 'Brands updated.']);
+    }
+
+    public function bulkApprove(Request $request): RedirectResponse
+    {
+        $this->authorize('viewAny', PurchaseRequest::class);
+        $ids = $request->validate(['ids' => 'required|array', 'ids.*' => 'integer'])['ids'];
+
+        $prs = PurchaseRequest::whereIn('id', $ids)
+            ->with(['workflowTemplate', 'requestedBy'])
+            ->get()
+            ->keyBy('id');
+
+        $approved = 0;
+        $skipped  = 0;
+        foreach ($ids as $id) {
+            $pr = $prs->get($id);
+            if (!$pr) continue;
+            try {
+                $this->workflowService->approveStep($pr, auth()->user());
+                $approved++;
+            } catch (\Throwable) {
+                $skipped++;
+            }
+        }
+
+        $msg = "Approved {$approved} step(s).";
+        if ($skipped) $msg .= " {$skipped} skipped (already acted or not authorised).";
+        return back()->with(['success' => true, 'status' => $msg]);
+    }
+
+    public function addComment(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    {
+        $this->authorize('viewAny', PurchaseRequest::class);
+        $data = $request->validate(['body' => 'required|string|max:2000']);
+        $purchaseRequest->comments()->create([
+            'user_id' => auth()->id(),
+            'body'    => $data['body'],
+        ]);
+        return back()->with(['success' => true, 'status' => 'Comment added.']);
+    }
+
+    public function recall(PurchaseRequest $purchaseRequest): RedirectResponse
+    {
+        $this->authorize('viewAny', PurchaseRequest::class);
+        try {
+            $this->workflowService->recall($purchaseRequest, auth()->user());
+        } catch (\Throwable $e) {
+            return back()->with(['success' => false, 'status' => $e->getMessage()]);
+        }
+        return back()->with(['success' => true, 'status' => 'Request recalled and returned to draft.']);
+    }
+
+    public function delegateStep(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    {
+        $this->authorize('viewAny', PurchaseRequest::class);
+        $data = $request->validate(['delegate_to_user_id' => 'required|exists:users,id']);
+        try {
+            $this->workflowService->delegate($purchaseRequest, auth()->user(), $data['delegate_to_user_id']);
+        } catch (\Throwable $e) {
+            return back()->with(['success' => false, 'status' => $e->getMessage()]);
+        }
+        return back()->with(['success' => true, 'status' => 'Step delegated successfully.']);
+    }
+
+    public function approveStep(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    {
+        $this->authorize('viewAny', PurchaseRequest::class);
+        $notes = $request->input('notes');
+        try {
+            $this->workflowService->approveStep($purchaseRequest, auth()->user(), $notes);
+        } catch (\Throwable $e) {
+            return back()->with(['success' => false, 'status' => $e->getMessage()]);
+        }
+        return back()->with(['success' => true, 'status' => 'Step approved.']);
+    }
+
+    public function rejectStep(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    {
+        $this->authorize('viewAny', PurchaseRequest::class);
+        $data = $request->validate(['notes' => 'required|string|max:1000']);
+        try {
+            $this->workflowService->rejectStep($purchaseRequest, auth()->user(), $data['notes']);
+        } catch (\Throwable $e) {
+            return back()->with(['success' => false, 'status' => $e->getMessage()]);
+        }
+        return back()->with(['success' => true, 'status' => 'Step rejected. Request returned to draft.']);
     }
 
     public function cancel(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse

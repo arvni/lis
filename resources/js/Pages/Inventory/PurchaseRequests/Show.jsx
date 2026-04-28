@@ -3,6 +3,7 @@ import {router, usePage, useForm} from "@inertiajs/react";
 import {
     Alert, Box, Button, Card, CardContent, CardHeader, Chip, Dialog,
     DialogActions, DialogContent, DialogTitle, Divider, Grid,
+    Step, StepContent, StepLabel, Stepper,
     Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography,
     LinearProgress,
 } from "@mui/material";
@@ -21,6 +22,12 @@ import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
 import SendIcon from "@mui/icons-material/Send";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import ThumbDownIcon from "@mui/icons-material/ThumbDown";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import {Autocomplete} from "@mui/material";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageHeader from "@/Components/PageHeader";
 import SupplierSelect from "@/Pages/Inventory/Components/SupplierSelect";
@@ -65,16 +72,269 @@ const EVENT_META = {
     RECEIVED_PARTIAL: {label: "Partially Received",  color: "warning", icon: <MoveToInboxIcon fontSize="small"/>},
     RECEIVED:         {label: "Fully Received",      color: "success", icon: <MoveToInboxIcon fontSize="small"/>},
     CANCELLED:        {label: "Cancelled",           color: "error",   icon: <CancelIcon fontSize="small"/>},
+    STEP_APPROVED:    {label: "Step Approved",       color: "success", icon: <ThumbUpIcon fontSize="small"/>},
+    REJECTED:         {label: "Step Rejected",       color: "error",   icon: <ThumbDownIcon fontSize="small"/>},
+    RECALLED:         {label: "Recalled by Requester", color: "warning",  icon: <CancelIcon fontSize="small"/>},
+    RESUBMITTED:      {label: "Re-submitted",          color: "info",     icon: <SendIcon fontSize="small"/>},
+    STEP_DELEGATED:   {label: "Step Delegated",        color: "secondary", icon: <AccountTreeIcon fontSize="small"/>},
+};
+
+const DiscussionPanel = ({comments, prId}) => {
+    const commentForm = useForm({body: ""});
+    const submit = () => commentForm.post(route("inventory.purchase-requests.comments.store", prId), {
+        onSuccess: () => commentForm.reset(),
+    });
+    return (
+        <Card sx={{mb: 3}}>
+            <CardHeader
+                title={
+                    <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
+                        <ChatBubbleOutlineIcon fontSize="small" color="action"/>
+                        <Typography variant="h6">Discussion</Typography>
+                    </Box>
+                }
+            />
+            <CardContent sx={{pt: 0}}>
+                {comments.length === 0 ? (
+                    <Typography variant="caption" color="text.secondary">No comments yet.</Typography>
+                ) : (
+                    <Box sx={{mb: 2, display: "flex", flexDirection: "column", gap: 1.5}}>
+                        {comments.map((c) => (
+                            <Box key={c.id} sx={{display: "flex", gap: 1.5, alignItems: "flex-start"}}>
+                                <Box sx={{
+                                    width: 32, height: 32, borderRadius: "50%", bgcolor: "primary.main",
+                                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                                }}>
+                                    <Typography variant="caption" color="white" fontWeight={700}>
+                                        {c.user?.name?.[0]?.toUpperCase()}
+                                    </Typography>
+                                </Box>
+                                <Box sx={{flex: 1, bgcolor: "grey.50", borderRadius: 1, p: 1}}>
+                                    <Box sx={{display: "flex", justifyContent: "space-between", mb: 0.5}}>
+                                        <Typography variant="caption" fontWeight={600}>{c.user?.name}</Typography>
+                                        <Typography variant="caption" color="text.disabled">{c.created_at?.substring(0, 16)}</Typography>
+                                    </Box>
+                                    <Typography variant="body2">{c.body}</Typography>
+                                </Box>
+                            </Box>
+                        ))}
+                    </Box>
+                )}
+                <Box sx={{display: "flex", gap: 1, mt: 1}}>
+                    <TextField
+                        fullWidth size="small" placeholder="Leave a comment…"
+                        value={commentForm.data.body}
+                        onChange={(e) => commentForm.setData("body", e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), submit())}
+                        error={!!commentForm.errors.body}
+                    />
+                    <Button variant="contained" size="small" onClick={submit}
+                        disabled={commentForm.processing || !commentForm.data.body}>
+                        Post
+                    </Button>
+                </Box>
+            </CardContent>
+        </Card>
+    );
 };
 
 const canCancel = (status) => !["RECEIVED", "CANCELLED"].includes(status);
 const canReceive = (status) => ["SHIPPED", "PARTIALLY_RECEIVED"].includes(status);
 
+const APPROVAL_COLORS = {PENDING: "warning", APPROVED: "success", REJECTED: "error"};
+
+const WorkflowProgress = ({approvals, canAct, prId, users}) => {
+    const [rejectDialog,   setRejectDialog]   = useState(false);
+    const [delegateDialog, setDelegateDialog] = useState(false);
+    const [delegateUser,   setDelegateUser]   = useState(null);
+    const approveForm  = useForm({notes: ""});
+    const rejectForm   = useForm({notes: ""});
+    const delegateForm = useForm({delegate_to_user_id: ""});
+
+    if (!approvals || approvals.length === 0) return null;
+
+    const activeIdx = approvals.findIndex((a) => a.status === "PENDING");
+
+    const submitApprove = () => {
+        approveForm.post(route("inventory.purchase-requests.approve-step", prId), {
+            onSuccess: () => approveForm.reset(),
+        });
+    };
+
+    const submitReject = () => {
+        rejectForm.post(route("inventory.purchase-requests.reject-step", prId), {
+            onSuccess: () => { rejectForm.reset(); setRejectDialog(false); },
+        });
+    };
+
+    return (
+        <>
+            <Card sx={{mb: 3}}>
+                <CardHeader
+                    title={
+                        <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
+                            <AccountTreeIcon fontSize="small" color="primary"/>
+                            <Typography variant="h6">Approval Workflow</Typography>
+                        </Box>
+                    }
+                />
+                <CardContent sx={{pt: 0}}>
+                    <Stepper activeStep={activeIdx === -1 ? approvals.length : activeIdx} orientation="vertical">
+                        {approvals.map((approval, idx) => {
+                            const isPending  = approval.status === "PENDING";
+                            const isApproved = approval.status === "APPROVED";
+                            const isRejected = approval.status === "REJECTED";
+                            const stepColor  = isApproved ? "success" : isRejected ? "error" : "inherit";
+                            const isActive   = idx === activeIdx;
+
+                            return (
+                                <Step key={approval.id} completed={isApproved}>
+                                    <StepLabel
+                                        error={isRejected}
+                                        optional={
+                                            <Typography variant="caption" color="text.secondary">
+                                                {approval.step?.approver_user
+                                                    ? `User: ${approval.step.approver_user.name}`
+                                                    : approval.step?.approver_role
+                                                        ? `Role: ${approval.step.approver_role}`
+                                                        : null
+                                                }
+                                            </Typography>
+                                        }
+                                    >
+                                        <Box sx={{display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap"}}>
+                                            <Typography variant="body2" fontWeight={600}>
+                                                {approval.step?.name ?? `Step ${idx + 1}`}
+                                            </Typography>
+                                            <Chip
+                                                label={approval.status}
+                                                size="small"
+                                                color={APPROVAL_COLORS[approval.status] ?? "default"}
+                                                variant={isPending ? "outlined" : "filled"}
+                                            />
+                                            {isPending && approval.due_at && (
+                                                new Date(approval.due_at) < new Date()
+                                                    ? <Chip icon={<WarningAmberIcon fontSize="small"/>} label="Overdue" size="small" color="error"/>
+                                                    : <Chip label={`Due ${approval.due_at.substring(0,10)}`} size="small" variant="outlined" color="warning"/>
+                                            )}
+                                        </Box>
+                                    </StepLabel>
+                                    <StepContent>
+                                        {approval.acted_by && (
+                                            <Typography variant="caption" color="text.secondary" display="block">
+                                                {isApproved ? "Approved" : "Rejected"} by {approval.acted_by.name}
+                                                {approval.acted_at ? ` · ${approval.acted_at.substring(0, 10)}` : ""}
+                                            </Typography>
+                                        )}
+                                        {approval.notes && (
+                                            <Box sx={{mt: 0.5, p: 1, bgcolor: "grey.50", borderRadius: 1, borderLeft: "3px solid", borderColor: isRejected ? "error.main" : "success.main"}}>
+                                                <Typography variant="caption">{approval.notes}</Typography>
+                                            </Box>
+                                        )}
+
+                                        {isActive && canAct && (
+                                            <Box sx={{mt: 1.5, display: "flex", gap: 1, alignItems: "center"}}>
+                                                <TextField
+                                                    size="small"
+                                                    label="Comment (optional)"
+                                                    value={approveForm.data.notes}
+                                                    onChange={(e) => approveForm.setData("notes", e.target.value)}
+                                                    sx={{flex: 1}}
+                                                />
+                                                <Button
+                                                    startIcon={<ThumbUpIcon/>}
+                                                    variant="contained"
+                                                    color="success"
+                                                    size="small"
+                                                    onClick={submitApprove}
+                                                    disabled={approveForm.processing}
+                                                >
+                                                    Approve
+                                                </Button>
+                                                <Button
+                                                    startIcon={<ThumbDownIcon/>}
+                                                    variant="outlined"
+                                                    color="error"
+                                                    size="small"
+                                                    onClick={() => setRejectDialog(true)}
+                                                >
+                                                    Reject
+                                                </Button>
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    onClick={() => setDelegateDialog(true)}
+                                                >
+                                                    Delegate
+                                                </Button>
+                                            </Box>
+                                        )}
+                                    </StepContent>
+                                </Step>
+                            );
+                        })}
+                    </Stepper>
+                </CardContent>
+            </Card>
+
+            <Dialog open={delegateDialog} onClose={() => setDelegateDialog(false)} maxWidth="sm" fullWidth>
+                <DialogTitle>Delegate This Step</DialogTitle>
+                <DialogContent sx={{pt: 2}}>
+                    <Autocomplete
+                        sx={{mt: 1}}
+                        options={users ?? []}
+                        getOptionLabel={(u) => u.name}
+                        isOptionEqualToValue={(a, b) => a.id === b.id}
+                        value={delegateUser}
+                        onChange={(_, u) => { setDelegateUser(u); delegateForm.setData("delegate_to_user_id", u?.id ?? ""); }}
+                        renderInput={(params) => <TextField {...params} size="small" label="Delegate to user" required/>}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDelegateDialog(false)}>Cancel</Button>
+                    <Button variant="contained" disabled={!delegateUser || delegateForm.processing}
+                        onClick={() => delegateForm.post(route("inventory.purchase-requests.delegate-step", prId), {
+                            onSuccess: () => { delegateForm.reset(); setDelegateUser(null); setDelegateDialog(false); }
+                        })}>
+                        Delegate
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog open={rejectDialog} onClose={() => setRejectDialog(false)} maxWidth="sm" fullWidth>
+                <DialogTitle>Reject This Step</DialogTitle>
+                <DialogContent sx={{pt: 2}}>
+                    <TextField
+                        autoFocus fullWidth multiline rows={3} size="small" sx={{mt: 1}}
+                        label="Reason for rejection (required)"
+                        value={rejectForm.data.notes}
+                        onChange={(e) => rejectForm.setData("notes", e.target.value)}
+                        error={!!rejectForm.errors.notes}
+                        helperText={rejectForm.errors.notes}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setRejectDialog(false)}>Cancel</Button>
+                    <Button
+                        variant="contained" color="error"
+                        onClick={submitReject}
+                        disabled={rejectForm.processing || !rejectForm.data.notes}
+                    >
+                        Confirm Reject
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </>
+    );
+};
+
 const Show = () => {
-    const {purchaseRequest: pr, success, status, poDocument, paymentDocument} = usePage().props;
+    const {purchaseRequest: pr, approvals, canActOnWorkflow, canDirectApprove, isRequester, wasRejected, users, success, status, poDocument, paymentDocument} = usePage().props;
     const [viewingDoc, setViewingDoc] = useState(null);
 
     // Dialog state
+    const [submitDialog,  setSubmitDialog]  = useState(false);
+    const [changeNotes,   setChangeNotes]  = useState("");
     const [orderDialog,   setOrderDialog]   = useState(false);
     const [payDialog,     setPayDialog]      = useState(false);
     const [shipDialog,    setShipDialog]     = useState(false);
@@ -127,13 +387,18 @@ const Show = () => {
                             </Button>
                         )}
                         {currentStatus === "DRAFT" && (
-                            <Button variant="contained" color="info" onClick={() => handleAction("submit")}>
+                            <Button variant="contained" color="info" onClick={() => wasRejected ? setSubmitDialog(true) : handleAction("submit")}>
                                 Submit
                             </Button>
                         )}
-                        {currentStatus === "SUBMITTED" && (
+                        {currentStatus === "SUBMITTED" && canDirectApprove && (
                             <Button startIcon={<CheckCircleIcon/>} variant="contained" color="success" onClick={() => handleAction("approve")}>
                                 Approve
+                            </Button>
+                        )}
+                        {currentStatus === "SUBMITTED" && isRequester && !(approvals ?? []).some(a => a.status === "APPROVED" || a.status === "REJECTED") && (
+                            <Button variant="outlined" color="warning" onClick={() => router.post(route("inventory.purchase-requests.recall", pr.id))}>
+                                Recall
                             </Button>
                         )}
                         {currentStatus === "APPROVED" && (
@@ -182,6 +447,10 @@ const Show = () => {
             <Grid container spacing={3}>
                 {/* Left: info + lines + receipts */}
                 <Grid item xs={12} md={7}>
+                    {pr.workflow_template_id && (
+                        <WorkflowProgress approvals={approvals ?? []} canAct={canActOnWorkflow} prId={pr.id} users={users}/>
+                    )}
+                    <DiscussionPanel comments={pr.comments ?? []} prId={pr.id}/>
                     <Card sx={{mb: 3}}>
                         <CardHeader
                             title="Request Info"
@@ -206,6 +475,7 @@ const Show = () => {
                                 <Grid item xs={12} sm={6}>
                                     <InfoRow label="Requested By">{pr.requested_by?.name}</InfoRow>
                                     <InfoRow label="Approved By">{pr.approved_by?.name}</InfoRow>
+                                    <InfoRow label="Workflow">{pr.workflow_template?.name ?? "— none —"}</InfoRow>
                                     <InfoRow label="Supplier">{pr.supplier?.name}</InfoRow>
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
@@ -342,9 +612,13 @@ const Show = () => {
                                                     </Typography>
                                                     {h.notes && (
                                                         <Box sx={{mt: 0.5, p: 1, bgcolor: "warning.50", borderRadius: 1, borderLeft: "3px solid", borderColor: "warning.main"}}>
-                                                            <Typography variant="caption" color="text.secondary">
-                                                                {h.notes}
-                                                            </Typography>
+                                                            <Typography variant="caption" color="text.secondary">{h.notes}</Typography>
+                                                        </Box>
+                                                    )}
+                                                    {h.change_notes && (
+                                                        <Box sx={{mt: 0.5, p: 1, bgcolor: "info.50", borderRadius: 1, borderLeft: "3px solid", borderColor: "info.main"}}>
+                                                            <Typography variant="caption" color="text.secondary" fontWeight={600}>What changed: </Typography>
+                                                            <Typography variant="caption" color="text.secondary">{h.change_notes}</Typography>
                                                         </Box>
                                                     )}
                                                 </TimelineContent>
@@ -491,6 +765,32 @@ const Show = () => {
                 <DialogActions>
                     <Button onClick={() => setBrandsDialog(false)}>Cancel</Button>
                     <Button variant="contained" onClick={submitBrands}>Save Brands</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Re-submission change note dialog */}
+            <Dialog open={submitDialog} onClose={() => setSubmitDialog(false)} maxWidth="sm" fullWidth>
+                <DialogTitle>Re-submit Purchase Request</DialogTitle>
+                <DialogContent sx={{pt: 2}}>
+                    <TextField
+                        autoFocus fullWidth multiline rows={3} size="small" sx={{mt: 1}}
+                        label="What changed since the rejection? (required)"
+                        value={changeNotes}
+                        onChange={(e) => setChangeNotes(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setSubmitDialog(false)}>Cancel</Button>
+                    <Button
+                        variant="contained" color="info"
+                        disabled={!changeNotes.trim()}
+                        onClick={() => {
+                            router.put(route("inventory.purchase-requests.update", pr.id), {action: "submit", change_notes: changeNotes});
+                            setSubmitDialog(false);
+                        }}
+                    >
+                        Re-submit
+                    </Button>
                 </DialogActions>
             </Dialog>
 
