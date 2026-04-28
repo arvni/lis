@@ -36,9 +36,7 @@ readonly class PurchaseRequestService
             ->orderBy('created_at', 'desc');
 
         // Scope by view
-        if ($view === 'mine' || (!$canViewAll && $view !== 'approval')) {
-            $query->where('requested_by_user_id', $user->id);
-        } elseif ($view === 'approval') {
+        if ($view === 'approval') {
             $userRoles = $user->getRoleNames()->all();
             $query->where('status', PurchaseRequestStatus::SUBMITTED)
                 ->whereHas('approvals', function ($q) use ($user, $userRoles) {
@@ -58,8 +56,12 @@ readonly class PurchaseRequestService
                             }
                         });
                 });
+        } elseif ($view === 'all' && $canViewAll) {
+            // no scope — return every PR in the system
+        } else {
+            // 'mine' or any other value (including non-admins attempting 'all')
+            $query->where('requested_by_user_id', $user->id);
         }
-        // 'all' → no extra scope (only reachable when $canViewAll)
 
         if ($status  !== '') $query->where('status',  $status);
         if ($urgency !== '') $query->where('urgency', $urgency);
