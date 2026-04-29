@@ -59,10 +59,10 @@ class NodeService
             ->orderBy('sampled_at');
 
         if ($beginTime !== null) {
-            $query->where('sampled_at', '>=', Carbon::createFromTimestamp($beginTime));
+            $query->where('sampled_at', '>=', Carbon::createFromTimestampUTC($beginTime));
         }
         if ($endTime !== null) {
-            $query->where('sampled_at', '<=', Carbon::createFromTimestamp($endTime));
+            $query->where('sampled_at', '<=', Carbon::createFromTimestampUTC($endTime));
         }
 
         return $query->offset($offset)->limit($limit)->get()

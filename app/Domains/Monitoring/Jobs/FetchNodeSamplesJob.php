@@ -87,7 +87,7 @@ class FetchNodeSamplesJob implements ShouldQueue
             }
 
             MonitoringSample::firstOrCreate(
-                ['node_id' => $this->nodeId, 'sampled_at' => \Carbon\Carbon::createFromTimestamp($sampleTime)],
+                ['node_id' => $this->nodeId, 'sampled_at' => \Carbon\Carbon::createFromTimestampUTC($sampleTime)],
                 [
                     'temperature' => isset($sample['data']['tm']) ? round($sample['data']['tm'] / 100, 2) : null,
                     'humidity'    => isset($sample['data']['hu']) ? round($sample['data']['hu'] / 100, 2) : null,
