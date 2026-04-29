@@ -29,11 +29,10 @@ class PurchaseRequestController extends Controller
     public function index(Request $request): Response
     {
         $this->authorize('viewAny', PurchaseRequest::class);
-        $canViewAll    = auth()->user()->can('Inventory.PurchaseRequests.View All Purchase Requests');
         $requestInputs = $request->all();
-        $requests      = $this->prService->listRequests($requestInputs, $canViewAll);
+        $requests      = $this->prService->listRequests($requestInputs);
         $pendingCount  = $this->prService->pendingApprovalCount();
-        return Inertia::render('Inventory/PurchaseRequests/Index', compact('requests', 'requestInputs', 'canViewAll', 'pendingCount'));
+        return Inertia::render('Inventory/PurchaseRequests/Index', compact('requests', 'requestInputs', 'pendingCount'));
     }
 
     public function create(Request $request): Response

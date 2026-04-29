@@ -12,7 +12,7 @@ class PurchaseRequest extends Model
 {
     protected $fillable = [
         'requested_by_user_id', 'approved_by_user_id', 'supplier_id',
-        'urgency', 'notes', 'status',
+        'urgency', 'notes', 'status', 'workflow_template_id',
         'po_number', 'po_file',
         'payment_date', 'payment_reference', 'payment_file',
         'shipment_date', 'tracking_number', 'expected_delivery_date', 'currency',
@@ -40,9 +40,29 @@ class PurchaseRequest extends Model
         return $this->belongsTo(Supplier::class);
     }
 
+    public function workflowTemplate(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(WorkflowTemplate::class);
+    }
+
+    public function approvals(): HasMany
+    {
+        return $this->hasMany(PurchaseRequestApproval::class);
+    }
+
+    public function estimatedTotal(): float
+    {
+        return $this->lines->sum(fn($l) => (float) $l->qty * (float) ($l->estimated_unit_price ?? 0));
+    }
+
     public function lines(): HasMany
     {
         return $this->hasMany(PurchaseRequestLine::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(PurchaseRequestComment::class)->orderBy('created_at');
     }
 
     public function histories(): HasMany

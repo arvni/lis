@@ -15,7 +15,7 @@ import SupplierSelect from "@/Pages/Inventory/Components/SupplierSelect";
 import BrandInput from "@/Pages/Inventory/Components/BrandInput";
 import PriceHint from "@/Pages/Inventory/Components/PriceHint";
 
-const URGENCY_OPTIONS = ["NORMAL", "URGENT"];
+const URGENCY_OPTIONS = ["LOW", "NORMAL", "HIGH", "URGENT"];
 
 const emptyLine = () => ({
     _item: null,

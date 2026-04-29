@@ -46,6 +46,8 @@ use App\Http\Controllers\Document\UpdateBatchDocumentsController;
 use App\Http\Controllers\Document\UploadPublicDocumentController;
 use App\Http\Controllers\GetUserDetailsController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\Inventory\Api\FifoPreviewController;
+use App\Http\Controllers\Inventory\Api\ItemPurchasePriceController;
 use App\Http\Controllers\Laboratory\BarcodeGroupController;
 use App\Http\Controllers\Laboratory\ConsentFormController;
 use App\Http\Controllers\Laboratory\DoctorController;
@@ -396,10 +398,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Inventory Domain
     Route::group(["prefix" => "inventory", "as" => "inventory."], function () {
         Route::resource("items", InventoryItemController::class);
-        Route::get("items-import",           [ItemImportController::class, "create"])->name("items.import.create");
-        Route::post("items-import",          [ItemImportController::class, "store"])->name("items.import.store");
-        Route::post("items-import/rows",     [ItemImportController::class, "storeRows"])->name("items.import.rows");
-        Route::get("items-import/template",  [ItemImportController::class, "template"])->name("items.import.template");
+        Route::get("items-import", [ItemImportController::class, "create"])->name("items.import.create");
+        Route::post("items-import", [ItemImportController::class, "store"])->name("items.import.store");
+        Route::post("items-import/rows", [ItemImportController::class, "storeRows"])->name("items.import.rows");
+        Route::get("items-import/template", [ItemImportController::class, "template"])->name("items.import.template");
         Route::resource("suppliers", InventorySupplierController::class);
         Route::resource("stores", InventoryStoreController::class);
         Route::post("stores/{store}/locations", [StoreLocationController::class, 'store'])->name("stores.locations.store");
@@ -414,27 +416,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post("transactions/{transaction}/return", ReturnToRequesterController::class)->name("transactions.return");
         Route::post("transactions/{transaction}/confirm-receipt", ConfirmTransferReceiptController::class)->name("transactions.confirm-receipt");
         Route::resource("purchase-requests", PurchaseRequestController::class)->except("destroy");
-        Route::post("purchase-requests/{purchaseRequest}/order",   [PurchaseRequestController::class, "order"])->name("purchase-requests.order");
-        Route::post("purchase-requests/{purchaseRequest}/pay",     [PurchaseRequestController::class, "pay"])->name("purchase-requests.pay");
-        Route::post("purchase-requests/{purchaseRequest}/ship",    [PurchaseRequestController::class, "ship"])->name("purchase-requests.ship");
-        Route::get("purchase-requests/{purchaseRequest}/receive",  [PurchaseRequestController::class, "receiveItems"])->name("purchase-requests.receive");
+        Route::post("purchase-requests/{purchaseRequest}/order", [PurchaseRequestController::class, "order"])->name("purchase-requests.order");
+        Route::post("purchase-requests/{purchaseRequest}/pay", [PurchaseRequestController::class, "pay"])->name("purchase-requests.pay");
+        Route::post("purchase-requests/{purchaseRequest}/ship", [PurchaseRequestController::class, "ship"])->name("purchase-requests.ship");
+        Route::get("purchase-requests/{purchaseRequest}/receive", [PurchaseRequestController::class, "receiveItems"])->name("purchase-requests.receive");
         Route::post("purchase-requests/{purchaseRequest}/receive", [PurchaseRequestController::class, "storeReceipt"])->name("purchase-requests.store-receipt");
-        Route::post("purchase-requests/{purchaseRequest}/cancel",       [PurchaseRequestController::class, "cancel"])->name("purchase-requests.cancel");
-        Route::post("purchase-requests/{purchaseRequest}/set-brands",   [PurchaseRequestController::class, "setBrands"])->name("purchase-requests.set-brands");
-        Route::post("purchase-requests/bulk-approve",                    [PurchaseRequestController::class, "bulkApprove"])->name("purchase-requests.bulk-approve");
-        Route::post("purchase-requests/{purchaseRequest}/recall",        [PurchaseRequestController::class, "recall"])->name("purchase-requests.recall");
-        Route::post("purchase-requests/{purchaseRequest}/comments",      [PurchaseRequestController::class, "addComment"])->name("purchase-requests.comments.store");
-        Route::post("purchase-requests/{purchaseRequest}/approve-step",  [PurchaseRequestController::class, "approveStep"])->name("purchase-requests.approve-step");
+        Route::post("purchase-requests/{purchaseRequest}/cancel", [PurchaseRequestController::class, "cancel"])->name("purchase-requests.cancel");
+        Route::post("purchase-requests/{purchaseRequest}/set-brands", [PurchaseRequestController::class, "setBrands"])->name("purchase-requests.set-brands");
+        Route::post("purchase-requests/bulk-approve", [PurchaseRequestController::class, "bulkApprove"])->name("purchase-requests.bulk-approve");
+        Route::post("purchase-requests/{purchaseRequest}/recall", [PurchaseRequestController::class, "recall"])->name("purchase-requests.recall");
+        Route::post("purchase-requests/{purchaseRequest}/comments", [PurchaseRequestController::class, "addComment"])->name("purchase-requests.comments.store");
+        Route::post("purchase-requests/{purchaseRequest}/approve-step", [PurchaseRequestController::class, "approveStep"])->name("purchase-requests.approve-step");
         Route::post("purchase-requests/{purchaseRequest}/delegate-step", [PurchaseRequestController::class, "delegateStep"])->name("purchase-requests.delegate-step");
-        Route::post("purchase-requests/{purchaseRequest}/reject-step",  [PurchaseRequestController::class, "rejectStep"])->name("purchase-requests.reject-step");
+        Route::post("purchase-requests/{purchaseRequest}/reject-step", [PurchaseRequestController::class, "rejectStep"])->name("purchase-requests.reject-step");
         Route::get("purchase-requests/{purchaseRequest}/match-template", [PurchaseRequestController::class, "matchTemplate"])->name("purchase-requests.match-template");
 
-        Route::get("workflow-templates",                        [WorkflowTemplateController::class, "index"])->name("workflow-templates.index");
-        Route::get("workflow-templates/create",                 [WorkflowTemplateController::class, "create"])->name("workflow-templates.create");
-        Route::post("workflow-templates",                       [WorkflowTemplateController::class, "store"])->name("workflow-templates.store");
-        Route::get("workflow-templates/{workflowTemplate}/edit",[WorkflowTemplateController::class, "edit"])->name("workflow-templates.edit");
-        Route::put("workflow-templates/{workflowTemplate}",     [WorkflowTemplateController::class, "update"])->name("workflow-templates.update");
-        Route::delete("workflow-templates/{workflowTemplate}",  [WorkflowTemplateController::class, "destroy"])->name("workflow-templates.destroy");
+        Route::get("workflow-templates", [WorkflowTemplateController::class, "index"])->name("workflow-templates.index");
+        Route::get("workflow-templates/create", [WorkflowTemplateController::class, "create"])->name("workflow-templates.create");
+        Route::post("workflow-templates", [WorkflowTemplateController::class, "store"])->name("workflow-templates.store");
+        Route::get("workflow-templates/{workflowTemplate}/edit", [WorkflowTemplateController::class, "edit"])->name("workflow-templates.edit");
+        Route::put("workflow-templates/{workflowTemplate}", [WorkflowTemplateController::class, "update"])->name("workflow-templates.update");
+        Route::delete("workflow-templates/{workflowTemplate}", [WorkflowTemplateController::class, "destroy"])->name("workflow-templates.destroy");
         Route::get("stock", CurrentStockController::class)->name("stock.index");
         Route::get("stock-card/{item}", StockCardController::class)->name("stock.card");
         Route::get("reorder-alerts", ReorderAlertController::class)->name("reorder-alerts.index");
@@ -459,7 +461,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Inventory API
     Route::group(["prefix" => "api/inventory", "as" => "api.inventory."], function () {
-        Route::get("items/lookup",     InventoryLookupItemController::class)->name("items.lookup");
+        Route::get("items/lookup", InventoryLookupItemController::class)->name("items.lookup");
         Route::get("suppliers/lookup", InventoryLookupSupplierController::class)->name("suppliers.lookup");
         Route::get("brands/suggestions", InventoryBrandSuggestionsController::class)->name("brands.suggestions");
         Route::get("lots/lookup", InventoryLookupLotController::class)->name("lots.lookup");
@@ -468,8 +470,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("items/{item}/stock", InventoryItemStockController::class)->name("items.stock");
         Route::get("items/{item}/lots", InventoryItemLotsController::class)->name("items.lots");
         Route::get("stores/{store}/locations", InventoryStoreLocationsController::class)->name("stores.locations");
-        Route::get("fifo-preview",    \App\Http\Controllers\Inventory\Api\FifoPreviewController::class)->name("fifo.preview");
-        Route::get("items/price-hint", \App\Http\Controllers\Inventory\Api\ItemPurchasePriceController::class)->name("items.price-hint");
+        Route::get("fifo-preview", FifoPreviewController::class)->name("fifo.preview");
+        Route::get("items/price-hint", ItemPurchasePriceController::class)->name("items.price-hint");
     });
 
 });

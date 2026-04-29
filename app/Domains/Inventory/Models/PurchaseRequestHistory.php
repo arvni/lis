@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PurchaseRequestHistory extends Model
 {
-    protected $fillable = ['purchase_request_id', 'user_id', 'event', 'notes'];
+    protected $fillable = ['purchase_request_id', 'user_id', 'event', 'notes', 'change_notes'];
 
     public function purchaseRequest(): BelongsTo
     {

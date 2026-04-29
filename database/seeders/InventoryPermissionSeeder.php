@@ -36,12 +36,16 @@ class InventoryPermissionSeeder extends Seeder
             "Inventory.Transactions.Cancel Transaction",
 
             "Inventory.PurchaseRequests.List Purchase Requests",
+            "Inventory.PurchaseRequests.View All Purchase Requests",
             "Inventory.PurchaseRequests.Create Purchase Request",
             "Inventory.PurchaseRequests.Approve Purchase Request",
 
             "Inventory.Stock.View Stock",
             "Inventory.ReorderAlerts.View Reorder Alerts",
             "Inventory.ReorderAlerts.Resolve Reorder Alert",
+
+            "Inventory.WorkflowTemplates.List Workflow Templates",
+            "Inventory.WorkflowTemplates.Manage Workflow Templates",
         ];
 
         foreach ($permissions as $perm) {
@@ -50,7 +54,7 @@ class InventoryPermissionSeeder extends Seeder
 
         $allInventoryPerms = collect($permissions);
 
-        // Store Manager: full access
+        // Store Manager: full access including workflow template management
         $manager = Role::firstOrCreate(['name' => 'Store Manager', 'guard_name' => 'web']);
         $manager->syncPermissions($allInventoryPerms->all());
 

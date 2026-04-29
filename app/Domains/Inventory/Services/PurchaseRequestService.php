@@ -24,10 +24,10 @@ readonly class PurchaseRequestService
         private WorkflowTemplateMatcher $templateMatcher,
     ) {}
 
-    public function listRequests(array $filters, bool $canViewAll = false): LengthAwarePaginator
+    public function listRequests(array $filters): LengthAwarePaginator
     {
-        $user    = auth()->user();
-        $view    = $filters['filters']['view'] ?? ($canViewAll ? 'all' : 'mine');
+        $user = auth()->user();
+        $view = $filters['filters']['view'] ?? 'mine';
         $status  = $filters['filters']['status']  ?? '';
         $urgency = $filters['filters']['urgency'] ?? '';
 
@@ -35,31 +35,21 @@ readonly class PurchaseRequestService
             ->withCount('lines')
             ->orderBy('created_at', 'desc');
 
-        // Scope by view
         if ($view === 'approval') {
-            $userRoles = $user->getRoleNames()->all();
+            // Only workflow-based PRs where this user is explicitly the active step approver or delegatee
             $query->where('status', PurchaseRequestStatus::SUBMITTED)
-                ->whereHas('approvals', function ($q) use ($user, $userRoles) {
-                    $q->where('purchase_request_approvals.status', 'PENDING')
-                        ->join('workflow_steps as ws', 'ws.id', '=', 'purchase_request_approvals.workflow_step_id')
-                        ->whereRaw('ws.sort_order = (
-                            SELECT MIN(ws2.sort_order)
-                            FROM purchase_request_approvals pra2
-                            JOIN workflow_steps ws2 ON ws2.id = pra2.workflow_step_id
-                            WHERE pra2.purchase_request_id = purchase_request_approvals.purchase_request_id
-                            AND pra2.status = ?
-                        )', ['PENDING'])
-                        ->where(function ($q2) use ($user, $userRoles) {
-                            $q2->where('ws.approver_user_id', $user->id);
-                            if (!empty($userRoles)) {
-                                $q2->orWhereIn('ws.approver_role', $userRoles);
-                            }
-                        });
-                });
-        } elseif ($view === 'all' && $canViewAll) {
-            // no scope — return every PR in the system
+                ->whereHas('approvals', fn($sub) => $this->scopeActiveApproverQuery($sub, $user));
+        } elseif ($view === 'all') {
+            // Union: PRs the user created OR workflow PRs awaiting their action
+            $query->where(function ($q) use ($user) {
+                $q->where('requested_by_user_id', $user->id)
+                  ->orWhere(function ($sub) use ($user) {
+                      $sub->where('status', PurchaseRequestStatus::SUBMITTED)
+                          ->whereHas('approvals', fn($s) => $this->scopeActiveApproverQuery($s, $user));
+                  });
+            });
         } else {
-            // 'mine' or any other value (including non-admins attempting 'all')
+            // 'mine' — PRs the user created (default)
             $query->where('requested_by_user_id', $user->id);
         }
 
@@ -71,28 +61,39 @@ readonly class PurchaseRequestService
 
     public function pendingApprovalCount(): int
     {
-        $user      = auth()->user();
-        $userRoles = $user->getRoleNames()->all();
+        $user = auth()->user();
 
         return PurchaseRequest::where('status', PurchaseRequestStatus::SUBMITTED)
-            ->whereHas('approvals', function ($q) use ($user, $userRoles) {
-                $q->where('purchase_request_approvals.status', 'PENDING')
-                    ->join('workflow_steps as ws', 'ws.id', '=', 'purchase_request_approvals.workflow_step_id')
-                    ->whereRaw('ws.sort_order = (
-                        SELECT MIN(ws2.sort_order)
-                        FROM purchase_request_approvals pra2
-                        JOIN workflow_steps ws2 ON ws2.id = pra2.workflow_step_id
-                        WHERE pra2.purchase_request_id = purchase_request_approvals.purchase_request_id
-                        AND pra2.status = ?
-                    )', ['PENDING'])
-                    ->where(function ($q2) use ($user, $userRoles) {
-                        $q2->where('ws.approver_user_id', $user->id);
-                        if (!empty($userRoles)) {
-                            $q2->orWhereIn('ws.approver_role', $userRoles);
-                        }
-                    });
-            })
+            ->whereHas('approvals', fn($q) => $this->scopeActiveApproverQuery($q, $user))
             ->count();
+    }
+
+    /**
+     * Constrains a purchase_request_approvals subquery to rows where:
+     *  - the approval is PENDING
+     *  - it is the currently active step (lowest sort_order among pending steps)
+     *  - the given user is the designated approver, a role-holder, or the delegatee
+     */
+    private function scopeActiveApproverQuery($q, $user): void
+    {
+        $userRoles = $user->getRoleNames()->all();
+
+        $q->where('purchase_request_approvals.status', 'PENDING')
+            ->join('workflow_steps as ws', 'ws.id', '=', 'purchase_request_approvals.workflow_step_id')
+            ->whereRaw('ws.sort_order = (
+                SELECT MIN(ws2.sort_order)
+                FROM purchase_request_approvals pra2
+                JOIN workflow_steps ws2 ON ws2.id = pra2.workflow_step_id
+                WHERE pra2.purchase_request_id = purchase_request_approvals.purchase_request_id
+                AND pra2.status = ?
+            )', ['PENDING'])
+            ->where(function ($q2) use ($user, $userRoles) {
+                $q2->where('ws.approver_user_id', $user->id)
+                   ->orWhere('purchase_request_approvals.delegated_to_user_id', $user->id);
+                if (!empty($userRoles)) {
+                    $q2->orWhereIn('ws.approver_role', $userRoles);
+                }
+            });
     }
 
     public function createRequest(array $data): PurchaseRequest

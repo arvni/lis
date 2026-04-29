@@ -60,7 +60,9 @@ const WorkflowTemplatesIndex = () => {
                         <TableHead>
                             <TableRow>
                                 <TableCell>Name</TableCell>
+                                <TableCell>Conditions</TableCell>
                                 <TableCell>Steps</TableCell>
+                                <TableCell>Priority</TableCell>
                                 <TableCell>Used By</TableCell>
                                 <TableCell>Status</TableCell>
                                 <TableCell align="right">Actions</TableCell>
@@ -72,7 +74,7 @@ const WorkflowTemplatesIndex = () => {
                                     <TableCell>
                                         <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
                                             {tpl.is_default && (
-                                                <Tooltip title="Default template">
+                                                <Tooltip title="Default / fallback template">
                                                     <StarIcon fontSize="small" color="warning"/>
                                                 </Tooltip>
                                             )}
@@ -83,6 +85,30 @@ const WorkflowTemplatesIndex = () => {
                                                 )}
                                             </Box>
                                         </Box>
+                                    </TableCell>
+                                    <TableCell sx={{minWidth: 200}}>
+                                        {(!tpl.conditions?.urgencies?.length && !tpl.conditions?.requester_roles?.length) ? (
+                                            <Typography variant="caption" color="text.disabled">
+                                                {tpl.is_default ? "Fallback (any)" : "—"}
+                                            </Typography>
+                                        ) : (
+                                            <Stack spacing={0.5}>
+                                                {tpl.conditions?.urgencies?.length > 0 && (
+                                                    <Box sx={{display: "flex", gap: 0.5, flexWrap: "wrap"}}>
+                                                        {tpl.conditions.urgencies.map((u) => (
+                                                            <Chip key={u} label={u} size="small" variant="outlined" color="warning" sx={{fontSize: "0.65rem"}}/>
+                                                        ))}
+                                                    </Box>
+                                                )}
+                                                {tpl.conditions?.requester_roles?.length > 0 && (
+                                                    <Box sx={{display: "flex", gap: 0.5, flexWrap: "wrap"}}>
+                                                        {tpl.conditions.requester_roles.map((r) => (
+                                                            <Chip key={r} label={r} size="small" variant="outlined" color="primary" sx={{fontSize: "0.65rem"}}/>
+                                                        ))}
+                                                    </Box>
+                                                )}
+                                            </Stack>
+                                        )}
                                     </TableCell>
                                     <TableCell>
                                         {tpl.steps.length === 0 ? (
@@ -102,6 +128,9 @@ const WorkflowTemplatesIndex = () => {
                                                 ))}
                                             </Stack>
                                         )}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip label={tpl.priority} size="small" variant="outlined" sx={{fontFamily: "monospace"}}/>
                                     </TableCell>
                                     <TableCell>
                                         <Typography variant="body2">{tpl.purchase_requests_count} PR{tpl.purchase_requests_count !== 1 ? "s" : ""}</Typography>

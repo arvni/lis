@@ -64,10 +64,10 @@ const PRFilter = ({defaultFilter, onFilter}) => {
 };
 
 const PurchaseRequestsIndex = () => {
-    const {requests, requestInputs, canViewAll, pendingCount, success, status, errors} = usePage().props;
+    const {requests, requestInputs, pendingCount, success, status, errors} = usePage().props;
     const [selected, setSelected] = useState([]);
 
-    const currentView = requestInputs?.filters?.view ?? (canViewAll ? "all" : "mine");
+    const currentView = requestInputs?.filters?.view ?? "mine";
 
     const handlePageReload = useCallback((page, filters, sort, pageSize) => {
         router.visit(route("inventory.purchase-requests.index"), {
@@ -156,17 +156,15 @@ const PurchaseRequestsIndex = () => {
                     iconPosition="start"
                     label="Pending My Approval"
                 />
-                {canViewAll && (
-                    <Tab
-                        value="all"
-                        icon={<ListAltIcon fontSize="small"/>}
-                        iconPosition="start"
-                        label="All Requests"
-                    />
-                )}
+                <Tab
+                    value="all"
+                    icon={<ListAltIcon fontSize="small"/>}
+                    iconPosition="start"
+                    label="All My Activity"
+                />
             </Tabs>
 
-            <Collapse in={currentView === "approval" && selected.length > 0}>
+            <Collapse in={selected.length > 0}>
                 <Box sx={{mb: 1, display: "flex", alignItems: "center", gap: 2, p: 1.5, bgcolor: "warning.50", borderRadius: 1, border: "1px solid", borderColor: "warning.light"}}>
                     <Typography variant="body2" fontWeight={600}>{selected.length} selected</Typography>
                     <Button size="small" variant="contained" color="warning" onClick={handleBulkApprove}>
@@ -180,7 +178,7 @@ const PurchaseRequestsIndex = () => {
                 Filter={PRFilter}
                 defaultValues={requestInputs ?? {}} success={success} status={status}
                 reload={handlePageReload} columns={columns} data={requests} errors={errors}
-                checkboxSelection={currentView === "approval"}
+                checkboxSelection={currentView === "approval" || currentView === "all"}
                 onRowSelectionModelChange={(ids) => setSelected(ids)}
                 rowSelectionModel={selected}
             />

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Domains\Inventory\Services\PurchaseRequestService;
 use App\Services\DashboardService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -9,19 +10,18 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-    public function __construct(private readonly DashboardService $dashboardService)
-    {
-    }
+    public function __construct(
+        private readonly DashboardService $dashboardService,
+        private readonly PurchaseRequestService $prService,
+    ) {}
 
-    /**
-     * Handle the incoming request.
-     */
     public function __invoke(Request $request)
     {
-        $date = Carbon::parse($request->get('date',), "Asia/Muscat");
+        $date = Carbon::parse($request->get('date'), "Asia/Muscat");
         return Inertia::render('Dashboard/Index', [
-            "data" => $this->dashboardService->getDashboardData($date)->toArray(),
-            "date" => $date->format('Y-m-d'),
+            "data"               => $this->dashboardService->getDashboardData($date)->toArray(),
+            "date"               => $date->format('Y-m-d'),
+            "pendingPRApprovals" => $this->prService->pendingApprovalCount(),
         ]);
     }
 }

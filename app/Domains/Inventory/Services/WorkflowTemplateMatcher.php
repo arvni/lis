@@ -19,7 +19,7 @@ class WorkflowTemplateMatcher
      *   - Key absent / empty array → matches any value (wildcard).
      *   - Key present with values  → value must be in the list.
      */
-    public function find(User $requester, string $urgency): ?WorkflowTemplate
+    public function find(User $requester, string $urgency, float $estimatedTotal = 0): ?WorkflowTemplate
     {
         $templates = WorkflowTemplate::active()
             ->orderBy('priority')
@@ -31,7 +31,7 @@ class WorkflowTemplateMatcher
         // First pass: templates that have at least one condition defined
         foreach ($templates as $template) {
             if ($template->is_default) continue; // skip default in first pass
-            if ($this->matches($template, $urgency, $requesterRoles)) {
+            if ($this->matches($template, $urgency, $requesterRoles, $estimatedTotal)) {
                 return $template;
             }
         }
@@ -40,16 +40,16 @@ class WorkflowTemplateMatcher
         return $templates->firstWhere('is_default', true);
     }
 
-    private function matches(WorkflowTemplate $template, string $urgency, array $requesterRoles): bool
+    private function matches(WorkflowTemplate $template, string $urgency, array $requesterRoles, float $estimatedTotal): bool
     {
         $conditions = $template->conditions ?? [];
 
-        $urgencies      = $conditions['urgencies']       ?? [];
-        $requiredRoles  = $conditions['requester_roles'] ?? [];
+        $urgencies     = $conditions['urgencies']       ?? [];
+        $requiredRoles = $conditions['requester_roles'] ?? [];
+        $minTotal      = isset($conditions['min_total']) ? (float) $conditions['min_total'] : null;
 
         // Empty conditions on a non-default template = matches nothing
-        // (it would be a no-op template; use is_default for catch-alls)
-        if (empty($urgencies) && empty($requiredRoles)) {
+        if (empty($urgencies) && empty($requiredRoles) && $minTotal === null) {
             return false;
         }
 
@@ -57,9 +57,12 @@ class WorkflowTemplateMatcher
             return false;
         }
 
-        if (!empty($requiredRoles)) {
-            $overlap = array_intersect($requiredRoles, $requesterRoles);
-            if (empty($overlap)) return false;
+        if (!empty($requiredRoles) && empty(array_intersect($requiredRoles, $requesterRoles))) {
+            return false;
+        }
+
+        if ($minTotal !== null && $estimatedTotal < $minTotal) {
+            return false;
         }
 
         return true;

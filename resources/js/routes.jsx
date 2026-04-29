@@ -246,6 +246,12 @@ const routes = (sections = []) => {
                     icon: <AddShoppingCartIcon fontSize="small"/>,
                 },
                 {
+                    title: "Workflow Templates",
+                    route: "inventory.workflow-templates.index",
+                    permission: 'Inventory.WorkflowTemplates.List Workflow Templates',
+                    icon: <AccountTreeIcon fontSize="small"/>,
+                },
+                {
                     title: "Reorder Alerts",
                     route: "inventory.reorder-alerts.index",
                     permission: 'Inventory.ReorderAlerts.View Reorder Alerts',

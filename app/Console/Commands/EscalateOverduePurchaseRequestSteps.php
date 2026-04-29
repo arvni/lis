@@ -22,6 +22,9 @@ class EscalateOverduePurchaseRequestSteps extends Command
             ->with(['step.approverUser', 'purchaseRequest.requestedBy'])
             ->get();
 
+        // Load once outside the loop
+        $storeManagers = User::role('Store Manager')->get();
+
         foreach ($overdue as $approval) {
             $daysOverdue = (int) now()->diffInDays($approval->due_at);
             $pr          = $approval->purchaseRequest;
@@ -40,7 +43,7 @@ class EscalateOverduePurchaseRequestSteps extends Command
 
             // Also escalate to Store Managers if not already escalated
             if (!$approval->escalated) {
-                User::role('Store Manager')->get()->each->notify($notification);
+                $storeManagers->each->notify($notification);
                 $approval->update(['escalated' => true]);
             }
 

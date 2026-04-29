@@ -68,11 +68,13 @@ use App\Domains\Inventory\Models\Supplier;
 use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\StockTransaction;
 use App\Domains\Inventory\Models\PurchaseRequest;
+use App\Domains\Inventory\Models\WorkflowTemplate;
 use App\Domains\Inventory\Policies\ItemPolicy;
 use App\Domains\Inventory\Policies\SupplierPolicy;
 use App\Domains\Inventory\Policies\StorePolicy;
 use App\Domains\Inventory\Policies\StockTransactionPolicy;
 use App\Domains\Inventory\Policies\PurchaseRequestPolicy;
+use App\Domains\Inventory\Policies\WorkflowTemplatePolicy;
 use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
 use App\Domains\User\Policies\RolePolicy;
@@ -183,5 +185,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Store::class, StorePolicy::class);
         Gate::policy(StockTransaction::class, StockTransactionPolicy::class);
         Gate::policy(PurchaseRequest::class, PurchaseRequestPolicy::class);
+        Gate::policy(WorkflowTemplate::class, WorkflowTemplatePolicy::class);
     }
 }

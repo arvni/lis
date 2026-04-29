@@ -292,8 +292,13 @@ class RoleAndPermissionSeeder extends Seeder
                 ],
                 "PurchaseRequests" => [
                     "List Purchase Requests",
+                    "View All Purchase Requests",
                     "Create Purchase Request",
                     "Approve Purchase Request",
+                ],
+                "WorkflowTemplates" => [
+                    "List Workflow Templates",
+                    "Manage Workflow Templates",
                 ],
                 "Stock" => [
                     "View Stock",

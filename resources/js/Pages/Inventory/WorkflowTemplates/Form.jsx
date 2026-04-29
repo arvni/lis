@@ -16,6 +16,7 @@ import PageHeader from "@/Components/PageHeader";
 const emptyStep = (sortOrder = 0) => ({
     name: "",
     sort_order: sortOrder,
+    deadline_days: "",
     approver_type: "role",  // "role" | "user"
     approver_user_id: null,
     approver_role: null,
@@ -23,7 +24,7 @@ const emptyStep = (sortOrder = 0) => ({
 });
 
 const WorkflowTemplateForm = () => {
-    const {template, users, roles, success, status} = usePage().props;
+    const {template, users, roles, urgencies, success, status} = usePage().props;
     const isEdit = !!template;
 
     const buildSteps = () => {
@@ -31,6 +32,7 @@ const WorkflowTemplateForm = () => {
         return template.steps.map((s) => ({
             name:             s.name,
             sort_order:       s.sort_order,
+            deadline_days:    s.deadline_days ?? "",
             approver_type:    s.approver_user_id ? "user" : "role",
             approver_user_id: s.approver_user_id ?? null,
             approver_role:    s.approver_role ?? null,
@@ -43,7 +45,13 @@ const WorkflowTemplateForm = () => {
         description: template?.description ?? "",
         is_active:   template?.is_active ?? true,
         is_default:  template?.is_default ?? false,
-        steps:       buildSteps(),
+        priority:    template?.priority ?? 0,
+        conditions:  {
+            urgencies:       template?.conditions?.urgencies       ?? [],
+            requester_roles: template?.conditions?.requester_roles ?? [],
+            min_total:       template?.conditions?.min_total       ?? "",
+        },
+        steps: buildSteps(),
     });
 
     const [localSteps, setLocalSteps] = useState(buildSteps);
@@ -142,12 +150,73 @@ const WorkflowTemplateForm = () => {
                                 }
                                 label={
                                     <Box>
-                                        <Typography variant="body2">Default template</Typography>
+                                        <Typography variant="body2">Default / fallback</Typography>
                                         <Typography variant="caption" color="text.secondary">
-                                            Auto-assigned to new purchase requests
+                                            Used when no other template matches
                                         </Typography>
                                     </Box>
                                 }
+                            />
+                            <TextField
+                                fullWidth size="small" type="number" label="Priority"
+                                inputProps={{min: 0}}
+                                value={data.priority}
+                                onChange={(e) => setData("priority", parseInt(e.target.value) || 0)}
+                                helperText="Lower number = evaluated first (0 = highest priority)"
+                            />
+                        </CardContent>
+                    </Card>
+
+                    <Card sx={{mt: 2}}>
+                        <CardHeader
+                            title="Matching Conditions"
+                            subheader="Leave both empty to match every request (use with Default enabled)."
+                        />
+                        <CardContent sx={{display: "flex", flexDirection: "column", gap: 2}}>
+                            <Autocomplete
+                                multiple
+                                options={urgencies}
+                                value={data.conditions.urgencies}
+                                onChange={(_, v) => setData("conditions", {...data.conditions, urgencies: v})}
+                                renderTags={(val, getTagProps) =>
+                                    val.map((opt, idx) => (
+                                        <Chip key={opt} label={opt} size="small" {...getTagProps({index: idx})}/>
+                                    ))
+                                }
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        size="small"
+                                        label="Urgency levels"
+                                        helperText="Empty = match any urgency"
+                                    />
+                                )}
+                            />
+                            <TextField
+                                fullWidth size="small" type="number" label="Min. estimated total"
+                                inputProps={{min: 0, step: 0.01}}
+                                value={data.conditions.min_total}
+                                onChange={(e) => setData("conditions", {...data.conditions, min_total: e.target.value})}
+                                helperText="Apply when estimated PR total ≥ this amount (leave empty to ignore)"
+                            />
+                            <Autocomplete
+                                multiple
+                                options={roles}
+                                value={data.conditions.requester_roles}
+                                onChange={(_, v) => setData("conditions", {...data.conditions, requester_roles: v})}
+                                renderTags={(val, getTagProps) =>
+                                    val.map((opt, idx) => (
+                                        <Chip key={opt} label={opt} size="small" color="primary" variant="outlined" {...getTagProps({index: idx})}/>
+                                    ))
+                                }
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        size="small"
+                                        label="Requester roles"
+                                        helperText="Empty = match any role"
+                                    />
+                                )}
                             />
                         </CardContent>
                     </Card>
@@ -215,6 +284,15 @@ const WorkflowTemplateForm = () => {
                                                 <Grid container spacing={1}>
                                                     <Grid item xs={12} sm={4}>
                                                         <TextField
+                                                            fullWidth size="small" type="number" label="Deadline (days)"
+                                                            inputProps={{min: 1}}
+                                                            value={step.deadline_days}
+                                                            onChange={(e) => updateStep(idx, "deadline_days", e.target.value ? parseInt(e.target.value) : "")}
+                                                            helperText="Leave empty for no deadline"
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={4}>
+                                                        <TextField
                                                             select fullWidth size="small" label="Approver Type"
                                                             value={step.approver_type}
                                                             onChange={(e) => {
@@ -233,7 +311,7 @@ const WorkflowTemplateForm = () => {
                                                         </TextField>
                                                     </Grid>
 
-                                                    <Grid item xs={12} sm={8}>
+                                                    <Grid item xs={12} sm={4}>
                                                         {step.approver_type === "role" ? (
                                                             <Autocomplete
                                                                 size="small"
