@@ -2,6 +2,7 @@ import React from "react";
 import {Card, Paper, Stack, Box} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {Head} from "@inertiajs/react";
+import PropTypes from 'prop-types';
 
 const PageHeader = ({title, actions, subtitle, icon}) => {
     return (
@@ -83,6 +84,13 @@ const PageHeader = ({title, actions, subtitle, icon}) => {
             </Paper>
         </Card>
     );
+};
+
+PageHeader.propTypes = {
+    title: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
+    subtitle: PropTypes.string,
+    actions: PropTypes.node,
+    icon: PropTypes.node,
 };
 
 export default PageHeader;

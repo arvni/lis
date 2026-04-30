@@ -1,60 +1,146 @@
-import {useState} from "react";
-import List from "@mui/material/List";
-import {IconButton, ListItem, Stack} from "@mui/material";
-import TextField from "@mui/material/TextField";
-import {Add, Delete} from "@mui/icons-material";
+import React, {useState, useCallback, useMemo, useEffect} from 'react';
+import {
+    List,
+    ListItem,
+    IconButton,
+    TextField,
+    Box,
+    Typography,
+    Stack
+} from '@mui/material';
+import {
+    Add as AddIcon,
+    Delete as DeleteIcon
+} from '@mui/icons-material';
 import {makeId} from "@/Services/helper";
 
-const ConditionsField = ({defaultValue = [], onChange, errors, name}) => {
+
+const ConditionsField = ({
+                             onChange,
+                             name,
+                             defaultValue = [],
+                             errors = {},
+                             label = 'Conditions'
+                         }) => {
     const [conditions, setConditions] = useState(defaultValue);
-    const handleAdd = () => {
-        let id = makeId(6);
-        setConditions(prevState => ([...prevState, {condition: "", id, value: ""}]));
-        onChange({target: {name, value: [...conditions, {condition: "", id, value: ""}]}});
-    };
-    const handleDelete = (id) => () => {
-        const temp = [...conditions];
-        let index = temp.findIndex((item) => item.id === id);
-        temp.splice(index, 1);
-        setConditions(temp);
-        onChange({target: {name, value: temp}});
-    }
-    const handleChange = (id) => (e) => {
-        const temp = [...conditions];
-        let index = temp.findIndex((item) => item.id === id);
-        temp[index] = {...temp[index], [e.target.name]: e.target.value};
-        setConditions(temp);
-        onChange({target: {name, value: temp}});
-    }
-    return <List dense disablePadding>
-        <ListItem>Conditions</ListItem>
-        {conditions.map(condition => <ListItem key={condition.id}
-                                               secondaryAction={<IconButton onClick={handleDelete(condition.id)}>
-                                                   <Delete/>
-                                               </IconButton>}>
-            <Stack direction="row" spacing={1}>
-                <TextField name="condition"
-                           size="small"
-                           label="Condition"
-                           onChange={handleChange(condition.id)}
-                           value={condition.condition}
-                           error={Boolean(errors?.[condition.id])}
-                           helperText={errors?.[condition.id]}/>
-                <TextField name="value"
-                           size="small"
-                           label="Value"
-                           onChange={handleChange(condition.id)}
-                           value={condition.value}
-                           error={Boolean(errors?.[condition.id])}
-                           helperText={errors?.[condition.id]}/>
-            </Stack>
-        </ListItem>)}
-        <ListItem>
-            <IconButton onClick={handleAdd}>
-                <Add/>
-            </IconButton>
-        </ListItem>
-    </List>
-}
+
+    useEffect(() => {
+        setConditions(defaultValue);
+    }, [defaultValue]);
+
+    const handleAdd = useCallback(() => {
+        const newCondition = {
+            id: makeId(6),
+            condition: '',
+            value: ''
+        };
+
+        const updatedConditions = [...conditions, newCondition];
+
+        setConditions(updatedConditions);
+        onChange({target: {name, value: updatedConditions}});
+    }, [conditions, name, onChange]);
+
+    const handleDelete = useCallback((id) => {
+        const updatedConditions = conditions.filter(condition => condition.id !== id);
+
+        setConditions(updatedConditions);
+        onChange({target: {name, value: updatedConditions}});
+    }, [conditions, name, onChange]);
+
+    const handleChange = useCallback((id) => (e) => {
+        const {name: fieldName, value} = e.target;
+
+        const updatedConditions = conditions.map(condition =>
+            condition.id === id
+                ? {...condition, [fieldName]: value}
+                : condition
+        );
+
+        setConditions(updatedConditions);
+        onChange({target: {name, value: updatedConditions}});
+    }, [conditions, name, onChange]);
+
+    const getFieldError = useMemo(() => {
+        return (id) => errors[id];
+    }, [errors]);
+
+    return (
+        <Box sx={{width: '100%'}}>
+            <Typography variant="subtitle1" gutterBottom>
+                {label}
+            </Typography>
+            <List dense disablePadding>
+                {conditions.map((condition) => (
+                    <ListItem
+                        key={condition.id}
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 2,
+                            paddingX: 0,
+                            paddingY: 1
+                        }}
+                        disableGutters
+                    >
+                        <Stack
+                            direction="row"
+                            spacing={2}
+                            sx={{
+                                flexGrow: 1,
+                                alignItems: 'center'
+                            }}
+                        >
+                            <TextField
+                                name="condition"
+                                size="small"
+                                label="Condition"
+                                fullWidth
+                                value={condition.condition}
+                                onChange={handleChange(condition.id)}
+                                error={Boolean(getFieldError(condition.id))}
+                                helperText={getFieldError(condition.id)}
+                            />
+                            <TextField
+                                name="value"
+                                size="small"
+                                label="Value"
+                                fullWidth
+                                value={condition.value}
+                                onChange={handleChange(condition.id)}
+                                error={Boolean(getFieldError(condition.id))}
+                                helperText={getFieldError(condition.id)}
+                            />
+                            <IconButton
+                                onClick={() => handleDelete(condition.id)}
+                                color="error"
+                                size="small"
+                                edge="end"
+                            >
+                                <DeleteIcon/>
+                            </IconButton>
+                        </Stack>
+                    </ListItem>
+                ))}
+
+                <ListItem
+                    sx={{
+                        justifyContent: 'center',
+                        paddingY: 1
+                    }}
+                    disableGutters
+                >
+                    <IconButton
+                        onClick={handleAdd}
+                        color="primary"
+                        aria-label="Add condition"
+                    >
+                        <AddIcon/>
+                    </IconButton>
+                </ListItem>
+            </List>
+        </Box>
+    );
+};
 
 export default ConditionsField;

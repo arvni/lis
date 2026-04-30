@@ -1,6 +1,7 @@
 import {Box, Button, Chip, Paper, Typography} from "@mui/material";
 import {CloudDownload} from "@mui/icons-material";
 import React from "react";
+import PropTypes from 'prop-types';
 
 const GenericFileViewer = ({ fileUrl, fileType, fileName, fileSize, onDownload }) => {
     return (
@@ -62,6 +63,14 @@ const GenericFileViewer = ({ fileUrl, fileType, fileName, fileSize, onDownload }
             </Paper>
         </Box>
     );
+};
+
+GenericFileViewer.propTypes = {
+    fileUrl: PropTypes.string.isRequired,
+    fileType: PropTypes.string,
+    fileName: PropTypes.string,
+    fileSize: PropTypes.number,
+    onDownload: PropTypes.func,
 };
 
 export default GenericFileViewer;

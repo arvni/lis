@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState, useMemo, memo} from "react";
+import PropTypes from 'prop-types';
 import {
     Alert,
     Box,
@@ -771,6 +772,26 @@ const Upload = ({
             )}
         </>
     );
+};
+
+Upload.propTypes = {
+    url: PropTypes.string.isRequired,
+    label: PropTypes.string,
+    name: PropTypes.string,
+    value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+    error: PropTypes.bool,
+    helperText: PropTypes.string,
+    onChange: PropTypes.func.isRequired,
+    accept: PropTypes.string,
+    multiple: PropTypes.bool,
+    editable: PropTypes.bool,
+    required: PropTypes.bool,
+    maxFileSize: PropTypes.number,
+    maxFiles: PropTypes.number,
+    tags: PropTypes.arrayOf(PropTypes.shape({
+        value: PropTypes.string,
+        label: PropTypes.string,
+    })),
 };
 
 export default Upload;

@@ -10,6 +10,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import EditIcon from "@mui/icons-material/Edit";
 import LabelIcon from "@mui/icons-material/Label";
 import React, { useState } from "react";
+import PropTypes from 'prop-types';
 
 /**
  * Component to display an uploaded file with actions
@@ -360,6 +361,22 @@ const UploadItem = ({
     }
 
     return null;
+};
+
+UploadItem.propTypes = {
+    value: PropTypes.object,
+    status: PropTypes.string,
+    progress: PropTypes.number,
+    error: PropTypes.string,
+    onDelete: PropTypes.func,
+    onCancel: PropTypes.func,
+    onTagChange: PropTypes.func,
+    availableTags: PropTypes.arrayOf(PropTypes.shape({
+        value: PropTypes.string,
+        label: PropTypes.string,
+    })),
+    editable: PropTypes.bool,
+    showFileSize: PropTypes.bool,
 };
 
 export default UploadItem;

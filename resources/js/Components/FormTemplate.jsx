@@ -10,6 +10,7 @@ import {
     CircularProgress
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
+import PropTypes from 'prop-types';
 
 const FormContext = createContext();
 export const useFormState = () => useContext(FormContext);
@@ -90,3 +91,12 @@ export const FormProvider = ({open, onClose, url, children, defaultValue = {}, g
     );
 };
 
+FormProvider.propTypes = {
+    open: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    url: PropTypes.string.isRequired,
+    children: PropTypes.node,
+    defaultValue: PropTypes.object,
+    generalTitle: PropTypes.string,
+    maxWidth: PropTypes.string,
+};

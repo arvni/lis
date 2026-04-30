@@ -2,6 +2,7 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import React, {useState, useEffect} from "react";
+import PropTypes from 'prop-types';
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -514,6 +515,16 @@ const DocumentsInfo = ({
                       onClose={handleClose}/>
         </>
     );
+};
+
+DocumentsInfo.propTypes = {
+    documents: PropTypes.array,
+    appendData: PropTypes.object,
+    defaultExpanded: PropTypes.bool,
+    titleVariant: PropTypes.string,
+    editable: PropTypes.bool,
+    url: PropTypes.string,
+    allowedTags: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default DocumentsInfo;

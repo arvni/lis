@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import mammoth from "mammoth";
 import {Alert, AppBar, Box, CircularProgress, IconButton, Paper, Toolbar, Tooltip, Typography} from "@mui/material";
 import {FilterCenterFocus, ZoomIn, ZoomOut} from "@mui/icons-material";
+import PropTypes from 'prop-types';
 
 const DOCXViewer = ({ fileUrl, fullScreen = false }) => {
     const [content, setContent] = useState('');
@@ -161,6 +162,11 @@ const DOCXViewer = ({ fileUrl, fullScreen = false }) => {
             </Box>
         </Box>
     );
+};
+
+DOCXViewer.propTypes = {
+    fileUrl: PropTypes.string.isRequired,
+    fullScreen: PropTypes.bool,
 };
 
 export default DOCXViewer;

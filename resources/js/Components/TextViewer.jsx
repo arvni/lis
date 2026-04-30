@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Alert, AppBar, Box, CircularProgress, IconButton, Paper, Toolbar, Tooltip, Typography} from "@mui/material";
 import {ContentCopy, ZoomIn, ZoomOut} from "@mui/icons-material";
+import PropTypes from 'prop-types';
 
 const TextViewer = ({ fileUrl, fullScreen = false }) => {
     const [content, setContent] = useState('');
@@ -141,6 +142,11 @@ const TextViewer = ({ fileUrl, fullScreen = false }) => {
             </Box>
         </Box>
     );
+};
+
+TextViewer.propTypes = {
+    fileUrl: PropTypes.string.isRequired,
+    fullScreen: PropTypes.bool,
 };
 
 export default TextViewer;

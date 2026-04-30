@@ -22,6 +22,7 @@ class DocumentController extends Controller
 
     public function store(StoreDocumentRequest $request): DocumentResource
     {
+        $this->authorize('create', Document::class);
 
         $document = $this->documentService->storeDocument(
             $request->input('ownerClass', "user"),
@@ -34,22 +35,26 @@ class DocumentController extends Controller
 
     public function show(Document $document): Response
     {
+        $this->authorize('view', $document);
         return Inertia::render("Document", ["document" => $document]);
     }
 
     public function update(UpdateDocumentRequest $request, Document $document): DocumentResource
     {
+        $this->authorize('update', $document);
         $this->documentService->updateDocument($document, $request->validated());
         return new DocumentResource($document);
     }
 
     public function download(Document $document): BinaryFileResponse
     {
+        $this->authorize('view', $document);
         return $this->documentService->showDocument($document);
     }
 
     public function destroy(Document $document): JsonResponse
     {
+        $this->authorize('delete', $document);
         $this->documentService->deleteDocument($document);
         return response()->json(['message' => 'Document successfully deleted.'], 204);
     }

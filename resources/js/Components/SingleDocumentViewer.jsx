@@ -1,5 +1,6 @@
 // EnhancedDocumentViewer.jsx
 import React, {useState, useEffect, lazy, Suspense} from 'react';
+import PropTypes from 'prop-types';
 import {
     Box,
     Typography,
@@ -638,6 +639,21 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
             </Snackbar>
         </Box>
     );
+};
+
+EnhancedDocumentViewer.propTypes = {
+    document: PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        hash: PropTypes.string,
+        originalName: PropTypes.string,
+        ext: PropTypes.string,
+        size: PropTypes.number,
+        mime_type: PropTypes.string,
+        created_at: PropTypes.string,
+        updated_at: PropTypes.string,
+    }),
+    fullScreen: PropTypes.bool,
+    onClose: PropTypes.func,
 };
 
 // Export all components

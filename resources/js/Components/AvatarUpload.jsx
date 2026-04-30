@@ -5,6 +5,7 @@ import styled from "@emotion/styled";
 import Stack from "@mui/material/Stack";
 import {Dialog, FormHelperText} from "@mui/material";
 import Typography from "@mui/material/Typography";
+import PropTypes from 'prop-types';
 
 const FileInput = styled.input`
     display: none;
@@ -66,5 +67,19 @@ const AvatarUploader = ({
         {helperText && <FormHelperText sx={{textAlign: "center"}} error>{helperText}</FormHelperText>}
     </Stack>);
 }
+
+AvatarUploader.propTypes = {
+    value: PropTypes.string,
+    onChange: PropTypes.func.isRequired,
+    name: PropTypes.string,
+    uploadUrl: PropTypes.string.isRequired,
+    label: PropTypes.string,
+    disabled: PropTypes.bool,
+    error: PropTypes.bool,
+    helperText: PropTypes.string,
+    tag: PropTypes.string,
+    ownerClass: PropTypes.string,
+    ownerId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+};
 
 export default AvatarUploader;

@@ -1,5 +1,6 @@
 import React, {useEffect} from "react";
 import {useSnackbar} from "notistack";
+import PropTypes from 'prop-types';
 
 const AlertComponent = ({success, status, errors}) => {
     const {enqueueSnackbar} = useSnackbar();
@@ -18,5 +19,11 @@ const AlertComponent = ({success, status, errors}) => {
         <React.Fragment/>
     );
 }
+
+AlertComponent.propTypes = {
+    success: PropTypes.bool,
+    status: PropTypes.string,
+    errors: PropTypes.object,
+};
 
 export default AlertComponent;

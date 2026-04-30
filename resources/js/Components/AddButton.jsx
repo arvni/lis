@@ -1,6 +1,7 @@
 import React from 'react';
 import { Fab, Tooltip, Zoom, useTheme } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import PropTypes from 'prop-types';
 
 /**
  * Enhanced AddButton component with improved styling and interactions
@@ -68,6 +69,16 @@ const AddButton = ({
             {button}
         </Tooltip>
     ) : button;
+};
+
+AddButton.propTypes = {
+    onClick: PropTypes.func,
+    title: PropTypes.string,
+    color: PropTypes.string,
+    position: PropTypes.object,
+    showTooltip: PropTypes.bool,
+    icon: PropTypes.node,
+    sx: PropTypes.object,
 };
 
 export default AddButton;

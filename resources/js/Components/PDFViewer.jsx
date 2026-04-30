@@ -18,6 +18,7 @@ import {
     Print,
     Refresh
 } from '@mui/icons-material';
+import PropTypes from 'prop-types';
 
 const SimplifiedPDFViewer = ({ fileUrl, fullScreen = false }) => {
     const [loading, setLoading] = useState(true);
@@ -297,6 +298,11 @@ const SimplifiedPDFViewer = ({ fileUrl, fullScreen = false }) => {
             </Box>
         </Box>
     );
+};
+
+SimplifiedPDFViewer.propTypes = {
+    fileUrl: PropTypes.string.isRequired,
+    fullScreen: PropTypes.bool,
 };
 
 export default SimplifiedPDFViewer;

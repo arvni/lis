@@ -2,6 +2,7 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import {Divider} from "@mui/material";
 import Grid from "@mui/material/Grid2";
+import PropTypes from 'prop-types';
 
 const renderElement = (value, level) => (key, index) => {
     level += 1;
@@ -30,4 +31,10 @@ const DashboardCard = ({title, value, level = 0}) => {
         </Paper>
     </Grid>
 }
+DashboardCard.propTypes = {
+    title: PropTypes.string.isRequired,
+    value: PropTypes.object.isRequired,
+    level: PropTypes.number,
+};
+
 export default DashboardCard;

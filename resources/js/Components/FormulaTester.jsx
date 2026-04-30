@@ -20,6 +20,7 @@ import {
     Error
 } from '@mui/icons-material';
 import * as mathjs from 'mathjs';
+import PropTypes from 'prop-types';
 
 /**
  * Component for testing formulas with parameter values
@@ -299,6 +300,19 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
             </Collapse>
         </Paper>
     );
+};
+
+FormulaTester.propTypes = {
+    parameters: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        value: PropTypes.string,
+    })),
+    formula: PropTypes.string,
+    isConditional: PropTypes.bool,
+    conditions: PropTypes.arrayOf(PropTypes.shape({
+        condition: PropTypes.string,
+        value: PropTypes.string,
+    })),
 };
 
 export default FormulaTester;

@@ -71,6 +71,7 @@ class AcceptanceRepository
                     ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
                     ->join('methods', 'methods.id', '=', 'method_tests.method_id')
                     ->selectRaw('MAX(methods.turnaround_time)')
+                    ->whereNull('acceptance_items.deleted_at')
                     ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id'),
                 'published_at' => DB::table('reports')
                     ->join('acceptance_items', 'acceptance_items.id', '=', 'reports.acceptance_item_id')
@@ -107,6 +108,7 @@ class AcceptanceRepository
             ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
             ->join('methods', 'methods.id', '=', 'method_tests.method_id')
             ->selectRaw('MAX(DATE_ADD(acceptance_items.created_at, INTERVAL methods.turnaround_time DAY))')
+            ->whereNull('acceptance_items.deleted_at')
             ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id');
 
         return Acceptance::query()

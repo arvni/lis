@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Alert, AppBar, Box, CircularProgress, Divider, IconButton, Toolbar, Tooltip, Typography} from "@mui/material";
 import {FilterCenterFocus, RotateLeft, RotateRight, ZoomIn, ZoomOut} from "@mui/icons-material";
+import PropTypes from 'prop-types';
 
 const ImageViewer = ({ fileUrl, fullScreen = false }) => {
     const [loading, setLoading] = useState(true);
@@ -150,6 +151,11 @@ const ImageViewer = ({ fileUrl, fullScreen = false }) => {
             </Box>
         </Box>
     );
+};
+
+ImageViewer.propTypes = {
+    fileUrl: PropTypes.string.isRequired,
+    fullScreen: PropTypes.bool,
 };
 
 export default ImageViewer;

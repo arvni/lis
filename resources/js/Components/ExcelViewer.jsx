@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import * as XLSX from "xlsx";
 import {Search} from "@mui/icons-material";
+import PropTypes from 'prop-types';
 
 const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
     const [sheets, setSheets] = useState([]);
@@ -364,4 +365,9 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
         </Box>
     );
 };
+ExcelViewer.propTypes = {
+    fileUrl: PropTypes.string.isRequired,
+    fullScreen: PropTypes.bool,
+};
+
 export default ExcelViewer;

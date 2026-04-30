@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Autocomplete, TextField} from "@mui/material";
 import axios from "axios";
+import PropTypes from 'prop-types';
 
 
 const SelectSearch = ({
@@ -97,4 +98,22 @@ const SelectSearch = ({
                                                              required={required}/>}
     />;
 }
+SelectSearch.propTypes = {
+    value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+    onChange: PropTypes.func.isRequired,
+    name: PropTypes.string,
+    url: PropTypes.string,
+    helperText: PropTypes.string,
+    label: PropTypes.string,
+    error: PropTypes.bool,
+    required: PropTypes.bool,
+    disabled: PropTypes.bool,
+    multiple: PropTypes.bool,
+    sx: PropTypes.object,
+    defaultData: PropTypes.object,
+    disableFirst: PropTypes.bool,
+    fullWidth: PropTypes.bool,
+    size: PropTypes.string,
+};
+
 export default SelectSearch;

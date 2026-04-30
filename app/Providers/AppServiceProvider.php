@@ -17,6 +17,8 @@ use App\Domains\Consultation\Policies\ConsultantPolicy;
 use App\Domains\Consultation\Policies\ConsultationPolicy;
 use App\Domains\Consultation\Policies\TimePolicy;
 use App\Domains\Document\Models\Document;
+use App\Domains\Document\Policies\DocumentPolicy;
+use App\Domains\Notification\Policies\NotificationPolicy;
 use App\Domains\Laboratory\Models\BarcodeGroup;
 use App\Domains\Laboratory\Models\ConsentForm;
 use App\Domains\Laboratory\Models\Instruction;
@@ -174,10 +176,14 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('failed-jobs.retry',  fn($user) => $failedJobPolicy->retry($user));
         Gate::define('failed-jobs.delete', fn($user) => $failedJobPolicy->delete($user));
 
+        $notificationPolicy = new NotificationPolicy();
+        Gate::define('notifications.manage-whatsapp', fn($user) => $notificationPolicy->manageWhatsapp($user));
+
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);
         Gate::policy(Statement::class, StatementPolicy::class);
 
+        Gate::policy(Document::class, DocumentPolicy::class);
         Gate::policy(MonitoringNode::class, MonitoringNodePolicy::class);
 
         Gate::policy(Item::class, ItemPolicy::class);

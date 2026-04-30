@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import { Box, Typography, Stack } from "@mui/material";
 import React from "react";
+import PropTypes from 'prop-types';
 
 /**
  * Confirmation dialog for delete operations
@@ -119,6 +120,15 @@ const DeleteForm = ({
             </DialogActions>
         </Dialog>
     );
+};
+
+DeleteForm.propTypes = {
+    title: PropTypes.string,
+    message: PropTypes.string,
+    agreeCB: PropTypes.func.isRequired,
+    disAgreeCB: PropTypes.func.isRequired,
+    openDelete: PropTypes.bool.isRequired,
+    loading: PropTypes.bool,
 };
 
 export default DeleteForm;

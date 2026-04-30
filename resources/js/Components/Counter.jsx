@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Stack from "@mui/material/Stack";
+import PropTypes from 'prop-types';
 
 const useInterval = (callback, delay) => {
     const savedCallback = useRef();
@@ -48,6 +49,10 @@ const Counter = ({ date }) => {
             <span>{formatTime(time.second)}</span>
         </Stack>
     );
+};
+
+Counter.propTypes = {
+    date: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]).isRequired,
 };
 
 export default Counter;

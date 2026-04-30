@@ -12,6 +12,7 @@ class WhatsappMessageController extends Controller
     public function __construct(private WhatsappMessageService $whatsappMessageService)
     {
         $this->middleware('indexProvider:created_at,desc');
+        $this->middleware('can:notifications.manage-whatsapp');
     }
 
     public function index(Request $request)

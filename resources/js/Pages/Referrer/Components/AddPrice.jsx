@@ -38,8 +38,8 @@ import {router} from '@inertiajs/react';
 import axios from 'axios';
 
 import SelectSearch from '@/Components/SelectSearch';
-import ParametersField from './ParametersField';
-import ConditionsField from './ConditionsField';
+import ParametersField from '@/Components/ParametersField';
+import ConditionsField from '@/Components/ConditionsField';
 import Grid from "@mui/material/Grid2";
 import Typography from '@mui/material/Typography';
 

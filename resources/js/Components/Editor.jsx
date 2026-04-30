@@ -1,6 +1,7 @@
 import SunEditor from 'suneditor-react';
 import 'suneditor/dist/css/suneditor.min.css';
 import {useEffect, useState} from "react";
+import PropTypes from 'prop-types';
 
 const Editor = ({value, onChange, name, ...rest}) => {
     const [templates, setTemplates] = useState([]);
@@ -69,5 +70,11 @@ const Editor = ({value, onChange, name, ...rest}) => {
                           ]
                       }} height={"calc(100vh - 400px)"}/>
 }
+
+Editor.propTypes = {
+    value: PropTypes.string,
+    onChange: PropTypes.func.isRequired,
+    name: PropTypes.string.isRequired,
+};
 
 export default Editor;

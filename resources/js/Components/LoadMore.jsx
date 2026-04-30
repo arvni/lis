@@ -19,6 +19,7 @@ import {
     OpenInNew as OpenInNewIcon
 } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
+import PropTypes from 'prop-types';
 
 /**
  * Enhanced LoadMore component for displaying data with expandable accordion
@@ -227,6 +228,18 @@ const LoadMore = ({
             )}
         </Accordion>
     );
+};
+
+LoadMore.propTypes = {
+    items: PropTypes.array,
+    columns: PropTypes.array,
+    loadMoreLink: PropTypes.string,
+    title: PropTypes.string,
+    defaultExpanded: PropTypes.bool,
+    loading: PropTypes.bool,
+    onRefresh: PropTypes.func,
+    pageSize: PropTypes.number,
+    emptyMessage: PropTypes.string,
 };
 
 export default LoadMore;

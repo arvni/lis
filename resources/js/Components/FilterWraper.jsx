@@ -2,6 +2,7 @@ import React from "react";
 import Grid from "@mui/material/Grid2";
 import Button from "@mui/material/Button";
 import {useTheme} from "@mui/material";
+import PropTypes from 'prop-types';
 
 const FilterTemplate = ({children, onFilter}) => {
     const theme=useTheme();
@@ -21,4 +22,9 @@ const FilterTemplate = ({children, onFilter}) => {
     </form>
 
 }
+FilterTemplate.propTypes = {
+    children: PropTypes.node,
+    onFilter: PropTypes.func.isRequired,
+};
+
 export default FilterTemplate;

@@ -1,4 +1,5 @@
 import React, {useState, useCallback, useRef, useMemo, useEffect} from 'react';
+import PropTypes from 'prop-types';
 import ReactFlow, {
     ReactFlowProvider,
     addEdge,
@@ -2036,5 +2037,14 @@ const PedigreeChartWrapper = (props) => (
         <PedigreeChart {...props} />
     </ReactFlowProvider>
 );
+
+PedigreeChartWrapper.propTypes = {
+    defaultValue: PropTypes.shape({
+        nodes: PropTypes.array,
+        edges: PropTypes.array,
+    }),
+    onChange: PropTypes.func,
+    disabled: PropTypes.bool,
+};
 
 export default PedigreeChartWrapper;

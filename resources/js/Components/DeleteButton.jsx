@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import {Delete as DeleteIcon} from "@mui/icons-material";
 import React, {useState} from "react";
+import PropTypes from 'prop-types';
 
 
 const DeleteButton = ({onConfirm}) => {
@@ -55,5 +56,9 @@ const DeleteButton = ({onConfirm}) => {
 
     </>;
 }
+
+DeleteButton.propTypes = {
+    onConfirm: PropTypes.func.isRequired,
+};
 
 export default DeleteButton;

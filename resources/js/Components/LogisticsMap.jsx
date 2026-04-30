@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Map, Marker } from "pigeon-maps";
 import { Box, Paper, Typography } from "@mui/material";
+import PropTypes from 'prop-types';
 
 /**
  * Reusable logistics map component for displaying and selecting location
@@ -101,6 +102,15 @@ const LogisticsMap = ({
             )}
         </Paper>
     );
+};
+
+LogisticsMap.propTypes = {
+    latitude: PropTypes.number,
+    longitude: PropTypes.number,
+    onLocationChange: PropTypes.func,
+    editable: PropTypes.bool,
+    height: PropTypes.number,
+    zoom: PropTypes.number,
 };
 
 export default LogisticsMap;
