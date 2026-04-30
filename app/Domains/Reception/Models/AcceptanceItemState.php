@@ -8,12 +8,13 @@ use App\Domains\User\Models\User;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 class AcceptanceItemState extends Model
 {
-    use Searchable, HasRelationships;
+    use Searchable, HasRelationships, SoftDeletes;
 
     protected $fillable = [
         'acceptance_item_id',

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Domains\Monitoring\Jobs\FetchNodeSamplesJob;
 use App\Domains\Monitoring\Services\MocreoService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class FetchMonitoringSamplesCommand extends Command
 {
@@ -18,18 +19,24 @@ class FetchMonitoringSamplesCommand extends Command
 
     public function handle(): int
     {
-        $nodes = $this->mocreoService->getNodes();
+        try {
+            $nodes = $this->mocreoService->getNodes();
 
-        if (empty($nodes)) {
-            $this->warn('No nodes returned from Mocreo API.');
+            if (empty($nodes)) {
+                $this->warn('No nodes returned from Mocreo API.');
+                return self::SUCCESS;
+            }
+
+            foreach ($nodes as $node) {
+                FetchNodeSamplesJob::dispatch($node['nodeId']);
+            }
+
+            $this->info('Dispatched ' . count($nodes) . ' node sample job(s).');
             return self::SUCCESS;
+        } catch (\Throwable $e) {
+            $this->error('Mocreo API error: ' . $e->getMessage());
+            Log::error('monitoring:fetch-samples failed', ['exception' => $e]);
+            return self::FAILURE;
         }
-
-        foreach ($nodes as $node) {
-            FetchNodeSamplesJob::dispatch($node['nodeId']);
-        }
-
-        $this->info('Dispatched ' . count($nodes) . ' node sample job(s).');
-        return self::SUCCESS;
     }
 }

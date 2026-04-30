@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Document;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class UploadPublicDocumentController extends Controller
 {
@@ -22,7 +23,7 @@ class UploadPublicDocumentController extends Controller
         $file = $request->file('file');
 
         // Generate a unique name
-        $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+        $filename = Str::uuid() . '.' . $file->guessExtension();
 
         // Define destination path
         $destination = public_path('images/icons');

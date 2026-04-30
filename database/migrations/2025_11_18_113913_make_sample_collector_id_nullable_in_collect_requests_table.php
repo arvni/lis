@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('collect_requests', function (Blueprint $table) {
-            //
+            $table->unsignedBigInteger('sample_collector_id')->nullable(false)->change();
         });
     }
 };

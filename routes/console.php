@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 Schedule::command('inventory:mark-expired-lots')->dailyAt('00:05');
 Schedule::command('inventory:escalate-overdue-pr-steps')->dailyAt('08:00');
 Schedule::command('monitoring:fetch-samples')->everyFiveMinutes();
+Schedule::command('telescope:prune --hours=48')->daily();

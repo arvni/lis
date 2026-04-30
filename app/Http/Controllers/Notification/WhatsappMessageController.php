@@ -16,12 +16,6 @@ class WhatsappMessageController extends Controller
 
     public function index(Request $request)
     {
-        return $this->whatsappMessageService->listContacts($request->all());
         return $this->whatsappMessageService->listMessages($request->all());
-    }
-
-    public function listContacts(Request $request)
-    {
-
     }
 }
