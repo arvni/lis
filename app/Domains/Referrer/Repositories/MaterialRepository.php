@@ -2,9 +2,8 @@
 
 namespace App\Domains\Referrer\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Referrer\Models\Material;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use DB;
 use Exception;
@@ -14,6 +13,8 @@ use InvalidArgumentException;
 
 class MaterialRepository
 {
+    use LogsUserActivity;
+
 
     public function listMaterials(array $queryData): LengthAwarePaginator
     {
@@ -61,7 +62,7 @@ class MaterialRepository
     {
         $material = Material::query()->make($materialData);
         $material->save();
-        UserActivityService::createUserActivity($material,ActivityType::CREATE);
+        $this->logCreated($material);
         return $material;
     }
 
@@ -70,7 +71,7 @@ class MaterialRepository
         $material->fill($materialData);
         if ($material->isDirty()) {
             $material->save();
-            UserActivityService::createUserActivity($material,ActivityType::UPDATE);
+            $this->logUpdated($material);
         }
         return $material;
     }
@@ -78,7 +79,7 @@ class MaterialRepository
     public function deleteMaterial(Material $material): void
     {
         $material->delete();
-        UserActivityService::createUserActivity($material,ActivityType::DELETE);
+        $this->logDeleted($material);
     }
 
     protected function applyFilters($query, array $filters)

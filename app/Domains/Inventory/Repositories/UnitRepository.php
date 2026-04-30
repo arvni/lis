@@ -2,13 +2,14 @@
 
 namespace App\Domains\Inventory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Inventory\Models\Unit;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class UnitRepository
 {
+    use LogsUserActivity;
+
     public function listUnits(array $queryData): LengthAwarePaginator
     {
         $query = Unit::withCount('itemConversions');
@@ -22,7 +23,7 @@ class UnitRepository
     public function createUnit(array $data): Unit
     {
         $unit = Unit::query()->create($data);
-        UserActivityService::createUserActivity($unit, ActivityType::CREATE);
+        $this->logCreated($unit);
         return $unit;
     }
 
@@ -31,7 +32,7 @@ class UnitRepository
         $unit->fill($data);
         if ($unit->isDirty()) {
             $unit->save();
-            UserActivityService::createUserActivity($unit, ActivityType::UPDATE);
+            $this->logUpdated($unit);
         }
         return $unit;
     }
@@ -39,6 +40,6 @@ class UnitRepository
     public function deleteUnit(Unit $unit): void
     {
         $unit->delete();
-        UserActivityService::createUserActivity($unit, ActivityType::DELETE);
+        $this->logDeleted($unit);
     }
 }

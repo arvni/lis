@@ -2,13 +2,14 @@
 
 namespace App\Domains\Billing\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Billing\Models\Statement;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 
 class StatementRepository
 {
+    use LogsUserActivity;
+
 
     public function listStatements($queryData)
     {
@@ -21,7 +22,7 @@ class StatementRepository
     public function creatStatement(array $statementData): Statement
     {
         $statement= Statement::query()->create([...$statementData, "no" => $this->generateStatementNumber($statementData["issue_date"])]);
-        UserActivityService::createUserActivity($statement,ActivityType::CREATE);
+        $this->logCreated($statement);
         return $statement;
     }
 
@@ -30,7 +31,7 @@ class StatementRepository
         $statement->fill($statementData);
         if ($statement->isDirty()) {
             $statement->save();
-            UserActivityService::createUserActivity($statement,ActivityType::UPDATE);
+            $this->logUpdated($statement);
         }
         return $statement;
     }
@@ -38,7 +39,7 @@ class StatementRepository
     public function deleteStatement(Statement $statement): void
     {
         $statement->delete();
-        UserActivityService::createUserActivity($statement,ActivityType::DELETE);
+        $this->logDeleted($statement);
     }
 
     public function findStatementById($id): ?Statement

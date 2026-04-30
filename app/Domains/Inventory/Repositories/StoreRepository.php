@@ -2,14 +2,15 @@
 
 namespace App\Domains\Inventory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\StoreLocation;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class StoreRepository
 {
+    use LogsUserActivity;
+
     public function listStores(array $queryData): LengthAwarePaginator
     {
         $query = Store::withCount('locations');
@@ -28,7 +29,7 @@ class StoreRepository
     public function createStore(array $data): Store
     {
         $store = Store::query()->create($data);
-        UserActivityService::createUserActivity($store, ActivityType::CREATE);
+        $this->logCreated($store);
         return $store;
     }
 
@@ -37,7 +38,7 @@ class StoreRepository
         $store->fill($data);
         if ($store->isDirty()) {
             $store->save();
-            UserActivityService::createUserActivity($store, ActivityType::UPDATE);
+            $this->logUpdated($store);
         }
         return $store;
     }
@@ -45,7 +46,7 @@ class StoreRepository
     public function deleteStore(Store $store): void
     {
         $store->delete();
-        UserActivityService::createUserActivity($store, ActivityType::DELETE);
+        $this->logDeleted($store);
     }
 
     public function createLocation(Store $store, array $data): StoreLocation

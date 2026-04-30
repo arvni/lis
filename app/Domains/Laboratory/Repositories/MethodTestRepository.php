@@ -2,16 +2,17 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\MethodTest;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 
 class MethodTestRepository
 {
+    use LogsUserActivity;
+
     public function createMethodTest(array $methodTestData): MethodTest
     {
         $methodTest= MethodTest::create($methodTestData);
-        UserActivityService::createUserActivity($methodTest,ActivityType::CREATE);
+        $this->logCreated($methodTest);
         return $methodTest;
     }
 
@@ -20,7 +21,7 @@ class MethodTestRepository
         $methodTest->fill($methodTestData);
         if ($methodTest->isDirty()) {
             $methodTest->save();
-            UserActivityService::createUserActivity($methodTest,ActivityType::UPDATE);
+            $this->logUpdated($methodTest);
         }
         return $methodTest;
     }
@@ -28,7 +29,7 @@ class MethodTestRepository
     public function deleteMethodTest(MethodTest $methodTest): void
     {
         $methodTest->delete();
-        UserActivityService::createUserActivity($methodTest,ActivityType::DELETE);
+        $this->logDeleted($methodTest);
     }
 
     public function findMethodTestById($id): ?MethodTest

@@ -2,13 +2,14 @@
 
 namespace App\Domains\Referrer\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Referrer\Models\CollectRequest;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class CollectRequestRepository
 {
+    use LogsUserActivity;
+
     public function listCollectRequest(array $queryData): LengthAwarePaginator
     {
         $query = CollectRequest::query()
@@ -26,7 +27,7 @@ class CollectRequestRepository
     public function createCollectRequest(array $data): CollectRequest
     {
         $collectRequest = CollectRequest::create($data);
-        UserActivityService::createUserActivity($collectRequest, ActivityType::CREATE);
+        $this->logCreated($collectRequest);
         return $collectRequest;
     }
 
@@ -35,7 +36,7 @@ class CollectRequestRepository
         $collectRequest->fill($data);
         if ($collectRequest->isDirty()) {
             $collectRequest->save();
-            UserActivityService::createUserActivity($collectRequest, ActivityType::UPDATE);
+            $this->logUpdated($collectRequest);
         }
         return $collectRequest;
     }
@@ -43,7 +44,7 @@ class CollectRequestRepository
     public function deleteCollectRequest(CollectRequest $collectRequest): void
     {
         $collectRequest->delete();
-        UserActivityService::createUserActivity($collectRequest, ActivityType::DELETE);
+        $this->logDeleted($collectRequest);
     }
 
     public function findCollectRequestById($id): ?CollectRequest

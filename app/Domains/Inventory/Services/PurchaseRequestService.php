@@ -6,6 +6,7 @@ use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Document\Services\DocumentService;
 use App\Domains\Inventory\Enums\PurchaseRequestStatus;
 use App\Domains\Inventory\Models\PurchaseRequest;
+use App\Domains\Inventory\Models\PurchaseRequestApproval;
 use App\Domains\Inventory\Models\PurchaseRequestHistory;
 use App\Domains\Inventory\Models\PurchaseRequestLine;
 use App\Domains\Inventory\Models\PurchaseRequestReceipt;
@@ -320,6 +321,16 @@ readonly class PurchaseRequestService
         $pr->update(['status' => PurchaseRequestStatus::ORDERED->value]);
         $this->log($pr, 'ORDERED');
         return $pr;
+    }
+
+    public function getOrderedApprovals(PurchaseRequest $pr): \Illuminate\Support\Collection
+    {
+        return PurchaseRequestApproval::where('purchase_request_id', $pr->id)
+            ->join('workflow_steps', 'workflow_steps.id', '=', 'purchase_request_approvals.workflow_step_id')
+            ->orderBy('workflow_steps.sort_order')
+            ->select('purchase_request_approvals.*')
+            ->with(['step', 'step.approverUser', 'actedBy'])
+            ->get();
     }
 
     private function log(PurchaseRequest $pr, string $event, ?string $notes = null, ?string $changeNotes = null): void

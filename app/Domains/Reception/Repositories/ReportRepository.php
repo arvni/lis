@@ -3,15 +3,16 @@
 namespace App\Domains\Reception\Repositories;
 
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Report;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Database\Eloquent\Collection;
 
 class ReportRepository
 {
+    use LogsUserActivity;
+
 
     public function list($queryData)
     {
@@ -78,7 +79,7 @@ class ReportRepository
     public function create($data)
     {
         $report = Report::create($data);
-        UserActivityService::createUserActivity($report, ActivityType::CREATE);
+        $this->logCreated($report);
         return $report;
     }
 
@@ -95,7 +96,7 @@ class ReportRepository
         $report->fill($data);
         if ($report->isDirty()) {
             $report->save();
-            UserActivityService::createUserActivity($report, ActivityType::UPDATE);
+            $this->logUpdated($report);
         }
 
         return $report;

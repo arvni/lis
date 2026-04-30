@@ -2,13 +2,14 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\BarcodeGroup;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class BarcodeGroupRepository
 {
+    use LogsUserActivity;
+
 
     public function listBarcodeGroups(array $queryData): LengthAwarePaginator
     {
@@ -24,7 +25,7 @@ class BarcodeGroupRepository
     {
         $barcodeGroup = BarcodeGroup::query()->make($barcodeGroupData);
         $barcodeGroup->save();
-        UserActivityService::createUserActivity($barcodeGroup,ActivityType::CREATE);
+        $this->logCreated($barcodeGroup);
         return $barcodeGroup;
     }
 
@@ -33,7 +34,7 @@ class BarcodeGroupRepository
         $barcodeGroup->fill($barcodeGroupData);
         if ($barcodeGroup->isDirty()) {
             $barcodeGroup->save();
-            UserActivityService::createUserActivity($barcodeGroup,ActivityType::UPDATE);
+            $this->logUpdated($barcodeGroup);
         }
         return $barcodeGroup;
     }
@@ -41,7 +42,7 @@ class BarcodeGroupRepository
     public function deleteBarcodeGroup(BarcodeGroup $barcodeGroup): void
     {
         $barcodeGroup->delete();
-        UserActivityService::createUserActivity($barcodeGroup,ActivityType::DELETE);
+        $this->logDeleted($barcodeGroup);
     }
 
     protected function applyFilters($query, array $filters)

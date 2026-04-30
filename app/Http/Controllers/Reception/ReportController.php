@@ -51,15 +51,11 @@ class ReportController extends Controller
     {
         $user = auth()->user();
         $parameters = $request->get('parameters', []);
-        if ($parameters && count($parameters) > 0) {
-            foreach (($request->file("parameters") ?? []) as $parameter => $value) {
-                $doc = $this->documentService->storeDocument("patient", $request->get("patient_id"), $value, DocumentTag::IMAGE->value);
-                $parameters[$parameter] = $doc;
-            }
-        } else {
-            $doc = $this->documentService->getDocument($request->input("reported_document.id"));
+        foreach (($request->file('parameters') ?? []) as $parameter => $value) {
+            $parameters[$parameter] = $this->documentService->storeDocument(
+                'patient', $request->get('patient_id'), $value, DocumentTag::IMAGE->value
+            );
         }
-
 
         $report = $this->reportService->createReport(
             $user,
@@ -155,16 +151,10 @@ class ReportController extends Controller
     {
         $user = auth()->user();
         $parameters = $request->get('parameters', []);
-        if ($parameters && count($parameters) > 0) {
-            if ($parameters && count($parameters) > 0) {
-                foreach (($request->file("parameters") ?? []) as $parameter => $value) {
-                    $doc = $this->documentService->storeDocument("patient", $request->get("patient_id"), $value, DocumentTag::IMAGE->value);
-                    $parameters[$parameter] = $doc;
-                }
-            }
-        } else {
-
-            $doc = $this->documentService->getDocument($request->input("reported_document.id"));
+        foreach (($request->file('parameters') ?? []) as $parameter => $value) {
+            $parameters[$parameter] = $this->documentService->storeDocument(
+                'patient', $request->get('patient_id'), $value, DocumentTag::IMAGE->value
+            );
         }
 
         $report = $this->reportService->updateReport(

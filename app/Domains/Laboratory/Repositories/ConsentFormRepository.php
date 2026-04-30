@@ -2,13 +2,14 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\ConsentForm;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ConsentFormRepository
 {
+    use LogsUserActivity;
+
 
     public function listConsentForms(array $queryData): LengthAwarePaginator
     {
@@ -23,7 +24,7 @@ class ConsentFormRepository
     public function creatConsentForm(array $consentFormData): ConsentForm
     {
         $consentForm= ConsentForm::query()->create($consentFormData);
-        UserActivityService::createUserActivity($consentForm,ActivityType::CREATE);
+        $this->logCreated($consentForm);
         return $consentForm;
     }
 
@@ -32,7 +33,7 @@ class ConsentFormRepository
         $consentForm->fill($consentFormData);
         if ($consentForm->isDirty()) {
             $consentForm->save();
-            UserActivityService::createUserActivity($consentForm,ActivityType::UPDATE);
+            $this->logUpdated($consentForm);
         }
         return $consentForm;
     }
@@ -40,7 +41,7 @@ class ConsentFormRepository
     public function deleteConsentForm(ConsentForm $consentForm): void
     {
         $consentForm->delete();
-        UserActivityService::createUserActivity($consentForm,ActivityType::DELETE);
+        $this->logDeleted($consentForm);
     }
 
     protected function applyFilters($query, array $filters)

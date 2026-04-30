@@ -2,18 +2,19 @@
 
 namespace App\Domains\Reception\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Report;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 
 class AcceptanceItemRepository
 {
+    use LogsUserActivity;
+
 
     public function listAcceptanceItems($queryData = [])
     {
@@ -99,7 +100,7 @@ class AcceptanceItemRepository
             $patients = Arr::flatten(array_map(fn($item) => $item["patients"] ?? [], $acceptanceItemData["customParameters"]["samples"]), 1);
             $this->syncPatients($acceptanceItem, $patients);
         }
-        UserActivityService::createUserActivity($acceptanceItem, ActivityType::CREATE);
+        $this->logCreated($acceptanceItem);
         return $acceptanceItem;
     }
 
@@ -113,14 +114,14 @@ class AcceptanceItemRepository
             $patients = Arr::flatten(array_map(fn($item) => $item["patients"] ?? [], $acceptanceItemData["customParameters"]["samples"]), 1);
             $this->syncPatients($acceptanceItem, $patients);
         }
-        UserActivityService::createUserActivity($acceptanceItem, ActivityType::UPDATE);
+        $this->logUpdated($acceptanceItem);
         return $acceptanceItem;
     }
 
     public function deleteAcceptanceItem(AcceptanceItem $acceptanceItem): void
     {
         $acceptanceItem->delete();
-        UserActivityService::createUserActivity($acceptanceItem, ActivityType::DELETE);
+        $this->logDeleted($acceptanceItem);
     }
 
     public function findAcceptanceItemById($id): ?AcceptanceItem

@@ -2,14 +2,15 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\Section;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
 class SectionRepository
 {
+    use LogsUserActivity;
+
     public function getAll(): Collection
     {
         return Section::all();
@@ -32,7 +33,7 @@ class SectionRepository
         $section = Section::query()->make($sectionData);
         $section->sectionGroup()->associate($sectionData["section_group_id"]);
         $section->save();
-        UserActivityService::createUserActivity($section,ActivityType::CREATE);
+        $this->logCreated($section);
         return $section;
     }
 
@@ -43,7 +44,7 @@ class SectionRepository
         $section->sectionGroup()->associate($sectionData["section_group_id"]);
         if ($section->isDirty()) {
             $section->save();
-            UserActivityService::createUserActivity($section,ActivityType::UPDATE);
+            $this->logUpdated($section);
         }
         return $section;
     }
@@ -51,7 +52,7 @@ class SectionRepository
     public function deleteSection(Section $section): void
     {
         $section->delete();
-        UserActivityService::createUserActivity($section,ActivityType::DELETE);
+        $this->logDeleted($section);
     }
 
     protected function applyFilters($query, array $filters)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Inventory;
 
 use App\Domains\Document\Models\Document;
 use App\Domains\Inventory\Enums\PurchaseRequestStatus;
+use App\Domains\User\Models\User;
 use App\Domains\Inventory\Models\PurchaseRequest;
 use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\Supplier;
@@ -84,23 +85,14 @@ class PurchaseRequestController extends Controller
             'receipts.transaction', 'receipts.lines.prLine.item', 'receipts.lines.location',
         ]);
 
-        // Load approvals ordered by step sort_order
-        $approvals = \App\Domains\Inventory\Models\PurchaseRequestApproval::where('purchase_request_id', $purchaseRequest->id)
-            ->join('workflow_steps', 'workflow_steps.id', '=', 'purchase_request_approvals.workflow_step_id')
-            ->orderBy('workflow_steps.sort_order')
-            ->select('purchase_request_approvals.*')
-            ->with(['step', 'step.approverUser', 'actedBy'])
-            ->get();
+        $approvals       = $this->prService->getOrderedApprovals($purchaseRequest);
+        $poDocument      = $purchaseRequest->po_file     ? Document::find($purchaseRequest->po_file)     : null;
+        $paymentDocument = $purchaseRequest->payment_file ? Document::find($purchaseRequest->payment_file) : null;
 
-        $poDocument      = $purchaseRequest->po_file      ? Document::find($purchaseRequest->po_file)      : null;
-        $paymentDocument = $purchaseRequest->payment_file  ? Document::find($purchaseRequest->payment_file) : null;
-
+        $isRequester      = $purchaseRequest->requested_by_user_id === auth()->id();
         $canActOnWorkflow = $purchaseRequest->workflow_template_id
             && $purchaseRequest->status->value === 'SUBMITTED'
             && $this->workflowService->canAct($purchaseRequest, auth()->user());
-
-        $isRequester = $purchaseRequest->requested_by_user_id === auth()->id();
-
         $canDirectApprove = !$purchaseRequest->workflow_template_id
             && auth()->user()->can('Inventory.PurchaseRequests.Approve Purchase Request')
             && !$isRequester;
@@ -108,17 +100,17 @@ class PurchaseRequestController extends Controller
             && $purchaseRequest->status->value === 'DRAFT';
 
         return Inertia::render('Inventory/PurchaseRequests/Show', [
-            'purchaseRequest' => $purchaseRequest,
-            'approvals'       => $approvals,
+            'purchaseRequest'  => $purchaseRequest,
+            'approvals'        => $approvals,
             'canActOnWorkflow' => $canActOnWorkflow,
             'canDirectApprove' => $canDirectApprove,
             'isRequester'      => $isRequester,
-            'wasRejected'     => $wasRejected,
-            'users'           => $canActOnWorkflow
-                ? \App\Domains\User\Models\User::where('is_active', true)->orderBy('name')->get(['id', 'name'])
+            'wasRejected'      => $wasRejected,
+            'users'            => $canActOnWorkflow
+                ? User::where('is_active', true)->orderBy('name')->get(['id', 'name'])
                 : [],
-            'poDocument'      => $poDocument,
-            'paymentDocument' => $paymentDocument,
+            'poDocument'       => $poDocument,
+            'paymentDocument'  => $paymentDocument,
         ]);
     }
 

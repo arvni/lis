@@ -2,14 +2,14 @@
 
 namespace App\Domains\Reception\Repositories;
 
+use App\Domains\Shared\Traits\FiltersByDateRange;
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Setting\Services\SettingService;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\DB;
 
 class AcceptanceRepository
 {
+    use LogsUserActivity, FiltersByDateRange;
+
     // Define constants for filter and sort keys for better maintainability
     private const FILTER_SEARCH = 'search';
     private const FILTER_STATUS = 'status';
@@ -151,7 +153,7 @@ class AcceptanceRepository
     public function createAcceptance(array $acceptanceData): Acceptance
     {
         $acceptance = Acceptance::create($acceptanceData);
-        UserActivityService::createUserActivity($acceptance, ActivityType::CREATE);
+        $this->logCreated($acceptance);
         return $acceptance;
     }
 
@@ -160,7 +162,7 @@ class AcceptanceRepository
         $acceptance->fill($acceptanceData);
         if ($acceptance->isDirty()) {
             $acceptance->save();
-            UserActivityService::createUserActivity($acceptance, ActivityType::UPDATE);
+            $this->logUpdated($acceptance);
         }
         return $acceptance;
     }
@@ -182,7 +184,7 @@ class AcceptanceRepository
     {
         // Consider adding logic here if deletion has side effects or requires checks
         $acceptance->delete();
-        UserActivityService::createUserActivity($acceptance, ActivityType::DELETE);
+        $this->logDeleted($acceptance);
     }
 
     public function listSampleCollection(array $queryData): LengthAwarePaginator
@@ -291,23 +293,7 @@ class AcceptanceRepository
             $query->where('acceptances.patient_id', $filters[self::FILTER_PATIENT_ID]); // Qualify column name
         }
 
-        if (isset($filters["date"])) {
-            $date = Carbon::parse($filters["date"],"Asia/Muscat");
-            $dateRange = [$date->copy()->startOfDay(), $date->copy()->endOfDay()];
-            $query->whereBetween('acceptances.created_at', $dateRange);
-        }
-        if (!empty($filters["from_date"]) || !empty($filters["to_date"])) {
-            // Set default values for the date range
-            $startDate = !empty($filters["from_date"])
-                ? Carbon::parse($filters["from_date"],"Asia/Muscat")->startOfDay()
-                : Carbon::createFromTimestamp(0);
-
-            $endDate = !empty($filters["to_date"])
-                ? Carbon::parse($filters["to_date"],"Asia/Muscat")->endOfDay()
-                : Carbon::now("Asia/Muscat"); // Current time
-
-            $query->whereBetween('created_at', [$startDate, $endDate]);
-        }
+        $this->applyDateFilter($query, $filters, 'acceptances.created_at');
     }
 
     public function getPendingAcceptance(Patient $patient): ?Acceptance

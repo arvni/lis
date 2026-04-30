@@ -2,14 +2,15 @@
 
 namespace App\Domains\Inventory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Inventory\Enums\TransactionStatus;
 use App\Domains\Inventory\Models\StockTransaction;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class StockTransactionRepository
 {
+    use LogsUserActivity;
+
     public function listTransactions(array $queryData): LengthAwarePaginator
     {
         $query = StockTransaction::with(['store', 'supplier', 'requestedBy'])
@@ -35,7 +36,7 @@ class StockTransactionRepository
         $tx = StockTransaction::query()->create($data);
         foreach ($lines as $line)
             $tx->lines()->create($line);
-        UserActivityService::createUserActivity($tx, ActivityType::CREATE);
+        $this->logCreated($tx);
         return $tx->load('lines.item', 'lines.unit');
     }
 
@@ -45,14 +46,14 @@ class StockTransactionRepository
             'status'              => TransactionStatus::APPROVED->value,
             'approved_by_user_id' => $approverId,
         ]);
-        UserActivityService::createUserActivity($tx, ActivityType::UPDATE);
+        $this->logUpdated($tx);
         return $tx;
     }
 
     public function cancel(StockTransaction $tx): StockTransaction
     {
         $tx->update(['status' => TransactionStatus::CANCELLED->value]);
-        UserActivityService::createUserActivity($tx, ActivityType::UPDATE);
+        $this->logUpdated($tx);
         return $tx;
     }
 }

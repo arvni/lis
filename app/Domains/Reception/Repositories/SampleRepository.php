@@ -2,10 +2,9 @@
 
 namespace App\Domains\Reception\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Reception\Events\SampleCollectedEvent;
 use App\Domains\Reception\Models\Sample;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -13,6 +12,8 @@ use Illuminate\Support\Arr;
 
 class SampleRepository
 {
+    use LogsUserActivity;
+
 
     public function listSamples(array $queryData): LengthAwarePaginator
     {
@@ -61,7 +62,7 @@ class SampleRepository
             "received_at" => isset($sampleData["received_at"]) ? Carbon::parse($sampleData["received_at"]) : Carbon::now(),
         ]);
         $this->syncAcceptanceItems($sample, collect($sampleData["acceptance_items"])->pluck("id")->unique()->toArray());
-        UserActivityService::createUserActivity($sample, ActivityType::CREATE);
+        $this->logCreated($sample);
         return $sample;
     }
 
@@ -70,7 +71,7 @@ class SampleRepository
         $sample->fill(Arr::except($sampleData, "acceptance_items"));
         if ($sample->isDirty()) {
             $sample->save();
-            UserActivityService::createUserActivity($sample, ActivityType::UPDATE);
+            $this->logUpdated($sample);
         }
         $this->syncAcceptanceItems($sample, $sampleData["acceptance_items"]);
         return $sample;
@@ -79,7 +80,7 @@ class SampleRepository
     public function deleteSample(Sample $sample): void
     {
         $sample->delete();
-        UserActivityService::createUserActivity($sample, ActivityType::DELETE);
+        $this->logDeleted($sample);
 
     }
 

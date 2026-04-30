@@ -2,18 +2,19 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\SectionWorkflow;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Database\Eloquent\Collection;
 
 class SectionWorkflowRepository
 {
+    use LogsUserActivity;
+
 
     public function creatSectionWorkflow(array $workflowData): SectionWorkflow
     {
         $workflow= SectionWorkflow::query()->create($workflowData);
-        UserActivityService::createUserActivity($workflow,ActivityType::CREATE);
+        $this->logCreated($workflow);
         return $workflow;
     }
 
@@ -22,7 +23,7 @@ class SectionWorkflowRepository
         $workflow->fill($workflowData);
         if ($workflow->isDirty()) {
             $workflow->save();
-            UserActivityService::createUserActivity($workflow,ActivityType::UPDATE);
+            $this->logUpdated($workflow);
         }
         return $workflow;
     }
@@ -30,7 +31,7 @@ class SectionWorkflowRepository
     public function deleteSectionWorkflow(SectionWorkflow $workflow): void
     {
         $workflow->delete();
-        UserActivityService::createUserActivity($workflow,ActivityType::DELETE);
+        $this->logDeleted($workflow);
     }
 
     public function findSectionWorkflowById($id): ?SectionWorkflow

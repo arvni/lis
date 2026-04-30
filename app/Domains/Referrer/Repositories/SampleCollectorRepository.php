@@ -2,13 +2,14 @@
 
 namespace App\Domains\Referrer\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Referrer\Models\SampleCollector;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class SampleCollectorRepository
 {
+    use LogsUserActivity;
+
     public function listSampleCollector(array $queryData): LengthAwarePaginator
     {
         $query = SampleCollector::query()->withCount(['collectRequests']);
@@ -24,7 +25,7 @@ class SampleCollectorRepository
     public function createSampleCollector(array $data): SampleCollector
     {
         $sampleCollector = SampleCollector::create($data);
-        UserActivityService::createUserActivity($sampleCollector, ActivityType::CREATE);
+        $this->logCreated($sampleCollector);
         return $sampleCollector;
     }
 
@@ -33,7 +34,7 @@ class SampleCollectorRepository
         $sampleCollector->fill($data);
         if ($sampleCollector->isDirty()) {
             $sampleCollector->save();
-            UserActivityService::createUserActivity($sampleCollector, ActivityType::UPDATE);
+            $this->logUpdated($sampleCollector);
         }
         return $sampleCollector;
     }
@@ -41,7 +42,7 @@ class SampleCollectorRepository
     public function deleteSampleCollector(SampleCollector $sampleCollector): void
     {
         $sampleCollector->delete();
-        UserActivityService::createUserActivity($sampleCollector, ActivityType::DELETE);
+        $this->logDeleted($sampleCollector);
     }
 
     public function findSampleCollectorById($id): ?SampleCollector

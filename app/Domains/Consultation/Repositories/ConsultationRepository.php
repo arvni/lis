@@ -2,16 +2,17 @@
 
 namespace App\Domains\Consultation\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Consultation\Enums\ConsultationStatus;
 use App\Domains\Consultation\Models\Consultation;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class ConsultationRepository
 {
+    use LogsUserActivity;
+
     private string $durationStatement;
 
     public function __construct()
@@ -61,7 +62,7 @@ class ConsultationRepository
     public function createConsultation(array $data): Consultation
     {
         $consultation= Consultation::create($data);
-        UserActivityService::createUserActivity($consultation,ActivityType::CREATE);
+        $this->logCreated($consultation);
         return $consultation;
     }
 
@@ -70,7 +71,7 @@ class ConsultationRepository
         $consultation->fill($data);
         if ($consultation->isDirty()) {
             $consultation->save();
-            UserActivityService::createUserActivity($consultation,ActivityType::UPDATE);
+            $this->logUpdated($consultation);
         }
         return $consultation;
     }
@@ -78,7 +79,7 @@ class ConsultationRepository
     public function deleteConsultation(Consultation $consultation): void
     {
         $consultation->delete();
-        UserActivityService::createUserActivity($consultation,ActivityType::DELETE);
+        $this->logDeleted($consultation);
     }
 
     private function applyFilters($query, array $filters): void

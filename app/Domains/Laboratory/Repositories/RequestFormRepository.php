@@ -2,13 +2,14 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\RequestForm;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class RequestFormRepository
 {
+    use LogsUserActivity;
+
     public function listRequestForms(array $queryData): LengthAwarePaginator
     {
         $query = RequestForm::query()
@@ -24,7 +25,7 @@ class RequestFormRepository
     public function creatRequestForm(array $requestFormData): RequestForm
     {
         $requestForm= RequestForm::create($requestFormData);
-        UserActivityService::createUserActivity($requestForm,ActivityType::CREATE);
+        $this->logCreated($requestForm);
         return $requestForm;
     }
 
@@ -33,7 +34,7 @@ class RequestFormRepository
         $requestForm->fill($requestFormData);
         if ($requestForm->isDirty()) {
             $requestForm->save();
-            UserActivityService::createUserActivity($requestForm,ActivityType::UPDATE);
+            $this->logUpdated($requestForm);
         }
         return $requestForm;
     }
@@ -41,7 +42,7 @@ class RequestFormRepository
     public function deleteRequestForm(RequestForm $requestForm): void
     {
         $requestForm->delete();
-        UserActivityService::createUserActivity($requestForm,ActivityType::DELETE);
+        $this->logDeleted($requestForm);
     }
 
     protected function applyFilters($query, array $filters)

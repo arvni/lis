@@ -2,16 +2,17 @@
 
 namespace App\Domains\Reception\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Reception\Models\Patient;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use DB;
 use Illuminate\Database\Eloquent\Collection;
 use function Laravel\Prompts\select;
 
 class PatientRepository
 {
+    use LogsUserActivity;
+
     public function listPatient(array $queryData)
     {
         $query = Patient::withCount(["acceptances", "relatives", "payments", "consultations"])
@@ -30,14 +31,14 @@ class PatientRepository
         $patient = new Patient($data);
         $patient->registrar()->associate(auth()->user()->id);
         $patient->save();
-        UserActivityService::createUserActivity($patient, ActivityType::CREATE);
+        $this->logCreated($patient);
         return $patient;
     }
 
     public function updatePatient(Patient $patient, array $data): Patient
     {
         $patient->update($data);
-        UserActivityService::createUserActivity($patient, ActivityType::UPDATE);
+        $this->logUpdated($patient);
         return $patient;
     }
 
@@ -62,7 +63,7 @@ class PatientRepository
     public function deletePatient(Patient $patient): void
     {
         $patient->delete();
-        UserActivityService::createUserActivity($patient, ActivityType::DELETE);
+        $this->logDeleted($patient);
     }
 
     public function findPatientByIdNo($idNo)

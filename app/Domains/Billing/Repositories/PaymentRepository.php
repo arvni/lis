@@ -2,15 +2,16 @@
 
 namespace App\Domains\Billing\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Models\Payment;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
 class PaymentRepository
 {
+    use LogsUserActivity;
+
 
     public function listPayments($queryData)
     {
@@ -23,7 +24,7 @@ class PaymentRepository
     public function creatPayment(array $paymentData): Payment
     {
         $payment= Payment::query()->create($paymentData);
-        UserActivityService::createUserActivity($payment,ActivityType::CREATE);
+        $this->logCreated($payment);
         return $payment;
     }
 
@@ -32,7 +33,7 @@ class PaymentRepository
         $payment->fill($paymentData);
         if ($payment->isDirty()) {
             $payment->save();
-            UserActivityService::createUserActivity($payment,ActivityType::UPDATE);
+            $this->logUpdated($payment);
         }
         return $payment;
     }
@@ -40,7 +41,7 @@ class PaymentRepository
     public function deletePayment(Payment $payment): void
     {
         $payment->delete();
-        UserActivityService::createUserActivity($payment,ActivityType::DELETE);
+        $this->logDeleted($payment);
     }
 
     public function findPaymentById($id): ?Payment

@@ -2,10 +2,10 @@
 
 namespace App\Domains\Billing\Repositories;
 
+use App\Domains\Shared\Traits\FiltersByDateRange;
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\Statement;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +13,8 @@ use Illuminate\Support\Str;
 
 class InvoiceRepository
 {
+    use LogsUserActivity, FiltersByDateRange;
+
 
     public function listInvoices(array $queryData)
     {
@@ -35,7 +37,7 @@ class InvoiceRepository
     public function creatInvoice(array $invoiceData): Invoice
     {
         $invoice= Invoice::query()->create($invoiceData);
-        UserActivityService::createUserActivity($invoice,ActivityType::CREATE);
+        $this->logCreated($invoice);
         return $invoice;
     }
 
@@ -44,7 +46,7 @@ class InvoiceRepository
         $invoice->fill($invoiceData);
         if ($invoice->isDirty()) {
             $invoice->save();
-            UserActivityService::createUserActivity($invoice,ActivityType::UPDATE);
+            $this->logUpdated($invoice);
         }
         return $invoice;
     }
@@ -52,7 +54,7 @@ class InvoiceRepository
     public function deleteInvoice(Invoice $invoice): void
     {
         $invoice->delete();
-        UserActivityService::createUserActivity($invoice,ActivityType::DELETE);
+        $this->logDeleted($invoice);
     }
 
     public function findInvoiceById($id): ?Invoice
@@ -105,23 +107,7 @@ class InvoiceRepository
                 $query->where("owner_id", $filters["owner_id"]);
         }
 
-        // Single date filtering
-        if (isset($filters["date"])) {
-            $date = Carbon::parse($filters["date"],"Asia/Muscat");
-            $dateRange = [$date->copy()->startOfDay(), $date->copy()->endOfDay()];
-            $query->whereBetween('invoices.created_at', $dateRange);
-        }
-
-        // Date range filtering
-        if (!empty($filters["from_date"]) || !empty($filters["to_date"])) {
-            $startDate = !empty($filters["from_date"])
-                ? Carbon::parse($filters["from_date"],"Asia/Muscat")->startOfDay()
-                : Carbon::createFromTimestamp(0);
-            $endDate = !empty($filters["to_date"])
-                ? Carbon::parse($filters["to_date"],"Asia/Muscat")->endOfDay()
-                : Carbon::now("Asia/Muscat");
-            $query->whereBetween('invoices.created_at', [$startDate, $endDate]);
-        }
+        $this->applyDateFilter($query, $filters, 'invoices.created_at');
 
         // Search filter
         if (isset($filters["search"]))

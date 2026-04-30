@@ -42,7 +42,7 @@ const Add = () => {
                                 <TextField
                                     fullWidth required label="Store Code"
                                     value={data.code} onChange={(e) => setData("code", e.target.value)}
-                                    error={!!errors.code} helperText={errors.code}
+                                    error={!!errors.code}
                                     helperText={errors.code || "Short uppercase identifier, e.g. WH-01"}
                                 />
                             </Grid>

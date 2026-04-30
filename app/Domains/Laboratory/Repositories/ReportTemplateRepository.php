@@ -2,13 +2,14 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\ReportTemplate;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ReportTemplateRepository
 {
+    use LogsUserActivity;
+
 
     public function listReportTemplates(array $queryData): LengthAwarePaginator
     {
@@ -23,7 +24,7 @@ class ReportTemplateRepository
     public function creatReportTemplate(array $reportTemplateData): ReportTemplate
     {
         $reportTemplate= ReportTemplate::query()->create($reportTemplateData);
-        UserActivityService::createUserActivity($reportTemplate,ActivityType::CREATE);
+        $this->logCreated($reportTemplate);
         return $reportTemplate;
     }
 
@@ -32,7 +33,7 @@ class ReportTemplateRepository
         $reportTemplate->fill($reportTemplateData);
         if ($reportTemplate->isDirty()) {
             $reportTemplate->save();
-            UserActivityService::createUserActivity($reportTemplate,ActivityType::UPDATE);
+            $this->logUpdated($reportTemplate);
         }
         return $reportTemplate;
     }
@@ -40,7 +41,7 @@ class ReportTemplateRepository
     public function deleteReportTemplate(ReportTemplate $reportTemplate): void
     {
         $reportTemplate->delete();
-        UserActivityService::createUserActivity($reportTemplate,ActivityType::DELETE);
+        $this->logDeleted($reportTemplate);
     }
 
     protected function applyFilters($query, array $filters)

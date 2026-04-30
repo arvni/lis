@@ -2,15 +2,16 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\Test;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 
 class TestRepository
 {
+    use LogsUserActivity;
+
 
     public function listTests(array $queryData): LengthAwarePaginator
     {
@@ -46,7 +47,7 @@ class TestRepository
     public function creatTest(array $testData): Test
     {
         $test= Test::query()->create($testData);
-        UserActivityService::createUserActivity($test,ActivityType::CREATE);
+        $this->logCreated($test);
         return $test;
     }
 
@@ -55,7 +56,7 @@ class TestRepository
         $test->fill($testData);
         if ($test->isDirty()) {
             $test->save();
-            UserActivityService::createUserActivity($test,ActivityType::UPDATE);
+            $this->logUpdated($test);
         }
         return $test;
     }
@@ -63,7 +64,7 @@ class TestRepository
     public function deleteTest(Test $test): void
     {
         $test->delete();
-        UserActivityService::createUserActivity($test,ActivityType::DELETE);
+        $this->logDeleted($test);
     }
 
     public function findTestById($id): ?Test

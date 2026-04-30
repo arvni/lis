@@ -2,13 +2,14 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\Instruction;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class InstructionRepository
 {
+    use LogsUserActivity;
+
 
     public function listInstructions(array $queryData): LengthAwarePaginator
     {
@@ -23,7 +24,7 @@ class InstructionRepository
     public function creatInstruction(array $instructionData): Instruction
     {
         $instruction= Instruction::query()->create($instructionData);
-        UserActivityService::createUserActivity($instruction,ActivityType::CREATE);
+        $this->logCreated($instruction);
         return $instruction;
     }
 
@@ -32,7 +33,7 @@ class InstructionRepository
         $instruction->fill($instructionData);
         if ($instruction->isDirty()) {
             $instruction->save();
-            UserActivityService::createUserActivity($instruction,ActivityType::UPDATE);
+            $this->logUpdated($instruction);
         }
         return $instruction;
     }
@@ -40,7 +41,7 @@ class InstructionRepository
     public function deleteInstruction(Instruction $instruction): void
     {
         $instruction->delete();
-        UserActivityService::createUserActivity($instruction,ActivityType::DELETE);
+        $this->logDeleted($instruction);
     }
 
     protected function applyFilters($query, array $filters)

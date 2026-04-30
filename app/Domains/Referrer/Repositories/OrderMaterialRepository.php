@@ -2,9 +2,8 @@
 
 namespace App\Domains\Referrer\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Referrer\Models\OrderMaterial;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -12,6 +11,8 @@ use InvalidArgumentException;
 
 class OrderMaterialRepository
 {
+    use LogsUserActivity;
+
 
     public function listOrderMaterials(array $queryData): LengthAwarePaginator
     {
@@ -28,7 +29,7 @@ class OrderMaterialRepository
     public function createOrderMaterial(array $data): OrderMaterial
     {
         $orderMaterial = OrderMaterial::create($data);
-        UserActivityService::createUserActivity($orderMaterial, ActivityType::CREATE);
+        $this->logCreated($orderMaterial);
         return $orderMaterial;
     }
 
@@ -37,7 +38,7 @@ class OrderMaterialRepository
         $orderMaterial->fill($orderMaterialData);
         if ($orderMaterial->isDirty()) {
             $orderMaterial->save();
-            UserActivityService::createUserActivity($orderMaterial,ActivityType::UPDATE);
+            $this->logUpdated($orderMaterial);
         }
         return $orderMaterial;
     }

@@ -2,13 +2,14 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\Offer;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class OfferRepository
 {
+    use LogsUserActivity;
+
 
     public function listOffers(array $queryData): LengthAwarePaginator
     {
@@ -24,7 +25,7 @@ class OfferRepository
     {
         $offer = Offer::query()->make($offerData);
         $offer->save();
-        UserActivityService::createUserActivity($offer,ActivityType::CREATE);
+        $this->logCreated($offer);
         return $offer;
     }
 
@@ -33,7 +34,7 @@ class OfferRepository
         $offer->fill($offerData);
         if ($offer->isDirty()) {
             $offer->save();
-            UserActivityService::createUserActivity($offer,ActivityType::UPDATE);
+            $this->logUpdated($offer);
         }
         return $offer;
     }
@@ -41,7 +42,7 @@ class OfferRepository
     public function deleteOffer(Offer $offer): void
     {
         $offer->delete();
-        UserActivityService::createUserActivity($offer,ActivityType::DELETE);
+        $this->logDeleted($offer);
     }
 
     protected function applyFilters($query, array $filters)

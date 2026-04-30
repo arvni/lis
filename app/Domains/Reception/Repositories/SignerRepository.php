@@ -2,22 +2,23 @@
 
 namespace App\Domains\Reception\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Reception\Models\Signer;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 
 class SignerRepository
 {
+    use LogsUserActivity;
+
     public function create($data)
     {
         $signer= Signer::create($data);
-        UserActivityService::createUserActivity($signer,ActivityType::CREATE);
+        $this->logCreated($signer);
         return $signer;
     }
 
     public function save(Signer $signer)
     {
          $signer->save();
-        UserActivityService::createUserActivity($signer,ActivityType::UPDATE);
+        $this->logUpdated($signer);
     }
 }

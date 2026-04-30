@@ -2,14 +2,15 @@
 
 namespace App\Domains\Referrer\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Referrer\DTOs\ReferrerTestDTO;
 use App\Domains\Referrer\Models\ReferrerTest;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ReferrerTestRepository
 {
+    use LogsUserActivity;
+
     public function index(array $queryData = []): LengthAwarePaginator
     {
         $query = ReferrerTest::query()->with(["test"]);
@@ -38,20 +39,20 @@ class ReferrerTestRepository
     public function store($data): ReferrerTest
     {
         $referrerTest = ReferrerTest::create($data);
-        UserActivityService::createUserActivity($referrerTest, ActivityType::CREATE);
+        $this->logCreated($referrerTest);
         return $referrerTest;
     }
 
     public function update(ReferrerTest $referrerTest, $data)
     {
         $referrerTest->update($data);
-        UserActivityService::createUserActivity($referrerTest, ActivityType::DELETE);
+        $this->logDeleted($referrerTest);
         return $referrerTest;
     }
 
     public function delete(ReferrerTest $referrerTest): bool
     {
-        UserActivityService::createUserActivity($referrerTest, ActivityType::DELETE);
+        $this->logDeleted($referrerTest);
         return $referrerTest->delete();
     }
 

@@ -2,13 +2,14 @@
 
 namespace App\Domains\Consultation\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Consultation\Models\Customer;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class CustomerRepository
 {
+    use LogsUserActivity;
+
 
     public function listCustomers(array $queryData): LengthAwarePaginator
     {
@@ -24,7 +25,7 @@ class CustomerRepository
     {
         $customer = Customer::query()->make($customerData);
         $customer->save();
-        UserActivityService::createUserActivity($customer,ActivityType::CREATE);
+        $this->logCreated($customer);
         return $customer;
     }
 
@@ -33,7 +34,7 @@ class CustomerRepository
         $customer->fill($customerData);
         if ($customer->isDirty()) {
             $customer->save();
-            UserActivityService::createUserActivity($customer,ActivityType::UPDATE);
+            $this->logUpdated($customer);
         }
         return $customer;
     }
@@ -41,7 +42,7 @@ class CustomerRepository
     public function deleteCustomer(Customer $customer): void
     {
         $customer->delete();
-        UserActivityService::createUserActivity($customer,ActivityType::DELETE);
+        $this->logDeleted($customer);
     }
 
     protected function applyFilters($query, array $filters)

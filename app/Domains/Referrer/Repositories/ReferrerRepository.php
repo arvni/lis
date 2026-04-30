@@ -2,14 +2,15 @@
 
 namespace App\Domains\Referrer\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Referrer\Models\Referrer;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Ramsey\Collection\Collection;
 
 class ReferrerRepository
 {
+    use LogsUserActivity;
+
     public function listReferrer(array $queryData): LengthAwarePaginator
     {
         $query = Referrer::query()->withCount(["acceptances", "referrerOrders"])
@@ -24,7 +25,7 @@ class ReferrerRepository
     public function createReferrer(array $data): Referrer
     {
         $referrer= Referrer::create($data);
-        UserActivityService::createUserActivity($referrer,ActivityType::CREATE);
+        $this->logCreated($referrer);
         return $referrer;
     }
 
@@ -33,7 +34,7 @@ class ReferrerRepository
         $referrer->fill($data);
         if ($referrer->isDirty()) {
             $referrer->save();
-            UserActivityService::createUserActivity($referrer,ActivityType::UPDATE);
+            $this->logUpdated($referrer);
         }
         return $referrer;
     }
@@ -41,7 +42,7 @@ class ReferrerRepository
     public function deleteReferrer(Referrer $referrer): void
     {
         $referrer->delete();
-        UserActivityService::createUserActivity($referrer,ActivityType::DELETE);
+        $this->logDeleted($referrer);
     }
 
 

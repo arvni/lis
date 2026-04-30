@@ -2,13 +2,14 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\Workflow;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class WorkflowRepository
 {
+    use LogsUserActivity;
+
     public function listWorkflows(array $queryData): LengthAwarePaginator
     {
         $query = Workflow::withCount(["methods"]);
@@ -22,7 +23,7 @@ class WorkflowRepository
     public function creatWorkflow(array $workflowData): Workflow
     {
         $workflow= Workflow::query()->create($workflowData);
-        UserActivityService::createUserActivity($workflow,ActivityType::CREATE);
+        $this->logCreated($workflow);
         return $workflow;
     }
 
@@ -31,7 +32,7 @@ class WorkflowRepository
         $workflow->fill($workflowData);
         if ($workflow->isDirty()) {
             $workflow->save();
-            UserActivityService::createUserActivity($workflow,ActivityType::UPDATE);
+            $this->logUpdated($workflow);
         }
         return $workflow;
     }
@@ -39,7 +40,7 @@ class WorkflowRepository
     public function deleteWorkflow(Workflow $workflow): void
     {
         $workflow->delete();
-        UserActivityService::createUserActivity($workflow,ActivityType::DELETE);
+        $this->logDeleted($workflow);
     }
 
     protected function applyFilters($query, array $filters)

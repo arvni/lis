@@ -2,13 +2,14 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\Doctor;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class DoctorRepository
 {
+    use LogsUserActivity;
+
 
     public function listDoctors(array $queryData): LengthAwarePaginator
     {
@@ -24,7 +25,7 @@ class DoctorRepository
     {
         $doctor = Doctor::query()->make($doctorData);
         $doctor->save();
-        UserActivityService::createUserActivity($doctor,ActivityType::CREATE);
+        $this->logCreated($doctor);
         return $doctor;
     }
 
@@ -33,7 +34,7 @@ class DoctorRepository
         $doctor->fill($doctorData);
         if ($doctor->isDirty()) {
             $doctor->save();
-            UserActivityService::createUserActivity($doctor,ActivityType::UPDATE);
+            $this->logUpdated($doctor);
         }
         return $doctor;
     }
@@ -41,7 +42,7 @@ class DoctorRepository
     public function deleteDoctor(Doctor $doctor): void
     {
         $doctor->delete();
-        UserActivityService::createUserActivity($doctor,ActivityType::DELETE);
+        $this->logDeleted($doctor);
     }
 
     protected function applyFilters($query, array $filters)

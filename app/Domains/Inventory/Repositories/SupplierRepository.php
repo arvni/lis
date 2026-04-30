@@ -2,14 +2,15 @@
 
 namespace App\Domains\Inventory\Repositories;
 
+use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Inventory\Models\Supplier;
 use App\Domains\Inventory\Models\SupplierContact;
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class SupplierRepository
 {
+    use LogsUserActivity;
+
     public function listSuppliers(array $queryData): LengthAwarePaginator
     {
         $query = Supplier::withCount('contacts', 'supplierItems');
@@ -31,7 +32,7 @@ class SupplierRepository
         $supplier = Supplier::query()->create($data);
         foreach ($contacts as $contact)
             $supplier->contacts()->create($contact);
-        UserActivityService::createUserActivity($supplier, ActivityType::CREATE);
+        $this->logCreated($supplier);
         return $supplier;
     }
 
@@ -47,13 +48,13 @@ class SupplierRepository
             foreach ($contacts as $contact)
                 $supplier->contacts()->create($contact);
         }
-        UserActivityService::createUserActivity($supplier, ActivityType::UPDATE);
+        $this->logUpdated($supplier);
         return $supplier;
     }
 
     public function deleteSupplier(Supplier $supplier): void
     {
         $supplier->delete();
-        UserActivityService::createUserActivity($supplier, ActivityType::DELETE);
+        $this->logDeleted($supplier);
     }
 }
