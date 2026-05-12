@@ -90,7 +90,7 @@ const LotSelect = ({itemId, storeId, value, onChange, size = "medium", disabled 
                     {...params}
                     label="Lot / Brand"
                     size={size}
-                    InputProps={{
+                    slotProps={{ input: {
                         ...params.InputProps,
                         endAdornment: (
                             <>
@@ -98,7 +98,7 @@ const LotSelect = ({itemId, storeId, value, onChange, size = "medium", disabled 
                                 {params.InputProps.endAdornment}
                             </>
                         ),
-                    }}
+                    } }}
                 />
             )}
         />

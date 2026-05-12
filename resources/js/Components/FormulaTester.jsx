@@ -5,7 +5,7 @@ import {
     TextField,
     Typography,
     Paper,
-    Grid2 as Grid,
+    Grid as Grid,
     Alert,
     Collapse,
     IconButton,

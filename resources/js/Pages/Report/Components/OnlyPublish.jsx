@@ -159,10 +159,10 @@ const PublishForm = ({open, onCancel, acceptance}) => {
                 bgcolor: 'primary.main',
                 color: 'primary.contrastText'
             }}>
-                <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                     <Share />
                     <Box>
-                        <Typography variant="h6" fontWeight="600">
+                        <Typography variant="h6" fontWeight="600" component="span">
                             Publish Acceptance #{acceptance?.id}
                         </Typography>
                         <Typography variant="body2" sx={{ opacity: 0.9 }}>

@@ -3,7 +3,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import SelectSearch from "@/Components/SelectSearch";
 import {useForm} from "@inertiajs/react";
 
@@ -17,7 +17,7 @@ const AddFromExistPatientForm = ({open, referrerOrder, onClose}) => {
         onClose();
     }
     const handleChange = (e) => setData(e.target.name, e.target.value);
-    return <Dialog open={open} fullWidth maxWidth="sm">
+    return <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
         <DialogTitle>Select Patient From Exist Patients</DialogTitle>
         <DialogContent>
             <Grid container>

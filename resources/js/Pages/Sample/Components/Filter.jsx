@@ -1,36 +1,46 @@
-import Grid from "@mui/material/Grid2";
-import TextField from "@mui/material/TextField";
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
 import React, {useState} from "react";
-import FilterIcon from '@mui/icons-material/FilterAlt'
-import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
+import TextField from "@mui/material/TextField";
+import {FormControl, InputLabel, MenuItem, Select} from "@mui/material";
+import FilterTemplate from "@/Components/FilterWraper.jsx";
 
 const Filter = ({defaultFilter, onFilter}) => {
-    const [filter, setFilter] = useState(defaultFilter);
-    const handleChange = (e) => {
+    const [filter, setFilter] = useState(defaultFilter ?? {});
 
-        setFilter(prevState => ({...prevState, search: e.target.value}))
+    const handleChange = (e) => {
+        const {name, value} = e.target;
+        setFilter(prev => ({...prev, [name]: value}));
     };
+
     return (
-        <Accordion>
-            <AccordionSummary>
-                <FilterIcon/>Filter
-            </AccordionSummary>
-            <AccordionDetails>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={5}>
-                        <TextField sx={{width: "100%"}} name={"search"} value={filter?.search} onChange={handleChange}
-                                   label={"Search title"}/>
-                    </Grid>
-                    <Grid item xs={12} sm={2} sx={{display: "flex"}} justifyContent={"center"}>
-                        <Button variant={"outlined"} onClick={onFilter(filter)}>Filter</Button>
-                    </Grid>
-                </Grid>
-            </AccordionDetails>
-        </Accordion>
+        <FilterTemplate onFilter={onFilter(filter)}>
+            <Grid size={{xs: 12, sm: 5}}>
+                <TextField
+                    fullWidth
+                    name="search"
+                    label="Search (barcode, patient name, ID)"
+                    value={filter?.search ?? ''}
+                    onChange={handleChange}
+                />
+            </Grid>
+            <Grid size={{xs: 12, sm: 3}}>
+                <FormControl fullWidth>
+                    <InputLabel>QC Status</InputLabel>
+                    <Select
+                        name="qc_status"
+                        label="QC Status"
+                        value={filter?.qc_status ?? ''}
+                        onChange={handleChange}
+                    >
+                        <MenuItem value="">All</MenuItem>
+                        <MenuItem value="pending">Pending</MenuItem>
+                        <MenuItem value="approved">Approved</MenuItem>
+                        <MenuItem value="rejected">Rejected</MenuItem>
+                    </Select>
+                </FormControl>
+            </Grid>
+        </FilterTemplate>
     );
-}
+};
 
 export default Filter;

@@ -5,7 +5,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import SelectSearch from "@/Components/SelectSearch";
 import {FormControlLabel, FormHelperText, Input, Switch} from "@mui/material";

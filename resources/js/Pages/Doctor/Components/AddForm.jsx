@@ -1,13 +1,13 @@
-import {Box, CircularProgress, TextField, Tooltip} from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import {Box, TextField, Tooltip} from "@mui/material";
+import Grid from "@mui/material/Grid";
 
 import { FormProvider, useFormState } from "@/Components/FormTemplate.jsx";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
 import PhoneIcon from "@mui/icons-material/Phone";
 import BadgeIcon from "@mui/icons-material/Badge";
+import PersonIcon from "@mui/icons-material/Person";
 import React from "react";
-import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 
 const AddForm = ({ open, onClose, defaultValue = {} }) => {
 
@@ -18,7 +18,7 @@ const AddForm = ({ open, onClose, defaultValue = {} }) => {
     return (
         <FormProvider
             open={open}
-            generalTitle="Barcode Group"
+            generalTitle="Doctor"
             url={url}
             onClose={onClose}
             defaultValue={{ name: "", expertise: "", phone: "", license_no: "", ...defaultValue }}
@@ -29,7 +29,7 @@ const AddForm = ({ open, onClose, defaultValue = {} }) => {
 };
 
 const FormContent = () => {
-    const { data, setData, errors, processing } = useFormState();
+    const { data, setData, errors } = useFormState();
     const handleChange = (e) => {
         const { name, value } = e.target;
         setData((prevState) => ({ ...prevState, [name]: value }));
@@ -37,7 +37,7 @@ const FormContent = () => {
 
     return (
         <>
-            <Grid xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
                 <Box sx={{ display: "flex", alignItems: "flex-start" }}>
                     <TextField
                         name="name"
@@ -45,27 +45,32 @@ const FormContent = () => {
                         value={data?.name || ""}
                         onChange={handleChange}
                         fullWidth
-                        placeholder="enter name"
+                        required
+                        placeholder="e.g. Dr. John Smith"
+                        error={!!errors?.name}
+                        helperText={errors?.name}
                         slotProps={{
                             input: {
-                                startAdornment: (<MedicalServicesIcon color="action" sx={{mr: 1}}/>),
+                                startAdornment: (<PersonIcon color="action" sx={{mr: 1}}/>),
                             }
                         }}
                     />
-                    <Tooltip title="Doctor's area of specialization">
+                    <Tooltip title="Full name of the doctor">
                         <HelpOutlineIcon fontSize="small" color="action" sx={{ ml: 1, mt: 2 }} />
                     </Tooltip>
                 </Box>
             </Grid>
-            <Grid size={{xs:12,sm:6,md:3}}>
+            <Grid size={{xs:12,sm:6}}>
                 <Box sx={{ display: "flex", alignItems: "flex-start" }}>
                     <TextField
                         name="expertise"
                         label="Speciality"
                         value={data?.expertise || ""}
-                        onChange={e => onDoctorChange('expertise', e.target.value)}
+                        onChange={handleChange}
                         fullWidth
                         placeholder="e.g. Cardiology"
+                        error={!!errors?.expertise}
+                        helperText={errors?.expertise}
                         slotProps={{
                             input: {
                                 startAdornment: (
@@ -79,15 +84,17 @@ const FormContent = () => {
                 </Box>
             </Grid>
 
-            <Grid size={{xs:12,sm:6,md:3}}>
+            <Grid size={{xs:12,sm:6}}>
                 <Box sx={{ display: "flex", alignItems: "flex-start" }}>
                     <TextField
                         name="phone"
                         label="Phone Number"
                         value={data?.phone || ""}
-                        onChange={e => onDoctorChange('phone', e.target.value)}
+                        onChange={handleChange}
                         fullWidth
                         placeholder="+968 1234 5678"
+                        error={!!errors?.phone}
+                        helperText={errors?.phone}
                         slotProps={{
                             input: {
                                 startAdornment: (
@@ -102,15 +109,17 @@ const FormContent = () => {
                 </Box>
             </Grid>
 
-            <Grid size={{xs:12,sm:6,md:3}}>
+            <Grid size={{xs:12,sm:6}}>
                 <Box sx={{ display: "flex", alignItems: "flex-start" }}>
                     <TextField
                         name="license_no"
                         label="License Number"
-                        value={data?.licenseNo || ""}
-                        onChange={e => onDoctorChange('license_no', e.target.value)}
+                        value={data?.license_no || ""}
+                        onChange={handleChange}
                         fullWidth
                         placeholder="e.g. MD12345"
+                        error={!!errors?.license_no}
+                        helperText={errors?.license_no}
                         slotProps={{
                             input: {
                                 startAdornment: (

@@ -1,4 +1,4 @@
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import countries from "@/Data/Countries";
@@ -420,7 +420,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                 {/* Gender Field */}
                                 <Grid size={{xs: 12, sm: 7}}>
                                     <FormControlLabel labelPlacement="start"
-                                                      label={<Stack direction="row" alignItems="center">
+  label={<Stack direction="row" sx={{alignItems: "center"}}>
                                                           <Wc color="primary" sx={{mr: 1}}/>
                                                           <span style={{minWidth: 70}}>Gender *</span>
                                                       </Stack>}
@@ -460,7 +460,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                                               </ToggleButton>
                                                           </ToggleButtonGroup>
                                                       }
-                                                      fullWidth variant="outlined" error={hasError("gender")}>
+                                                      >
                                         {hasError("gender") && (
                                             <FormHelperText error>{errors?.gender}</FormHelperText>
                                         )}
@@ -594,8 +594,8 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             autoHighlight
                                             disabled={!editable}
                                             getOptionLabel={(option) => option.label}
-                                            renderOption={(props, option) => (
-                                                <Box component="li" sx={{'& > img': {mr: 2, flexShrink: 0}}} {...props}>
+                                            renderOption={({key, ...props}, option) => (
+                                                <Box key={key} component="li" sx={{'& > img': {mr: 2, flexShrink: 0}}} {...props}>
                                                     <img
                                                         loading="lazy"
                                                         width="20"
@@ -674,8 +674,8 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                                             variant="outlined"
                                                         />
                                                     )}
-                                                    renderOption={(props, option) => (
-                                                        <li {...props}>
+                                                    renderOption={({key, ...props}, option) => (
+                                                        <li key={key} {...props}>
                                                             <Box sx={{display: 'flex', alignItems: 'center'}}>
                                                                 <LocationCity fontSize="small" color="action"
                                                                               sx={{mr: 1}}/>
@@ -775,9 +775,11 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             </Box>
                                         )}
                                         MenuProps={{
-                                            PaperProps: {
-                                                style: {
-                                                    maxHeight: 224,
+                                            slotProps: {
+                                                paper: {
+                                                    style: {
+                                                        maxHeight: 224,
+                                                    },
                                                 },
                                             },
                                         }}

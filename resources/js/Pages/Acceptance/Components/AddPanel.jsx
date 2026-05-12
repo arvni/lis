@@ -5,7 +5,7 @@ import {
     DialogActions,
     DialogContent,
     Button,
-    Grid2 as Grid,
+    Grid as Grid,
     IconButton,
     Typography,
     Box,
@@ -19,7 +19,7 @@ import {
 import {
     Close,
     PlaylistAddCheck,
-    HelpOutline,
+    HelpOutlined,
 } from "@mui/icons-material";
 import SelectSearch from "@/Components/SelectSearch";
 import { useFormValidation } from './hooks/useFormValidation';
@@ -42,7 +42,7 @@ const LOADING_STATES = {
 
 // Memoized Components
 const LoadingIndicator = React.memo(({ message = "Loading..." }) => (
-    <Grid size={{ xs: 12, md: 6 }} textAlign="center">
+    <Grid size={{ xs: 12, md: 6 }} sx={{ textAlign: "center" }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <CircularProgress size={24} sx={{ mr: 1 }} />
             <Typography variant="body2">{message}</Typography>
@@ -88,9 +88,9 @@ const PanelSelector = React.memo(({
             Select Panel
         </Typography>
 
-        <Grid container spacing={3} alignItems="center">
-            <Grid xs={12} md={6}>
-                <Box display="flex" alignItems="flex-start">
+  <Grid container spacing={3} sx={{alignItems: "center"}}>
+            <Grid size={{ xs: 12, md: 6 }} >
+  <Box display="flex" sx={{alignItems: "flex-start"}}>
                     <SelectSearch
                         value={value}
                         label="Select Test Panel"
@@ -104,7 +104,7 @@ const PanelSelector = React.memo(({
                         disabled={isLoading}
                     />
                     <Tooltip title="A panel contains multiple tests grouped together">
-                        <HelpOutline fontSize="small" color="action" sx={{ ml: 1, mt: 2 }} />
+                        <HelpOutlined fontSize="small" color="action" sx={{ ml: 1, mt: 2 }} />
                     </Tooltip>
                 </Box>
             </Grid>
@@ -124,10 +124,10 @@ const DialogHeader = React.memo(({ title, onClose }) => (
             p: DIALOG_CONFIG.titlePadding
         }}
     >
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-            <Box display="flex" alignItems="center">
+  <Box display="flex" sx={{alignItems: "center", justifyContent: "space-between"}}>
+  <Box display="flex" sx={{alignItems: "center"}}>
                 <PlaylistAddCheck sx={{ mr: 2 }} />
-                <Typography variant="h6">{title}</Typography>
+                <Typography variant="h6" component="span">{title}</Typography>
             </Box>
             <IconButton
                 onClick={onClose}
@@ -355,7 +355,6 @@ const AddPanel = ({
         <Dialog
             open={open}
             fullWidth
-            keepMounted
             maxWidth={DIALOG_CONFIG.maxWidth}
             onClose={handleClose}
             slotProps={{
@@ -373,7 +372,7 @@ const AddPanel = ({
 
             <DialogContent sx={{ p: DIALOG_CONFIG.contentPadding }}>
                 <PanelSelector
-                    value={data.panel || ""}
+                    value={data.panel || null}
                     onChange={handleTestSelect}
                     error={Boolean(errors.panel)}
                     helperText={errors.panel || "Choose a test panel from the list"}

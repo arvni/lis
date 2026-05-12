@@ -202,10 +202,10 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
             open={open}
             fullWidth
             maxWidth="xl"
-            disableEscapeKeyDown={isSubmitting}
+            onClose={(_, reason) => { if (!isSubmitting || reason !== 'escapeKeyDown') handleClose(); }}
         >
             <DialogTitle>
-                <Stack direction="row" alignItems="center" spacing={1}>
+  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                     {isPooling && <MergeType color="info" />}
                     <Typography variant="h6" component="div">
                         Select Samples for Order #{referrerOrder?.id}
@@ -289,7 +289,7 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                                         {isPooling && (
                                             <TableCell sx={{ verticalAlign: 'top' }}>
                                                 <Box>
-                                                    <Stack direction="row" alignItems="center" spacing={1}>
+  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                                                         <Typography variant="body2" color="text.secondary">
                                                             {barcode.selectedItems?.length || 0} items selected
                                                         </Typography>
@@ -434,7 +434,7 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                                             {barcode.sample && (
                                                 <Box sx={{ p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
                                                     <Stack spacing={0.5}>
-                                                        <Box display="flex" alignItems="center">
+  <Box display="flex" sx={{alignItems: "center"}}>
                                                             <Typography variant="caption" sx={{ fontWeight: 'medium', minWidth: 80 }}>
                                                                 Type:
                                                             </Typography>
@@ -443,7 +443,7 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                                                             </Typography>
                                                         </Box>
                                                         {barcode.collectionDate && (
-                                                            <Box display="flex" alignItems="center">
+  <Box display="flex" sx={{alignItems: "center"}}>
                                                                 <Typography variant="caption" sx={{ fontWeight: 'medium', minWidth: 80 }}>
                                                                     Collected:
                                                                 </Typography>
@@ -453,7 +453,7 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                                                             </Box>
                                                         )}
                                                         {barcode.sample.sampleId && (
-                                                            <Box display="flex" alignItems="center">
+  <Box display="flex" sx={{alignItems: "center"}}>
                                                                 <Typography variant="caption" sx={{ fontWeight: 'medium', minWidth: 80 }}>
                                                                     Barcode:
                                                                 </Typography>

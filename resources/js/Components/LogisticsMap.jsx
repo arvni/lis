@@ -1,105 +1,150 @@
-import React, { useState, useEffect } from "react";
-import { Map, Marker } from "pigeon-maps";
-import { Box, Paper, Typography } from "@mui/material";
-import PropTypes from 'prop-types';
+import React, { useState, useCallback, useRef, useEffect } from "react";
+import { APIProvider, Map, AdvancedMarker, useMapsLibrary, useMap } from "@vis.gl/react-google-maps";
+import { Box, Paper, Typography, TextField, InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import PropTypes from "prop-types";
 
-/**
- * Reusable logistics map component for displaying and selecting location
- * @param {Object} props
- * @param {number} props.latitude - Latitude coordinate
- * @param {number} props.longitude - Longitude coordinate
- * @param {Function} props.onLocationChange - Callback when location is changed (only for editable mode)
- * @param {boolean} props.editable - Whether the map is editable (clickable to change location)
- * @param {number} props.height - Map height in pixels (default: 400)
- * @param {number} props.zoom - Map zoom level (default: 13)
- */
+const DEFAULT_CENTER = { lat: 23.588, lng: 58.3829 }; // Muscat, Oman
+
+const PlaceSearch = ({ onPlaceSelect }) => {
+    const places = useMapsLibrary("places");
+    const inputRef = useRef(null);
+
+    useEffect(() => {
+        if (!places || !inputRef.current) return;
+        const autocomplete = new places.Autocomplete(inputRef.current);
+        const listener = autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (place?.geometry?.location) onPlaceSelect(place);
+        });
+        return () => window.google.maps.event.removeListener(listener);
+    }, [places, onPlaceSelect]);
+
+    return (
+        <TextField
+            inputRef={inputRef}
+            fullWidth
+            size="small"
+            placeholder="Search for a place…"
+            sx={{ mb: 1.5 }}
+            slotProps={{
+                input: {
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                    ),
+                },
+            }}
+        />
+    );
+};
+
+const MapContent = ({ latitude, longitude, onLocationChange, editable, height, initialZoom }) => {
+    const map = useMap();
+    const hasCoords = latitude && longitude;
+
+    const [markerPos, setMarkerPos] = useState(
+        hasCoords ? { lat: Number(latitude), lng: Number(longitude) } : null
+    );
+
+    // Sync marker + pan when lat/lng props change (e.g. manual text input)
+    useEffect(() => {
+        if (!latitude || !longitude) return;
+        const pos = { lat: Number(latitude), lng: Number(longitude) };
+        setMarkerPos(pos);
+        map?.panTo(pos);
+    }, [latitude, longitude, map]);
+
+    const handleMapClick = useCallback(
+        (e) => {
+            if (!editable) return;
+            const { lat, lng } = e.detail.latLng;
+            setMarkerPos({ lat, lng });
+            onLocationChange?.({ latitude: lat, longitude: lng });
+        },
+        [editable, onLocationChange]
+    );
+
+    const handleMarkerDragEnd = useCallback(
+        (e) => {
+            if (!editable || !e.latLng) return;
+            const lat = e.latLng.lat();
+            const lng = e.latLng.lng();
+            setMarkerPos({ lat, lng });
+            onLocationChange?.({ latitude: lat, longitude: lng });
+        },
+        [editable, onLocationChange]
+    );
+
+    const handlePlaceSelect = useCallback(
+        (place) => {
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+            const pos = { lat, lng };
+            setMarkerPos(pos);
+            map?.panTo(pos);
+            map?.setZoom(15);
+            onLocationChange?.({ latitude: lat, longitude: lng });
+        },
+        [map, onLocationChange]
+    );
+
+    return (
+        <>
+            {editable && <PlaceSearch onPlaceSelect={handlePlaceSelect} />}
+            {editable && (
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Search for a place, click on the map, or drag the marker to set the location
+                </Typography>
+            )}
+            <Box sx={{ height: `${height}px`, width: "100%", borderRadius: 1, overflow: "hidden" }}>
+                <Map
+                    defaultCenter={hasCoords ? { lat: Number(latitude), lng: Number(longitude) } : DEFAULT_CENTER}
+                    defaultZoom={initialZoom}
+                    mapId={import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || "DEMO_MAP_ID"}
+                    onClick={handleMapClick}
+                    clickableIcons={false}
+                    style={{ width: "100%", height: "100%" }}
+                >
+                    {markerPos && (
+                        <AdvancedMarker
+                            position={markerPos}
+                            draggable={editable}
+                            onDragEnd={handleMarkerDragEnd}
+                        />
+                    )}
+                </Map>
+            </Box>
+            {markerPos && (
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+                    Location: {markerPos.lat.toFixed(6)}, {markerPos.lng.toFixed(6)}
+                </Typography>
+            )}
+        </>
+    );
+};
+
 const LogisticsMap = ({
     latitude,
     longitude,
     onLocationChange,
     editable = false,
     height = 400,
-    zoom: initialZoom = 13
+    zoom: initialZoom = 13,
 }) => {
-    // Default to a generic location if no coordinates provided
-    const defaultLat = 35.6892; // Tokyo
-    const defaultLng = 51.3890; // Tehran
-
-    const [center, setCenter] = useState([
-        latitude || defaultLat,
-        longitude || defaultLng
-    ]);
-    const [marker, setMarker] = useState(
-        latitude && longitude ? [latitude, longitude] : null
-    );
-    const [zoom, setZoom] = useState(initialZoom);
-
-    // Update center and marker when props change
-    useEffect(() => {
-        if (latitude && longitude) {
-            setCenter([latitude, longitude]);
-            setMarker([latitude, longitude]);
-        }
-    }, [latitude, longitude]);
-
-    // Handle map click (only in editable mode)
-    const handleMapClick = ({ latLng }) => {
-        if (!editable) return;
-
-        const [lat, lng] = latLng;
-        setMarker([lat, lng]);
-        setCenter([lat, lng]);
-
-        if (onLocationChange) {
-            onLocationChange({ latitude: lat, longitude: lng });
-        }
-    };
-
-    // Handle marker drag (only in editable mode)
-    const handleMarkerDrag = (latLng) => {
-        if (!editable) return;
-
-        const [lat, lng] = latLng;
-        setMarker([lat, lng]);
-
-        if (onLocationChange) {
-            onLocationChange({ latitude: lat, longitude: lng });
-        }
-    };
-
     return (
         <Paper elevation={2} sx={{ p: 2 }}>
-            {editable && (
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    Click on the map to set location, or drag the marker
-                </Typography>
-            )}
-            <Box sx={{ height: `${height}px`, width: "100%", borderRadius: 1, overflow: "hidden" }}>
-                <Map
-                    center={center}
-                    zoom={zoom}
-                    onBoundsChanged={({ center: newCenter, zoom: newZoom }) => {
-                        setCenter(newCenter);
-                        setZoom(newZoom);
-                    }}
-                    onClick={handleMapClick}
+            <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+                <MapContent
+                    latitude={latitude}
+                    longitude={longitude}
+                    onLocationChange={onLocationChange}
+                    editable={editable}
                     height={height}
-                >
-                    {marker && (
-                        <Marker
-                            anchor={marker}
-                            color="#1976d2"
-                            onClick={editable ? undefined : null}
-                            onDragEnd={editable ? handleMarkerDrag : undefined}
-                        />
-                    )}
-                </Map>
-            </Box>
-            {marker && (
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
-                    Location: {marker[0].toFixed(6)}, {marker[1].toFixed(6)}
-                </Typography>
-            )}
+                    initialZoom={initialZoom}
+                />
+            </APIProvider>
         </Paper>
     );
 };

@@ -1,4 +1,5 @@
 import React, {useState, useCallback, useMemo, useEffect} from 'react';
+import PropTypes from 'prop-types';
 import {makeId} from "@/Services/helper.js";
 import {IconButton, ListItem, ListItemText} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -103,6 +104,18 @@ const ParametersField = ({
             </List>
         </>
     );
+};
+
+ParametersField.propTypes = {
+    defaultValue: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.string,
+        value: PropTypes.string,
+    })),
+    onChange: PropTypes.func.isRequired,
+    errors: PropTypes.object,
+    name: PropTypes.string.isRequired,
+    label: PropTypes.string,
+    placeholder: PropTypes.string,
 };
 
 export default ParametersField;

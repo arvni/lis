@@ -6,7 +6,7 @@ import {
     DialogTitle,
     TextField,
     Button,
-    Grid2 as Grid,
+    Grid as Grid,
     Box,
     Typography,
     IconButton,
@@ -66,7 +66,7 @@ const EnteringForm = ({ open, barcode, onChange, submit, onClose }) => {
             >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <InputIcon />
-                    <Typography variant="h6">Enter Sample to Section</Typography>
+                    <Typography variant="h6" component="span">Enter Sample to Section</Typography>
                 </Box>
                 <Tooltip title="Close">
                     <IconButton
@@ -101,11 +101,9 @@ const EnteringForm = ({ open, barcode, onChange, submit, onClose }) => {
 
                     <Grid
                         container
-                        justifyContent="center"
-                        alignItems="center"
-                        sx={{ minHeight: "150px", mt: 2 }}
+                        sx={{ minHeight: "150px", mt: 2, justifyContent: "center", alignItems: "center" }}
                     >
-                        <Grid item xs={12} sm={10} md={8}>
+                        <Grid size={{ xs: 12, sm: 10, md: 8 }} >
                             <TextField
                                 value={barcode}
                                 onChange={onChange}

@@ -50,7 +50,7 @@ const Form = ({defaultValues, open, onClose, id, withRelative = false, mainPatie
         onClose();
     }
 
-    return <Dialog open={open} fullWidth maxWidth="md">
+    return <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
         <DialogTitle>
             {withRelative ? 'Add Relative Patient' : 'Add Patient'}
         </DialogTitle>

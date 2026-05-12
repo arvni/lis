@@ -71,8 +71,7 @@ const TestInfo = ({ method,test, defaultExpanded = true, showSections = true, sh
                         <Stack
                             direction={{ xs: 'column', sm: 'row' }}
                             spacing={1}
-                            alignItems={{ xs: 'flex-start', sm: 'center' }}
-                            sx={{ mb: 2 }}
+                            sx={{ mb: 2, alignItems: { xs: 'flex-start', sm: 'center' } }}
                         >
                             <Chip
                                 label={test.test_group?.name}
@@ -185,11 +184,11 @@ const TestInfo = ({ method,test, defaultExpanded = true, showSections = true, sh
                                                     <Stack
                                                         direction="row"
                                                         spacing={1}
-                                                        justifyContent={index % 2 ? "flex-end" : "flex-start"}
-                                                        flexWrap="wrap"
                                                         sx={{
                                                             mt: 1,
-                                                            gap: 0.5
+                                                            gap: 0.5,
+                                                            justifyContent: index % 2 ? "flex-end" : "flex-start",
+                                                            flexWrap: "wrap"
                                                         }}
                                                     >
                                                         {JSON.parse(section.pivot.parameters).map((parameter, paramIndex) => (

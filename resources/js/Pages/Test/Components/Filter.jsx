@@ -1,4 +1,4 @@
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import {useState} from "react";
 import FilterTemplate from "@/Components/FilterWraper.jsx";

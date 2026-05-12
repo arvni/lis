@@ -65,7 +65,7 @@ const ItemSelect = ({value, onChange, label = "Item", required = false, error = 
                     size={size}
                     error={error}
                     helperText={helperText}
-                    InputProps={{
+                    slotProps={{ input: {
                         ...params.InputProps,
                         endAdornment: (
                             <>
@@ -73,7 +73,7 @@ const ItemSelect = ({value, onChange, label = "Item", required = false, error = 
                                 {params.InputProps.endAdornment}
                             </>
                         ),
-                    }}
+                    } }}
                 />
             )}
         />

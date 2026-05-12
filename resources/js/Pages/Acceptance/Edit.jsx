@@ -150,7 +150,7 @@ const Edit = ({acceptance, maxDiscount=100,errors, canAddPrescription = false}) 
                         defaultStep={data.step}
                         canAddPrescription={canAddPrescription}
                         maxDiscount={maxDiscount}/>
-        <Dialog open={open}>
+        <Dialog open={open} onClose={handleClose}>
             <DialogTitle>
                 <Stack direction="row" spacing={1}>
                     <Dangerous color="error"/>

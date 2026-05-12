@@ -4,7 +4,7 @@ import {
     Card,
     CardContent,
     Typography,
-    Grid2 as Grid,
+    Grid as Grid,
     Container,
     Skeleton,
     Alert,
@@ -62,7 +62,9 @@ import TextField from "@mui/material/TextField";
 import Excel from "../../../../images/excel.svg";
 
 // Styled components for enhanced UI
-const StyledCard = styled(Card)(({theme, priority, isAlert}) => ({
+const StyledCard = styled(Card, {
+    shouldForwardProp: (prop) => prop !== 'isAlert' && prop !== 'priority',
+})(({theme, priority, isAlert}) => ({
     height: '100%',
     transition: 'all 0.3s ease-in-out',
     borderRadius: theme.spacing(2),
@@ -84,7 +86,9 @@ const StyledCard = styled(Card)(({theme, priority, isAlert}) => ({
     })
 }));
 
-const MetricValue = styled(Typography)(({theme, isAlert}) => ({
+const MetricValue = styled(Typography, {
+    shouldForwardProp: (prop) => prop !== 'isAlert',
+})(({theme, isAlert}) => ({
     fontWeight: 'bold',
     fontSize: '2rem',
     background: isAlert
@@ -322,9 +326,9 @@ const MetricCard = React.memo(({
                 )}
 
                 <CardContent sx={{p: 3}}>
-                    <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-                        <Box flex={1}>
-                            <Box display="flex" alignItems="center" gap={1} mb={1}>
+                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+                        <Box sx={{flex: 1}}>
+                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 1}}>
                                 <Typography
                                     variant="body2"
                                     color="text.secondary"
@@ -348,8 +352,8 @@ const MetricCard = React.memo(({
                                 {formatValue(value)}
                             </MetricValue>
 
-                            <Box display="flex" alignItems="center" justifyContent="space-between">
-                                <Stack direction="row" spacing={1} alignItems="center">
+                            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                                <Stack direction="row" spacing={1} sx={{alignItems: 'center'}}>
                                     <Chip
                                         label={category}
                                         size="small"
@@ -385,7 +389,7 @@ const MetricCard = React.memo(({
                             </Box>
 
                             <Collapse in={showDetails}>
-                                <Box mt={2} pt={2} borderTop={1} borderColor="divider">
+                                <Box sx={{mt: 2, pt: 2, borderTop: 1, borderColor: 'divider'}}>
                                     <Typography variant="caption" color="text.secondary">
                                         Category: {config.category} • Unit: {config.unit}
                                     </Typography>
@@ -397,7 +401,7 @@ const MetricCard = React.memo(({
                                 </Box>
                             </Collapse>
 
-                            <Box display="flex" justifyContent="space-between" mt={1}>
+                            <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 1}}>
                                 <IconButton
                                     size="small"
                                     onClick={() => setShowDetails(!showDetails)}
@@ -432,11 +436,11 @@ const MetricCard = React.memo(({
 const MetricSkeleton = React.memo(() => (
     <Card sx={{height: '100%', borderRadius: 2}}>
         <CardContent sx={{p: 3}}>
-            <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-                <Box flex={1} mr={2}>
+            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+                <Box sx={{flex: 1, mr: 2}}>
                     <Skeleton variant="text" width="70%" height={24}/>
                     <Skeleton variant="text" width="50%" height={48} sx={{my: 1}}/>
-                    <Box display="flex" gap={1}>
+                    <Box sx={{display: 'flex', gap: 1}}>
                         <Skeleton variant="rounded" width={80} height={24}/>
                         <Skeleton variant="rounded" width={60} height={24}/>
                     </Box>
@@ -631,7 +635,7 @@ const Dashboard = ({
                         Dashboard Overview
                     </Typography>
 
-                    <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+                    <Stack direction="row" sx={{justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2}}>
                         <Box>
                             <Typography variant="h6" color="text.secondary">
                                 {subtitle}
@@ -644,7 +648,7 @@ const Dashboard = ({
                         </Box>
 
                         {showFilters && (
-                            <Stack direction="row" spacing={2} alignItems="center">
+                            <Stack direction="row" spacing={2} sx={{alignItems: 'center'}}>
                                 <Tooltip title="Export to Excel">
                                     <IconButton
                                         href={route("api.dailyCashReport.export", {date})}
@@ -656,7 +660,7 @@ const Dashboard = ({
                                             p: 1
                                         }}
                                     >
-                                        <Stack direction="row" spacing={1} alignItems="center">
+                                        <Stack direction="row" spacing={1} sx={{alignItems: 'center'}}>
                                             <img src={Excel} alt="Excel" width="24px"/>
                                             <Typography variant="button" sx={{display: {xs: 'none', sm: 'block'}}}>
                                                 Export
@@ -738,7 +742,7 @@ const Dashboard = ({
 
                             return (
                                 <Paper key={category} elevation={1} sx={{p: 3, borderRadius: 3}}>
-                                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3}}>
                                         <Typography variant="h4" component="h2" sx={{fontWeight: 'bold'}}>
                                             {category} Metrics
                                         </Typography>
@@ -766,12 +770,12 @@ const Dashboard = ({
 
                                     {/* Hidden metrics section */}
                                     {enableAutoHide && data && Object.keys(data[category] || {}).some(label => hiddenMetrics.has(label)) && (
-                                        <Box mt={3} pt={3}>
+                                        <Box sx={{mt: 3, pt: 3}}>
                                             <Divider sx={{mb: 2}}/>
                                             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                                                 Hidden Metrics
                                             </Typography>
-                                            <Stack direction="row" spacing={1} flexWrap="wrap">
+                                            <Stack direction="row" spacing={1} sx={{flexWrap: 'wrap'}}>
                                                 {Object.keys(data[category] || {})
                                                     .filter(label => hiddenMetrics.has(label))
                                                     .map(label => (

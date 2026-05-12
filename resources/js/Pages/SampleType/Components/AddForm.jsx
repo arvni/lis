@@ -1,5 +1,5 @@
 import {Switch, TextField} from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 
 import {FormProvider, useFormState} from "@/Components/FormTemplate.jsx";
 import FormControlLabel from "@mui/material/FormControlLabel";

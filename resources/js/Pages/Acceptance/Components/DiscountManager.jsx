@@ -5,7 +5,7 @@ import {
     Chip,
     FormControl,
     FormHelperText,
-    Grid2 as Grid,
+    Grid as Grid,
     IconButton,
     InputAdornment,
     MenuItem,

@@ -6,7 +6,7 @@ import {
     Paper,
     Box,
     Button,
-    Grid2 as Grid,
+    Grid as Grid,
     Chip,
     IconButton,
     MenuItem,
@@ -27,8 +27,8 @@ import {useTheme} from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
@@ -346,8 +346,8 @@ const Index = () => {
                 </Tabs>
 
                 <Box sx={{p: 2, borderBottom: 1, borderColor: 'divider'}}>
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={12} sm={6}>
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
+                        <Grid size={{ xs: 12, sm: 6 }} >
                             <TextField
                                 placeholder="Search notifications..."
                                 variant="outlined"
@@ -366,7 +366,7 @@ const Index = () => {
                                 }}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }} >
                             <Box sx={{display: 'flex', justifyContent: {xs: 'flex-start', sm: 'flex-end'}, gap: 1}}>
                                 <Button
                                     variant="outlined"
@@ -424,14 +424,14 @@ const Index = () => {
 
                 {selectMode && selectedIds.length > 0 && (
                     <Box sx={{p: 2, bgcolor: 'action.selected', borderBottom: 1, borderColor: 'divider'}}>
-                        <Grid container alignItems="center" spacing={1}>
-                            <Grid item>
+  <Grid container spacing={1} sx={{alignItems: "center"}}>
+                            <Grid >
                                 <Typography variant="body2">
                                     {selectedIds.length} selected
                                 </Typography>
                             </Grid>
-                            <Grid item sx={{flexGrow: 1}}/>
-                            <Grid item>
+                            <Grid sx={{flexGrow: 1}}/>
+                            <Grid >
                                 <Button
                                     size="small"
                                     variant="outlined"
@@ -440,7 +440,7 @@ const Index = () => {
                                     {selectedIds.length === notifications.length ? "Deselect All" : "Select All"}
                                 </Button>
                             </Grid>
-                            <Grid item>
+                            <Grid >
                                 <Button
                                     size="small"
                                     variant="outlined"
@@ -450,7 +450,7 @@ const Index = () => {
                                     Mark as Read
                                 </Button>
                             </Grid>
-                            <Grid item>
+                            <Grid >
                                 <Button
                                     size="small"
                                     variant="outlined"
@@ -460,7 +460,7 @@ const Index = () => {
                                     Mark as Unread
                                 </Button>
                             </Grid>
-                            <Grid item>
+                            <Grid >
                                 <Button
                                     size="small"
                                     variant="outlined"

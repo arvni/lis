@@ -1,7 +1,7 @@
 import {useForm} from "@inertiajs/react";
 import {
     Dialog, DialogActions, DialogContent, DialogTitle,
-    Grid2 as Grid, Table, TableBody, TableHead, TableRow, TableCell,
+    Grid as Grid, Table, TableBody, TableHead, TableRow, TableCell,
     Checkbox, Button, LinearProgress, TextField, Typography, Box,
     Chip, Alert, IconButton, Tooltip, TableContainer, Paper, Card,
     CardContent, Badge, Fade, Zoom, Snackbar, Divider,
@@ -9,7 +9,7 @@ import {
 import {
     CalendarToday, Person, SelectAll, Deselect as DeselectAll,
     Search, MonetizationOn, Receipt, Close, Info, Warning,
-    CheckCircleOutline,
+    CheckCircleOutlined,
 } from "@mui/icons-material";
 import SelectSearch from "@/Components/SelectSearch.jsx";
 import {useState, useEffect, useCallback, useMemo} from "react";
@@ -239,7 +239,7 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
             <DialogTitle sx={{pb: 1}}>
                 <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                     <Box>
-                        <Typography variant="h5" fontWeight="bold">
+                        <Typography variant="h5" fontWeight="bold" component="span">
                             {title || (editMode ? "Edit Statement" : "Create New Statement")}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -276,7 +276,7 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
                                         value={data.referrer}
                                         name="referrer"
                                         required
-                                        InputProps={{startAdornment: <Person sx={{mr: 1, color: 'action.active'}}/>}}
+                                        slotProps={{ input: {startAdornment: <Person sx={{mr: 1, color: 'action.active'}}/>} }}
                                     />
 
                                     <TextField
@@ -293,8 +293,8 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
                                             inputLabel: {shrink: true},
                                             input: {
                                                 startAdornment: <CalendarToday sx={{mr: 1, color: 'action.active'}}/>,
-                                                inputProps: {max: currentMonth},
                                             },
+                                            htmlInput: {max: currentMonth},
                                         }}
                                     />
 
@@ -305,7 +305,7 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
                                             <Box>
                                                 <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1}}>
                                                     <Typography variant="subtitle2" sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                                        <CheckCircleOutline fontSize="small" color="primary"/>
+                                                        <CheckCircleOutlined fontSize="small" color="primary"/>
                                                         Selected
                                                         <Chip label={selectedCount} size="small" color="primary" sx={{ml: 0.5}}/>
                                                     </Typography>
@@ -402,7 +402,7 @@ const AddForm = ({open, defaultValue = {}, onClose, editMode = false, title}) =>
                                             size="small"
                                             fullWidth
                                             sx={{mb: 2}}
-                                            InputProps={{startAdornment: <Search sx={{mr: 1, color: 'action.active'}}/>}}
+                                            slotProps={{ input: {startAdornment: <Search sx={{mr: 1, color: 'action.active'}}/>} }}
                                         />
                                     )}
 

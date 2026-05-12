@@ -105,13 +105,13 @@ const Edit = () => {
                     <CardHeader title="Request Details"/>
                     <CardContent>
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }} >
                                 <TextField select fullWidth required label="Urgency"
                                     value={data.urgency} onChange={(e) => setData("urgency", e.target.value)}>
                                     {URGENCY_OPTIONS.map((u) => <MenuItem key={u} value={u}>{u}</MenuItem>)}
                                 </TextField>
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={12} >
                                 <TextField fullWidth multiline rows={2} label="Notes"
                                     value={data.notes} onChange={(e) => setData("notes", e.target.value)}/>
                             </Grid>
@@ -178,14 +178,14 @@ const Edit = () => {
                                                 <TextField size="small" type="number" placeholder="Qty"
                                                     value={line.qty}
                                                     onChange={(e) => updateLine(idx, "qty", e.target.value)}
-                                                    inputProps={{min: 0, step: "any"}} fullWidth
+                                                    slotProps={{ htmlInput: {min: 0, step: "any"} }} fullWidth
                                                     error={!!errors[`lines.${idx}.qty`]}/>
                                             </TableCell>
                                             <TableCell>
                                                 <TextField size="small" type="number" placeholder="0.00"
                                                     value={line.estimated_unit_price}
                                                     onChange={(e) => updateLine(idx, "estimated_unit_price", e.target.value)}
-                                                    inputProps={{min: 0, step: "any"}} fullWidth
+                                                    slotProps={{ htmlInput: {min: 0, step: "any"} }} fullWidth
                                                     error={!!errors[`lines.${idx}.estimated_unit_price`]}/>
                                             </TableCell>
                                             <TableCell>

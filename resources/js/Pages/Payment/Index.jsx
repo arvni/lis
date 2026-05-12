@@ -133,7 +133,7 @@ const PaymentIndex = () => {
         <>
             <Box sx={{ mb: 3 }}>
                 <Paper sx={{ padding: 2 }}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+  <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "center"}}>
                         <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
                             Payment Management
                         </Typography>

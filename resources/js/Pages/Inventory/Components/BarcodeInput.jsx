@@ -2,7 +2,7 @@ import {useState, useRef} from "react";
 import {InputAdornment, TextField, CircularProgress, Tooltip} from "@mui/material";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
 import axios from "axios";
 
 /**
@@ -67,9 +67,9 @@ const BarcodeInput = ({value, onChange, onFound, onNotFound, size = "small", dis
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             disabled={disabled}
-            InputProps={{
+            slotProps={{ input: {
                 endAdornment: <InputAdornment position="end">{endIcon()}</InputAdornment>,
-            }}
+            } }}
         />
     );
 };

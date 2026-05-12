@@ -6,7 +6,7 @@ import axios from "axios";
 import {
     Button,
     Container,
-    Grid2 as Grid,
+    Grid as Grid,
     FormGroup,
     CircularProgress,
     Typography,
@@ -43,7 +43,7 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
     const formattedDate = formatDate(today);
 
     const { data, setData, reset, processing, post, errors, setError } = useForm({
-        consultant: "",
+        consultant: null,
         dueDate: formattedDate,
         time: null, // Keep this but don't require it
         patient_id: patientId
@@ -128,7 +128,7 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
                 {/* Consultant Selection */}
                 <Grid size={{ xs: 12, md: 6 }}>
                     <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
-                        <Box display="flex" alignItems="center" mb={1}>
+  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
                             <PersonIcon color="primary" sx={{ mr: 1 }} />
                             <Typography variant="subtitle1" fontWeight="medium">
                                 Select Consultant
@@ -151,7 +151,7 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
                 {/* Date Selection */}
                 <Grid size={{ xs: 12, md: 6 }}>
                     <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
-                        <Box display="flex" alignItems="center" mb={1}>
+  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
                             <CalendarTodayIcon color="primary" sx={{ mr: 1 }} />
                             <Typography variant="subtitle1" fontWeight="medium">
                                 Select Date
@@ -177,7 +177,7 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
                 {(times.length > 0 || waiting) && (
                     <Grid size={{ xs: 12 }}>
                         <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
-                            <Box display="flex" alignItems="center" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
                                 <AccessTimeIcon color="primary" sx={{ mr: 1 }} />
                                 <Typography variant="subtitle1" fontWeight="medium">
                                     Available Time Slots
@@ -185,7 +185,7 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
                             </Box>
 
                             {waiting ? (
-                                <Box display="flex" justifyContent="center" alignItems="center" p={4}>
+  <Box display="flex" p={4} sx={{justifyContent: "center", alignItems: "center"}}>
                                     <CircularProgress size={40} />
                                     <Typography variant="body2" color="text.secondary" ml={2}>
                                         Loading available times...

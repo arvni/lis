@@ -20,7 +20,7 @@ import {
     Visibility as VisibilityIcon,
     Person as PersonIcon
 } from "@mui/icons-material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import AddRelative from "./AddRelative";
 import DeleteForm from "@/Components/DeleteForm";
 import {useForm} from "@inertiajs/react";
@@ -150,7 +150,7 @@ const RelativeForm = ({
                         px: 3,
                         py: 1.5
                     }}>
-                        <Grid container alignItems="center" spacing={2}>
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
                             <Grid size={{xs: 4}}>
                                 <Typography variant="subtitle2" color="text.secondary">
                                     Full Name
@@ -186,7 +186,7 @@ const RelativeForm = ({
                                         width: "100%"
                                     }}
                                 >
-                                    <Grid container alignItems="center" spacing={2} sx={{width: "100%"}}>
+  <Grid container spacing={2} sx={{alignItems: "center", width: "100%"}}>
                                         <Grid size={{xs: 4}}>
                                             <Box sx={{display: 'flex', alignItems: 'center'}}>
                                                 <Avatar
@@ -274,7 +274,7 @@ const RelativeForm = ({
                         mb: 3
                     }}
                 >
-                    <Typography variant="body1" color="text.secondary" paragraph>
+                    <Typography variant="body1" color="text.secondary" sx={{mb: 2}}>
                         No family members have been added yet.
                     </Typography>
 

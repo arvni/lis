@@ -103,12 +103,12 @@ const SelectAcceptanceDialog = ({
     return (
         <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
             <DialogTitle>
-                <Stack direction="row" alignItems="center" spacing={2}>
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                     <Avatar sx={{ bgcolor: "primary.main" }}>
                         <Assignment />
                     </Avatar>
                     <Box>
-                        <Typography variant="h6">
+                        <Typography variant="h6" component="span">
                             Select Existing Acceptance
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
@@ -123,8 +123,7 @@ const SelectAcceptanceDialog = ({
                 {loading && (
                     <Box
                         display="flex"
-                        justifyContent="center"
-                        alignItems="center"
+                        sx={{ justifyContent: "center", alignItems: "center" }}
                         py={4}
                     >
                         <CircularProgress />
@@ -191,7 +190,8 @@ const SelectAcceptanceDialog = ({
                                         primary={
                                             <Stack
                                                 direction="row"
-                                                alignItems="center"
+
+ sx={{alignItems: "center"}}
                                                 spacing={2}
                                             >
                                                 <Typography
@@ -220,7 +220,8 @@ const SelectAcceptanceDialog = ({
                                             <Box sx={{ mt: 1 }}>
                                                 <Stack
                                                     direction="row"
-                                                    alignItems="center"
+
+ sx={{alignItems: "center"}}
                                                     spacing={1}
                                                     mb={1}
                                                 >
@@ -257,8 +258,7 @@ const SelectAcceptanceDialog = ({
                                                         <Stack
                                                             direction="row"
                                                             spacing={0.5}
-                                                            flexWrap="wrap"
-                                                            gap={0.5}
+                                                            sx={{ flexWrap: "wrap", gap: 0.5 }}
                                                         >
                                                             {acceptance.acceptance_items.map(
                                                                 (item) => (
@@ -307,7 +307,7 @@ const SelectAcceptanceDialog = ({
                     }}
                     onClick={handleCreateNew}
                 >
-                    <Stack direction="row" alignItems="center" spacing={2}>
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                         <Avatar sx={{ bgcolor: "success.main" }}>
                             <Add />
                         </Avatar>

@@ -257,7 +257,7 @@ const Show = ({
                                         Edit
                                     </Button>
                                 </Tooltip> : null,
-                            canApprove && !report.approver ? <>
+                            canApprove && !report.approver ? <React.Fragment key="approve-reject">
                                 <Tooltip title="Reject Report">
                                     <Button
                                         size="small"
@@ -279,7 +279,7 @@ const Show = ({
                                         Approve
                                     </Button>
                                 </Tooltip>
-                            </> : null,
+                            </React.Fragment> : null,
                             canUnpublish && report.publisher ?
                                 <Tooltip title="Unpublish Report">
                                     <Button
@@ -307,7 +307,7 @@ const Show = ({
                             sx={{mb: 2, borderRadius: 1, overflow: 'hidden'}}
                         >
                             <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                                <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                                     <MedicalServices color="primary"/>
                                     <Typography variant="h6">Consultation</Typography>
                                 </Stack>
@@ -376,7 +376,7 @@ const Show = ({
                 }}
             >
                 <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                    <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                         <Description color="primary"/>
                         <Typography variant="h6">Report Content</Typography>
                     </Stack>
@@ -411,8 +411,8 @@ const Show = ({
                     <Box sx={{mt: 2}}>
                         <Stack spacing={2} divider={<Divider flexItem/>}>
                             {/* Reported By */}
-                            <Stack direction={{xs: 'column', sm: 'row'}} spacing={2} alignItems={{sm: 'center'}}
-                                   justifyContent="space-between">
+                            <Stack direction={{xs: 'column', sm: 'row'}} spacing={2}
+ sx={{justifyContent: "space-between", alignItems: {sm: 'center'}}}>
                                 <Typography>
                                     Reported
                                     by <strong>{report.reporter.name}</strong> at {formatDate(report.reported_at)}
@@ -432,8 +432,8 @@ const Show = ({
 
                             {/* Approved By */}
                             {report.approver && (
-                                <Stack direction={{xs: 'column', sm: 'row'}} spacing={2} alignItems={{sm: 'center'}}
-                                       justifyContent="space-between">
+                                <Stack direction={{xs: 'column', sm: 'row'}} spacing={2}
+ sx={{justifyContent: "space-between", alignItems: {sm: 'center'}}}>
                                     <Typography>
                                         Approved
                                         by <strong>{report.approver.name}</strong> at {formatDate(report.approved_at)}
@@ -453,8 +453,8 @@ const Show = ({
                             )}
 
                             {/* Published By */}
-                            <Stack direction={{xs: 'column', sm: 'row'}} spacing={2} alignItems={{sm: 'center'}}
-                                   justifyContent="space-between">
+                            <Stack direction={{xs: 'column', sm: 'row'}} spacing={2}
+ sx={{justifyContent: "space-between", alignItems: {sm: 'center'}}}>
                                 {report.publisher && (<Typography>
                                     Published
                                     by <strong>{report.publisher.name}</strong> at {formatDate(report.published_at)}
@@ -504,7 +504,7 @@ const Show = ({
                 }}
             >
                 <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                    <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                         <MedicalServices color="primary"/>
                         <Typography variant="h6">Clinical Report</Typography>
                     </Stack>

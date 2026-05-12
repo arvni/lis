@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo, useCallback} from "react";
+import React, {useState, useMemo, useCallback, useEffect} from "react";
 import {
     Box,
     Tab,
@@ -47,27 +47,25 @@ import Avatar from "@mui/material/Avatar";
 // TabPanel component with minHeight via sx prop and optional loading state
 function TabPanel(props) {
     const {children, value, index, loading, ...other} = props;
+    const isActive = value === index;
 
     return (
         <div
             role="tabpanel"
-            hidden={value !== index}
+            hidden={!isActive}
             id={`patient-tabpanel-${index}`}
             aria-labelledby={`patient-tab-${index}`}
             {...other}
-            style={{position: 'relative'}} // Needed for absolute positioning of loader
+            style={{position: 'relative'}}
         >
-            {/* Add a loading indicator */}
             {loading && (
                 <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200, py: 3}}>
                     <CircularProgress/>
                 </Box>
             )}
-            {/* Fade in content when not loading */}
-            <Fade in={value === index && !loading}>
+            <Fade in={isActive && !loading}>
                 <Box sx={{py: 3, minHeight: 200}}>
-                    {/* Only render children when not loading to prevent rendering with incomplete data */}
-                    {!loading ? children : null}
+                    {(isActive && !loading) ? children : null}
                 </Box>
             </Fade>
         </div>
@@ -578,7 +576,7 @@ const Show = ({
                             title="Consultations"
                             items={consultations || []}
                             columns={consultationsColumns}
-                            defaultExpanded={true}
+                            defaultExpanded
                             loading={loadingTabs['consultations']} // Pass loading state
                             pageSize={5}
                             onRefresh={() => { // Fixed refresh action
@@ -604,7 +602,7 @@ const Show = ({
                             title="Acceptances"
                             items={acceptances || []}
                             columns={acceptanceColumns}
-                            defaultExpanded={true}
+                            defaultExpanded
                             loading={loadingTabs['acceptances']}
                             pageSize={5}
                             emptyMessage="No acceptances found for this patient"
@@ -619,7 +617,7 @@ const Show = ({
                             title="Invoices"
                             items={invoices || []}
                             columns={invoiceColumns}
-                            defaultExpanded={true}
+                            defaultExpanded
                             loading={loadingTabs['invoices']}
                             pageSize={5}
                             emptyMessage="No invoices found for this patient"
@@ -634,7 +632,7 @@ const Show = ({
                             title="Payments"
                             items={payments || []}
                             columns={paymentColumns}
-                            defaultExpanded={true}
+                            defaultExpanded
                             loading={loadingTabs['payments']}
                             pageSize={5}
                             emptyMessage="No payments found for this patient"

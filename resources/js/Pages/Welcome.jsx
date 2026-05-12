@@ -7,10 +7,10 @@ import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
-import {LoadingButton} from "@mui/lab";
+import Button from '@mui/material/Button';
 import {useSnackbar} from "notistack";
 import {Head, router} from "@inertiajs/react";
 import {useForm} from "@inertiajs/react";
@@ -84,16 +84,6 @@ const theme = createTheme({
                     '& .MuiOutlinedInput-root': {
                         borderRadius: '8px',
                     },
-                },
-            },
-        },
-        MuiLoadingButton: {
-            styleOverrides: {
-                root: {
-                    textTransform: 'none',
-                    borderRadius: '8px',
-                    padding: '12px 22px',
-                    fontWeight: 500,
                 },
             },
         },
@@ -336,7 +326,7 @@ export default function Welcome(props) {
                                             Forgot password?
                                         </Link>
                                     </Box>
-                                    <LoadingButton
+                                    <Button
                                         loading={processing}
                                         type="submit"
                                         fullWidth
@@ -345,7 +335,7 @@ export default function Welcome(props) {
                                         size="large"
                                     >
                                         Sign In
-                                    </LoadingButton>
+                                    </Button>
                                 </Box>
                             </Container>
                         </Box>

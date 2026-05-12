@@ -21,11 +21,11 @@ import PaymentIcon from "@mui/icons-material/Payment";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
 import SendIcon from "@mui/icons-material/Send";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlined";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutlined";
 import {Autocomplete} from "@mui/material";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
@@ -466,7 +466,7 @@ const Show = () => {
 
             <Grid container spacing={3}>
                 {/* Left: info + lines + receipts */}
-                <Grid item xs={12} md={7}>
+                <Grid size={{ xs: 12, md: 7 }} >
                     {pr.workflow_template_id && (
                         <WorkflowProgress approvals={approvals ?? []} canAct={canActOnWorkflow} prId={pr.id} users={users}/>
                     )}
@@ -492,13 +492,13 @@ const Show = () => {
                         />
                         <CardContent>
                             <Grid container spacing={2}>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }} >
                                     <InfoRow label="Requested By">{pr.requested_by?.name}</InfoRow>
                                     <InfoRow label="Approved By">{pr.approved_by?.name}</InfoRow>
                                     <InfoRow label="Workflow">{pr.workflow_template?.name ?? "— none —"}</InfoRow>
                                     <InfoRow label="Supplier">{pr.supplier?.name}</InfoRow>
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }} >
                                     <InfoRow label="PO Number">{pr.po_number}</InfoRow>
                                     <InfoRow label="PO File" chipContent={poDocument ? <FileChip document={poDocument} onClick={() => setViewingDoc(poDocument)}/> : null}/>
                                     <InfoRow label="Payment Date">{pr.payment_date}</InfoRow>
@@ -603,7 +603,7 @@ const Show = () => {
                 </Grid>
 
                 {/* Right: timeline */}
-                <Grid item xs={12} md={5}>
+                <Grid size={{ xs: 12, md: 5 }} >
                     <Card>
                         <CardHeader title="Timeline"/>
                         <CardContent sx={{p: 0}}>
@@ -670,8 +670,7 @@ const Show = () => {
                         error={!!orderForm.errors.supplier_id}
                     />
                     <TextField size="small" fullWidth label="PO File (PDF/Image)"
-                        type="file" InputLabelProps={{shrink: true}}
-                        inputProps={{accept: "application/pdf,image/*"}}
+                        type="file" slotProps={{ inputLabel: {shrink: true}, htmlInput: {accept: "application/pdf,image/*"} }}
                         onChange={(e) => orderForm.setData("po_file", e.target.files[0] ?? null)}
                         helperText="Optional — attach the PO document"/>
                 </DialogContent>
@@ -689,7 +688,7 @@ const Show = () => {
                 <DialogTitle>Record Payment</DialogTitle>
                 <DialogContent sx={{display: "flex", flexDirection: "column", gap: 2, pt: 2}}>
                     <TextField size="small" fullWidth required type="date" label="Payment Date" sx={{mt:2}}
-                        InputLabelProps={{shrink: true}}
+                        slotProps={{ inputLabel: {shrink: true} }}
                         value={payForm.data.payment_date}
                         onChange={(e) => payForm.setData("payment_date", e.target.value)}
                         error={!!payForm.errors.payment_date}/>
@@ -697,8 +696,7 @@ const Show = () => {
                         value={payForm.data.payment_reference}
                         onChange={(e) => payForm.setData("payment_reference", e.target.value)}/>
                     <TextField size="small" fullWidth label="Payment Document"
-                        type="file" InputLabelProps={{shrink: true}}
-                        inputProps={{accept: "application/pdf,image/*"}}
+                        type="file" slotProps={{ inputLabel: {shrink: true}, htmlInput: {accept: "application/pdf,image/*"} }}
                         onChange={(e) => payForm.setData("payment_file", e.target.files[0] ?? null)}
                         helperText="Optional — attach receipt or bank transfer"/>
                 </DialogContent>
@@ -715,13 +713,13 @@ const Show = () => {
             <Dialog open={shipDialog} onClose={() => setShipDialog(false)} maxWidth="sm" fullWidth>
                 <DialogTitle>Mark as Shipped</DialogTitle>
                 <DialogContent sx={{display: "flex", flexDirection: "column", gap: 2, pt: 2}}>
-                    <TextField size="small" fullWidth type="date" label="Shipment Date" InputLabelProps={{shrink: true}}
+                    <TextField size="small" fullWidth type="date" label="Shipment Date" slotProps={{ inputLabel: {shrink: true} }}
                         value={shipForm.data.shipment_date}  sx={{mt:2}}
                         onChange={(e) => shipForm.setData("shipment_date", e.target.value)}/>
                     <TextField size="small" fullWidth label="Tracking Number"
                         value={shipForm.data.tracking_number}
                         onChange={(e) => shipForm.setData("tracking_number", e.target.value)}/>
-                    <TextField size="small" fullWidth type="date" label="Expected Delivery" InputLabelProps={{shrink: true}}
+                    <TextField size="small" fullWidth type="date" label="Expected Delivery" slotProps={{ inputLabel: {shrink: true} }}
                         value={shipForm.data.expected_delivery_date}
                         onChange={(e) => shipForm.setData("expected_delivery_date", e.target.value)}/>
                 </DialogContent>

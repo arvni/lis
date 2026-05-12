@@ -1,24 +1,22 @@
-import React, {useState, useMemo, useEffect, useCallback, useRef} from 'react';
+import React, {useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense} from 'react';
 import {Head, Link, router, usePage} from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader.jsx';
 import SelectSearch from '@/Components/SelectSearch.jsx';
 import axios from 'axios';
 import {
-    Box, Card, CardContent, Chip, FormControl, Grid2 as Grid,
+    Box, Card, CardContent, Chip, FormControl, Grid as Grid,
     InputLabel, LinearProgress, MenuItem, Paper, Select, Stack,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     TextField, Tooltip, Typography, alpha, useTheme, Button, Divider,
     Pagination, Skeleton, CircularProgress,
 } from '@mui/material';
 import {
-    CheckCircle, FlashOn, Warning, ErrorOutline, FilterList,
+    CheckCircle, FlashOn, Warning, ErrorOutlined as ErrorOutline, FilterList,
     BarChart as BarChartIcon, Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid,
-    Tooltip as ReTooltip, ResponsiveContainer, Cell, Legend,
-} from 'recharts';
+
+const TATCharts = lazy(() => import('./TATCharts'));
 
 // ── Summary card ──────────────────────────────────────────────────────────────
 const SummaryCard = ({title, value, icon: Icon, color, subtitle}) => {
@@ -26,7 +24,7 @@ const SummaryCard = ({title, value, icon: Icon, color, subtitle}) => {
     return (
         <Card elevation={2} sx={{borderRadius: 2, borderTop: `4px solid ${theme.palette[color]?.main ?? theme.palette.grey[400]}`, height: '100%'}}>
             <CardContent>
-                <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+  <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "flex-start"}}>
                     <Box>
                         <Typography variant="body2" color="text.secondary" gutterBottom>{title}</Typography>
                         <Typography variant="h3" fontWeight="bold" color={`${color}.main`}>{value ?? '—'}</Typography>
@@ -74,23 +72,6 @@ const PRESETS = [
     {key: 'last_3_months', label: 'Last 3 Months'},
 ];
 
-const AnalyticsTooltip = ({active, payload}) => {
-    if (!active || !payload?.length) return null;
-    const d = payload[0].payload;
-    return (
-        <Paper elevation={3} sx={{p: 1.5, minWidth: 200}}>
-            <Typography variant="body2" fontWeight="bold" gutterBottom>{d.test_name}</Typography>
-            <Typography variant="caption" display="block">Avg: <b>{d.avg_days} working days</b></Typography>
-            <Typography variant="caption" display="block">Min: {d.min_days}d — Max: {d.max_days}d</Typography>
-            <Typography variant="caption" display="block">Count: {d.count} reports</Typography>
-            {d.target_days != null && (
-                <Typography variant="caption" display="block" color={d.on_target ? 'success.main' : 'error.main'}>
-                    Target: {d.target_days}d — {d.on_target ? '✓ On target' : '✗ Over target'}
-                </Typography>
-            )}
-        </Paper>
-    );
-};
 
 // ── Row skeleton ──────────────────────────────────────────────────────────────
 const SkeletonRows = ({count = 5, cols = 7}) => (
@@ -230,7 +211,7 @@ const Dashboard = () => {
 
                 {/* ── Active items filters ──────────────────────────────────── */}
                 <Paper elevation={1} sx={{p: 2, mb: 2, borderRadius: 2}}>
-                    <Stack direction="row" spacing={1} alignItems="center" mb={1.5}>
+  <Stack direction="row" spacing={1} mb={1.5} sx={{alignItems: "center"}}>
                         <FilterList fontSize="small" color="action"/>
                         <Typography variant="subtitle2" color="text.secondary">Active Items Filters</Typography>
                     </Stack>
@@ -262,10 +243,10 @@ const Dashboard = () => {
                             />
                         </Grid>
                         <Grid size={{xs: 12, sm: 6, md: 3}}>
-                            <TextField label="From" type="date" size="small" fullWidth InputLabelProps={{shrink: true}} value={filters.date_from} onChange={(e) => applyFilters({date_from: e.target.value})}/>
+                            <TextField label="From" type="date" size="small" fullWidth slotProps={{ inputLabel: {shrink: true} }} value={filters.date_from} onChange={(e) => applyFilters({date_from: e.target.value})}/>
                         </Grid>
                         <Grid size={{xs: 12, sm: 6, md: 3}}>
-                            <TextField label="To" type="date" size="small" fullWidth InputLabelProps={{shrink: true}} value={filters.date_to} onChange={(e) => applyFilters({date_to: e.target.value})}/>
+                            <TextField label="To" type="date" size="small" fullWidth slotProps={{ inputLabel: {shrink: true} }} value={filters.date_to} onChange={(e) => applyFilters({date_to: e.target.value})}/>
                         </Grid>
                     </Grid>
                 </Paper>
@@ -323,14 +304,14 @@ const Dashboard = () => {
                                                     <Typography variant="caption" color="text.secondary">{row.patient_name}</Typography>
                                                 </TableCell>
                                                 <TableCell sx={{maxWidth: 180}}>
-                                                    <Stack direction="row" flexWrap="wrap" gap={0.5}>
+                                                    <Stack direction="row" gap={0.5} sx={{flexWrap: 'wrap'}}>
                                                         {(row.tests ?? []).map((t, i) => (
                                                             <Chip key={i} label={t} size="small" variant="outlined" sx={{fontSize: '0.65rem', height: 20}}/>
                                                         ))}
                                                     </Stack>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Stack direction="row" flexWrap="wrap" gap={0.5}>
+                                                    <Stack direction="row" gap={0.5} sx={{flexWrap: 'wrap'}}>
                                                         {(row.sections ?? []).length === 0 ? (
                                                             <Typography variant="body2" color="text.secondary">—</Typography>
                                                         ) : (row.sections).map((s) => (
@@ -351,7 +332,7 @@ const Dashboard = () => {
                                                 <TableCell>
                                                     {row.deadline ? (
                                                         <Tooltip title={`${row.elapsed_working_days}d elapsed / ${row.max_tat}d TAT · ${row.active_items_count} pending test(s)`}>
-                                                            <Stack direction="row" spacing={0.5} alignItems="center">
+  <Stack direction="row" spacing={0.5} sx={{alignItems: "center"}}>
                                                                 {row.is_breached && <ErrorOutline fontSize="small" color="error"/>}
                                                                 <Typography variant="body2" color={row.is_breached ? 'error.main' : 'text.primary'} fontWeight={row.is_breached ? 'bold' : 'normal'}>
                                                                     {new Date(row.deadline).toLocaleDateString()}
@@ -390,7 +371,7 @@ const Dashboard = () => {
                 <Divider sx={{mb: 4}}/>
 
                 {/* ── Analytics section ─────────────────────────────────────── */}
-                <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+  <Stack direction="row" spacing={1} mb={2} sx={{alignItems: "center"}}>
                     <BarChartIcon color="primary"/>
                     <Typography variant="h6" fontWeight="bold">Avg TAT by Test</Typography>
                     {analyticsDates && !analyticsLoading && (
@@ -412,9 +393,9 @@ const Dashboard = () => {
 
                 {/* Date presets + filters */}
                 <Paper elevation={1} sx={{p: 2, mb: 2, borderRadius: 2}}>
-                    <Grid container spacing={2} alignItems="center">
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
                         <Grid size={{xs: 12}}>
-                            <Stack direction="row" flexWrap="wrap" gap={1}>
+                            <Stack direction="row" gap={1} sx={{flexWrap: 'wrap'}}>
                                 {PRESETS.map(p => (
                                     <Button key={p.key} size="small"
                                         variant={af.a_preset === p.key ? 'contained' : 'outlined'}
@@ -440,98 +421,24 @@ const Dashboard = () => {
                             />
                         </Grid>
                         <Grid size={{xs: 12, sm: 4, md: 3}}>
-                            <TextField label="Custom From" type="date" size="small" fullWidth InputLabelProps={{shrink: true}} value={af.a_from}
+                            <TextField label="Custom From" type="date" size="small" fullWidth slotProps={{ inputLabel: {shrink: true} }} value={af.a_from}
                                 onChange={(e) => applyAnalytics({a_from: e.target.value, a_preset: ''})}/>
                         </Grid>
                         <Grid size={{xs: 12, sm: 4, md: 3}}>
-                            <TextField label="Custom To" type="date" size="small" fullWidth InputLabelProps={{shrink: true}} value={af.a_to}
+                            <TextField label="Custom To" type="date" size="small" fullWidth slotProps={{ inputLabel: {shrink: true} }} value={af.a_to}
                                 onChange={(e) => applyAnalytics({a_to: e.target.value, a_preset: ''})}/>
                         </Grid>
                     </Grid>
                 </Paper>
 
-                {/* Bar chart */}
-                <Paper elevation={1} sx={{p: 2, mb: 3, borderRadius: 2}}>
-                    {analyticsLoading ? (
-                        <Box>
-                            <Skeleton variant="rectangular" height={320} sx={{borderRadius: 1}}/>
-                        </Box>
-                    ) : chartData.length === 0 ? (
-                        <Box sx={{py: 6, textAlign: 'center'}}>
-                            <Typography color="text.secondary">No published reports in this period.</Typography>
-                        </Box>
-                    ) : (
-                        <>
-                            <ResponsiveContainer width="100%" height={320}>
-                                <BarChart data={chartData} margin={{top: 8, right: 24, left: 0, bottom: 60}}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false}/>
-                                    <XAxis dataKey="short_name" angle={-35} textAnchor="end" tick={{fontSize: 12}} interval={0}/>
-                                    <YAxis unit="d" tick={{fontSize: 12}} label={{value: 'Working Days', angle: -90, position: 'insideLeft', offset: 10}}/>
-                                    <ReTooltip content={<AnalyticsTooltip/>}/>
-                                    <Legend verticalAlign="top"/>
-                                    <Bar dataKey="avg_days" name="Avg TAT (working days)" radius={[4, 4, 0, 0]}>
-                                        {chartData.map((entry, i) => (
-                                            <Cell key={i} fill={
-                                                entry.on_target === false ? theme.palette.error.main
-                                                : entry.on_target === true ? theme.palette.success.main
-                                                : theme.palette.primary.main
-                                            }/>
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                            <Stack direction="row" spacing={2} justifyContent="center" mt={1}>
-                                <Stack direction="row" spacing={0.5} alignItems="center"><Box sx={{width: 12, height: 12, borderRadius: 1, bgcolor: 'success.main'}}/><Typography variant="caption">On target</Typography></Stack>
-                                <Stack direction="row" spacing={0.5} alignItems="center"><Box sx={{width: 12, height: 12, borderRadius: 1, bgcolor: 'error.main'}}/><Typography variant="caption">Over target</Typography></Stack>
-                                <Stack direction="row" spacing={0.5} alignItems="center"><Box sx={{width: 12, height: 12, borderRadius: 1, bgcolor: 'primary.main'}}/><Typography variant="caption">No target set</Typography></Stack>
-                            </Stack>
-                        </>
-                    )}
-                </Paper>
-
-                {/* Analytics table */}
-                {!analyticsLoading && analyticsData.length > 0 && (
-                    <Paper elevation={1} sx={{borderRadius: 2, overflow: 'hidden'}}>
-                        <Box sx={{p: 2, borderBottom: `1px solid ${theme.palette.divider}`}}>
-                            <Typography variant="subtitle1" fontWeight="bold">Details ({analyticsData.length} tests)</Typography>
-                        </Box>
-                        <TableContainer>
-                            <Table size="small">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Test</TableCell>
-                                        <TableCell align="right">Reports</TableCell>
-                                        <TableCell align="right">Avg (days)</TableCell>
-                                        <TableCell align="right">Min (days)</TableCell>
-                                        <TableCell align="right">Max (days)</TableCell>
-                                        <TableCell align="right">Target (days)</TableCell>
-                                        <TableCell align="center">Status</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {analyticsData.map((row) => (
-                                        <TableRow key={row.test_id} sx={{'&:hover': {bgcolor: alpha(theme.palette.primary.main, 0.04)}}}>
-                                            <TableCell><Typography variant="body2">{row.test_name}</Typography></TableCell>
-                                            <TableCell align="right">{row.count}</TableCell>
-                                            <TableCell align="right"><Typography variant="body2" fontWeight="medium">{row.avg_days}</Typography></TableCell>
-                                            <TableCell align="right" sx={{color: 'text.secondary'}}>{row.min_days}</TableCell>
-                                            <TableCell align="right" sx={{color: 'text.secondary'}}>{row.max_days}</TableCell>
-                                            <TableCell align="right">{row.target_days ?? '—'}</TableCell>
-                                            <TableCell align="center">
-                                                {row.on_target === null
-                                                    ? <Chip label="No target" size="small" variant="outlined"/>
-                                                    : row.on_target
-                                                        ? <Chip label="On target" size="small" color="success" variant="filled"/>
-                                                        : <Chip label="Over target" size="small" color="error" variant="filled"/>
-                                                }
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Paper>
-                )}
+                {/* Bar chart + analytics table (lazy-loaded) */}
+                <Suspense fallback={<Skeleton variant="rectangular" height={320} sx={{borderRadius: 1, mb: 3}}/>}>
+                    <TATCharts
+                        chartData={chartData}
+                        analyticsLoading={analyticsLoading}
+                        analyticsData={analyticsData}
+                    />
+                </Suspense>
             </Box>
         </>
     );

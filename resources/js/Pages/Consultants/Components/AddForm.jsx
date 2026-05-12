@@ -7,7 +7,7 @@ import {
     DialogActions,
     Button,
     TextField,
-    Grid2 as Grid,
+    Grid as Grid,
     CircularProgress,
     Typography,
     Divider,
@@ -252,7 +252,7 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
                     color: 'white',
                     borderRadius: '8px 8px 0 0'
                 }}>
-                    <Typography variant="h6" sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                    <Typography variant="h6" sx={{display: 'flex', alignItems: 'center', gap: 1}} component="span">
                         <EventNoteIcon/> Add New Time Slot
                     </Typography>
                     <Tooltip title="Close">

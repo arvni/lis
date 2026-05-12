@@ -1,5 +1,5 @@
 import { TextField } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 
 import { FormProvider, useFormState } from "@/Components/FormTemplate.jsx";
 
@@ -31,7 +31,7 @@ const FormContent = () => {
 
     return (
         <>
-            <Grid xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }} >
                 <TextField
                     label="Title"
                     name="name"
@@ -45,7 +45,7 @@ const FormContent = () => {
                     disabled={processing}
                 />
             </Grid>
-            <Grid xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }} >
                 <TextField
                     label="Abbreviation"
                     name="abbr"

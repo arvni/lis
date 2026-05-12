@@ -52,6 +52,11 @@ const Index = () => {
             only: ["reportTemplates", "status", "success", "requestInputs"],
         });
     }, [])
+    const handleCloseAddForm = useCallback(() => {
+        setReportTemplate(null);
+        setOpenAddForm(false);
+    }, []);
+
     const handleCloseDeleteForm = useCallback(() => {
         setReportTemplate(null);
         if (openDeleteForm)
@@ -123,7 +128,7 @@ const Index = () => {
                                            disAgreeCB={handleCloseDeleteForm}
                                            openDelete={openDeleteForm}/>}
             {openAddForm && <AddForm open={openAddForm}
-                                     onClose={handleCloseDeleteForm}
+                                     onClose={handleCloseAddForm}
                                      defaultValue={reportTemplate}/>}
         </>);
 }

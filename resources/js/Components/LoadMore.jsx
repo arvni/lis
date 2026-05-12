@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
     Accordion,
     AccordionActions,
@@ -48,17 +48,16 @@ const LoadMore = ({
     const theme = useTheme();
     const [expanded, setExpanded] = useState(defaultExpanded);
     const [pageModel, setPageModel] = useState({ pageSize, page: 0 });
-    const [gridReady, setGridReady] = useState(false);
+    const [gridReady, setGridReady] = useState(defaultExpanded);
 
-    // Set grid as ready after a short delay to ensure smooth accordion animation
-    useEffect(() => {
-        if (expanded) {
-            const timer = setTimeout(() => setGridReady(true), 150);
-            return () => clearTimeout(timer);
-        } else {
-            setGridReady(false);
-        }
-    }, [expanded]);
+    const uniqueItems = useMemo(() => {
+        const seen = new Set();
+        return items.filter(item => {
+            if (seen.has(item.id)) return false;
+            seen.add(item.id);
+            return true;
+        });
+    }, [items]);
 
     // Handle accordion expansion state
     const handleChange = (_, isExpanded) => {
@@ -88,6 +87,12 @@ const LoadMore = ({
             onChange={handleChange}
             defaultExpanded={defaultExpanded}
             elevation={2}
+            slotProps={{
+                transition: {
+                    onEntered: () => setGridReady(true),
+                    onExited: () => setGridReady(false),
+                }
+            }}
             sx={{
                 border: `1px solid ${theme.palette.divider}`,
                 borderRadius: 1,
@@ -131,6 +136,7 @@ const LoadMore = ({
                     {onRefresh && (
                         <Tooltip title="Refresh data">
                             <IconButton
+                                component="span"
                                 size="small"
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -161,7 +167,7 @@ const LoadMore = ({
                 ) : (
                     gridReady && (
                         <DataGrid
-                            rows={items}
+                            rows={uniqueItems}
                             columns={columns}
                             autoHeight
                             disableColumnMenu

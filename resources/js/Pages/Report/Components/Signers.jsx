@@ -201,7 +201,7 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
                         borderBottom: `1px solid ${theme.palette.divider}`,
                     }}
                 >
-                    <Stack direction="row" alignItems="center" spacing={2}>
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                         <Typography variant="h6" component="h2">
                             Signers
                         </Typography>
@@ -288,7 +288,7 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
                                                 }}
                                             >
                                                 <TableCell>
-                                                    <Stack direction="row" spacing={1} alignItems="center">
+  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                                                         {onChange && editable && (
                                                             <Stack direction="column" spacing={0.5}>
                                                                 <Tooltip title="Move Up" placement="left">

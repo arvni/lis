@@ -25,9 +25,8 @@ const PageHeader = ({title, actions, subtitle, icon}) => {
             >
                 <Stack
                     direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
                     spacing={2}
+                    sx={{justifyContent: "space-between", alignItems: "center"}}
                 >
                     <Box sx={{p: 2, pl: 3}}>
                         {typeof title === "string" ? (
@@ -56,6 +55,7 @@ const PageHeader = ({title, actions, subtitle, icon}) => {
                                 </Typography>
                                 {subtitle && (
                                     <Typography
+                                        component="div"
                                         variant="body2"
                                         color="text.secondary"
                                         sx={{mt: 0.5}}
@@ -73,9 +73,7 @@ const PageHeader = ({title, actions, subtitle, icon}) => {
                         <Stack
                             direction="row"
                             spacing={2}
-                            flexWrap="wrap"
-                            alignItems="center"
-                            sx={{py: 1}}
+                            sx={{py: 1, flexWrap: "wrap", alignItems: "center"}}
                         >
                             {actions}
                         </Stack>
@@ -88,7 +86,7 @@ const PageHeader = ({title, actions, subtitle, icon}) => {
 
 PageHeader.propTypes = {
     title: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
-    subtitle: PropTypes.string,
+    subtitle: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
     actions: PropTypes.node,
     icon: PropTypes.node,
 };

@@ -143,8 +143,8 @@ const Filter = ({ defaultValues, onFilter }) => {
 
             {/* Basic search - always visible */}
             <form onSubmit={handleSubmit}>
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} md={expanded ? 12 : 4}>
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
+                    <Grid size={{ xs: 12, md: expanded ? 12 : 4 }} >
                         <TextField
                             name="name"
                             label="Search by title"
@@ -173,7 +173,7 @@ const Filter = ({ defaultValues, onFilter }) => {
 
                     {!expanded && (
                         <>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }} >
                                 <FormControl fullWidth variant="outlined">
                                     <InputLabel id="active-label">Status</InputLabel>
                                     <Select
@@ -200,7 +200,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                                 </FormControl>
                             </Grid>
 
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }} >
                                 <FormControl fullWidth variant="outlined">
                                     <InputLabel id="type-label">Offer Type</InputLabel>
                                     <Select
@@ -231,12 +231,12 @@ const Filter = ({ defaultValues, onFilter }) => {
 
                     {expanded && (
                         <>
-                            <Grid item xs={12}>
+                            <Grid size={12} >
                                 <Divider sx={{ my: 2 }} />
                                 <Typography variant="subtitle2" gutterBottom>Advanced Filters</Typography>
                             </Grid>
 
-                            <Grid item xs={12} md={3}>
+                            <Grid size={{ xs: 12, md: 3 }} >
                                 <FormControl fullWidth variant="outlined">
                                     <InputLabel id="active-label">Status</InputLabel>
                                     <Select
@@ -263,7 +263,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                                 </FormControl>
                             </Grid>
 
-                            <Grid item xs={12} md={3}>
+                            <Grid size={{ xs: 12, md: 3 }} >
                                 <FormControl fullWidth variant="outlined">
                                     <InputLabel id="type-label">Offer Type</InputLabel>
                                     <Select
@@ -290,7 +290,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                                 </FormControl>
                             </Grid>
 
-                            <Grid item xs={12} md={3}>
+                            <Grid size={{ xs: 12, md: 3 }} >
                                 <TextField
                                     name="amount_min"
                                     label="Min Amount"
@@ -299,11 +299,11 @@ const Filter = ({ defaultValues, onFilter }) => {
                                     type="number"
                                     value={filters.amount_min}
                                     onChange={handleChange}
-                                    inputProps={{ min: 0 }}
+                                    slotProps={{ htmlInput: { min: 0 } }}
                                 />
                             </Grid>
 
-                            <Grid item xs={12} md={3}>
+                            <Grid size={{ xs: 12, md: 3 }} >
                                 <TextField
                                     name="amount_max"
                                     label="Max Amount"
@@ -316,7 +316,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }} >
                                 <TextField
                                     label="Start Date From"
                                     name="date_start"
@@ -331,7 +331,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }} >
                                 <TextField
                                     label="End Date To"
                                     name="date_end"
@@ -346,7 +346,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }} >
                                 <SelectSearch
                                     filterSelectedOptions
                                     value={filters.tests}
@@ -361,7 +361,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }} >
                                 <SelectSearch
                                     filterSelectedOptions
                                     value={filters.referrers}
@@ -378,7 +378,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                         </>
                     )}
 
-                    <Grid item xs={12}>
+                    <Grid size={12} >
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, gap: 1 }}>
                             <Button
                                 variant="outlined"

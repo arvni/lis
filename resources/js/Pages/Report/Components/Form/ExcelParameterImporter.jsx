@@ -171,7 +171,7 @@ const ExcelParameterImporter = ({ onImport, currentValues = {} }) => {
 
                 <DialogContent>
                     <Box sx={{ mb: 3 }}>
-                        <Typography variant="body2" color="text.secondary" paragraph>
+                        <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
                             Upload an Excel file containing parameter values. The file should have:
                         </Typography>
                         <ul>

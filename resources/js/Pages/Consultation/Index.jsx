@@ -1,7 +1,7 @@
 import TableLayout from "@/Layouts/TableLayout";
 import DeleteForm from "@/Components/DeleteForm";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import Filter from "./Components/Filter";
+import Filter from "./Components/IndexFilter";
 import PageHeader from "@/Components/PageHeader.jsx";
 import { router, useForm, usePage } from "@inertiajs/react";
 import { useState, useMemo } from "react";
@@ -18,7 +18,6 @@ import {
 
 // Material UI icons
 import {
-    RemoveRedEye,
     DeleteOutlined,
     MedicalServicesOutlined,
     AccessTimeOutlined,
@@ -125,21 +124,23 @@ const Index = () => {
             display:"flex",
             flex: 0.5,
             renderCell: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Tooltip title={params.value || "Unknown"} placement="top">
-                        <Typography
-                            variant="body2"
-                            sx={{
-                                fontWeight: 500,
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap'
-                            }}
-                        >
-                            {params.value || "Unknown"}
-                        </Typography>
-                    </Tooltip>
-                </Box>
+                <Tooltip title="View consultation" placement="top">
+                    <Typography
+                        variant="body2"
+                        onClick={(e) => { e.stopPropagation(); show(params.row.id)(); }}
+                        sx={{
+                            fontWeight: 500,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            color: 'primary.main',
+                            cursor: 'pointer',
+                            '&:hover': { textDecoration: 'underline' },
+                        }}
+                    >
+                        {params.value || "Unknown"}
+                    </Typography>
+                </Tooltip>
             )
         },
         {
@@ -243,32 +244,12 @@ const Index = () => {
             sortable: false,
             renderCell: (params) => (
                 <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Tooltip title="View Details">
-                        <IconButton
-                            onClick={() => show(params.row.id)()}
-                            size="small"
-                            color="primary"
-                            sx={{
-                                '&:hover': {
-                                    backgroundColor: 'rgba(25, 118, 210, 0.08)'
-                                }
-                            }}
-                        >
-                            <RemoveRedEye fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-
                     {params.row.status?.toLowerCase() === 'waiting' && (
                         <Tooltip title="Delete Consultation">
                             <IconButton
-                                onClick={() => deleteConsultation(params.row)()}
+                                onClick={(e) => { e.stopPropagation(); deleteConsultation(params.row)(); }}
                                 size="small"
                                 color="error"
-                                sx={{
-                                    '&:hover': {
-                                        backgroundColor: 'rgba(211, 47, 47, 0.08)'
-                                    }
-                                }}
                             >
                                 <DeleteOutlined fontSize="small" />
                             </IconButton>

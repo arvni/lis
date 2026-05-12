@@ -1,12 +1,12 @@
 import React, {useCallback} from "react";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import SelectSearch from "@/Components/SelectSearch";
 import {Box, Typography, Tooltip, CircularProgress} from "@mui/material";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import PhoneIcon from "@mui/icons-material/Phone";
@@ -111,7 +111,6 @@ const DoctorSection = ({doctor, onDoctorChange}) => {
             onDoctorChange('licenseNo', '');
             onDoctorChange('id', null);
         }
-        console.log(newValue);
     };
 
     return (
@@ -128,27 +127,27 @@ const DoctorSection = ({doctor, onDoctorChange}) => {
                             open={open}
                             onOpen={() => setOpen(true)}
                             onClose={() => setOpen(false)}
-                            value={doctor || ""}
+                            value={doctor?.id ? doctor : (doctor?.name || null)}
                             onChange={handleDoctorSelect}
                             onInputChange={fetchData}
-                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                            getOptionLabel={(option) => option.name || ''}
+                            isOptionEqualToValue={(option, value) => option.id === value?.id}
+                            getOptionLabel={(option) => (typeof option === 'string' ? option : option?.name) || ''}
                             options={options}
                             loading={loading}
                             fullWidth
                             freeSolo
-                            renderInput={(params) => (
+                            renderInput={({slotProps: paramSlotProps, ...params}) => (
                                 <TextField
                                     {...params}
                                     name="name"
                                     label="Doctor's Name"
-                                    value={doctor?.name || ""}
                                     placeholder="Search or enter name"
                                     slotProps={{
+                                        ...paramSlotProps,
                                         input: {
-                                            ...params.InputProps,
+                                            ...(paramSlotProps?.input ?? {}),
                                             startAdornment: <MedicalServicesIcon color="action" sx={{mr: 1}}/>,
-                                            endAdornment: loading ? <CircularProgress size="small"/> : null
+                                            endAdornment: loading ? <CircularProgress size={20}/> : paramSlotProps?.input?.endAdornment,
                                         },
                                     }}
                                 />

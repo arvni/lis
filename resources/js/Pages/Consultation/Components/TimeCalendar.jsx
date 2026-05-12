@@ -246,9 +246,8 @@ const TimeCalendar = ({
             <Box sx={{ mb: 2 }}>
                 <Stack
                     direction="row"
-                    alignItems="center"
-                    justifyContent="space-between"
                     spacing={1}
+                    sx={{ alignItems: "center", justifyContent: "space-between" }}
                 >
                     <Typography variant="h5" fontWeight="600" color="text.primary">
                         {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
@@ -287,7 +286,7 @@ const TimeCalendar = ({
                 <Grid container>
                     {/* Days of week header */}
                     {daysOfWeek.map((day, index) => (
-                        <Grid item key={`header-${index}`} xs={12/7}>
+                        <Grid size={12/7} key={`header-${index}`} >
                             <Box
                                 sx={{
                                     textAlign: 'center',
@@ -305,7 +304,7 @@ const TimeCalendar = ({
 
                     {/* Calendar days */}
                     {calendarData.map((dayObj, index) => (
-                        <Grid item key={`day-${index}`} xs={12/7}>
+                        <Grid size={12/7} key={`day-${index}`} >
                             <Box
                                 sx={{
                                     height: { xs: 40, sm: 50 },
@@ -402,9 +401,8 @@ const TimeCalendar = ({
                 >
                     <Stack
                         direction="row"
-                        alignItems="center"
                         spacing={1}
-                        sx={{ mb: 2 }}
+                        sx={{ mb: 2, alignItems: "center" }}
                     >
                         <CalendarMonth color="primary" />
                         <Typography variant="h6" fontWeight="600">
@@ -415,7 +413,7 @@ const TimeCalendar = ({
                     {selectedDateTimeSlots.length > 0 ? (
                         <Grid container spacing={2}>
                             {selectedDateTimeSlots.map((timeSlot) => (
-                                <Grid item xs={12} sm={6} md={4} key={timeSlot.id}>
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={timeSlot.id}>
                                     <TimeSlotCard
                                         timeSlot={timeSlot}
                                         onClick={handleTimeSlotClick}

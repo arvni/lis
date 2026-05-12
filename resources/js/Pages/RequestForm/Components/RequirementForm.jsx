@@ -26,25 +26,160 @@ import {
     Numbers,
     Warning
 } from "@mui/icons-material";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import DeleteButton from "@/Components/DeleteButton";
 import AddRequirementForm from "./AddRequirementForm";
 import {makeId} from "@/Services/helper.js";
 
+const getFieldTypeIcon = (type) => {
+    switch (type) {
+        case 'text': return <TextFields fontSize="small" color="primary" />;
+        case 'checkbox': return <CheckBox fontSize="small" color="secondary" />;
+        case 'number': return <Numbers fontSize="small" color="warning" />;
+        case 'select': return <ListIcon fontSize="small" color="success" />;
+        default: return <TextFields fontSize="small" color="primary" />;
+    }
+};
 
-/**
- * RequirementForm component
- * Allows adding and managing form fields
- *
- * @param {Object} props Component props
- * @param {Object} props.errors Validation errors
- * @param {Array} props.requirements Requirements list
- * @param {Function} props.onChange Update requirements handler
- * @param {boolean} props.disabled Whether component is disabled
- * @returns {JSX.Element} Rendered component
- */
+const getTypeLabel = (type) => {
+    switch (type) {
+        case 'text': return 'Text Field';
+        case 'checkbox': return 'Checkbox';
+        case 'number': return 'Number Field';
+        case 'select': return 'Dropdown';
+        default: return type.charAt(0).toUpperCase() + type.slice(1);
+    }
+};
+
+const SortableRequirementItem = ({ field, index, disabled, requirements, onEdit, onDelete }) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+        id: field.id.toString(),
+        disabled,
+    });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+
+    return (
+        <ListItem
+            ref={setNodeRef}
+            style={style}
+            divider={index < requirements.length - 1}
+            sx={{
+                bgcolor: isDragging ? 'rgba(25, 118, 210, 0.08)' : 'background.paper',
+                '&:hover': {
+                    bgcolor: 'rgba(25, 118, 210, 0.04)',
+                },
+                transition: 'background-color 0.2s',
+            }}
+        >
+            {/* Drag handle */}
+            <ListItemIcon
+                {...attributes}
+                {...listeners}
+                sx={{
+                    cursor: disabled ? 'default' : 'grab',
+                    color: 'text.secondary',
+                    '&:hover': {
+                        color: disabled ? 'text.secondary' : 'primary.main'
+                    }
+                }}
+            >
+                <DragIndicator />
+            </ListItemIcon>
+
+            {/* Field number and type icon */}
+            <ListItemAvatar>
+                <Avatar
+                    sx={{
+                        bgcolor: field.required ? 'primary.main' : 'grey.200',
+                        color: field.required ? 'primary.contrastText' : 'text.primary'
+                    }}
+                >
+                    {index + 1}
+                </Avatar>
+            </ListItemAvatar>
+
+            {/* Field information */}
+            <ListItemText
+                slotProps={{ primary: { component: 'div' }, secondary: { component: 'div' } }}
+                primary={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="subtitle2">
+                            {field.label}
+                        </Typography>
+                        {field.required && (
+                            <Chip
+                                label="Required"
+                                size="small"
+                                color="error"
+                                variant="outlined"
+                            />
+                        )}
+                    </Box>
+                }
+                secondary={
+                    <Stack
+                        direction={{ xs: 'column', sm: 'row' }}
+                        spacing={{ xs: 1, sm: 2 }}
+                        sx={{ mt: 0.5 }}
+                    >
+                        <Chip
+                            icon={getFieldTypeIcon(field.type)}
+                            label={getTypeLabel(field.type)}
+                            size="small"
+                            variant="filled"
+                            sx={{
+                                height: 24,
+                                '& .MuiChip-label': { px: 1 },
+                                '& .MuiChip-icon': { fontSize: 16 }
+                            }}
+                        />
+
+                        {field.placeholder && (
+                            <Typography variant="caption" color="text.secondary">
+                                Placeholder: "{field.placeholder}"
+                            </Typography>
+                        )}
+
+                        {field.type === 'select' && field.options && field.options.length > 0 && (
+                            <Typography variant="caption" color="text.secondary">
+                                Options: {field.options.join(", ")}
+                            </Typography>
+                        )}
+                    </Stack>
+                }
+            />
+
+            {/* Action buttons */}
+            <Stack direction="row" spacing={1}>
+                <Tooltip title="Edit Field">
+                    <IconButton
+                        color="primary"
+                        onClick={onEdit}
+                        size="small"
+                        disabled={disabled}
+                    >
+                        <EditIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+
+                <DeleteButton
+                    onConfirm={onDelete}
+                    size="small"
+                    disabled={disabled}
+                    IconProps={{ fontSize: 'small' }}
+                />
+            </Stack>
+        </ListItem>
+    );
+};
+
 const RequirementForm = ({ errors, requirements = [], onChange, disabled = false }) => {
-    // Initialize form field state
     const [requirement, setRequirement] = useState({
         id: makeId(6),
         label: "",
@@ -55,21 +190,15 @@ const RequirementForm = ({ errors, requirements = [], onChange, disabled = false
         placeholder: ""
     });
 
-    // State for field dialog
     const [openAddRequirement, setOpenAddRequirement] = useState(false);
 
-    /**
-     * Add or update requirement
-     */
     const handleAddRequirement = () => {
         let newRequirements = [...requirements];
         let index = newRequirements.findIndex((item) => item.id === requirement.id);
 
         if (index === -1) {
-            // Add new requirement
             newRequirements.push(requirement);
         } else {
-            // Update existing requirement
             newRequirements.splice(index, 1, requirement);
         }
 
@@ -77,20 +206,11 @@ const RequirementForm = ({ errors, requirements = [], onChange, disabled = false
         handleCloseRequirement();
     };
 
-    /**
-     * Close the add requirement dialog
-     */
     const handleCloseRequirement = () => {
         setOpenAddRequirement(false);
         resetRequirement();
     };
 
-    /**
-     * Update requirement field
-     *
-     * @param {string} key Field key
-     * @param {any} value Field value
-     */
     const handleRequirementChange = (key, value) => {
         setRequirement((prevState) => ({
             ...prevState,
@@ -98,9 +218,6 @@ const RequirementForm = ({ errors, requirements = [], onChange, disabled = false
         }));
     };
 
-    /**
-     * Reset requirement form
-     */
     const resetRequirement = () => {
         setRequirement({
             id: makeId(6),
@@ -113,20 +230,11 @@ const RequirementForm = ({ errors, requirements = [], onChange, disabled = false
         });
     };
 
-    /**
-     * Open add requirement dialog
-     */
     const handleAddNewRequirement = () => {
         resetRequirement();
         setOpenAddRequirement(true);
     };
 
-    /**
-     * Edit existing requirement
-     *
-     * @param {number} index Requirement index
-     * @returns {Function} Click handler
-     */
     const handleEditRequirement = (index) => () => {
         if (requirements && requirements[index]) {
             setRequirement({...requirements[index]});
@@ -134,73 +242,17 @@ const RequirementForm = ({ errors, requirements = [], onChange, disabled = false
         setOpenAddRequirement(true);
     };
 
-    /**
-     * Delete requirement
-     *
-     * @param {number} index Requirement index
-     * @returns {Function} Click handler
-     */
     const handleDeleteRequirement = (index) => () => {
         let newRequirements = [...requirements];
         newRequirements.splice(index, 1);
         onChange(newRequirements);
     };
 
-    /**
-     * Handle drag and drop reordering
-     *
-     * @param {Object} result Drag result
-     */
-    const handleDragEnd = (result) => {
-        if (!result.destination) return;
-
-        const reorderedItems = Array.from(requirements);
-        const [removed] = reorderedItems.splice(result.source.index, 1);
-        reorderedItems.splice(result.destination.index, 0, removed);
-
-        onChange(reorderedItems);
-    };
-
-    /**
-     * Get field type icon
-     *
-     * @param {string} type Field type
-     * @returns {JSX.Element} Icon component
-     */
-    const getFieldTypeIcon = (type) => {
-        switch (type) {
-            case 'text':
-                return <TextFields fontSize="small" color="primary" />;
-            case 'checkbox':
-                return <CheckBox fontSize="small" color="secondary" />;
-            case 'number':
-                return <Numbers fontSize="small" color="warning" />;
-            case 'select':
-                return <ListIcon fontSize="small" color="success" />;
-            default:
-                return <TextFields fontSize="small" color="primary" />;
-        }
-    };
-
-    /**
-     * Get field type label
-     *
-     * @param {string} type Field type
-     * @returns {string} Type label
-     */
-    const getTypeLabel = (type) => {
-        switch (type) {
-            case 'text':
-                return 'Text Field';
-            case 'checkbox':
-                return 'Checkbox';
-            case 'number':
-                return 'Number Field';
-            case 'select':
-                return 'Dropdown';
-            default:
-                return type.charAt(0).toUpperCase() + type.slice(1);
-        }
+    const handleDragEnd = ({ active, over }) => {
+        if (!over || active.id === over.id) return;
+        const oldIndex = requirements.findIndex(r => r.id.toString() === active.id);
+        const newIndex = requirements.findIndex(r => r.id.toString() === over.id);
+        onChange(arrayMove(requirements, oldIndex, newIndex));
     };
 
     return (
@@ -210,9 +262,7 @@ const RequirementForm = ({ errors, requirements = [], onChange, disabled = false
                 <Stack
                     direction="row"
                     spacing={2}
-                    alignItems="center"
-                    justifyContent="space-between"
-                    sx={{ mb: 2 }}
+                    sx={{ mb: 2, alignItems: "center", justifyContent: "space-between" }}
                 >
                     <Button
                         variant="contained"
@@ -276,146 +326,32 @@ const RequirementForm = ({ errors, requirements = [], onChange, disabled = false
                     </Button>
                 </Paper>
             ) : (
-                <DragDropContext onDragEnd={handleDragEnd}>
-                    <Droppable droppableId="fields-list">
-                        {(provided) => (
-                            <Paper
-                                variant="outlined"
-                                sx={{
-                                    borderRadius: 1,
-                                    overflow: 'hidden',
-                                    mb: 3
-                                }}
-                                ref={provided.innerRef}
-                                {...provided.droppableProps}
-                            >
-                                <List disablePadding>
-                                    {requirements.map((field, index) => (
-                                        <Draggable
-                                            key={field.id.toString()}
-                                            draggableId={field.id.toString()}
-                                            index={index}
-                                            isDragDisabled={disabled}
-                                        >
-                                            {(provided, snapshot) => (
-                                                <ListItem
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    divider={index < requirements.length - 1}
-                                                    sx={{
-                                                        bgcolor: snapshot.isDragging ? 'rgba(25, 118, 210, 0.08)' : 'background.paper',
-                                                        '&:hover': {
-                                                            bgcolor: 'rgba(25, 118, 210, 0.04)',
-                                                        },
-                                                        transition: 'background-color 0.2s'
-                                                    }}
-                                                >
-                                                    {/* Drag handle */}
-                                                    <ListItemIcon
-                                                        {...provided.dragHandleProps}
-                                                        sx={{
-                                                            cursor: disabled ? 'default' : 'grab',
-                                                            color: 'text.secondary',
-                                                            '&:hover': {
-                                                                color: disabled ? 'text.secondary' : 'primary.main'
-                                                            }
-                                                        }}
-                                                    >
-                                                        <DragIndicator />
-                                                    </ListItemIcon>
-
-                                                    {/* Field number and type icon */}
-                                                    <ListItemAvatar>
-                                                        <Avatar
-                                                            sx={{
-                                                                bgcolor: field.required ? 'primary.main' : 'grey.200',
-                                                                color: field.required ? 'primary.contrastText' : 'text.primary'
-                                                            }}
-                                                        >
-                                                            {index + 1}
-                                                        </Avatar>
-                                                    </ListItemAvatar>
-
-                                                    {/* Field information */}
-                                                    <ListItemText
-                                                        primary={
-                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                <Typography variant="subtitle2">
-                                                                    {field.label}
-                                                                </Typography>
-                                                                {field.required && (
-                                                                    <Chip
-                                                                        label="Required"
-                                                                        size="small"
-                                                                        color="error"
-                                                                        variant="outlined"
-                                                                    />
-                                                                )}
-                                                            </Box>
-                                                        }
-                                                        secondary={
-                                                            <Stack
-                                                                direction={{ xs: 'column', sm: 'row' }}
-                                                                spacing={{ xs: 1, sm: 2 }}
-                                                                sx={{ mt: 0.5 }}
-                                                            >
-                                                                <Chip
-                                                                    icon={getFieldTypeIcon(field.type)}
-                                                                    label={getTypeLabel(field.type)}
-                                                                    size="small"
-                                                                    variant="filled"
-                                                                    sx={{
-                                                                        height: 24,
-                                                                        '& .MuiChip-label': { px: 1 },
-                                                                        '& .MuiChip-icon': { fontSize: 16 }
-                                                                    }}
-                                                                />
-
-                                                                {field.placeholder && (
-                                                                    <Typography variant="caption" color="text.secondary">
-                                                                        Placeholder: "{field.placeholder}"
-                                                                    </Typography>
-                                                                )}
-
-                                                                {field.type === 'select' && field.options && field.options.length > 0 && (
-                                                                    <Typography variant="caption" color="text.secondary">
-                                                                        Options: {field.options.join(", ")}
-                                                                    </Typography>
-                                                                )}
-                                                            </Stack>
-                                                        }
-                                                    />
-
-                                                    {/* Action buttons */}
-                                                    <Stack direction="row" spacing={1}>
-                                                        <Tooltip title="Edit Field">
-                                                            <IconButton
-                                                                color="primary"
-                                                                onClick={handleEditRequirement(index)}
-                                                                size="small"
-                                                                disabled={disabled}
-                                                            >
-                                                                <EditIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Tooltip>
-
-                                                        <DeleteButton
-                                                            onConfirm={handleDeleteRequirement(index)}
-                                                            size="small"
-                                                            disabled={disabled}
-                                                            IconProps={{ fontSize: 'small' }}
-                                                        />
-                                                    </Stack>
-                                                </ListItem>
-                                            )}
-                                        </Draggable>
-                                    ))}
-                                    {provided.placeholder}
-                                </List>
-                            </Paper>
-                        )}
-                    </Droppable>
-                </DragDropContext>
+                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={requirements.map(f => f.id.toString())} strategy={verticalListSortingStrategy}>
+                        <Paper
+                            variant="outlined"
+                            sx={{
+                                borderRadius: 1,
+                                overflow: 'hidden',
+                                mb: 3
+                            }}
+                        >
+                            <List disablePadding>
+                                {requirements.map((field, index) => (
+                                    <SortableRequirementItem
+                                        key={field.id.toString()}
+                                        field={field}
+                                        index={index}
+                                        disabled={disabled}
+                                        requirements={requirements}
+                                        onEdit={handleEditRequirement(index)}
+                                        onDelete={handleDeleteRequirement(index)}
+                                    />
+                                ))}
+                            </List>
+                        </Paper>
+                    </SortableContext>
+                </DndContext>
             )}
 
             {/* Field dialog */}

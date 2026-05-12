@@ -1,10 +1,10 @@
-import React, {useState} from 'react';
+﻿import React, {useState} from 'react';
 import {Head, router, usePage} from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader.jsx';
 import SelectSearch from '@/Components/SelectSearch.jsx';
 import {
-    Box, Chip, FormControl, Grid2 as Grid, InputLabel, MenuItem,
+    Box, Chip, FormControl, Grid as Grid, InputLabel, MenuItem,
     Paper, Select, Stack, Table, TableBody, TableCell,
     TableContainer, TableHead, TableRow, TextField, Typography,
     alpha, useTheme, Tooltip, IconButton, Collapse,
@@ -17,7 +17,7 @@ import {
     Delete as DeleteIcon,
     Login as LoginIcon,
     Logout as LogoutIcon,
-    HelpOutline,
+    HelpOutlined,
 } from '@mui/icons-material';
 import {formatDate} from '@/Services/helper.js';
 
@@ -30,7 +30,7 @@ const TYPE_CONFIG = {
 };
 
 const ActivityChip = ({type}) => {
-    const cfg = TYPE_CONFIG[type] ?? {label: type, color: 'default', icon: <HelpOutline fontSize="small"/>};
+    const cfg = TYPE_CONFIG[type] ?? {label: type, color: 'default', icon: <HelpOutlined fontSize="small"/>};
     return <Chip icon={cfg.icon} label={cfg.label} color={cfg.color} size="small" variant="filled"/>;
 };
 
@@ -90,7 +90,7 @@ const Index = () => {
 
                 {/* Filters */}
                 <Paper elevation={1} sx={{p: 2, mb: 2, borderRadius: 2}}>
-                    <Stack direction="row" spacing={1} alignItems="center" mb={1.5}>
+  <Stack direction="row" spacing={1} mb={1.5} sx={{alignItems: "center"}}>
                         <FilterList fontSize="small" color="action"/>
                         <Typography variant="subtitle2" color="text.secondary">Filters</Typography>
                     </Stack>
@@ -134,12 +134,12 @@ const Index = () => {
                         </Grid>
                         <Grid size={{xs: 12, sm: 6, md: 2}}>
                             <TextField label="From" type="date" size="small" fullWidth
-                                InputLabelProps={{shrink: true}} value={filters.from}
+                                slotProps={{ inputLabel: {shrink: true} }} value={filters.from}
                                 onChange={(e) => apply({from: e.target.value})}/>
                         </Grid>
                         <Grid size={{xs: 12, sm: 6, md: 2}}>
                             <TextField label="To" type="date" size="small" fullWidth
-                                InputLabelProps={{shrink: true}} value={filters.to}
+                                slotProps={{ inputLabel: {shrink: true} }} value={filters.to}
                                 onChange={(e) => apply({to: e.target.value})}/>
                         </Grid>
                     </Grid>

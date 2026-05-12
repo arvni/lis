@@ -18,61 +18,61 @@ const ReferrerInfo = ({referrer, defaultExpanded = true, showDocuments = false, 
         </AccordionSummary>
         <AccordionDetails>
             <Grid  container spacing={2}>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} >
                     <strong>Name: </strong>{referrer.name}
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} >
                     <strong>Phone: </strong>{referrer.phoneNo}
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} >
                     <strong>Email: </strong>{referrer.email}
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={12} >
                     <Divider>Billing Information</Divider>
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} >
                     <strong>Name: </strong>{referrer.billingInfo?.name}
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} >
                     <strong>Email: </strong>{referrer.billingInfo?.email}
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} >
                     <strong>Phone: </strong>{referrer.billingInfo?.phone}
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} >
                     <strong>VATIN: </strong>{referrer.billingInfo?.vatIn}
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} >
                     <strong>City: </strong>{referrer.billingInfo?.city}
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} >
                     <strong>Country: </strong>{referrer.billingInfo?.country}
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={12} >
                     <strong>Address: </strong>{referrer.billingInfo?.address}
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid size={12} >
                     <Divider>Logistic Information</Divider>
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid size={12} >
                     <strong>Address: </strong>{referrer.logisticInfo?.address || 'N/A'}
                 </Grid>
 
                 {referrer.logisticInfo?.latitude && referrer.logisticInfo?.longitude && (
                     <>
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }} >
                             <strong>Latitude: </strong>{referrer.logisticInfo.latitude}
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }} >
                             <strong>Longitude: </strong>{referrer.logisticInfo.longitude}
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={12} >
                             <LogisticsMap
                                 latitude={referrer.logisticInfo.latitude}
                                 longitude={referrer.logisticInfo.longitude}

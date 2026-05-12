@@ -168,14 +168,14 @@ const ReportInfo = ({ report, defaultExpanded = true }) => {
                                 <UserAvatar name={report.reporter.name} icon="reporter" />
 
                                 <Box>
-                                    <Stack direction="row" spacing={1} alignItems="center">
+  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                                         <PersonIcon fontSize="small" color="primary" />
                                         <Typography variant="subtitle1" fontWeight="medium">
                                             {report.reporter.name}
                                         </Typography>
                                     </Stack>
 
-                                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5 }}>
+  <Stack direction="row" spacing={1} sx={{alignItems: "center", mt: 0.5}}>
                                         <DateIcon fontSize="small" color="action" />
                                         <Typography variant="body2" color="text.secondary">
                                             Created at {formatDateTime(report.reportedAt)}
@@ -193,14 +193,14 @@ const ReportInfo = ({ report, defaultExpanded = true }) => {
                                     <UserAvatar name={report.approver.name} icon="approver" />
 
                                     <Box>
-                                        <Stack direction="row" spacing={1} alignItems="center">
+  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                                             <ApproveIcon fontSize="small" color="success" />
                                             <Typography variant="subtitle1" fontWeight="medium">
                                                 {report.approver.name}
                                             </Typography>
                                         </Stack>
 
-                                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5 }}>
+  <Stack direction="row" spacing={1} sx={{alignItems: "center", mt: 0.5}}>
                                             <DateIcon fontSize="small" color="action" />
                                             <Typography variant="body2" color="text.secondary">
                                                 Approved at {formatDateTime(report.approvedAt)}

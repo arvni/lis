@@ -161,7 +161,7 @@ const NodesIndex = () => {
                     {label: "Online",         value: online,        color: "success"},
                     {label: "Offline",        value: offline,       color: "default"},
                 ].map(({label, value, color}) => (
-                    <Grid item xs={6} sm={4} md={2} key={label}>
+                    <Grid size={{ xs: 6, sm: 4, md: 2 }} key={label}>
                         <Card elevation={0} variant="outlined" sx={{textAlign: "center", p: 1}}>
                             <CardContent sx={{p: "8px !important"}}>
                                 <Typography variant="h5" fontWeight={700} color={`${color}.main`}>{value}</Typography>
@@ -185,13 +185,13 @@ const NodesIndex = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         sx={{width: 320}}
-                        InputProps={{
+                        slotProps={{ input: {
                             startAdornment: (
                                 <InputAdornment position="start">
                                     <SearchIcon fontSize="small" color="action"/>
                                 </InputAdornment>
                             ),
-                        }}
+                        } }}
                     />
                     <Tooltip title="Refresh nodes">
                         <IconButton size="small" onClick={() => router.reload()}>

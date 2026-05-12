@@ -158,9 +158,9 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
             {/* Step 1 – Item selection list */}
             <Dialog open={open && step === 'list'} onClose={handleClose} maxWidth="xs" fullWidth>
                 <DialogTitle>
-                    <Box display="flex" alignItems="center" gap={1}>
+  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
                         <MergeTypeIcon color="secondary"/>
-                        <Typography variant="h6" fontWeight={600}>Add Pooling</Typography>
+                        <Typography variant="h6" fontWeight={600} component="span">Add Pooling</Typography>
                     </Box>
                     <Typography variant="body2" color="text.secondary" mt={0.5}>
                         Select a test or panel to add a pooling item for
@@ -169,7 +169,7 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
 
                 <DialogContent dividers sx={{p: 0}}>
                     {loadingList && (
-                        <Box display="flex" justifyContent="center" py={4}>
+  <Box display="flex" py={4} sx={{justifyContent: "center"}}>
                             <CircularProgress size={32}/>
                         </Box>
                     )}
@@ -208,7 +208,7 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
                                         </ListItemIcon>
                                         <ListItemText
                                             primary={
-                                                <Box display="flex" alignItems="center" gap={1}>
+  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
                                                     <Typography variant="body2" fontWeight={500}>
                                                         {item.name}
                                                     </Typography>

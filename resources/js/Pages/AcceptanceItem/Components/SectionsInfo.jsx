@@ -17,7 +17,7 @@ import {
     useMediaQuery,
     Tabs,
     Tab,
-    Grid2 as Grid,
+    Grid as Grid,
 } from "@mui/material";
 import List from "@mui/material/List";
 import {
@@ -35,7 +35,7 @@ import {
     AccessTime as AccessTimeIcon,
     Info as InfoIcon,
     CheckCircle,
-    ErrorOutline,
+    ErrorOutlined as ErrorOutline,
     HourglassEmpty,
     CalendarToday,
     Timeline as TimelineIcon,
@@ -112,7 +112,7 @@ const PatientInfoCard = ({patient, sample}) => {
             }}
         >
             <Box sx={{ p: 2 }}>
-                <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                     <Avatar
                         sx={{
                             bgcolor: theme.palette.info.dark,
@@ -357,7 +357,7 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                     backgroundColor: theme.palette.background.default,
                                     borderBottom: `1px solid ${theme.palette.divider}`
                                 }}>
-                                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+  <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "center"}}>
                                         <Typography variant="subtitle1" fontWeight="bold">
                                             {acceptanceItemState.section.name}
                                         </Typography>
@@ -377,8 +377,7 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                     <Stack
                                         direction="row"
                                         spacing={1}
-                                        alignItems="center"
-                                        sx={{mb: 2}}
+                                        sx={{ mb: 2, alignItems: "center" }}
                                     >
                                         <Badge
                                             overlap="circular"
@@ -446,9 +445,7 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                                                     <Stack
                                                                         direction={{xs: 'column', sm: 'row'}}
                                                                         spacing={1}
-                                                                        alignItems={{xs: 'flex-start', sm: 'center'}}
-                                                                        justifyContent="space-between"
-                                                                        width="100%"
+                                                                        sx={{justifyContent: "space-between", alignItems: {xs: 'flex-start', sm: 'center'}, width: "100%"}}
                                                                     >
                                                                         <Typography
                                                                             variant="subtitle2"
@@ -505,8 +502,8 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                             <Stack
                                                 direction="row"
                                                 spacing={1}
-                                                alignItems="center"
                                                 sx={{
+                                                    alignItems: "center",
                                                     mt: 2,
                                                     pt: 2,
                                                     borderTop: `1px dashed ${theme.palette.divider}`
@@ -543,8 +540,7 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                     <Stack
                                         direction="row"
                                         spacing={2}
-                                        justifyContent="center"
-                                        sx={{mt: 2}}
+                                        sx={{ mt: 2, justifyContent: "center" }}
                                     >
                                         <Button
                                             variant="outlined"
@@ -706,9 +702,9 @@ const SectionsInfo = ({acceptanceItemStates = true}) => {
                         color: theme.palette.primary.contrastText,
                     }}
                 >
-                    <Grid container spacing={2} alignItems="center">
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
                         <Grid size={{ xs:12, md:6}}>
-                            <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                                 <TimelineIcon fontSize="large"/>
                                 <Box>
                                     <Typography variant="h5" fontWeight="bold">
@@ -767,8 +763,8 @@ const SectionsInfo = ({acceptanceItemStates = true}) => {
                             <Tab
                                 key={sample.sampleId}
                                 label={
-                                    <Stack direction="column" spacing={0.5} alignItems="center">
-                                        <Stack direction="row" spacing={1} alignItems="center">
+  <Stack direction="column" spacing={0.5} sx={{alignItems: "center"}}>
+  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                                             <ScienceIcon fontSize="small" />
                                             <span>{sample.sample?.barcode || `Sample ${sample.sampleId}`}</span>
                                             <Chip

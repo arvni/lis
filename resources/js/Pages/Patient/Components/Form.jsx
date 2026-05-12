@@ -2,7 +2,7 @@ import {Step, StepLabel, Stepper} from "@mui/material";
 import Container from "@mui/material/Container";
 import PatientForm from "./PatientForm";
 import Divider from "@mui/material/Divider";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import PatientIdForm from "@/Pages/Patient/Components/PatientIdForm";
@@ -79,7 +79,7 @@ export default function ({data, setData, back, edit, next, step, ...rest}) {
             {step == 0 && <PatientIdForm data={data} onChange={handlePatientChange}/>}
             {step == 1 && <PatientForm data={data} errors={errors} edit={edit} onChange={handlePatientChange}/>}
             <Divider sx={{my: "1em"}}/>
-            <Grid container flex justifyItems="flex-end" justifyContent="flex-end" spacing={2}>
+  <Grid container spacing={2} sx={{justifyContent: "flex-end"}}>
                 <Grid>
                     <Button onClick={back}>Back</Button>
                 </Grid>

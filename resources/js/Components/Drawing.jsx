@@ -1331,9 +1331,7 @@ const PedigreeChart = ({
                     <>
                         <Stack
                             direction="row"
-                            justifyContent="space-between"
-                            alignItems="center"
-                            sx={{mb: 2, borderBottom: '1px solid lightgrey', pb: 1}}
+                            sx={{ mb: 2, borderBottom: '1px solid lightgrey', pb: 1, justifyContent: "space-between", alignItems: "center" }}
                         >
                             <Typography variant="h6" sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                 {singleSelectedNode.type === 'male' && <ManIcon sx={{color: 'blue'}}/>}
@@ -1475,9 +1473,7 @@ const PedigreeChart = ({
                     <>
                         <Stack
                             direction="row"
-                            justifyContent="space-between"
-                            alignItems="center"
-                            sx={{mb: 2, borderBottom: '1px solid lightgrey', pb: 1}}
+                            sx={{ mb: 2, borderBottom: '1px solid lightgrey', pb: 1, justifyContent: "space-between", alignItems: "center" }}
                         >
                             <Typography variant="h6">Edit Connection</Typography>
 
@@ -1579,7 +1575,7 @@ const PedigreeChart = ({
                             onChange={handleStyleChange}
                         >
                             <Grid container spacing={2}>
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <Card variant="outlined" sx={{
                                         mb: 1,
                                         borderColor: selectedStyle === 'solid' ? 'primary.main' : 'divider',
@@ -1604,7 +1600,7 @@ const PedigreeChart = ({
                                     </Card>
                                 </Grid>
 
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <Card variant="outlined" sx={{
                                         mb: 1,
                                         borderColor: selectedStyle === 'dashed' ? 'primary.main' : 'divider',
@@ -1633,7 +1629,7 @@ const PedigreeChart = ({
                                     </Card>
                                 </Grid>
 
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <Card variant="outlined" sx={{
                                         borderColor: selectedStyle === 'double' ? 'primary.main' : 'divider',
                                         bgcolor: selectedStyle === 'double' ? alpha('#1976d2', 0.05) : 'transparent'
@@ -1700,7 +1696,7 @@ const PedigreeChart = ({
 
             <DialogContent>
                 <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }} >
                         <Typography variant="subtitle1" sx={{mb: 1, fontWeight: 'bold'}}>
                             Individuals
                         </Typography>
@@ -1754,7 +1750,7 @@ const PedigreeChart = ({
                         />
                     </Grid>
 
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }} >
                         <Typography variant="subtitle1" sx={{mb: 1, fontWeight: 'bold'}}>
                             Connection Types
                         </Typography>
@@ -1828,7 +1824,7 @@ const PedigreeChart = ({
                 </Typography>
 
                 <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }} >
                         <Typography variant="subtitle1" sx={{mb: 1, fontWeight: 'bold'}}>
                             Basic Controls
                         </Typography>
@@ -1875,7 +1871,7 @@ const PedigreeChart = ({
                         </Typography>
                     </Grid>
 
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }} >
                         <Typography variant="subtitle1" sx={{mb: 1, fontWeight: 'bold'}}>
                             Advanced Features
                         </Typography>

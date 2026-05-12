@@ -5,7 +5,7 @@ import { RemoveRedEye, Edit as EditIcon } from '@mui/icons-material';
 
 import TableLayout from '@/Layouts/TableLayout';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import Filter from './Components/Filter';
+import Filter from './Components/ApprovingFilter';
 
 // Constants for breadcrumbs
 const BREADCRUMBS = [

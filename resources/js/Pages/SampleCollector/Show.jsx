@@ -39,7 +39,6 @@ const Show = () => {
         {
             field: 'created_at',
             headerName: 'Created At',
-            type: 'dateTime',
             width: 180,
         },
         {
@@ -86,7 +85,7 @@ const Show = () => {
                 <Divider sx={{ my: 2 }} />
 
                 <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }} >
                         <Typography variant="subtitle2" color="text.secondary">
                             Name
                         </Typography>
@@ -95,7 +94,7 @@ const Show = () => {
                         </Typography>
                     </Grid>
 
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{ xs: 12, sm: 6 }} >
                         <Typography variant="subtitle2" color="text.secondary">
                             Email
                         </Typography>

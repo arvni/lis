@@ -82,7 +82,7 @@ const SupplierSelect = ({
                     size={size}
                     error={error}
                     helperText={helperText}
-                    InputProps={{
+                    slotProps={{ input: {
                         ...params.InputProps,
                         endAdornment: (
                             <>
@@ -90,7 +90,7 @@ const SupplierSelect = ({
                                 {params.InputProps.endAdornment}
                             </>
                         ),
-                    }}
+                    } }}
                 />
             )}
         />

@@ -12,7 +12,7 @@ import {
     DialogContent,
     DialogActions,
     Tooltip,
-    Grid2 as Grid,
+    Grid as Grid,
 } from '@mui/material';
 import {
     Science as ScienceIcon,
@@ -54,7 +54,7 @@ const TestFilter = ({defaultFilter, onFilter}) => {
     };
 
     return (
-        <Grid container spacing={2} alignItems="center">
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
             <Grid size={{xs: 12, md: 4}}>
                 <TextField
                     fullWidth
@@ -123,7 +123,7 @@ const SampleTypesDisplay = ({sampleTypes = []}) => {
     if (!sampleTypes.length) return <Typography variant="body2" color="text.secondary">—</Typography>;
 
     return (
-        <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+        <Stack direction="row" spacing={0.5} useFlexGap sx={{flexWrap: 'wrap'}}>
             {sampleTypes.slice(0, 3).map((type) => (
                 <Chip
                     key={type.id}
@@ -158,7 +158,7 @@ const MethodDisplay = ({method, testType}) => {
 
     return (
         <Box>
-            <Stack direction="row" spacing={0.5} alignItems="center">
+  <Stack direction="row" spacing={0.5} sx={{alignItems: "center"}}>
                 {testType !== "PANEL" && <Typography variant="body2" fontWeight="medium">
                     {method.name}
                 </Typography>}

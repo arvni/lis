@@ -13,11 +13,11 @@ import {
     useTheme,
     alpha
 } from '@mui/material';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlined';
 import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
 import HomeIcon from '@mui/icons-material/Home';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
 
 export default function Error({ status, message }) {
     const theme = useTheme();

@@ -8,7 +8,7 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import {router, usePage} from "@inertiajs/react";
 import PageHeader from '@/Components/PageHeader';
-import Filter from './Components/Filter';
+import Filter from './Components/SampleCollectionFilter';
 import {formatDate} from "@/Services/helper.js";
 
 

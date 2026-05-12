@@ -1,5 +1,5 @@
 import React from 'react';
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { Box, Typography, Chip, Paper, Divider } from '@mui/material';
 import CodeIcon from '@mui/icons-material/Code';
 import CategoryIcon from '@mui/icons-material/Category';
@@ -9,14 +9,14 @@ import ScienceIcon from '@mui/icons-material/Science';
 const TestDetails = ({ test }) => (
     <Paper elevation={0} sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2, mb: 3 }}>
         <Grid container spacing={3}>
-            <Grid item size={{ xs: 12 }}>
+            <Grid size={{ xs: 12 }}>
                 <Typography variant="h6" fontWeight="medium" gutterBottom>
                     {test?.fullName}
                 </Typography>
             </Grid>
 
-            <Grid item size={{ xs: 12, sm: 6, md: 4 }}>
-                <Box display="flex" alignItems="center">
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+  <Box display="flex" sx={{alignItems: "center"}}>
                     <CodeIcon fontSize="small" color="primary" sx={{ mr: 1 }} />
                     <Typography variant="body2" color="text.secondary">
                         Test Code
@@ -27,8 +27,8 @@ const TestDetails = ({ test }) => (
                 </Typography>
             </Grid>
 
-            <Grid item size={{ xs: 12, sm: 6, md: 4 }}>
-                <Box display="flex" alignItems="center">
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+  <Box display="flex" sx={{alignItems: "center"}}>
                     <CategoryIcon fontSize="small" color="primary" sx={{ mr: 1 }} />
                     <Typography variant="body2" color="text.secondary">
                         Category
@@ -40,8 +40,8 @@ const TestDetails = ({ test }) => (
             </Grid>
 
             {test?.type === '1' && (
-                <Grid item size={{ xs: 12 }}>
-                    <Box display="flex" alignItems="center" mb={1}>
+                <Grid size={{ xs: 12 }}>
+  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
                         <ScienceIcon fontSize="small" color="primary" sx={{ mr: 1 }} />
                         <Typography variant="body2" color="text.secondary">
                             Acceptable Sample Types
@@ -69,9 +69,9 @@ const TestDetails = ({ test }) => (
             )}
 
             {test?.description && (
-                <Grid item size={{ xs: 12 }}>
+                <Grid size={{ xs: 12 }}>
                     <Divider sx={{ my: 1 }} />
-                    <Box display="flex" alignItems="center" mb={1}>
+  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
                         <DescriptionIcon fontSize="small" color="primary" sx={{ mr: 1 }} />
                         <Typography variant="body2" color="text.secondary">
                             Description

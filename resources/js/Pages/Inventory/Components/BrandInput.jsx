@@ -68,7 +68,7 @@ const BrandInput = ({
                     {...params}
                     label={label}
                     size={size}
-                    InputProps={{
+                    slotProps={{ input: {
                         ...params.InputProps,
                         endAdornment: (
                             <>
@@ -76,7 +76,7 @@ const BrandInput = ({
                                 {params.InputProps.endAdornment}
                             </>
                         ),
-                    }}
+                    } }}
                 />
             )}
         />

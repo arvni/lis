@@ -11,7 +11,7 @@ import {
     IconButton
 } from "@mui/material";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import AddIcon from "@mui/icons-material/Add";
 import LogisticsMap from "@/Components/LogisticsMap";
@@ -352,7 +352,7 @@ export default function ReferrerForm({ data, setData, submit, cancel, errors, se
                             onChange={handleLogisticInfoChange}
                             error={!!errors?.["logisticInfo.latitude"]}
                             helperText={errors?.["logisticInfo.latitude"]}
-                            inputProps={{ step: "any", min: -90, max: 90 }}
+                            slotProps={{ htmlInput: { step: "any", min: -90, max: 90 } }}
                         />
                     </Grid>
 
@@ -366,7 +366,7 @@ export default function ReferrerForm({ data, setData, submit, cancel, errors, se
                             onChange={handleLogisticInfoChange}
                             error={!!errors?.["logisticInfo.longitude"]}
                             helperText={errors?.["logisticInfo.longitude"]}
-                            inputProps={{ step: "any", min: -180, max: 180 }}
+                            slotProps={{ htmlInput: { step: "any", min: -180, max: 180 } }}
                         />
                     </Grid>
 

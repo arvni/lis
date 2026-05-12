@@ -19,8 +19,8 @@ const ReorderAlertsFilter = ({defaultFilter, onFilter, stores}) => {
     const apply = () => onFilter(Object.fromEntries(Object.entries(values).filter(([, v]) => v !== "")))();
     const reset = () => { setValues({status: "", store_id: ""}); onFilter({})(); };
     return (
-        <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={3}>
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
+            <Grid size={{ xs: 12, md: 3 }} >
                 <TextField select fullWidth size="small" label="Status" value={values.status} onChange={set("status")}>
                     <MenuItem value="">All Statuses</MenuItem>
                     <MenuItem value="OPEN">Open</MenuItem>
@@ -28,13 +28,13 @@ const ReorderAlertsFilter = ({defaultFilter, onFilter, stores}) => {
                     <MenuItem value="RESOLVED">Resolved</MenuItem>
                 </TextField>
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid size={{ xs: 12, md: 3 }} >
                 <TextField select fullWidth size="small" label="Store" value={values.store_id} onChange={set("store_id")}>
                     <MenuItem value="">All Stores</MenuItem>
                     {(stores ?? []).map((s) => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
                 </TextField>
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }} >
                 <Box sx={{display: "flex", gap: 1}}>
                     <Button variant="contained" size="small" onClick={apply}>Apply</Button>
                     <Button variant="outlined" size="small" onClick={reset}>Reset</Button>

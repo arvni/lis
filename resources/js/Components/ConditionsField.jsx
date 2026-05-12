@@ -1,4 +1,5 @@
 import React, {useState, useCallback, useMemo, useEffect} from 'react';
+import PropTypes from 'prop-types';
 import {
     List,
     ListItem,
@@ -141,6 +142,18 @@ const ConditionsField = ({
             </List>
         </Box>
     );
+};
+
+ConditionsField.propTypes = {
+    onChange: PropTypes.func.isRequired,
+    name: PropTypes.string.isRequired,
+    defaultValue: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.string,
+        condition: PropTypes.string,
+        value: PropTypes.string,
+    })),
+    errors: PropTypes.object,
+    label: PropTypes.string,
 };
 
 export default ConditionsField;

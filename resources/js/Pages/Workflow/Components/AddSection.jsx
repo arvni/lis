@@ -10,7 +10,7 @@ import ListItemText from "@mui/material/ListItemText" ;
 import OutlinedInput from "@mui/material/OutlinedInput";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import List from "@mui/material/List";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";

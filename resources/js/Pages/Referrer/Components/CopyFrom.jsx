@@ -8,7 +8,7 @@ import {
 import {router} from '@inertiajs/react';
 
 import SelectSearch from '@/Components/SelectSearch';
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 
 const CopyForm = ({
                       open,

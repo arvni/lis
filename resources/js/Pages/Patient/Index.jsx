@@ -35,7 +35,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import countries from "@/Data/Countries.js";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -197,7 +197,7 @@ const GenderStats = ({stats}) => {
                         backgroundColor: genderColors[gender] || 'grey.200'
                     }}
                 >
-                    <Stack direction="row" alignItems="center" spacing={1}>
+                    <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                         {getGenderInfo(gender).icon}
                         <Typography variant="body2"> {getGenderInfo(gender).label}</Typography>
                     </Stack>
@@ -285,7 +285,7 @@ const Index = () => {
             display: "flex",
             valueGetter: (value) => countries.find((item) => item.code === value)?.label,
             renderCell: ({row, value}) => (
-                <Stack direction="row" spacing={1} alignItems="center">
+                <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                     <Box
                         component="img"
                         loading="lazy"
@@ -305,7 +305,7 @@ const Index = () => {
             flex: .4,
             display: "flex",
             renderCell: ({row}) => (
-                <Stack direction="row" spacing={1} alignItems="center">
+                <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                     <span>{row.dateOfBirth}</span>
                     <Chip label={row.age} size="small" variant="outlined"/>
                 </Stack>
@@ -387,7 +387,7 @@ const Index = () => {
                     <AccordionDetails>
                         <Grid container spacing={0}>
                             <StatsCard title="Total Patients">
-                                <Box display="flex" justifyContent="center" alignItems="center" p={2}>
+                                <Box display="flex" sx={{justifyContent: "center", alignItems: "center", p: 2}}>
                                     <Typography variant="h3" color="primary.main">
                                         {stats.patients}
                                     </Typography>

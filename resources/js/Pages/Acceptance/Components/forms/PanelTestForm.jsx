@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+﻿import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
     FormControl,
     FormHelperText,
@@ -6,7 +6,7 @@ import {
     MenuItem,
     Select,
     TextField,
-    Grid2 as Grid,
+    Grid as Grid,
     Typography,
     Paper,
     Box,
@@ -33,7 +33,7 @@ import {
     Science as ScienceIcon,
     Person as PersonIcon,
     ScienceOutlined as ScienceOutlinedIcon,
-    HelpOutline as HelpOutlineIcon,
+    HelpOutlined as HelpOutlineIcon,
     ExpandMore as ExpandMoreIcon,
     AttachMoney as AttachMoneyIcon,
     Error as ErrorIcon,
@@ -203,8 +203,8 @@ const EmptyState = React.memo(() => (
 EmptyState.displayName = 'EmptyState';
 
 const PanelHeader = React.memo(({panel, itemCount}) => (
-    <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-        <Box display="flex" alignItems="center">
+  <Box display="flex" mb={2} sx={{alignItems: "center", justifyContent: "space-between"}}>
+  <Box display="flex" sx={{alignItems: "center"}}>
             <ScienceIcon color="primary" sx={{mr: 1}}/>
             <Typography variant="subtitle1" fontWeight="medium">
                 {panel?.name || "Panel"}
@@ -225,7 +225,7 @@ const PanelHeader = React.memo(({panel, itemCount}) => (
                 color: 'white',
                 borderRadius: 2
             }}>
-                <Box display="flex" alignItems="center">
+  <Box display="flex" sx={{alignItems: "center"}}>
                     <AttachMoneyIcon sx={{mr: 1}}/>
                     <Typography variant="h6" fontWeight="bold">
                         Panel Price: {panel.price} OMR
@@ -260,11 +260,11 @@ const SampleConfiguration = React.memo(({
         <Grid container spacing={2}>
             {/* Sample count controls */}
             <Grid size={{xs: 12}}>
-                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center", justifyContent: "space-between"}}>
                     <Typography variant="body2" color="text.secondary">
                         Samples ({currentSampleCount}/{maxSamples})
                     </Typography>
-                    <Box display="flex" alignItems="center" gap={1}>
+  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
                         <Tooltip title="Add sample">
                             <span>
                                 <IconButton
@@ -318,7 +318,7 @@ const SampleConfiguration = React.memo(({
                     >
                         <Grid container spacing={2}>
                             <Grid size={6}>
-                                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center", justifyContent: "space-between"}}>
                                     <Typography variant="subtitle2" color="primary" fontWeight="medium">
                                         Sample {sampleIndex + 1}
                                     </Typography>
@@ -384,7 +384,8 @@ const SampleConfiguration = React.memo(({
                                         <Box
                                             key={`patient-${patientIndex}`}
                                             display="flex"
-                                            alignItems="flex-start"
+
+ sx={{alignItems: "flex-start"}}
                                         >
                                             <Box sx={{flexGrow: 1}}>
                                                 <SelectSearch
@@ -599,7 +600,7 @@ const PanelTestForm = ({
     // Tab content renderers
     const renderPriceConfiguration = useCallback(() => (
         <Box sx={{mb: 4}}>
-            <Box display="flex" alignItems="center" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
                 <CalculateIcon color="primary" sx={{mr: 1}}/>
                 <Typography variant="h6" fontWeight="medium">
                     Panel Configuration
@@ -670,7 +671,7 @@ const PanelTestForm = ({
                         )}
 
                         <Grid size={{xs: 12}}>
-                            <Box display="flex" alignItems="center" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
                                 <DiscountIcon color="secondary" sx={{mr: 1}}/>
                                 <Typography variant="subtitle1" fontWeight="medium">
                                     Discount Management
@@ -699,7 +700,7 @@ const PanelTestForm = ({
 
     const renderPatientAssignment = useCallback(() => (
         <Box sx={{mb: 4}}>
-            <Box display="flex" alignItems="center" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
                 <PersonIcon color="primary" sx={{mr: 1}}/>
                 <Typography variant="h6" fontWeight="medium">
                     Patient Assignment
@@ -750,7 +751,7 @@ const PanelTestForm = ({
 
     const renderTestDetails = useCallback(() => (
         <Box sx={{mb: 4}}>
-            <Box display="flex" alignItems="center" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
                 <SettingsIcon color="primary" sx={{mr: 1}}/>
                 <Typography variant="h6" fontWeight="medium">
                     Test Details
@@ -798,7 +799,7 @@ const PanelTestForm = ({
 
     const renderPanelInformation = useCallback(() => (
         <Box sx={{mb: 4}}>
-            <Box display="flex" alignItems="center" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
                 <Details color="primary" sx={{mr: 1}}/>
                 <Typography variant="h6" fontWeight="medium">
                     Panel Information
@@ -820,7 +821,7 @@ const PanelTestForm = ({
                                                 <TableRow>
                                                     <TableCell>{"Test Name >> Method Name"}</TableCell>
                                                     <TableCell align="center">
-                                                        <Box display="flex" alignItems="center" justifyContent="center">
+  <Box display="flex" sx={{alignItems: "center", justifyContent: "center"}}>
                                                             <AccessTimeIcon fontSize="small" sx={{mr: 0.5}}/>
                                                             Turnaround Time
                                                         </Box>
@@ -902,7 +903,7 @@ const PanelTestForm = ({
                             <Tab
                                 key={tab.key}
                                 label={
-                                    <Box display="flex" alignItems="center" gap={1}>
+  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
                                         <Badge
                                             color="error"
                                             variant="dot"

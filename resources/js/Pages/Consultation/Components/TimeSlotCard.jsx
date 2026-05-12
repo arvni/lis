@@ -28,9 +28,9 @@ import {
     Schedule,
     Cancel,
     EditOutlined,
-    DeleteOutline,
+    DeleteOutlined,
     VisibilityOutlined,
-    PersonOutline,
+    PersonOutlined,
     SwapHoriz,
     LocationOn
 } from "@mui/icons-material";
@@ -232,10 +232,8 @@ const TimeSlotCard = ({
                     {/* Header with Title and Status */}
                     <Stack
                         direction="row"
-                        justifyContent="space-between"
-                        alignItems="flex-start"
                         spacing={2}
-                        sx={{mb: 2}}
+                        sx={{ mb: 2, justifyContent: "space-between", alignItems: "flex-start" }}
                     >
                         <Typography
                             variant="h6"
@@ -386,7 +384,7 @@ const TimeSlotCard = ({
 
                                         <Stack spacing={1}>
                                             <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                                <PersonOutline
+                                                <PersonOutlined
                                                     fontSize="small"
                                                     sx={{color: getThemedColor('text.secondary', 'grey.400')}}
                                                 />
@@ -473,8 +471,7 @@ const TimeSlotCard = ({
                                         {/* Header */}
                                         <Stack
                                             direction="row"
-                                            justifyContent="space-between"
-                                            alignItems="center"
+                                            sx={{ justifyContent: "space-between", alignItems: "center" }}
                                         >
                                             <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                                 <MedicalServices sx={{
@@ -699,7 +696,7 @@ const TimeSlotCard = ({
                                         color="primary"
                                         component={Link}
                                         href={route("patients.show", timeSlot?.reservable?.patient?.id)}
-                                        startIcon={<PersonOutline/>}
+                                        startIcon={<PersonOutlined/>}
                                         fullWidth={isMobile}
                                         sx={{
                                             textTransform: 'none',
@@ -755,7 +752,7 @@ const TimeSlotCard = ({
                                                 }
                                             }}
                                         >
-                                            <DeleteOutline fontSize="small"/>
+                                            <DeleteOutlined fontSize="small"/>
                                         </IconButton>
                                     </Tooltip>
                                 )}

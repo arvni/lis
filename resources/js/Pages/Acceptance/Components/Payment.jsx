@@ -26,7 +26,7 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import AccordionSummary from "@mui/material/AccordionSummary";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import {
     ExpandMore as ExpandMoreIcon,
     Remove as RemoveIcon,
@@ -424,7 +424,7 @@ const PaymentComponent = ({
                                 onChange={handleChange}
                                 name="discount"
                                 max={sum(acceptanceItems, "price") - sum(acceptanceItems, "discount")}
-                                inputProps={{style: {textAlign: 'right'}}}
+                                slotProps={{ htmlInput: {style: {textAlign: 'right'}} }}
                                 sx={{width: 80}}
                             />
                         )}
@@ -547,12 +547,12 @@ const PaymentComponent = ({
                                             name="discount"
                                             size="small"
                                             sx={{width: 80}}
-                                            inputProps={{
+                                            slotProps={{ htmlInput: {
                                                 min: 0,
                                                 max: sum(acceptanceItems, "price") - sum(acceptanceItems, "discount"),
                                                 step: 0.01,
                                                 style: {textAlign: 'right'}
-                                            }}
+                                            } }}
                                         />
                                     </Box>
                                 </Box>

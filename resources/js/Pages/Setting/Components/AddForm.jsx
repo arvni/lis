@@ -14,7 +14,7 @@ import {
     IconButton,
     Tooltip
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import AvatarUpload from "@/Components/AvatarUpload";
@@ -26,7 +26,7 @@ import ImageIcon from "@mui/icons-material/Image";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CodeIcon from "@mui/icons-material/Code";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
 import LockIcon from "@mui/icons-material/Lock";
 import SelectSearch from "@/Components/SelectSearch.jsx";
 

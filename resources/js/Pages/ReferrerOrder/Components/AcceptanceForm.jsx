@@ -18,7 +18,7 @@ import {
     Slide,
     FormHelperText,
     Switch,
-    Grid2 as Grid
+    Grid as Grid
 } from "@mui/material";
 import {
     Close as CloseIcon,
@@ -62,7 +62,7 @@ const ReportSection = ({data, errors, onChange}) => {
 
                 {/* Send to Referrer option for referred patients */}
                 {
-                    <Grid item xs={12}>
+                    <Grid size={12} >
                         <FormControlLabel
                             control={
                                 <Checkbox
@@ -229,7 +229,7 @@ const AcceptanceFormDialog = ({
             <DialogTitle sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                     {isPoolingMode && <MergeTypeIcon color="info"/>}
-                    <Typography variant="h5">{dialogTitle}</Typography>
+                    <Typography variant="h5" component="span">{dialogTitle}</Typography>
                 </Box>
                 <IconButton onClick={onClose}>
                     <CloseIcon/>

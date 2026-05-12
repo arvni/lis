@@ -25,7 +25,6 @@ const useTotalCalculations = (tests, panels) => {
 
     const totalDiscount = testDiscount + panelDiscount;
     const totalPrice = testPrice + panelPrice;
-    console.log(totalDiscount, totalPrice,testPrice,testDiscount,panelPrice,panelDiscount,);
     const hasItems = panels.length > 0 || tests.length > 0;
     return {totalDiscount, totalPrice, hasItems}
 

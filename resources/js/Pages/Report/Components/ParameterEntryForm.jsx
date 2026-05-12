@@ -24,7 +24,7 @@ import { alpha } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
 
 // Define input types with descriptions
 const TYPE_DESCRIPTIONS = {
@@ -162,9 +162,9 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                 }
             }}
         >
-            <Grid container spacing={2} alignItems="center">
-                <Grid item xs={12} container>
-                    <Grid item xs={12} sm={8} md={9}>
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
+                <Grid size={12} container>
+                    <Grid size={{ xs: 12, sm: 8, md: 9 }} >
                         <Typography variant="subtitle2" gutterBottom>
                             Parameter #{index + 1}
                             {param.required && (
@@ -174,7 +174,7 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                             )}
                         </Typography>
                     </Grid>
-                    <Grid item xs={12} sm={4} md={3} textAlign="right">
+                    <Grid size={{ xs: 12, sm: 4, md: 3 }} sx={{ textAlign: "right" }}>
                         {showTabs && (
                             <Tooltip title="Drag to reorder" placement="top">
                                 <IconButton size="small" sx={{ mr: 1, cursor: 'grab' }}>
@@ -200,7 +200,7 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                     </Grid>
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }} >
                     <TextField
                         fullWidth
                         label="Parameter Title"
@@ -213,7 +213,7 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                     />
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }} >
                     <FormControl fullWidth>
                         <InputLabel id={`param-type-label-${index}`}>Input Type</InputLabel>
                         <Select
@@ -236,7 +236,7 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                     </FormControl>
                 </Grid>
 
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }} >
                     <FormControlLabel
                         control={
                             <Checkbox
@@ -248,7 +248,7 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                     />
                 </Grid>
 
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }} >
                     <FormControlLabel
                         control={
                             <Checkbox
@@ -263,7 +263,7 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                 </Grid>
 
                 {(param.type === 'select' || param.type === 'checkbox') && (
-                    <Grid item xs={12}>
+                    <Grid size={12} >
                         <TextField
                             fullWidth
                             label="Options"
@@ -295,7 +295,7 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
 
     return (
         <Paper elevation={0} sx={{ p: 3, border: '1px solid #e0e0e0' }}>
-            <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+  <Box display="flex" mb={1} sx={{alignItems: "center", justifyContent: "space-between"}}>
                 <Typography variant="h6" color="primary">
                     Template Parameters
                 </Typography>

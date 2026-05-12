@@ -4,7 +4,7 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    Grid2 as Grid,
+    Grid as Grid,
     FormControl,
     FormLabel,
     Radio,
@@ -98,6 +98,7 @@ const EditInvoiceForm = ({invoice, open, onClose, onSubmit, onChange}) => {
     useEffect(() => {
         if (invoice) {
             setFormData(invoice);
+            setActiveTab(0);
         }
     }, [invoice]);
 
@@ -155,6 +156,9 @@ const EditInvoiceForm = ({invoice, open, onClose, onSubmit, onChange}) => {
         }
     };
 
+    const ownerTabVisible = !!(formData.patient || formData.referrer);
+    const itemsTabIndex = ownerTabVisible ? 2 : 1;
+
     // Handle tab change
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
@@ -182,7 +186,6 @@ const EditInvoiceForm = ({invoice, open, onClose, onSubmit, onChange}) => {
             } else {
                 payments.push(paymentData);
             }
-            console.log(payments);
             handleChange("payments", payments)
         }
     }
@@ -286,7 +289,7 @@ const EditInvoiceForm = ({invoice, open, onClose, onSubmit, onChange}) => {
                         }}
                     />
                     <Box>
-                        <Typography variant="h6">
+                        <Typography variant="h6" component="span">
                             Edit Invoice #{formData.id}
                         </Typography>
                         <Typography
@@ -367,7 +370,7 @@ const EditInvoiceForm = ({invoice, open, onClose, onSubmit, onChange}) => {
                             icon={<TableRowsIcon/>}
                             label="Items"
                             iconPosition="start"
-                            {...a11yProps(2)}
+                            {...a11yProps(itemsTabIndex)}
                         />
                     </Tabs>
                 </Box>
@@ -658,7 +661,7 @@ const EditInvoiceForm = ({invoice, open, onClose, onSubmit, onChange}) => {
                     )}
 
                     {/* Invoice Items Tab */}
-                    <TabPanel value={activeTab} index={2}>
+                    <TabPanel value={activeTab} index={itemsTabIndex}>
                         <InvoiceItemsField items={formData.acceptance_items} onChange={handleChange}/>
                     </TabPanel>
                 </Box>

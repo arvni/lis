@@ -94,9 +94,9 @@ const PublishForm = ({onSubmit, open, onCancel, data, setData, processing = fals
                 p: 2.5,
                 bgcolor: 'background.default'
             }}>
-                <Stack direction="row" spacing={1.5} alignItems="center">
+  <Stack direction="row" spacing={1.5} sx={{alignItems: "center"}}>
                     <Share color="primary"/>
-                    <Typography variant="h6">Publish Report</Typography>
+                    <Typography variant="h6" component="span">Publish Report</Typography>
                 </Stack>
 
                 <Tooltip title="Close">

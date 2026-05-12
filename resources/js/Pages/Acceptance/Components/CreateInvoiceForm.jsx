@@ -171,7 +171,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose }) => {
                         }}
                     />
                     <Box>
-                        <Typography variant="h6">
+                        <Typography variant="h6" component="span">
                             Create New Invoice
                         </Typography>
                         <Typography

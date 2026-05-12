@@ -5,7 +5,7 @@ import Filter from "./Components/Filter";
 import TableLayout from "@/Layouts/TableLayout";
 import DeleteForm from "@/Components/DeleteForm";
 import PageHeader from "@/Components/PageHeader.jsx";
-import {router, useForm, usePage} from "@inertiajs/react";
+import {router, useForm, usePage, Link} from "@inertiajs/react";
 import {
     Stack,
     Dialog,
@@ -27,7 +27,6 @@ import {
 import {
     Edit as EditIcon,
     Delete as DeleteIcon,
-    Visibility as VisibilityIcon,
     Cancel as CancelIcon,
     LocalHospital as LocalHospitalIcon,
     CheckCircle as CheckCircleIcon,
@@ -45,7 +44,7 @@ import {
     FlashOn as FlashOnIcon,
     PriorityHigh as PriorityHighIcon,
 } from "@mui/icons-material";
-import {calculateBusinessDays, formatDate} from "@/Services/helper.js";
+import {formatDate} from "@/Services/helper.js";
 import AddPoolingDialog from "@/Pages/Acceptance/Components/AddPoolingDialog.jsx";
 
 const Index = () => {
@@ -65,7 +64,8 @@ const Index = () => {
         canView,
         canUpdate,
         canDelete,
-        canCancel
+        canCancel,
+        canEditInvoiced,
     } = usePage().props;
 
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
@@ -144,32 +144,17 @@ const Index = () => {
             field: 'patient_fullname',
             headerName: 'Patient',
             type: "string",
-            flex: 0.7,
+            flex: 1.2,
             display: "flex",
             align: 'left',
             renderCell: ({row}) => (
-                <Box display="flex" alignItems="center">
-                    <Avatar
-                        sx={{
-                            width: 32,
-                            height: 32,
-                            mr: 1.5,
-                            bgcolor: (theme) => theme.palette.primary.light,
-                            color: (theme) => theme.palette.primary.dark,
-                            fontSize: '0.875rem',
-                            fontWeight: 'bold'
-                        }}
-                    >
-                        {row.patient_fullname?.charAt(0) || "?"}
-                    </Avatar>
-                    <Box>
-                        <Typography variant="body2" fontWeight={600}>
-                            {row.patient_fullname || "N/A"}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                            ID: {row.patient_idno || "N/A"}
-                        </Typography>
-                    </Box>
+                <Box sx={{display: "flex", flexDirection: "column"}}>
+                    <Link href={route('acceptances.show', row.id)} title={row.id}>
+                        {row.patient_fullname || "N/A"}
+                    </Link>
+                    <Typography variant="caption" color="text.secondary">
+                        ID: {row.patient_idno || "N/A"}
+                    </Typography>
                 </Box>
             )
         },
@@ -180,14 +165,14 @@ const Index = () => {
             flex: 0.5,
             display: "flex",
             renderCell: ({row}) => (
-                <Box display="flex" alignItems="center">
+                <Box display="flex" sx={{alignItems: "center"}}>
                     <Box>
                         <Typography variant="body2">
                             {row.referrer_fullname || "N/A"}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        {row.referrer_fullname && <Typography variant="caption" color="text.secondary">
                             Reference Code: {row.referenceCode || "N/A"}
-                        </Typography>
+                        </Typography>}
                     </Box>
                 </Box>
             )
@@ -267,28 +252,6 @@ const Index = () => {
                         borderRadius: 1
                     }}
                 />
-            )
-        },
-        {
-            field: 'waiting_for_pooling',
-            headerName: 'Pooling',
-            type: "boolean",
-            flex: 0.25,
-            display: "flex",
-            renderCell: ({row}) => (
-                row.waiting_for_pooling ? (
-                    <Chip
-                        icon={<MergeTypeIcon fontSize="small"/>}
-                        label="Pooling"
-                        color="secondary"
-                        size="small"
-                        sx={{
-                            fontWeight: 500,
-                            fontSize: '0.7rem',
-                            borderRadius: 1
-                        }}
-                    />
-                ) : null
             )
         },
         {
@@ -380,24 +343,32 @@ const Index = () => {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
 
-                const reportDate = value ? calculateBusinessDays(row.created_at, value) : null;
+                const reportDate = value ?? null;
                 const reportDay = reportDate ? new Date(reportDate) : null;
                 if (reportDay) reportDay.setHours(0, 0, 0, 0);
 
                 const isToday = reportDay && reportDay.getTime() === today.getTime();
                 const isPast = reportDay && reportDay.getTime() < today.getTime();
 
+                const isReported = row.status?.toLowerCase() === 'reported';
+
                 return reportDate ? (
-                    <Box display="flex" alignItems="center">
-                        <Badge
-                            color={isToday ? "warning" : isPast ? "error" : "success"}
-                            variant="dot"
-                            sx={{mr: 1}}
-                        >
-                            <CalendarTodayIcon fontSize="small" color="action"/>
-                        </Badge>
+                    <Box sx={{display: "flex", flexDirection: "row", alignItems: "center"}}>
+                        {isReported ? (
+                            <CheckCircleIcon fontSize="small" color="success" sx={{mr: 1}}/>
+                        ) : row.waiting_for_pooling ? (
+                            <HourglassEmptyIcon fontSize="small" color="secondary" sx={{mr: 1}}/>
+                        ) : (
+                            <Badge
+                                color={isToday ? "warning" : isPast ? "error" : "success"}
+                                variant="dot"
+                                sx={{mr: 1}}
+                            >
+                                <CalendarTodayIcon fontSize="small" color="action"/>
+                            </Badge>
+                        )}
                         <Box>
-                            <Typography variant="body2" color={isPast ? "error.main" : "text.primary"}>
+                            <Typography variant="body2" color={isPast && !isReported && !row.waiting_for_pooling ? "error.main" : "text.primary"}>
                                 {formatDate(reportDate).split(',')[0]}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
@@ -417,7 +388,7 @@ const Index = () => {
             type: "datetime",
             display: "flex",
             valueGetter: (value) => value && new Date(value),
-            renderCell:({value})=>formatDate(value)
+            renderCell: ({value}) => formatDate(value)
         },
         {
             field: 'published_at',
@@ -432,27 +403,14 @@ const Index = () => {
             field: 'id',
             headerName: 'Actions',
             type: 'actions',
-            flex: 0.1,
+            flex: 0.6,
             display: "flex",
             getActions: (params) => {
+                const isInvoiced = Boolean(params.row.invoice_id);
+                const invoicedAllowed = !isInvoiced || canEditInvoiced;
                 let cols = [];
 
-                if (canView) {
-                    cols.push(
-                        <GridActionsCellItem
-                            icon={
-                                <Tooltip title="View details">
-                                    <VisibilityIcon color="info"/>
-                                </Tooltip>
-                            }
-                            label="View"
-                            onClick={show(params.row.id)}
-                            showInMenu
-                        />
-                    );
-                }
-
-                if (canUpdate || params.row.status==="pending") {
+                if ((canUpdate || params.row.status === "pending") && invoicedAllowed) {
                     cols.push(
                         <GridActionsCellItem
                             icon={
@@ -462,12 +420,11 @@ const Index = () => {
                             }
                             label="Edit"
                             onClick={edit(params.row.id)}
-                            showInMenu
                         />
                     );
                 }
 
-                if (canDelete || params.row.status==="pending") {
+                if ((canDelete || params.row.status === "pending") && invoicedAllowed) {
                     cols.push(
                         <GridActionsCellItem
                             icon={
@@ -476,13 +433,12 @@ const Index = () => {
                                 </Tooltip>
                             }
                             label="Delete"
-                            showInMenu
                             onClick={deleteAcceptance(params.row)}
                         />
                     );
                 }
 
-                if (canCancel && params.row.status?.toLowerCase() !== 'canceled') {
+                if (canCancel && params.row.status?.toLowerCase() !== 'canceled' && invoicedAllowed) {
                     cols.push(
                         <GridActionsCellItem
                             icon={
@@ -491,13 +447,12 @@ const Index = () => {
                                 </Tooltip>
                             }
                             label="Cancel"
-                            showInMenu
                             onClick={cancelAcceptance(params.row)}
                         />
                     );
                 }
 
-                if (params.row.status?.toLowerCase() === 'pooling') {
+                if (params.row.status?.toLowerCase() === 'pooling' && invoicedAllowed) {
                     cols.push(
                         <GridActionsCellItem
                             icon={
@@ -506,7 +461,6 @@ const Index = () => {
                                 </Tooltip>
                             }
                             label="Add Pooling"
-                            showInMenu
                             onClick={() => {
                                 setPoolingAcceptance(params.row);
                                 setOpenPoolingDialog(true);
@@ -589,28 +543,7 @@ const Index = () => {
                 icon={<LocalHospitalIcon fontSize="large" color="primary"/>}
                 subtitle="Manage and view all patient acceptances"
                 actions={
-                    <Stack direction="row" spacing={2} alignItems="center">
-                        <Chip
-                            icon={<AssignmentIcon/>}
-                            label="Reports Ready"
-                            color="success"
-                            variant="outlined"
-                            sx={{fontWeight: 500}}
-                        />
-                        <Chip
-                            icon={<ScienceIcon/>}
-                            label="In Progress"
-                            color="info"
-                            variant="outlined"
-                            sx={{fontWeight: 500}}
-                        />
-                        <Chip
-                            icon={<HourglassEmptyIcon/>}
-                            label="Waiting"
-                            color="warning"
-                            variant="outlined"
-                            sx={{fontWeight: 500}}
-                        />
+                    <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                         <Button
                             variant="outlined"
                             color="success"

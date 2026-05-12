@@ -12,7 +12,7 @@ import {
     Typography,
     Alert
 } from '@mui/material';
-import { WarningAmber, ErrorOutline } from '@mui/icons-material';
+import { WarningAmber, ErrorOutlined as ErrorOutline } from '@mui/icons-material';
 
 /**
  * A dialog to confirm deletion of items
@@ -48,10 +48,12 @@ const DeleteConfirmationDialog = ({
             onClose={!isLoading ? onClose : undefined}
             maxWidth="sm"
             fullWidth
-            PaperProps={{
-                sx: {
-                    borderRadius: 2,
-                    overflow: 'hidden'
+            slotProps={{
+                paper: {
+                    sx: {
+                        borderRadius: 2,
+                        overflow: 'hidden'
+                    }
                 }
             }}
         >

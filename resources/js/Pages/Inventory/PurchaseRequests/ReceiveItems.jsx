@@ -108,7 +108,7 @@ const ReceiveItems = () => {
                     <CardHeader title="Delivery Details"/>
                     <CardContent>
                         <Grid container spacing={2}>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }} >
                                 <TextField select fullWidth required label="Receiving Store"
                                     value={storeId}
                                     onChange={(e) => setStoreId(e.target.value)}
@@ -116,7 +116,7 @@ const ReceiveItems = () => {
                                     {stores.map((s) => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
                                 </TextField>
                             </Grid>
-                            <Grid item xs={12} md={8}>
+                            <Grid size={{ xs: 12, md: 8 }} >
                                 <TextField fullWidth multiline rows={2} label="Notes"
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}/>
@@ -163,14 +163,14 @@ const ReceiveItems = () => {
                                             <TableCell>
                                                 <TextField size="small" type="number" fullWidth
                                                     value={rl.qty} disabled={!rl._selected}
-                                                    inputProps={{min: 0.000001, max: remaining, step: "any"}}
+                                                    slotProps={{ htmlInput: {min: 0.000001, max: remaining, step: "any"} }}
                                                     onChange={(e) => updateReceiveLine(idx, "qty", e.target.value)}
                                                     error={!!errors[`lines.${idx}.qty`]}/>
                                             </TableCell>
                                             <TableCell>
                                                 <TextField size="small" type="number" fullWidth
                                                     value={rl.unit_price} disabled={!rl._selected}
-                                                    inputProps={{min: 0, step: "any"}}
+                                                    slotProps={{ htmlInput: {min: 0, step: "any"} }}
                                                     onChange={(e) => updateReceiveLine(idx, "unit_price", e.target.value)}/>
                                             </TableCell>
                                             <TableCell>
@@ -186,7 +186,7 @@ const ReceiveItems = () => {
                                             <TableCell>
                                                 <TextField size="small" fullWidth
                                                     value={rl.barcode} disabled={!rl._selected}
-                                                    inputProps={{sx: {fontFamily: "monospace"}}}
+                                                    slotProps={{ htmlInput: {sx: {fontFamily: "monospace"}} }}
                                                     onChange={(e) => updateReceiveLine(idx, "barcode", e.target.value)}/>
                                             </TableCell>
                                             <TableCell>
@@ -201,7 +201,7 @@ const ReceiveItems = () => {
                                                 <TextField size="small" type="date" fullWidth
                                                     value={rl.expiry_date} disabled={!rl._selected}
                                                     onChange={(e) => updateReceiveLine(idx, "expiry_date", e.target.value)}
-                                                    InputLabelProps={{shrink: true}}/>
+                                                    slotProps={{ inputLabel: {shrink: true} }}/>
                                             </TableCell>
                                             <TableCell>
                                                 <LocationSelect

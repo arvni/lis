@@ -35,14 +35,14 @@ const AddLocationForm = ({storeId, onClose}) => {
             </Typography>
             <Grid container spacing={2}>
                 {["zone", "row", "column", "shelf", "bin"].map((field) => (
-                    <Grid item xs={6} sm={2} key={field}>
+                    <Grid size={{ xs: 6, sm: 2 }} key={field}>
                         <TextField
                             fullWidth size="small" label={field.charAt(0).toUpperCase() + field.slice(1)}
                             value={data[field]} onChange={(e) => setData(field, e.target.value)}
                         />
                     </Grid>
                 ))}
-                <Grid item xs={12} sm={2}>
+                <Grid size={{ xs: 12, sm: 2 }} >
                     <TextField
                         fullWidth size="small" label="Capacity Notes"
                         value={data.capacity_notes} onChange={(e) => setData("capacity_notes", e.target.value)}
@@ -99,7 +99,7 @@ const Show = () => {
             )}
 
             <Grid container spacing={3}>
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }} >
                     <Card sx={{height: "100%"}}>
                         <CardHeader
                             title="Store Info"
@@ -115,10 +115,10 @@ const Show = () => {
                         />
                         <CardContent>
                             <Grid container spacing={0}>
-                                <Grid item xs={6}>
+                                <Grid size={6} >
                                     <Field label="Code">{store.code}</Field>
                                 </Grid>
-                                <Grid item xs={6}>
+                                <Grid size={6} >
                                     <Field label="Manager">{store.manager?.name}</Field>
                                 </Grid>
                             </Grid>
@@ -145,7 +145,7 @@ const Show = () => {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} md={8}>
+                <Grid size={{ xs: 12, md: 8 }} >
                     <Card>
                         <CardHeader
                             title="Locations"

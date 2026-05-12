@@ -1,6 +1,6 @@
 
 import {TextField} from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import {FormProvider, useFormState} from "@/Components/FormTemplate.jsx";
 
 const AddForm = ({open, onClose, defaultValue}) => {
@@ -25,7 +25,7 @@ const AddForm = ({open, onClose, defaultValue}) => {
 const FormContent = () => {
     const {data, setData, errors} = useFormState();
     const handleChange = (e) => setData(prevState => ({...prevState, [e.target.name]: e.target.value}));
-    return <Grid item>
+    return <Grid >
         <TextField label="Title"
                    name="name"
                    error={!!errors?.name}

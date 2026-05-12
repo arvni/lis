@@ -112,7 +112,7 @@ const Labels = () => {
 
             <Grid container spacing={2}>
                 {lots.map((lot, idx) => (
-                    <Grid item key={lot.id ?? idx}>
+                    <Grid key={lot.id ?? idx}>
                         <LotLabel lot={lot}/>
                     </Grid>
                 ))}

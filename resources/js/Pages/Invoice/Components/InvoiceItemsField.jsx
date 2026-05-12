@@ -24,7 +24,7 @@ import {
     MenuItem,
     Select,
     InputAdornment,
-    Grid2 as Grid
+    Grid as Grid
 } from '@mui/material';
 import {
     Edit as EditIcon,
@@ -485,7 +485,7 @@ const InvoiceItemsField = ({items = [], onChange, maxDiscount = 100}) => {
 
         return (
             <TableCell align="right">
-                <Box display="flex" alignItems="center" justifyContent="flex-end">
+  <Box display="flex" sx={{alignItems: "center", justifyContent: "flex-end"}}>
                     <Typography variant="body2">
                         {parseFloat(totalDiscount || 0).toFixed(2)}
                     </Typography>
@@ -556,7 +556,7 @@ const InvoiceItemsField = ({items = [], onChange, maxDiscount = 100}) => {
             }}
         >
             <TableCell sx={{pl: isSubItem ? 4 : 2}}>
-                <Box display="flex" alignItems="center" gap={1}>
+  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
                     {!isSubItem && (
                         <Chip
                             label={item.method_test.test?.type || 'Unknown'}
@@ -604,7 +604,7 @@ const InvoiceItemsField = ({items = [], onChange, maxDiscount = 100}) => {
             <React.Fragment key={panel.id}>
                 <TableRow>
                     <TableCell>
-                        <Box display="flex" alignItems="center" gap={1}>
+  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
                             <Chip label="PANEL" size="small" color="default"/>
                             <Typography fontWeight="medium">
                                 {panel.test?.name || panel.method_test.test?.name || 'Unknown Panel'}
@@ -762,8 +762,8 @@ const InvoiceItemsField = ({items = [], onChange, maxDiscount = 100}) => {
                 fullWidth
             >
                 <DialogTitle>
-                    <Box display="flex" alignItems="center" justifyContent="space-between">
-                        <Typography variant="h6">
+  <Box display="flex" sx={{alignItems: "center", justifyContent: "space-between"}}>
+                        <Typography variant="h6" component="span">
                             Manage Discounts
                         </Typography>
                         <IconButton onClick={handleDiscountDialogClose}>

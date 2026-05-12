@@ -1,4 +1,4 @@
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -276,8 +276,8 @@ const ShowFilter = memo(({defaultFilter, onFilter}) => {
                         />
                     </Grid>
 
-                    <Grid item container size={{xs: 12}} spacing={1} sx={{mt: 1}}>
-                        <Grid item>
+                    <Grid container size={{xs: 12}} spacing={1} sx={{mt: 1}}>
+                        <Grid >
                             <Button
                                 variant="contained"
                                 onClick={applyFilter}
@@ -286,7 +286,7 @@ const ShowFilter = memo(({defaultFilter, onFilter}) => {
                                 Apply Filters
                             </Button>
                         </Grid>
-                        <Grid item>
+                        <Grid >
                             <Button
                                 variant="outlined"
                                 onClick={clearAllFilters}

@@ -114,7 +114,7 @@ const WorkflowTemplatesIndex = () => {
                                         {tpl.steps.length === 0 ? (
                                             <Typography variant="caption" color="text.secondary">No steps</Typography>
                                         ) : (
-                                            <Stack direction="row" flexWrap="wrap" gap={0.5}>
+                                            <Stack direction="row" gap={0.5} sx={{flexWrap: 'wrap'}}>
                                                 {tpl.steps.map((s, i) => (
                                                     <Box key={s.id} sx={{display: "flex", alignItems: "center", gap: 0.5}}>
                                                         <Typography variant="caption" color="text.disabled">{i + 1}.</Typography>

@@ -22,7 +22,7 @@ const StockCard = () => {
             <PageHeader title={`${item.item_code} — ${item.name}`}/>
 
             <Grid container spacing={3} sx={{mb: 3}}>
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }} >
                     <Card sx={{height: "100%"}}>
                         <CardContent>
                             <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
@@ -46,7 +46,7 @@ const StockCard = () => {
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid item xs={12} md={5}>
+                <Grid size={{ xs: 12, md: 5 }} >
                     <Card sx={{height: "100%"}}>
                         <CardContent>
                             <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
@@ -59,7 +59,7 @@ const StockCard = () => {
                                     ["Storage",      item.storage_condition],
                                     ["Base Unit",    `${item.default_unit?.name} (${item.default_unit?.abbreviation})`],
                                 ].map(([label, value]) => (
-                                    <Grid item xs={6} key={label}>
+                                    <Grid size={6} key={label}>
                                         <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
                                         <Typography variant="body2" fontWeight={500}>{value || "—"}</Typography>
                                     </Grid>
@@ -68,7 +68,7 @@ const StockCard = () => {
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid item xs={12} md={3}>
+                <Grid size={{ xs: 12, md: 3 }} >
                     <Card sx={{height: "100%"}}>
                         <CardContent>
                             <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
@@ -88,7 +88,7 @@ const StockCard = () => {
             </Grid>
 
             <Grid container spacing={3}>
-                <Grid item xs={12} lg={8}>
+                <Grid size={{ xs: 12, lg: 8 }} >
                     <Card>
                         <CardHeader
                             title="Transaction History"
@@ -170,7 +170,7 @@ const StockCard = () => {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} lg={4}>
+                <Grid size={{ xs: 12, lg: 4 }} >
                     <Card>
                         <CardHeader
                             title="Active Lots"

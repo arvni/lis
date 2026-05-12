@@ -4,7 +4,7 @@ import {
     Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle,
     IconButton, Paper, Stack, Tooltip, Typography, Alert, Collapse,
     Divider, LinearProgress, TextField, MenuItem, Select, FormControl,
-    InputLabel, Grid2 as Grid, Card, CardContent,
+    InputLabel, Grid as Grid, Card, CardContent,
 } from '@mui/material';
 import {GridActionsCellItem} from '@mui/x-data-grid';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -16,8 +16,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import ReplayCircleFilledIcon from '@mui/icons-material/ReplayCircleFilled';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import {formatDate} from '@/Services/helper.js';
 
 // ─── Exception detail dialog ──────────────────────────────────────────────────
@@ -29,7 +29,7 @@ function ExceptionDialog({open, onClose, job}) {
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                     <ErrorOutlineIcon color="error"/>
                     <Box>
-                        <Typography variant="h6">{job.display_name?.split('\\').pop()}</Typography>
+                        <Typography variant="h6" component="span">{job.display_name?.split('\\').pop()}</Typography>
                         <Typography variant="caption" color="text.secondary">{job.display_name}</Typography>
                     </Box>
                 </Box>
@@ -130,7 +130,7 @@ function BulkConfirmDialog({open, onClose, onConfirm, title, message, confirmCol
 // ─── Filter component ─────────────────────────────────────────────────────────
 export function FailedJobFilter({filters, setFilters, queues}) {
     return (
-        <Stack direction="row" spacing={2} flexWrap="wrap" sx={{p: 2}}>
+        <Stack direction="row" spacing={2} sx={{p: 2, flexWrap: 'wrap'}}>
             <TextField
                 size="small"
                 label="Search"

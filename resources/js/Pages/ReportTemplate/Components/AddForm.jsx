@@ -12,12 +12,12 @@ import {
     Alert,
     Stack, Chip
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
@@ -109,7 +109,7 @@ const FormContent = () => {
                 <Divider sx={{ mb: 2 }} />
 
                 <Grid container spacing={3}>
-                    <Grid xs={12}>
+                    <Grid size={12} >
                         <TextField
                             fullWidth
                             label="Template Title"
@@ -122,7 +122,7 @@ const FormContent = () => {
                         />
                     </Grid>
 
-                    <Grid xs={12}>
+                    <Grid size={12} >
                         <Typography variant="subtitle2" gutterBottom>
                             Template Document
                         </Typography>
@@ -144,7 +144,7 @@ const FormContent = () => {
 
             {/* Parameters Section */}
             <Paper elevation={0} sx={{ p: 3, border: '1px solid #e0e0e0' }}>
-                <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+  <Box display="flex" mb={1} sx={{alignItems: "center", justifyContent: "space-between"}}>
                     <Typography variant="h6" color="primary">
                         Template Parameters
                     </Typography>
@@ -177,9 +177,9 @@ const FormContent = () => {
                             }
                         }}
                     >
-                        <Grid container spacing={2} alignItems="center">
-                            <Grid xs={12} container>
-                                <Grid xs={12} sm={8} md={9}>
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
+                            <Grid size={12} container>
+                                <Grid size={{ xs: 12, sm: 8, md: 9 }} >
                                     <Typography variant="subtitle2" gutterBottom>
                                         Parameter #{index + 1}
                                         {param.required && (
@@ -189,7 +189,7 @@ const FormContent = () => {
                                         )}
                                     </Typography>
                                 </Grid>
-                                <Grid xs={12} sm={4} md={3} textAlign="right">
+                                <Grid size={{ xs: 12, sm: 4, md: 3 }} sx={{ textAlign: "right" }}>
                                     <Tooltip title="Drag to reorder" placement="top">
                                         <IconButton size="small" sx={{ mr: 1, cursor: 'grab' }}>
                                             <DragIndicatorIcon fontSize="small" />
@@ -213,7 +213,7 @@ const FormContent = () => {
                                 </Grid>
                             </Grid>
 
-                            <Grid xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }} >
                                 <TextField
                                     fullWidth
                                     label="Parameter Title"
@@ -224,7 +224,7 @@ const FormContent = () => {
                                 />
                             </Grid>
 
-                            <Grid xs={12} sm={6}>
+                            <Grid size={{ xs: 12, sm: 6 }} >
                                 <FormControl fullWidth>
                                     <InputLabel id={`param-type-label-${index}`}>Input Type</InputLabel>
                                     <Select
@@ -247,7 +247,7 @@ const FormContent = () => {
                                 </FormControl>
                             </Grid>
 
-                            <Grid xs={6} sm={3}>
+                            <Grid size={{ xs: 6, sm: 3 }} >
                                 <FormControlLabel
                                     control={
                                         <Checkbox
@@ -259,7 +259,7 @@ const FormContent = () => {
                                 />
                             </Grid>
 
-                            <Grid xs={6} sm={3}>
+                            <Grid size={{ xs: 6, sm: 3 }} >
                                 <FormControlLabel
                                     control={
                                         <Checkbox
@@ -274,7 +274,7 @@ const FormContent = () => {
                             </Grid>
 
                             {(param.type === 'select' || param.type === 'checkbox') && (
-                                <Grid xs={12}>
+                                <Grid size={12} >
                                     <TextField
                                         fullWidth
                                         label="Options"
@@ -303,7 +303,7 @@ const FormContent = () => {
                     </Paper>
                 ))}
 
-                <Box textAlign="center" mt={3}>
+                <Box sx={{ textAlign: "center", mt: 3 }}>
                     <Button
                         variant="contained"
                         color="primary"

@@ -38,11 +38,13 @@ const DeleteForm = ({
             onClose={!loading ? disAgreeCB : undefined}
             aria-labelledby="delete-dialog-title"
             aria-describedby="delete-dialog-description"
-            PaperProps={{
-                elevation: 3,
-                sx: {
-                    borderRadius: 2,
-                    minWidth: { xs: '85%', sm: 400 }
+            slotProps={{
+                paper: {
+                    elevation: 3,
+                    sx: {
+                        borderRadius: 2,
+                        minWidth: { xs: '85%', sm: 400 }
+                    }
                 }
             }}
         >
@@ -53,7 +55,7 @@ const DeleteForm = ({
                     pb: 1
                 }}
             >
-                <Stack direction="row" spacing={2} alignItems="center">
+                <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                     <Box
                         sx={{
                             display: 'flex',
@@ -76,6 +78,7 @@ const DeleteForm = ({
             <DialogContent sx={{ pt: 2, pb: 2 }}>
                 <DialogContentText
                     id="delete-dialog-description"
+                    component="div"
                     sx={{ color: 'text.primary' }}
                 >
                     {displayMessage}
@@ -124,7 +127,7 @@ const DeleteForm = ({
 
 DeleteForm.propTypes = {
     title: PropTypes.string,
-    message: PropTypes.string,
+    message: PropTypes.node,
     agreeCB: PropTypes.func.isRequired,
     disAgreeCB: PropTypes.func.isRequired,
     openDelete: PropTypes.bool.isRequired,

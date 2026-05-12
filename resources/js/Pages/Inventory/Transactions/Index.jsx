@@ -34,34 +34,34 @@ const TransactionsFilter = ({defaultFilter, onFilter, stores}) => {
         onFilter({})();
     };
     return (
-        <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={2}>
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
+            <Grid size={{ xs: 12, md: 2 }} >
                 <TextField select fullWidth size="small" label="Type" value={values.transaction_type} onChange={set("transaction_type")}>
                     <MenuItem value="">All Types</MenuItem>
                     {TX_TYPES.map((t) => <MenuItem key={t} value={t}>{t.replace("_", " ")}</MenuItem>)}
                 </TextField>
             </Grid>
-            <Grid item xs={12} md={2}>
+            <Grid size={{ xs: 12, md: 2 }} >
                 <TextField select fullWidth size="small" label="Status" value={values.status} onChange={set("status")}>
                     <MenuItem value="">All Statuses</MenuItem>
                     {TX_STATUSES.map((s) => <MenuItem key={s} value={s}>{s.replace("_", " ")}</MenuItem>)}
                 </TextField>
             </Grid>
-            <Grid item xs={12} md={2}>
+            <Grid size={{ xs: 12, md: 2 }} >
                 <TextField select fullWidth size="small" label="Store" value={values.store_id} onChange={set("store_id")}>
                     <MenuItem value="">All Stores</MenuItem>
                     {(stores ?? []).map((s) => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
                 </TextField>
             </Grid>
-            <Grid item xs={12} md={2}>
+            <Grid size={{ xs: 12, md: 2 }} >
                 <TextField fullWidth size="small" type="date" label="From Date" value={values.date_from}
-                    onChange={set("date_from")} InputLabelProps={{shrink: true}}/>
+                    onChange={set("date_from")} slotProps={{ inputLabel: {shrink: true} }}/>
             </Grid>
-            <Grid item xs={12} md={2}>
+            <Grid size={{ xs: 12, md: 2 }} >
                 <TextField fullWidth size="small" type="date" label="To Date" value={values.date_to}
-                    onChange={set("date_to")} InputLabelProps={{shrink: true}}/>
+                    onChange={set("date_to")} slotProps={{ inputLabel: {shrink: true} }}/>
             </Grid>
-            <Grid item xs={12} md={2}>
+            <Grid size={{ xs: 12, md: 2 }} >
                 <Box sx={{display: "flex", gap: 1}}>
                     <Button variant="contained" size="small" onClick={apply}>Apply</Button>
                     <Button variant="outlined" size="small" onClick={reset}>Reset</Button>

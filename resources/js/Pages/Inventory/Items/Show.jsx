@@ -11,7 +11,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageHeader from "@/Components/PageHeader";
 
 const Field = ({label, children}) => (
-    <Grid item xs={6}>
+    <Grid size={6} >
         <Typography variant="caption" color="text.secondary" display="block" gutterBottom>{label}</Typography>
         <Typography variant="body2" fontWeight={500}>{children || "—"}</Typography>
     </Grid>
@@ -39,7 +39,7 @@ const Show = () => {
             />
 
             <Grid container spacing={3}>
-                <Grid item xs={12} md={7}>
+                <Grid size={{ xs: 12, md: 7 }} >
                     <Card>
                         <CardHeader
                             title="Item Details"
@@ -78,7 +78,7 @@ const Show = () => {
                                     {item.lead_time_days ? `${item.lead_time_days} days` : null}
                                 </Field>
 
-                                <Grid item xs={12}><Divider/></Grid>
+                                <Grid size={12} ><Divider/></Grid>
 
                                 <Field label="Min Stock Level">
                                     {item.minimum_stock_level != null
@@ -92,10 +92,10 @@ const Show = () => {
                                 </Field>
 
                                 {(item.storage_condition_notes || item.description || item.notes) && (
-                                    <Grid item xs={12}><Divider/></Grid>
+                                    <Grid size={12} ><Divider/></Grid>
                                 )}
                                 {item.storage_condition_notes && (
-                                    <Grid item xs={12}>
+                                    <Grid size={12} >
                                         <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
                                             Storage Notes
                                         </Typography>
@@ -103,7 +103,7 @@ const Show = () => {
                                     </Grid>
                                 )}
                                 {item.description && (
-                                    <Grid item xs={12}>
+                                    <Grid size={12} >
                                         <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
                                             Description
                                         </Typography>
@@ -111,7 +111,7 @@ const Show = () => {
                                     </Grid>
                                 )}
                                 {item.notes && (
-                                    <Grid item xs={12}>
+                                    <Grid size={12} >
                                         <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
                                             Notes
                                         </Typography>
@@ -123,7 +123,7 @@ const Show = () => {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} md={5}>
+                <Grid size={{ xs: 12, md: 5 }} >
                     <Card>
                         <CardHeader
                             title="Unit Conversions"

@@ -1,4 +1,4 @@
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import {useState} from "react";
 import FilterTemplate from "@/Components/FilterWraper.jsx";
@@ -10,8 +10,8 @@ const Filter = ({defaultFilter, onFilter}) => {
     };
     return <FilterTemplate onFilter={onFilter(filter)}>
         <Grid size={{xs: 12, sm: 5}}>
-            <TextField sx={{width: "100%"}} name={"search"} value={filter?.search} onChange={handleChange}
-                       label={"Search title"}/>
+            <TextField sx={{width: "100%"}} name={"search"} value={filter?.search ?? ""} onChange={handleChange}
+                       label={"Search title"} />
         </Grid>
     </FilterTemplate>;
 }

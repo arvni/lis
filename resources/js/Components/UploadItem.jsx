@@ -80,7 +80,7 @@ const UploadItem = ({
                     borderStyle: "dashed"
                 }}
             >
-                <Stack direction="row" alignItems="center" spacing={2} width="100%">
+  <Stack direction="row" spacing={2} width="100%" sx={{alignItems: "center"}}>
                     <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
                             {value?.originalName ? `Waiting to upload ${value.originalName}...` : "Waiting to upload..."}
@@ -116,7 +116,7 @@ const UploadItem = ({
                     borderRadius: 1
                 }}
             >
-                <Stack direction="row" alignItems="center" spacing={2} width="100%">
+  <Stack direction="row" spacing={2} width="100%" sx={{alignItems: "center"}}>
                     <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
                             {value?.originalName ? `Uploading ${value.originalName}...` : "Uploading..."}
@@ -165,7 +165,7 @@ const UploadItem = ({
                     bgcolor: "error.light",
                 }}
             >
-                <Stack direction="row" alignItems="center" spacing={2} width="100%">
+  <Stack direction="row" spacing={2} width="100%" sx={{alignItems: "center"}}>
                     <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body2" gutterBottom fontWeight="medium">
                             {value?.originalName || "File"} - Upload failed
@@ -203,7 +203,7 @@ const UploadItem = ({
                     opacity: 0.6,
                 }}
             >
-                <Stack direction="row" alignItems="center" spacing={2} width="100%">
+  <Stack direction="row" spacing={2} width="100%" sx={{alignItems: "center"}}>
                     <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
                             Deleting {value?.originalName || "file"}...
@@ -252,10 +252,9 @@ const UploadItem = ({
                     direction="row"
                     spacing={2}
                     width="100%"
-                    alignItems="center"
-                    justifyContent="space-between"
+                    sx={{ alignItems: "center", justifyContent: "space-between" }}
                 >
-                    <Stack direction="row" spacing={2} alignItems="center" sx={{ overflow: "hidden" }}>
+  <Stack direction="row" spacing={2} sx={{alignItems: "center", overflow: "hidden"}}>
                         {getFileIcon()}
                         <Box sx={{ overflow: "hidden" }}>
                             <Tooltip title={value?.originalName || "File"} placement="top">
@@ -271,7 +270,7 @@ const UploadItem = ({
                                 </Typography>
                             </Tooltip>
 
-                            <Stack direction="row" alignItems="center" spacing={1}>
+  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                                 {showFileSize && value?.size && (
                                     <Typography variant="caption" color="text.secondary">
                                         {formatFileSize(value.size)}
@@ -298,7 +297,7 @@ const UploadItem = ({
                                         </Select>
                                     </FormControl>
                                 ) : (
-                                    <Stack direction="row" alignItems="center" spacing={0.5}>
+  <Stack direction="row" spacing={0.5} sx={{alignItems: "center"}}>
                                         <LabelIcon sx={{ fontSize: 16, color: 'primary.main' }} />
                                         <Typography variant="caption" color="primary">
                                             {value?.tag || "TEMP"}

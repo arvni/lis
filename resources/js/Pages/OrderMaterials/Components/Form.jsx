@@ -17,7 +17,7 @@ import {
     Fade,
     Badge
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import {FormProvider, useFormState} from "@/Components/FormTemplate.jsx";
 import React, {useState, useEffect} from "react";
 import {

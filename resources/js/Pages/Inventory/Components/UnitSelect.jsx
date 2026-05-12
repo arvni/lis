@@ -50,7 +50,7 @@ const UnitSelect = ({itemId, allUnits = [], value, onChange, label = "Unit", req
                     size={size}
                     error={error}
                     helperText={helperText || (itemId && itemUnits ? `${options.length} unit(s) available` : "")}
-                    InputProps={{
+                    slotProps={{ input: {
                         ...params.InputProps,
                         endAdornment: (
                             <>
@@ -58,7 +58,7 @@ const UnitSelect = ({itemId, allUnits = [], value, onChange, label = "Unit", req
                                 {params.InputProps.endAdornment}
                             </>
                         ),
-                    }}
+                    } }}
                 />
             )}
         />

@@ -2,7 +2,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import {usePage} from "@inertiajs/react";
 import {
     Box, Typography, Table, TableBody, TableCell, TableContainer,
-    TableHead, TableRow, Paper, Divider, Grid2 as Grid, Chip, Button,
+    TableHead, TableRow, Paper, Divider, Grid as Grid, Chip, Button,
 } from "@mui/material";
 import {
     Print as PrintIcon,

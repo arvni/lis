@@ -75,12 +75,12 @@ const Add = () => {
                     <Box component="form" onSubmit={handleSubmit}>
                         {activeStep === 0 && (
                             <Grid container spacing={3}>
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                                         Selecting department and material type will generate the item code automatically.
                                     </Typography>
                                 </Grid>
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{ xs: 12, md: 6 }} >
                                     <TextField
                                         select fullWidth required
                                         label="Department / Purpose"
@@ -94,7 +94,7 @@ const Add = () => {
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{ xs: 12, md: 6 }} >
                                     <TextField
                                         select fullWidth required
                                         label="Material Type"
@@ -108,7 +108,7 @@ const Add = () => {
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
                                         <Typography variant="body2" color="text.secondary">Generated Code Preview:</Typography>
                                         <Typography
@@ -119,7 +119,7 @@ const Add = () => {
                                         </Typography>
                                     </Box>
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <Button
                                         variant="contained"
                                         disabled={!data.department || !data.material_type}
@@ -133,7 +133,7 @@ const Add = () => {
 
                         {activeStep === 1 && (
                             <Grid container spacing={3}>
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{ xs: 12, md: 6 }} >
                                     <TextField
                                         fullWidth required label="Item Name"
                                         value={data.name}
@@ -141,14 +141,14 @@ const Add = () => {
                                         error={!!errors.name} helperText={errors.name}
                                     />
                                 </Grid>
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{ xs: 12, md: 6 }} >
                                     <TextField
                                         fullWidth label="Scientific Name"
                                         value={data.scientific_name}
                                         onChange={(e) => setData("scientific_name", e.target.value)}
                                     />
                                 </Grid>
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{ xs: 12, md: 6 }} >
                                     <TextField
                                         select fullWidth required label="Storage Condition"
                                         value={data.storage_condition}
@@ -160,7 +160,7 @@ const Add = () => {
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{ xs: 12, md: 6 }} >
                                     <TextField
                                         select fullWidth required label="Base Unit"
                                         value={data.default_unit_id}
@@ -172,67 +172,67 @@ const Add = () => {
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item xs={12} md={4}>
+                                <Grid size={{ xs: 12, md: 4 }} >
                                     <TextField
                                         fullWidth type="number" label="Min Stock Level (base units)"
                                         value={data.minimum_stock_level}
                                         onChange={(e) => setData("minimum_stock_level", e.target.value)}
-                                        inputProps={{min: 0, step: "any"}}
+                                        slotProps={{ htmlInput: {min: 0, step: "any"} }}
                                     />
                                 </Grid>
-                                <Grid item xs={12} md={4}>
+                                <Grid size={{ xs: 12, md: 4 }} >
                                     <TextField
                                         fullWidth type="number" label="Max Stock Level (base units)"
                                         value={data.maximum_stock_level}
                                         onChange={(e) => setData("maximum_stock_level", e.target.value)}
-                                        inputProps={{min: 0, step: "any"}}
+                                        slotProps={{ htmlInput: {min: 0, step: "any"} }}
                                     />
                                 </Grid>
-                                <Grid item xs={12} md={4}>
+                                <Grid size={{ xs: 12, md: 4 }} >
                                     <TextField
                                         fullWidth type="number" label="Lead Time (days)"
                                         value={data.lead_time_days}
                                         onChange={(e) => setData("lead_time_days", e.target.value)}
-                                        inputProps={{min: 0}}
+                                        slotProps={{ htmlInput: {min: 0} }}
                                     />
                                 </Grid>
-                                <Grid item xs={6} md={3}>
+                                <Grid size={{ xs: 6, md: 3 }} >
                                     <FormControlLabel
                                         control={<Checkbox checked={data.is_hazardous} onChange={(e) => setData("is_hazardous", e.target.checked)}/>}
                                         label="Hazardous"
                                     />
                                 </Grid>
-                                <Grid item xs={6} md={3}>
+                                <Grid size={{ xs: 6, md: 3 }} >
                                     <FormControlLabel
                                         control={<Checkbox checked={data.requires_lot_tracking} onChange={(e) => setData("requires_lot_tracking", e.target.checked)}/>}
                                         label="Lot Tracking"
                                     />
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <Divider/>
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <TextField
                                         fullWidth multiline rows={2} label="Description"
                                         value={data.description}
                                         onChange={(e) => setData("description", e.target.value)}
                                     />
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <TextField
                                         fullWidth multiline rows={2} label="Storage Notes"
                                         value={data.storage_condition_notes}
                                         onChange={(e) => setData("storage_condition_notes", e.target.value)}
                                     />
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <TextField
                                         fullWidth multiline rows={2} label="Notes"
                                         value={data.notes}
                                         onChange={(e) => setData("notes", e.target.value)}
                                     />
                                 </Grid>
-                                <Grid item xs={12} sx={{display: "flex", gap: 2}}>
+                                <Grid size={12} sx={{display: "flex", gap: 2}}>
                                     <Button onClick={() => setActiveStep(0)}>Back</Button>
                                     <Button
                                         variant="contained"
@@ -277,7 +277,7 @@ const Add = () => {
                                                         size="small" type="number"
                                                         value={conv.conversion_to_base}
                                                         onChange={(e) => updateConversion(idx, "conversion_to_base", e.target.value)}
-                                                        inputProps={{min: 0.000001, step: "any"}}
+                                                        slotProps={{ htmlInput: {min: 0.000001, step: "any"} }}
                                                         sx={{width: 120}}
                                                     />
                                                 </TableCell>

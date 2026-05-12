@@ -1,13 +1,13 @@
-import React from "react";
-import Grid from "@mui/material/Grid2";
+﻿import React from "react";
+import Grid from "@mui/material/Grid";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import FormGroup from "@mui/material/FormGroup";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
-import { Print, Email, WhatsApp, HelpOutline } from "@mui/icons-material";
+import { Print, Email, WhatsApp, HelpOutlined } from "@mui/icons-material";
 import { Box, Divider, Paper, Typography, Tooltip, Stack, IconButton } from "@mui/material";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
 import Checkbox from "@mui/material/Checkbox";
 import SelectSearch from "@/Components/SelectSearch.jsx";
 
@@ -180,7 +180,7 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
                                         </Typography>
                                         <Tooltip title="Please provide the name of the person who will collect the printed report">
                                             <IconButton size="small" sx={{ ml: 1 }}>
-                                                <HelpOutline fontSize="small" />
+                                                <HelpOutlined fontSize="small" />
                                             </IconButton>
                                         </Tooltip>
                                     </Box>
@@ -198,9 +198,9 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
                                         helperText={errors?.["howReport.printReceiver"] || ""}
                                         variant="outlined"
                                         size="medium"
-                                        inputProps={{
+                                        slotProps={{ htmlInput: {
                                             'aria-describedby': 'print-receiver-helper'
-                                        }}
+                                        } }}
                                     />
                                 </Box>
                             )}
@@ -213,7 +213,7 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
                                         </Typography>
                                         <Tooltip title="We'll send your test results to this email address">
                                             <IconButton size="small" sx={{ ml: 1 }}>
-                                                <HelpOutline fontSize="small" />
+                                                <HelpOutlined fontSize="small" />
                                             </IconButton>
                                         </Tooltip>
                                     </Box>
@@ -232,10 +232,10 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
                                         variant="outlined"
                                         type="email"
                                         size="medium"
-                                        inputProps={{
+                                        slotProps={{ htmlInput: {
                                             'aria-describedby': 'email-helper',
                                             autoComplete: 'email'
-                                        }}
+                                        } }}
                                     />
                                 </Box>
                             )}
@@ -248,7 +248,7 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
                                         </Typography>
                                         <Tooltip title="We'll send your test results to this WhatsApp number">
                                             <IconButton size="small" sx={{ ml: 1 }}>
-                                                <HelpOutline fontSize="small" />
+                                                <HelpOutlined fontSize="small" />
                                             </IconButton>
                                         </Tooltip>
                                     </Box>
@@ -266,10 +266,10 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
                                         helperText={errors?.["howReport.whatsappNumber"] || "Include country code (e.g., +968)"}
                                         variant="outlined"
                                         size="medium"
-                                        inputProps={{
+                                        slotProps={{ htmlInput: {
                                             'aria-describedby': 'whatsapp-helper',
                                             autoComplete: 'tel'
-                                        }}
+                                        } }}
                                     />
                                 </Box>
                             )}
@@ -295,7 +295,7 @@ const ReportSection = ({ data, errors, onChange }) => {
                     borderColor: 'grey.200'
                 }}
             >
-                <Grid container spacing={3} alignItems="center">
+  <Grid container spacing={3} sx={{alignItems: "center"}}>
                     <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                         <OutPatientToggle
                             value={data?.out_patient}

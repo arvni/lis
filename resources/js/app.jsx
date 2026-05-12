@@ -38,6 +38,29 @@ createInertiaApp({
     },
 
     setup({ el, App, props }) {
+        // MUI v9's ModalManager still sets aria-hidden="true" on the app root
+        // when a modal opens, which triggers browser warnings when a focused element
+        // remains inside the root before the focus trap activates. Replace with
+        // the `inert` attribute (the browser-recommended modern API) which proactively
+        // prevents focus rather than describing it retroactively.
+        let ariaHiddenDepth = 0;
+        const _setAttribute = el.setAttribute.bind(el);
+        const _removeAttribute = el.removeAttribute.bind(el);
+        el.setAttribute = (name, value) => {
+            if (name === 'aria-hidden') {
+                if (++ariaHiddenDepth === 1) _setAttribute('inert', '');
+            } else {
+                _setAttribute(name, value);
+            }
+        };
+        el.removeAttribute = (name) => {
+            if (name === 'aria-hidden') {
+                if (--ariaHiddenDepth <= 0) { ariaHiddenDepth = 0; _removeAttribute('inert'); }
+            } else {
+                _removeAttribute(name);
+            }
+        };
+
         const root = createRoot(el);
 
         // Add a loading state to the app

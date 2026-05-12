@@ -5,7 +5,7 @@ import {
     Stack,
     Paper,
     Typography,
-    Grid2 as Grid,
+    Grid as Grid,
 } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -107,7 +107,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
 
                     {/* Action Buttons */}
                     <Grid size={12}>
-                        <Stack direction="row" spacing={2} justifyContent="flex-end">
+  <Stack direction="row" spacing={2} sx={{justifyContent: "flex-end"}}>
                             <Button
                                 variant="outlined"
                                 color="inherit"

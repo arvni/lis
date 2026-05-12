@@ -35,8 +35,8 @@ const PRFilter = ({defaultFilter, onFilter}) => {
     const reset = () => { setValues({status: "", urgency: ""}); onFilter({})(); };
 
     return (
-        <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={3}>
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
+            <Grid size={{ xs: 12, md: 3 }} >
                 <TextField select fullWidth size="small" label="Status" value={values.status} onChange={set("status")}>
                     <MenuItem value="">All Statuses</MenuItem>
                     {PR_STATUSES.map((s) => (
@@ -44,7 +44,7 @@ const PRFilter = ({defaultFilter, onFilter}) => {
                     ))}
                 </TextField>
             </Grid>
-            <Grid item xs={12} md={2}>
+            <Grid size={{ xs: 12, md: 2 }} >
                 <TextField select fullWidth size="small" label="Urgency" value={values.urgency} onChange={set("urgency")}>
                     <MenuItem value="">All</MenuItem>
                     <MenuItem value="LOW">Low</MenuItem>
@@ -53,7 +53,7 @@ const PRFilter = ({defaultFilter, onFilter}) => {
                     <MenuItem value="URGENT">Urgent</MenuItem>
                 </TextField>
             </Grid>
-            <Grid item xs={12} md={7}>
+            <Grid size={{ xs: 12, md: 7 }} >
                 <Box sx={{display: "flex", gap: 1}}>
                     <Button variant="contained" size="small" onClick={apply}>Apply</Button>
                     <Button variant="outlined" size="small" onClick={reset}>Reset</Button>

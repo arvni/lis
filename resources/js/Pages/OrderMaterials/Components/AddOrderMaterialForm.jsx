@@ -5,8 +5,8 @@ import {
     Divider, Chip, IconButton, CircularProgress, Fade,
     InputAdornment, Alert,
 } from '@mui/material';
-import {Close, QrCode, CheckCircle, Science, Add, DeleteOutline} from '@mui/icons-material';
-import Grid from '@mui/material/Grid2';
+import {Close, QrCode, CheckCircle, Science, Add, DeleteOutlined} from '@mui/icons-material';
+import Grid from '@mui/material/Grid';
 import {useForm} from '@inertiajs/react';
 import SelectSearch from '@/Components/SelectSearch.jsx';
 import axios from 'axios';
@@ -136,9 +136,9 @@ const AddOrderMaterialForm = ({open, onClose}) => {
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 py: 2, px: 3,
             }}>
-                <Box display="flex" alignItems="center" gap={1.5}>
+  <Box display="flex" gap={1.5} sx={{alignItems: "center"}}>
                     <Science/>
-                    <Typography variant="h6" fontWeight={600}>New Order Material</Typography>
+                    <Typography variant="h6" fontWeight={600} component="span">New Order Material</Typography>
                 </Box>
                 <IconButton color="inherit" onClick={handleClose} disabled={processing}>
                     <Close/>
@@ -200,7 +200,7 @@ const AddOrderMaterialForm = ({open, onClose}) => {
                     </Paper>
 
                     <Paper variant="outlined" sx={{p: 2.5, borderRadius: 2}}>
-                        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center", justifyContent: "space-between"}}>
                             <Typography variant="subtitle2" fontWeight={600} color="text.secondary"
                                 sx={{textTransform: 'uppercase', letterSpacing: 0.5}}>
                                 Material Barcodes
@@ -265,7 +265,7 @@ const AddOrderMaterialForm = ({open, onClose}) => {
                                                 sx={{mt: '4px', flexShrink: 0}}
                                                 title="Remove"
                                             >
-                                                <DeleteOutline fontSize="small"/>
+                                                <DeleteOutlined fontSize="small"/>
                                             </IconButton>
                                         </Box>
                                     );

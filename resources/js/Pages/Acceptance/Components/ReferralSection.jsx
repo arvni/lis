@@ -1,11 +1,11 @@
 import React from "react";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import SelectSearch from "@/Components/SelectSearch";
 import { Box, Typography, Tooltip } from "@mui/material";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
 
 const ReferredToggle = ({ value, onChange }) => (
     <Box sx={{ display: "flex", alignItems: "center" }}>

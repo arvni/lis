@@ -10,7 +10,7 @@ import {
     DialogActions,
     Button,
     Container,
-    Grid2 as Grid,
+    Grid as Grid,
     FormGroup,
     FormHelperText,
     Radio,
@@ -38,7 +38,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import SelectSearch from "@/Components/SelectSearch";
 import Autocomplete from "@mui/material/Autocomplete";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import BadgeIcon from "@mui/icons-material/Badge";
 
@@ -188,14 +188,15 @@ const EditForm = ({openEdit, onClose, reservation}) => {
             isValid = false;
         }
 
-        if (!data.customer.phone) {
-            setError("customer.phone", "Please enter customer phone number");
-            isValid = false;
-        }
-
-        if (!data.customer.name) {
-            setError("customer.name", "Please enter customer name");
-            isValid = false;
+        if (reservation.reservable_type === 'customer') {
+            if (!data.customer.phone) {
+                setError("customer.phone", "Please enter customer phone number");
+                isValid = false;
+            }
+            if (!data.customer.name) {
+                setError("customer.name", "Please enter customer name");
+                isValid = false;
+            }
         }
 
         return isValid;
@@ -203,15 +204,14 @@ const EditForm = ({openEdit, onClose, reservation}) => {
 
     const fetchData = useCallback((_, search) => {
         setLoading(true);
-        setData(prevData => ({...prevData, customer: {phone: search}}));
+        setData(prevData => ({...prevData, customer: {...prevData.customer, phone: search}}));
         fetch(route("api.customers.list", {search}))
             .then(response => response.json())
             .then(data => {
-                setOptions(data.data);
+                setOptions((data.data || []).filter(Boolean));
                 setLoading(false);
             })
-            .catch(error => {
-                console.error("Error fetching customers:", error);
+            .catch(() => {
                 setLoading(false);
                 setOptions([]);
             });
@@ -262,7 +262,7 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                 }}>
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                         <EditIcon/>
-                        <Typography variant="h5" fontWeight="500">
+                        <Typography variant="h5" fontWeight="500" component="span">
                             Edit Reservation
                         </Typography>
                     </Box>
@@ -271,7 +271,7 @@ const EditForm = ({openEdit, onClose, reservation}) => {
 
                 <DialogContent sx={{p: 3, mt: 1}}>
                     <Container>
-                        <Box>
+                        {reservation.reservable_type === 'customer' && <Box>
                             <Typography variant="subtitle1" fontWeight="medium" sx={{mb: 2}}>
                                 Customer Information
                             </Typography>
@@ -284,11 +284,11 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                                             open={open}
                                             onOpen={() => setOpen(true)}
                                             onClose={() => setOpen(false)}
-                                            value={data.customer || ""}
+                                            value={data.customer?.id ? data.customer : null}
                                             onChange={handleCustomerSelect}
                                             onInputChange={fetchData}
-                                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                                            getOptionLabel={(option) => option.phone || ''}
+                                            isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                                            getOptionLabel={(option) => option?.phone || ''}
                                             options={options}
                                             loading={loading}
                                             fullWidth
@@ -298,17 +298,26 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                                                     {...params}
                                                     name="phone"
                                                     label="Phone Number"
-                                                    value={data.customer?.phone || ""}
                                                     placeholder="Search or enter phone"
                                                     error={Boolean(errors["customer.phone"])}
                                                     helperText={errors?.["customer.phone"]}
                                                     slotProps={{
+                                                        ...params.slotProps,
+                                                        htmlInput: params.slotProps?.htmlInput ?? params.inputProps,
                                                         input: {
-                                                            ...params.InputProps,
-                                                            startAdornment: <MedicalServicesIcon color="action"
-                                                                                                 sx={{mr: 1}}/>,
-                                                            endAdornment: loading ?
-                                                                <CircularProgress size="small"/> : null
+                                                            ...(params.slotProps?.input ?? params.InputProps),
+                                                            startAdornment: (
+                                                                <>
+                                                                    <MedicalServicesIcon color="action" sx={{mr: 1}}/>
+                                                                    {(params.slotProps?.input ?? params.InputProps)?.startAdornment}
+                                                                </>
+                                                            ),
+                                                            endAdornment: (
+                                                                <>
+                                                                    {loading && <CircularProgress size={16}/>}
+                                                                    {(params.slotProps?.input ?? params.InputProps)?.endAdornment}
+                                                                </>
+                                                            ),
                                                         },
                                                     }}
                                                 />
@@ -369,14 +378,14 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                                     </Box>
                                 </Grid>
                             </Grid>
-                        </Box>
+                        </Box>}
 
                         <Grid container spacing={3} sx={{mt: 2}}>
                             {/* Consultant Selection */}
                             <Grid size={{xs: 12, md: 6}}>
                                 <Paper elevation={0}
                                        sx={{p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2}}>
-                                    <Box display="flex" alignItems="center" mb={1}>
+  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
                                         <PersonIcon color="primary" sx={{mr: 1}}/>
                                         <Typography variant="subtitle1" fontWeight="medium">
                                             Select Consultant
@@ -400,7 +409,7 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                             <Grid size={{xs: 12, md: 6}}>
                                 <Paper elevation={0}
                                        sx={{p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2}}>
-                                    <Box display="flex" alignItems="center" mb={1}>
+  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
                                         <CalendarTodayIcon color="primary" sx={{mr: 1}}/>
                                         <Typography variant="subtitle1" fontWeight="medium">
                                             Select Date
@@ -430,7 +439,7 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                                 <Grid size={{xs: 12}}>
                                     <Paper elevation={0}
                                            sx={{p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2}}>
-                                        <Box display="flex" alignItems="center" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
                                             <AccessTimeIcon color="primary" sx={{mr: 1}}/>
                                             <Typography variant="subtitle1" fontWeight="medium">
                                                 Available Time Slots
@@ -438,7 +447,7 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                                         </Box>
 
                                         {waiting ? (
-                                            <Box display="flex" justifyContent="center" alignItems="center" p={4}>
+  <Box display="flex" p={4} sx={{justifyContent: "center", alignItems: "center"}}>
                                                 <CircularProgress size={40}/>
                                                 <Typography variant="body2" color="text.secondary" ml={2}>
                                                     Loading available times...

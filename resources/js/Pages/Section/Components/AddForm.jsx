@@ -1,12 +1,9 @@
 import {
     Checkbox,
-    FormControl,
     FormControlLabel,
-    Input,
-    InputLabel,
     TextField
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import SelectSearch from "@/Components/SelectSearch";
 import {FormProvider, useFormState} from "@/Components/FormTemplate.jsx";
 import AvatarUpload from "@/Components/AvatarUpload.jsx";
@@ -88,20 +85,17 @@ const FormContent = () => {
                               onChange={handleChange}/>
         </Grid>
         <Grid size={{xs: 12}}>
-            <FormControl fullWidth
-                         variant="outlined">
-                <InputLabel
-                    id="description"
-                    variant="outlined">Description</InputLabel>
-                <Input multiline
-                       onChange={handleChange}
-                       value={data.description}
-                       id="description"
-                       error={!!errors?.description}
-                       helperText={errors?.description}
-                       rows={3}
-                       name="description"/>
-            </FormControl>
+            <TextField
+                label="Description"
+                name="description"
+                fullWidth
+                multiline
+                rows={3}
+                onChange={handleChange}
+                value={data.description}
+                error={!!errors?.description}
+                helperText={errors?.description}
+            />
         </Grid>
     </>
 }

@@ -14,7 +14,7 @@ import {
     Select,
     MenuItem,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import {
     FileDownload as FileDownloadIcon,
     Check as CheckIcon,
@@ -157,7 +157,7 @@ const ReportFormContent = ({
                 />
 
                 {/* Submit Button */}
-                <Grid container justifyContent="flex-end">
+  <Grid container sx={{justifyContent: "flex-end"}}>
                     <Button
                         onClick={handleSubmit}
                         variant="contained"

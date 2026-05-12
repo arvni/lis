@@ -6,7 +6,7 @@ import {
     Stack,
     Paper,
     Typography,
-    Grid2 as Grid,
+    Grid as Grid,
     IconButton,
     InputAdornment,
     Chip,
@@ -343,9 +343,9 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                         onKeyDown={handleKeyPress}
                                         error={!!amountError && filters.amountFrom}
                                         type="text"
-                                        inputProps={{
+                                        slotProps={{ htmlInput: {
                                             inputMode: 'decimal',
-                                        }}
+                                        } }}
                                     />
                                     <TextField
                                         fullWidth
@@ -357,9 +357,9 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                         error={!!amountError}
                                         helperText={amountError}
                                         type="text"
-                                        inputProps={{
+                                        slotProps={{ htmlInput: {
                                             inputMode: 'decimal',
-                                        }}
+                                        } }}
                                     />
                                 </Stack>
                             </Box>
@@ -442,23 +442,11 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                             label="From Date"
                                             value={filters.dateFrom}
                                             onChange={(value) => handleFilterChange('dateFrom', value)}
+                                            clearable
                                             slotProps={{
                                                 textField: {
                                                     fullWidth: true,
                                                     error: !!dateError,
-                                                    InputProps: {
-                                                        endAdornment: filters.dateFrom && (
-                                                            <InputAdornment position="end">
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={() => handleClearDate('dateFrom')}
-                                                                    edge="end"
-                                                                >
-                                                                    <ClearIcon fontSize="small"/>
-                                                                </IconButton>
-                                                            </InputAdornment>
-                                                        )
-                                                    }
                                                 }
                                             }}
                                         />
@@ -468,24 +456,12 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                             label="To Date"
                                             value={filters.dateTo}
                                             onChange={(value) => handleFilterChange('dateTo', value)}
+                                            clearable
                                             slotProps={{
                                                 textField: {
                                                     fullWidth: true,
                                                     error: !!dateError,
                                                     helperText: dateError,
-                                                    InputProps: {
-                                                        endAdornment: filters.dateTo && (
-                                                            <InputAdornment position="end">
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={() => handleClearDate('dateTo')}
-                                                                    edge="end"
-                                                                >
-                                                                    <ClearIcon fontSize="small"/>
-                                                                </IconButton>
-                                                            </InputAdornment>
-                                                        )
-                                                    }
                                                 }
                                             }}
                                         />
@@ -496,7 +472,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
 
                         {/* Action Buttons */}
                         <Grid size={{xs: 12}}>
-                            <Stack direction="row" spacing={2} justifyContent="flex-end">
+  <Stack direction="row" spacing={2} sx={{justifyContent: "flex-end"}}>
                                 <Button
                                     variant="outlined"
                                     startIcon={<ClearIcon/>}

@@ -75,7 +75,7 @@ const AddRelative = ({
     const findPatientCallBack = (response) => {
         setLoading(false);
         setStep(step + 1);
-        if (response) {
+        if (response?.data) {
             const {id = null, nationality = null, ...res} = response.data
             setRelative(prevRelative => ({
                 ...prevRelative,

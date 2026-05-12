@@ -31,7 +31,7 @@ import {
 } from "@mui/icons-material";
 import {FormControl, InputLabel, Select, MenuItem} from "@mui/material";
 import Typography from "@mui/material/Typography";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import React, {useMemo, useState} from "react";
 import PatientInfo from "@/Pages/Patient/Components/PatientInfo";
 import Prescription from "./Components/Prescription";
@@ -131,7 +131,7 @@ const SummaryCard = ({title, value, icon, color = "primary"}) => {
             }}
         >
             <CardContent>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
+  <Box display="flex" sx={{justifyContent: "space-between", alignItems: "center"}}>
                     <Typography color="text.secondary" variant="subtitle1" fontWeight="medium">
                         {title}
                     </Typography>
@@ -316,7 +316,7 @@ const Show = ({
 
             <PageHeader title={`Acceptance #${acceptance.id}`}
                         subtitle={`Created: ${new Date(acceptance.created_at).toLocaleString()}`} actions={[
-                <StatusChip status={acceptance.status}/>,
+                <StatusChip key="status" status={acceptance.status}/>,
                 <PriorityChanger key="priority" acceptance={acceptance} canUpdatePriority={canUpdatePriority}/>,
                 canCheckStatus && (
                     <Button
@@ -509,28 +509,28 @@ const Show = ({
                 </AccordionSummary>
                 <AccordionDetails sx={{backgroundColor: 'background.default', p: 3}}>
                     <Grid container spacing={3}>
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} >
                             <InfoItem
                                 label="Name"
                                 value={acceptance.doctor?.name}
                             />
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} >
                             <InfoItem
                                 label="Expertise"
                                 value={acceptance.doctor?.expertise}
                             />
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} >
                             <InfoItem
                                 label="Phone"
                                 value={acceptance.doctor?.phone}
                             />
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={4} lg={3}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} >
                             <InfoItem
                                 label="License No"
                                 value={acceptance.doctor?.licenseNo}
@@ -581,7 +581,7 @@ const Show = ({
                         }}
                     >
                         <Grid container spacing={2}>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }} >
                                 <Typography variant="subtitle1" fontWeight="bold">
                                     Total Price:
                                     <Box component="span" sx={{ml: 1, color: 'text.primary'}}>
@@ -589,7 +589,7 @@ const Show = ({
                                     </Box>
                                 </Typography>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }} >
                                 <Typography variant="subtitle1" fontWeight="bold">
                                     Total Discount:
                                     <Box component="span" sx={{ml: 1, color: 'error.main'}}>
@@ -597,7 +597,7 @@ const Show = ({
                                     </Box>
                                 </Typography>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }} >
                                 <Typography variant="subtitle1" fontWeight="bold">
                                     Net Amount:
                                     <Box component="span" sx={{ml: 1, color: 'success.main'}}>

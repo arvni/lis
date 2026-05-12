@@ -112,7 +112,6 @@ const Document = ({ document, onClose }) => {
             onClose={handleClose}
             slots={{transition:Transition}}
             keepMounted={false}
-            disableEscapeKeyDown={false}
             aria-labelledby="document-dialog-title"
             {...dialogProps}
         >

@@ -6,7 +6,7 @@ import {
     Stack,
     Paper,
     Typography,
-    Grid2 as Grid,
+    Grid as Grid,
     IconButton,
     InputAdornment,
     Chip,
@@ -28,6 +28,7 @@ import SelectSearch from "@/Components/SelectSearch.jsx";
 const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
     const [filters, setFilters] = useState({
         search: defaultValues.search || '',
+        invoice_no: defaultValues.invoice_no || '',
         owner_type: defaultValues.owner_type || '',
         owner_id: defaultValues.owner_id || null,
         owner_object: defaultValues.owner_object || null, // Store the full object for SelectSearch
@@ -44,6 +45,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
     useEffect(() => {
         const filterValues = {
             search: filters.search,
+            invoice_no: filters.invoice_no,
             owner_type: filters.owner_type,
             owner_id: filters.owner_id,
             from_date: filters.from_date,
@@ -114,6 +116,14 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
         setFilters(prevState => ({...prevState, search: ""}));
     }, []);
 
+    const handleInvoiceNoChange = useCallback((e) => {
+        handleFilterChange('invoice_no', e.target.value);
+    }, []);
+
+    const handleClearInvoiceNo = useCallback(() => {
+        setFilters(prevState => ({...prevState, invoice_no: ""}));
+    }, []);
+
     const formatDateForBackend = (date) => {
         if (!date) return null;
         // Format date as YYYY-MM-DD to avoid timezone issues
@@ -132,6 +142,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
         // Clean up filters before sending
         const cleanedFilters = {
             search: filters.search,
+            invoice_no: filters.invoice_no,
             owner_type: filters.owner_type,
             owner_id: filters.owner_id,
             from_date: formatDateForBackend(filters.from_date),
@@ -151,6 +162,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
     const handleClearFilters = useCallback(() => {
         const clearedFilters = {
             search: '',
+            invoice_no: '',
             owner_type: '',
             owner_id: null,
             owner_object: null,
@@ -243,7 +255,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
 
                     <Grid container spacing={2}>
                         {/* Patient Search Field */}
-                        <Grid size={{xs: 12}}>
+                        <Grid size={{xs: 12, md: 6}}>
                             <TextField
                                 fullWidth
                                 name="search"
@@ -264,6 +276,39 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                                 <IconButton
                                                     size="small"
                                                     onClick={handleClearSearch}
+                                                    edge="end"
+                                                >
+                                                    <ClearIcon fontSize="small"/>
+                                                </IconButton>
+                                            </InputAdornment>
+                                        )
+                                    }
+                                }}
+                            />
+                        </Grid>
+
+                        {/* Invoice No Filter */}
+                        <Grid size={{xs: 12, md: 6}}>
+                            <TextField
+                                fullWidth
+                                name="invoice_no"
+                                label="Invoice No"
+                                placeholder="e.g. 2026-5/3"
+                                value={filters.invoice_no}
+                                onChange={handleInvoiceNoChange}
+                                onKeyDown={handleKeyPress}
+                                slotProps={{
+                                    input: {
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <SearchIcon color="action"/>
+                                            </InputAdornment>
+                                        ),
+                                        endAdornment: filters.invoice_no && (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={handleClearInvoiceNo}
                                                     edge="end"
                                                 >
                                                     <ClearIcon fontSize="small"/>
@@ -408,23 +453,11 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                             label="From Date"
                                             value={filters.from_date}
                                             onChange={(value) => handleFilterChange('from_date', value)}
+                                            clearable
                                             slotProps={{
                                                 textField: {
                                                     fullWidth: true,
                                                     error: !!dateError,
-                                                    InputProps: {
-                                                        endAdornment: filters.from_date && (
-                                                            <InputAdornment position="end">
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={() => handleClearDate('from_date')}
-                                                                    edge="end"
-                                                                >
-                                                                    <ClearIcon fontSize="small"/>
-                                                                </IconButton>
-                                                            </InputAdornment>
-                                                        )
-                                                    }
                                                 }
                                             }}
                                         />
@@ -434,24 +467,12 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                             label="To Date"
                                             value={filters.to_date}
                                             onChange={(value) => handleFilterChange('to_date', value)}
+                                            clearable
                                             slotProps={{
                                                 textField: {
                                                     fullWidth: true,
                                                     error: !!dateError,
                                                     helperText: dateError,
-                                                    InputProps: {
-                                                        endAdornment: filters.to_date && (
-                                                            <InputAdornment position="end">
-                                                                <IconButton
-                                                                    size="small"
-                                                                    onClick={() => handleClearDate('to_date')}
-                                                                    edge="end"
-                                                                >
-                                                                    <ClearIcon fontSize="small"/>
-                                                                </IconButton>
-                                                            </InputAdornment>
-                                                        )
-                                                    }
                                                 }
                                             }}
                                         />
@@ -462,7 +483,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
 
                         {/* Action Buttons */}
                         <Grid size={{xs: 12}}>
-                            <Stack direction="row" spacing={2} justifyContent="flex-end">
+  <Stack direction="row" spacing={2} sx={{justifyContent: "flex-end"}}>
                                 <Button
                                     variant="outlined"
                                     startIcon={<ClearIcon/>}

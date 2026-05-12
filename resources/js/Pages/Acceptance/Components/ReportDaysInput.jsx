@@ -10,7 +10,7 @@ const ReportDaysInput = ({initialDays = 5}) => {
     };
 
     return (
-        <Typography variant="body1" component="p">
+        <Typography variant="body1" component="div">
             The report will be available in{' '}
             <Box
                 component="span"

@@ -77,7 +77,7 @@ const History = ({ history }) => {
                     borderBottom: `1px solid ${theme.palette.divider}`,
                 }}
             >
-                <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                     <HistoryOutlined color="primary" />
                     <Typography variant="h6">Report History</Typography>
                     <Chip
@@ -117,10 +117,8 @@ const History = ({ history }) => {
                                     <Box sx={{ width: '100%' }}>
                                         <Stack
                                             direction={{ xs: 'column', sm: 'row' }}
-                                            justifyContent="space-between"
-                                            alignItems={{ xs: 'flex-start', sm: 'center' }}
                                             spacing={1}
-                                            sx={{ width: '100%' }}
+                                            sx={{ justifyContent: "space-between", alignItems: { xs: 'flex-start', sm: 'center' }, width: '100%' }}
                                         >
                                             <Chip
                                                 label={`Revision ${index + 1}`}
@@ -134,28 +132,28 @@ const History = ({ history }) => {
                                                 spacing={{ xs: 0.5, md: 2 }}
                                                 divider={<Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' } }} />}
                                             >
-                                                <Stack direction="row" spacing={0.5} alignItems="center">
+  <Stack direction="row" spacing={0.5} sx={{alignItems: "center"}}>
                                                     <PersonOutlined fontSize="small" color="primary" />
                                                     <Typography variant="body2">
                                                         Reported by <strong>{item?.reporter?.name || 'Unknown'}</strong>
                                                     </Typography>
                                                 </Stack>
 
-                                                <Stack direction="row" spacing={0.5} alignItems="center">
+  <Stack direction="row" spacing={0.5} sx={{alignItems: "center"}}>
                                                     <CalendarToday fontSize="small" color="action" />
                                                     <Typography variant="body2">
                                                         {formatDate(item?.reportedAt)}
                                                     </Typography>
                                                 </Stack>
 
-                                                <Stack direction="row" spacing={0.5} alignItems="center">
+  <Stack direction="row" spacing={0.5} sx={{alignItems: "center"}}>
                                                     <ThumbDownAlt fontSize="small" color="error" />
                                                     <Typography variant="body2">
                                                         Rejected by <strong>{item?.approver?.name || 'Unknown'}</strong>
                                                     </Typography>
                                                 </Stack>
 
-                                                <Stack direction="row" spacing={0.5} alignItems="center">
+  <Stack direction="row" spacing={0.5} sx={{alignItems: "center"}}>
                                                     <CalendarToday fontSize="small" color="action" />
                                                     <Typography variant="body2">
                                                         {formatDate(item?.approvedAt)}
@@ -194,7 +192,7 @@ const History = ({ history }) => {
                                                 borderRadius: 1,
                                             }}
                                         >
-                                            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+  <Stack direction="row" spacing={1} sx={{alignItems: "center", mb: 1}}>
                                                 <Description fontSize="small" color="primary" />
                                                 <Typography variant="subtitle1">
                                                     Report Content

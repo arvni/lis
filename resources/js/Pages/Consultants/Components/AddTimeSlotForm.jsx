@@ -4,7 +4,7 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle, FormControlLabel,
-    Grid2 as Grid,
+    Grid as Grid,
     Typography,
     Box,
     Tooltip,
@@ -17,7 +17,7 @@ import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
-    DeleteOutline as DeleteIcon,
+    DeleteOutlined as DeleteIcon,
     WarningAmber as WarningIcon
 } from '@mui/icons-material';
 
@@ -96,7 +96,7 @@ const AddTimeSlotForm = ({ open, setData, data, title, onClose, onsubmit, onDele
     return (
         <>
             {/* Main Time Slot Form Dialog */}
-            <Dialog open={open} maxWidth="sm" fullWidth>
+            <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
                 <DialogTitle>
                     <Typography variant="h6" component="div">
                         {title || "Schedule Time Slot"}
@@ -118,7 +118,7 @@ const AddTimeSlotForm = ({ open, setData, data, title, onClose, onsubmit, onDele
                         <Typography variant="subtitle2" gutterBottom>
                             Quick Select:
                         </Typography>
-                        <Box display="flex" gap={1} flexWrap="wrap">
+                        <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap'}}>
                             {timeSlotPresets.map((preset, idx) => (
                                 <Button
                                     key={idx}

@@ -1,11 +1,11 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Head, router, usePage} from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader.jsx';
 import {
-    Box, Button, Chip, Paper, Stack, Table, TableBody, TableCell,
-    TableContainer, TableHead, TableRow, Typography, alpha, useTheme,
-    Tooltip, Pagination,
+    Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle,
+    Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead,
+    TableRow, TextField, Typography, alpha, useTheme, Tooltip, Pagination,
 } from '@mui/material';
 import {CheckCircle, Cancel, QrCode, Science} from '@mui/icons-material';
 import {formatDate} from '@/Services/helper.js';
@@ -14,8 +14,35 @@ const SamplesIndex = () => {
     const {samples} = usePage().props;
     const theme = useTheme();
 
+    const [rejectDialog, setRejectDialog] = useState({open: false, sampleId: null});
+    const [rejectionReason, setRejectionReason] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+
     const approve = (id) => router.post(route('qc.samples.approve', id), {}, {preserveState: false});
-    const reject  = (id) => router.post(route('qc.samples.reject',  id), {}, {preserveState: false});
+
+    const openRejectDialog = (id) => {
+        setRejectDialog({open: true, sampleId: id});
+        setRejectionReason('');
+    };
+
+    const closeRejectDialog = () => {
+        if (submitting) return;
+        setRejectDialog({open: false, sampleId: null});
+        setRejectionReason('');
+    };
+
+    const submitRejection = () => {
+        if (!rejectionReason.trim()) return;
+        setSubmitting(true);
+        router.post(
+            route('qc.samples.reject', rejectDialog.sampleId),
+            {rejection_reason: rejectionReason},
+            {
+                preserveState: false,
+                onFinish: () => setSubmitting(false),
+            }
+        );
+    };
 
     return (
         <>
@@ -45,7 +72,7 @@ const SamplesIndex = () => {
                                 {samples.data.length === 0 && (
                                     <TableRow>
                                         <TableCell colSpan={8} align="center" sx={{py: 6}}>
-                                            <Stack alignItems="center" spacing={1}>
+                                            <Stack spacing={1} sx={{alignItems: 'center'}}>
                                                 <Science sx={{fontSize: 40, color: 'text.disabled'}}/>
                                                 <Typography color="text.secondary">
                                                     No samples pending QC
@@ -56,14 +83,14 @@ const SamplesIndex = () => {
                                 )}
                                 {samples.data.map(sample => {
                                     const items = sample.active_acceptance_items ?? [];
-                                    const patient = items[0]?.acceptance?.patient;
+                                    const patient = sample.patient;
                                     const acceptance = items[0]?.acceptance;
                                     const tests = [...new Set(items.map(i => i.test?.name).filter(Boolean))];
 
                                     return (
                                         <TableRow key={sample.id} sx={{'&:hover': {bgcolor: alpha(theme.palette.primary.main, 0.03)}}}>
                                             <TableCell>
-                                                <Stack direction="row" spacing={0.5} alignItems="center">
+                                                <Stack direction="row" spacing={0.5} sx={{alignItems: 'center'}}>
                                                     <QrCode fontSize="small" color="action"/>
                                                     <Typography variant="body2" fontWeight="medium">
                                                         {sample.barcode}
@@ -77,10 +104,10 @@ const SamplesIndex = () => {
                                             </TableCell>
                                             <TableCell>
                                                 <Typography variant="body2" fontWeight="medium">
-                                                    {patient?.full_name ?? '—'}
+                                                    {patient?.fullName ?? '—'}
                                                 </Typography>
                                                 <Typography variant="caption" color="text.secondary">
-                                                    {patient?.id_no}
+                                                    {patient?.idNo}
                                                 </Typography>
                                             </TableCell>
                                             <TableCell>
@@ -89,7 +116,7 @@ const SamplesIndex = () => {
                                                 </Typography>
                                             </TableCell>
                                             <TableCell sx={{maxWidth: 200}}>
-                                                <Stack direction="row" flexWrap="wrap" gap={0.5}>
+                                                <Stack direction="row" sx={{flexWrap: 'wrap'}} gap={0.5}>
                                                     {tests.map((t, i) => (
                                                         <Chip key={i} label={t} size="small" variant="outlined"
                                                             sx={{fontSize: '0.65rem', height: 20}}/>
@@ -107,7 +134,7 @@ const SamplesIndex = () => {
                                                 </Typography>
                                             </TableCell>
                                             <TableCell align="center">
-                                                <Stack direction="row" spacing={1} justifyContent="center">
+                                                <Stack direction="row" spacing={1} sx={{justifyContent: 'center'}}>
                                                     <Tooltip title="Approve QC">
                                                         <Button size="small" variant="contained" color="success"
                                                             startIcon={<CheckCircle fontSize="small"/>}
@@ -118,7 +145,7 @@ const SamplesIndex = () => {
                                                     <Tooltip title="Reject — sample must be re-collected">
                                                         <Button size="small" variant="outlined" color="error"
                                                             startIcon={<Cancel fontSize="small"/>}
-                                                            onClick={() => reject(sample.id)}>
+                                                            onClick={() => openRejectDialog(sample.id)}>
                                                             Reject
                                                         </Button>
                                                     </Tooltip>
@@ -144,6 +171,44 @@ const SamplesIndex = () => {
                     )}
                 </Paper>
             </Box>
+
+            <Dialog open={rejectDialog.open} onClose={closeRejectDialog} maxWidth="sm" fullWidth>
+                <DialogTitle sx={{color: 'error.main'}}>Reject Sample</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
+                        This sample will be marked as rejected and returned to the sample collection queue for re-collection.
+                        Please provide a reason for rejection.
+                    </Typography>
+                    <TextField
+                        autoFocus
+                        fullWidth
+                        multiline
+                        minRows={3}
+                        label="Rejection Reason"
+                        placeholder="Describe why this sample is being rejected..."
+                        value={rejectionReason}
+                        onChange={(e) => setRejectionReason(e.target.value)}
+                        disabled={submitting}
+                        required
+                        error={rejectionReason.trim() === '' && submitting}
+                        helperText={rejectionReason.trim() === '' && submitting ? 'Rejection reason is required.' : ''}
+                    />
+                </DialogContent>
+                <DialogActions sx={{px: 3, pb: 2}}>
+                    <Button onClick={closeRejectDialog} disabled={submitting}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={submitRejection}
+                        disabled={!rejectionReason.trim() || submitting}
+                        startIcon={<Cancel fontSize="small"/>}
+                    >
+                        {submitting ? 'Rejecting...' : 'Confirm Rejection'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 };

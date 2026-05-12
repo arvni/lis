@@ -177,7 +177,7 @@ const ActionButtons = ({ test, onEdit, onDelete, onRestore }) => {
 
     return (
         <>
-            <Stack direction="row" spacing={1} justifyContent="center">
+  <Stack direction="row" spacing={1} sx={{justifyContent: "center"}}>
                 {onEdit && (
                     <Tooltip title="Edit test">
                         <IconButton
@@ -293,7 +293,7 @@ const TestRow = ({
         >
             {/* Test Name */}
             <TableCell>
-                <Box display="flex" alignItems="center" gap={1}>
+  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
                     <ScienceIcon color="primary" sx={{ fontSize: 16 }} />
                     {showButton ? (
                         <Link
@@ -353,7 +353,7 @@ const TestRow = ({
 
             {/* Method */}
             <TableCell>
-                <Box display="flex" alignItems="center" gap={1}>
+  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
                     <Badge
                         badgeContent=""
                         color="secondary"

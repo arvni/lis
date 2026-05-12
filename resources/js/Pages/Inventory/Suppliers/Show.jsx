@@ -32,7 +32,7 @@ const Show = () => {
             />
 
             <Grid container spacing={3}>
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }} >
                     <Card sx={{height: "100%"}}>
                         <CardHeader
                             title="Supplier Info"
@@ -49,27 +49,27 @@ const Show = () => {
                         />
                         <CardContent>
                             <Grid container spacing={0}>
-                                <Grid item xs={6}>
+                                <Grid size={6} >
                                     <Field label="Type">{supplier.type}</Field>
                                 </Grid>
-                                <Grid item xs={6}>
+                                <Grid size={6} >
                                     <Field label="Lead Time">
                                         {supplier.lead_time_days ? `${supplier.lead_time_days} days` : null}
                                     </Field>
                                 </Grid>
-                                <Grid item xs={6}>
+                                <Grid size={6} >
                                     <Field label="Country">{supplier.country}</Field>
                                 </Grid>
-                                <Grid item xs={6}>
+                                <Grid size={6} >
                                     <Field label="City">{supplier.city}</Field>
                                 </Grid>
                                 {supplier.address && (
-                                    <Grid item xs={12}>
+                                    <Grid size={12} >
                                         <Field label="Address">{supplier.address}</Field>
                                     </Grid>
                                 )}
                                 {supplier.payment_terms && (
-                                    <Grid item xs={12}>
+                                    <Grid size={12} >
                                         <Field label="Payment Terms">{supplier.payment_terms}</Field>
                                     </Grid>
                                 )}
@@ -99,12 +99,12 @@ const Show = () => {
 
                             <Grid container>
                                 {supplier.tax_number && (
-                                    <Grid item xs={12}>
+                                    <Grid size={12} >
                                         <Field label="Tax Number">{supplier.tax_number}</Field>
                                     </Grid>
                                 )}
                                 {supplier.commercial_registration && (
-                                    <Grid item xs={12}>
+                                    <Grid size={12} >
                                         <Field label="Commercial Registration">{supplier.commercial_registration}</Field>
                                     </Grid>
                                 )}
@@ -120,7 +120,7 @@ const Show = () => {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} md={8}>
+                <Grid size={{ xs: 12, md: 8 }} >
                     <Card sx={{mb: 3}}>
                         <CardHeader
                             title="Contacts"

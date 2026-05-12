@@ -11,7 +11,7 @@ import {
     Box,
     Chip,
     Divider,
-    Grid2 as Grid,
+    Grid as Grid,
     IconButton,
     Paper,
     Tooltip,
@@ -21,7 +21,6 @@ import {
     Tab,
 } from "@mui/material";
 import Button from "@mui/material/Button";
-import {LoadingButton} from "@mui/lab";
 import {
     Save as SaveIcon,
     Cancel as CancelIcon,
@@ -485,7 +484,7 @@ const DocumentsInfo = ({
                                     >
                                         Cancel
                                     </Button>
-                                    <LoadingButton
+                                    <Button
                                         onClick={handleSubmit}
                                         variant="contained"
                                         loading={processing}
@@ -494,7 +493,7 @@ const DocumentsInfo = ({
                                         sx={{borderRadius: 2}}
                                     >
                                         Save Changes
-                                    </LoadingButton>
+                                    </Button>
                                 </Stack>
                             ) : (
                                 <Button

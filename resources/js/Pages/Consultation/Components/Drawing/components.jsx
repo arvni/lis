@@ -12,7 +12,7 @@ import {
     CropSquare as SquareIcon,
     RadioButtonUnchecked as CircleIcon,
     Timeline as SelectLineIcon,
-    RemoveCircleOutline as EraserIcon,
+    RemoveCircleOutlined as EraserIcon,
     Create as TextIcon,
     Straighten as LineIcon,
     FormatColorFill as FillIcon,

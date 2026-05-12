@@ -25,7 +25,7 @@ const FormAccordion = ({
                     minHeight: 60
                 }}
             >
-                <Box display="flex" alignItems="center">
+  <Box display="flex" sx={{alignItems: "center"}}>
                     {icon && <Box mr={1}>{icon}</Box>}
                     <Typography variant="h6">{title}</Typography>
                 </Box>

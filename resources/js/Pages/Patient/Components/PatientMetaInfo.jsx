@@ -30,7 +30,6 @@ import Grid from "@mui/material/Grid";
 import React, { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import { LoadingButton } from "@mui/lab";
 import MenuItem from "@mui/material/MenuItem";
 import { useForm } from "@inertiajs/react";
 import Box from "@mui/material/Box";
@@ -152,7 +151,7 @@ const PatientMetaInfo = ({
                 <AccordionDetails sx={{ p: 3 }}>
                     <Grid container spacing={3}>
                         {/* First row */}
-                        <Grid item xs={12} sm={6} md={4}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4 }} >
                             <Box sx={{
                                 display: 'flex',
                                 flexDirection: 'row',
@@ -173,7 +172,7 @@ const PatientMetaInfo = ({
                                 </Box>
                                 <FormControl fullWidth variant="standard" error={errors.maritalStatus ? true : false}>
                                     <Select
-                                        value={data.maritalStatus !== null ? data.maritalStatus : ''}
+                                        value={data.maritalStatus ?? ''}
                                         disabled={!edit}
                                         onChange={handleChange}
                                         name="maritalStatus"
@@ -198,29 +197,29 @@ const PatientMetaInfo = ({
                             </Box>
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={4}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4 }} >
                             {renderFormField("Company", "company", data?.company, "text", false, 1,
                                 <BusinessIcon color="primary" />)}
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={4}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4 }} >
                             {renderFormField("Profession", "profession", data?.profession, "text", false, 1,
                                 <WorkIcon color="primary" />)}
                         </Grid>
 
                         {/* Second row */}
-                        <Grid item xs={12} sm={6} md={4}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4 }} >
                             {renderFormField("Email", "email", data?.email, "email", false, 1,
                                 <EmailIcon color="primary" />)}
                         </Grid>
 
-                        <Grid item xs={12} md={8}>
+                        <Grid size={{ xs: 12, md: 8 }} >
                             {renderFormField("Address", "address", data?.address, "text", true, 2,
                                 <HomeIcon color="primary" />)}
                         </Grid>
 
                         {/* Third row - Details */}
-                        <Grid item xs={12}>
+                        <Grid size={12} >
                             <Divider sx={{ my: 1 }} />
                             {renderFormField("Details", "details", data?.details, "text", true, 3,
                                 <InfoIcon color="primary" />, "110px")}
@@ -246,7 +245,7 @@ const PatientMetaInfo = ({
                                 >
                                     Cancel
                                 </Button>
-                                <LoadingButton
+                                <Button
                                     onClick={handleSubmit}
                                     variant="contained"
                                     loading={processing}
@@ -254,7 +253,7 @@ const PatientMetaInfo = ({
                                     color="primary"
                                 >
                                     Save Changes
-                                </LoadingButton>
+                                </Button>
                             </Stack>
                         ) : (
                             <Tooltip title="Edit patient information">

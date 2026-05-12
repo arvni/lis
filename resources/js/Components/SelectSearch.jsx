@@ -48,11 +48,14 @@ const SelectSearch = ({
             })
     }, []);
 
-    const handleSearch = (e) => {
+    const handleSearch = (e, inputValue, reason) => {
+        // Only run for user-typed input, user-clear, or direct calls from useEffect (reason=undefined).
+        // Block MUI's internal value-sync calls ('reset', 'blur', 'selectOption', etc.)
+        if (reason !== undefined && reason !== 'input' && reason !== 'clear') return;
         setLoading(true);
         axios.get(url + "?" + (new URLSearchParams({
             ...defaultData,
-            search: e?.target?.value ?? ""
+            search: inputValue ?? e?.target?.value ?? ""
         })).toString(),).then((result) => {
             const items = Array.isArray(result.data.data) ? result.data.data : [];
             if (multiple && Array.isArray(value)) {
@@ -84,12 +87,12 @@ const SelectSearch = ({
                          options={data}
                          fullWidth={fullWidth}
                          name={name}
-                         getOptionKey={(option)=>data.find(op => op.id == option.id)?.id ?? value?.id}
+                         getOptionKey={(option) => option?.id}
                          multiple={multiple}
                          disabled={disabled}
                          filterOptions={(options)=>options}
                          onInputChange={handleSearch}
-                         getOptionLabel={(option) => data.find(op => op.id == option.id)?.name ?? value?.name}
+                         getOptionLabel={(option) => option?.name ?? ""}
                          loading={loading}
                          renderInput={(params) => <TextField sx={sx} {...params}
                                                              helperText={helperText} error={error}

@@ -12,7 +12,7 @@ import {
     FormControl,
     FormControlLabel,
     FormHelperText,
-    Grid2 as Grid,
+    Grid as Grid,
     IconButton,
     InputAdornment,
     MenuItem,
@@ -258,7 +258,7 @@ const AddRequirementForm = ({
             }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     {data?.type && getFieldTypeIcon(data?.type)}
-                    <Typography variant="h6">
+                    <Typography variant="h6" component="span">
                         {data?.id && data?.label ? 'Edit Field' : 'Add New Field'}
                     </Typography>
                 </Box>
@@ -477,9 +477,9 @@ const AddRequirementForm = ({
                                                 size="small"
                                                 disabled
                                                 fullWidth
-                                                InputLabelProps={{
+                                                slotProps={{ inputLabel: {
                                                     shrink: true,
-                                                }}
+                                                } }}
                                             />
                                         )}
 

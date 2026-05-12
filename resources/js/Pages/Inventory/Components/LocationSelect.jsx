@@ -67,7 +67,7 @@ const LocationSelect = ({storeId, itemId, transactionType, value, onChange, labe
                     {...params}
                     label={label}
                     size={size}
-                    InputProps={{
+                    slotProps={{ input: {
                         ...params.InputProps,
                         endAdornment: (
                             <>
@@ -75,7 +75,7 @@ const LocationSelect = ({storeId, itemId, transactionType, value, onChange, labe
                                 {params.InputProps.endAdornment}
                             </>
                         ),
-                    }}
+                    } }}
                 />
             )}
         />

@@ -10,7 +10,7 @@ import {
     Button,
     Card,
     Chip,
-    Grid2 as Grid,
+    Grid as Grid,
     IconButton,
     Paper,
     Tooltip,
@@ -25,8 +25,8 @@ import {
     Edit as EditIcon,
     ScienceOutlined as ScienceIcon,
     AccessTimeOutlined as AccessTimeIcon,
-    CheckCircleOutline as CheckCircleIcon,
-    ErrorOutline as ErrorOutlineIcon,
+    CheckCircleOutlined as CheckCircleIcon,
+    ErrorOutlined as ErrorOutlineIcon,
     HourglassEmpty as HourglassEmptyIcon,
     Refresh as RefreshIcon,
     Dashboard as DashboardIcon
@@ -386,7 +386,7 @@ const Show = () => {
                     color: theme.palette.primary.contrastText
                 }}
             >
-                <Grid container spacing={2} alignItems="center">
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
                     <Grid size={{xs: 12, md: 6}}>
                         <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
                             {section.icon ? <Avatar src={section.icon}/> : <DashboardIcon fontSize="large"/>}

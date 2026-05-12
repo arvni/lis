@@ -99,7 +99,6 @@ const Index = () => {
         }
     ], [editSectionGroup, deleteSectionGroup]);
     const addNew = useCallback(() => setOpenAddForm(true), []);
-     console.log(sectionGroup);
     return (
         <>
             <PageHeader title="Section Group List"

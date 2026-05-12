@@ -15,7 +15,7 @@ import {
     Chip,
     InputAdornment
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import SelectSearch from "@/Components/SelectSearch";
 import {FormProvider, useFormState} from "@/Components/FormTemplate.jsx";
 import React, {useState, useEffect} from "react";
@@ -27,7 +27,7 @@ import {
     CalendarToday,
     Numbers,
     BiotechOutlined,
-    DeleteOutline
+    DeleteOutlined
 } from "@mui/icons-material";
 
 const AddForm = ({open, onClose, defaultValue}) => {
@@ -186,8 +186,8 @@ const FormContent = () => {
                                             </IconButton>
                                         </InputAdornment>
                                     ),
-                                    inputProps: { min: 1, max: 100 }
-                                }
+                                },
+                                htmlInput: { min: 1, max: 100 }
                             }}
                         />
                     </Grid>
@@ -257,7 +257,7 @@ const FormContent = () => {
                                                     onClick={() => handleDeleteTube(index)}
                                                     disabled={tubesList.length <= 1}
                                                 >
-                                                    <DeleteOutline fontSize="small"/>
+                                                    <DeleteOutlined fontSize="small"/>
                                                 </IconButton>
                                             </TableCell>
                                         </TableRow>
@@ -289,7 +289,7 @@ const FormContent = () => {
                                                     color="error"
                                                     onClick={() => handleDeleteTube(index)}
                                                 >
-                                                    <DeleteOutline fontSize="small"/>
+                                                    <DeleteOutlined fontSize="small"/>
                                                 </IconButton>
                                             )}
                                         </Box>

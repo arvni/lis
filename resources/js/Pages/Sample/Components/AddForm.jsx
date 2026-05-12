@@ -23,7 +23,7 @@ import {
     Collapse,
     Avatar,
     Badge,
-    Grid2 as Grid,
+    Grid as Grid,
 } from "@mui/material";
 import {
     LocationOn,
@@ -181,17 +181,17 @@ const AddForm = ({ open, onClose, defaultValue }) => {
             onClose={processing ? undefined : handleClose}
             fullWidth
             maxWidth="md"
-            PaperProps={{
-                sx: { borderRadius: 3, boxShadow: "0 12px 40px rgba(0,0,0,0.12)", maxHeight: '92vh' }
+            slotProps={{
+                paper: { sx: { borderRadius: 3, boxShadow: "0 12px 40px rgba(0,0,0,0.12)", maxHeight: '92vh' } }
             }}
         >
             {/* Header */}
             <DialogTitle sx={{ bgcolor: "primary.main", color: "primary.contrastText", display: "flex", alignItems: "center", justifyContent: "space-between", py: 2, px: 3 }}>
-                <Box display="flex" alignItems="center" gap={1.5}>
+  <Box display="flex" gap={1.5} sx={{alignItems: "center"}}>
                     <Avatar sx={{ bgcolor: "primary.light" }}><Science /></Avatar>
                     <Box>
-                        <Typography variant="h6" fontWeight={600}>Sample Collection</Typography>
-                        <Box display="flex" alignItems="center" gap={1}>
+                        <Typography variant="h6" fontWeight={600} component="span">Sample Collection</Typography>
+  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
                             <Typography variant="caption" sx={{ opacity: 0.85 }}>Record collection details and print barcodes</Typography>
                             {data.acceptanceId && (
                                 <Chip
@@ -249,7 +249,7 @@ const AddForm = ({ open, onClose, defaultValue }) => {
                             variant="outlined"
                             sx={{ p: 2, borderRadius: 2, bgcolor: validation.isValid ? 'success.50' : 'warning.50', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                         >
-                            <Box display="flex" alignItems="center" gap={1.5}>
+  <Box display="flex" gap={1.5} sx={{alignItems: "center"}}>
                                 <Badge badgeContent={validation.totalSamples} color="primary">
                                     <Biotech color={validation.isValid ? 'success' : 'warning'} />
                                 </Badge>
@@ -292,7 +292,7 @@ const AddForm = ({ open, onClose, defaultValue }) => {
 
                                     <Chip label={barcode.barcodeGroup?.name || `BC-${index + 1}`} color="primary" variant="outlined" size="small" sx={{ fontWeight: 600, minWidth: 64 }} />
 
-                                    <Box display="flex" alignItems="center" gap={1} sx={{ flex: 1 }}>
+  <Box display="flex" gap={1} sx={{alignItems: "center", flex: 1}}>
                                         <Avatar sx={{ width: 28, height: 28, bgcolor: 'primary.light' }}><Person sx={{ fontSize: 16 }} /></Avatar>
                                         <Typography variant="body2" fontWeight={600}>{barcode.patient?.fullName || '—'}</Typography>
                                     </Box>
@@ -322,7 +322,7 @@ const AddForm = ({ open, onClose, defaultValue }) => {
                                                 <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5, display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
                                                     <Science sx={{ fontSize: 14 }} /> Requested Tests
                                                 </Typography>
-                                                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                                                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }} useFlexGap>
                                                     {barcode.items?.map((item, i) => (
                                                         <Chip key={i} size="small" variant="outlined" sx={{ bgcolor: 'background.paper', mb: 0.5 }}
                                                             label={<><strong>{item.test?.name}</strong>{item.method?.name ? ` • ${item.method.name}` : ''}</>}
@@ -445,7 +445,7 @@ const AddForm = ({ open, onClose, defaultValue }) => {
             </DialogContent>
 
             <DialogActions sx={{ px: 3, pb: 2.5, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-                <Box display="flex" justifyContent="space-between" width="100%" alignItems="center">
+  <Box display="flex" width="100%" sx={{justifyContent: "space-between", alignItems: "center"}}>
                     <Typography variant="body2" color="text.secondary">
                         {validation.totalSamples > 0 && `Progress: ${validation.completedSamples}/${validation.totalSamples} samples`}
                     </Typography>

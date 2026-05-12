@@ -17,7 +17,7 @@ import ReplayIcon from "@mui/icons-material/Replay";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import PrintIcon from "@mui/icons-material/Print";
 import UndoIcon from "@mui/icons-material/Undo";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlined";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import BlockIcon from "@mui/icons-material/Block";
 import BuildIcon from "@mui/icons-material/Build";
@@ -147,7 +147,7 @@ const Show = () => {
             )}
 
             <Grid container spacing={3}>
-                <Grid item xs={12} md={8}>
+                <Grid size={{ xs: 12, md: 8 }} >
                     <Card sx={{mb: 3}}>
                         <CardHeader
                             title="Transaction Details"
@@ -168,7 +168,7 @@ const Show = () => {
                         />
                         <CardContent>
                             <Grid container spacing={0}>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }} >
                                     <InfoRow label="Reference">{transaction.reference_number}</InfoRow>
                                     <InfoRow label="Date">{transaction.transaction_date}</InfoRow>
                                     <InfoRow label="Source Store">{transaction.store?.name}</InfoRow>
@@ -179,7 +179,7 @@ const Show = () => {
                                         <InfoRow label="Supplier">{transaction.supplier.name}</InfoRow>
                                     )}
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }} >
                                     <InfoRow label="Requested By">{transaction.requested_by?.name}</InfoRow>
                                     <InfoRow label="Approved By">{transaction.approved_by?.name}</InfoRow>
                                     <InfoRow label="Total Value">
@@ -270,7 +270,7 @@ const Show = () => {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }} >
                     <Card>
                         <CardHeader title="Audit Trail"/>
                         <CardContent sx={{p: 0, pt: 1}}>

@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Editor from "@/Components/Editor";
 import Button from "@mui/material/Button";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -23,11 +23,10 @@ import {
     InputLabel,
     Select,
     MenuItem,
-    ListItemText,
     Chip,
     RadioGroup,
     FormControlLabel,
-    Radio
+    Radio,
 } from "@mui/material";
 import Upload from "@/Components/Upload";
 import {
@@ -183,7 +182,7 @@ const ApproveForm = ({
             maxWidth="md"
             slots={{Transition: Fade}}
             transitionDuration={300}
-            slotsProps={{
+            slotProps={{
                 Paper: {
                     sx: {
                         borderRadius: 2,
@@ -201,12 +200,12 @@ const ApproveForm = ({
                     bgcolor: 'background.default'
                 }}
             >
-                <Stack direction="row" spacing={1.5} alignItems="center">
+  <Stack direction="row" spacing={1.5} sx={{alignItems: "center"}}>
                     {isUpdateMode ? <EditNote color="primary"/> : <ThumbUpAlt color="primary"/>}
-                    <Typography variant="h6">{dialogTitle}</Typography>
+                    <Typography variant="h6" component="span">{dialogTitle}</Typography>
                 </Stack>
 
-                <Stack direction="row" spacing={1} alignItems="center">
+  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                     {clinicalCommentTemplateUrl && (
                         <Tooltip title="Download Template">
                             <Button
@@ -320,24 +319,24 @@ const ApproveForm = ({
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
                                                     <PictureAsPdf fontSize="small" color="error" />
                                                     <Box sx={{ flex: 1 }}>
-                                                        <ListItemText
-                                                            primary={formatDocumentName(document)}
-                                                            secondary={
-                                                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                                                    <Typography variant="caption" color="text.secondary">
-                                                                        {new Date(document.created_at).toLocaleDateString()}
-                                                                    </Typography>
-                                                                    {document.tag && (
-                                                                        <Chip
-                                                                            label={document.tag}
-                                                                            size="small"
-                                                                            color="primary"
-                                                                            variant="outlined"
-                                                                        />
-                                                                    )}
-                                                                </Box>
-                                                            }
-                                                        />
+                                                        <Box>
+                                                            <Typography variant="body2">
+                                                                {formatDocumentName(document)}
+                                                            </Typography>
+                                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 0.25 }}>
+                                                                <Typography variant="caption" color="text.secondary">
+                                                                    {new Date(document.created_at).toLocaleDateString()}
+                                                                </Typography>
+                                                                {document.tag && (
+                                                                    <Chip
+                                                                        label={document.tag}
+                                                                        size="small"
+                                                                        color="primary"
+                                                                        variant="outlined"
+                                                                    />
+                                                                )}
+                                                            </Box>
+                                                        </Box>
                                                     </Box>
                                                 </Box>
 
@@ -393,7 +392,7 @@ const ApproveForm = ({
                     sx={{mt: 2}}
                 >
                     {activeTab === 0 && (
-                        <Grid container spacing={3} justifyContent="center">
+  <Grid container spacing={3} sx={{justifyContent: "center"}}>
                             <Grid size={12}>
                                 <Typography
                                     variant="subtitle1"
@@ -489,24 +488,24 @@ const ApproveForm = ({
                                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
                                                                 <PictureAsPdf fontSize="small" color="error" />
                                                                 <Box sx={{ flex: 1 }}>
-                                                                    <ListItemText
-                                                                        primary={formatDocumentName(document)}
-                                                                        secondary={
-                                                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                                                                <Typography variant="caption" color="text.secondary">
-                                                                                    {new Date(document.created_at).toLocaleDateString()}
-                                                                                </Typography>
-                                                                                {document.tag && (
-                                                                                    <Chip
-                                                                                        label={document.tag}
-                                                                                        size="small"
-                                                                                        color="secondary"
-                                                                                        variant="outlined"
-                                                                                    />
-                                                                                )}
-                                                                            </Box>
-                                                                        }
-                                                                    />
+                                                                    <Box>
+                                                                        <Typography variant="body2">
+                                                                            {formatDocumentName(document)}
+                                                                        </Typography>
+                                                                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 0.25 }}>
+                                                                            <Typography variant="caption" color="text.secondary">
+                                                                                {new Date(document.created_at).toLocaleDateString()}
+                                                                            </Typography>
+                                                                            {document.tag && (
+                                                                                <Chip
+                                                                                    label={document.tag}
+                                                                                    size="small"
+                                                                                    color="secondary"
+                                                                                    variant="outlined"
+                                                                                />
+                                                                            )}
+                                                                        </Box>
+                                                                    </Box>
                                                                 </Box>
                                                             </Box>
 
@@ -558,7 +557,7 @@ const ApproveForm = ({
                     sx={{mt: 2}}
                 >
                     {activeTab === 1 && (
-                        <Grid container spacing={3} justifyContent="center">
+  <Grid container spacing={3} sx={{justifyContent: "center"}}>
                             <Grid size={12}>
                                 <Typography
                                     variant="subtitle1"

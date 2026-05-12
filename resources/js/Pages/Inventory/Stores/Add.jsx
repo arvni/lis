@@ -31,14 +31,14 @@ const Add = () => {
                     <CardHeader title="Store Details"/>
                     <CardContent>
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }} >
                                 <TextField
                                     fullWidth required label="Store Name"
                                     value={data.name} onChange={(e) => setData("name", e.target.value)}
                                     error={!!errors.name} helperText={errors.name}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }} >
                                 <TextField
                                     fullWidth required label="Store Code"
                                     value={data.code} onChange={(e) => setData("code", e.target.value)}
@@ -46,7 +46,7 @@ const Add = () => {
                                     helperText={errors.code || "Short uppercase identifier, e.g. WH-01"}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }} >
                                 <TextField
                                     select fullWidth label="Store Manager"
                                     value={data.manager_user_id} onChange={(e) => setData("manager_user_id", e.target.value)}
@@ -55,19 +55,19 @@ const Add = () => {
                                     {managers.map((m) => <MenuItem key={m.id} value={m.id}>{m.name}</MenuItem>)}
                                 </TextField>
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }} >
                                 <TextField
                                     fullWidth label="Address"
                                     value={data.address} onChange={(e) => setData("address", e.target.value)}
                                 />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={12} >
                                 <TextField
                                     fullWidth multiline rows={2} label="Description"
                                     value={data.description} onChange={(e) => setData("description", e.target.value)}
                                 />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={12} >
                                 <TextField
                                     fullWidth multiline rows={2} label="Notes"
                                     value={data.notes} onChange={(e) => setData("notes", e.target.value)}

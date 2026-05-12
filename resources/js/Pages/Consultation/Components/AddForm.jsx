@@ -10,7 +10,7 @@ import {
     DialogActions,
     Button,
     Container,
-    Grid2 as Grid,
+    Grid as Grid,
     FormGroup,
     FormHelperText,
     Radio,
@@ -36,7 +36,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SelectSearch from "@/Components/SelectSearch";
 import Autocomplete from "@mui/material/Autocomplete";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import BadgeIcon from "@mui/icons-material/Badge";
 
@@ -141,11 +141,11 @@ const AddForm = ({openAdd, onClose}) => {
 
     const fetchData = useCallback((_, search) => {
         setLoading(true);
-        setData(prevData => ({...prevData, customer: {phone: search}}));
+        setData(prevData => ({...prevData, customer: {...prevData.customer, phone: search}}));
         fetch(route("api.customers.list", {search}))
             .then(response => response.json())
             .then(data => {
-                setOptions(data.data);
+                setOptions((data.data || []).filter(Boolean));
                 setLoading(false);
             })
             .catch(error => {
@@ -190,7 +190,7 @@ const AddForm = ({openAdd, onClose}) => {
                     color: "white",
                     py: 2
                 }}>
-                    <Typography variant="h5" fontWeight="500">
+                    <Typography variant="h5" fontWeight="500" component="span">
                         Schedule New Reservation
                     </Typography>
                 </DialogTitle>
@@ -212,11 +212,11 @@ const AddForm = ({openAdd, onClose}) => {
                                             open={open}
                                             onOpen={() => setOpen(true)}
                                             onClose={() => setOpen(false)}
-                                            value={data.customer || ""}
+                                            value={data.customer?.id ? data.customer : null}
                                             onChange={handleCustomerSelect}
                                             onInputChange={fetchData}
-                                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                                            getOptionLabel={(option) => option.phone || ''}
+                                            isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                                            getOptionLabel={(option) => option?.phone || ''}
                                             options={options}
                                             loading={loading}
                                             fullWidth
@@ -226,13 +226,24 @@ const AddForm = ({openAdd, onClose}) => {
                                                     {...params}
                                                     name="phone"
                                                     label="Phone Number"
-                                                    value={data.customer?.phone || ""}
                                                     placeholder="Search or enter phone"
                                                     slotProps={{
+                                                        ...params.slotProps,
+                                                        htmlInput: params.slotProps?.htmlInput ?? params.inputProps,
                                                         input: {
-                                                            ...params.InputProps,
-                                                            startAdornment: <MedicalServicesIcon color="action" sx={{mr: 1}}/>,
-                                                            endAdornment: loading ? <CircularProgress size="small"/> : null
+                                                            ...(params.slotProps?.input ?? params.InputProps),
+                                                            startAdornment: (
+                                                                <>
+                                                                    <MedicalServicesIcon color="action" sx={{mr: 1}}/>
+                                                                    {(params.slotProps?.input ?? params.InputProps)?.startAdornment}
+                                                                </>
+                                                            ),
+                                                            endAdornment: (
+                                                                <>
+                                                                    {loading && <CircularProgress size={16}/>}
+                                                                    {(params.slotProps?.input ?? params.InputProps)?.endAdornment}
+                                                                </>
+                                                            ),
                                                         },
                                                     }}
                                                 />
@@ -299,7 +310,7 @@ const AddForm = ({openAdd, onClose}) => {
                             <Grid size={{xs: 12, md: 6}}>
                                 <Paper elevation={0}
                                        sx={{p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2}}>
-                                    <Box display="flex" alignItems="center" mb={1}>
+  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
                                         <PersonIcon color="primary" sx={{mr: 1}}/>
                                         <Typography variant="subtitle1" fontWeight="medium">
                                             Select Consultant
@@ -323,7 +334,7 @@ const AddForm = ({openAdd, onClose}) => {
                             <Grid size={{xs: 12, md: 6}}>
                                 <Paper elevation={0}
                                        sx={{p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2}}>
-                                    <Box display="flex" alignItems="center" mb={1}>
+  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
                                         <CalendarTodayIcon color="primary" sx={{mr: 1}}/>
                                         <Typography variant="subtitle1" fontWeight="medium">
                                             Select Date
@@ -350,7 +361,7 @@ const AddForm = ({openAdd, onClose}) => {
                                 <Grid size={{xs: 12}}>
                                     <Paper elevation={0}
                                            sx={{p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2}}>
-                                        <Box display="flex" alignItems="center" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
                                             <AccessTimeIcon color="primary" sx={{mr: 1}}/>
                                             <Typography variant="subtitle1" fontWeight="medium">
                                                 Available Time Slots
@@ -358,7 +369,7 @@ const AddForm = ({openAdd, onClose}) => {
                                         </Box>
 
                                         {waiting ? (
-                                            <Box display="flex" justifyContent="center" alignItems="center" p={4}>
+  <Box display="flex" p={4} sx={{justifyContent: "center", alignItems: "center"}}>
                                                 <CircularProgress size={40}/>
                                                 <Typography variant="body2" color="text.secondary" ml={2}>
                                                     Loading available times...

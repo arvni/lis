@@ -59,7 +59,7 @@ const Print = ({invoice}) => {
                                 </Table>
                             </TableCell>
                             <TableCell sx={{padding: 0, border: "none"}}>
-                                <Stack alignItems="center">
+  <Stack sx={{alignItems: "center"}}>
                                     <img src="/images/logo.png" alt="logo" style={{width: "25mm"}}/>
                                     <span style={{fontSize: "1rem", fontWeight: "bolder"}}>
                                     TAX Invoice

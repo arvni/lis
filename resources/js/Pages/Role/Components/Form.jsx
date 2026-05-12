@@ -1,4 +1,4 @@
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import {
     Accordion,
@@ -95,7 +95,7 @@ const Permission = memo(({ onChange, checked, permission, label, level, disabled
                     {label}
                 </Typography>
 
-                <Stack direction="row" spacing={1} alignItems="center">
+  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                     {checked && (
                         <Chip
                             size="small"
@@ -210,7 +210,7 @@ const PermissionGroup = memo(({ permission, label, onChange, data, level = 0, se
                     }
                 }}
             >
-                <Stack direction="row" spacing={2} alignItems="center" width="100%">
+  <Stack direction="row" spacing={2} width="100%" sx={{alignItems: "center"}}>
                     <Settings
                         fontSize="small"
                         color={hasPermission ? "primary" : "action"}
@@ -598,12 +598,12 @@ export default function RoleManager({
                     alignItems: 'center'
                 }}
             >
-                <Stack direction="row" spacing={1} alignItems="center">
+  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                     <EditOutlined />
                     <Typography variant="h5">{`${edit ? "Edit" : "Add New"} Role`}</Typography>
                 </Stack>
 
-                <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                     {isReadOnly && (
                         <Chip
                             label="Read Only"
@@ -691,7 +691,7 @@ export default function RoleManager({
                         border: `1px solid ${theme.palette.divider}`
                     }}
                 >
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 3 }}>
+  <Stack direction="row" spacing={1} sx={{alignItems: "center", mb: 3}}>
                         <Typography variant="h6">Role Permissions</Typography>
                         <Tooltip title="Select the permissions this role should have">
                             <Help fontSize="small" color="action" />

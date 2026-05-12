@@ -4,7 +4,7 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    Grid2 as Grid,
+    Grid as Grid,
     TextField,
     Typography,
     Fade,
@@ -14,7 +14,7 @@ import {
     IconButton
 } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
 import SelectSearch from "@/Components/SelectSearch";
 import {useState, useEffect} from "react";
 
@@ -144,7 +144,7 @@ const SignerAddForm = ({data, onChange, onSubmit, open, onClose}) => {
             onClose={!isSubmitting ? onClose : undefined}
         >
             <DialogTitle sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <Typography variant="h6">Add Signer</Typography>
+                <Typography variant="h6" component="span">Add Signer</Typography>
                 <Tooltip title="Close">
                     <IconButton
                         edge="end"
@@ -160,7 +160,7 @@ const SignerAddForm = ({data, onChange, onSubmit, open, onClose}) => {
 
             <DialogContent dividers>
                 <Grid container spacing={3} sx={{mt: 0.5}}>
-                    <Grid item xs={12}>
+                    <Grid size={12} >
                         <Box sx={{display: 'flex', alignItems: 'flex-start'}}>
                             <SelectSearch
                                 onChange={handleChange}
@@ -184,7 +184,7 @@ const SignerAddForm = ({data, onChange, onSubmit, open, onClose}) => {
                     </Grid>
 
                     {data?.user && (
-                        <Grid item xs={12}>
+                        <Grid size={12} >
                             <Box sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
@@ -218,7 +218,7 @@ const SignerAddForm = ({data, onChange, onSubmit, open, onClose}) => {
                         </Grid>
                     )}
 
-                    <Grid item xs={12}>
+                    <Grid size={12} >
                         <Box sx={{display: 'flex', alignItems: 'flex-start'}}>
                             <TextField
                                 fullWidth

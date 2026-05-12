@@ -31,7 +31,7 @@ import {
     LocalHospital,
     PersonOutlined
 } from "@mui/icons-material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import EditIcon from "@mui/icons-material/Edit";
 
 // Lazy-loaded sections

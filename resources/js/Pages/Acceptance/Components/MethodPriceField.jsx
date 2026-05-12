@@ -10,11 +10,11 @@ import {
     InputAdornment,
     Alert
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import Grid from '@mui/material/Grid';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
 import CalculateIcon from '@mui/icons-material/Calculate';
 import FunctionsIcon from '@mui/icons-material/Functions';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import {
     calcPrice,
     getCondition
@@ -110,7 +110,7 @@ const PriceField = ({
 
     return (
         <Grid container spacing={3}>
-            <Grid item size={{xs: 12}}>
+            <Grid size={{xs: 12}}>
                 <Alert
                     severity="info"
                     icon={<CalculateIcon/>}
@@ -127,11 +127,10 @@ const PriceField = ({
 
                 return (
                     <Grid
-                        item
-                        size={{xs: 12, sm: 6, md: 4}}
-                        key={parameter.value}
-                    >
-                        <Box display="flex" alignItems="flex-start">
+ size={{xs: 12, sm: 6, md: 4}}
+ key={parameter.value}
+ >
+  <Box display="flex" sx={{alignItems: "flex-start"}}>
                             <TextField
                                 type="number"
                                 label={parameter.label || parameter.value}
@@ -178,7 +177,7 @@ const PriceField = ({
                 );
             })}
 
-            <Grid item size={{xs: 12}}>
+            <Grid size={{xs: 12}}>
                 <Paper
                     elevation={0}
                     sx={{
@@ -190,9 +189,9 @@ const PriceField = ({
                         borderColor: isValid ? 'success.light' : 'grey.300'
                     }}
                 >
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid item size={{xs: 12, md: 6}}>
-                            <Box display="flex" alignItems="center">
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
+                        <Grid size={{xs: 12, md: 6}}>
+  <Box display="flex" sx={{alignItems: "center"}}>
                                 <FunctionsIcon sx={{mr: 1, color: 'text.secondary'}}/>
                                 <Typography variant="subtitle2" color="text.secondary">
                                     {method.price_type === "Formulate" ? "Formula:" : "Conditions:"}
@@ -278,7 +277,7 @@ const PriceField = ({
                             )}
                         </Grid>
 
-                        <Grid item size={{xs: 12, md: 6}}>
+                        <Grid size={{xs: 12, md: 6}}>
                             <Divider orientation="vertical" sx={{display: {xs: 'none', md: 'block'}}}/>
                             <Divider sx={{display: {xs: 'block', md: 'none'}, my: 2}}/>
 

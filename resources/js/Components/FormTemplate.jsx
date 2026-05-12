@@ -9,7 +9,7 @@ import {
     Container,
     CircularProgress
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import PropTypes from 'prop-types';
 
 const FormContext = createContext();

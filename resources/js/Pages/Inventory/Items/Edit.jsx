@@ -91,7 +91,7 @@ const Edit = () => {
                     <Box component="form" onSubmit={handleSubmit}>
                         {activeStep === 0 && (
                             <Grid container spacing={3}>
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{ xs: 12, md: 6 }} >
                                     <TextField
                                         fullWidth required label="Item Name"
                                         value={data.name}
@@ -99,7 +99,7 @@ const Edit = () => {
                                         error={!!errors.name} helperText={errors.name}
                                     />
                                 </Grid>
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{ xs: 12, md: 6 }} >
                                     <TextField
                                         fullWidth label="Scientific Name"
                                         value={data.scientific_name}
@@ -107,7 +107,7 @@ const Edit = () => {
                                         error={!!errors.scientific_name} helperText={errors.scientific_name}
                                     />
                                 </Grid>
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{ xs: 12, md: 6 }} >
                                     <TextField
                                         select fullWidth required label="Storage Condition"
                                         value={data.storage_condition}
@@ -119,7 +119,7 @@ const Edit = () => {
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item xs={12} md={6}>
+                                <Grid size={{ xs: 12, md: 6 }} >
                                     <TextField
                                         select fullWidth required label="Base Unit"
                                         value={data.default_unit_id}
@@ -131,55 +131,55 @@ const Edit = () => {
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item xs={12} md={4}>
+                                <Grid size={{ xs: 12, md: 4 }} >
                                     <TextField
                                         fullWidth type="number" label="Min Stock Level"
                                         value={data.minimum_stock_level}
                                         onChange={(e) => setData("minimum_stock_level", e.target.value)}
-                                        inputProps={{min: 0, step: "any"}}
+                                        slotProps={{ htmlInput: {min: 0, step: "any"} }}
                                         error={!!errors.minimum_stock_level} helperText={errors.minimum_stock_level}
                                     />
                                 </Grid>
-                                <Grid item xs={12} md={4}>
+                                <Grid size={{ xs: 12, md: 4 }} >
                                     <TextField
                                         fullWidth type="number" label="Max Stock Level"
                                         value={data.maximum_stock_level}
                                         onChange={(e) => setData("maximum_stock_level", e.target.value)}
-                                        inputProps={{min: 0, step: "any"}}
+                                        slotProps={{ htmlInput: {min: 0, step: "any"} }}
                                         error={!!errors.maximum_stock_level} helperText={errors.maximum_stock_level}
                                     />
                                 </Grid>
-                                <Grid item xs={12} md={4}>
+                                <Grid size={{ xs: 12, md: 4 }} >
                                     <TextField
                                         fullWidth type="number" label="Lead Time (days)"
                                         value={data.lead_time_days}
                                         onChange={(e) => setData("lead_time_days", e.target.value)}
-                                        inputProps={{min: 0}}
+                                        slotProps={{ htmlInput: {min: 0} }}
                                         error={!!errors.lead_time_days} helperText={errors.lead_time_days}
                                     />
                                 </Grid>
-                                <Grid item xs={6} md={3}>
+                                <Grid size={{ xs: 6, md: 3 }} >
                                     <FormControlLabel
                                         control={<Checkbox checked={data.is_hazardous} onChange={(e) => setData("is_hazardous", e.target.checked)}/>}
                                         label="Hazardous"
                                     />
                                 </Grid>
-                                <Grid item xs={6} md={3}>
+                                <Grid size={{ xs: 6, md: 3 }} >
                                     <FormControlLabel
                                         control={<Checkbox checked={data.requires_lot_tracking} onChange={(e) => setData("requires_lot_tracking", e.target.checked)}/>}
                                         label="Lot Tracking"
                                     />
                                 </Grid>
-                                <Grid item xs={6} md={3}>
+                                <Grid size={{ xs: 6, md: 3 }} >
                                     <FormControlLabel
                                         control={<Checkbox checked={data.is_active} onChange={(e) => setData("is_active", e.target.checked)}/>}
                                         label="Active"
                                     />
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <Divider/>
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <TextField
                                         fullWidth multiline rows={2} label="Description"
                                         value={data.description}
@@ -187,21 +187,21 @@ const Edit = () => {
                                         error={!!errors.description} helperText={errors.description}
                                     />
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <TextField
                                         fullWidth multiline rows={2} label="Storage Notes"
                                         value={data.storage_condition_notes}
                                         onChange={(e) => setData("storage_condition_notes", e.target.value)}
                                     />
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <TextField
                                         fullWidth multiline rows={2} label="Notes"
                                         value={data.notes}
                                         onChange={(e) => setData("notes", e.target.value)}
                                     />
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid size={12} >
                                     <Button
                                         variant="contained"
                                         disabled={!data.name || !data.storage_condition || !data.default_unit_id}
@@ -245,7 +245,7 @@ const Edit = () => {
                                                         size="small" type="number"
                                                         value={conv.conversion_to_base}
                                                         onChange={(e) => updateConversion(idx, "conversion_to_base", e.target.value)}
-                                                        inputProps={{min: 0.000001, step: "any"}}
+                                                        slotProps={{ htmlInput: {min: 0.000001, step: "any"} }}
                                                         sx={{width: 120}}
                                                     />
                                                 </TableCell>

@@ -162,7 +162,7 @@ const ActionButtons = ({ panel, onEdit, onDelete, onRestore }) => {
 
     return (
         <>
-            <Stack direction="row" spacing={1} justifyContent="center">
+  <Stack direction="row" spacing={1} sx={{justifyContent: "center"}}>
                 {onEdit && (
                     <Tooltip title="Edit panel">
                         <IconButton
@@ -300,8 +300,8 @@ const PanelRow = ({
                                         backgroundColor: 'rgba(25, 118, 210, 0.02)'
                                     }}
                                 >
-                                    <Box display="flex" alignItems="center" justifyContent="space-between">
-                                        <Box display="flex" alignItems="center">
+  <Box display="flex" sx={{alignItems: "center", justifyContent: "space-between"}}>
+  <Box display="flex" sx={{alignItems: "center"}}>
                                             <PlaylistAddCheckIcon color="primary" sx={{ mr: 1 }} />
                                             <Box>
                                                 <Typography fontWeight="600" color="primary.main">
@@ -363,7 +363,7 @@ const PanelRow = ({
                         )}
 
                         <TableCell>
-                            <Box display="flex" alignItems="center" gap={1}>
+  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
                                 {showButton ? (
                                     <Link
                                         href={route("acceptanceItems.show", {

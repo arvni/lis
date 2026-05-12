@@ -6,7 +6,7 @@ import {
     Chip,
     CircularProgress,
     Divider,
-    Grid2 as Grid,
+    Grid as Grid,
     IconButton,
     Paper,
     Snackbar,
@@ -116,8 +116,8 @@ const PatientCard = ({patient, index, isMultiple, onSelectPatient,mainPatientID}
             }}
         >
             {/* Header */}
-            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={2}>
-                <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" mb={2} sx={{justifyContent: "space-between", alignItems: "flex-start"}}>
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                     <Avatar
                         sx={{
                             bgcolor: patient.is_main ? 'primary.main' : 'grey.400',
@@ -136,7 +136,7 @@ const PatientCard = ({patient, index, isMultiple, onSelectPatient,mainPatientID}
                         </Typography>
                     </Box>
                 </Stack>
-                <Stack spacing={1} alignItems="flex-end">
+  <Stack spacing={1} sx={{alignItems: "flex-end"}}>
                     {patient.is_main && (
                         <Chip
                             label="Main Patient"
@@ -277,7 +277,7 @@ const TestOrderItem = ({orderItem, index}) => {
                     py: 2
                 }}
             >
-                <Stack direction="row" spacing={2} alignItems="center" sx={{flex: 1}}>
+  <Stack direction="row" spacing={2} sx={{alignItems: "center", flex: 1}}>
                     <Avatar sx={{bgcolor: 'primary.main'}}>
                         <MedicalServices/>
                     </Avatar>
@@ -323,11 +323,11 @@ const TestOrderItem = ({orderItem, index}) => {
                                 <Person fontSize="small" color="primary"/>
                                 Associated Patients
                             </Typography>
-                            <Stack direction="row" spacing={1} flexWrap="wrap" sx={{mt: 1}}>
+                            <Stack direction="row" spacing={1} sx={{mt: 1, flexWrap: 'wrap'}}>
                                 {orderItem.patients.map((patient) => (
                                     <Chip
                                         key={patient.id}
-                                        avatar={<Avatar>{patient.fullName.charAt(0)}</Avatar>}
+                                        avatar={<Avatar>{patient.fullName?.charAt(0)}</Avatar>}
                                         label={patient.fullName}
                                         variant={patient.is_main ? "filled" : "outlined"}
                                         color={patient.is_main ? "primary" : "default"}
@@ -441,7 +441,7 @@ const StatusTimeline = ({referrerOrder}) => {
                     const status = getStepStatus(step.key);
                     return (
                         <Box key={step.key} sx={{flex: 1, position: 'relative'}}>
-                            <Stack alignItems="center" spacing={1}>
+  <Stack spacing={1} sx={{alignItems: "center"}}>
                                 <Avatar
                                     sx={{
                                         bgcolor: status === 'completed' ? 'success.main' :
@@ -679,6 +679,7 @@ const Show = ({referrerOrder, errors = {}}) => {
                 subtitle={`Referrer: ${referrerOrder?.referrer?.fullName} | Status: ${referrerOrder?.orderInformation?.status}`}
                 actions={[
                     <Chip
+                        key="completion"
                         size="medium"
                         color={getCompletionColor()}
                         label={`${getCompletionPercentage()}% Complete`}
@@ -720,7 +721,7 @@ const Show = ({referrerOrder, errors = {}}) => {
                     <TabPanel value={activeTab} index={0}>
                         {/* Patients Section */}
                         <Box sx={{mb: 4}}>
-                            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+  <Stack direction="row" mb={3} sx={{justifyContent: "space-between", alignItems: "center"}}>
                                 <Typography variant="h5" fontWeight={600}>
                                     Patients ({patients.length})
                                 </Typography>
@@ -771,8 +772,8 @@ const Show = ({referrerOrder, errors = {}}) => {
 
                         {/* Tests & Samples Section */}
                         <Box>
-                            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-                                <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" mb={3} sx={{justifyContent: "space-between", alignItems: "center"}}>
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                                     <Typography variant="h5" fontWeight={600}>
                                         Tests & Samples ({orderItems.length})
                                     </Typography>
@@ -897,7 +898,7 @@ const Show = ({referrerOrder, errors = {}}) => {
                                                     borderColor: consent.value === "1" ? 'success.main' : 'warning.main'
                                                 }}
                                             >
-                                                <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                                                     <Avatar
                                                         sx={{
                                                             bgcolor: consent.value === "1" ? 'success.main' : 'warning.main'
@@ -1026,12 +1027,12 @@ const Show = ({referrerOrder, errors = {}}) => {
                 fullWidth
             >
                 <DialogTitle>
-                    <Stack direction="row" alignItems="center" spacing={2}>
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                         <Avatar sx={{bgcolor: 'primary.main'}}>
                             <Person/>
                         </Avatar>
                         <Box>
-                            <Typography variant="h6">
+                            <Typography variant="h6" component="span">
                                 Add Patient to System
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
@@ -1062,7 +1063,7 @@ const Show = ({referrerOrder, errors = {}}) => {
                             }}
                             onClick={handleAddNewPatient}
                         >
-                            <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                                 <Avatar sx={{bgcolor: 'primary.main', width: 48, height: 48}}>
                                     <PersonAdd/>
                                 </Avatar>
@@ -1093,7 +1094,7 @@ const Show = ({referrerOrder, errors = {}}) => {
                             }}
                             onClick={handleSelectFromExisting}
                         >
-                            <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                                 <Avatar sx={{bgcolor: 'secondary.main', width: 48, height: 48}}>
                                     <Person/>
                                 </Avatar>

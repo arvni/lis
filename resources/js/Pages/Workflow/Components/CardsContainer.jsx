@@ -1,6 +1,6 @@
-import React, {useCallback} from "react";
-import update from 'immutability-helper'
+import React from "react";
 import SectionCard from "./SectionCard";
+import {SortableContext, horizontalListSortingStrategy} from '@dnd-kit/sortable';
 import {styled} from '@mui/material/styles';
 import Box from "@mui/material/Box";
 
@@ -24,30 +24,23 @@ const Basic = styled(Box)`
     font-size:4em;
   }
 `;
-export const CardsContainer = ({onEdit, onDelete, sections, setData}) => {
-    const moveCard = useCallback((dragIndex, hoverIndex) => {
-        setData((prevData) => ({
-            ...prevData, section_workflows: update(prevData.section_workflows, {
-                $splice: [
-                    [dragIndex, 1],
-                    [hoverIndex, 0, prevData.section_workflows[dragIndex]],
-                ],
-            })
-        }))
-    }, [])
-    const renderCard = useCallback((card, index) => {
-        return (
-            <SectionCard
-                key={card.id}
-                index={index}
-                id={card.id}
-                text={card.text}
-                moveCard={moveCard}
-                section={card}
-                onEdit={onEdit}
-                onDelete={onDelete}
-            />
-        )
-    }, [])
-    return sections?.length ? <Basic>{sections.map((card, i) => renderCard(card, i))}</Basic> : null;
+
+export const CardsContainer = ({onEdit, onDelete, sections}) => {
+    if (!sections?.length) return null;
+    const ids = sections.map(s => s.id.toString());
+    return (
+        <Basic>
+            <SortableContext items={ids} strategy={horizontalListSortingStrategy}>
+                {sections.map((card) => (
+                    <SectionCard
+                        key={card.id}
+                        id={card.id}
+                        section={card}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                    />
+                ))}
+            </SortableContext>
+        </Basic>
+    );
 };

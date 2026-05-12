@@ -65,57 +65,57 @@ const Edit = () => {
                     />
                     <CardContent>
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }} >
                                 <TextField fullWidth required label="Supplier Name"
                                     value={data.name} onChange={(e) => setData("name", e.target.value)}
                                     error={!!errors.name} helperText={errors.name}/>
                             </Grid>
-                            <Grid item xs={12} md={3}>
+                            <Grid size={{ xs: 12, md: 3 }} >
                                 <TextField fullWidth required label="Code"
                                     value={data.code} onChange={(e) => setData("code", e.target.value)}
                                     error={!!errors.code} helperText={errors.code}/>
                             </Grid>
-                            <Grid item xs={12} md={3}>
+                            <Grid size={{ xs: 12, md: 3 }} >
                                 <TextField select fullWidth required label="Type"
                                     value={data.type} onChange={(e) => setData("type", e.target.value)}>
                                     {types.map((t) => <MenuItem key={t.value} value={t.value}>{t.name}</MenuItem>)}
                                 </TextField>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }} >
                                 <TextField fullWidth label="Country"
                                     value={data.country} onChange={(e) => setData("country", e.target.value)}/>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }} >
                                 <TextField fullWidth label="City"
                                     value={data.city} onChange={(e) => setData("city", e.target.value)}/>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }} >
                                 <TextField fullWidth type="number" label="Lead Time (days)"
                                     value={data.lead_time_days} onChange={(e) => setData("lead_time_days", e.target.value)}
-                                    inputProps={{min: 0}}/>
+                                    slotProps={{ htmlInput: {min: 0} }}/>
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }} >
                                 <TextField fullWidth label="Website"
                                     value={data.website} onChange={(e) => setData("website", e.target.value)}
                                     error={!!errors.website} helperText={errors.website}/>
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }} >
                                 <TextField fullWidth label="Payment Terms"
                                     value={data.payment_terms} onChange={(e) => setData("payment_terms", e.target.value)}/>
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }} >
                                 <TextField fullWidth label="Tax Number"
                                     value={data.tax_number} onChange={(e) => setData("tax_number", e.target.value)}/>
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }} >
                                 <TextField fullWidth label="Commercial Registration"
                                     value={data.commercial_registration} onChange={(e) => setData("commercial_registration", e.target.value)}/>
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={12} >
                                 <TextField fullWidth multiline rows={2} label="Address"
                                     value={data.address} onChange={(e) => setData("address", e.target.value)}/>
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={12} >
                                 <TextField fullWidth multiline rows={2} label="Notes"
                                     value={data.notes} onChange={(e) => setData("notes", e.target.value)}/>
                             </Grid>
@@ -144,28 +144,28 @@ const Edit = () => {
                         {data.contacts.map((contact, idx) => (
                             <Box key={idx}>
                                 {idx > 0 && <Divider sx={{my: 2}}/>}
-                                <Grid container spacing={2} alignItems="center">
-                                    <Grid item xs={12} md={3}>
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
+                                    <Grid size={{ xs: 12, md: 3 }} >
                                         <TextField fullWidth required size="small" label="Name"
                                             value={contact.name} onChange={(e) => updateContact(idx, "name", e.target.value)}/>
                                     </Grid>
-                                    <Grid item xs={12} md={2}>
+                                    <Grid size={{ xs: 12, md: 2 }} >
                                         <TextField fullWidth size="small" label="Title / Position"
                                             value={contact.title} onChange={(e) => updateContact(idx, "title", e.target.value)}/>
                                     </Grid>
-                                    <Grid item xs={12} md={2}>
+                                    <Grid size={{ xs: 12, md: 2 }} >
                                         <TextField fullWidth size="small" label="Phone"
                                             value={contact.phone} onChange={(e) => updateContact(idx, "phone", e.target.value)}/>
                                     </Grid>
-                                    <Grid item xs={12} md={2}>
+                                    <Grid size={{ xs: 12, md: 2 }} >
                                         <TextField fullWidth size="small" label="Mobile"
                                             value={contact.mobile} onChange={(e) => updateContact(idx, "mobile", e.target.value)}/>
                                     </Grid>
-                                    <Grid item xs={12} md={2}>
+                                    <Grid size={{ xs: 12, md: 2 }} >
                                         <TextField fullWidth size="small" label="Email"
                                             value={contact.email} onChange={(e) => updateContact(idx, "email", e.target.value)}/>
                                     </Grid>
-                                    <Grid item xs="auto">
+                                    <Grid size="auto" >
                                         <FormControlLabel
                                             control={
                                                 <Switch
@@ -178,7 +178,7 @@ const Edit = () => {
                                             label={<Typography variant="caption">Primary</Typography>}
                                         />
                                     </Grid>
-                                    <Grid item xs="auto">
+                                    <Grid size="auto" >
                                         <IconButton size="small" color="error" onClick={() => removeContact(idx)}>
                                             <DeleteIcon fontSize="small"/>
                                         </IconButton>

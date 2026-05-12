@@ -40,7 +40,7 @@ import axios from 'axios';
 import SelectSearch from '@/Components/SelectSearch';
 import ParametersField from '@/Components/ParametersField';
 import ConditionsField from '@/Components/ConditionsField';
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Typography from '@mui/material/Typography';
 
 const AddPrice = ({
@@ -287,7 +287,7 @@ const AddPrice = ({
                                             value={methodData.price || ''}
                                             error={!!errors[`methods.${index}.price`]}
                                             required
-                                            inputProps={{min: 0}}
+                                            slotProps={{ htmlInput: {min: 0} }}
                                             onChange={(e) => handleMethodChange(index, 'price', e.target.value)}
                                             endAdornment={<Chip label="OMR" size="small" color="primary" />}
                                         />
@@ -408,7 +408,7 @@ const AddPrice = ({
                                             Test Information
                                         </Typography>
                                         <Grid container spacing={2}>
-                                            <Grid size={12} md={6}>
+                                            <Grid size={12} >
                                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                                     <Typography variant="body2" sx={{ fontWeight: 'bold', mr: 1 }}>
                                                         Full Name:
@@ -418,7 +418,7 @@ const AddPrice = ({
                                                     </Typography>
                                                 </Box>
                                             </Grid>
-                                            <Grid size={12} md={6}>
+                                            <Grid size={12} >
                                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                                     <Typography variant="body2" sx={{ fontWeight: 'bold', mr: 1 }}>
                                                         Test Code:
@@ -426,7 +426,7 @@ const AddPrice = ({
                                                     <Chip label={data.test.code} size="small" color="primary" />
                                                 </Box>
                                             </Grid>
-                                            <Grid size={12} md={6}>
+                                            <Grid size={12} >
                                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                                     <Typography variant="body2" sx={{ fontWeight: 'bold', mr: 1 }}>
                                                         Category:
@@ -437,7 +437,7 @@ const AddPrice = ({
                                                 </Box>
                                             </Grid>
                                             {data.test.type === "PANEL" && data.price_type=="Fix"&& (
-                                                <Grid size={12} md={6}>
+                                                <Grid size={12} >
                                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                                         <Typography variant="body2" sx={{ fontWeight: 'bold', mr: 1 }}>
                                                             Price:
@@ -571,7 +571,7 @@ const AddPrice = ({
                                                                 error={!!errors.price}
                                                                 required
                                                                 name="price"
-                                                                inputProps={{min: 0}}
+                                                                slotProps={{ htmlInput: {min: 0} }}
                                                                 onChange={handleChange}
                                                                 endAdornment={<Chip label="OMR" size="small" color="primary" />}
                                                             />

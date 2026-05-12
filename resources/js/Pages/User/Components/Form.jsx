@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import {
     Container,
-    Grid2 as Grid,
+    Grid as Grid,
     TextField,
     Button,
     Switch,
@@ -16,7 +16,7 @@ import AvatarUpload from "@/Components/AvatarUpload";
 import SelectSearch from "@/Components/SelectSearch.jsx";
 import PageHeader from "@/Components/PageHeader.jsx";
 
-const UserForm = ({ values, setValues, cancel, loading, submit, errors, edit }) => {
+const UserForm = ({ values = {is_active: true, roles: []}, setValues, cancel, loading = false, submit, errors = {}, edit = false }) => {
     const handleChange = useCallback((e) => {
         const { name, value, checked, type } = e.target;
         setValues((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
@@ -199,14 +199,5 @@ UserForm.propTypes = {
     edit: PropTypes.bool
 };
 
-UserForm.defaultProps = {
-    loading: false,
-    errors: {},
-    edit: false,
-    values: {
-        is_active: true,
-        roles: []
-    }
-};
 
 export default UserForm;

@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useCallback} from 'react';
+﻿import React, {useState, useMemo, useCallback} from 'react';
 import {
     Alert,
     Box,
@@ -6,7 +6,7 @@ import {
     Divider,
     FormControl,
     FormHelperText,
-    Grid2 as Grid,
+    Grid as Grid,
     IconButton,
     InputLabel,
     MenuItem,
@@ -34,7 +34,7 @@ import {
     Paid as PaidIcon,
     Science as ScienceIcon,
     Person as PersonIcon,
-    HelpOutline as HelpOutlineIcon,
+    HelpOutlined as HelpOutlineIcon,
     LocalOffer as DiscountIcon,
     Error as ErrorIcon,
     CheckCircle as CheckCircleIcon,
@@ -174,7 +174,7 @@ const SampleConfiguration = React.memo(({
                 bgcolor: 'background.paper'
             }}>
                 {/* Sample Header with Remove Button */}
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+  <Box display="flex" mb={2} sx={{justifyContent: "space-between", alignItems: "center"}}>
                     <Typography variant="subtitle2" color="primary" fontWeight="medium">
                         Sample {sampleIndex + 1}
                     </Typography>
@@ -201,7 +201,7 @@ const SampleConfiguration = React.memo(({
                         {errors?.[`samples.${sampleIndex}.sampleType`] &&
                             <Alert severity="error"
                                    sx={{mb: 1}}>{errors?.[`samples.${sampleIndex}.sampleType`]}</Alert>}
-                        <Box display="flex" alignItems="flex-start">
+  <Box display="flex" sx={{alignItems: "flex-start"}}>
                             <FormControl
                                 fullWidth
                                 error={Boolean(errors?.[`samples.${sampleIndex}.sampleType`])}
@@ -243,7 +243,8 @@ const SampleConfiguration = React.memo(({
                                 <Box
                                     key={`patient-${patientIndex}`}
                                     display="flex"
-                                    alignItems="flex-start"
+
+ sx={{alignItems: "flex-start"}}
                                 >
                                     <Box sx={{flexGrow: 1}}>
                                         <SelectSearch
@@ -505,7 +506,7 @@ const RegularTestForm = ({
     // Tab content renderers
     const renderMethodSelection = useCallback(() => (
         <Box sx={{mb: 4}}>
-            <Box display="flex" alignItems="center" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
                 <ScienceIcon color="primary" sx={{mr: 1}}/>
                 <Typography variant="h6" fontWeight="medium">
                     Select Testing Method
@@ -522,13 +523,13 @@ const RegularTestForm = ({
                             <TableRow>
                                 <TableCell>Method Name</TableCell>
                                 <TableCell align="center">
-                                    <Box display="flex" alignItems="center" justifyContent="center">
+  <Box display="flex" sx={{alignItems: "center", justifyContent: "center"}}>
                                         <AccessTimeIcon fontSize="small" sx={{mr: 0.5}}/>
                                         Turnaround Time
                                     </Box>
                                 </TableCell>
                                 <TableCell align="center">
-                                    <Box display="flex" alignItems="center" justifyContent="center">
+  <Box display="flex" sx={{alignItems: "center", justifyContent: "center"}}>
                                         <PaidIcon fontSize="small" sx={{mr: 0.5}}/>
                                         Price
                                     </Box>
@@ -561,8 +562,8 @@ const RegularTestForm = ({
 
     const renderPatientInformation = useCallback(() => (
         <Box sx={{mb: 4}}>
-            <Box display="flex" alignItems="center" justify="space-between" mb={2}>
-                <Box display="flex" alignItems="center">
+  <Box display="flex" justify="space-between" mb={2} sx={{alignItems: "center"}}>
+  <Box display="flex" sx={{alignItems: "center"}}>
                     <PersonIcon color="primary" sx={{mr: 1}}/>
                     <Typography variant="h6" fontWeight="medium">
                         Sample Configuration
@@ -570,7 +571,7 @@ const RegularTestForm = ({
                 </Box>
 
                 {methodTest?.method && (
-                    <Box display="flex" alignItems="center" gap={1}>
+  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
                         <Typography variant="body2" color="text.secondary">
                             {samples.length} of {maxSamples} samples
                         </Typography>
@@ -639,7 +640,7 @@ const RegularTestForm = ({
 
     const renderPricingAndDiscounts = useCallback(() => (
         <Box sx={{mb: 4}}>
-            <Box display="flex" alignItems="center" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
                 <CalculateIcon color="primary" sx={{mr: 1}}/>
                 <Typography variant="h6" fontWeight="medium">
                     Pricing & Discounts
@@ -671,7 +672,7 @@ const RegularTestForm = ({
                         )}
 
                         <Grid size={{xs: 12}}>
-                            <Box display="flex" alignItems="center" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
                                 <DiscountIcon color="secondary" sx={{mr: 1}}/>
                                 <Typography variant="subtitle1" fontWeight="medium">
                                     Discount Management
@@ -744,7 +745,7 @@ const RegularTestForm = ({
                             <Tab
                                 key={tab.key}
                                 label={
-                                    <Box display="flex" alignItems="center" gap={1}>
+  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
                                         <Badge
                                             color="error"
                                             variant="dot"

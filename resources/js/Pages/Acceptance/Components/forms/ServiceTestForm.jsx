@@ -15,10 +15,10 @@ import {
     Chip,
     Tooltip,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import PaidIcon from '@mui/icons-material/Paid';
 import ScienceIcon from '@mui/icons-material/Science';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
 import DiscountIcon from '@mui/icons-material/LocalOffer';
 import MethodPriceField from '../MethodPriceField';
 import DiscountManager from '../DiscountManager'; // Import the DiscountManager component
@@ -112,7 +112,7 @@ const ServiceTestForm = ({
             )}
 
             <Box sx={{mb: 3}}>
-                <Box display="flex" alignItems="center" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
                     <ScienceIcon color="primary" sx={{mr: 1}}/>
                     <Typography variant="subtitle1" fontWeight="medium">
                         Available Testing Methods
@@ -128,7 +128,7 @@ const ServiceTestForm = ({
                             <TableRow>
                                 <TableCell>Name</TableCell>
                                 <TableCell align="center">
-                                    <Box display="flex" alignItems="center" justifyContent="center">
+  <Box display="flex" sx={{alignItems: "center", justifyContent: "center"}}>
                                         <PaidIcon fontSize="small" sx={{mr: 0.5}}/>
                                         Price(OMR)
                                     </Box>
@@ -178,7 +178,7 @@ const ServiceTestForm = ({
             <Divider sx={{my: 3}}/>
 
             <Box sx={{mb: 3}}>
-                <Box display="flex" alignItems="center" mb={2}>
+  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
                     <Typography variant="subtitle1" fontWeight="medium">
                         Test Configuration
                     </Typography>

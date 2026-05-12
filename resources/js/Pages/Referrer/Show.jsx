@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useMemo} from "react";
 import {RemoveRedEye} from "@mui/icons-material";
 import {useSnackbar} from "notistack";
-import {Tab, Box} from "@mui/material";
+import {Tab, Box, Chip} from "@mui/material";
 import {TabContext, TabList, TabPanel} from "@mui/lab";
 
 // Layouts and Components
@@ -20,19 +20,145 @@ const Show = ({
     const {enqueueSnackbar} = useSnackbar();
     const [activeTab, setActiveTab] = useState("1");
 
-    // Memoized columns to prevent unnecessary re-renders
-    const invoiceColumns = useMemo(() => [
+    const referrerOrderColumns = useMemo(() => [
         {
-            field: 'price',
-            headerName: 'Price',
+            field: 'id',
+            headerName: 'ID',
             type: 'number',
-            width: 50,
+            width: 70,
             align: 'center',
             headerAlign: 'center'
         },
         {
-            field: 'discount',
-            headerName: 'Discount',
+            field: 'order_id',
+            headerName: 'Order ID',
+            type: 'string',
+            width: 150,
+            align: 'center',
+            headerAlign: 'center'
+        },
+        {
+            field: 'status',
+            headerName: 'Status',
+            type: 'string',
+            width: 130,
+            align: 'center',
+            headerAlign: 'center'
+        },
+        {
+            field: 'created_at',
+            headerName: 'Created At',
+            type: 'string',
+            width: 130,
+            align: 'center',
+            headerAlign: 'center',
+            renderCell: ({row}) => row.created_at ? new Date(row.created_at).toLocaleDateString() : '—'
+        },
+        {
+            field: 'id_action',
+            headerName: 'Action',
+            type: 'string',
+            width: 100,
+            align: 'center',
+            headerAlign: 'center',
+            sortable: false,
+            renderCell: ({row}) => (
+                <a href={route("referrer-orders.show", row.id)} target="_blank" rel="noopener noreferrer">
+                    <RemoveRedEye/>
+                </a>
+            )
+        }
+    ], []);
+
+    const collectRequestColumns = useMemo(() => [
+        {
+            field: 'id',
+            headerName: 'ID',
+            type: 'number',
+            width: 70,
+            align: 'center',
+            headerAlign: 'center'
+        },
+        {
+            field: 'sample_collector',
+            headerName: 'Collector',
+            type: 'string',
+            width: 160,
+            align: 'center',
+            headerAlign: 'center',
+            sortable: false,
+            renderCell: ({row}) => row.sample_collector?.name || '—'
+        },
+        {
+            field: 'status',
+            headerName: 'Status',
+            type: 'string',
+            width: 180,
+            align: 'center',
+            headerAlign: 'center',
+            renderCell: ({row}) => (
+                <Chip
+                    label={row.status ? row.status.replace(/_/g, ' ') : '—'}
+                    size="small"
+                    variant="outlined"
+                />
+            )
+        },
+        {
+            field: 'barcode',
+            headerName: 'Barcode',
+            type: 'string',
+            width: 130,
+            align: 'center',
+            headerAlign: 'center'
+        },
+        {
+            field: 'preferred_date',
+            headerName: 'Preferred Date',
+            type: 'string',
+            width: 140,
+            align: 'center',
+            headerAlign: 'center',
+            renderCell: ({row}) => row.preferred_date ? new Date(row.preferred_date).toLocaleDateString() : '—'
+        },
+        {
+            field: 'collect_action',
+            headerName: 'Action',
+            type: 'string',
+            width: 100,
+            align: 'center',
+            headerAlign: 'center',
+            sortable: false,
+            renderCell: ({row}) => (
+                <a href={route("collect-requests.show", row.id)} target="_blank" rel="noopener noreferrer">
+                    <RemoveRedEye/>
+                </a>
+            )
+        }
+    ], []);
+
+    const orderMaterialColumns = useMemo(() => [
+        {
+            field: 'id',
+            headerName: 'ID',
+            type: 'number',
+            width: 70,
+            align: 'center',
+            headerAlign: 'center'
+        },
+        {
+            field: 'sample_type',
+            headerName: 'Sample Type',
+            type: 'string',
+            width: 160,
+            align: 'center',
+            headerAlign: 'center',
+            sortable: false,
+            renderCell: ({row}) => row.sample_type?.name || '—'
+        },
+        {
+            field: 'amount',
+            headerName: 'Quantity',
             type: 'number',
             width: 100,
             align: 'center',
@@ -42,23 +168,86 @@ const Show = ({
             field: 'status',
             headerName: 'Status',
             type: 'string',
-            width: 200,
+            width: 130,
+            align: 'center',
+            headerAlign: 'center',
+            renderCell: ({row}) => (
+                <Chip
+                    label={row.status || '—'}
+                    size="small"
+                    color={row.status === 'PROCESSED' ? 'success' : 'warning'}
+                    variant="outlined"
+                />
+            )
+        },
+        {
+            field: 'created_at',
+            headerName: 'Ordered At',
+            type: 'string',
+            width: 130,
+            align: 'center',
+            headerAlign: 'center',
+            renderCell: ({row}) => row.created_at ? new Date(row.created_at).toLocaleDateString() : '—'
+        }
+    ], []);
+
+    const invoiceColumns = useMemo(() => [
+        {
+            field: 'id',
+            headerName: 'ID',
+            type: 'number',
+            width: 70,
             align: 'center',
             headerAlign: 'center'
         },
         {
-            field: 'id',
-            headerName: 'Action',
-            type: 'string',
-            width: 200,
+            field: 'total_price',
+            headerName: 'Amount',
+            type: 'number',
+            width: 120,
             align: 'center',
             headerAlign: 'center',
+            renderCell: ({value}) => value != null ? Number(value).toLocaleString() : '—'
+        },
+        {
+            field: 'discount',
+            headerName: 'Discount',
+            type: 'number',
+            width: 110,
+            align: 'center',
+            headerAlign: 'center',
+            renderCell: ({value}) => value != null ? Number(value).toLocaleString() : '—'
+        },
+        {
+            field: 'status',
+            headerName: 'Status',
+            type: 'string',
+            width: 160,
+            align: 'center',
+            headerAlign: 'center',
+            renderCell: ({value}) => (
+                <Chip label={value || '—'} size="small" variant="outlined"/>
+            )
+        },
+        {
+            field: 'created_at',
+            headerName: 'Created At',
+            type: 'string',
+            width: 130,
+            align: 'center',
+            headerAlign: 'center',
+            renderCell: ({value}) => value ? new Date(value).toLocaleDateString() : '—'
+        },
+        {
+            field: 'invoice_action',
+            headerName: 'Action',
+            type: 'string',
+            width: 90,
+            align: 'center',
+            headerAlign: 'center',
+            sortable: false,
             renderCell: ({row}) => (
-                <a
-                    href={route("invoices.show", row.id)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
+                <a href={route("invoices.show", row.id)} target="_blank" rel="noopener noreferrer">
                     <RemoveRedEye/>
                 </a>
             )
@@ -76,37 +265,46 @@ const Show = ({
             sortable: false
         },
         {
-            field: 'patient',
-            headerName: 'Patient',
-            width: 200,
-            align: 'center',
-            headerAlign: 'center',
-            sortable: false,
-            renderCell: ({row}) => row.patient?.fullName || 'N/A'
-        },
-        {
-            field: 'status',
-            headerName: 'Status',
+            field: 'referenceCode',
+            headerName: 'Reference',
             type: 'string',
-            width: 200,
+            width: 160,
             align: 'center',
             headerAlign: 'center',
             sortable: false
         },
         {
-            field: "created_at",
+            field: 'status',
+            headerName: 'Status',
+            type: 'string',
+            width: 180,
+            align: 'center',
+            headerAlign: 'center',
+            sortable: false,
+            renderCell: ({value}) => (
+                <Chip label={value || '—'} size="small" variant="outlined"/>
+            )
+        },
+        {
+            field: 'created_at',
+            headerName: 'Created At',
+            type: 'string',
+            width: 130,
+            align: 'center',
+            headerAlign: 'center',
+            sortable: false,
+            renderCell: ({value}) => value ? new Date(value).toLocaleDateString() : '—'
+        },
+        {
+            field: 'acceptance_action',
             headerName: 'Action',
             type: 'string',
-            width: 200,
+            width: 90,
             align: 'center',
             headerAlign: 'center',
             sortable: false,
             renderCell: ({row}) => (
-                <a
-                    href={route("acceptances.show", row.id)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
+                <a href={route("acceptances.show", row.id)} target="_blank" rel="noopener noreferrer">
                     <RemoveRedEye/>
                 </a>
             )
@@ -148,6 +346,9 @@ const Show = ({
                         <Tab label="Acceptances" value="1"/>
                         <Tab label="Invoices" value="2"/>
                         <Tab label="Test Prices" value="3"/>
+                        <Tab label="Referrer Orders" value="4"/>
+                        <Tab label="Collect Requests" value="5"/>
+                        <Tab label="Order Materials" value="6"/>
                     </TabList>
                 </Box>
                 <TabPanel value="1">
@@ -173,6 +374,33 @@ const Show = ({
                 </TabPanel>
                 <TabPanel value="3">
                     <ReferrerTestsTab referrer={referrer}/>
+                </TabPanel>
+                <TabPanel value="4">
+                    <LoadMore
+                        title="Referrer Orders"
+                        items={referrer.referrer_orders ?? []}
+                        columns={referrerOrderColumns}
+                        defaultExpanded
+                        loadMoreLink={route("referrer-orders.index", {filters: {referrer_id: referrer.id}})}
+                    />
+                </TabPanel>
+                <TabPanel value="5">
+                    <LoadMore
+                        title="Collect Requests"
+                        items={referrer.collect_requests ?? []}
+                        columns={collectRequestColumns}
+                        defaultExpanded
+                        loadMoreLink={route("collect-requests.index", {filters: {referrer_id: referrer.id}})}
+                    />
+                </TabPanel>
+                <TabPanel value="6">
+                    <LoadMore
+                        title="Order Materials"
+                        items={referrer.order_materials ?? []}
+                        columns={orderMaterialColumns}
+                        defaultExpanded
+                        loadMoreLink={route("orderMaterials.index", {filters: {referrer_id: referrer.id}})}
+                    />
                 </TabPanel>
             </TabContext>
         </div>

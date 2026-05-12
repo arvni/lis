@@ -28,7 +28,7 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import Divider from "@mui/material/Divider";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -862,9 +862,9 @@ const Create = ({ success, error, patientFields }) => {
                                                                 setSelectedTests(updatedTests);
                                                                 setData('tests', updatedTests);
                                                             }}
-                                                            InputProps={{
+                                                            slotProps={{ input: {
                                                                 endAdornment: <Typography variant="body2" sx={{ ml: 1 }}>OMR</Typography>
-                                                            }}
+                                                            } }}
                                                         />
                                                     </Box>
 
@@ -956,10 +956,10 @@ const Create = ({ success, error, patientFields }) => {
                 fullWidth
             >
                 <DialogTitle sx={{ backgroundColor: 'primary.main', color: 'white', p: 2 }}>
-                    <Box display="flex" alignItems="center" justifyContent="space-between">
-                        <Box display="flex" alignItems="center">
+  <Box display="flex" sx={{alignItems: "center", justifyContent: "space-between"}}>
+  <Box display="flex" sx={{alignItems: "center"}}>
                             <ScienceIcon sx={{ mr: 2 }} />
-                            <Typography variant="h6">Add Test</Typography>
+                            <Typography variant="h6" component="span">Add Test</Typography>
                         </Box>
                         <IconButton onClick={handleCloseTestModal} sx={{ color: 'white' }}>
                             <CloseIcon />
@@ -1276,9 +1276,9 @@ const Create = ({ success, error, patientFields }) => {
                                         label="Test Price"
                                         value={currentPrice}
                                         onChange={(e) => setCurrentPrice(parseFloat(e.target.value) || 0)}
-                                        InputProps={{
+                                        slotProps={{ input: {
                                             endAdornment: <Typography variant="body2" sx={{ ml: 1 }}>OMR</Typography>
-                                        }}
+                                        } }}
                                         helperText="You can modify the test price"
                                     />
                                 </Grid>

@@ -19,7 +19,7 @@ import {
     Add as AddIcon,
     Visibility as ViewIcon,
 } from "@mui/icons-material";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import DeleteForm from "@/Components/DeleteForm";
 import { router, useForm, usePage } from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
@@ -44,24 +44,6 @@ const StatementIndex = () => {
         issue_date: "",
         invoices: []
     });
-
-    // Handle success/error messages
-    useEffect(() => {
-        if (success) {
-            setSnackbar({
-                open: true,
-                message: success,
-                severity: 'success'
-            });
-        }
-        if (status) {
-            setSnackbar({
-                open: true,
-                message: status,
-                severity: 'error'
-            });
-        }
-    }, [success, status]);
 
     // Enhanced table columns with better formatting and accessibility
     const columns = [
@@ -252,11 +234,6 @@ const StatementIndex = () => {
                 reset();
                 setOpenDeleteForm(false);
                 setSelectedStatement(null);
-                setSnackbar({
-                    open: true,
-                    message: 'Statement deleted successfully',
-                    severity: 'success'
-                });
                 pageReload();
             },
             onError: () => {

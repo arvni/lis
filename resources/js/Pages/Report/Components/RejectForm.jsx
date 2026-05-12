@@ -11,7 +11,7 @@ const RejectForm = ({data, onSubmit, open, onChange, onCancel}) => {
         <DialogTitle>Reject Form</DialogTitle>
         <DialogContent>
             <Grid container spacing={3} sx={{pt: "1em"}} justifyContent={"end"}>
-                <Grid item xs={12}>
+                <Grid size={12} >
                     <TextField fullWidth multiline rows={4} label={"Comment"} onChange={onChange}
                                value={data.comment} name={"comment"}/>
                 </Grid>

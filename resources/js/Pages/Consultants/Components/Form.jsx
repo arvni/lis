@@ -2,7 +2,7 @@ import React, {useCallback, useState} from "react";
 import PropTypes from "prop-types";
 import {
     Container,
-    Grid2 as Grid,
+    Grid as Grid,
     TextField,
     Button,
     Switch,
@@ -74,7 +74,7 @@ export const default_time_table = [
     ],
 ];
 
-const ConsultantForm = ({values, setValues, cancel, loading, submit, errors, edit}) => {
+const ConsultantForm = ({values = {active: true, roles: []}, setValues, cancel, loading = false, submit, errors = {}, edit = false}) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [activeStep, setActiveStep] = useState(0);
@@ -387,14 +387,5 @@ ConsultantForm.propTypes = {
     edit: PropTypes.bool
 };
 
-ConsultantForm.defaultProps = {
-    loading: false,
-    errors: {},
-    edit: false,
-    values: {
-        active: true,
-        roles: []
-    }
-};
 
 export default ConsultantForm;

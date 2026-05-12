@@ -246,9 +246,11 @@ const MenuItem = memo(({item, permissions, onNavigate, isNested = false}) => {
                         </Badge>
                     ) : safeItem.title
                 }
-                primaryTypographyProps={{
-                    sx: styles.itemText,
-                    noWrap: true
+                slotProps={{
+                    primary: {
+                        sx: styles.itemText,
+                        noWrap: true
+                    }
                 }}
             />
             {hasSubmenu && (

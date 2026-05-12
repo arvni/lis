@@ -43,7 +43,7 @@ const PERIODS = [
 const Field = ({label, children}) => (
     <Box sx={{py: 0.75}}>
         <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
-        <Typography variant="body2" fontWeight={500}>{children ?? "—"}</Typography>
+        <Typography variant="body2" fontWeight={500} component="div">{children ?? "—"}</Typography>
     </Box>
 );
 
@@ -325,7 +325,7 @@ const Show = () => {
 
             <Grid container spacing={3}>
                 {/* Left: node info + section assignment */}
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }} >
                     <Card elevation={0} variant="outlined" sx={{mb: 2}}>
                         <CardHeader
                             title="Node Info"
@@ -342,8 +342,8 @@ const Show = () => {
                         />
                         <CardContent>
                             <Grid container spacing={0}>
-                                <Grid item xs={6}><Field label="Node ID">{node.nodeId}</Field></Grid>
-                                <Grid item xs={6}><Field label="Model">{node.model}</Field></Grid>
+                                <Grid size={6} ><Field label="Node ID">{node.nodeId}</Field></Grid>
+                                <Grid size={6} ><Field label="Model">{node.model}</Field></Grid>
                             </Grid>
                             <Divider sx={{my: 1}}/>
                             <Box sx={{display: "flex", gap: 3}}>
@@ -394,7 +394,7 @@ const Show = () => {
                 </Grid>
 
                 {/* Right: period filter + chart + download */}
-                <Grid item xs={12} md={8}>
+                <Grid size={{ xs: 12, md: 8 }} >
                     <PeriodBar
                         nodeId={node.nodeId}
                         activePeriod={period}

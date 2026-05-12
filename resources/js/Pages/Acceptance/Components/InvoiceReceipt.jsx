@@ -11,7 +11,7 @@ import {
     Paper,
     Divider,
     styled,
-    Grid2 as Grid,
+    Grid as Grid,
     Chip
 } from '@mui/material';
 import {

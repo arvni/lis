@@ -10,13 +10,12 @@ import {
     Box,
     Chip,
     Divider,
-    Grid2 as Grid,
+    Grid as Grid,
     Paper,
     Tooltip,
     Dialog
 } from "@mui/material";
 import Button from "@mui/material/Button";
-import {LoadingButton} from "@mui/lab";
 import {
     Save as SaveIcon,
     Cancel as CancelIcon,
@@ -159,12 +158,12 @@ const PatientInfo = ({
                     borderColor: 'divider'
                 }}
             >
-                <Grid container spacing={2} alignItems="center">
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
                     <Grid size={{xs: 12, sm: 3, md: 2}} sx={{display: 'flex', justifyContent: 'center'}}>
                         <PatientAvatar/>
                     </Grid>
                     <Grid size={{xs: 12, sm: 9, md: 10}}>
-                        <Grid container spacing={1} alignItems="center">
+  <Grid container spacing={1} sx={{alignItems: "center"}}>
                             <Grid size={{xs: 12}}>
                                 <Box sx={{display: 'flex', alignItems: 'center', flexWrap: 'wrap'}}>
                                     <Typography variant="h5" sx={{mr: 1, fontWeight: 'bold'}}>
@@ -334,7 +333,7 @@ const PatientInfo = ({
                                 >
                                     Cancel
                                 </Button>
-                                <LoadingButton
+                                <Button
                                     onClick={handleSubmit}
                                     variant="contained"
                                     loading={processing}
@@ -343,7 +342,7 @@ const PatientInfo = ({
                                     sx={{borderRadius: 2}}
                                 >
                                     Save Changes
-                                </LoadingButton>
+                                </Button>
                             </Stack>
                         ) : (
                             <Button

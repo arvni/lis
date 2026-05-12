@@ -8,7 +8,7 @@ import {
     Alert,
     Tooltip,
     IconButton,
-    Grid2 as Grid,
+    Grid as Grid,
     Chip, Stack, Divider
 } from '@mui/material';
 import {styled} from '@mui/material/styles';
@@ -192,7 +192,7 @@ const BarcodeComponent = ({materials}) => {
                 />
             </HeaderBar>
             <BarcodeContainer>
-                <Grid container spacing={0} sx={{gap:0}} justifyContent="center">
+  <Grid container spacing={0} sx={{justifyContent: "center", gap:0}} >
                     {materials.map((material) => (
                         <Grid key={material.id}
                               size={12}
@@ -200,8 +200,7 @@ const BarcodeComponent = ({materials}) => {
                               className="page-break">
                             <BarcodeItem printOnlyBarcode={printOnlyBarcode}>
                                 {printOnlyBarcode ? <Stack direction="column"
-                                                           sx={{height:"100%"}}
-                                                           justifyContent="space-around">
+                                                           sx={{height:"100%", justifyContent: "space-around"}}>
                                     <BarcodeText printOnlyBarcode>{material.barcode}</BarcodeText>
                                     <Divider/>
                                     <BarcodeText printOnlyBarcode>{material.barcode}</BarcodeText>

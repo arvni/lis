@@ -43,8 +43,8 @@ const StockIndex = () => {
             <PageHeader title="Current Stock Overview"/>
             <Card sx={{mb: 3}}>
                 <CardContent>
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={12} md={3}>
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
+                        <Grid size={{ xs: 12, md: 3 }} >
                             <TextField
                                 select fullWidth label="Store" size="small"
                                 value={storeId || ""}
@@ -56,33 +56,33 @@ const StockIndex = () => {
                                 ))}
                             </TextField>
                         </Grid>
-                        <Grid item xs={12} md={3}>
+                        <Grid size={{ xs: 12, md: 3 }} >
                             <TextField fullWidth size="small" label="Search item name / code"
                                 value={search} onChange={(e) => setSearch(e.target.value)}
                                 onKeyDown={(e) => e.key === "Enter" && applyFilters()}/>
                         </Grid>
-                        <Grid item xs={12} md={2}>
+                        <Grid size={{ xs: 12, md: 2 }} >
                             <TextField select fullWidth size="small" label="Department"
                                 value={department} onChange={(e) => setDepartment(e.target.value)}>
                                 <MenuItem value="">All Departments</MenuItem>
                                 {DEPARTMENTS.map((d) => <MenuItem key={d} value={d}>{d}</MenuItem>)}
                             </TextField>
                         </Grid>
-                        <Grid item xs={12} md={2}>
+                        <Grid size={{ xs: 12, md: 2 }} >
                             <TextField select fullWidth size="small" label="Material Type"
                                 value={materialType} onChange={(e) => setMaterialType(e.target.value)}>
                                 <MenuItem value="">All Types</MenuItem>
                                 {MATERIAL_TYPES.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
                             </TextField>
                         </Grid>
-                        <Grid item xs={12} md={1}>
+                        <Grid size={{ xs: 12, md: 1 }} >
                             <FormControlLabel
                                 control={<Switch checked={lowStockOnly} onChange={(e) => setLowStockOnly(e.target.checked)} size="small"/>}
                                 label="Low Stock"
                                 sx={{m: 0}}
                             />
                         </Grid>
-                        <Grid item xs={12} md={1}>
+                        <Grid size={{ xs: 12, md: 1 }} >
                             <Box sx={{display: "flex", gap: 1}}>
                                 <Button variant="contained" size="small" onClick={() => applyFilters()}>Apply</Button>
                                 <Button variant="outlined" size="small" onClick={resetFilters}>Reset</Button>

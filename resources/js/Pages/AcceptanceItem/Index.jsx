@@ -275,7 +275,7 @@ const StatisticsIndex = () => {
 
             <Box sx={{mb: 3}}>
                 <Paper sx={{padding: 2, mb: 2}}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+  <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "center"}}>
                         <Typography variant="h5" component="h1" sx={{fontWeight: 'bold'}}>
                             Test Statistics
                         </Typography>
@@ -292,7 +292,7 @@ const StatisticsIndex = () => {
                                         p: 1
                                     }}
                                 >
-                                    <Stack direction="row" spacing={1} alignItems="center">
+  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                                         <ViewColumnIcon/>
                                         <Typography variant="button" sx={{display: {xs: 'none', sm: 'block'}}}>
                                             Columns
@@ -311,7 +311,7 @@ const StatisticsIndex = () => {
                                         p: 1
                                     }}
                                 >
-                                    <Stack direction="row" spacing={1} alignItems="center">
+  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                                         <img src={Excel} alt="Excel" width="24px"/>
                                         <Typography variant="button" sx={{display: {xs: 'none', sm: 'block'}}}>
                                             Export

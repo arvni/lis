@@ -20,7 +20,9 @@ import UploadItem from "./UploadItem";
 import DeleteForm from "./DeleteForm";
 
 // --- Styled Components ---
-const UploadBox = styled(Box)(({theme, isDragOver, error}) => ({
+const UploadBox = styled(Box, {
+    shouldForwardProp: (prop) => prop !== 'isDragOver' && prop !== 'error',
+})(({theme, isDragOver, error}) => ({
     border: `2px dashed ${
         error ? theme.palette.error.main : isDragOver ? theme.palette.primary.main : theme.palette.divider
     }`,

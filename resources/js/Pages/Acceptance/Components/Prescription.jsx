@@ -10,7 +10,6 @@ import {
     Stack,
     Tooltip
 } from "@mui/material";
-import { LoadingButton } from "@mui/lab";
 import {
     ExpandMore as ExpandMoreIcon,
     Save as SaveIcon,
@@ -74,7 +73,7 @@ const Prescription = ({
     const renderPrescriptionStatus = () => {
         if (prescription && !edit) {
             return (
-                <Stack direction="row" spacing={2} alignItems="center">
+  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                     <Typography>{prescription.originalName}</Typography>
                     <Tooltip title="View Prescription">
                         <Button
@@ -119,7 +118,7 @@ const Prescription = ({
                         </Button>
                     )}
                     {data.prescription && (
-                        <LoadingButton
+                        <Button
                             onClick={handleSubmit}
                             variant="contained"
                             loading={processing}
@@ -127,7 +126,7 @@ const Prescription = ({
                             color="primary"
                         >
                             Save
-                        </LoadingButton>
+                        </Button>
                     )}
                 </Stack>
             );

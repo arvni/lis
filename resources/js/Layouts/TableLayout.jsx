@@ -22,7 +22,8 @@ import {
     TableRows as TableRowsIcon,
     Refresh as RefreshIcon,
     FilterList as FilterListIcon,
-    Download as DownloadIcon
+    Download as DownloadIcon,
+    FilterListOff as FilterListOffIcon,
 } from "@mui/icons-material";
 
 /**
@@ -30,7 +31,7 @@ import {
  */
 const CustomNoRowsOverlay = () => {
     return (
-        <Stack height="100%" alignItems="center" justifyContent="center" sx={{py: 5}}>
+        <Stack sx={{height: "100%", alignItems: "center", justifyContent: "center", py: 5}}>
             <TableRowsIcon sx={{fontSize: 48, color: 'text.secondary', opacity: 0.4, mb: 2}}/>
             <Typography variant="h6" color="text.secondary" gutterBottom>No Records Found</Typography>
             <Typography variant="body2" color="text.disabled" align="center" sx={{maxWidth: 300, mx: 'auto'}}>
@@ -141,7 +142,7 @@ const TableLayout = ({
     const processedColumns = useMemo(() => {
         return columns.map(column => ({
             ...column,
-            flex: column.flex || 1,
+            flex: column.flex !== undefined ? column.flex : 1,
             minWidth: column.minWidth || 100,
             headerClassName: 'table-header-cell',
         }));
@@ -205,7 +206,8 @@ const TableLayout = ({
     const pageSize = defaultValues?.pageSize || 10;
     const startRecord = ((currentPage - 1) * pageSize) + 1;
     const endRecord = Math.min(startRecord + pageSize - 1, data?.total || 0);
-    const recordRange = data?.total > 0 ? `${startRecord.toLocaleString()}-${endRecord.toLocaleString()}` : '0';
+    const recordRange = data?.total > 0 ? `${startRecord.toLocaleString()}–${endRecord.toLocaleString()}` : '0';
+    const activeFilterCount = Object.values(defaultValues.filters || {}).filter(v => v !== '' && v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0)).length;
 
     return (
         <Fade in={true} timeout={300}>
@@ -254,7 +256,8 @@ const TableLayout = ({
                     {/* Table Header */}
                     <Box
                         sx={{
-                            p: 2,
+                            px: 2,
+                            py: 1.5,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
@@ -262,76 +265,56 @@ const TableLayout = ({
                             borderColor: 'divider',
                             bgcolor: theme.palette.mode === 'light' ? 'grey.50' : alpha(theme.palette.background.default, 0.5),
                             flexWrap: {xs: 'wrap', md: 'nowrap'},
-                            gap: {xs: 1, md: 0}
+                            gap: 1,
                         }}
                     >
-                        <Box display="flex" alignItems="center" sx={{mb: {xs: 1, md: 0}}}>
-                            <TableRowsIcon sx={{mr: 1, color: 'text.secondary'}}/>
-                            <Typography variant="subtitle1" fontWeight={500}>
-                                Records
+                        {/* Left: record count */}
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, minWidth: 0}}>
+                            <TableRowsIcon sx={{color: 'text.disabled', fontSize: 18, flexShrink: 0}}/>
+                            <Typography variant="body2" color="text.secondary" noWrap>
+                                Showing <strong>{recordRange}</strong> of <strong>{formattedTotal}</strong> records
                             </Typography>
-                            <Chip
-                                label={formattedTotal}
-                                size="small"
-                                color="primary"
-                                variant="outlined"
-                                sx={{ml: 1, fontWeight: 500}}
-                            />
                         </Box>
 
-                        <Box display="flex" alignItems="center" justifyContent="flex-end" sx={{flexGrow: 1}}>
-                            <Typography variant="body2" color="text.secondary" sx={{mr: 2}}>
-                                Showing {recordRange} of {formattedTotal} records
-                            </Typography>
+                        {/* Right: actions */}
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0}}>
+                            {Filter && (
+                                <Button
+                                    size="small"
+                                    variant={filterOpen ? 'contained' : activeFilterCount > 0 ? 'outlined' : 'text'}
+                                    color={activeFilterCount > 0 ? 'primary' : 'inherit'}
+                                    onClick={toggleFilter}
+                                    startIcon={filterOpen ? <FilterListOffIcon fontSize="small"/> : <FilterListIcon fontSize="small"/>}
+                                    sx={{textTransform: 'none', fontWeight: 500, minWidth: 90}}
+                                >
+                                    {filterOpen ? 'Hide' : activeFilterCount > 0 ? `Filters (${activeFilterCount})` : 'Filters'}
+                                </Button>
+                            )}
 
-                            {/* Actions */}
-                            <Box sx={{display: 'flex', gap: 1}}>
-                                {!filterOpen && Filter && (
-                                    <Tooltip title="Filter data">
-                                        <IconButton
-                                            size="small"
-                                            onClick={toggleFilter}
-                                            color={Object.keys(defaultValues.filters).length > 0 ? "primary" : "default"}
-                                        >
-                                            <FilterListIcon fontSize="small"/>
-                                        </IconButton>
-                                    </Tooltip>
-                                )}
+                            <Tooltip title="Refresh">
+                                <IconButton size="small" onClick={handleRefresh} disabled={loading}>
+                                    <RefreshIcon fontSize="small"/>
+                                </IconButton>
+                            </Tooltip>
 
-                                <Tooltip title="Refresh data">
-                                    <IconButton
-                                        size="small"
-                                        onClick={handleRefresh}
-                                        disabled={loading}
-                                    >
-                                        <RefreshIcon fontSize="small"/>
+                            {onExport && (
+                                <Tooltip title="Export">
+                                    <IconButton size="small" onClick={handleExport} disabled={loading || !data.total}>
+                                        <DownloadIcon fontSize="small"/>
                                     </IconButton>
                                 </Tooltip>
+                            )}
 
-                                {onExport && (
-                                    <Tooltip title="Export data">
-                                        <IconButton
-                                            size="small"
-                                            onClick={handleExport}
-                                            disabled={loading || !data.total}
-                                        >
-                                            <DownloadIcon fontSize="small"/>
-                                        </IconButton>
-                                    </Tooltip>
-                                )}
-
-                                {addNew && (
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        size="small"
-                                        onClick={onClickAddNew}
-                                        sx={{ml: 1}}
-                                    >
-                                        {addNewTitle}
-                                    </Button>
-                                )}
-                            </Box>
+                            {addNew && (
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    size="small"
+                                    onClick={onClickAddNew}
+                                >
+                                    {addNewTitle}
+                                </Button>
+                            )}
                         </Box>
                     </Box>
 

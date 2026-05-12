@@ -156,18 +156,18 @@ const TransactionEdit = () => {
                     <CardHeader title="Transaction Details"/>
                     <CardContent>
                         <Grid container spacing={2}>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }} >
                                 <TextField fullWidth disabled label="Transaction Type" value={txType}/>
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }} >
                                 <TextField
                                     fullWidth required type="date" label="Transaction Date"
                                     value={data.transaction_date}
                                     onChange={(e) => setData("transaction_date", e.target.value)}
-                                    InputLabelProps={{shrink: true}}
+                                    slotProps={{ inputLabel: {shrink: true} }}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={4}>
+                            <Grid size={{ xs: 12, md: 4 }} >
                                 <TextField
                                     select fullWidth required label="Source Store"
                                     value={data.store_id}
@@ -180,7 +180,7 @@ const TransactionEdit = () => {
                                 </TextField>
                             </Grid>
                             {isTransfer && (
-                                <Grid item xs={12} md={4}>
+                                <Grid size={{ xs: 12, md: 4 }} >
                                     <TextField
                                         select fullWidth required label="Destination Store"
                                         value={data.destination_store_id}
@@ -193,7 +193,7 @@ const TransactionEdit = () => {
                                 </Grid>
                             )}
                             {isEntry && (
-                                <Grid item xs={12} md={4}>
+                                <Grid size={{ xs: 12, md: 4 }} >
                                     <SupplierSelect
                                         label="Supplier (optional)"
                                         value={supplierObj}
@@ -201,7 +201,7 @@ const TransactionEdit = () => {
                                     />
                                 </Grid>
                             )}
-                            <Grid item xs={12}>
+                            <Grid size={12} >
                                 <TextField
                                     fullWidth multiline rows={2} label="Notes"
                                     value={data.notes}
@@ -275,7 +275,7 @@ const TransactionEdit = () => {
                                                 <TextField size="small" type="number" fullWidth
                                                     value={line.quantity}
                                                     onChange={(e) => updateLine(idx, "quantity", e.target.value)}
-                                                    inputProps={{min: 0, step: "any"}}
+                                                    slotProps={{ htmlInput: {min: 0, step: "any"} }}
                                                     error={!!errors[`lines.${idx}.quantity`]}
                                                     autoFocus={line._barcode_locked}/>
                                             </TableCell>
@@ -320,7 +320,7 @@ const TransactionEdit = () => {
                                                         label="Expiry"
                                                         value={line.expiry_date} disabled={line._barcode_locked}
                                                         onChange={(e) => updateLine(idx, "expiry_date", e.target.value)}
-                                                        InputLabelProps={{shrink: true}}/>
+                                                        slotProps={{ inputLabel: {shrink: true} }}/>
                                                 </TableCell>
                                             )}
                                             {isEntry && (
@@ -328,7 +328,7 @@ const TransactionEdit = () => {
                                                     <TextField size="small" type="number" fullWidth
                                                         value={line.unit_price}
                                                         onChange={(e) => updateLine(idx, "unit_price", e.target.value)}
-                                                        inputProps={{min: 0, step: "any"}}/>
+                                                        slotProps={{ htmlInput: {min: 0, step: "any"} }}/>
                                                 </TableCell>
                                             )}
                                             <TableCell>

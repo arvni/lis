@@ -8,7 +8,7 @@ import {
     Alert,
     Tooltip,
     IconButton,
-    Grid2 as Grid,
+    Grid as Grid,
     Chip, Stack
 } from '@mui/material';
 import {styled} from '@mui/material/styles';
@@ -207,7 +207,7 @@ const BarcodeComponent = ({barcodes}) => {
                 />
             </HeaderBar>
             <BarcodeContainer>
-                <Grid container spacing={0} sx={{gap:0}} justifyContent="center">
+  <Grid container spacing={0} sx={{justifyContent: "center", gap:0}} >
                     {barcodes.map((barcode) => (
                         <Grid key={barcode.barcode}
                               size={12}

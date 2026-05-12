@@ -46,7 +46,6 @@ const Reservations = ({times, canEdit, canAdd, canDelete}) => {
 
     // Edit reservation handlers
     const handleEdit = (time) => {
-        console.log(time);
         setEditingReservation(time);
         setOpenEdit(true);
     };
@@ -110,7 +109,7 @@ const Reservations = ({times, canEdit, canAdd, canDelete}) => {
                     canEditTimeSlot={canEdit}
                     canViewConsultation
                     canViewPatient
-                    onDateSelect={console.log}
+                    onDateSelect={() => {}}
                     onMonthChange={pageReload}
                     onTimeSlotDelete={handleDelete}
                     onTimeSlotEdit={handleEdit}

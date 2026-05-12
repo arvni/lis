@@ -12,7 +12,7 @@ import {
     Chip,
     Avatar,
     Container,
-    Grid2 as MuiGrid,
+    Grid as MuiGrid,
     IconButton,
     Paper,
     Menu,
@@ -29,8 +29,8 @@ import {
     Science as ScienceIcon,
     MoreVert as MoreVertIcon,
     Visibility as VisibilityIcon,
-    CheckCircleOutline as CheckCircleIcon,
-    ErrorOutline as ErrorOutlineIcon,
+    CheckCircleOutlined as CheckCircleIcon,
+    ErrorOutlined as ErrorOutlineIcon,
     AccessTimeOutlined as AccessTimeIcon,
     HourglassEmpty as HourglassEmptyIcon,
     DashboardOutlined as DashboardIcon,
@@ -107,8 +107,8 @@ const Show = ({ sectionGroup }) => {
         <Tooltip title={label} arrow placement="top">
             <Box
                 display="flex"
-                alignItems="center"
                 sx={{
+                    alignItems: "center",
                     borderRadius: 1,
                     px: 1,
                     py: 0.5,
@@ -152,8 +152,8 @@ const Show = ({ sectionGroup }) => {
                         overflow: 'visible'
                     }}
                 >
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid size={{xs:12,md:7}} xs={12} md={7}>
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
+                        <Grid size={{xs:12,md:7}} >
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                 {sectionGroup.parent && (
                                     <Tooltip title="Back to parent group">
@@ -205,7 +205,7 @@ const Show = ({ sectionGroup }) => {
                             </Box>
                         </Grid>
 
-                        <Grid size={{xs:12,md:5}} xs={12} md={5}>
+                        <Grid size={{xs:12,md:5}} >
                             <Box sx={{
                                 display: 'flex',
                                 gap: 1.5,

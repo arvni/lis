@@ -14,7 +14,7 @@ import {
     Switch,
     Alert
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import SelectSearch from "@/Components/SelectSearch";
 import {FormProvider, useFormState} from "@/Components/FormTemplate.jsx";
 import React, {useState, useEffect} from "react";
@@ -37,9 +37,8 @@ const AddForm = ({open, onClose, defaultValue}) => {
         : route('offers.store');
 
     const defaultData = {
-        name: "",
+        title: "",
         description: "",
-        offer_group: null,
         type: "PERCENTAGE", // Default selection
         amount: "",
         tests: [],

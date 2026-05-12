@@ -12,7 +12,7 @@ import {
     TextField,
     Button,
     Box,
-    Grid2 as Grid,
+    Grid as Grid,
     FormControl,
     Typography,
     InputAdornment,
@@ -38,7 +38,7 @@ import {
     Business,
     Save,
     Info,
-    ErrorOutline,
+    ErrorOutlined,
     Receipt,
     SwapHoriz
 } from "@mui/icons-material";
@@ -364,7 +364,7 @@ const AddPayment = ({
                     justifyContent: 'space-between'
                 }}
             >
-                <Typography variant="h6" sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                <Typography variant="h6" component="div" sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                     {data.id ? (
                         <>
                             <EditIcon fontSize="small"/>
@@ -493,18 +493,17 @@ const AddPayment = ({
                                             Payment Amount
                                         </InputLabel>
                                         <OutlinedInput
-                                            labelId="amount-input-label"
                                             type="number"
                                             name="price"
                                             label="Payment Amount"
                                             value={data.price}
                                             required
                                             autoFocus={shouldFocusAmount}
-                                            inputProps={{
+                                            slotProps={{ htmlInput: {
                                                 min: 0,
                                                 max: max,
                                                 step: 0.01
-                                            }}
+                                            } }}
                                             onChange={handlePriceChange}
                                             startAdornment={
                                                 <InputAdornment position="start">
@@ -539,7 +538,7 @@ const AddPayment = ({
                             </Typography>
                             {allErrors.paymentMethod && (
                                 <Chip
-                                    icon={<ErrorOutline fontSize="small"/>}
+                                    icon={<ErrorOutlined fontSize="small"/>}
                                     label="Required"
                                     color="error"
                                     size="small"
@@ -563,7 +562,7 @@ const AddPayment = ({
                                     }
 
                                     return (
-                                        <Grid i size={{xs: 12, sm: 6, md: 3}} key={method.value}>
+                                        <Grid size={{xs: 12, sm: 6, md: 3}} key={method.value}>
                                             <Tooltip
                                                 title={method.disabled ? "Not available for this payer type" : ""}
                                                 placement="top"

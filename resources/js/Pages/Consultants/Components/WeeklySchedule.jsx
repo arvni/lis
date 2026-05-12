@@ -153,7 +153,7 @@ const WeeklySchedule = ({ data = Array(7).fill([]), onChange, onDeleteTimeSlot }
 
                             <ListItemText>
                                 {data[index]?.length > 0 ? (
-                                    <Stack direction="row" spacing={1} flexWrap="wrap">
+                                    <Stack direction="row" spacing={1} sx={{flexWrap: 'wrap'}}>
                                         {data[index].map(item => (
                                             <Button
                                                 onClick={handleEdit(item.id, index)}

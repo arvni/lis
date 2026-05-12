@@ -9,7 +9,7 @@ import {
     Tooltip,
     CircularProgress
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import {
     UploadFile as UploadFileIcon,
     Info as InfoIcon,
@@ -258,13 +258,12 @@ const DocumentUploadSection = ({
                     label={label}
                     value={data[dataKey]}
                     name={dataKey}
-                    editable
+                    editable={!disabled && !isSubmitting}
                     onChange={setData}
                     required={type === 'reported'}
                     accept={acceptTypes}
                     url={route("documents.store")}
                     helperText={getHelperText(type)}
-                    disabled={disabled || isSubmitting}
                 />
 
                 {errors[dataKey] && (

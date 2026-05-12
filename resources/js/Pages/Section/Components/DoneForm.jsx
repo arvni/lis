@@ -24,13 +24,13 @@ import {
     Alert,
     IconButton,
     Tooltip,
-    Grid2 as Grid,
+    Grid as Grid,
     MenuItem
 } from "@mui/material";
 import {
     Close as CloseIcon,
     CheckCircle,
-    ErrorOutline,
+    ErrorOutlined as ErrorOutline,
     MedicalServices,
     LocalHospital,
     Science,
@@ -252,7 +252,7 @@ const WorkflowActionForm = ({
             >
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                     {actionConfig.icon}
-                    <Typography variant="h6">
+                    <Typography variant="h6" component="span">
                         {actionConfig.title}: {acceptanceItemState?.section?.name}
                     </Typography>
                 </Box>
@@ -452,7 +452,7 @@ const WorkflowActionForm = ({
             </DialogContent>
 
             <DialogActions sx={{px: 3, py: 2, bgcolor: theme.palette.background.default}}>
-                <Stack direction="row" spacing={2} justifyContent="flex-end">
+  <Stack direction="row" spacing={2} sx={{justifyContent: "flex-end"}}>
                     <Button
                         onClick={onClose}
                         variant="outlined"

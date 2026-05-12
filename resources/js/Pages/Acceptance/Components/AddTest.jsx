@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useMemo, useEffect} from 'react';
+﻿import React, {useState, useCallback, useMemo, useEffect} from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -7,7 +7,7 @@ import {
     CircularProgress,
     Alert,
     Button,
-    Grid2 as Grid,
+    Grid as Grid,
     IconButton,
     Typography,
     Box,
@@ -27,7 +27,7 @@ import {
     Science,
     ArrowBack,
     ArrowForward,
-    HelpOutline,
+    HelpOutlined,
     Check
 } from "@mui/icons-material";
 import SelectSearch from "@/Components/SelectSearch";
@@ -434,23 +434,23 @@ const AddTest = ({
                 </Box>
             )}
 
-            <Grid container spacing={3} alignItems="center">
+  <Grid container spacing={3} sx={{alignItems: "center"}}>
                 <Grid size={{xs: 12, md: 6}}>
-                    <Box display="flex" alignItems="flex-start">
+  <Box display="flex" sx={{alignItems: "flex-start"}}>
                         <TestTypeSelector
                             testType={testType}
                             onChange={handleTestTypeChange}
                             error={errors?.testType}
                         />
                         <Tooltip title="Select the type of test you want to add">
-                            <HelpOutline fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
+                            <HelpOutlined fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
                         </Tooltip>
                     </Box>
                 </Grid>
 
                 {testType && (
                     <Grid size={{xs: 12, md: 6}}>
-                        <Box display="flex" alignItems="flex-start">
+  <Box display="flex" sx={{alignItems: "flex-start"}}>
                             <SelectSearch
                                 value={selectedTest || ""}
                                 label="Select Test"
@@ -464,7 +464,7 @@ const AddTest = ({
                                 placeholder="Start typing to search..."
                             />
                             <Tooltip title="Search and select the specific test to add">
-                                <HelpOutline fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
+                                <HelpOutlined fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
                             </Tooltip>
                         </Box>
                     </Grid>
@@ -538,12 +538,12 @@ const AddTest = ({
 
             {/* Additional Details Section */}
             <Paper elevation={0} sx={{p: 3, mt: 3, backgroundColor: "grey.50", borderRadius: 2}}>
-                <Box display="flex" alignItems="center" mb={1}>
+  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
                     <Typography variant="subtitle1" fontWeight="medium">
                         Additional Details
                     </Typography>
                     <Tooltip title="Optional notes about this test">
-                        <HelpOutline fontSize="small" color="action" sx={{ml: 1}}/>
+                        <HelpOutlined fontSize="small" color="action" sx={{ml: 1}}/>
                     </Tooltip>
                 </Box>
 
@@ -573,7 +573,7 @@ const AddTest = ({
 
             <Grid container spacing={3}>
                 {/* Test Information */}
-                <Grid xs={12}>
+                <Grid size={12} >
                     <Paper elevation={1} sx={{p: 3, borderRadius: 2}}>
                         <Typography variant="subtitle2" color="primary" gutterBottom>
                             Selected Test
@@ -601,7 +601,7 @@ const AddTest = ({
                 </Grid>
 
                 {/* Pricing Information */}
-                <Grid xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }} >
                     <Paper elevation={1} sx={{p: 3, borderRadius: 2, height: '100%'}}>
                         <Typography variant="subtitle2" color="primary" gutterBottom>
                             Pricing
@@ -621,13 +621,13 @@ const AddTest = ({
                 </Grid>
 
                 {/* Patient Information */}
-                <Grid xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }} >
                     <Paper elevation={1} sx={{p: 3, borderRadius: 2, height: '100%'}}>
                         <Typography variant="subtitle2" color="primary" gutterBottom>
                             Patient Information
                         </Typography>
                         <Stack direction="column" spacing={2}>
-                            {data.samples.map((sample, sampleIndex) => <Box sx={{pl: 2}}>
+                            {data.samples.map((sample, sampleIndex) => <Box key={sampleIndex} sx={{pl: 2}}>
                                 <span>{sampleIndex + 1}</span>
                                 {sample.patients.map((patient, index) => <Typography
                                     key={sampleIndex + "-" + index} variant="body1">
@@ -640,7 +640,7 @@ const AddTest = ({
 
                 {/* Additional Details */}
                 {data.details && (
-                    <Grid xs={12}>
+                    <Grid size={12} >
                         <Paper elevation={1} sx={{p: 3, borderRadius: 2}}>
                             <Typography variant="subtitle2" color="primary" gutterBottom>
                                 Additional Details
@@ -679,8 +679,8 @@ const AddTest = ({
     return (
         <Dialog
             open={open}
+            onClose={onClose}
             fullWidth
-            keepMounted
             maxWidth="md"
             slotProps={{
                 paper: {
@@ -699,10 +699,10 @@ const AddTest = ({
                     p: 2
                 }}
             >
-                <Box display="flex" alignItems="center" justifyContent="space-between">
-                    <Box display="flex" alignItems="center">
+  <Box display="flex" sx={{alignItems: "center", justifyContent: "space-between"}}>
+  <Box display="flex" sx={{alignItems: "center"}}>
                         <Science sx={{mr: 2}}/>
-                        <Typography variant="h6">
+                        <Typography variant="h6" component="span">
                             {isEdit ? "Edit Test" : "Add Test"}
                         </Typography>
                     </Box>

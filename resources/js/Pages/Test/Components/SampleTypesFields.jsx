@@ -10,7 +10,6 @@ import Button from "@mui/material/Button";
 
 const SampleTypeFields = ({sampleTypes, onChange, error, name}) => {
     const [sampleType, setSampleType] = useState({
-        id: Date.now(),
         sample_type: null,
         description: "",
         defaultType: false
@@ -19,13 +18,14 @@ const SampleTypeFields = ({sampleTypes, onChange, error, name}) => {
     const closeSampleType = () => {
         setOpenSampleType(false);
     }
+    const rowKey = (item) => item?.sample_type?.id ?? item?.sample_type_id;
     const find = (id) => {
-        let tmp = sampleTypes.filter((item) => item?.id + "" === id + "")[0];
-        return {sample_type: tmp, index: sampleTypes.indexOf(tmp)};
+        const index = sampleTypes.findIndex((item) => rowKey(item) + "" === id + "");
+        return {sample_type: index > -1 ? sampleTypes[index] : undefined, index};
     }
     const sampleTypeChange = () => {
-        let tmp = sampleTypes;
-        let index = find(sampleType.id).index;
+        const tmp = [...sampleTypes];
+        const index = find(rowKey(sampleType)).index;
         if (index > -1)
             tmp[index] = sampleType;
         else
@@ -39,13 +39,12 @@ const SampleTypeFields = ({sampleTypes, onChange, error, name}) => {
         setOpenSampleType(true);
     }
     const sampleTypeDelete = (id) => () => {
-        let tmp = sampleTypes;
+        const tmp = [...sampleTypes];
         tmp.splice(find(id).index, 1);
         onChange(name, tmp);
     }
     const addSampleType = () => {
         setSampleType({
-            id: Date.now(),
             sample_type: null,
             description: "",
             defaultType: false
@@ -55,17 +54,19 @@ const SampleTypeFields = ({sampleTypes, onChange, error, name}) => {
     return <>
         {error && <Alert severity="error">{error}</Alert>}
         <List sx={{maxWidth: "100%"}}>
-            {sampleTypes.map(item => (
-                <React.Fragment key={item.id}>
+            {sampleTypes.map(item => {
+                const id = rowKey(item);
+                return (
+                <React.Fragment key={id}>
                     <ListItem secondaryAction={[
                         <IconButton color="warning"
-                                    key={`edit-button-${item.id}`}
-                                    onClick={sampleTypeEdit(item.id)}>
+                                    key={`edit-button-${id}`}
+                                    onClick={sampleTypeEdit(id)}>
                             <EditIcon/>
                         </IconButton>,
                         <IconButton color="error"
-                                    key={`delete-button-${item.id}`}
-                                    onClick={sampleTypeDelete(item.id)}>
+                                    key={`delete-button-${id}`}
+                                    onClick={sampleTypeDelete(id)}>
                             <DeleteIcon/>
                         </IconButton>
                     ]}>
@@ -77,7 +78,8 @@ const SampleTypeFields = ({sampleTypes, onChange, error, name}) => {
                         </ListItemText>
                     </ListItem>
                 </React.Fragment>
-            ))}
+                );
+            })}
         </List>
         <Button onClick={addSampleType}>Add SampleType</Button>
         <AddSampleType onClose={closeSampleType}

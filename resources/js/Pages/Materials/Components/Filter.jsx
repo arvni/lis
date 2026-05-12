@@ -6,7 +6,7 @@ import {
     Stack,
     Paper,
     Typography,
-    Grid2 as Grid,
+    Grid as Grid,
 } from '@mui/material';
 import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
@@ -236,7 +236,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
 
                     {/* Action Buttons */}
                     <Grid size={12}>
-                        <Stack direction="row" spacing={2} justifyContent="flex-end">
+  <Stack direction="row" spacing={2} sx={{justifyContent: "flex-end"}}>
                             <Button
                                 variant="outlined"
                                 color="inherit"

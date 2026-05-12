@@ -19,7 +19,7 @@ import {
     CircularProgress,
     Badge, Select, MenuItem
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import {
     ExpandMore as ExpandMoreIcon,
     FileDownload as FileDownloadIcon,
@@ -415,7 +415,7 @@ const TabbedReportForm = ({
                         </Box>
 
                         {/* Submit Button */}
-                        <Grid container justifyContent="flex-end">
+  <Grid container sx={{justifyContent: "flex-end"}}>
                             <Button
                                 onClick={handleSubmit}
                                 variant="contained"

@@ -143,9 +143,10 @@ const InvoiceIndex = () => {
         },
         {
             field: 'id',
-            type: 'action',
             sortable: false,
             headerName: 'Actions',
+            width: 250,
+            flex: 0,
             display: "flex",
             renderCell: ({row}) => {
                 return (
@@ -212,6 +213,7 @@ const InvoiceIndex = () => {
 
     // CRUD operations
     const handleEdit = async (id) => {
+        document.activeElement?.blur();
         try {
             setLoading(true);
             const response = await axios.get(route("api.invoices.show", id));
@@ -226,6 +228,7 @@ const InvoiceIndex = () => {
 
 
     const deleteInvoice = (invoice) => {
+        document.activeElement?.blur();
         setData({...invoice, _method: "delete"});
         setOpenDeleteForm(true);
     };
@@ -259,7 +262,7 @@ const InvoiceIndex = () => {
         <>
             <Box sx={{mb: 3}}>
                 <Paper sx={{padding: 2}}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+  <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "center"}}>
                         <Typography variant="h5" component="h1" sx={{fontWeight: 'bold'}}>
                             Invoice Management
                         </Typography>
@@ -274,7 +277,7 @@ const InvoiceIndex = () => {
                                     p: 1
                                 }}
                             >
-                                <Stack direction="row" spacing={1} alignItems="center">
+  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
                                     <img src={Excel} alt="Excel" width="24px"/>
                                     <Typography variant="button" sx={{display: {xs: 'none', sm: 'block'}}}>
                                         Export

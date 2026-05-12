@@ -39,7 +39,7 @@ const LotShow = () => {
             />
 
             <Grid container spacing={3} sx={{mb: 3}}>
-                <Grid item xs={12} md={5}>
+                <Grid size={{ xs: 12, md: 5 }} >
                     <Card>
                         <CardHeader title="Lot Details"/>
                         <CardContent>
@@ -73,14 +73,14 @@ const LotShow = () => {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} md={7}>
+                <Grid size={{ xs: 12, md: 7 }} >
                     <Grid container spacing={2}>
                         {[
                             {label: "Total Received (base)", value: totalIn.toFixed(4), color: "success.main"},
                             {label: "Total Consumed (base)", value: totalOut.toFixed(4), color: "error.main"},
                             {label: "Current Balance (base)", value: balance.toFixed(4), color: balance > 0 ? "text.primary" : "error.main"},
                         ].map((stat) => (
-                            <Grid item xs={12} key={stat.label}>
+                            <Grid size={12} key={stat.label}>
                                 <Card variant="outlined">
                                     <CardContent sx={{py: "12px !important"}}>
                                         <Typography variant="caption" color="text.secondary">{stat.label}</Typography>

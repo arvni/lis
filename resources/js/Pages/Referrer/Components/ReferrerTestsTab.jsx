@@ -355,7 +355,7 @@ const ReferrerTestsTab = ({ referrer }) => {
 
             {/* Loading overlay */}
             {loading && (
-                <Box display="flex" justifyContent="center" p={2}>
+  <Box display="flex" p={2} sx={{justifyContent: "center"}}>
                     <CircularProgress size={24} />
                 </Box>
             )}
@@ -366,7 +366,7 @@ const ReferrerTestsTab = ({ referrer }) => {
                     <Typography variant="h6" color="text.secondary" gutterBottom>
                         No tests found
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" paragraph>
+                    <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
                         Start by adding a new test or copying from another referrer
                     </Typography>
                     <Button

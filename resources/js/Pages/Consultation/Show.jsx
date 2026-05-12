@@ -19,7 +19,7 @@ import {
     CardHeader,
     IconButton,
     Tooltip,
-    Grid2 as Grid,
+    Grid as Grid,
     Stack
 } from "@mui/material";
 
@@ -29,7 +29,7 @@ import {
     CalendarToday,
     PersonOutlined,
     PlayArrow,
-    CheckCircleOutline,
+    CheckCircleOutlined,
     Edit,
     ArrowBack,
     LocalHospital,
@@ -181,7 +181,7 @@ const Show = ({
                         onClick={handleOpenDoneForm}
                         variant="contained"
                         color="success"
-                        startIcon={<CheckCircleOutline/>}
+                        startIcon={<CheckCircleOutlined/>}
                         sx={{
                             borderRadius: 2,
                             px: 3,
@@ -290,7 +290,7 @@ const Show = ({
         <>
             <PageHeader
                 title={`Consultation #${consultation.id}`}
-                actions={<Stack direction="row" spacing={2} alignItems="center">
+  actions={<Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
                 <Button
                     variant="outlined"
                     startIcon={<ArrowBack/>}
@@ -362,7 +362,7 @@ const Show = ({
 
                         <Box sx={{p: 3}}>
                             <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }} >
                                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                         <LocalHospital color="primary" fontSize="small"/>
                                         <Typography variant="body2" color="text.secondary">Consultant</Typography>
@@ -372,7 +372,7 @@ const Show = ({
                                     </Typography>
                                 </Grid>
 
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }} >
                                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                         <CalendarToday color="primary" fontSize="small"/>
                                         <Typography variant="body2" color="text.secondary">Due Date</Typography>
@@ -384,7 +384,7 @@ const Show = ({
 
                                 {consultation.started_at && (
                                     <>
-                                        <Grid item xs={12} sm={6}>
+                                        <Grid size={{ xs: 12, sm: 6 }} >
                                             <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                                 <EventAvailable color="primary" fontSize="small"/>
                                                 <Typography variant="body2" color="text.secondary">Started
@@ -395,7 +395,7 @@ const Show = ({
                                             </Typography>
                                         </Grid>
 
-                                        <Grid item xs={12} sm={6}>
+                                        <Grid size={{ xs: 12, sm: 6 }} >
                                             <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                                 <AccessTimeFilledOutlined color="primary" fontSize="small"/>
                                                 <Typography variant="body2" color="text.secondary">Duration</Typography>

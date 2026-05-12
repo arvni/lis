@@ -17,13 +17,13 @@ const UnitsFilter = ({defaultFilter, onFilter}) => {
     const apply = () => onFilter(search ? {search} : {})();
     const reset = () => { setSearch(""); onFilter({})(); };
     return (
-        <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={4}>
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
+            <Grid size={{ xs: 12, md: 4 }} >
                 <TextField fullWidth size="small" label="Search name / abbreviation" value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && apply()}/>
             </Grid>
-            <Grid item xs={12} md={8}>
+            <Grid size={{ xs: 12, md: 8 }} >
                 <Box sx={{display: "flex", gap: 1}}>
                     <Button variant="contained" size="small" onClick={apply}>Apply</Button>
                     <Button variant="outlined" size="small" onClick={reset}>Reset</Button>

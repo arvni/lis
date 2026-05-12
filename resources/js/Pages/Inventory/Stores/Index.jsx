@@ -19,19 +19,19 @@ const StoresFilter = ({defaultFilter, onFilter}) => {
     const apply = () => onFilter(Object.fromEntries(Object.entries(values).filter(([, v]) => v !== "")))();
     const reset = () => { setValues({search: "", is_active: ""}); onFilter({})(); };
     return (
-        <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={4}>
+  <Grid container spacing={2} sx={{alignItems: "center"}}>
+            <Grid size={{ xs: 12, md: 4 }} >
                 <TextField fullWidth size="small" label="Search name / code" value={values.search}
                     onChange={set("search")} onKeyDown={(e) => e.key === "Enter" && apply()}/>
             </Grid>
-            <Grid item xs={12} md={2}>
+            <Grid size={{ xs: 12, md: 2 }} >
                 <TextField select fullWidth size="small" label="Status" value={values.is_active} onChange={set("is_active")}>
                     <MenuItem value="">All</MenuItem>
                     <MenuItem value="1">Active</MenuItem>
                     <MenuItem value="0">Inactive</MenuItem>
                 </TextField>
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }} >
                 <Box sx={{display: "flex", gap: 1}}>
                     <Button variant="contained" size="small" onClick={apply}>Apply</Button>
                     <Button variant="outlined" size="small" onClick={reset}>Reset</Button>

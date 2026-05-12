@@ -35,8 +35,8 @@ const ReportCard = ({report, stores}) => {
         <Card>
             <CardHeader title={report.label} subheader={report.desc}/>
             <CardContent>
-                <Grid container spacing={2} alignItems="flex-end">
-                    <Grid item xs={12} sm={4}>
+  <Grid container spacing={2} sx={{alignItems: "flex-end"}}>
+                    <Grid size={{ xs: 12, sm: 4 }} >
                         <TextField select fullWidth size="small" label="Store" value={storeId}
                             onChange={(e) => setStoreId(e.target.value)}>
                             <MenuItem value="">All Stores</MenuItem>
@@ -46,17 +46,17 @@ const ReportCard = ({report, stores}) => {
 
                     {report.value === "transaction_history" && (
                         <>
-                            <Grid item xs={12} sm={3}>
+                            <Grid size={{ xs: 12, sm: 3 }} >
                                 <TextField fullWidth size="small" type="date" label="From"
                                     value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-                                    InputLabelProps={{shrink: true}}/>
+                                    slotProps={{ inputLabel: {shrink: true} }}/>
                             </Grid>
-                            <Grid item xs={12} sm={3}>
+                            <Grid size={{ xs: 12, sm: 3 }} >
                                 <TextField fullWidth size="small" type="date" label="To"
                                     value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-                                    InputLabelProps={{shrink: true}}/>
+                                    slotProps={{ inputLabel: {shrink: true} }}/>
                             </Grid>
-                            <Grid item xs={12} sm={4}>
+                            <Grid size={{ xs: 12, sm: 4 }} >
                                 <TextField select fullWidth size="small" label="Type" value={txType}
                                     onChange={(e) => setTxType(e.target.value)}>
                                     <MenuItem value="">All Types</MenuItem>
@@ -69,7 +69,7 @@ const ReportCard = ({report, stores}) => {
                     )}
 
                     {report.value === "expiry" && (
-                        <Grid item xs={12} sm={4}>
+                        <Grid size={{ xs: 12, sm: 4 }} >
                             <TextField select fullWidth size="small" label="Window" value={days}
                                 onChange={(e) => setDays(e.target.value)}>
                                 {["30","60","90","180"].map((d) => (
@@ -79,7 +79,7 @@ const ReportCard = ({report, stores}) => {
                         </Grid>
                     )}
 
-                    <Grid item xs={12} sm="auto">
+                    <Grid size={{ xs: 12, sm: "auto" }} >
                         <Button
                             variant="contained"
                             startIcon={<DownloadIcon/>}

@@ -38,7 +38,7 @@ import {
     FormControlLabel,
     Radio,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import {
     Edit as EditIcon,
     Delete as DeleteIcon,
@@ -51,7 +51,7 @@ import {
     Person,
     Business,
     Receipt,
-    ErrorOutline,
+    ErrorOutlined as ErrorOutline,
     Payment as PaymentIcon,
 } from "@mui/icons-material";
 
@@ -297,7 +297,7 @@ const PaymentDialog = ({
             }}
         >
             <DialogTitle sx={{pb: 1}}>
-                <Typography variant="h6" sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                <Typography variant="h6" sx={{display: 'flex', alignItems: 'center', gap: 1}} component="span">
                     {isEditing ? <EditIcon/> : <AddIcon/>}
                     {isEditing ? 'Edit Payment' : 'Add Payment'}
                 </Typography>
@@ -356,7 +356,7 @@ const PaymentDialog = ({
                                 endAdornment={
                                     <InputAdornment position="end">OMR</InputAdornment>
                                 }
-                                inputProps={{min: 0, max: maxAmount, step: 0.01}}
+                                slotProps={{ htmlInput: {min: 0, max: maxAmount, step: 0.01} }}
                             />
                             {errors.price && <FormHelperText>{errors.price}</FormHelperText>}
                         </FormControl>
@@ -596,9 +596,6 @@ const InvoicePaymentManager = ({
     };
 
     const handleSavePayment = async (paymentData) => {
-        // Simulate API call
-        console.log("Saving payment:", paymentData);
-
         // Mock success
         if (onPaymentChange) {
             onPaymentChange(paymentData);
@@ -609,9 +606,6 @@ const InvoicePaymentManager = ({
     };
 
     const handleDeletePayment = async (paymentId) => {
-        // Simulate API call
-        console.log("Deleting payment:", paymentId);
-
         // Mock success
         if (onPaymentChange) {
             onPaymentChange({id: paymentId, _method: 'delete'});
@@ -743,7 +737,6 @@ const InvoicePaymentManager = ({
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
-                                        {console.log(payment.payer)}
                                         <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                                             {payment?.payer_type === 'patient' ? <Person fontSize="small"/> :
                                                 <Business fontSize="small"/>}

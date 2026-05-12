@@ -4,7 +4,7 @@ import Container from '@mui/material/Container';
 import {Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button} from '@mui/material';
 import {useForm} from '@inertiajs/react';
 import {enqueueSnackbar} from 'notistack';
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 
 const ChangePassword = ({open, onClose, currentNeeded = true,userId}) => {
     const {data, setData, setError, errors, reset, post} = useForm({

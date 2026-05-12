@@ -8,7 +8,7 @@ import {
     Alert,
     Stack
 } from '@mui/material';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlined';
 import PropTypes from 'prop-types';
 
 export default class ErrorBoundary extends Component {

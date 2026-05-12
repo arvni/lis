@@ -88,23 +88,23 @@ const DoneForm = ({open, onClose, acceptanceItemState, onChange, onSubmit, optio
         </DialogTitle>
         <DialogContent>
             <Grid container spacing={2}>
-                <Grid item>
+                <Grid >
                     Patient Information(ID/Age/Gender)
                     : {`${acceptanceItemState.patient?.id} / ${acceptanceItemState.patient?.age} / ${acceptanceItemState.patient?.gender}`}
                 </Grid>
-                <Grid item>
+                <Grid >
                     Sample Information(Type/Sampled At)
                     : {`${acceptanceItemState.sample?.sampleType} / ${acceptanceItemState.sample?.createdAt}`}
                 </Grid>
-                <Grid item>
+                <Grid >
                     Test Name : {acceptanceItemState.test?.name}
                 </Grid>
             </Grid>
             <Grid container sx={{mt: "1em"}} spacing={3}>
-                {acceptanceItemState?.parameters?.map((item, index) => <Grid item key={index} xs={12}>
+                {acceptanceItemState?.parameters?.map((item, index) => <Grid size={12} key={index} >
                     {renderItem(item)}
                 </Grid>)}
-                <Grid item xs={12}>
+                <Grid size={12} >
                     <FormControl fullWidth error={errors.hasOwnProperty("next")}>
                         <InputLabel error={errors.hasOwnProperty("next")}
                                     id={"next-section-label"}>Return to Section</InputLabel>
@@ -120,7 +120,7 @@ const DoneForm = ({open, onClose, acceptanceItemState, onChange, onSubmit, optio
                             <FormHelperText error={errors.hasOwnProperty("next")}>{errors.next}</FormHelperText> : null}
                     </FormControl>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={12} >
                     <TextField multiline name={"details"} fullWidth onChange={handleChange} label={"Reject Details"}
                                rows={4}
                                error={errors.hasOwnProperty("details")} value={acceptanceItemState.details}
