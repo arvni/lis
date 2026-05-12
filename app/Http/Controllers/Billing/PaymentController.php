@@ -25,7 +25,7 @@ class PaymentController extends Controller
     public function index(Request $request): Response
     {
         $this->authorize("viewAny", Payment::class);
-        $requestInputs = $request->all();
+        $requestInputs = $request->only(['filters', 'sort', 'pageSize']);
         $payments = $this->paymentService->listPayments($requestInputs);
         return Inertia::render("Payment/Index", compact("requestInputs", "payments"));
     }

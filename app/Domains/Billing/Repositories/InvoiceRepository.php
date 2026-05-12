@@ -65,10 +65,8 @@ class InvoiceRepository
     public function listReferrerInvoicesForStatement(int $referrerId, ?string $month = null)
     {
         $query = $this->applyQuery(['acceptance.patient'])
-            ->join('acceptances', 'acceptances.invoice_id', '=', 'invoices.id')
             ->whereNull('invoices.statement_id')
-            ->where('acceptances.referrer_id', $referrerId)
-            ->groupBy('invoices.id', 'numberedInvoices.row_num');
+            ->whereHas('acceptances', fn($q) => $q->where('referrer_id', $referrerId));
 
         if ($month) {
             $start = Carbon::parse($month . '-01')->startOfMonth();
@@ -112,6 +110,10 @@ class InvoiceRepository
         // Search filter
         if (isset($filters["search"]))
             $query->search($filters["search"] ?? "");
+
+        // Invoice number filter (computed column)
+        if (!empty($filters["invoice_no"]))
+            $query->havingRaw("invoiceNo LIKE ?", ['%' . $filters["invoice_no"] . '%']);
 
         return $query;
     }

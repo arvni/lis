@@ -26,8 +26,9 @@ class StoreInvoiceRequest extends FormRequest
     {
         return [
             "acceptance_id" => "required|exists:acceptances,id",
-            "owner_id" => "required",
-            "owner_type" => "required",
+            "owner_id"      => "required",
+            "owner_type"    => "required",
+            "discount"      => "nullable|numeric|min:0",
         ];
     }
 }

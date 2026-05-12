@@ -23,7 +23,7 @@ class ShowStatementController extends Controller
                 $reportDateSubquery = DB::table('acceptance_items')
                     ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
                     ->join('methods', 'methods.id', '=', 'method_tests.method_id')
-                    ->selectRaw('MAX(DATE_ADD(acceptance_items.created_at, INTERVAL methods.turnaround_time DAY))')
+                    ->selectRaw('MAX(DATE_ADD(acceptance_items.created_at, INTERVAL methods.turnaround_time + 2 * FLOOR((methods.turnaround_time + WEEKDAY(acceptance_items.created_at)) / 5) DAY))')
                     ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id');
 
                 $query->with([

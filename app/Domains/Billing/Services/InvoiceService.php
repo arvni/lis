@@ -3,8 +3,8 @@
 namespace App\Domains\Billing\Services;
 
 
-use App\Domains\Billing\Adapters\ReceptionAdapter;
 use App\Domains\Billing\DTOs\InvoiceDTO;
+use App\Domains\Billing\Events\AcceptanceItemPricingEvent;
 use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Models\Invoice;
@@ -19,7 +19,6 @@ readonly class InvoiceService
 {
     public function __construct(
         private InvoiceRepository $invoiceRepository,
-        private ReceptionAdapter  $receptionAdapter,
     )
     {
     }
@@ -147,11 +146,7 @@ readonly class InvoiceService
 
     public function updateInvoiceItems($invoiceItems): void
     {
-        foreach ($invoiceItems as $type => $items) {
-            foreach ($items as $item) {
-                $this->receptionAdapter->updateAcceptanceItem($item, $type);
-            }
-        }
+        AcceptanceItemPricingEvent::dispatch($invoiceItems);
     }
 
     public function updateInvoicesStatementID(Statement $statement, $invoices)

@@ -29,7 +29,7 @@ class StatementController extends Controller
     public function index(Request $request): Response
     {
         $this->authorize("viewAny", Statement::class);
-        $requestInputs = $request->all();
+        $requestInputs = $request->only(['filters', 'sort', 'pageSize']);
         $statements = $this->statementService->listStatements($requestInputs);
         $canEdit=Gate::allows("update",new Statement());
         $canAdd=Gate::allows("create",new Statement());
@@ -55,7 +55,7 @@ class StatementController extends Controller
         $reportDateSubquery = DB::table('acceptance_items')
             ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
             ->join('methods', 'methods.id', '=', 'method_tests.method_id')
-            ->selectRaw('MAX(DATE_ADD(acceptance_items.created_at, INTERVAL methods.turnaround_time DAY))')
+            ->selectRaw('MAX(DATE_ADD(acceptance_items.created_at, INTERVAL methods.turnaround_time + 2 * FLOOR((methods.turnaround_time + WEEKDAY(acceptance_items.created_at)) / 5) DAY))')
             ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id');
 
         $statement->load([

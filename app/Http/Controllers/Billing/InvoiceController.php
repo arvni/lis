@@ -31,7 +31,7 @@ class InvoiceController extends Controller
     public function index(Request $request): Response
     {
         $this->authorize("viewAny", Invoice::class);
-        $requestInputs = $request->all();
+        $requestInputs = $request->only(['filters', 'sort', 'pageSize']);
         $invoices = $this->invoiceService->listInvoices($requestInputs);
         $canDelete = Gate::allows("delete", Invoice::class);
         $canEdit = Gate::allows("edit", new Invoice());
@@ -46,13 +46,13 @@ class InvoiceController extends Controller
 
         $invoice = $this->invoiceService
             ->storeInvoice(new InvoiceDTO(
-                $request->get("owner_type"),
-                $request->get("owner_id"),
+                $request->validated("owner_type"),
+                $request->validated("owner_id"),
                 auth()->user()->id,
                 InvoiceStatus::WAITING_FOR_PAYMENT,
-                $request->get("discount", 0)
+                $request->validated("discount") ?? 0
             ));
-        InvoiceAcceptanceUpdateEvent::dispatch($request->get("acceptance_id"), $invoice->id);
+        InvoiceAcceptanceUpdateEvent::dispatch($request->validated("acceptance_id"), $invoice->id);
         return redirect()->back()->with(["success" => true, "status" => "Invoice created successfully."]);
 
     }
