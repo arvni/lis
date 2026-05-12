@@ -3,6 +3,7 @@
 namespace App\Domains\Consultation\Services;
 
 use App\Domains\Document\Enums\DocumentTag;
+use App\Domains\Shared\Helpers\RouteHelper;
 use App\Domains\Consultation\DTOs\ConsultantDTO;
 use App\Domains\Consultation\Events\ConsultantDocumentUpdateEvent;
 use App\Domains\Consultation\Models\Consultant;
@@ -25,7 +26,7 @@ class ConsultantService
     {
         $consultant = $this->consultantRepository->create([
             ...Arr::except($consultantDTO->toArray(), ['avatar']),
-            "avatar" => $consultantDTO->avatar['id'] ? relative_route("documents.download", [$consultantDTO->avatar['id']]) : $consultantDTO->avatar,
+            "avatar" => $consultantDTO->avatar['id'] ? RouteHelper::relativePath("documents.download", [$consultantDTO->avatar['id']]) : $consultantDTO->avatar,
         ]);
         $this->handleDocumentUpdate($consultant, $consultantDTO);
         return $consultant;
@@ -35,7 +36,7 @@ class ConsultantService
     {
         $this->handleDocumentUpdate($consultant, $consultantDTO);
         if (isset($consultantDTO->avatar['id'])) {
-            $consultantDTO->avatar = relative_route("documents.download", [$consultantDTO->avatar['id']]);
+            $consultantDTO->avatar = RouteHelper::relativePath("documents.download", [$consultantDTO->avatar['id']]);
         }
         return $this->consultantRepository->update(
             $consultant,
@@ -61,11 +62,7 @@ class ConsultantService
 
     public function loadConsultantRelation(Consultant $consultant): Consultant
     {
-        return $consultant->load([
-            'user',
-            'consultations',
-            'consultations.patient'
-        ])
+        return $consultant->load(['user'])
             ->loadCount([
                 'consultations',
                 'upcomingTimes',

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Referrer;
 
 use App\Domains\Referrer\DTOs\SampleCollectorDTO;
 use App\Domains\Referrer\Models\SampleCollector;
+use App\Domains\Referrer\Requests\StoreSampleCollectorRequest;
+use App\Domains\Referrer\Requests\UpdateSampleCollectorRequest;
 use App\Domains\Referrer\Services\SampleCollectorService;
 use App\Http\Controllers\Controller;
 use Exception;
@@ -42,16 +44,11 @@ class SampleCollectorController extends Controller
         return Inertia::render('SampleCollector/Add');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreSampleCollectorRequest $request): RedirectResponse
     {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:sample_collectors,email',
-        ]);
-
         $sampleCollectorDTO = new SampleCollectorDTO(
-            $validatedData['name'],
-            $validatedData['email']
+            $request->validated('name'),
+            $request->validated('email')
         );
 
         $sampleCollector = $this->sampleCollectorService->createSampleCollector($sampleCollectorDTO);
@@ -77,16 +74,11 @@ class SampleCollectorController extends Controller
         return Inertia::render('SampleCollector/Edit', ["sampleCollector" => $sampleCollector]);
     }
 
-    public function update(Request $request, SampleCollector $sampleCollector): RedirectResponse
+    public function update(UpdateSampleCollectorRequest $request, SampleCollector $sampleCollector): RedirectResponse
     {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:sample_collectors,email,' . $sampleCollector->id,
-        ]);
-
         $sampleCollectorDTO = new SampleCollectorDTO(
-            $validatedData['name'],
-            $validatedData['email']
+            $request->validated('name'),
+            $request->validated('email')
         );
 
         $this->sampleCollectorService->updateSampleCollector($sampleCollector, $sampleCollectorDTO);

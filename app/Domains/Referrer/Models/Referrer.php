@@ -83,6 +83,16 @@ class Referrer extends Model
         return $this->hasMany(ReferrerOrder::class);
     }
 
+    public function collectRequests()
+    {
+        return $this->hasMany(CollectRequest::class);
+    }
+
+    public function orderMaterials()
+    {
+        return $this->hasMany(OrderMaterial::class);
+    }
+
     public function offers()
     {
         return $this->belongsToMany(Offer::class, 'offer_referrer');

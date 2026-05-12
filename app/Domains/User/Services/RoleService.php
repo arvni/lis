@@ -2,8 +2,7 @@
 
 namespace App\Domains\User\Services;
 
-use App\Domains\Laboratory\Models\Section;
-use App\Domains\Laboratory\Models\SectionGroup;
+use App\Domains\Shared\Contracts\SectionLookupInterface;
 use App\Domains\User\Models\Role;
 use App\Domains\User\Repositories\RoleRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -13,8 +12,10 @@ use Illuminate\Support\Str;
 
 class RoleService
 {
-    public function __construct(protected RoleRepository $roleRepository)
-    {
+    public function __construct(
+        protected RoleRepository $roleRepository,
+        protected SectionLookupInterface $sectionLookup,
+    ) {
     }
 
     public function listRoles(array $filters): LengthAwarePaginator
@@ -77,8 +78,8 @@ class RoleService
                 $nonSectionPermissions->add($permission);
             }
         });
-        $sectionGroups = SectionGroup::all()->keyBy("id")->map(fn($item) => $item->name);
-        $sections = Section::all()->keyBy("id")->map(fn($item) => $item->name);
+        $sectionGroups = $this->sectionLookup->getSectionGroupNames();
+        $sections = $this->sectionLookup->getSectionNames();
         $sectionPermissions->map(function ($permission) use ($sectionGroups, $sections) {
                 $name = $permission->name;
                 $names = explode(".", $name);

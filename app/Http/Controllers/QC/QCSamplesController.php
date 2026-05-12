@@ -19,8 +19,8 @@ class QCSamplesController extends Controller
             ->with([
                 'sampler:id,name',
                 'sampleType:id,name',
+                'patient:id,fullName,idNo',
                 'activeAcceptanceItems.acceptance:id,referenceCode',
-                'activeAcceptanceItems.acceptance.patient:id,fullName,idNo',
                 'activeAcceptanceItems.test' => fn($q) => $q->select('tests.id', 'tests.name'),
             ])
             ->latest()

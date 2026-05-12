@@ -46,7 +46,7 @@ class TimeService
         // Get upcoming time slots for the current month
         $now = Carbon::now();
         $fromDate = (Arr::has($all, "startDate") ? Carbon::parse($all['startDate']) : $now->copy()->startOfMonth());
-        $toDate = (Arr::has($all, "endDate") ? Carbon::parse($all['endDate']) : $now->copy()->startOfMonth());
+        $toDate = (Arr::has($all, "endDate") ? Carbon::parse($all['endDate']) : $now->copy()->endOfMonth());
 
 
         return $this->timeRepository->listTimes([

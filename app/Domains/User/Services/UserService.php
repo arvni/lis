@@ -3,6 +3,7 @@
 namespace App\Domains\User\Services;
 
 use App\Domains\Document\Enums\DocumentTag;
+use App\Domains\Shared\Helpers\RouteHelper;
 use App\Domains\User\DTOs\UserDTO;
 use App\Domains\User\Events\UserDocumentUpdateEvent;
 use App\Domains\User\Models\User;
@@ -53,12 +54,12 @@ class UserService
     {
         if (isset($userDTO->signature['id'])) {
             UserDocumentUpdateEvent::dispatch($userDTO->signature['id'], $user->id, DocumentTag::SIGNATURE->value);
-            $user->fill(['signature' => relative_route("documents.download", [$userDTO->signature['id']])]);
+            $user->fill(['signature' => RouteHelper::relativePath("documents.download", [$userDTO->signature['id']])]);
         }
 
         if (isset($userDTO->stamp['id'])) {
             UserDocumentUpdateEvent::dispatch($userDTO->stamp['id'], $user->id, DocumentTag::STAMP->value);
-            $user->fill(['stamp' => relative_route("documents.download", [$userDTO->stamp['id']])]);
+            $user->fill(['stamp' => RouteHelper::relativePath("documents.download", [$userDTO->stamp['id']])]);
         }
         if ($user->isDirty())
             $user->save();

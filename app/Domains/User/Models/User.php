@@ -3,8 +3,6 @@
 namespace App\Domains\User\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Domains\Consultation\Models\Consultant;
-use App\Domains\Consultation\Models\Consultation;
 use App\Traits\Searchable;
 use Database\Factories\Domains\User\Models\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -51,13 +49,5 @@ class User extends Authenticatable
         'qc_auto_approve'    => 'boolean',
     ];
 
-    public function consultations()
-    {
-        return $this->hasManyThrough(Consultation::class, Consultant::class);
-    }
 
-    public function consultant()
-    {
-        return $this->hasOne(Consultant::class);
-    }
 }

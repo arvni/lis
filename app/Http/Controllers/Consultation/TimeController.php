@@ -71,30 +71,39 @@ class TimeController extends Controller
     public function update(UpdateTimeRequest $request, Time $time)
     {
         $validated = $request->validated();
-        $customerID = $request->input("customer.id");
-        if (!$customerID) {
-            $customerID = $this->customerService->createOrGetCustomer($validated["customer"])->id;
-        } else {
-            $customer = $this->customerService->findById($customerID);
-            $customerData = $validated["customer"];
-            $this->customerService->updateCustomer($customer, new CustomerDTO(
-                $customerData["name"],
-                $customerData["phone"],
-                $customerData["email"] ?? null,
-            ));
-        }
         $dueDate = Carbon::createFromFormat("Y-m-d H:i", $validated["dueDate"] . " " . $validated["time"], "Asia/Muscat");
+
+        if ($time->reservable_type === 'customer') {
+            $customerID = $request->input("customer.id");
+            if (!$customerID) {
+                $customerID = $this->customerService->createOrGetCustomer($validated["customer"])->id;
+            } else {
+                $customer = $this->customerService->findById($customerID);
+                $customerData = $validated["customer"];
+                $this->customerService->updateCustomer($customer, new CustomerDTO(
+                    $customerData["name"],
+                    $customerData["phone"],
+                    $customerData["email"] ?? null,
+                ));
+            }
+            $reservableType = 'customer';
+            $reservableID = $customerID;
+        } else {
+            $reservableType = $time->reservable_type;
+            $reservableID = $time->reservable_id;
+        }
+
         $this->timeService->updateTime($time, new TimeDTO(
             $dueDate->format("H:i"),
             $validated["consultant"]["id"],
             $dueDate,
             $dueDate->copy()->addMinutes(30),
             true,
-            "customer",
-            $customerID,
-            $validated["note"]
+            $reservableType,
+            $reservableID,
+            $validated["note"] ?? null,
         ));
-        return back()->with(["success" => true, "status" => "Time added successfully"]);
+        return back()->with(["success" => true, "status" => "Reservation updated successfully"]);
     }
 
     /**

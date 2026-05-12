@@ -2,24 +2,15 @@
 
 namespace App\Http\Controllers\Document;
 
+use App\Domains\Document\Requests\UploadPublicDocumentRequest;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class UploadPublicDocumentController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
-    public function __invoke(Request $request)
+    public function __invoke(UploadPublicDocumentRequest $request)
     {
-        // Validate the file input
-        $request->validate([
-            'file' => 'required|file|mimes:jpg,jpeg,png,svg,webp|max:2048',
-        ]);
-
-        // Get the uploaded file
         $file = $request->file('file');
 
         // Generate a unique name

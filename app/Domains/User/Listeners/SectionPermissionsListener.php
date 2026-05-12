@@ -2,7 +2,7 @@
 
 namespace App\Domains\User\Listeners;
 
-use App\Domains\Laboratory\Enums\ActionType;
+use App\Domains\Shared\Enums\ActionType;
 use App\Domains\User\Services\PermissionService;
 use App\Domains\User\Services\RoleService;
 
@@ -47,7 +47,7 @@ class SectionPermissionsListener
     private function createSectionPermissions(array $sectionData): void
     {
         $permissions = [];
-        $permissionNames = $this->permissions($sectionData["id"], $sectionData["parent"]);
+        $permissionNames = $this->permissions($sectionData["id"], $sectionData["section_group"]);
         foreach ($permissionNames as $permissionName) {
             $permissions[] = $this->permissionService->createPermission($permissionName);
         }

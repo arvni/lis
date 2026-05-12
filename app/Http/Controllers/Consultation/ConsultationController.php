@@ -6,6 +6,7 @@ use App\Domains\Consultation\DTOs\ConsultationDTO;
 use App\Domains\Consultation\DTOs\TimeDTO;
 use App\Domains\Consultation\Enums\ConsultationStatus;
 use App\Domains\Consultation\Models\Consultation;
+use App\Domains\Consultation\Models\Consultant;
 use App\Domains\Consultation\Requests\StoreConsultationRequest;
 use App\Domains\Consultation\Requests\UpdateConsultationRequest;
 use App\Domains\Consultation\Services\ConsultationService;
@@ -41,7 +42,15 @@ class ConsultationController extends Controller
         $this->authorize("viewAny", Consultation::class);
         $requestInputs = $request->all();
         $consultations = $this->consultationService->listConsultations($requestInputs);
-        return Inertia::render("Consultation/Index", ["consultations" => $consultations, "requestInputs" => $requestInputs]);
+        $consultants = Consultant::query()
+            ->where('active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'title']);
+        return Inertia::render("Consultation/Index", [
+            "consultations" => $consultations,
+            "requestInputs" => $requestInputs,
+            "consultants" => $consultants,
+        ]);
     }
 
 

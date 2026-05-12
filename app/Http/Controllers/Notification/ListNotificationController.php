@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Notification;
 
+use App\Domains\Notification\Requests\ListNotificationRequest;
 use App\Domains\Notification\Resources\NotificationResource;
 use App\Domains\Notification\Services\NotificationService;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ListNotificationController extends Controller
@@ -14,12 +14,7 @@ class ListNotificationController extends Controller
     {
     }
 
-    /**
-     * Handle the incoming request.
-     * @param Request $request
-     * @return AnonymousResourceCollection
-     */
-    public function __invoke(Request $request): AnonymousResourceCollection
+    public function __invoke(ListNotificationRequest $request): AnonymousResourceCollection
     {
         $notifications = $this->notificationService->listNotifications($request->all());
         return NotificationResource::collection($notifications);

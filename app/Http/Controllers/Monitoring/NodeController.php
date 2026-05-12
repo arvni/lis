@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Monitoring;
 use App\Domains\Laboratory\Models\Section;
 use App\Domains\Monitoring\Jobs\FetchNodeSamplesJob;
 use App\Domains\Monitoring\Models\MonitoringNode;
+use App\Domains\Monitoring\Requests\UpdateNodeSectionRequest;
 use App\Domains\Monitoring\Services\MocreoService;
 use App\Domains\Monitoring\Services\NodeService;
 use App\Http\Controllers\Controller;
@@ -57,16 +58,9 @@ class NodeController extends Controller
             compact('node', 'samples', 'sections', 'period', 'limit', 'offset', 'beginTime', 'endTime'));
     }
 
-    public function updateSection(string $nodeId, Request $request): RedirectResponse
+    public function updateSection(string $nodeId, UpdateNodeSectionRequest $request): RedirectResponse
     {
-        $this->authorize('update', MonitoringNode::class);
-
-        $data = $request->validate([
-            'section_id' => 'nullable|exists:sections,id',
-            'notes'      => 'nullable|string|max:1000',
-        ]);
-
-        $this->nodeService->updateLocalNode($nodeId, $data);
+        $this->nodeService->updateLocalNode($nodeId, $request->validated());
         return back()->with(['success' => true, 'status' => 'Node updated.']);
     }
 

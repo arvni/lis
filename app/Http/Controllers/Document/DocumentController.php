@@ -8,7 +8,7 @@ use App\Domains\Document\Requests\StoreDocumentRequest;
 use App\Domains\Document\Resources\DocumentResource;
 use App\Domains\Document\Services\DocumentService;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UpdateDocumentRequest;
+use App\Domains\Document\Requests\UpdateDocumentRequest;
 use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,7 +22,6 @@ class DocumentController extends Controller
 
     public function store(StoreDocumentRequest $request): DocumentResource
     {
-        $this->authorize('create', Document::class);
 
         $document = $this->documentService->storeDocument(
             $request->input('ownerClass', "user"),

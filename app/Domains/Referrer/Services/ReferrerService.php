@@ -39,9 +39,15 @@ class ReferrerService
             "referrerOrders" => function ($query) {
                 $query->latest()->limit(5);
             },
+            "collectRequests" => function ($query) {
+                $query->with("sampleCollector")->latest()->limit(5);
+            },
+            "orderMaterials" => function ($query) {
+                $query->with("sampleType")->latest()->limit(5);
+            },
         ]);
         return [
-            "referrer"=>$referrer,
+            "referrer" => $referrer,
             "referrerOrders" => $referrer->referrerOrders,
             "invoices" => $referrer->invoices,
             "payments" => $referrer->payments,

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Document;
 
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Document\Services\DocumentService;
-use App\Domains\Laboratory\Requests\UpdateDocumentBatchUpdateRequest;
+use App\Domains\Document\Requests\UpdateDocumentBatchUpdateRequest;
 use App\Http\Controllers\Controller;
 
 class UpdateBatchDocumentsController extends Controller

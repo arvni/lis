@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Referrer;
 
 use App\Domains\Referrer\DTOs\CollectRequestDTO;
-use App\Domains\Referrer\Enums\CollectRequestStatus;
 use App\Domains\Referrer\Models\CollectRequest;
 use App\Domains\Referrer\Models\SampleCollector;
 use App\Domains\Referrer\Models\Referrer;
+use App\Domains\Referrer\Requests\StoreCollectRequestRequest;
+use App\Domains\Referrer\Requests\UpdateCollectRequestRequest;
 use App\Domains\Referrer\Services\CollectRequestService;
 use App\Http\Controllers\Controller;
 use Exception;
@@ -14,7 +15,6 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -51,26 +51,18 @@ class CollectRequestController extends Controller
         return Inertia::render('CollectRequest/Add', compact('sampleCollectors', 'referrers'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreCollectRequestRequest $request): RedirectResponse
     {
-        $validatedData = $request->validate([
-            'sample_collector_id'  => 'required|exists:sample_collectors,id',
-            'referrer_id'          => 'required|exists:referrers,id',
-            'preferred_date'       => 'nullable|date',
-            'note'                 => 'nullable|string',
-            'logistic_information' => 'nullable|array',
-            'status'               => ['nullable', 'string', Rule::in(CollectRequestStatus::values())],
-            'barcode'              => 'nullable|string|unique:collect_requests,barcode',
-        ]);
+        $validated = $request->validated();
 
         $collectRequestDTO = new CollectRequestDTO(
-            $validatedData['sample_collector_id'],
-            $validatedData['referrer_id'],
-            $validatedData['preferred_date'] ?? null,
-            $validatedData['note'] ?? null,
-            $validatedData['logistic_information'] ?? [],
-            $validatedData['status'] ?? null,
-            $validatedData['barcode'] ?? null,
+            $validated['sample_collector_id'],
+            $validated['referrer_id'],
+            $validated['preferred_date'] ?? null,
+            $validated['note'] ?? null,
+            $validated['logistic_information'] ?? [],
+            $validated['status'] ?? null,
+            $validated['barcode'] ?? null,
         );
 
         $collectRequest = $this->collectRequestService->createCollectRequest($collectRequestDTO);
@@ -104,26 +96,18 @@ class CollectRequestController extends Controller
         ]);
     }
 
-    public function update(Request $request, CollectRequest $collectRequest): RedirectResponse
+    public function update(UpdateCollectRequestRequest $request, CollectRequest $collectRequest): RedirectResponse
     {
-        $validatedData = $request->validate([
-            'sample_collector_id'  => 'required|exists:sample_collectors,id',
-            'referrer_id'          => 'required|exists:referrers,id',
-            'preferred_date'       => 'nullable|date',
-            'note'                 => 'nullable|string',
-            'logistic_information' => 'nullable|array',
-            'status'               => ['nullable', 'string', Rule::in(CollectRequestStatus::values())],
-            'barcode'              => ['nullable', 'string', Rule::unique('collect_requests', 'barcode')->ignore($collectRequest->id)],
-        ]);
+        $validated = $request->validated();
 
         $collectRequestDTO = new CollectRequestDTO(
-            $validatedData['sample_collector_id'],
-            $validatedData['referrer_id'],
-            $validatedData['preferred_date'] ?? null,
-            $validatedData['note'] ?? null,
-            $validatedData['logistic_information'] ?? [],
-            $validatedData['status'] ?? null,
-            $validatedData['barcode'] ?? null,
+            $validated['sample_collector_id'],
+            $validated['referrer_id'],
+            $validated['preferred_date'] ?? null,
+            $validated['note'] ?? null,
+            $validated['logistic_information'] ?? [],
+            $validated['status'] ?? null,
+            $validated['barcode'] ?? null,
         );
 
         $this->collectRequestService->updateCollectRequest($collectRequest, $collectRequestDTO);

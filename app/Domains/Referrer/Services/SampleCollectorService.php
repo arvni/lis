@@ -28,7 +28,10 @@ class SampleCollectorService
     {
         $sampleCollector->load([
             'collectRequests' => function ($query) {
-                $query->with(['referrer'])->latest()->limit(10);
+                $query->with(['referrer'])
+                    ->withCount(['referrerOrders'])
+                    ->latest()
+                    ->limit(10);
             }
         ]);
 
