@@ -28,6 +28,7 @@ class StoreReportTemplateRequest extends FormRequest
             "name" => ["required", "string", "max:255", "unique:report_templates,name"],
             "template" => ["required", "array"],
             "template.id" => ["required", "exists:documents,hash"],
+            'parameters' => ['required', 'array', 'min:1'],
             'parameters.*.type'=> ['required', 'string', 'max:255'],
             'parameters.*.title'=> ['required', 'string', 'max:255'],
             'parameters.*.required'=> ['required', 'boolean'],

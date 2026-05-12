@@ -2,7 +2,7 @@
 
 namespace App\Domains\Laboratory\Events;
 
-use App\Domains\Laboratory\Enums\ActionType;
+use App\Domains\Shared\Enums\ActionType;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;

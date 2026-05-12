@@ -6,9 +6,9 @@ class DoctorDTO
 {
     public function __construct(
         public string $name,
-        public string $expertise,
-        public string $phone,
-        public string $licenseNo
+        public ?string $expertise = null,
+        public ?string $phone = null,
+        public ?string $licenseNo = null
     )
     {
     }

@@ -13,7 +13,7 @@ class UpdateDoctorRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("barcodeGroup"));
+        return Gate::allows("update", $this->route()->parameter("doctor"));
     }
 
     /**

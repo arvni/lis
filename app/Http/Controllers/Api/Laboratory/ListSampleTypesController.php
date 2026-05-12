@@ -20,7 +20,7 @@ class ListSampleTypesController extends Controller
      */
     public function __invoke(Request $request): AnonymousResourceCollection
     {
-        $queryData = $request->all();
+        $queryData = $request->only(['filters', 'sort', 'pageSize', 'search']);
         $sampleTypes = $this->sampleTypeService->listSampleTypes($queryData);
         return ListResource::collection($sampleTypes);
     }

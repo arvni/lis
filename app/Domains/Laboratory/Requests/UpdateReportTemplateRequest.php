@@ -27,6 +27,7 @@ class UpdateReportTemplateRequest extends FormRequest
             "name" => ["required", "string", "max:255", "unique:report_templates,name," . $this->route()->parameter("reportTemplate")->id],
             "template" => ["required", "array"],
             "template.id" => ["required", "exists:documents,hash"],
+            'parameters' => ['required', 'array', 'min:1'],
             'parameters.*.id'=> ['nullable'],
             'parameters.*.type'=> ['required', 'string', 'max:255'],
             'parameters.*.title'=> ['required', 'string', 'max:255'],

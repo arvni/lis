@@ -20,7 +20,7 @@ class ListBarcodeGroupsController extends Controller
      */
     public function __invoke(Request $request): AnonymousResourceCollection
     {
-        $queryData = $request->all();
+        $queryData = $request->only(['filters', 'sort', 'pageSize', 'search']);
         $barcodeGroups = $this->barcodeGroupService->listBarcodeGroups($queryData);
         return ListResource::collection($barcodeGroups);
     }

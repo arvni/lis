@@ -20,7 +20,7 @@ class ListSectionGroupsController extends Controller
      */
     public function __invoke(Request $request): AnonymousResourceCollection
     {
-        $queryData = $request->all();
+        $queryData = $request->only(['filters', 'sort', 'pageSize', 'search']);
         $queryData["filters"]["active"] = true;
         $sectionGroups = $this->sectionGroupService->listSectionGroups($queryData);
         return ListResource::collection($sectionGroups);

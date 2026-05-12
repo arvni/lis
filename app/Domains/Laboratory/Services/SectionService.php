@@ -4,7 +4,7 @@ namespace App\Domains\Laboratory\Services;
 
 
 use App\Domains\Laboratory\DTOs\SectionDTO;
-use App\Domains\Laboratory\Enums\ActionType;
+use App\Domains\Shared\Enums\ActionType;
 use App\Domains\Laboratory\Events\SectionEvent;
 use App\Domains\Laboratory\Models\Section;
 use App\Domains\Laboratory\Repositories\SectionRepository;

@@ -20,7 +20,7 @@ class ListTestGroupsController extends Controller
      */
     public function __invoke(Request $request): AnonymousResourceCollection
     {
-        $queryData = $request->all();
+        $queryData = $request->only(['filters', 'sort', 'pageSize', 'search']);
         $queryData["filters"]["active"] = true;
         $testGroups = $this->testGroupService->listTestGroups($queryData);
         return ListResource::collection($testGroups);

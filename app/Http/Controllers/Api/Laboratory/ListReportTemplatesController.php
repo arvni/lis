@@ -20,7 +20,7 @@ class ListReportTemplatesController extends Controller
      */
     public function __invoke(Request $request): AnonymousResourceCollection
     {
-        $queryData = $request->all();
+        $queryData = $request->only(['filters', 'sort', 'pageSize', 'search']);
         $queryData["filters"]["active"] = true;
         $reportTemplates = $this->reportTemplateService->listReportTemplates($queryData);
         return ListResource::collection($reportTemplates);

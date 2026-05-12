@@ -20,7 +20,7 @@ class ListActiveSectionsController extends Controller
      */
     public function __invoke(Request $request): AnonymousResourceCollection
     {
-        $queryData = $request->all();
+        $queryData = $request->only(['filters', 'sort', 'pageSize', 'search']);
         $queryData["filters"]["active"]=true;
         $sections = $this->sectionService->listSections($queryData);
         return ListResource::collection($sections);

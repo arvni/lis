@@ -20,7 +20,7 @@ class ListWorkflowsController extends Controller
      */
     public function __invoke(Request $request): AnonymousResourceCollection
     {
-        $queryData = $request->all();
+        $queryData = $request->only(['filters', 'sort', 'pageSize', 'search']);
         $queryData["filters"]["active"] = true;
         $workflows = $this->workflowService->listWorkflows($queryData);
         return ListResource::collection($workflows);

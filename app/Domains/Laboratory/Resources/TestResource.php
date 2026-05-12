@@ -84,9 +84,12 @@ class TestResource extends JsonResource
                 $methodTest->load('method');
             }
 
+            $sourceTest = $this->type === TestType::PANEL ? $methodTest->method->test : null;
+
             $output[] = [
                 'id' => $methodTest->id,
                 'method_id' => $methodTest->method_id,
+                'test_name' => $sourceTest?->fullName ?? $sourceTest?->name,
                 "method" => [
                     ...$methodTest->method->toArray(),
                     'price' => $this->resolvePrice($methodTest),

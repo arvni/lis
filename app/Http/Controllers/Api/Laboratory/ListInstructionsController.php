@@ -21,7 +21,7 @@ class ListInstructionsController extends Controller
     public function __invoke(Request $request): AnonymousResourceCollection
     {
         $request->mergeIfMissing(["filters" => ["active" => true]]);
-        $queryData = $request->all();
+        $queryData = $request->only(['filters', 'sort', 'pageSize', 'search']);
         $requestForms = $this->instructionService->listInstructions($queryData);
         return ListResource::collection($requestForms);
     }

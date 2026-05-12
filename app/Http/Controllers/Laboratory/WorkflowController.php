@@ -81,7 +81,7 @@ class WorkflowController extends Controller
     public function edit(Workflow $workflow): Response
     {
         $this->authorize("update", $workflow);
-        $workflow->load("sectionWorkflows.section:name,id");
+        $workflow->load("sectionWorkflows.section:id,name,section_group_id", "sectionWorkflows.section.sectionGroup:id,name");
         return Inertia::render('Workflow/Edit', compact("workflow"));
     }
 
