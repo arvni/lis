@@ -5,6 +5,13 @@ import { glob } from 'glob';
 import path from 'path';
 
 export default defineConfig({
+    server: {
+        host: '0.0.0.0',
+        port: 5173,
+        strictPort: true,
+        hmr: { host: 'localhost', protocol: 'ws', clientPort: 5173 },
+        watch: { usePolling: true },
+    },
     plugins: [
         laravel({
             input: [
