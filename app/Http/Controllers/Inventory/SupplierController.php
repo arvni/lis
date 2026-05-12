@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Inventory;
 
 use App\Domains\Inventory\Enums\SupplierType;
 use App\Domains\Inventory\Models\Supplier;
+use App\Domains\Inventory\Requests\StoreSupplierRequest;
+use App\Domains\Inventory\Requests\UpdateSupplierRequest;
 use App\Domains\Inventory\Services\SupplierService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -30,35 +32,14 @@ class SupplierController extends Controller
     {
         $this->authorize('create', Supplier::class);
         return Inertia::render('Inventory/Suppliers/Add', [
-            'types' => enumMap(SupplierType::cases()),
+            'types' => SupplierType::toOptions(),
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreSupplierRequest $request): RedirectResponse
     {
         $this->authorize('create', Supplier::class);
-        $data = $request->validate([
-            'name'                    => 'required|string|max:255',
-            'code'                    => 'required|string|unique:suppliers,code',
-            'type'                    => 'required|string',
-            'country'                 => 'nullable|string',
-            'city'                    => 'nullable|string',
-            'address'                 => 'nullable|string',
-            'website'                 => 'nullable|url',
-            'payment_terms'           => 'nullable|string',
-            'lead_time_days'          => 'nullable|integer|min:0',
-            'notes'                   => 'nullable|string',
-            'tax_number'              => 'nullable|string',
-            'commercial_registration' => 'nullable|string',
-            'contacts'                => 'nullable|array',
-            'contacts.*.name'         => 'required|string',
-            'contacts.*.email'        => 'nullable|email',
-            'contacts.*.phone'        => 'nullable|string',
-            'contacts.*.mobile'       => 'nullable|string',
-            'contacts.*.is_primary'   => 'boolean',
-        ]);
-
-        $supplier = $this->supplierService->createSupplier($data);
+        $supplier = $this->supplierService->createSupplier($request->validated());
         return redirect()->route('inventory.suppliers.show', $supplier->id)
             ->with(['success' => true, 'status' => "Supplier {$supplier->name} created."]);
     }
@@ -76,36 +57,14 @@ class SupplierController extends Controller
         $supplier->load('contacts');
         return Inertia::render('Inventory/Suppliers/Edit', [
             'supplier' => $supplier,
-            'types'    => enumMap(SupplierType::cases()),
+            'types'    => SupplierType::toOptions(),
         ]);
     }
 
-    public function update(Request $request, Supplier $supplier): RedirectResponse
+    public function update(UpdateSupplierRequest $request, Supplier $supplier): RedirectResponse
     {
         $this->authorize('update', Supplier::class);
-        $data = $request->validate([
-            'name'                    => 'required|string|max:255',
-            'code'                    => "required|string|unique:suppliers,code,{$supplier->id}",
-            'type'                    => 'required|string',
-            'country'                 => 'nullable|string',
-            'city'                    => 'nullable|string',
-            'address'                 => 'nullable|string',
-            'website'                 => 'nullable|url',
-            'payment_terms'           => 'nullable|string',
-            'lead_time_days'          => 'nullable|integer|min:0',
-            'is_active'               => 'boolean',
-            'notes'                   => 'nullable|string',
-            'tax_number'              => 'nullable|string',
-            'commercial_registration' => 'nullable|string',
-            'contacts'                => 'nullable|array',
-            'contacts.*.name'         => 'required|string',
-            'contacts.*.email'        => 'nullable|email',
-            'contacts.*.phone'        => 'nullable|string',
-            'contacts.*.mobile'       => 'nullable|string',
-            'contacts.*.is_primary'   => 'boolean',
-        ]);
-
-        $this->supplierService->updateSupplier($supplier, $data);
+        $this->supplierService->updateSupplier($supplier, $request->validated());
         return back()->with(['success' => true, 'status' => "Supplier updated."]);
     }
 

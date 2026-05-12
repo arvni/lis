@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Domains\Inventory\Models\Store;
+use App\Domains\Inventory\Requests\StoreStoreRequest;
+use App\Domains\Inventory\Requests\UpdateStoreRequest;
 use App\Domains\Inventory\Services\StoreService;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
@@ -34,19 +36,10 @@ class StoreController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreStoreRequest $request): RedirectResponse
     {
         $this->authorize('create', Store::class);
-        $data = $request->validate([
-            'name'            => 'required|string|max:255',
-            'code'            => 'required|string|max:50|unique:stores,code',
-            'description'     => 'nullable|string',
-            'manager_user_id' => 'nullable|exists:users,id',
-            'address'         => 'nullable|string',
-            'notes'           => 'nullable|string',
-        ]);
-
-        $store = $this->storeService->createStore($data);
+        $store = $this->storeService->createStore($request->validated());
         return redirect()->route('inventory.stores.show', $store->id)
             ->with(['success' => true, 'status' => "Store {$store->name} created."]);
     }
@@ -67,20 +60,10 @@ class StoreController extends Controller
         ]);
     }
 
-    public function update(Request $request, Store $store): RedirectResponse
+    public function update(UpdateStoreRequest $request, Store $store): RedirectResponse
     {
         $this->authorize('update', Store::class);
-        $data = $request->validate([
-            'name'            => 'required|string|max:255',
-            'code'            => "required|string|max:50|unique:stores,code,{$store->id}",
-            'description'     => 'nullable|string',
-            'is_active'       => 'boolean',
-            'manager_user_id' => 'nullable|exists:users,id',
-            'address'         => 'nullable|string',
-            'notes'           => 'nullable|string',
-        ]);
-
-        $this->storeService->updateStore($store, $data);
+        $this->storeService->updateStore($store, $request->validated());
         return back()->with(['success' => true, 'status' => "Store updated."]);
     }
 

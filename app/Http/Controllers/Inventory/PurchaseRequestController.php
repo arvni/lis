@@ -2,9 +2,20 @@
 
 namespace App\Http\Controllers\Inventory;
 
-use App\Domains\Document\Models\Document;
 use App\Domains\Inventory\Enums\PurchaseRequestStatus;
-use App\Domains\User\Models\User;
+use App\Domains\Inventory\Requests\AddCommentRequest;
+use App\Domains\Inventory\Requests\ApproveStepRequest;
+use App\Domains\Inventory\Requests\CancelPurchaseRequestRequest;
+use App\Domains\Inventory\Requests\BulkApprovePurchaseRequestRequest;
+use App\Domains\Inventory\Requests\DelegateStepRequest;
+use App\Domains\Inventory\Requests\OrderPurchaseRequestRequest;
+use App\Domains\Inventory\Requests\PayPurchaseRequestRequest;
+use App\Domains\Inventory\Requests\RejectStepRequest;
+use App\Domains\Inventory\Requests\SetBrandsRequest;
+use App\Domains\Inventory\Requests\ShipPurchaseRequestRequest;
+use App\Domains\Inventory\Requests\StorePurchaseRequestRequest;
+use App\Domains\Inventory\Requests\StoreReceiptRequest;
+use App\Domains\Inventory\Requests\UpdatePurchaseRequestRequest;
 use App\Domains\Inventory\Models\PurchaseRequest;
 use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\Supplier;
@@ -52,23 +63,10 @@ class PurchaseRequestController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StorePurchaseRequestRequest $request): RedirectResponse
     {
         $this->authorize('create', PurchaseRequest::class);
-        $data = $request->validate([
-            'urgency'                         => 'required|in:LOW,NORMAL,HIGH,URGENT',
-            'notes'                           => 'nullable|string',
-            'lines'                           => 'required|array|min:1',
-            'lines.*.item_id'                 => 'required|exists:items,id',
-            'lines.*.unit_id'                 => 'required|exists:units,id',
-            'lines.*.qty'                     => 'required|numeric|min:0.000001',
-            'lines.*.preferred_supplier_id'   => 'nullable|exists:suppliers,id',
-            'lines.*.estimated_unit_price'    => 'nullable|numeric|min:0',
-            'lines.*.cat_no'                  => 'nullable|string',
-            'lines.*.brand'                   => 'nullable|string',
-            'lines.*.notes'                   => 'nullable|string',
-        ]);
-        $pr = $this->prService->createRequest($data);
+        $pr = $this->prService->createRequest($request->validated());
         return redirect()->route('inventory.purchase-requests.show', $pr->id)
             ->with(['success' => true, 'status' => 'Purchase request created.']);
     }
@@ -76,42 +74,9 @@ class PurchaseRequestController extends Controller
     public function show(PurchaseRequest $purchaseRequest): Response
     {
         $this->authorize('viewAny', PurchaseRequest::class);
-        $purchaseRequest->load([
-            'requestedBy', 'approvedBy', 'supplier',
-            'workflowTemplate',
-            'lines.item.defaultUnit', 'lines.unit', 'lines.preferredSupplier',
-            'histories.user',
-            'comments.user',
-            'receipts.transaction', 'receipts.lines.prLine.item', 'receipts.lines.location',
-        ]);
-
-        $approvals       = $this->prService->getOrderedApprovals($purchaseRequest);
-        $poDocument      = $purchaseRequest->po_file     ? Document::find($purchaseRequest->po_file)     : null;
-        $paymentDocument = $purchaseRequest->payment_file ? Document::find($purchaseRequest->payment_file) : null;
-
-        $isRequester      = $purchaseRequest->requested_by_user_id === auth()->id();
-        $canActOnWorkflow = $purchaseRequest->workflow_template_id
-            && $purchaseRequest->status->value === 'SUBMITTED'
-            && $this->workflowService->canAct($purchaseRequest, auth()->user());
-        $canDirectApprove = !$purchaseRequest->workflow_template_id
-            && auth()->user()->can('Inventory.PurchaseRequests.Approve Purchase Request')
-            && !$isRequester;
-        $wasRejected = $purchaseRequest->histories()->where('event', 'REJECTED')->exists()
-            && $purchaseRequest->status->value === 'DRAFT';
-
-        return Inertia::render('Inventory/PurchaseRequests/Show', [
-            'purchaseRequest'  => $purchaseRequest,
-            'approvals'        => $approvals,
-            'canActOnWorkflow' => $canActOnWorkflow,
-            'canDirectApprove' => $canDirectApprove,
-            'isRequester'      => $isRequester,
-            'wasRejected'      => $wasRejected,
-            'users'            => $canActOnWorkflow
-                ? User::where('is_active', true)->orderBy('name')->get(['id', 'name'])
-                : [],
-            'poDocument'       => $poDocument,
-            'paymentDocument'  => $paymentDocument,
-        ]);
+        return Inertia::render('Inventory/PurchaseRequests/Show',
+            $this->prService->loadForShow($purchaseRequest, auth()->user())
+        );
     }
 
     public function edit(PurchaseRequest $purchaseRequest): Response
@@ -128,7 +93,7 @@ class PurchaseRequestController extends Controller
         ]);
     }
 
-    public function update(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    public function update(UpdatePurchaseRequestRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $action = $request->input('action');
 
@@ -138,21 +103,7 @@ class PurchaseRequestController extends Controller
             if ($purchaseRequest->status !== PurchaseRequestStatus::DRAFT)
                 abort(403, 'Only DRAFT purchase requests can be edited.');
 
-            $data = $request->validate([
-                'urgency'                       => 'required|string',
-                'notes'                         => 'nullable|string',
-                'lines'                         => 'required|array|min:1',
-                'lines.*.item_id'               => 'required|exists:items,id',
-                'lines.*.unit_id'               => 'required|exists:units,id',
-                'lines.*.qty'                   => 'required|numeric|min:0.000001',
-                'lines.*.preferred_supplier_id' => 'nullable|exists:suppliers,id',
-                'lines.*.estimated_unit_price'  => 'nullable|numeric|min:0',
-                'lines.*.cat_no'                => 'nullable|string',
-                'lines.*.brand'                 => 'nullable|string',
-                'lines.*.notes'                 => 'nullable|string',
-            ]);
-
-            $this->prService->updateRequest($purchaseRequest, $data);
+            $this->prService->updateRequest($purchaseRequest, $request->validated());
 
             return redirect()->route('inventory.purchase-requests.show', $purchaseRequest->id)
                 ->with(['success' => true, 'status' => 'Purchase request updated.']);
@@ -166,39 +117,25 @@ class PurchaseRequestController extends Controller
         return back()->with(['success' => true, 'status' => 'Purchase request updated.']);
     }
 
-    public function order(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    public function order(OrderPurchaseRequestRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('create', PurchaseRequest::class);
-        $data = $request->validate([
-            'po_number'   => 'required|string',
-            'supplier_id' => 'required|exists:suppliers,id',
-            'po_file'     => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-        ]);
+        $data = $request->validated();
         $this->prService->order($purchaseRequest, $data['po_number'], $data['supplier_id'] ?? null, $request->file('po_file'));
         return back()->with(['success' => true, 'status' => 'Order confirmed. PO number saved.']);
     }
 
-    public function pay(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    public function pay(PayPurchaseRequestRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('create', PurchaseRequest::class);
-        $data = $request->validate([
-            'payment_date'      => 'required|date',
-            'payment_reference' => 'nullable|string',
-            'payment_file'      => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-        ]);
-        $this->prService->recordPayment($purchaseRequest, $data, $request->file('payment_file'));
+        $this->prService->recordPayment($purchaseRequest, $request->validated(), $request->file('payment_file'));
         return back()->with(['success' => true, 'status' => 'Payment recorded.']);
     }
 
-    public function ship(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    public function ship(ShipPurchaseRequestRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('create', PurchaseRequest::class);
-        $data = $request->validate([
-            'shipment_date'          => 'nullable|date',
-            'tracking_number'        => 'nullable|string',
-            'expected_delivery_date' => 'nullable|date',
-        ]);
-        $this->prService->markShipped($purchaseRequest, $data);
+        $this->prService->markShipped($purchaseRequest, $request->validated());
         return back()->with(['success' => true, 'status' => 'Marked as shipped.']);
     }
 
@@ -212,26 +149,12 @@ class PurchaseRequestController extends Controller
         ]);
     }
 
-    public function storeReceipt(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    public function storeReceipt(StoreReceiptRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('create', PurchaseRequest::class);
-        $data = $request->validate([
-            'store_id'                      => 'required|exists:stores,id',
-            'notes'                         => 'nullable|string',
-            'lines'                         => 'required|array|min:1',
-            'lines.*.pr_line_id'            => 'required|exists:purchase_request_lines,id',
-            'lines.*.qty'                   => 'required|numeric|min:0.000001',
-            'lines.*.lot_number'            => 'nullable|string',
-            'lines.*.brand'                 => 'nullable|string',
-            'lines.*.cat_no'                => 'nullable|string',
-            'lines.*.expiry_date'           => 'nullable|date',
-            'lines.*.store_location_id'     => 'nullable|exists:store_locations,id',
-            'lines.*.unit_price'            => 'nullable|numeric|min:0',
-            'lines.*.barcode'               => 'nullable|string|max:255',
-        ]);
 
         try {
-            $this->prService->receiveItems($purchaseRequest, $data);
+            $this->prService->receiveItems($purchaseRequest, $request->validated());
         } catch (\Throwable $e) {
             return back()->with(['success' => false, 'status' => $e->getMessage()]);
         }
@@ -240,22 +163,17 @@ class PurchaseRequestController extends Controller
             ->with(['success' => true, 'status' => 'Items received and stock entry created.']);
     }
 
-    public function setBrands(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    public function setBrands(SetBrandsRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('create', PurchaseRequest::class);
-        $data = $request->validate([
-            'lines'         => 'required|array',
-            'lines.*.id'    => 'required|exists:purchase_request_lines,id',
-            'lines.*.brand' => 'nullable|string|max:255',
-        ]);
-        $this->prService->setBrands($purchaseRequest, $data['lines']);
+        $this->prService->setBrands($purchaseRequest, $request->validated()['lines']);
         return back()->with(['success' => true, 'status' => 'Brands updated.']);
     }
 
-    public function bulkApprove(Request $request): RedirectResponse
+    public function bulkApprove(BulkApprovePurchaseRequestRequest $request): RedirectResponse
     {
         $this->authorize('viewAny', PurchaseRequest::class);
-        $ids = $request->validate(['ids' => 'required|array', 'ids.*' => 'integer'])['ids'];
+        $ids = $request->validated()['ids'];
 
         $prs = PurchaseRequest::whereIn('id', $ids)
             ->with(['workflowTemplate', 'requestedBy'])
@@ -280,13 +198,12 @@ class PurchaseRequestController extends Controller
         return back()->with(['success' => true, 'status' => $msg]);
     }
 
-    public function addComment(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    public function addComment(AddCommentRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('viewAny', PurchaseRequest::class);
-        $data = $request->validate(['body' => 'required|string|max:2000']);
         $purchaseRequest->comments()->create([
             'user_id' => auth()->id(),
-            'body'    => $data['body'],
+            'body'    => $request->validated()['body'],
         ]);
         return back()->with(['success' => true, 'status' => 'Comment added.']);
     }
@@ -302,22 +219,21 @@ class PurchaseRequestController extends Controller
         return back()->with(['success' => true, 'status' => 'Request recalled and returned to draft.']);
     }
 
-    public function delegateStep(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    public function delegateStep(DelegateStepRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('viewAny', PurchaseRequest::class);
-        $data = $request->validate(['delegate_to_user_id' => 'required|exists:users,id']);
         try {
-            $this->workflowService->delegate($purchaseRequest, auth()->user(), $data['delegate_to_user_id']);
+            $this->workflowService->delegate($purchaseRequest, auth()->user(), $request->validated()['delegate_to_user_id']);
         } catch (\Throwable $e) {
             return back()->with(['success' => false, 'status' => $e->getMessage()]);
         }
         return back()->with(['success' => true, 'status' => 'Step delegated successfully.']);
     }
 
-    public function approveStep(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    public function approveStep(ApproveStepRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('viewAny', PurchaseRequest::class);
-        $notes = $request->input('notes');
+        $notes = $request->validated('notes');
         try {
             $this->workflowService->approveStep($purchaseRequest, auth()->user(), $notes);
         } catch (\Throwable $e) {
@@ -326,12 +242,11 @@ class PurchaseRequestController extends Controller
         return back()->with(['success' => true, 'status' => 'Step approved.']);
     }
 
-    public function rejectStep(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    public function rejectStep(RejectStepRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('viewAny', PurchaseRequest::class);
-        $data = $request->validate(['notes' => 'required|string|max:1000']);
         try {
-            $this->workflowService->rejectStep($purchaseRequest, auth()->user(), $data['notes']);
+            $this->workflowService->rejectStep($purchaseRequest, auth()->user(), $request->validated()['notes']);
         } catch (\Throwable $e) {
             return back()->with(['success' => false, 'status' => $e->getMessage()]);
         }
@@ -412,10 +327,10 @@ class PurchaseRequestController extends Controller
         ]);
     }
 
-    public function cancel(Request $request, PurchaseRequest $purchaseRequest): RedirectResponse
+    public function cancel(CancelPurchaseRequestRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('create', PurchaseRequest::class);
-        $notes = $request->input('notes');
+        $notes = $request->validated('notes');
         try {
             $this->prService->cancel($purchaseRequest, $notes);
         } catch (RuntimeException $e) {

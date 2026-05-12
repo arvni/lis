@@ -3,6 +3,7 @@
 namespace App\Domains\Inventory\Services;
 
 use App\Domains\Document\Enums\DocumentTag;
+use App\Domains\Document\Models\Document;
 use App\Domains\Document\Services\DocumentService;
 use App\Domains\Inventory\Enums\PurchaseRequestStatus;
 use App\Domains\Inventory\Models\PurchaseRequest;
@@ -11,6 +12,7 @@ use App\Domains\Inventory\Models\PurchaseRequestHistory;
 use App\Domains\Inventory\Models\PurchaseRequestLine;
 use App\Domains\Inventory\Models\PurchaseRequestReceipt;
 use App\Domains\Inventory\Models\PurchaseRequestReceiptLine;
+use App\Domains\User\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -321,6 +323,46 @@ readonly class PurchaseRequestService
         $pr->update(['status' => PurchaseRequestStatus::ORDERED->value]);
         $this->log($pr, 'ORDERED');
         return $pr;
+    }
+
+    public function loadForShow(PurchaseRequest $pr, User $user): array
+    {
+        $pr->load([
+            'requestedBy', 'approvedBy', 'supplier',
+            'workflowTemplate',
+            'lines.item.defaultUnit', 'lines.unit', 'lines.preferredSupplier',
+            'histories.user',
+            'comments.user',
+            'receipts.transaction', 'receipts.lines.prLine.item', 'receipts.lines.location',
+        ]);
+
+        $approvals       = $this->getOrderedApprovals($pr);
+        $poDocument      = $pr->po_file      ? Document::find($pr->po_file)      : null;
+        $paymentDocument = $pr->payment_file  ? Document::find($pr->payment_file)  : null;
+
+        $isRequester      = $pr->requested_by_user_id === $user->id;
+        $canActOnWorkflow = $pr->workflow_template_id
+            && $pr->status->value === 'SUBMITTED'
+            && $this->workflowService->canAct($pr, $user);
+        $canDirectApprove = !$pr->workflow_template_id
+            && $user->can('Inventory.PurchaseRequests.Approve Purchase Request')
+            && !$isRequester;
+        $wasRejected = $pr->histories()->where('event', 'REJECTED')->exists()
+            && $pr->status->value === 'DRAFT';
+
+        return [
+            'purchaseRequest'  => $pr,
+            'approvals'        => $approvals,
+            'canActOnWorkflow' => $canActOnWorkflow,
+            'canDirectApprove' => $canDirectApprove,
+            'isRequester'      => $isRequester,
+            'wasRejected'      => $wasRejected,
+            'users'            => $canActOnWorkflow
+                ? User::where('is_active', true)->orderBy('name')->get(['id', 'name'])
+                : [],
+            'poDocument'       => $poDocument,
+            'paymentDocument'  => $paymentDocument,
+        ];
     }
 
     public function getOrderedApprovals(PurchaseRequest $pr): \Illuminate\Support\Collection

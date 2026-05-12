@@ -4,24 +4,18 @@ namespace App\Http\Controllers\Inventory;
 
 use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\StoreLocation;
+use App\Domains\Inventory\Requests\StoreLocationRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class StoreLocationController extends Controller
 {
-    public function store(Request $request, Store $store): RedirectResponse
+    public function store(StoreLocationRequest $request, Store $store): RedirectResponse
     {
         $this->authorize('update', $store);
 
-        $data = $request->validate([
-            'zone'           => 'nullable|string|max:50',
-            'row'            => 'nullable|string|max:50',
-            'column'         => 'nullable|string|max:50',
-            'shelf'          => 'nullable|string|max:50',
-            'bin'            => 'nullable|string|max:50',
-            'capacity_notes' => 'nullable|string',
-        ]);
+        $data = $request->validated();
 
         $label = StoreLocation::generateLabel(
             $data['zone'] ?? null,

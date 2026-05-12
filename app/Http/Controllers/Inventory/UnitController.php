@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Domains\Inventory\Models\Unit;
+use App\Domains\Inventory\Requests\StoreUnitRequest;
 use App\Domains\Inventory\Services\UnitService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -24,24 +25,16 @@ class UnitController extends Controller
         return Inertia::render('Inventory/Units/Index', compact('units', 'requestInputs'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreUnitRequest $request): RedirectResponse
     {
-        $data = $request->validate([
-            'name'         => 'required|string|max:100',
-            'abbreviation' => 'required|string|max:20',
-            'description'  => 'nullable|string',
-        ]);
+        $data = $request->validated();
         $this->unitService->createUnit($data);
         return back()->with(['success' => true, 'status' => "Unit {$data['name']} created."]);
     }
 
-    public function update(Request $request, Unit $unit): RedirectResponse
+    public function update(StoreUnitRequest $request, Unit $unit): RedirectResponse
     {
-        $data = $request->validate([
-            'name'         => 'required|string|max:100',
-            'abbreviation' => 'required|string|max:20',
-            'description'  => 'nullable|string',
-        ]);
+        $data = $request->validated();
         $this->unitService->updateUnit($unit, $data);
         return back()->with(['success' => true, 'status' => "Unit updated."]);
     }

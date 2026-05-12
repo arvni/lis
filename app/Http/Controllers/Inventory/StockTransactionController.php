@@ -6,6 +6,8 @@ use App\Domains\Inventory\Enums\TransactionType;
 use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\StockTransaction;
 use App\Domains\Inventory\Models\Supplier;
+use App\Domains\Inventory\Requests\StoreStockTransactionRequest;
+use App\Domains\Inventory\Requests\UpdateStockTransactionRequest;
 use App\Domains\Inventory\Services\StockTransactionService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -40,38 +42,17 @@ class StockTransactionController extends Controller
         }
 
         return Inertia::render('Inventory/Transactions/Add', [
-            'transactionTypes' => enumMap(TransactionType::cases()),
+            'transactionTypes' => TransactionType::toOptions(),
             'stores'           => Store::active()->get(['id', 'name']),
             'defaultType'      => $defaults?->transaction_type ?? $request->input('type', TransactionType::ENTRY->value),
             'defaults'         => $defaults,
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreStockTransactionRequest $request): RedirectResponse
     {
         $this->authorize('create', StockTransaction::class);
-        $data = $request->validate([
-            'transaction_type'     => 'required|string',
-            'transaction_date'     => 'required|date',
-            'store_id'             => 'required|exists:stores,id',
-            'destination_store_id' => 'nullable|exists:stores,id',
-            'supplier_id'          => 'nullable|exists:suppliers,id',
-            'notes'                => 'nullable|string',
-            'lines'                => 'required|array|min:1',
-            'lines.*.item_id'      => 'required|exists:items,id',
-            'lines.*.unit_id'      => 'required|exists:units,id',
-            'lines.*.quantity'     => 'required|numeric|min:0.000001',
-            'lines.*.lot_number'   => 'nullable|string',
-            'lines.*.brand'        => 'nullable|string',
-            'lines.*.cat_no'       => 'nullable|string',
-            'lines.*.barcode'      => 'nullable|string',
-            'lines.*.expiry_date'  => 'nullable|date',
-            'lines.*.unit_price'   => 'nullable|numeric|min:0',
-            'lines.*.store_location_id' => 'nullable|exists:store_locations,id',
-            'lines.*.notes'        => 'nullable|string',
-        ]);
-
-        $tx = $this->transactionService->createTransaction($data);
+        $tx = $this->transactionService->createTransaction($request->validated());
         return redirect()->route('inventory.transactions.show', $tx->id)
             ->with(['success' => true, 'status' => "Transaction {$tx->reference_number} created."]);
     }
@@ -87,39 +68,19 @@ class StockTransactionController extends Controller
 
         return Inertia::render('Inventory/Transactions/Edit', [
             'transaction'      => $transaction,
-            'transactionTypes' => enumMap(TransactionType::cases()),
+            'transactionTypes' => TransactionType::toOptions(),
             'stores'           => Store::active()->get(['id', 'name']),
         ]);
     }
 
-    public function update(Request $request, StockTransaction $transaction): RedirectResponse
+    public function update(UpdateStockTransactionRequest $request, StockTransaction $transaction): RedirectResponse
     {
         $this->authorize('create', StockTransaction::class);
 
         if (!$transaction->isDraft())
             abort(403, "Only DRAFT transactions can be edited.");
 
-        $data = $request->validate([
-            'transaction_date'     => 'required|date',
-            'store_id'             => 'required|exists:stores,id',
-            'destination_store_id' => 'nullable|exists:stores,id',
-            'supplier_id'          => 'nullable|exists:suppliers,id',
-            'notes'                => 'nullable|string',
-            'lines'                => 'required|array|min:1',
-            'lines.*.item_id'      => 'required|exists:items,id',
-            'lines.*.unit_id'      => 'required|exists:units,id',
-            'lines.*.quantity'     => 'required|numeric|min:0.000001',
-            'lines.*.lot_number'   => 'nullable|string',
-            'lines.*.brand'        => 'nullable|string',
-            'lines.*.cat_no'       => 'nullable|string',
-            'lines.*.barcode'      => 'nullable|string',
-            'lines.*.expiry_date'  => 'nullable|date',
-            'lines.*.unit_price'   => 'nullable|numeric|min:0',
-            'lines.*.store_location_id' => 'nullable|exists:store_locations,id',
-            'lines.*.notes'        => 'nullable|string',
-        ]);
-
-        $this->transactionService->updateTransaction($transaction, $data);
+        $this->transactionService->updateTransaction($transaction, $request->validated());
 
         return redirect()->route('inventory.transactions.show', $transaction->id)
             ->with(['success' => true, 'status' => "Transaction {$transaction->reference_number} updated."]);

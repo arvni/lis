@@ -2,11 +2,12 @@
 
 namespace App\Domains\Inventory\Enums;
 
+use App\Domains\Shared\Traits\HasSelectOptions;
 use Kongulov\Traits\InteractWithEnum;
 
 enum ItemMaterialType: string
 {
-    use InteractWithEnum;
+    use InteractWithEnum, HasSelectOptions;
 
     case CHM = 'CHM';
     case SLD = 'SLD';

@@ -7,6 +7,8 @@ use App\Domains\Inventory\Enums\ItemMaterialType;
 use App\Domains\Inventory\Enums\StorageCondition;
 use App\Domains\Inventory\Models\Item;
 use App\Domains\Inventory\Models\Unit;
+use App\Domains\Inventory\Requests\StoreItemRequest;
+use App\Domains\Inventory\Requests\UpdateItemRequest;
 use App\Domains\Inventory\Services\ItemService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -33,37 +35,17 @@ class ItemController extends Controller
     {
         $this->authorize('create', Item::class);
         return Inertia::render('Inventory/Items/Add', [
-            'departments'       => enumMap(ItemDepartment::cases()),
-            'materialTypes'     => enumMap(ItemMaterialType::cases()),
-            'storageConditions' => enumMap(StorageCondition::cases()),
+            'departments'       => ItemDepartment::toOptions(),
+            'materialTypes'     => ItemMaterialType::toOptions(),
+            'storageConditions' => StorageCondition::toOptions(),
             'units'             => Unit::orderBy('name')->get(['id', 'name', 'abbreviation']),
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreItemRequest $request): RedirectResponse
     {
         $this->authorize('create', Item::class);
-        $data = $request->validate([
-            'name'                   => 'required|string|max:255',
-            'scientific_name'        => 'nullable|string|max:255',
-            'department'             => 'required|string',
-            'material_type'          => 'required|string',
-            'description'            => 'nullable|string',
-            'storage_condition'      => 'required|string',
-            'storage_condition_notes'=> 'nullable|string',
-            'default_unit_id'        => 'required|exists:units,id',
-            'is_hazardous'           => 'boolean',
-            'requires_lot_tracking'  => 'boolean',
-            'minimum_stock_level'    => 'numeric|min:0',
-            'maximum_stock_level'    => 'nullable|numeric|min:0',
-            'lead_time_days'         => 'nullable|integer|min:0',
-            'notes'                  => 'nullable|string',
-            'unit_conversions'       => 'nullable|array',
-            'unit_conversions.*.unit_id'          => 'required|exists:units,id',
-            'unit_conversions.*.conversion_to_base' => 'required|numeric|min:0.000001',
-        ]);
-
-        $item = $this->itemService->createItem($data);
+        $item = $this->itemService->createItem($request->validated());
         return redirect()->route('inventory.items.show', $item->id)
             ->with(['success' => true, 'status' => "Item {$item->item_code} created successfully."]);
     }
@@ -81,36 +63,17 @@ class ItemController extends Controller
         $item->load(['unitConversions.unit']);
         return Inertia::render('Inventory/Items/Edit', [
             'item'              => $item,
-            'departments'       => enumMap(ItemDepartment::cases()),
-            'materialTypes'     => enumMap(ItemMaterialType::cases()),
-            'storageConditions' => enumMap(StorageCondition::cases()),
+            'departments'       => ItemDepartment::toOptions(),
+            'materialTypes'     => ItemMaterialType::toOptions(),
+            'storageConditions' => StorageCondition::toOptions(),
             'units'             => Unit::orderBy('name')->get(['id', 'name', 'abbreviation']),
         ]);
     }
 
-    public function update(Request $request, Item $item): RedirectResponse
+    public function update(UpdateItemRequest $request, Item $item): RedirectResponse
     {
         $this->authorize('update', Item::class);
-        $data = $request->validate([
-            'name'                   => 'required|string|max:255',
-            'scientific_name'        => 'nullable|string|max:255',
-            'description'            => 'nullable|string',
-            'storage_condition'      => 'required|string',
-            'storage_condition_notes'=> 'nullable|string',
-            'default_unit_id'        => 'required|exists:units,id',
-            'is_active'              => 'boolean',
-            'is_hazardous'           => 'boolean',
-            'requires_lot_tracking'  => 'boolean',
-            'minimum_stock_level'    => 'numeric|min:0',
-            'maximum_stock_level'    => 'nullable|numeric|min:0',
-            'lead_time_days'         => 'nullable|integer|min:0',
-            'notes'                  => 'nullable|string',
-            'unit_conversions'       => 'nullable|array',
-            'unit_conversions.*.unit_id'          => 'required|exists:units,id',
-            'unit_conversions.*.conversion_to_base' => 'required|numeric|min:0.000001',
-        ]);
-
-        $this->itemService->updateItem($item, $data);
+        $this->itemService->updateItem($item, $request->validated());
         return redirect()->route('inventory.items.show', $item->id)
             ->with(['success' => true, 'status' => "Item updated successfully."]);
     }

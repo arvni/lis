@@ -8,6 +8,8 @@ use App\Domains\Inventory\Enums\StorageCondition;
 use App\Domains\Inventory\Imports\ItemsImport;
 use App\Domains\Inventory\Models\Item;
 use App\Domains\Inventory\Models\Unit;
+use App\Domains\Inventory\Requests\ImportItemFileRequest;
+use App\Domains\Inventory\Requests\ImportItemRowsRequest;
 use App\Domains\Inventory\Services\ItemCodeService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -50,26 +52,16 @@ class ItemImportController extends Controller
     {
         $this->authorize('create', Item::class);
         return Inertia::render('Inventory/Items/Import', [
-            'departments'       => enumMap(ItemDepartment::cases()),
-            'materialTypes'     => enumMap(ItemMaterialType::cases()),
-            'storageConditions' => enumMap(StorageCondition::cases()),
+            'departments'       => ItemDepartment::toOptions(),
+            'materialTypes'     => ItemMaterialType::toOptions(),
+            'storageConditions' => StorageCondition::toOptions(),
             'units'             => Unit::orderBy('name')->pluck('name')->toArray(),
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(ImportItemFileRequest $request): RedirectResponse
     {
         $this->authorize('create', Item::class);
-
-        $request->validate([
-            'file' => [
-                'required', 'file', 'max:10240',
-                'mimetypes:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,'
-                    . 'application/vnd.ms-excel,'
-                    . 'application/vnd.ms-excel.sheet.macroEnabled.12,'
-                    . 'text/csv,text/plain,application/csv,application/octet-stream',
-            ],
-        ]);
 
         $import = new ItemsImport($this->itemCodeService);
 
@@ -90,14 +82,9 @@ class ItemImportController extends Controller
             ]);
     }
 
-    public function storeRows(Request $request): RedirectResponse
+    public function storeRows(ImportItemRowsRequest $request): RedirectResponse
     {
         $this->authorize('create', Item::class);
-
-        $request->validate([
-            'rows'        => 'required|array|min:1',
-            'rows.*.name' => 'required|string|max:255',
-        ]);
 
         $import = new ItemsImport($this->itemCodeService);
         $import->collection(collect($request->input('rows')));

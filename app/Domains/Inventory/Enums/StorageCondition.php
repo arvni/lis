@@ -2,11 +2,12 @@
 
 namespace App\Domains\Inventory\Enums;
 
+use App\Domains\Shared\Traits\HasSelectOptions;
 use Kongulov\Traits\InteractWithEnum;
 
 enum StorageCondition: string
 {
-    use InteractWithEnum;
+    use InteractWithEnum, HasSelectOptions;
 
     case ROOM_TEMP       = 'ROOM_TEMP';
     case REFRIGERATED    = 'REFRIGERATED';

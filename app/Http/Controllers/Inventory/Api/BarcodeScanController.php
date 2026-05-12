@@ -4,15 +4,14 @@ namespace App\Http\Controllers\Inventory\Api;
 
 use App\Domains\Inventory\Models\StockLot;
 use App\Domains\Inventory\Models\StockTransactionLine;
+use App\Domains\Inventory\Requests\BarcodeScanRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class BarcodeScanController extends Controller
 {
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(BarcodeScanRequest $request): JsonResponse
     {
-        $request->validate(['barcode' => 'required|string']);
         $barcode = $request->input('barcode');
 
         // 1. Look for an active lot with this barcode

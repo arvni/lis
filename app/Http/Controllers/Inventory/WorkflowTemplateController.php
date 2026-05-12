@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Domains\Inventory\Models\WorkflowTemplate;
+use App\Domains\Inventory\Requests\StoreWorkflowTemplateRequest;
 use App\Http\Controllers\Controller;
 use App\Domains\User\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -37,30 +38,10 @@ class WorkflowTemplateController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreWorkflowTemplateRequest $request): RedirectResponse
     {
         $this->authorize('create', WorkflowTemplate::class);
-
-        $data = $request->validate([
-            'name'                            => 'required|string|max:255',
-            'description'                     => 'nullable|string',
-            'is_active'                       => 'boolean',
-            'is_default'                      => 'boolean',
-            'priority'                        => 'integer|min:0',
-            'conditions'                      => 'nullable|array',
-            'conditions.urgencies'            => 'nullable|array',
-            'conditions.urgencies.*'          => 'string',
-            'conditions.requester_roles'      => 'nullable|array',
-            'conditions.requester_roles.*'    => 'string',
-            'conditions.min_total'            => 'nullable|numeric|min:0',
-            'steps'                           => 'present|array',
-            'steps.*.name'                    => 'required|string|max:255',
-            'steps.*.sort_order'              => 'required|integer|min:0',
-            'steps.*.approver_user_id'        => 'nullable|exists:users,id',
-            'steps.*.approver_role'           => 'nullable|string',
-        ]);
-
-        $template = $this->saveTemplate(null, $data);
+        $template = $this->saveTemplate(null, $request->validated());
 
         return redirect()->route('inventory.workflow-templates.index')
             ->with(['success' => true, 'status' => "Workflow template \"{$template->name}\" created."]);
@@ -80,30 +61,10 @@ class WorkflowTemplateController extends Controller
         ]);
     }
 
-    public function update(Request $request, WorkflowTemplate $workflowTemplate): RedirectResponse
+    public function update(StoreWorkflowTemplateRequest $request, WorkflowTemplate $workflowTemplate): RedirectResponse
     {
         $this->authorize('update', WorkflowTemplate::class);
-
-        $data = $request->validate([
-            'name'                            => 'required|string|max:255',
-            'description'                     => 'nullable|string',
-            'is_active'                       => 'boolean',
-            'is_default'                      => 'boolean',
-            'priority'                        => 'integer|min:0',
-            'conditions'                      => 'nullable|array',
-            'conditions.urgencies'            => 'nullable|array',
-            'conditions.urgencies.*'          => 'string',
-            'conditions.requester_roles'      => 'nullable|array',
-            'conditions.requester_roles.*'    => 'string',
-            'conditions.min_total'            => 'nullable|numeric|min:0',
-            'steps'                           => 'present|array',
-            'steps.*.name'                    => 'required|string|max:255',
-            'steps.*.sort_order'              => 'required|integer|min:0',
-            'steps.*.approver_user_id'        => 'nullable|exists:users,id',
-            'steps.*.approver_role'           => 'nullable|string',
-        ]);
-
-        $this->saveTemplate($workflowTemplate, $data);
+        $this->saveTemplate($workflowTemplate, $request->validated());
 
         return redirect()->route('inventory.workflow-templates.index')
             ->with(['success' => true, 'status' => "Workflow template updated."]);
