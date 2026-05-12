@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Laboratory\Enums;
+namespace App\Domains\Shared\Enums;
 
 use Kongulov\Traits\InteractWithEnum;
 
@@ -11,5 +11,4 @@ enum ActionType
     case CREATE;
     case UPDATE;
     case DELETE;
-
 }
