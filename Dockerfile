@@ -1,7 +1,7 @@
 # ═══════════════════════════════════════════════════════════
 # Stage 1: Build
 # ═══════════════════════════════════════════════════════════
-FROM php:8.2-fpm-alpine AS builder
+FROM php:8.4-fpm-alpine AS builder
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
@@ -62,13 +62,15 @@ RUN if [ -f "package.json" ]; then \
         rm -rf node_modules; \
     fi
 
-# Finalise autoloader
-RUN composer dump-autoload --optimize --no-dev
+# Finalise autoloader (clear stale host-copied caches first so
+# package:discover doesn't try to load dev-only providers)
+RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php bootstrap/cache/routes-v7.php && \
+    composer dump-autoload --optimize --no-dev
 
 # ═══════════════════════════════════════════════════════════
 # Stage 2: Production image
 # ═══════════════════════════════════════════════════════════
-FROM php:8.2-alpine
+FROM php:8.4-alpine
 
 LABEL maintainer="Bion Genetic Laboratory"
 

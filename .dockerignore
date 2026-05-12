@@ -1,0 +1,39 @@
+.git
+.gitignore
+.github
+.vscode
+.idea
+
+# Don't ship host's installed deps — image builds them fresh
+vendor
+node_modules
+
+# Don't ship host env / secrets
+.env
+.env.*
+!.env.example
+
+# Don't ship host build artifacts / caches
+public/build
+public/hot
+storage/logs/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*.php
+
+# Tests / docs / dev stuff not needed at runtime
+tests
+phpunit.xml
+phpunit.xml.dist
+.phpunit.result.cache
+README.md
+CHANGELOG.md
+docker-compose.yml
+docker-compose.*.yml
+
+# Editor / OS noise
+.DS_Store
+*.log
+*.swp
+*.swo
