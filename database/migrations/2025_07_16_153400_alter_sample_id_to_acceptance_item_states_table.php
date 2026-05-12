@@ -13,16 +13,19 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('acceptance_item_states', function (Blueprint $table) {
-            $table->foreignIdFor(Sample::class)->nullable()->after('section_id');
-            $table->foreign("sample_id")->references("id")->on("samples");
-        });
+        if (!Schema::hasColumn("acceptance_item_states", "sample_id")) {
+            Schema::table('acceptance_item_states', function (Blueprint $table) {
 
-        Artisan::call('db:seed', [
-            '--class' => AddSampleToAcceptanceItemStatesTableSeeder::class,
-            '--force' => true,
-        ]);
+                $table->foreignIdFor(Sample::class)->nullable()->after('section_id');
+                $table->foreign("sample_id")->references("id")->on("samples");
 
+            });
+
+            Artisan::call('db:seed', [
+                '--class' => AddSampleToAcceptanceItemStatesTableSeeder::class,
+                '--force' => true,
+            ]);
+        }
     }
 
     /**

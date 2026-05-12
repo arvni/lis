@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Domains\Setting\Models\Setting;
+use App\Domains\Shared\Helpers\RouteHelper;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -72,7 +73,7 @@ class SettingsSeeder extends Seeder
                 "title" => "Consultation Service",
                 "key" => "defaultConsultationMethod",
                 "class" => "Acceptance",
-                "value" => ["value" => "", "type" => "selectSearch", "url" => relative_route("api.tests.list")]
+                "value" => ["value" => "", "type" => "selectSearch", "url" => RouteHelper::relativePath("api.tests.list")]
             ],
             [
                 "title" => "Monitoring Sample Interval (minutes)",

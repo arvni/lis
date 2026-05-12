@@ -149,6 +149,7 @@ class RoleAndPermissionSeeder extends Seeder
                 "Samples" => [
                     "View Sample",
                     "Create Sample",
+                    "Edit Sample",
                     "Delete Sample",
                     "List Samples",
                 ],
@@ -172,6 +173,7 @@ class RoleAndPermissionSeeder extends Seeder
                     "Toggle Sampleless Acceptance Item",
                     "Check Status",
                     "Update Priority",
+                    "Edit Invoiced Acceptance",
                 ],
                 "TAT" => [
                     "View Dashboard",
@@ -341,6 +343,14 @@ class RoleAndPermissionSeeder extends Seeder
                     "Approve Sample",
                 ],
             ],
+            "Document" => [
+                "Documents" => [
+                    "Create Document",
+                    "View Document",
+                    "Edit Document",
+                    "Delete Document"
+                ]
+            ]
         ];
 
         $sectionPermissions = $this->getSectionsPermissions();
@@ -423,7 +433,12 @@ class RoleAndPermissionSeeder extends Seeder
 
     private function getDocumentsPermissions(): array
     {
-        return Arr::map(DocumentTag::values(), fn($item) => "Documents." . Str::of($item)->replace('_', ' ')->title());
+        return [
+            "Documents" => Arr::map(
+                DocumentTag::values(),
+                fn($item) => Str::of($item)->replace('_', ' ')->title()->toString()
+            ),
+        ];
     }
 
 }
