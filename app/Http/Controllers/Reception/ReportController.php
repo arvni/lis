@@ -50,20 +50,20 @@ class ReportController extends Controller
     public function store(StoreReportRequest $request): RedirectResponse
     {
         $user = auth()->user();
-        $parameters = $request->get('parameters', []);
+        $parameters = $request->validated('parameters', []);
         foreach (($request->file('parameters') ?? []) as $parameter => $value) {
             $parameters[$parameter] = $this->documentService->storeDocument(
-                'patient', $request->get('patient_id'), $value, DocumentTag::IMAGE->value
+                'patient', $request->validated('patient_id'), $value, DocumentTag::IMAGE->value
             );
         }
 
         $report = $this->reportService->createReport(
             $user,
-            $request->get('acceptance_item_id'),
-            $request->input('report_template.id'),
-            $request->get('reported_document'),
+            $request->validated('acceptance_item_id'),
+            $request->validated('report_template_id'),
+            $request->validated('reported_document'),
             $parameters,
-            $request->get('files', []),
+            $request->validated('files', []),
         );
 
         // Check and update acceptance status
@@ -121,7 +121,7 @@ class ReportController extends Controller
         $reportData = $this->reportService->prepareReportForEditing($report);
 
         // Get related history
-        $history = $this->reportService->getHistoryByAcceptanceItemId($report->acceptance_item_id);
+        $history = $this->reportService->getHistoryForAcceptanceItem($reportData->acceptanceItem);
 
         // Format document files
         $files = $this->reportService->formatDocumentFiles($reportData->documents);
@@ -150,21 +150,21 @@ class ReportController extends Controller
     public function update(UpdateReportRequest $request, Report $report)
     {
         $user = auth()->user();
-        $parameters = $request->get('parameters', []);
+        $parameters = $request->validated('parameters', []);
         foreach (($request->file('parameters') ?? []) as $parameter => $value) {
             $parameters[$parameter] = $this->documentService->storeDocument(
-                'patient', $request->get('patient_id'), $value, DocumentTag::IMAGE->value
+                'patient', $request->validated('patient_id'), $value, DocumentTag::IMAGE->value
             );
         }
 
         $report = $this->reportService->updateReport(
             $report,
             $user,
-            $request->get('acceptance_item_id'),
-            $request->input('report_template.id'),
-            $request->get('reported_document'),
+            $request->validated('acceptance_item_id'),
+            $request->validated('report_template_id'),
+            $request->validated('reported_document'),
             $parameters,
-            $request->get('files', []),
+            $request->validated('files', []),
         );
 
         // Check and update acceptance status

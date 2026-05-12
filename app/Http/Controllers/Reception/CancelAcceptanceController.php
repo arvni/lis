@@ -18,6 +18,7 @@ class CancelAcceptanceController extends Controller
      */
     public function __invoke(Acceptance $acceptance)
     {
+        $this->authorize("cancel", $acceptance);
         $this->acceptanceService->cancelAcceptance($acceptance);
         return redirect()->back()->with(["success"=>true,"message"=>"Acceptance Cancelled Successfully"]);
     }

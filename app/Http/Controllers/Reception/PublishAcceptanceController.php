@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Reception;
 
 use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Reception\Requests\PublishAcceptanceRequest;
 use App\Domains\Reception\Services\AcceptanceService;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 
 class PublishAcceptanceController extends Controller
 {
@@ -13,10 +13,7 @@ class PublishAcceptanceController extends Controller
     {
     }
 
-    /**
-     * Handle the incoming request.
-     */
-    public function __invoke(Acceptance $acceptance, Request $request)
+    public function __invoke(Acceptance $acceptance, PublishAcceptanceRequest $request)
     {
         // Validate that all acceptance items have approved reports
         $acceptance->load([

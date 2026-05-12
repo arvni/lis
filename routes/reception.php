@@ -67,7 +67,7 @@ Route::group(["prefix" => "reception"], function () {
     Route::get("patients/{patient}/acceptances/create", [AcceptanceController::class, "create"])->name("acceptances.create");
     Route::post("patients/{patient}/acceptances", [AcceptanceController::class, "store"])->name("acceptances.store");
     Route::get("sample-collection", SampleCollectionController::class)->name("sampleCollection");
-    Route::resource("samples", SampleController::class)->except("create", "edit", "update");
+    Route::resource("samples", SampleController::class)->except("create", "edit");
     Route::get(
         "acceptances/{acceptance}/acceptance-items/{acceptanceItem}",
         ShowAcceptanceItemController::class

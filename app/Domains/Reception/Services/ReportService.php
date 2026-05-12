@@ -78,6 +78,11 @@ class ReportService
         return $this->reportRepository->listWaitingForPublish($queryData);
     }
 
+    public function getHistoryForAcceptanceItem(AcceptanceItem $acceptanceItem): Collection
+    {
+        return $this->reportRepository->getHistoryForAcceptanceItem($acceptanceItem);
+    }
+
     /**
      * @throws Exception
      * @throws ConnectionException
@@ -287,25 +292,6 @@ class ReportService
                 "created_at" => $item["created_at"]
             ];
         });
-    }
-
-    /**
-     * Get report history by acceptance item ID
-     *
-     * @param int $acceptanceItemId
-     * @return Collection
-     */
-    public function getHistoryByAcceptanceItemId(int $acceptanceItemId): Collection
-    {
-        return Report::where("acceptance_item_id", $acceptanceItemId)
-            ->where("status", false)
-            ->orderBy("approved_at")
-            ->with([
-                "Documents",
-                "Reporter:name,id",
-                "Approver:name,id"
-            ])
-            ->get();
     }
 
     /**

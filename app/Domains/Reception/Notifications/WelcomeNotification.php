@@ -69,14 +69,9 @@ class WelcomeNotification extends Notification implements ShouldQueue
      */
     public function toSms($notifiable): array
     {
-        $workingDays = (int) $this->reportDate;
-
-        if ($workingDays > 0) {
-            $daysLabel   = $workingDays === 1 ? '1 working day' : "{$workingDays} working days";
-            $reportLine  = " Your report will be ready in {$daysLabel}.";
-        } else {
-            $reportLine  = '';
-        }
+        $reportLine = $this->reportDate
+            ? ' Your report will be ready by ' . Carbon::parse($this->reportDate)->format('d/m/Y') . '.'
+            : '';
 
         return [$notifiable->phone, "Welcome, {$notifiable->fullName}!{$reportLine} Thank you for trusting Bion Genetic Laboratory!"];
     }
@@ -112,38 +107,6 @@ class WelcomeNotification extends Notification implements ShouldQueue
             'message' => 'Your request is now being processed.',
             'model_id' => $this->acceptance->id,
         ];
-    }
-
-    public function getEstimatedCompletionDateAttribute()
-    {
-        // Get the report_date (turnaround time in days)
-        $turnaroundDays = $this->reportDate;
-
-        if ($turnaroundDays === null) {
-            return null;
-        }
-
-        // Start with the created_at date
-        $startDate = Carbon::parse($this->acceptance->created_at);
-        $endDate = $startDate->clone();
-
-        // Counter for business days
-        $businessDaysAdded = 0;
-
-        // Loop until we've added enough business days
-        while ($businessDaysAdded < $turnaroundDays) {
-            // Add one day
-            $endDate->addDay();
-
-            // Skip weekends (Saturday = 6, Friday = 0)
-            $dayOfWeek = $endDate->dayOfWeek;
-            if ($dayOfWeek != 5 && $dayOfWeek != 6) {
-                $businessDaysAdded++;
-            }
-
-        }
-
-        return $endDate;
     }
 
 }

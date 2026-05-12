@@ -6,12 +6,12 @@ use App\Domains\Reception\DTOs\PatientDTO;
 use App\Domains\Reception\DTOs\RelativeDTO;
 use App\Domains\Reception\Models\Relative;
 use App\Domains\Reception\Requests\RelativeRequest;
+use App\Domains\Reception\Requests\UpdateRelativeRequest;
 use App\Domains\Reception\Services\PatientService;
 use App\Domains\Reception\Services\RelativeService;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Events\ReferrerOrderPatientCreated;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 
 class RelativeController extends Controller
 {
@@ -93,9 +93,8 @@ class RelativeController extends Controller
 
     }
 
-    public function update(Relative $relative, Request $request)
+    public function update(Relative $relative, UpdateRelativeRequest $request)
     {
-
         $relativeDto = new RelativeDTO(
             $relative->patient_id,
             $relative->relative_id,

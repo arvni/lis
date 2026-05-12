@@ -21,9 +21,9 @@ class SampleRepository
             "acceptanceItems.test",
             "acceptanceItems.method",
             "sampleType",
-        ])
-            ->withAggregate("patient", "fullName")
-            ->withAggregate("patient", "idNo");
+            "patient:id,fullName,idNo",
+            "qcApprovedBy:id,name",
+        ]);
         if (isset($queryData["filters"]))
             $this->applyFilters($query, $queryData["filters"]);
         if (isset($queryData["sort"]))
@@ -33,11 +33,7 @@ class SampleRepository
 
     public function listSampleBarcodes($filters): Collection
     {
-        return Sample::query()
-            ->where(function ($q) use ($filters) {
-                if (isset($filters["acceptance_id"]))
-                    $q->whereHas("acceptanceItems", fn($q) => $q->where("acceptance_id", $filters["acceptance_id"]));
-            })
+        $query = Sample::query()
             ->with([
                 "patient",
                 "acceptanceItems" => function ($q) use ($filters) {
@@ -46,8 +42,9 @@ class SampleRepository
                         $q->where("acceptance_id", $filters["acceptance_id"]);
                     $q->with("test", "method.test");
                 }
-            ])
-            ->get();
+            ]);
+        $this->applyFilters($query, $filters);
+        return $query->get();
     }
 
     public function creatSample(array $sampleData): Sample
@@ -133,6 +130,8 @@ class SampleRepository
             $query->whereHas("acceptanceItems", fn($q) => $q->where("acceptance_id", $filters["acceptance_id"]));
         if (isset($filters["sample_type_id"]))
             $query->where("sample_type_id", $filters["sample_type_id"]);
+        if (isset($filters["qc_status"]) && $filters["qc_status"] !== '')
+            $query->where("qc_status", $filters["qc_status"]);
     }
 
 }

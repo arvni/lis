@@ -34,17 +34,22 @@ class ReportRepository
         return $query->paginate($queryData["pageSize"] ?? 10);
     }
 
+    /** Shared eager loads used by the approval and publish list queries. */
+    private function reportListEagerLoads(): array
+    {
+        return [
+            "acceptanceItem.method",
+            "acceptanceItem.test",
+            "acceptanceItem.patients:id,fullName",
+        ];
+    }
+
     public function listWaitingForApproving($queryData)
     {
         $query = Report::query()
             ->notApproved()
             ->isActive()
-            ->with([
-                "acceptanceItem.method",
-                "acceptanceItem.test",
-                "reporter:id",
-                "acceptanceItem.patients:id,fullName"
-            ])
+            ->with(array_merge($this->reportListEagerLoads(), ["reporter:id"]))
             ->withAggregate("reporter", "name");
         if (isset($queryData["filters"]))
             $this->applyFilters($query, $queryData["filters"]);
@@ -60,12 +65,7 @@ class ReportRepository
             ->whereNotNull("reports.approved_at")
             ->whereNull("reports.published_at")
             ->isActive()
-            ->with([
-                "acceptanceItem.method",
-                "acceptanceItem.test",
-                "acceptanceItem.patients:id,fullName",
-                "acceptanceItem.acceptance.referrer"
-            ])
+            ->with(array_merge($this->reportListEagerLoads(), ["acceptanceItem.acceptance.referrer"]))
             ->withAggregate("reporter", "name")
             ->withAggregate("approver", "name");
         if (isset($queryData["filters"]))
@@ -85,10 +85,15 @@ class ReportRepository
 
     public function getHistoryForAcceptanceItem(AcceptanceItem $acceptanceItem): Collection
     {
-        $acceptanceItem->loadMissing(["reports" => function ($q) {
-            $q->where("status", false);
-        }]);
-        return $acceptanceItem->reports;
+        return Report::where("acceptance_item_id", $acceptanceItem->id)
+            ->where("status", false)
+            ->orderBy("approved_at")
+            ->with([
+                "Documents",
+                "Reporter:name,id",
+                "Approver:name,id",
+            ])
+            ->get();
     }
 
     public function update(Report $report, array $data): Report
@@ -117,10 +122,20 @@ class ReportRepository
         if (isset($filters["search"])) {
             $query->search($filters["search"]);
         }
+        if (isset($filters["reporter_id"])) {
+            $query->where("reporter_id", $filters["reporter_id"]);
+        }
     }
 
+    /**
+     * Load the full relation tree for displaying a single report.
+     * Only call with a persisted Report model; never use in list queries.
+     *
+     * @throws \LogicException if $report is not a persisted Report instance
+     */
     public function loadWithAllRelations(Report $report)
     {
+        assert($report instanceof Report, 'loadWithAllRelations expects a persisted Report model');
         $report->load([
             "Documents" => function ($q) {
                 $q->where("tag", DocumentTag::ADDITIONAL);
@@ -155,13 +170,14 @@ class ReportRepository
 
 
     /**
-     * Load a report with relations needed for editing
+     * Load relations needed to edit a single report.
+     * Only call with a persisted Report model; never use in list queries.
      *
-     * @param Report $report
-     * @return Report
+     * @throws \LogicException if $report is not a persisted Report instance
      */
     public function loadForEditing(Report $report): Report
     {
+        assert($report instanceof Report, 'loadForEditing expects a persisted Report model');
         $report->load([
             "documents",
             "acceptanceItem" => function ($q) {

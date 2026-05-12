@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Reception;
 
 use App\Domains\Reception\Exports\AcceptanceItemsExport;
+use App\Domains\Reception\Requests\ExportAcceptanceItemsRequest;
 use App\Domains\Reception\Services\AcceptanceItemService;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ExportAcceptanceItemsController extends Controller
@@ -16,10 +16,7 @@ class ExportAcceptanceItemsController extends Controller
         $this->middleware("indexProvider");
     }
 
-    /**
-     * Handle the incoming request.
-     */
-    public function __invoke(Request $request)
+    public function __invoke(ExportAcceptanceItemsRequest $request)
     {
         $filters = $request->get("filters", []);
         if (empty($filters["date"]) && empty($filters["from_date"]) && empty($filters["to_date"])) {

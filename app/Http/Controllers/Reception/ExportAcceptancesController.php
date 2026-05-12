@@ -3,25 +3,18 @@
 namespace App\Http\Controllers\Reception;
 
 use App\Domains\Reception\Exports\AcceptancesExport;
+use App\Domains\Reception\Requests\ExportAcceptancesRequest;
 use App\Domains\Reception\Services\AcceptanceService;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Http\Request;
-use App\Domains\Reception\Models\Acceptance;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ExportAcceptancesController extends Controller
 {
     public function __construct(private readonly AcceptanceService $acceptanceService) {}
 
-    /**
-     * @throws AuthorizationException
-     */
-    public function __invoke(Request $request)
+    public function __invoke(ExportAcceptancesRequest $request)
     {
-        $this->authorize('viewAny', Acceptance::class);
-
         $queryData = $request->all();
         $filters   = $queryData['filters'] ?? [];
 

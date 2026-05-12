@@ -150,14 +150,14 @@ class Acceptance extends Model
     {
         return $this->hasManyDeep(
             Sample::class,
-            [AcceptanceItem::class, 'acceptance_item_samples'], // Through models and pivot
+            [AcceptanceItem::class, AcceptanceItemSample::class],
             [
-                'acceptance_id',          // Foreign key on AcceptanceItem table
-                'acceptance_item_id',     // Foreign key on pivot table
+                'acceptance_id',
+                'acceptance_item_id',
             ],
             [
-                'id',                     // Local key on Acceptance table
-                'id'                      // Local key on AcceptanceItem table
+                'id',
+                'id',
             ]
         );
     }
@@ -167,7 +167,7 @@ class Acceptance extends Model
         return $this->hasOne(AcceptanceItem::class)
             ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
             ->join('methods', 'methods.id', '=', 'method_tests.method_id')
-            ->selectRaw('acceptance_items.acceptance_id, MAX(methods.turnaround_time) as report_date')
+            ->selectRaw('acceptance_items.acceptance_id, MAX(DATE_ADD(acceptance_items.created_at, INTERVAL methods.turnaround_time + 2 * FLOOR((methods.turnaround_time + WEEKDAY(acceptance_items.created_at)) / 5) DAY)) as report_date')
             ->groupBy('acceptance_items.acceptance_id')
             ->withDefault(['report_date' => null]);
     }

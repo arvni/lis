@@ -3,8 +3,10 @@
 namespace App\Domains\Reception\Services;
 
 use App\Domains\Document\Enums\DocumentTag;
+use App\Domains\Shared\Helpers\RouteHelper;
 use App\Domains\Reception\DTOs\PatientDTO;
 use App\Domains\Reception\Events\PatientDocumentUpdateEvent;
+use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Repositories\PatientRepository;
 use Exception;
@@ -27,7 +29,7 @@ readonly class PatientService
     {
         $avatarId = $patientDTO->avatar['id'] ?? null;
         if ($avatarId)
-            $patientDTO->avatar = relative_route("documents.download", [$avatarId]);
+            $patientDTO->avatar = RouteHelper::relativePath("documents.download", [$avatarId]);
         $patient = $this->patientRepository->createPatient($patientDTO->toArray());
 
         if ($avatarId)
@@ -50,9 +52,6 @@ readonly class PatientService
             "payments" => function ($query) {
                 $query->latest()->limit(5);
             },
-            "acceptances" => function ($query) {
-                $query->latest()->distinct()->limit(5);
-            },
             "consultations" => function ($query) {
                 $query
                     ->withAggregate("consultant","name")
@@ -63,20 +62,25 @@ readonly class PatientService
             "patients",
             "relatives"
         ])
-            ->loadCount(["invoices", "payments", "acceptances", "consultations"]);
+            ->loadCount(["invoices", "payments", "consultations"]);
+
+        $patientAcceptancesQuery = Acceptance::whereHas('acceptanceItems', fn($q) =>
+            $q->whereHas('patients', fn($q2) => $q2->where('patients.id', $patient->id))
+        );
+
         return [
             "patient" => $patient->withoutRelations(),
             "relatives" => $this->getPatientRelatives($patient),
             "invoices" => $patient->invoices,
             "payments" => $patient->payments,
-            "acceptances" => $patient->acceptances,
+            "acceptances" => (clone $patientAcceptancesQuery)->latest()->limit(5)->get(),
             "consultations" => $patient->consultations,
             "documents" => $this->patientRepository->getPatientDocuments($patient),
             "patientMeta" => $patient->patientMeta,
             "stats" => [
                 "invoices" => $patient->invoices_count,
                 "payments" => $patient->payments_count,
-                "acceptances" => $patient->acceptances_count,
+                "acceptances" => (clone $patientAcceptancesQuery)->count(),
                 "consultations" => $patient->consultations_count,
             ]
         ];
@@ -86,7 +90,7 @@ readonly class PatientService
     {
         $avatarId = $newPatientDTO->avatar['id'] ?? null;
         if ($avatarId) {
-            $newPatientDTO->avatar = relative_route("documents.download", [$avatarId]);
+            $newPatientDTO->avatar = RouteHelper::relativePath("documents.download", [$avatarId]);
             PatientDocumentUpdateEvent::dispatch($avatarId, $patient->id, DocumentTag::AVATAR->value);
         }
         $updated = $this->patientRepository->updatePatient($patient, $newPatientDTO->toArray());

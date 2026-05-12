@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Reception;
 
-use App\Domains\Reception\Models\AcceptanceItem;
+use App\Domains\Reception\Requests\ListAcceptanceItemReadyReportRequest;
 use App\Domains\Reception\Services\AcceptanceItemService;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ListAcceptanceItemReadyReportController extends Controller
@@ -15,10 +14,7 @@ class ListAcceptanceItemReadyReportController extends Controller
         $this->middleware("indexProvider");
     }
 
-    /**
-     * Handle the incoming request.
-     */
-    public function __invoke(Request $request)
+    public function __invoke(ListAcceptanceItemReadyReportRequest $request)
     {
         $requestInputs = $request->all();
         $acceptanceItems=$this->acceptanceItemService->listAcceptanceItemsReadyReport($requestInputs);

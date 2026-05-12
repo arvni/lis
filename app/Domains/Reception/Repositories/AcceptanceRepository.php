@@ -36,6 +36,16 @@ class AcceptanceRepository
     {
     }
 
+    /** Base subquery for the acceptance_items → method_tests → methods join used in report-date calculations. */
+    private function reportDateSubquery(): \Illuminate\Database\Query\Builder
+    {
+        return DB::table('acceptance_items')
+            ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
+            ->join('methods', 'methods.id', '=', 'method_tests.method_id')
+            ->whereNull('acceptance_items.deleted_at')
+            ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id');
+    }
+
     /**
      * Get the raw SQL expression for calculating payable amount.
      * Uses COALESCE to handle cases where there are no items or discounts.
@@ -69,12 +79,7 @@ class AcceptanceRepository
             ->withAggregate('patient', 'idNo')
             ->selectRaw("({$this->getPayableAmountSql()}) as payable_amount")
             ->addSelect([
-                'report_date' => DB::table('acceptance_items')
-                    ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
-                    ->join('methods', 'methods.id', '=', 'method_tests.method_id')
-                    ->selectRaw('MAX(methods.turnaround_time)')
-                    ->whereNull('acceptance_items.deleted_at')
-                    ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id'),
+                'report_date' => $this->reportDateSubquery()->selectRaw('MAX(DATE_ADD(acceptance_items.created_at, INTERVAL methods.turnaround_time + 2 * FLOOR((methods.turnaround_time + WEEKDAY(acceptance_items.created_at)) / 5) DAY))'),
                 'published_at' => DB::table('reports')
                     ->join('acceptance_items', 'acceptance_items.id', '=', 'reports.acceptance_item_id')
                     ->selectRaw('MAX(reports.published_at)')
@@ -106,12 +111,8 @@ class AcceptanceRepository
             $carbonDate->copy()->endOfMonth()->endOfDay(),
         ];
 
-        $reportDateSubquery = DB::table('acceptance_items')
-            ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
-            ->join('methods', 'methods.id', '=', 'method_tests.method_id')
-            ->selectRaw('MAX(DATE_ADD(acceptance_items.created_at, INTERVAL methods.turnaround_time DAY))')
-            ->whereNull('acceptance_items.deleted_at')
-            ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id');
+        $reportDateSubquery = $this->reportDateSubquery()
+            ->selectRaw('MAX(DATE_ADD(acceptance_items.created_at, INTERVAL methods.turnaround_time + 2 * FLOOR((methods.turnaround_time + WEEKDAY(acceptance_items.created_at)) / 5) DAY))');
 
         return Acceptance::query()
             ->with([
@@ -293,7 +294,48 @@ class AcceptanceRepository
             $query->where('acceptances.patient_id', $filters[self::FILTER_PATIENT_ID]); // Qualify column name
         }
 
+        if (!empty($filters['waiting_for_pooling'])) {
+            $query->where('acceptances.waiting_for_pooling', true);
+        }
+
+        if (isset($filters['out_patient']) && $filters['out_patient'] !== '') {
+            $query->where('acceptances.out_patient', (bool) $filters['out_patient']);
+        }
+
         $this->applyDateFilter($query, $filters, 'acceptances.created_at');
+
+        if (!empty($filters['report_date_from']) || !empty($filters['report_date_to'])) {
+            $subSql = '(' . $this->reportDateSubquery()
+                ->selectRaw('MAX(DATE_ADD(acceptance_items.created_at, INTERVAL methods.turnaround_time + 2 * FLOOR((methods.turnaround_time + WEEKDAY(acceptance_items.created_at)) / 5) DAY))')
+                ->toSql() . ')';
+
+            if (!empty($filters['report_date_from'])) {
+                $from = Carbon::parse($filters['report_date_from'], 'Asia/Muscat')->startOfDay();
+                $query->whereRaw("$subSql >= ?", [$from]);
+            }
+            if (!empty($filters['report_date_to'])) {
+                $to = Carbon::parse($filters['report_date_to'], 'Asia/Muscat')->endOfDay();
+                $query->whereRaw("$subSql <= ?", [$to]);
+            }
+        }
+
+        if (!empty($filters['published_at_from']) || !empty($filters['published_at_to'])) {
+            $publishedSubSql = '(' . DB::table('reports')
+                ->join('acceptance_items', 'acceptance_items.id', '=', 'reports.acceptance_item_id')
+                ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id')
+                ->whereNull('acceptance_items.deleted_at')
+                ->selectRaw('MAX(reports.published_at)')
+                ->toSql() . ')';
+
+            if (!empty($filters['published_at_from'])) {
+                $from = Carbon::parse($filters['published_at_from'], 'Asia/Muscat')->startOfDay();
+                $query->whereRaw("$publishedSubSql >= ?", [$from]);
+            }
+            if (!empty($filters['published_at_to'])) {
+                $to = Carbon::parse($filters['published_at_to'], 'Asia/Muscat')->endOfDay();
+                $query->whereRaw("$publishedSubSql <= ?", [$to]);
+            }
+        }
     }
 
     public function getPendingAcceptance(Patient $patient): ?Acceptance

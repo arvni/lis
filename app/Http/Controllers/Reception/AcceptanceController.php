@@ -47,7 +47,8 @@ class AcceptanceController extends Controller
                 "canView" => Gate::allows("view", Acceptance::class),
                 "canUpdate" => Gate::allows("update", $acceptance),
                 "canDelete" => Gate::allows("delete", $acceptance),
-                "canCancel" => Gate::allows("cancel", $acceptance)
+                "canCancel" => Gate::allows("cancel", $acceptance),
+                "canEditInvoiced" => Gate::allows("editInvoiced", Acceptance::class),
             ]);
     }
 
@@ -171,6 +172,7 @@ class AcceptanceController extends Controller
      */
     public function update(Acceptance $acceptance, UpdateAcceptanceRequest $request): RedirectResponse
     {
+        $this->authorize("update", $acceptance);
         $status = $acceptance->status;
         // Get validated data
         $validatedData = $request->validated();
@@ -191,11 +193,11 @@ class AcceptanceController extends Controller
                         ($updatedAcceptance->howReport["whatsappNumber"])
                     ) {
                         $updatedAcceptance->loadMissing("patient", "reportDate");
-                        $updatedAcceptance->patient->notify(new WelcomeNotification($acceptance, $acceptance->reportDate->report_date + 1));
+                        $updatedAcceptance->patient->notify(new WelcomeNotification($acceptance, $acceptance->reportDate->report_date));
                     }
                     if (isset($updatedAcceptance->howReport["sendToReferrer"]) && ($updatedAcceptance->howReport["sendToReferrer"])) {
                         $updatedAcceptance->loadMissing("referrer", "reportDate");
-                        $updatedAcceptance->referrer->notify(new WelcomeNotification($updatedAcceptance, $updatedAcceptance->reportDate->report_date + 1));
+                        $updatedAcceptance->referrer->notify(new WelcomeNotification($updatedAcceptance, $updatedAcceptance->reportDate->report_date));
                     }
                 }
                 // Redirect to the acceptance details page with success message

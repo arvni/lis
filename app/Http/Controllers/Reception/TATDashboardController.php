@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Reception;
 
+use App\Domains\Reception\Requests\TATDashboardRequest;
 use App\Domains\Reception\Services\TATService;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class TATDashboardController extends Controller
@@ -14,10 +13,8 @@ class TATDashboardController extends Controller
     {
     }
 
-    public function __invoke(Request $request)
+    public function __invoke(TATDashboardRequest $request)
     {
-        Gate::authorize('Reception.TAT.View Dashboard');
-
         $filters = $request->only(['priority', 'section_id', 'date_from', 'date_to']);
 
         return Inertia::render('TAT/Dashboard', [

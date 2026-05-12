@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Reception;
 use App\Domains\Reception\Models\Report;
 use App\Domains\Reception\Services\ReportService;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\RejectReportRequest;
+use App\Domains\Reception\Requests\RejectReportRequest;
 
 
 class RejectReportController extends Controller

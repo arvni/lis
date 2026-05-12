@@ -51,12 +51,9 @@ class AcceptancesExport implements
     {
         $remaining = ($row->payable_amount ?? 0) - ($row->payments_sum_price ?? 0);
 
-        $reportDate = null;
-        if ($row->report_date && $row->created_at) {
-            $reportDate = Carbon::parse($row->created_at, self::TIMEZONE)
-                ->addDays((int) $row->report_date)
-                ->toDateString();
-        }
+        $reportDate = $row->report_date
+            ? Carbon::parse($row->report_date, self::TIMEZONE)->toDateString()
+            : null;
 
         $barcodes = collect($row->samples ?? [])->pluck('barcode')->filter()->join(', ');
 

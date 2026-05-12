@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Reception;
 
-use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Reception\Requests\SampleCollectionRequest;
 use App\Domains\Reception\Services\AcceptanceService;
 use App\Http\Controllers\Controller;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class SampleCollectionController extends Controller
@@ -16,13 +14,8 @@ class SampleCollectionController extends Controller
         $this->middleware("indexProvider");
     }
 
-    /**
-     * Handle the incoming request.
-     * @throws AuthorizationException
-     */
-    public function __invoke(Request $request)
+    public function __invoke(SampleCollectionRequest $request)
     {
-        $this->authorize("sampleCollection", Acceptance::class);
         $requestInputs = $request->all();
         $acceptances = $this->acceptanceService->listSampleCollections($requestInputs);
 

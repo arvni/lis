@@ -73,10 +73,13 @@ class Patient extends Model
     }
     public function acceptances()
     {
+        // Use a pivot-free base so hasManyDeepFromRelations doesn't SELECT acceptance_item_patient.order,
+        // which would make DISTINCT operate on the full row and let the same acceptance.id appear twice.
+        $acceptanceItemsNoPivot = $this->belongsToMany(AcceptanceItem::class, "acceptance_item_patient");
         return $this->hasManyDeepFromRelations(
-            $this->acceptanceItems(),           // Patient → AcceptanceItem (through pivot)
-            (new AcceptanceItem)->acceptance()  // AcceptanceItem → Acceptance
-        )->distinct(); // Use distinct to avoid duplicate acceptances if patient has multiple items per acceptance
+            $acceptanceItemsNoPivot,
+            (new AcceptanceItem)->acceptance()
+        )->distinct();
     }
 
     public function consultations()

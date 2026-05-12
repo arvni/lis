@@ -27,6 +27,7 @@ class Sample extends Model
         "sampler_id",
         "material_id",
         "received_at",
+        "rejection_reason",
     ];
 
     protected $casts = [

@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Reception;
 
-use App\Domains\Reception\Enums\AcceptanceStatus;
-use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Reception\Requests\FinancialCheckRequest;
 use App\Domains\Reception\Services\AcceptanceService;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class FinancialCheckController extends Controller
@@ -18,14 +16,8 @@ class FinancialCheckController extends Controller
         $this->middleware("indexProvider");
     }
 
-    /**
-     * Display acceptances waiting for financial approval
-     */
-    public function __invoke(Request $request)
+    public function __invoke(FinancialCheckRequest $request)
     {
-        // Check permission using policy
-        $this->authorize('financialCheck', Acceptance::class);
-
         $requestInputs = $request->all();
 
         // Get acceptances in WAITING_FOR_PUBLISHING status

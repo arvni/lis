@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Reception;
 
+use App\Domains\Reception\Requests\ListAcceptanceItemsRequest;
 use App\Domains\Reception\Services\AcceptanceItemService;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ListAcceptanceItemsController extends Controller
@@ -14,10 +14,7 @@ class ListAcceptanceItemsController extends Controller
         $this->middleware("indexProvider");
     }
 
-    /**
-     * Handle the incoming request.
-     */
-    public function __invoke(Request $request)
+    public function __invoke(ListAcceptanceItemsRequest $request)
     {
         $requestInputs = $request->all();
          $acceptanceItems=$this->acceptanceItemService->listAcceptanceItems($request->all());

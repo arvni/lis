@@ -3,7 +3,6 @@
 namespace App\Domains\Reception\Services;
 
 
-use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Notification\Enums\WhatsappMessageType;
@@ -14,6 +13,7 @@ use App\Domains\Reception\DTOs\AcceptanceDTO;
 use App\Domains\Reception\DTOs\AcceptanceItemDTO;
 use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
+use App\Domains\Reception\Events\AcceptanceCancelledEvent;
 use App\Domains\Reception\Events\AcceptanceDeletedEvent;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
@@ -127,6 +127,11 @@ class AcceptanceService
         return $acceptance;
     }
 
+    /**
+     * Load all display relations for a single acceptance record.
+     * Only call this for one record at a time; the deep nested eager loads
+     * (referrerTests, activeSamples, etc.) are intentionally scoped per-record.
+     */
     public function showAcceptance(Acceptance $acceptance): Acceptance
     {
         $referrerId = $acceptance->referrer_id;
@@ -842,7 +847,9 @@ class AcceptanceService
             "status" => AcceptanceStatus::CANCELLED
         ]);
         $acceptance->acceptanceItemStates()->update(["status" => AcceptanceItemStateStatus::REJECTED]);
-        $acceptance->invoice()->update(["status" => InvoiceStatus::CANCELED]);
+        if ($acceptance->invoice_id) {
+            AcceptanceCancelledEvent::dispatch($acceptance->invoice_id);
+        }
     }
 
     /**

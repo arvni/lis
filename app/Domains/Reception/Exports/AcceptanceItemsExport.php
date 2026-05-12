@@ -2,7 +2,7 @@
 
 namespace App\Domains\Reception\Exports;
 
-use App\Domains\Billing\Repositories\InvoiceRepository;
+use App\Domains\Reception\Adapters\BillingAdapter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
@@ -26,12 +26,12 @@ class AcceptanceItemsExport implements
     private const HEADER_TEXT_COLOR = 'ffffff';
 
     private Collection $acceptanceItems;
-    private InvoiceRepository $invoiceRepository;
+    private BillingAdapter $billingAdapter;
 
     public function __construct(Collection $acceptanceItems)
     {
         $this->acceptanceItems = $acceptanceItems;
-        $this->invoiceRepository = app(InvoiceRepository::class);
+        $this->billingAdapter = app(BillingAdapter::class);
     }
 
     /**
@@ -244,7 +244,7 @@ class AcceptanceItemsExport implements
             return '';
         }
 
-        return $this->invoiceRepository->getInvoiceNo($invoice);
+        return $this->billingAdapter->getInvoiceNo($invoice);
     }
 
     /**

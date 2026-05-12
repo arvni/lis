@@ -35,25 +35,39 @@ class AcceptancePolicy
         /**
          * Determine whether the user can update the model.
          */
-        public function update(User $authUser,Acceptance $acceptance): bool
+        public function update(User $authUser, Acceptance $acceptance): bool
     {
-        return $authUser->can("Reception.Acceptances.Edit Acceptance") || $acceptance?->status == AcceptanceStatus::PENDING;
+        $allowed = $authUser->can("Reception.Acceptances.Edit Acceptance") || $acceptance->status == AcceptanceStatus::PENDING;
+        if (!$allowed) return false;
+        if ($acceptance->invoice_id) {
+            return $authUser->can("Reception.Acceptances.Edit Invoiced Acceptance");
+        }
+        return true;
     }
 
-        /**
-         * Determine whether the user can update the model.
-         */
-        public function cancel(User $authUser, Acceptance $acceptance): bool
+    public function cancel(User $authUser, Acceptance $acceptance): bool
     {
-        return $authUser->can("Reception.Acceptances.Cancel Acceptance");
+        $allowed = $authUser->can("Reception.Acceptances.Cancel Acceptance");
+        if (!$allowed) return false;
+        if ($acceptance->invoice_id) {
+            return $authUser->can("Reception.Acceptances.Edit Invoiced Acceptance");
+        }
+        return true;
     }
 
-        /**
-         * Determine whether the user can delete the model.
-         */
-        public function delete(User $authUser, Acceptance $acceptance): bool
+    public function delete(User $authUser, Acceptance $acceptance): bool
     {
-        return $authUser->can("Reception.Acceptances.Delete Acceptance") || $acceptance?->status == AcceptanceStatus::PENDING;
+        $allowed = $authUser->can("Reception.Acceptances.Delete Acceptance") || $acceptance->status == AcceptanceStatus::PENDING;
+        if (!$allowed) return false;
+        if ($acceptance->invoice_id) {
+            return $authUser->can("Reception.Acceptances.Edit Invoiced Acceptance");
+        }
+        return true;
+    }
+
+    public function editInvoiced(User $authUser): bool
+    {
+        return $authUser->can("Reception.Acceptances.Edit Invoiced Acceptance");
     }
 
     public function sampleCollection(User $authUser): bool

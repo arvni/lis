@@ -20,7 +20,7 @@ class ListPatientsController extends Controller
      */
     public function __invoke(Request $request): AnonymousResourceCollection
     {
-        $queryData = $request->all();
+        $queryData = $request->only(['filters', 'sort', 'pageSize', 'search']);
         $patients = $this->patientService->listPatients($queryData);
         return ListResource::collection($patients);
     }
