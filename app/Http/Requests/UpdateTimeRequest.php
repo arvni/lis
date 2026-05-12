@@ -25,8 +25,11 @@ class UpdateTimeRequest extends FormRequest
      */
     public function rules(): array
     {
+        $time = $this->route('time');
+        $isCustomer = $time?->reservable_type === 'customer';
         $customerId = $this->input('customer.id');
-        return [
+
+        $rules = [
             "consultant.id" => "required|exists:consultants,id",
             "dueDate" => [
                 "required",
@@ -41,19 +44,23 @@ class UpdateTimeRequest extends FormRequest
             "time" => [
                 "required",
                 "date_format:H:i",
-                new TimeSlotAvailable($this->input('consultant.id'), $this->input('dueDate'), $this->route()->parameter('time')->id),
-
+                new TimeSlotAvailable($this->input('consultant.id'), $this->input('dueDate'), $time?->id),
             ],
-            "customer" => "required|array",
-            "customer.id" => "nullable|exists:customers,id",
-            "customer.phone" => [
+            "note" => "nullable|string",
+        ];
+
+        if ($isCustomer) {
+            $rules["customer"] = "required|array";
+            $rules["customer.id"] = "nullable|exists:customers,id";
+            $rules["customer.phone"] = [
                 "required",
                 "string",
                 Rule::unique('customers', 'phone')->ignore($customerId),
-            ],
-            "customer.name" => "required|string|max:255",
-            "customer.email" => "nullable|email|max:255",
-            "note" => "nullable|string",
-        ];
+            ];
+            $rules["customer.name"] = "required|string|max:255";
+            $rules["customer.email"] = "nullable|email|max:255";
+        }
+
+        return $rules;
     }
 }
