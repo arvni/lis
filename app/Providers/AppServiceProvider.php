@@ -27,6 +27,8 @@ use App\Domains\Laboratory\Models\RequestForm;
 use App\Domains\Laboratory\Models\SampleType;
 use App\Domains\Laboratory\Models\Section;
 use App\Domains\Laboratory\Models\SectionGroup;
+use App\Domains\Laboratory\Services\SectionLookupService;
+use App\Domains\Shared\Contracts\SectionLookupInterface;
 use App\Domains\Laboratory\Models\Test;
 use App\Domains\Laboratory\Models\TestGroup;
 use App\Domains\Laboratory\Models\Workflow;
@@ -83,6 +85,7 @@ use App\Domains\User\Policies\RolePolicy;
 use App\Domains\User\Policies\UserPolicy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -96,7 +99,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(SectionLookupInterface::class, SectionLookupService::class);
     }
 
     /**
@@ -104,6 +107,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if ($this->app->environment('production') && ! $this->app->runningInConsole()) {
+            if (Artisan::call('env:validate') !== 0) {
+                abort(500, 'Environment validation failed. Check server logs.');
+            }
+        }
 
         DB::listen(function ($query) {
             if ($query->time > 1000) {

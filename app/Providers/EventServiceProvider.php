@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Domains\Billing\Events\AcceptanceItemPricingEvent;
 use App\Domains\Billing\Events\InvoiceAcceptanceUpdateEvent;
 use App\Domains\Billing\Events\PaymentsAddedEvent;
+use App\Domains\Billing\Listeners\CancelInvoiceOnAcceptanceCancelledListener;
 use App\Domains\Billing\Listeners\InvoiceAcceptanceDeletedListener;
 use App\Domains\Document\Listeners\DocumentUpdateListener;
 use App\Domains\Laboratory\Events\ConsentFormDocumentUpdateEvent;
@@ -22,11 +24,13 @@ use App\Domains\Notification\Listeners\NotifyProviderOfOrderMaterialUpdate;
 use App\Domains\Notification\Listeners\NotifyProviderOfRequestFormUpdate;
 use App\Domains\Notification\Listeners\NotifyProviderOfSampleTypeUpdate;
 use App\Domains\Notification\Listeners\NotifyLogisticsAppOfCollectRequestUpdate;
+use App\Domains\Reception\Events\AcceptanceCancelledEvent;
 use App\Domains\Reception\Events\AcceptanceDeletedEvent;
 use App\Domains\Reception\Events\PatientDocumentUpdateEvent;
 use App\Domains\Reception\Events\ReportPublishedEvent;
 use App\Domains\Reception\Events\SampleCollectedEvent;
 use App\Domains\Reception\Listeners\AcceptanceInvoiceListener;
+use App\Domains\Reception\Listeners\AcceptanceItemPricingListener;
 use App\Domains\Reception\Listeners\AcceptancePaymentListener;
 use App\Domains\Reception\Listeners\AcceptanceReportedListener;
 use App\Domains\Reception\Listeners\SampleCollectedListener;
@@ -71,6 +75,10 @@ class EventServiceProvider extends ServiceProvider
             [DocumentUpdateListener::class, 'handle']
         );
         Event::listen(
+            [AcceptanceItemPricingEvent::class],
+            [AcceptanceItemPricingListener::class, 'handle']
+        );
+        Event::listen(
             [
                 InvoiceAcceptanceUpdateEvent::class
             ],
@@ -89,6 +97,10 @@ class EventServiceProvider extends ServiceProvider
         Event::listen(
             [AcceptanceDeletedEvent::class],
             [InvoiceAcceptanceDeletedListener::class, 'handle']
+        );
+        Event::listen(
+            [AcceptanceCancelledEvent::class],
+            [CancelInvoiceOnAcceptanceCancelledListener::class, 'handle']
         );
         Event::listen(
             [SampleCollectedEvent::class],

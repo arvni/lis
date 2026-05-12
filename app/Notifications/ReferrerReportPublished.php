@@ -159,7 +159,7 @@ class ReferrerReportPublished extends Notification implements ShouldQueue
      */
     private function generateFileName($document, $acceptanceItem): string
     {
-        $fileName = $document->original_name ?? $document->name ?? 'report';
+        $fileName = $document->originalName ?? "Report_{$this->acceptance->id}_{$acceptanceItem->id}";
 
         // If filename doesn't have extension, add it based on extension
         if (!pathinfo($fileName, PATHINFO_EXTENSION)) {
@@ -167,9 +167,6 @@ class ReferrerReportPublished extends Notification implements ShouldQueue
             $fileName .= '.' . strtolower($extension);
         }
 
-        // Add acceptance item info to make filename unique
-        $prefix = "Report_{$this->acceptance->id}_{$acceptanceItem->id}_";
-
-        return $prefix . $fileName;
+        return $fileName;
     }
 }
