@@ -20,7 +20,6 @@ use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Models\Report;
 use App\Domains\Reception\Notifications\PatientReportPublished;
 use App\Domains\Reception\Repositories\AcceptanceRepository;
-use App\Domains\Referrer\Models\Referrer;
 use App\Domains\Referrer\Services\ReferrerOrderService;
 use App\Domains\Setting\Repositories\SettingRepository;
 use App\Domains\User\Models\User;
@@ -816,17 +815,11 @@ class AcceptanceService
 
             if (!$silent && $referrer) {
                 if ($howReport["sendToReferrer"] ?? false) {
-                    // Send notification to referrer
-                    $recipients[] = $referrer;
-                    if (count($referrer->reportReceivers)) {
-                        foreach ($referrer->reportReceivers as $reportReceiver) {
-                            $newReferrer = new Referrer();
-                            $newReferrer->fullName = $referrer->fullName;
-                            $newReferrer->email = $reportReceiver;
-                            $recipients[] = $newReferrer;
-                        }
+                    $notification = new ReferrerReportPublished($acceptance);
+                    $referrer->notify($notification);
+                    foreach ($referrer->reportReceivers ?? [] as $reportReceiver) {
+                        Notification::route('mail', $reportReceiver)->notify(new ReferrerReportPublished($acceptance));
                     }
-                    Notification::send($recipients, new ReferrerReportPublished($acceptance));
                     $acceptance->load("referrerOrder");
                     // Update referrer order status
                     if ($acceptance->referrerOrder)
