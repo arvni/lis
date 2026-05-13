@@ -65,15 +65,18 @@ const ItemSelect = ({value, onChange, label = "Item", required = false, error = 
                     size={size}
                     error={error}
                     helperText={helperText}
-                    slotProps={{ input: {
-                        ...params.InputProps,
-                        endAdornment: (
-                            <>
-                                {loading && <CircularProgress size={16}/>}
-                                {params.InputProps.endAdornment}
-                            </>
-                        ),
-                    } }}
+                    slotProps={{
+                        ...params.slotProps,
+                        input: {
+                            ...params.slotProps?.input,
+                            endAdornment: (
+                                <>
+                                    {loading && <CircularProgress size={16}/>}
+                                    {params.slotProps?.input?.endAdornment}
+                                </>
+                            ),
+                        },
+                    }}
                 />
             )}
         />

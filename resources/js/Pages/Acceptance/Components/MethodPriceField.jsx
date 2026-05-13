@@ -130,7 +130,7 @@ const PriceField = ({
  size={{xs: 12, sm: 6, md: 4}}
  key={parameter.value}
  >
-  <Box display="flex" sx={{alignItems: "flex-start"}}>
+                        <Box sx={{display: "flex", alignItems: "flex-start"}}>
                             <TextField
                                 type="number"
                                 label={parameter.label || parameter.value}
@@ -191,7 +191,7 @@ const PriceField = ({
                 >
   <Grid container spacing={2} sx={{alignItems: "center"}}>
                         <Grid size={{xs: 12, md: 6}}>
-  <Box display="flex" sx={{alignItems: "center"}}>
+                            <Box sx={{display: "flex", alignItems: "center"}}>
                                 <FunctionsIcon sx={{mr: 1, color: 'text.secondary'}}/>
                                 <Typography variant="subtitle2" color="text.secondary">
                                     {method.price_type === "Formulate" ? "Formula:" : "Conditions:"}

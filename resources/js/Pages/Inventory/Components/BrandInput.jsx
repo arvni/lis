@@ -68,15 +68,18 @@ const BrandInput = ({
                     {...params}
                     label={label}
                     size={size}
-                    slotProps={{ input: {
-                        ...params.InputProps,
-                        endAdornment: (
-                            <>
-                                {loading && <CircularProgress size={14}/>}
-                                {params.InputProps.endAdornment}
-                            </>
-                        ),
-                    } }}
+                    slotProps={{
+                        ...params.slotProps,
+                        input: {
+                            ...params.slotProps?.input,
+                            endAdornment: (
+                                <>
+                                    {loading && <CircularProgress size={14}/>}
+                                    {params.slotProps?.input?.endAdornment}
+                                </>
+                            ),
+                        },
+                    }}
                 />
             )}
         />

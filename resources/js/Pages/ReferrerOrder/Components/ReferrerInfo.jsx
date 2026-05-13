@@ -11,7 +11,7 @@ const ReferrerInfo = ({referrer, defaultExpanded = true, showDocuments = false, 
     return <Accordion defaultExpanded={defaultExpanded}>
         <AccordionSummary expandIcon={<ExpandMoreIcon/>} aria-controls="referrer-information"
                           id="referrer-information">
-            <Stack spacing={3} direction="row" alignItems={"center"}>
+            <Stack spacing={3} direction="row" sx={{alignItems: "center"}}>
                 <Typography variant="h5">Referrer Information</Typography>
             </Stack>
         </AccordionSummary>

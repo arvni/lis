@@ -30,7 +30,7 @@ const PrescriptionSection = ({ prescription }) => {
 
     return (
         <Paper elevation={1} sx={{ p: 3, borderRadius: 2, bgcolor: 'background.paper' }}>
-  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
+            <Box sx={{display: "flex", mb: 2, alignItems: "center"}}>
                 <DescriptionIcon sx={{ mr: 2, color: "primary.main", fontSize: 28 }} />
                 <Typography variant="h6">Prescription Document</Typography>
             </Box>

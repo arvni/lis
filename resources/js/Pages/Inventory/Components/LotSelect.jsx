@@ -90,15 +90,18 @@ const LotSelect = ({itemId, storeId, value, onChange, size = "medium", disabled 
                     {...params}
                     label="Lot / Brand"
                     size={size}
-                    slotProps={{ input: {
-                        ...params.InputProps,
-                        endAdornment: (
-                            <>
-                                {loading && <CircularProgress size={16}/>}
-                                {params.InputProps.endAdornment}
-                            </>
-                        ),
-                    } }}
+                    slotProps={{
+                        ...params.slotProps,
+                        input: {
+                            ...params.slotProps?.input,
+                            endAdornment: (
+                                <>
+                                    {loading && <CircularProgress size={16}/>}
+                                    {params.slotProps?.input?.endAdornment}
+                                </>
+                            ),
+                        },
+                    }}
                 />
             )}
         />

@@ -303,8 +303,8 @@ const PanelRow = ({
                                         backgroundColor: 'rgba(25, 118, 210, 0.02)'
                                     }}
                                 >
-  <Box display="flex" sx={{alignItems: "center", justifyContent: "space-between"}}>
-  <Box display="flex" sx={{alignItems: "center"}}>
+                                    <Box sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+                                        <Box sx={{display: "flex", alignItems: "center"}}>
                                             <PlaylistAddCheckIcon color="primary" sx={{ mr: 1 }} />
                                             <Box>
                                                 <Typography fontWeight="600" color="primary.main">

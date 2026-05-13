@@ -5,7 +5,7 @@ import PersonIcon from "@mui/icons-material/Person";
 
 const PatientSection = ({ patient }) => (
     <Box>
-  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
+        <Box sx={{display: "flex", mb: 2, alignItems: "center"}}>
             <Avatar
                 sx={{
                     bgcolor: "primary.main",

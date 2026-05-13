@@ -184,7 +184,7 @@ const IndexFilter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
                             <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: "block" }}>
                                 Status
                             </Typography>
-                            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                            <Stack direction="row" spacing={1} useFlexGap sx={{flexWrap: "wrap"}}>
                                 {STATUSES.map(({ value, label, color }) => {
                                     const selected = filters.status?.includes(value);
                                     return (

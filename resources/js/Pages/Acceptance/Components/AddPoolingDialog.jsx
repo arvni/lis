@@ -157,7 +157,7 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
             {/* Step 1 – Item selection list */}
             <Dialog open={open && step === 'list'} onClose={handleClose} maxWidth="xs" fullWidth>
                 <DialogTitle>
-  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
+                    <Box sx={{display: "flex", gap: 1, alignItems: "center"}}>
                         <MergeTypeIcon color="secondary"/>
                         <Typography variant="h6" fontWeight={600} component="span">Add Pooling</Typography>
                     </Box>
@@ -168,19 +168,19 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
 
                 <DialogContent dividers sx={{p: 0}}>
                     {loadingList && (
-  <Box display="flex" py={4} sx={{justifyContent: "center"}}>
+                        <Box sx={{display: "flex", py: 4, justifyContent: "center"}}>
                             <CircularProgress size={32}/>
                         </Box>
                     )}
 
                     {error && (
-                        <Box p={2}>
+                        <Box sx={{p: 2}}>
                             <Alert severity="error">{error}</Alert>
                         </Box>
                     )}
 
                     {!loadingList && !error && items.length === 0 && (
-                        <Box p={3}>
+                        <Box sx={{p: 3}}>
                             <Typography color="text.secondary" variant="body2">
                                 No tests or panels found for this acceptance.
                             </Typography>
@@ -207,7 +207,7 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
                                         </ListItemIcon>
                                         <ListItemText
                                             primary={
-  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
+                                                <Box sx={{display: "flex", gap: 1, alignItems: "center"}}>
                                                     <Typography variant="body2" fontWeight={500}>
                                                         {item.name}
                                                     </Typography>
