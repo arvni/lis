@@ -1,370 +1,182 @@
-import {useState, useCallback} from "react";
-import {makeId} from "@/Services/helper";
+import { useState, useCallback } from "react";
+import { makeId } from "@/Services/helper";
 
-const useAcceptanceFormState = (initialData, maxDiscount) => {
+const useAcceptanceFormState = (initialData) => {
     const [data, setData] = useState(initialData);
 
-    // Test Modal State - properly initialized with safe defaults
-    const [testModalState, setTestModalState] = useState({
+    // Unified modal for add/edit test or panel
+    const [modalState, setModalState] = useState({
         open: false,
-        item: {
-            id: makeId(6),
-            method_test: {test: {type: ''}}, // Initialize with proper structure
-            details: "",
-            discount: 0,
-            price: 0,
-            sample_type: "",
-            patients: [] // Ensure patients is always an array
-        }
-    });
-
-    // Panel Modal State
-    const [panelModalState, setPanelModalState] = useState({
-        open: false,
-        panel: {
-            id: makeId(6),
-            acceptanceItems: [],
-            panel: "",
-            price: 0,
-            discount: 0
-        }
+        mode: 'add', // 'add' | 'editTest' | 'editPanel'
+        testItem: null,
+        panelItem: null,
     });
 
     // Delete Confirmation State
     const [deleteConfirmState, setDeleteConfirmState] = useState({
         open: false,
-        item: null
+        item: null,
     });
 
-    // Generic form change handler
+    // ─── Generic form change handler ────────────────────────────────────────────
     const handleFormChange = useCallback((field, value) => {
-        // Handle nested properties
         if (field.includes('.')) {
             const [parent, child] = field.split('.');
-            setData(prevData => ({
-                ...prevData,
-                [parent]: {
-                    ...(prevData?.[parent] || {}),
-                    [child]: value
-                }
+            setData(prev => ({
+                ...prev,
+                [parent]: { ...(prev?.[parent] || {}), [child]: value },
+            }));
+        } else if (field === 'referred' && value === false) {
+            setData(prev => ({
+                ...prev,
+                referred: false,
+                referrer: "",
+                howReport: { who: "", way: "print" },
             }));
         } else {
-            // Special cases for complete object replacements
-            if (field === 'referred' && value === false) {
-                setData(prevData => ({
-                    ...prevData,
-                    referred: value,
-                    referrer: "",
-                    howReport: {
-                        who: "",
-                        way: "print"
-                    }
-                }));
-            } else {
-                // Normal field update
-                setData(prevData => ({
-                    ...prevData,
-                    [field]: value
-                }));
-            }
+            setData(prev => ({ ...prev, [field]: value }));
         }
     }, []);
 
-    // Handlers for Doctor Info
     const handleDoctorChange = useCallback((field, value) => {
-        setData(prevData => ({
-            ...prevData,
-            doctor: {
-                ...(prevData?.doctor || {}),
-                [field]: value
-            }
-        }));
-    }, []);
-
-    // Test Handlers
-    const openAddTestModal = useCallback(() => {
-        setTestModalState(prev => ({
+        setData(prev => ({
             ...prev,
-            open: true
+            doctor: { ...(prev?.doctor || {}), [field]: value },
         }));
     }, []);
 
-    const closeTestModal = useCallback(() => {
-        setTestModalState({
-            open: false,
-            item: {
-                method_test: {test: {type: ''}},
-                details: "",
-                discount: 0,
-                price: 0,
-                sample_type: "",
-                patients: [] // Explicitly set as empty array
-            }
-        });
+    // ─── Unified Modal Handlers ──────────────────────────────────────────────────
+    const openAddModal = useCallback(() => {
+        setModalState({ open: true, mode: 'add', testItem: null, panelItem: null });
     }, []);
 
-    const handleEditTest = useCallback(id => {
-        // Find the test by id and handle potential undefined values
-        const test = data?.acceptanceItems?.tests?.find(item => item.id === id);
+    const closeModal = useCallback(() => {
+        setModalState(prev => ({ ...prev, open: false, testItem: null, panelItem: null }));
+    }, []);
 
-        if (test) {
-            // Create safe item with guaranteed structure
-            const safeItem = {
-                ...test,
-                method_test: {
-                    ...(test.method_test || {}),
-                    test: {
-                        ...(test.method_test?.test || {}),
-                        type: test.method_test?.test?.type || ''
-                    }
-                },
-                patients: Array.isArray(test.patients) ? [...test.patients] : []
+    const handleEditTest = useCallback((id) => {
+        const test = data?.acceptanceItems?.tests?.find(t => t.id === id);
+        if (!test) return;
+        setModalState({ open: true, mode: 'editTest', testItem: test, panelItem: null });
+    }, [data?.acceptanceItems?.tests]);
+
+    const handleEditPanel = useCallback((id) => {
+        const panel = data?.acceptanceItems?.panels?.find(p => p.id === id);
+        if (!panel) return;
+        setModalState({ open: true, mode: 'editPanel', testItem: null, panelItem: panel });
+    }, [data?.acceptanceItems?.panels]);
+
+    // ─── Test Submit ─────────────────────────────────────────────────────────────
+    const submitTest = useCallback((testItem) => {
+        setData(prev => {
+            const currentTests = prev?.acceptanceItems?.tests || [];
+            const updatedTests = [...currentTests];
+            const idx = updatedTests.findIndex(t => t.id === testItem.id);
+            if (idx !== -1) {
+                updatedTests[idx] = testItem;
+            } else {
+                updatedTests.push({ ...testItem, id: makeId(5) });
+            }
+            return {
+                ...prev,
+                acceptanceItems: { ...(prev?.acceptanceItems || {}), tests: updatedTests },
             };
+        });
+        closeModal();
+    }, [closeModal]);
 
-            setTestModalState({
-                open: true,
-                item: safeItem
-            });
-        }
-    }, [data?.acceptanceItems?.tests]);
-
-    const handleDeleteTest = useCallback(id => {
-        const item = data?.acceptanceItems?.tests?.find(item => item.id === id);
-        if (item) {
-            setDeleteConfirmState({
-                open: true,
-                item
-            });
-        }
-    }, [data?.acceptanceItems?.tests]);
-
-    const restoreDeleteTest = useCallback(id => {
-        console.log("here",id)
-        const updatedTests = data.acceptanceItems.tests.map(
-            item => {
-                if (item.id === id && item.deleted)
-                    item["deleted"] = false;
-                return item;
+    // ─── Panel Submit ─────────────────────────────────────────────────────────────
+    const submitPanel = useCallback((panelItem) => {
+        setData(prev => {
+            const currentPanels = prev?.acceptanceItems?.panels || [];
+            const updatedPanels = [...currentPanels];
+            const idx = updatedPanels.findIndex(p => p.id === panelItem.id);
+            if (idx !== -1) {
+                updatedPanels[idx] = panelItem;
+            } else {
+                updatedPanels.push({ ...panelItem, id: makeId(6) });
             }
-        );
+            return {
+                ...prev,
+                acceptanceItems: { ...(prev?.acceptanceItems || {}), panels: updatedPanels },
+            };
+        });
+        closeModal();
+    }, [closeModal]);
 
-        setData(prevData => ({
-            ...prevData,
-            acceptanceItems: {
-                ...prevData.acceptanceItems,
-                tests: updatedTests
-            }
-        }));
-
+    // ─── Delete Test ──────────────────────────────────────────────────────────────
+    const handleDeleteTest = useCallback((id) => {
+        const item = data?.acceptanceItems?.tests?.find(t => t.id === id);
+        if (item) setDeleteConfirmState({ open: true, item });
     }, [data?.acceptanceItems?.tests]);
 
     const confirmDeleteTest = useCallback(() => {
-        if (!deleteConfirmState.item || !data?.acceptanceItems?.tests) return;
-
-        const updatedTests = data.acceptanceItems.tests.map(
-            item => {
-                if (item.id === deleteConfirmState.item.id)
-                    item["deleted"] = true;
-                return item;
-            }
+        if (!deleteConfirmState.item) return;
+        const updatedTests = (data?.acceptanceItems?.tests || []).map(t =>
+            t.id === deleteConfirmState.item.id ? { ...t, deleted: true } : t
         );
-
-        setData(prevData => ({
-            ...prevData,
-            acceptanceItems: {
-                ...prevData.acceptanceItems,
-                tests: updatedTests
-            }
+        setData(prev => ({
+            ...prev,
+            acceptanceItems: { ...(prev?.acceptanceItems || {}), tests: updatedTests },
         }));
-
-        setDeleteConfirmState({
-            open: false,
-            item: null
-        });
+        setDeleteConfirmState({ open: false, item: null });
     }, [deleteConfirmState.item, data?.acceptanceItems?.tests]);
 
     const cancelDelete = useCallback(() => {
-        setDeleteConfirmState({
-            open: false,
-            item: null
-        });
+        setDeleteConfirmState({ open: false, item: null });
     }, []);
 
-    const handleTestChange = useCallback(updatedValue => {
-        setTestModalState(prev => ({
+    const restoreDeleteTest = useCallback((id) => {
+        const updatedTests = (data?.acceptanceItems?.tests || []).map(t =>
+            t.id === id ? { ...t, deleted: false } : t
+        );
+        setData(prev => ({
             ...prev,
-            item: {
-                ...prev.item,
-                ...updatedValue,
-                ...(updatedValue.patients ? {
-                    patients: Array.isArray(updatedValue.patients)
-                        ? updatedValue.patients
-                        : []
-                } : {})
-            }
+            acceptanceItems: { ...(prev?.acceptanceItems || {}), tests: updatedTests },
         }));
-    }, []);
+    }, [data?.acceptanceItems?.tests]);
 
-    const submitTest = useCallback(() => {
-        const {item} = testModalState;
-
-        // Safely get the current tests array
-        const currentTests = data?.acceptanceItems?.tests || [];
-        const updatedTests = [...currentTests];
-
-        const existingIndex = updatedTests.findIndex(test => test.id === item.id);
-
-        if (existingIndex !== -1) {
-            updatedTests[existingIndex] = item;
-        } else {
-            updatedTests.push({
-                ...item,
-                id: makeId(5)
-            });
-        }
-
-        setData(prevData => ({
-            ...prevData,
-            acceptanceItems: {
-                ...(prevData?.acceptanceItems || {}),
-                tests: updatedTests
-            }
-        }));
-
-        closeTestModal();
-    }, [testModalState, data?.acceptanceItems?.tests, closeTestModal]);
-
-    // Panel Handlers
-    const openAddPanelModal = useCallback(() => {
-        setPanelModalState(prev => ({
+    // ─── Delete/Restore Panel ─────────────────────────────────────────────────────
+    const handleDeletePanel = useCallback((id) => {
+        const updatedPanels = (data?.acceptanceItems?.panels || []).map(p =>
+            p.id === id ? { ...p, deleted: true } : p
+        );
+        setData(prev => ({
             ...prev,
-            open: true
-        }));
-    }, []);
-
-    const closePanelModal = useCallback(() => {
-        setPanelModalState({
-            open: false,
-            panel: {
-                acceptanceItems: [],
-                panel: "",
-                price: 0,
-                discount: 0
-            }
-        });
-    }, []);
-
-    const handleEditPanel = useCallback(id => {
-        const panel = data?.acceptanceItems?.panels?.find(item => item.id === id);
-        if (panel) {
-            setPanelModalState({
-                open: true,
-                panel
-            });
-        }
-    }, [data?.acceptanceItems?.panels]);
-
-    const handleDeletePanel = useCallback(id => {
-        // Safely get the current panels array
-        const currentPanels = data?.acceptanceItems?.panels || [];
-        const updatedPanels = currentPanels.map(panel => {
-            if (panel.id === id) {
-                panel["deleted"] = true;
-            }
-            return panel;
-        });
-
-        setData(prevData => ({
-            ...prevData,
-            acceptanceItems: {
-                ...(prevData?.acceptanceItems || {}),
-                panels: updatedPanels
-            }
-        }));
-    }, [data?.acceptanceItems?.panels]);
-    const handleRestorePanel = useCallback(id => {
-        // Safely get the current panels array
-        const currentPanels = data?.acceptanceItems?.panels || [];
-        const updatedPanels = currentPanels.map(panel => {
-            if (panel.id === id && panel.deleted) {
-                panel["deleted"] = false;
-            }
-            return panel;
-        });
-
-        setData(prevData => ({
-            ...prevData,
-            acceptanceItems: {
-                ...(prevData?.acceptanceItems || {}),
-                panels: updatedPanels
-            }
+            acceptanceItems: { ...(prev?.acceptanceItems || {}), panels: updatedPanels },
         }));
     }, [data?.acceptanceItems?.panels]);
 
-    const handlePanelChange = useCallback(updatedValue => {
-        setPanelModalState(prev => ({
+    const handleRestorePanel = useCallback((id) => {
+        const updatedPanels = (data?.acceptanceItems?.panels || []).map(p =>
+            p.id === id ? { ...p, deleted: false } : p
+        );
+        setData(prev => ({
             ...prev,
-            panel: {
-                ...prev.panel,
-                ...updatedValue
-            }
+            acceptanceItems: { ...(prev?.acceptanceItems || {}), panels: updatedPanels },
         }));
-    }, []);
-
-    const submitPanel = useCallback(() => {
-        const {panel} = panelModalState;
-
-        // Safely get the current panels array
-        const currentPanels = data?.acceptanceItems?.panels || [];
-        const updatedPanels = [...currentPanels];
-
-        const existingIndex = updatedPanels.findIndex(p => p.id === panel.id);
-
-        if (existingIndex !== -1) {
-            updatedPanels[existingIndex] = panel;
-        } else {
-            updatedPanels.push({
-                ...panel,
-                id: makeId(6)
-            });
-        }
-
-        setData(prevData => ({
-            ...prevData,
-            acceptanceItems: {
-                ...(prevData?.acceptanceItems || {}),
-                panels: updatedPanels
-            }
-        }));
-
-        closePanelModal();
-    }, [panelModalState, data?.acceptanceItems?.panels, closePanelModal]);
+    }, [data?.acceptanceItems?.panels]);
 
     return {
         data,
-        testModalState,
-        panelModalState,
+        modalState,
         deleteConfirmState,
         handlers: {
             handleFormChange,
             handleDoctorChange,
-            openAddTestModal,
-            closeTestModal,
+            openAddModal,
+            closeModal,
             handleEditTest,
+            handleEditPanel,
             handleDeleteTest,
             confirmDeleteTest,
             cancelDelete,
-            handleTestChange,
-            submitTest,
-            openAddPanelModal,
-            closePanelModal,
-            handleEditPanel,
-            handleDeletePanel,
-            handlePanelChange,
-            submitPanel,
             restoreDeleteTest,
-            handleRestorePanel
-        }
+            submitTest,
+            submitPanel,
+            handleDeletePanel,
+            handleRestorePanel,
+        },
     };
 };
 

@@ -179,11 +179,9 @@ const AcceptanceForm = ({
         {label: "Review & Submit", icon: <ReceiptIcon/>}
     ];
 
-    // Use custom hook with memoization
     const {
         data,
-        testModalState,
-        panelModalState,
+        modalState,
         deleteConfirmState,
         handlers
     } = useAcceptanceFormState(initialData, maxDiscount, setData);
@@ -327,8 +325,7 @@ const AcceptanceForm = ({
                             <TestsSection
                                 data={data}
                                 errors={errors}
-                                testModalState={testModalState}
-                                panelModalState={panelModalState}
+                                modalState={modalState}
                                 deleteConfirmState={deleteConfirmState}
                                 handlers={handlers}
                                 maxDiscount={maxDiscount}
@@ -575,7 +572,7 @@ const AcceptanceForm = ({
                             <StepLabel
                                 error={hasStepErrors(index)}
                                 slotProps={{
-                                    StepIcon: {
+                                    stepIcon: {
                                         icon: step.icon
                                     }
                                 }}

@@ -23,8 +23,7 @@ import {
 } from "@mui/icons-material";
 import {router} from "@inertiajs/react";
 import axios from "axios";
-import AddTest from "@/Pages/Acceptance/Components/AddTest.jsx";
-import AddPanel from "@/Pages/Acceptance/Components/AddPanel.jsx";
+import AddTestOrPanel from "@/Pages/Acceptance/Components/AddTestOrPanel.jsx";
 
 const AddPoolingDialog = ({open, onClose, acceptance}) => {
     const [step, setStep] = useState('list');
@@ -145,8 +144,8 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
         submit({tests: [{...testData, sampleless: true, reportless: true}]});
     };
 
-    const handlePanelSubmit = () => {
-        submit({panels: [{...panelData, sampleless: true, reportless: true}]});
+    const handlePanelSubmit = (data) => {
+        submit({panels: [{...data, sampleless: true, reportless: true}]});
     };
 
     const patient = acceptance
@@ -234,23 +233,14 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
                 </Box>
             </Dialog>
 
-            {/* Step 2a – AddTest with full pre-filled data */}
-            <AddTest
-                open={step === 'test'}
+            {/* Step 2 – Unified add/configure dialog */}
+            <AddTestOrPanel
+                open={step === 'test' || step === 'panel'}
                 onClose={backToList}
-                onSubmit={handleTestSubmit}
-                initialData={selectedItem?.type === 'test' ? selectedItem.initialData : null}
-                patient={patient}
-                initialStep={1}
-            />
-
-            {/* Step 2b – AddPanel with full pre-filled data */}
-            <AddPanel
-                open={step === 'panel'}
-                onClose={backToList}
-                onSubmit={handlePanelSubmit}
-                data={panelData}
-                onChange={(updates) => setPanelData(prev => ({...prev, ...updates}))}
+                onSubmitTest={handleTestSubmit}
+                onSubmitPanel={handlePanelSubmit}
+                initialTestData={step === 'test' && selectedItem?.type === 'test' ? selectedItem.initialData : null}
+                initialPanelData={step === 'panel' ? panelData : null}
                 patient={patient}
             />
         </>

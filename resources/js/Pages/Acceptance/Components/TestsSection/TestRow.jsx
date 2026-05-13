@@ -34,17 +34,20 @@ import { Link } from "@inertiajs/react";
 const PatientChips = ({ patients, maxVisible = 3 }) => {
     const [showAll, setShowAll] = useState(false);
 
-    if (!patients?.length) return null;
+    // Filter out any null/undefined patients from the array
+    const validPatients = (patients || []).filter(Boolean);
 
-    const visiblePatients = showAll ? patients : patients.slice(0, maxVisible);
-    const remainingCount = patients.length - maxVisible;
+    if (!validPatients.length) return null;
+
+    const visiblePatients = showAll ? validPatients : validPatients.slice(0, maxVisible);
+    const remainingCount = validPatients.length - maxVisible;
 
     return (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
             {visiblePatients.map((patient, index) => (
                 <Chip
                     key={index}
-                    label={patient.fullName || patient.name}
+                    label={patient.fullName || patient.name || 'Unknown Patient'}
                     size="small"
                     variant="outlined"
                     sx={{ fontSize: '0.75rem' }}

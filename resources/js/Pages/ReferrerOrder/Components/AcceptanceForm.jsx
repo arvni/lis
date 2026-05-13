@@ -122,8 +122,7 @@ const AcceptanceFormDialog = ({
 
     const {
         data,
-        testModalState,
-        panelModalState,
+        modalState,
         deleteConfirmState,
         handlers
     } = useAcceptanceFormState(correctedInitialData, maxDiscount);
@@ -168,8 +167,7 @@ const AcceptanceFormDialog = ({
                     <TestsSection
                         data={data}
                         errors={errors}
-                        testModalState={testModalState}
-                        panelModalState={panelModalState}
+                        modalState={modalState}
                         deleteConfirmState={deleteConfirmState}
                         handlers={handlers}
                         maxDiscount={maxDiscount}
