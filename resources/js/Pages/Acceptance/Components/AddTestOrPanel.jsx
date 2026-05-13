@@ -1008,7 +1008,7 @@ const AddTestOrPanel = ({
     const errorCount = Object.keys(errors).length;
 
     return (
-        <Dialog open={open} fullWidth maxWidth="md" PaperProps={{ sx: { borderRadius: 2, maxHeight: '92vh' } }}>
+        <Dialog open={open} fullWidth maxWidth="md" slotProps={{ paper: { sx: { borderRadius: 2, maxHeight: '92vh' } } }}>
             <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white', py: 1.5, px: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

@@ -130,7 +130,7 @@ const AddOrderMaterialForm = ({open, onClose}) => {
 
     return (
         <Dialog open={open} onClose={processing ? undefined : handleClose} fullWidth maxWidth="sm"
-            PaperProps={{sx: {borderRadius: 3}}}>
+            slotProps={{paper: {sx: {borderRadius: 3}}}}>
             <DialogTitle sx={{
                 bgcolor: 'primary.main', color: 'primary.contrastText',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',

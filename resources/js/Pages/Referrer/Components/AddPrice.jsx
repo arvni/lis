@@ -359,10 +359,12 @@ const AddPrice = ({
                 open={open}
                 fullWidth
                 maxWidth="lg"
-                PaperProps={{
-                    sx: {
-                        borderRadius: 3,
-                        minHeight: '60vh'
+                slotProps={{
+                    paper: {
+                        sx: {
+                            borderRadius: 3,
+                            minHeight: '60vh'
+                        }
                     }
                 }}
             >
