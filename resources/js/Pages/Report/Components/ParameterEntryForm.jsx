@@ -344,7 +344,7 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                 data?.parameters?.map((param, index) => renderParameterForm(param, index))
             )}
 
-            <Box textAlign="center" mt={3}>
+            <Box sx={{textAlign: "center", mt: 3}}>
                 <Button
                     variant="contained"
                     color="primary"

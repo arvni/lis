@@ -362,7 +362,7 @@ const ReferrerTestsTab = ({ referrer }) => {
 
             {/* Empty state */}
             {!loading && referrerTests.data.length === 0 && (
-                <Box textAlign="center" py={4}>
+                <Box sx={{textAlign: "center", py: 4}}>
                     <Typography variant="h6" color="text.secondary" gutterBottom>
                         No tests found
                     </Typography>

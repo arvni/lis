@@ -281,7 +281,7 @@ const PriceField = ({
                             <Divider orientation="vertical" sx={{display: {xs: 'none', md: 'block'}}}/>
                             <Divider sx={{display: {xs: 'block', md: 'none'}, my: 2}}/>
 
-                            <Box textAlign="center">
+                            <Box sx={{textAlign: "center"}}>
                                 <Typography variant="body2" color="text.secondary" gutterBottom>
                                     {method.price_type === "Conditional"
                                         ? "Selected Price:"
