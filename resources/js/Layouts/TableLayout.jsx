@@ -327,6 +327,7 @@ const TableLayout = ({
                         disableColumnFilter
                         sortingMode="server"
                         sortModel={defaultValues.sort ? [defaultValues.sort] : []}
+                        pagination
                         paginationMode="server"
                         pageSizeOptions={[10, 20, 50, 100]}
                         paginationModel={{

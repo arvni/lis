@@ -271,13 +271,8 @@ const Index = () => {
 
     const pageReload = (page, filters, sort, pageSize) => {
         router.visit(route('consultations.index'), {
-            data: {
-                page,
-                filters,
-                sort,
-                pageSize
-            },
-            preserveState: true,
+            data: {page, filters, sort, pageSize},
+            only: ["consultations", "status", "success", "requestInputs"],
         });
     };
 
