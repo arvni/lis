@@ -39,7 +39,7 @@ const EVENT_META = {
 const InfoRow = ({label, children}) => (
     <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "flex-start", py: 0.75}}>
         <Typography variant="body2" color="text.secondary" sx={{minWidth: 110}}>{label}</Typography>
-        <Typography variant="body2" fontWeight={500} textAlign="right">{children || "—"}</Typography>
+        <Typography variant="body2" fontWeight={500} align="right">{children || "—"}</Typography>
     </Box>
 );
 

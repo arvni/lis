@@ -419,7 +419,7 @@ const AddForm = ({openAdd, onClose}) => {
                                                 )}
                                             </>
                                         ) : (
-                                            <Typography variant="body2" color="text.secondary" textAlign="center"
+                                            <Typography variant="body2" color="text.secondary" align="center"
                                                         py={2}>
                                                 No available time slots. Please try another date or consultant.
                                             </Typography>

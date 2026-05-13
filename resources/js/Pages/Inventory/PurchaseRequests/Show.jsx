@@ -41,7 +41,7 @@ const InfoRow = ({label, children, chipContent}) => (
         <Typography variant="body2" color="text.secondary" sx={{minWidth: 110}}>{label}</Typography>
         {chipContent
             ? <Box>{chipContent}</Box>
-            : <Typography variant="body2" fontWeight={500} textAlign="right">{children || "—"}</Typography>
+            : <Typography variant="body2" fontWeight={500} align="right">{children || "—"}</Typography>
         }
     </Box>
 );

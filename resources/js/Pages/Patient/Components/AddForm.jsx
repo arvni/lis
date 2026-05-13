@@ -267,7 +267,7 @@ const AddForm = ({ open, onClose, patientId }) => {
                                                 )}
                                             </>
                                         ) : (
-                                            <Typography variant="body2" color="text.secondary" textAlign="center" py={2}>
+                                            <Typography variant="body2" color="text.secondary" align="center" py={2}>
                                                 No available time slots. Please try another date or consultant.
                                             </Typography>
                                         )}

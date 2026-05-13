@@ -49,7 +49,7 @@ const WorkflowTemplatesIndex = () => {
             {templates.length === 0 ? (
                 <Card>
                     <CardContent>
-                        <Typography color="text.secondary" textAlign="center" py={3}>
+                        <Typography color="text.secondary" align="center" py={3}>
                             No workflow templates yet. Create one to enable multi-step approval on purchase requests.
                         </Typography>
                     </CardContent>
