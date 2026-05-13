@@ -82,8 +82,7 @@ const useAcceptanceFormState = (initialData) => {
                 acceptanceItems: { ...(prev?.acceptanceItems || {}), tests: updatedTests },
             };
         });
-        closeModal();
-    }, [closeModal]);
+    }, []);
 
     // ─── Panel Submit ─────────────────────────────────────────────────────────────
     const submitPanel = useCallback((panelItem) => {
@@ -101,8 +100,7 @@ const useAcceptanceFormState = (initialData) => {
                 acceptanceItems: { ...(prev?.acceptanceItems || {}), panels: updatedPanels },
             };
         });
-        closeModal();
-    }, [closeModal]);
+    }, []);
 
     // ─── Delete Test ──────────────────────────────────────────────────────────────
     const handleDeleteTest = useCallback((id) => {

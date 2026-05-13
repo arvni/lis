@@ -43,22 +43,49 @@ createInertiaApp({
         // remains inside the root before the focus trap activates. Replace with
         // the `inert` attribute (the browser-recommended modern API) which proactively
         // prevents focus rather than describing it retroactively.
+        //
+        // We must also mirror the virtual aria-hidden state on get/has so MUI's
+        // idempotent state checks (e.g. `getAttribute('aria-hidden') === 'true'`
+        // before re-applying or removing) see a consistent value. Otherwise MUI
+        // re-sets without matching removes and `inert` gets stuck on the root,
+        // locking every click in the app.
         let ariaHiddenDepth = 0;
         const _setAttribute = el.setAttribute.bind(el);
         const _removeAttribute = el.removeAttribute.bind(el);
+        const _getAttribute = el.getAttribute.bind(el);
+        const _hasAttribute = el.hasAttribute.bind(el);
         el.setAttribute = (name, value) => {
             if (name === 'aria-hidden') {
-                if (++ariaHiddenDepth === 1) _setAttribute('inert', '');
+                if (value === 'true' || value === true) {
+                    if (++ariaHiddenDepth === 1) _setAttribute('inert', '');
+                } else if (ariaHiddenDepth > 0) {
+                    if (--ariaHiddenDepth <= 0) { ariaHiddenDepth = 0; _removeAttribute('inert'); }
+                }
             } else {
                 _setAttribute(name, value);
             }
         };
         el.removeAttribute = (name) => {
             if (name === 'aria-hidden') {
-                if (--ariaHiddenDepth <= 0) { ariaHiddenDepth = 0; _removeAttribute('inert'); }
+                if (ariaHiddenDepth > 0 && --ariaHiddenDepth <= 0) {
+                    ariaHiddenDepth = 0;
+                    _removeAttribute('inert');
+                }
             } else {
                 _removeAttribute(name);
             }
+        };
+        el.getAttribute = (name) => {
+            if (name === 'aria-hidden') {
+                return ariaHiddenDepth > 0 ? 'true' : null;
+            }
+            return _getAttribute(name);
+        };
+        el.hasAttribute = (name) => {
+            if (name === 'aria-hidden') {
+                return ariaHiddenDepth > 0;
+            }
+            return _hasAttribute(name);
         };
 
         const root = createRoot(el);
