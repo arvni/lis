@@ -140,12 +140,12 @@ const PriceField = ({
                                 onChange={handleChange}
                                 value={values?.price?.[parameter.value] || ''}
                                 slotProps={{
-                                    input: {
+                                    htmlInput: {
                                         min: parameter.min,
                                         max: parameter.max,
                                         step: parameter.step || 1
                                     },
-                                    Input: {
+                                    input: {
                                         startAdornment: parameter.prefix ? (
                                             <InputAdornment position="start">
                                                 {parameter.prefix}

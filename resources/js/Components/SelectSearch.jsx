@@ -19,7 +19,8 @@ const SelectSearch = ({
                           defaultData = {},
                           disableFirst = false,
                           fullWidth = false,
-    size="medium"
+    size="medium",
+    startAdornment = null
                       }) => {
     const ref = useRef();
     const [data, setData] = useState([]);
@@ -94,11 +95,32 @@ const SelectSearch = ({
                          onInputChange={handleSearch}
                          getOptionLabel={(option) => option?.name ?? ""}
                          loading={loading}
-                         renderInput={(params) => <TextField sx={sx} {...params}
-                                                             helperText={helperText} error={error}
-                                                             label={label}
-                                                             fullWidth={fullWidth}
-                                                             required={required}/>}
+                         renderInput={(params) => {
+                             const { InputProps, inputProps, ...restParams } = params;
+                             return (
+                                 <TextField 
+                                     sx={sx} 
+                                     {...restParams}
+                                     slotProps={{
+                                         htmlInput: { ...(restParams.slotProps?.htmlInput ?? inputProps) },
+                                         input: {
+                                             ...(restParams.slotProps?.input ?? InputProps),
+                                             startAdornment: (
+                                                 <>
+                                                     {startAdornment}
+                                                     {(restParams.slotProps?.input ?? InputProps)?.startAdornment}
+                                                 </>
+                                             )
+                                         }
+                                     }}
+                                     helperText={helperText} 
+                                     error={error}
+                                     label={label}
+                                     fullWidth={fullWidth}
+                                     required={required}
+                                 />
+                             );
+                         }}
     />;
 }
 SelectSearch.propTypes = {
@@ -117,6 +139,7 @@ SelectSearch.propTypes = {
     disableFirst: PropTypes.bool,
     fullWidth: PropTypes.bool,
     size: PropTypes.string,
+    startAdornment: PropTypes.node,
 };
 
 export default SelectSearch;

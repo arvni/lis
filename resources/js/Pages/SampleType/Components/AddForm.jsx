@@ -16,6 +16,8 @@ const AddForm = ({open, defaultValue = {}, onClose}) => {
                           defaultValue={{
                               name: "",
                               description: "",
+                              orderable: false,
+                              required_barcode: false,
                               ...defaultValue
                           }}
                           generalTitle="Sample Type"
@@ -58,7 +60,7 @@ const FormContent = () => {
                                   labelPlacement="start"
                                   name="orderable"
                                   onChange={handleChange}
-                                  checked={data.orderable}/>
+                                  checked={!!data.orderable}/>
             </Grid>
             <Grid size={{sm: 6, xs: 12}}>
                 <FormControlLabel label="Required Material"
@@ -66,7 +68,7 @@ const FormContent = () => {
                                   labelPlacement="start"
                                   name="required_barcode"
                                   onChange={handleChange}
-                                  checked={data.required_barcode}/>
+                                  checked={!!data.required_barcode}/>
             </Grid>
             <Grid size={{xs: 12}}>
                 <TextField

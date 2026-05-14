@@ -9,7 +9,6 @@ import { Tooltip, Chip } from "@mui/material";
 
 const Index = () => {
     const { referrerOrders, status, success, requestInputs } = usePage().props;
-    console.log(referrerOrders);
     const [processing, setProcessing] = useState(false);
     const [filter, setFilter] = useState(requestInputs?.filters || {});
 
@@ -72,7 +71,7 @@ const Index = () => {
             renderCell: ({ row }) => (
                 row.pooling ? (
                     <Chip
-                        icon={<MergeType fontSize="small"/>}
+                        icon={<MergeType fontSize="small" />}
                         label="Pooling"
                         color="info"
                         size="small"
@@ -100,7 +99,7 @@ const Index = () => {
             headerName: 'Created',
             type: "date",
             width: 130,
-            valueFormatter: (value ) => {
+            valueFormatter: (value) => {
                 if (!value) return 'N/A';
                 return new Date(value).toLocaleDateString();
             }

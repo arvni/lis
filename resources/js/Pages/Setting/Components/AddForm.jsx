@@ -105,7 +105,7 @@ const AddForm = ({value, onChange, submit, open, setOpen, title, loading, reset,
                                 uploadUrl={route("documents.store")}
                                 ownerClass="Setting"
                                 ownerId={id}
-                                tag="setting"
+                                tag="SETTING"
                                 sx={{
                                     width: '200px',
                                     height: '200px',
