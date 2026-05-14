@@ -296,6 +296,17 @@ const Show = ({
                     </Button>
                 </Tooltip>
             )}
+            <Tooltip title="Print Samples Sheet">
+                <Button
+                    variant="outlined"
+                    color="success"
+                    startIcon={<Science/>}
+                    href={route("acceptances.printSamples", acceptance.id)}
+                    component={Link}
+                >
+                    Print Samples
+                </Button>
+            </Tooltip>
         </Box>
     );
 

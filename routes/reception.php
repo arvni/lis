@@ -29,6 +29,7 @@ use App\Http\Controllers\Reception\ListBarcodesController;
 use App\Http\Controllers\Reception\PatientController;
 use App\Http\Controllers\Reception\PrintAcceptanceBarcodeController;
 use App\Http\Controllers\Reception\PrintAcceptanceController;
+use App\Http\Controllers\Reception\PrintAcceptanceSamplesController;
 use App\Http\Controllers\Reception\PublishAcceptanceController;
 use App\Http\Controllers\Reception\PublishReportController;
 use App\Http\Controllers\Reception\RejectReportController;
@@ -56,6 +57,7 @@ Route::group(["prefix" => "reception"], function () {
     Route::get("acceptances/export", ExportAcceptancesController::class)->name("acceptances.export");
     Route::resource("acceptances", AcceptanceController::class)->except("create", "store");
     Route::get("acceptances/{acceptance}/print", PrintAcceptanceController::class)->name("acceptances.print");
+    Route::get("acceptances/{acceptance}/print-samples", PrintAcceptanceSamplesController::class)->name("acceptances.printSamples");
     Route::get("acceptances/{acceptance}/barcodes", PrintAcceptanceBarcodeController::class)->name("acceptances.barcodes");
     Route::put("acceptances/{acceptance}/cancel", CancelAcceptanceController::class)->name("acceptances.cancel");
     Route::patch("acceptances/{acceptance}/priority", UpdateAcceptancePriorityController::class)->name("acceptances.updatePriority");
