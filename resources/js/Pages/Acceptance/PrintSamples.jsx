@@ -12,20 +12,16 @@ import {
     Paper,
     Divider,
     Button,
-    IconButton,
-    Tooltip,
     Chip,
     styled,
 } from '@mui/material';
 import {
     Print as PrintIcon,
     ArrowBack,
-    Science,
-    Person,
     Biotech,
 } from '@mui/icons-material';
 
-// ─── A5 dimensions ──────────────────────────────────────────────
+// ─── Preview dimensions ─────────────────────────────────────────
 const A5_WIDTH = '148mm';
 const A5_HEIGHT = '210mm';
 
@@ -33,13 +29,15 @@ const A5_HEIGHT = '210mm';
 const printStyles = `
   @media print {
     @page {
-      size: 148mm 210mm !important;
+      size: auto !important;
       margin: 0 !important;
     }
     html, body {
-      width: 148mm !important;
+      width: 100% !important;
+      min-width: 0 !important;
       margin: 0 !important;
       padding: 0 !important;
+      overflow: visible !important;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
@@ -51,7 +49,8 @@ const printStyles = `
       position: absolute !important;
       top: 0 !important;
       left: 0 !important;
-      width: 148mm !important;
+      width: 100% !important;
+      max-width: none !important;
       overflow: visible !important;
       padding: 0 !important;
       margin: 0 !important;
@@ -60,6 +59,7 @@ const printStyles = `
       margin: 0 !important;
       padding: 0 !important;
       width: 100% !important;
+      min-width: 0 !important;
       overflow: visible !important;
     }
     * {
@@ -85,6 +85,8 @@ const PageContainer = styled(Paper)(({theme}) => ({
         boxShadow: 'none',
         margin: 0,
         width: '100%',
+        maxWidth: 'none',
+        minHeight: 'auto',
     }
 }));
 
@@ -107,17 +109,37 @@ const SectionHeading = styled(Box)(({theme}) => ({
 }));
 
 const StyledTable = styled(Table)(({theme}) => ({
+    width: '100%',
+    tableLayout: 'fixed',
     '& .MuiTableCell-root': {
         padding: '3px 6px',
         borderBottom: `1px solid ${theme.palette.divider}`,
         fontSize: '0.72rem',
         lineHeight: 1.3,
+        whiteSpace: 'normal',
+        overflowWrap: 'anywhere',
+        wordBreak: 'break-word',
+        verticalAlign: 'top',
     },
     '& .MuiTableHead-root .MuiTableCell-root': {
         backgroundColor: theme.palette.grey[100],
         fontWeight: 'bold',
         padding: '4px 6px',
-        whiteSpace: 'nowrap',
+        whiteSpace: 'normal',
+    },
+    '& .MuiChip-root': {
+        maxWidth: '100%',
+        height: 'auto',
+        minHeight: 18,
+        alignItems: 'flex-start',
+    },
+    '& .MuiChip-label': {
+        display: 'block',
+        whiteSpace: 'normal',
+        overflow: 'visible',
+        textOverflow: 'clip',
+        overflowWrap: 'anywhere',
+        lineHeight: 1.2,
     },
 }));
 
@@ -285,13 +307,13 @@ const PrintSamples = ({acceptance, samples}) => {
                         <StyledTable size="small" padding="none">
                             <TableHead>
                                 <TableRow>
-                                    <TableCell align="center" sx={{width: 30}}>#</TableCell>
-                                    <TableCell>Barcode</TableCell>
-                                    <TableCell>Sample Type</TableCell>
-                                    <TableCell>Test</TableCell>
-                                    <TableCell>Patient</TableCell>
-                                    <TableCell align="center">Gender</TableCell>
-                                    <TableCell align="center">Age</TableCell>
+                                    <TableCell align="center" sx={{width: '7%'}}>#</TableCell>
+                                    <TableCell sx={{width: '18%'}}>Barcode</TableCell>
+                                    <TableCell sx={{width: '18%'}}>Sample Type</TableCell>
+                                    <TableCell sx={{width: '29%'}}>Test</TableCell>
+                                    <TableCell sx={{width: '18%'}}>Patient</TableCell>
+                                    <TableCell align="center" sx={{width: '5%'}}>Gender</TableCell>
+                                    <TableCell align="center" sx={{width: '5%'}}>Age</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -317,18 +339,14 @@ const PrintSamples = ({acceptance, samples}) => {
                                             />
                                         </TableCell>
                                         <TableCell sx={{
-                                            maxWidth: '38mm',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
+                                            overflowWrap: 'anywhere',
+                                            whiteSpace: 'normal',
                                         }}>
                                             {row.testName}
                                         </TableCell>
                                         <TableCell sx={{
-                                            maxWidth: '30mm',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
+                                            overflowWrap: 'anywhere',
+                                            whiteSpace: 'normal',
                                         }}>
                                             {row.patientName}
                                         </TableCell>
