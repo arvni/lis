@@ -7,6 +7,7 @@ use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Events\PatientDocumentUpdateEvent;
 use App\Domains\Reception\Models\AcceptanceItemState;
 use App\Domains\Reception\Requests\UpdateAcceptanceItemStateRequest;
+use App\Domains\Reception\Requests\BulkUpdateAcceptanceItemStateRequest;
 use App\Domains\Reception\Resources\AcceptanceItemStateResource;
 use App\Domains\Reception\Services\AcceptanceItemStateService;
 use App\Http\Controllers\Controller;
@@ -75,4 +76,54 @@ class AcceptanceItemStateController extends Controller
         ]);
     }
 
+    public function bulkUpdate(BulkUpdateAcceptanceItemStateRequest $request)
+    {
+        $userId = auth()->id();
+        $ids = $request->ids;
+
+        foreach ($ids as $id) {
+            $acceptanceItemState = AcceptanceItemState::find($id);
+            if (!$acceptanceItemState) continue;
+
+            foreach ($request["parameters"] as $parameter) {
+                if ($parameter["type"] == "file" && isset($parameter["value"])) {
+                    $acceptanceItemState->loadMissing("sample");
+                    PatientDocumentUpdateEvent::dispatch(
+                        $parameter["value"]["id"],
+                        $acceptanceItemState->sample->patient_id,
+                        DocumentTag::ACCEPTANCE_ITEM_STATES->value,
+                        "acceptance_item_state",
+                        $acceptanceItemState->id
+                    );
+                }
+            }
+
+            if ($request->actionType === "Update") {
+                $this->acceptanceItemStateService->updateParameters(
+                    $acceptanceItemState,
+                    $request->parameters,
+                    $request->details ?? "",
+                    $userId
+                );
+            } else {
+                if ($acceptanceItemState->status !== AcceptanceItemStateStatus::PROCESSING) {
+                    continue; // Or handle error
+                }
+                $status = AcceptanceItemStateStatus::from($request->actionType);
+                $this->acceptanceItemStateService->changeStatus(
+                    $acceptanceItemState,
+                    $status,
+                    $request->parameters,
+                    $request->details ?? "",
+                    $userId,
+                    $request->next ?? null
+                );
+            }
+        }
+
+        return back()->with([
+            "success" => true,
+            "status" => "Acceptance Item States updated successfully."
+        ]);
+    }
 }

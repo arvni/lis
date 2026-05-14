@@ -253,7 +253,7 @@ const WorkflowActionForm = ({
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                     {actionConfig.icon}
                     <Typography variant="h6" component="span">
-                        {actionConfig.title}: {acceptanceItemState?.section?.name}
+                        {acceptanceItemState?.ids?.length > 1 ? `Bulk ${actionConfig.title}` : actionConfig.title}: {acceptanceItemState?.section?.name}
                     </Typography>
                 </Box>
                 <Tooltip title="Close">
@@ -284,7 +284,7 @@ const WorkflowActionForm = ({
                     }}
                 >
                     <Typography variant="subtitle1" fontWeight="bold" sx={{mb: 2}}>
-                        Case Information
+                        {acceptanceItemState?.ids?.length > 1 ? `Batch Processing (${acceptanceItemState.ids.length} items)` : 'Case Information'}
                     </Typography>
 
                     <Grid container spacing={2}>

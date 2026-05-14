@@ -74,6 +74,7 @@ Route::group(["prefix" => "reception"], function () {
         "acceptances/{acceptance}/acceptance-items/{acceptanceItem}",
         ShowAcceptanceItemController::class
     )->name("acceptanceItems.show");
+    Route::put("acceptanceItemStates/bulk-update", [AcceptanceItemStateController::class, "bulkUpdate"])->name("acceptanceItemStates.bulkUpdate");
     Route::resource("acceptanceItemStates", AcceptanceItemStateController::class)->only("show", "update");
     Route::get("acceptanceItems", ListAcceptanceItemsController::class)->name("acceptanceItems.index");
     Route::get("acceptanceItems/export", ExportAcceptanceItemsController::class)->name("acceptanceItems.export");

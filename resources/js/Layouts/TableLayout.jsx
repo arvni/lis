@@ -127,6 +127,7 @@ const TableLayout = ({
                          showToolbar = false,
                          onExport,
                          refreshData,
+                         headerActions,
                          customProps = {},
                          ...props
                      }) => {
@@ -291,6 +292,7 @@ const TableLayout = ({
                                 </Button>
                             )}
 
+                            {headerActions}
                             <Tooltip title="Refresh">
                                 <IconButton size="small" onClick={handleRefresh} disabled={loading}>
                                     <RefreshIcon fontSize="small"/>
@@ -413,6 +415,7 @@ const TableLayout = ({
                             },
                             ...customProps.sx
                         }}
+                        {...props}
                     />
                 </Paper>
 

@@ -13,6 +13,7 @@ import {
     Grid as Grid,
     IconButton,
     Paper,
+    Stack,
     Tooltip,
     Typography,
     useTheme
@@ -93,6 +94,7 @@ const Show = () => {
     const {post, setData, data, reset, processing} = useForm({});
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [selectedRows, setSelectedRows] = useState([]);
     const [openEnteringForm, setOpenEnteringForm] = useState(false);
     const [openDoneForm, setOpenDoneForm] = useState(false);
 
@@ -105,6 +107,37 @@ const Show = () => {
         requestInputs,
         stats
     } = usePage().props;
+
+    const getSelectionIds = (selection) => {
+        if (!selection) return [];
+        if (Array.isArray(selection)) return selection;
+        if (selection.ids) {
+            // In MUI X v7+, selection can be an object with a Set or Array in .ids
+            if (typeof selection.ids.forEach === 'function') {
+                const ids = [];
+                selection.ids.forEach(id => ids.push(id));
+                return ids;
+            }
+            if (Array.isArray(selection.ids)) return selection.ids;
+            if (typeof selection.ids === 'object') return Object.keys(selection.ids);
+        }
+        return [];
+    };
+
+    const isCompatible = useMemo(() => {
+        const selection = getSelectionIds(selectedRows);
+        if (selection.length <= 1) return true;
+
+        const dataRows = acceptanceItemStates?.data || [];
+        const rows = dataRows.filter(row => selection.includes(row.id));
+        if (rows.length === 0) return true;
+
+        const firstRow = rows[0];
+        return rows.every(row =>
+            row.acceptance_item?.test?.id === firstRow.acceptance_item?.test?.id &&
+            row.acceptance_item?.method?.test?.id === firstRow.acceptance_item?.method?.test?.id
+        );
+    }, [selectedRows, acceptanceItemStates]);
 
     const columns = useMemo(() => [
         {
@@ -313,6 +346,7 @@ const Show = () => {
     const onSuccess = () => {
         setOpenEnteringForm(false);
         setOpenDoneForm(false);
+        setSelectedRows([]);
         reset();
     };
 
@@ -355,7 +389,60 @@ const Show = () => {
 
     const handleChange = (name, value) => setData(prevData => ({...prevData, [name]: value}));
 
-    const handleSubmit = () => post(route("acceptanceItemStates.update", data.id), {onSuccess});
+    const handleSubmit = () => {
+        if (data.ids && data.ids.length > 0) {
+            post(route("acceptanceItemStates.bulkUpdate"), {onSuccess});
+        } else {
+            post(route("acceptanceItemStates.update", data.id), {onSuccess});
+        }
+    };
+
+    const handleOpenBulkForm = (type) => () => {
+        const selection = getSelectionIds(selectedRows);
+        if (selection.length === 0) return;
+
+        // Find the first selected row to use its parameters as a template
+        const firstSelectedRow = acceptanceItemStates.data.find(row => row.id === selection[0]);
+        if (!firstSelectedRow) return;
+
+        setLoading(true);
+        axios.get(route("acceptanceItemStates.show", firstSelectedRow.id))
+            .then(res => setData({
+                ...res.data.data,
+                ids: selection,
+                actionType: type,
+                "_method": "put"
+            }))
+            .then(() => {
+                setLoading(false);
+                setOpenDoneForm(true);
+            });
+    };
+
+    const handleOpenBulkRejectForm = () => async () => {
+        const selection = getSelectionIds(selectedRows);
+        if (selection.length === 0) return;
+
+        const firstSelectedRow = acceptanceItemStates.data.find(row => row.id === selection[0]);
+        if (!firstSelectedRow) return;
+
+        setLoading(true);
+        axios.get(route("acceptanceItemStates.prevSections", firstSelectedRow.id))
+            .then(res => {
+                setOptions(res.data.sections);
+            }).then(() => axios.get(route("acceptanceItemStates.show", firstSelectedRow.id)))
+            .then(res => setData({
+                ...res.data.data,
+                ids: selection,
+                next: null,
+                actionType: ACTION_TYPES.REJECT,
+                "_method": "put"
+            }))
+            .then(() => {
+                setOpenDoneForm(true);
+                setLoading(false);
+            });
+    };
 
     const handleOpenRejectForm = (id) => async () => {
         setLoading(true);
@@ -403,7 +490,8 @@ const Show = () => {
                     </Grid>
 
                     <Grid size={{xs: 12, md: 6}}
-                          sx={{display: 'flex', justifyContent: {xs: 'flex-start', md: 'flex-end'}}}>
+                          sx={{display: 'flex', justifyContent: {xs: 'flex-start', md: 'flex-end'}, gap: 1}}>
+                        {/* Bulk buttons removed from here and moved to TableLayout headerActions below */}
                         <Button
                             variant="contained"
                             startIcon={<AddIcon/>}
@@ -621,6 +709,54 @@ const Show = () => {
                     loading={processing || loading}
                     Filter={Filter}
                     errors={errors}
+                    checkboxSelection
+                    onRowSelectionModelChange={(newSelection) => setSelectedRows(newSelection || [])}
+                    isRowSelectable={(params) => params.row.status === ACCEPTANCE_ITEM_STATES_STATUS.PROCESSING}
+                    headerActions={
+                        <Stack direction="row" spacing={2} alignItems="center">
+                            {getSelectionIds(selectedRows).length > 0 ? (
+                                <>
+                                    {!isCompatible && (
+                                        <Tooltip title="Selected items must have the same test and method for bulk actions">
+                                            <Chip
+                                                label="Incompatible Selection"
+                                                size="small"
+                                                color="error"
+                                                variant="outlined"
+                                                sx={{fontWeight: 'bold'}}
+                                            />
+                                        </Tooltip>
+                                    )}
+                                    <Button
+                                        variant="contained"
+                                        startIcon={<DoneIcon/>}
+                                        onClick={handleOpenBulkForm(ACTION_TYPES.COMPLETE)}
+                                        color="success"
+                                        size="small"
+                                        disabled={!isCompatible}
+                                        sx={{borderRadius: 2, textTransform: 'none', px: 2}}
+                                    >
+                                        Bulk Done ({getSelectionIds(selectedRows).length})
+                                    </Button>
+                                    <Button
+                                        variant="contained"
+                                        startIcon={<CloseIcon/>}
+                                        onClick={handleOpenBulkRejectForm()}
+                                        color="error"
+                                        size="small"
+                                        disabled={!isCompatible}
+                                        sx={{borderRadius: 2, textTransform: 'none', px: 2}}
+                                    >
+                                        Bulk Reject ({getSelectionIds(selectedRows).length})
+                                    </Button>
+                                </>
+                            ) : (
+                                <Typography variant="caption" color="text.secondary" sx={{fontStyle: 'italic'}}>
+                                    Select processing items for bulk actions
+                                </Typography>
+                            )}
+                        </Stack>
+                    }
                 />
             </Card>
 
