@@ -89,12 +89,6 @@ const routes = (sections = []) => {
                     permission: 'Reception.TAT.View Dashboard',
                     icon: <SpeedIcon/>,
                 },
-                {
-                    title: "Manage Tags",
-                    route: "tags.index",
-                    permission: 'Reception.Acceptances.List Acceptance',
-                    icon: <TagIcon/>,
-                },
             ]
         },
         {
@@ -408,6 +402,12 @@ const routes = (sections = []) => {
                     route: "settings.index",
                     permission: 'Advance Settings.Settings.List Settings',
                     icon: <SettingsIcon/>,
+                },
+                {
+                    title: "Tags",
+                    route: "tags.index",
+                    permission: 'Advance Settings.Tags.List Tags',
+                    icon: <TagIcon/>,
                 },
             ]
         },

@@ -174,6 +174,7 @@ class RoleAndPermissionSeeder extends Seeder
                     "Check Status",
                     "Update Priority",
                     "Edit Invoiced Acceptance",
+                    "Assign Tag",
                 ],
                 "TAT" => [
                     "View Dashboard",
@@ -261,6 +262,12 @@ class RoleAndPermissionSeeder extends Seeder
                     "Edit Test",
                     "Delete Test",
                     "List Tests",
+                ],
+                "Tags" => [
+                    "Create Tag",
+                    "Edit Tag",
+                    "Delete Tag",
+                    "List Tags",
                 ],
             ],
             "Inventory" => [

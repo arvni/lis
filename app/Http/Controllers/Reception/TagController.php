@@ -14,6 +14,9 @@ class TagController extends Controller
 {
     public function __construct(private readonly TagService $tagService)
     {
+        $this->middleware('permission:Advance Settings.Tags.List Tags')->only('index');
+        $this->middleware('permission:Advance Settings.Tags.Edit Tag')->only('update');
+        $this->middleware('permission:Advance Settings.Tags.Delete Tag')->only('destroy');
     }
 
     public function index(Request $request): Response

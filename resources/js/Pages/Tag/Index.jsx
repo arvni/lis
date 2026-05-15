@@ -27,9 +27,11 @@ import {
 } from "@mui/icons-material";
 import TableLayout from "@/Layouts/TableLayout";
 
-const Index = ({ tags }) => {
+const Index = ({ auth, tags }) => {
     const [openEdit, setOpenEdit] = useState(false);
     const [selectedTag, setSelectedTag] = useState(null);
+    const canEdit = auth.permissions.includes('Advance Settings.Tags.Edit Tag');
+    const canDelete = auth.permissions.includes('Advance Settings.Tags.Delete Tag');
     const { data, setData, put, delete: destroy, processing, reset, errors } = useForm({
         name: '',
         color: '#7c4dff',
@@ -124,16 +126,20 @@ const Index = ({ tags }) => {
             sortable: false,
             renderCell: (params) => (
                 <Stack direction="row" spacing={0.5}>
-                    <Tooltip title="Edit Tag">
-                        <IconButton size="small" onClick={() => handleEdit(params.row)} color="primary">
-                            <EditIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete Tag">
-                        <IconButton size="small" onClick={() => handleDelete(params.row.id)} color="error">
-                            <DeleteIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
+                    {canEdit && (
+                        <Tooltip title="Edit Tag">
+                            <IconButton size="small" onClick={() => handleEdit(params.row)} color="primary">
+                                <EditIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                    {canDelete && (
+                        <Tooltip title="Delete Tag">
+                            <IconButton size="small" onClick={() => handleDelete(params.row.id)} color="error">
+                                <DeleteIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    )}
                 </Stack>
             )
         }
@@ -249,11 +255,11 @@ const Index = ({ tags }) => {
 
 const breadCrumbs = [
     {
-        title: "Reception",
+        title: "Advance Settings",
         link: null,
     },
     {
-        title: "Manage Tags",
+        title: "Tags",
         link: null,
     }
 ];

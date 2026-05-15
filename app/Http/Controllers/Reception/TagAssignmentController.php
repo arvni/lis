@@ -14,6 +14,7 @@ class TagAssignmentController extends Controller
 {
     public function __construct(private readonly TagService $tagService)
     {
+        $this->middleware('permission:Reception.Acceptances.Assign Tag');
     }
 
     public function syncAcceptance(SyncTagsRequest $request, Acceptance $acceptance): AnonymousResourceCollection

@@ -3,7 +3,7 @@ import { Chip } from "@mui/material";
 
 const TagChip = ({ tag, sx = {}, ...props }) => {
     const color = tag.color;
-    
+
     return (
         <Chip
             key={tag.id ?? tag.name}

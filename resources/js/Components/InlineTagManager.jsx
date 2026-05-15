@@ -6,11 +6,10 @@ import {
     CircularProgress,
     Typography,
     Stack,
-    IconButton,
 } from '@mui/material';
-import { LocalOffer as TagIcon } from '@mui/icons-material';
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
+import { usePage } from '@inertiajs/react';
 import TagChip from './TagChip';
 
 const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
@@ -21,6 +20,9 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
     const [saving, setSaving] = useState(false);
     const { enqueueSnackbar } = useSnackbar();
     const containerRef = useRef(null);
+    const { auth } = usePage().props;
+
+    const canAssign = auth?.permissions?.includes('Reception.Acceptances.Assign Tag') ?? false;
 
     // Fetch all available tags for the autocomplete options
     const fetchTags = async () => {
@@ -43,8 +45,6 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
             const updatedTags = response.data.data || [];
             setSelectedTags(updatedTags);
             if (onUpdate) onUpdate(updatedTags);
-
-            enqueueSnackbar('Tags updated', { variant: 'success', autoHideDuration: 2000 });
         } catch (error) {
             console.error('Error updating tags:', error);
             enqueueSnackbar('Failed to update tags', { variant: 'error' });
@@ -55,6 +55,7 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
 
     const handleToggleEdit = (e) => {
         e.stopPropagation();
+        if (!canAssign) return;
         if (!isEditing) {
             fetchTags();
             setIsEditing(true);
@@ -84,6 +85,8 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
                     multiple
                     freeSolo
                     autoFocus
+                    openOnFocus
+                    disablePortal
                     size="small"
                     options={allTags}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
@@ -94,59 +97,68 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
                         const valueName = typeof value === 'string' ? value : value.name;
                         return optionName === valueName;
                     }}
-                    onBlur={() => {
-                        setIsEditing(false);
-                    }}
                     onChange={(event, newValue) => {
                         setSelectedTags(newValue);
                         handleSave(newValue);
                     }}
-                    renderTags={(value, getTagProps) =>
+                    onKeyDown={(event) => {
+                        if (event.key === 'Escape') {
+                            setIsEditing(false);
+                        }
+                    }}
+                    renderValue={(value, getTagProps) =>
                         value.map((option, index) => {
                             const tagObj = typeof option === 'string'
                                 ? allTags.find(t => t.name === option) || { name: option }
                                 : option;
+                            const { key, ...tagProps } = getTagProps({ index });
                             return (
                                 <TagChip
-                                    key={index}
                                     tag={tagObj}
-                                    {...getTagProps({ index })}
+                                    key={key}
+                                    {...tagProps}
                                     sx={{ m: 0.2 }}
                                 />
                             );
                         })
                     }
-                    renderOption={(props, option) => (
-                        <li {...props}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Box
-                                    sx={{
-                                        width: 12,
-                                        height: 12,
-                                        borderRadius: '50%',
-                                        bgcolor: option.color || 'grey.400'
-                                    }}
-                                />
-                                {option.name}
-                            </Box>
-                        </li>
-                    )}
+                    renderOption={(props, option) => {
+                        const { key, ...optionProps } = props;
+                        return (
+                            <li key={key} {...optionProps}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Box
+                                        sx={{
+                                            width: 12,
+                                            height: 12,
+                                            borderRadius: '50%',
+                                            bgcolor: option.color || 'grey.400'
+                                        }}
+                                    />
+                                    {option.name}
+                                </Box>
+                            </li>
+                        );
+                    }}
                     renderInput={(params) => {
-                        const { InputProps, ...rest } = params;
+                        const { slotProps, ...rest } = params;
                         return (
                             <TextField
                                 {...rest}
                                 variant="outlined"
                                 placeholder="Add tags..."
                                 autoFocus
-                                InputProps={{
-                                    ...InputProps,
-                                    endAdornment: (
-                                        <React.Fragment>
-                                            {loading || saving ? <CircularProgress color="inherit" size={16} /> : null}
-                                            {InputProps?.endAdornment}
-                                        </React.Fragment>
-                                    ),
+                                slotProps={{
+                                    ...slotProps,
+                                    input: {
+                                        ...slotProps?.input,
+                                        endAdornment: (
+                                            <React.Fragment>
+                                                {loading || saving ? <CircularProgress color="inherit" size={16} /> : null}
+                                                {slotProps?.input?.endAdornment}
+                                            </React.Fragment>
+                                        ),
+                                    }
                                 }}
                             />
                         );
@@ -162,11 +174,11 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
             sx={{
                 display: 'flex',
                 alignItems: 'center',
-                cursor: 'pointer',
+                cursor: canAssign ? 'pointer' : 'default',
                 minHeight: 40,
                 width: '100%',
                 '&:hover': {
-                    bgcolor: 'action.hover',
+                    bgcolor: canAssign ? 'action.hover' : 'transparent',
                     borderRadius: 1
                 }
             }}
@@ -176,11 +188,11 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
                     selectedTags.map((tag) => (
                         <TagChip key={tag.id ?? tag.name} tag={tag} />
                     ))
-                ) : (
+                ) : canAssign ? (
                     <Typography variant="caption" color="text.secondary">
                         Click to add tags
                     </Typography>
-                )}
+                ) : null}
             </Stack>
         </Box>
     );

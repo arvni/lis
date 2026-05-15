@@ -1,6 +1,6 @@
-import React, {useEffect, useState, useMemo} from "react";
-import {DataGrid, GridToolbar} from "@mui/x-data-grid";
-import {SnackbarProvider} from "notistack";
+import React, { useEffect, useState, useMemo } from "react";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { SnackbarProvider } from "notistack";
 import AlertComponent from "@/Components/AlertComponent";
 import AddButton from "@/Components/AddButton";
 import {
@@ -31,10 +31,10 @@ import {
  */
 const CustomNoRowsOverlay = () => {
     return (
-        <Stack sx={{height: "100%", alignItems: "center", justifyContent: "center", py: 5}}>
-            <TableRowsIcon sx={{fontSize: 48, color: 'text.secondary', opacity: 0.4, mb: 2}}/>
+        <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center", py: 5 }}>
+            <TableRowsIcon sx={{ fontSize: 48, color: 'text.secondary', opacity: 0.4, mb: 2 }} />
             <Typography variant="h6" color="text.secondary" gutterBottom>No Records Found</Typography>
-            <Typography variant="body2" color="text.disabled" align="center" sx={{maxWidth: 300, mx: 'auto'}}>
+            <Typography variant="body2" color="text.disabled" align="center" sx={{ maxWidth: 300, mx: 'auto' }}>
                 Try adjusting your search or filter criteria to find what you're looking for
             </Typography>
         </Stack>
@@ -46,9 +46,9 @@ const CustomNoRowsOverlay = () => {
  */
 const CustomLoadingOverlay = () => {
     return (
-        <Box sx={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, bgcolor: alpha('#fff', 0.7), zIndex: 2}}>
-            <Box sx={{position: 'sticky', top: 0, width: '100%'}}>
-                <LinearProgress color="primary"/>
+        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, bgcolor: alpha('#fff', 0.7), zIndex: 2 }}>
+            <Box sx={{ position: 'sticky', top: 0, width: '100%' }}>
+                <LinearProgress color="primary" />
             </Box>
             <Box sx={{
                 display: 'flex',
@@ -64,11 +64,11 @@ const CustomLoadingOverlay = () => {
                     borderRadius: 2,
                     minWidth: 200
                 }}>
-                    <Box sx={{mb: 2}}>
-                        <Skeleton variant="circular" width={40} height={40}/>
+                    <Box sx={{ mb: 2 }}>
+                        <Skeleton variant="circular" width={40} height={40} />
                     </Box>
-                    <Skeleton variant="text" width={120} height={24}/>
-                    <Skeleton variant="text" width={160} height={18}/>
+                    <Skeleton variant="text" width={120} height={24} />
+                    <Skeleton variant="text" width={160} height={18} />
                 </Box>
             </Box>
         </Box>
@@ -106,36 +106,36 @@ const CustomLoadingOverlay = () => {
  * @param {Object} props - Component props
  */
 const TableLayout = ({
-                         Filter,
-                         columns,
-                         reload,
-                         data = {data: [], total: 0, current_page: 1},
-                         children,
-                         loading = false,
-                         status,
-                         addNew = false,
-                         onClickAddNew,
-                         addNewTitle = "Add New",
-                         errors,
-                         processing = false,
-                         defaultValues = {
-                             filters: {},
-                             sort: {field: 'id', sort: 'desc'},
-                             pageSize: 10,
-                             page: 1
-                         },
-                         showToolbar = false,
-                         onExport,
-                         refreshData,
-                         headerActions,
-                         customProps = {},
-                         ...props
-                     }) => {
+    Filter,
+    columns,
+    reload,
+    data = { data: [], total: 0, current_page: 1 },
+    children,
+    loading = false,
+    status,
+    addNew = false,
+    onClickAddNew,
+    addNewTitle = "Add New",
+    errors,
+    processing = false,
+    defaultValues = {
+        filters: {},
+        sort: { field: 'id', sort: 'desc' },
+        pageSize: 10,
+        page: 1
+    },
+    showToolbar = false,
+    onExport,
+    refreshData,
+    headerActions,
+    customProps = {},
+    ...props
+}) => {
     const theme = useTheme();
     const [success, setSuccess] = useState(null);
 
     // Merge caller-supplied defaultValues with safe fallbacks
-    defaultValues = {filters: {}, sort: {field: 'id', sort: 'desc'}, pageSize: 10, page: 1, ...defaultValues};
+    defaultValues = { filters: {}, sort: { field: 'id', sort: 'desc' }, pageSize: 10, page: 1, ...defaultValues };
 
     const [filterOpen, setFilterOpen] = useState(Object.keys(defaultValues.filters).length > 0);
 
@@ -212,7 +212,7 @@ const TableLayout = ({
 
     return (
         <Fade in={true} timeout={300}>
-            <Box sx={{position: 'relative'}}>
+            <Box sx={{ position: 'relative' }}>
                 {/* Filter Area - Only rendered when open */}
                 {filterOpen && Filter && (
                     <Fade in={true} timeout={300}>
@@ -227,17 +227,17 @@ const TableLayout = ({
                                 bgcolor: alpha(theme.palette.primary.main, 0.03),
                             }}
                         >
-                            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2}}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                                 <Typography variant="subtitle1" fontWeight={500}>
-                                    <FilterListIcon fontSize="small" sx={{mr: 1, verticalAlign: 'middle'}}/>
+                                    <FilterListIcon fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
                                     Filter Records
                                 </Typography>
                                 <IconButton size="small" onClick={toggleFilter}>
-                                    <FilterListIcon fontSize="small"/>
+                                    <FilterListIcon fontSize="small" />
                                 </IconButton>
                             </Box>
 
-                            <Filter defaultFilter={defaultValues.filters} onFilter={handleFilterChange}/>
+                            <Filter defaultFilter={defaultValues.filters} onFilter={handleFilterChange} />
                         </Paper>
                     </Fade>
                 )}
@@ -265,28 +265,28 @@ const TableLayout = ({
                             borderBottom: '1px solid',
                             borderColor: 'divider',
                             bgcolor: theme.palette.mode === 'light' ? 'grey.50' : alpha(theme.palette.background.default, 0.5),
-                            flexWrap: {xs: 'wrap', md: 'nowrap'},
+                            flexWrap: { xs: 'wrap', md: 'nowrap' },
                             gap: 1,
                         }}
                     >
                         {/* Left: record count */}
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, minWidth: 0}}>
-                            <TableRowsIcon sx={{color: 'text.disabled', fontSize: 18, flexShrink: 0}}/>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                            <TableRowsIcon sx={{ color: 'text.disabled', fontSize: 18, flexShrink: 0 }} />
                             <Typography variant="body2" color="text.secondary" noWrap>
                                 Showing <strong>{recordRange}</strong> of <strong>{formattedTotal}</strong> records
                             </Typography>
                         </Box>
 
                         {/* Right: actions */}
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0}}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
                             {Filter && (
                                 <Button
                                     size="small"
                                     variant={filterOpen ? 'contained' : activeFilterCount > 0 ? 'outlined' : 'text'}
                                     color={activeFilterCount > 0 ? 'primary' : 'inherit'}
                                     onClick={toggleFilter}
-                                    startIcon={filterOpen ? <FilterListOffIcon fontSize="small"/> : <FilterListIcon fontSize="small"/>}
-                                    sx={{textTransform: 'none', fontWeight: 500, minWidth: 90}}
+                                    startIcon={filterOpen ? <FilterListOffIcon fontSize="small" /> : <FilterListIcon fontSize="small" />}
+                                    sx={{ textTransform: 'none', fontWeight: 500, minWidth: 90 }}
                                 >
                                     {filterOpen ? 'Hide' : activeFilterCount > 0 ? `Filters (${activeFilterCount})` : 'Filters'}
                                 </Button>
@@ -295,14 +295,14 @@ const TableLayout = ({
                             {headerActions}
                             <Tooltip title="Refresh">
                                 <IconButton size="small" onClick={handleRefresh} disabled={loading}>
-                                    <RefreshIcon fontSize="small"/>
+                                    <RefreshIcon fontSize="small" />
                                 </IconButton>
                             </Tooltip>
 
                             {onExport && (
                                 <Tooltip title="Export">
                                     <IconButton size="small" onClick={handleExport} disabled={loading || !data.total}>
-                                        <DownloadIcon fontSize="small"/>
+                                        <DownloadIcon fontSize="small" />
                                     </IconButton>
                                 </Tooltip>
                             )}
@@ -339,6 +339,7 @@ const TableLayout = ({
                         onPaginationModelChange={handlePaginationChange}
                         rowCount={data.total || 0}
                         loading={loading}
+                        autosizeOnMount
                         onSortModelChange={handleSortChange}
                         components={{
                             NoRowsOverlay: CustomNoRowsOverlay,
@@ -423,11 +424,11 @@ const TableLayout = ({
 
                 {/* Only show floating add button if not showing it in the header */}
                 {addNew && !onClickAddNew && (
-                    <AddButton onClick={onClickAddNew} title={addNewTitle}/>
+                    <AddButton onClick={onClickAddNew} title={addNewTitle} />
                 )}
 
                 <SnackbarProvider maxSnack={3}>
-                    <AlertComponent status={status} errors={errors} success={success}/>
+                    <AlertComponent status={status} errors={errors} success={success} />
                 </SnackbarProvider>
             </Box>
         </Fade>

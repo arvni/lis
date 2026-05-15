@@ -17,7 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            "indexProvider"=>\App\Http\Middleware\IndexProvider::class
+            "indexProvider" => \App\Http\Middleware\IndexProvider::class,
+            "permission" => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            "role" => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            "role_or_permission" => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
         //
     })

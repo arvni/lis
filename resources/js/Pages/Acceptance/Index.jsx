@@ -256,7 +256,6 @@ const Index = () => {
             display: "flex",
             renderCell: ({ row }) => (
                 <Chip
-                    icon={<LocalHospitalIcon fontSize="small" />}
                     label={row.out_patient ? "Out patient" : "In patient"}
                     color={row.out_patient ? "info" : "secondary"}
                     variant={row.out_patient ? "filled" : "filled"}
@@ -282,7 +281,6 @@ const Index = () => {
                 return (
                     <Tooltip title={isPaid ? "Fully paid" : "Remaining amount to be paid"}>
                         <Chip
-                            icon={<PaymentsIcon fontSize="small" />}
                             label={formatCurrency(remaining)}
                             color={isPaid ? "success" : "warning"}
                             size="small"
