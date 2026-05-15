@@ -20,6 +20,7 @@ class SectionGroupController extends Controller
     public function __construct(private SectionGroupService $sectionGroupService)
     {
         $this->middleware("indexProvider")->only("index");
+        $this->middleware("indexProvider")->only("show");
     }
 
     /**
@@ -51,11 +52,13 @@ class SectionGroupController extends Controller
     }
 
 
-    public function show(SectionGroup $sectionGroup)
+    public function show(SectionGroup $sectionGroup, Request $request)
     {
         $this->authorize("view", $sectionGroup);
         $this->sectionGroupService->getSectionGroupWithChildrenAndSection($sectionGroup);
-        return Inertia::render('SectionGroup/Show', compact("sectionGroup"));
+        $requestInputs = $request->all();
+        $acceptanceItems = $this->sectionGroupService->listAcceptanceItems($sectionGroup, $requestInputs);
+        return Inertia::render('SectionGroup/Show', compact("sectionGroup", "acceptanceItems", "requestInputs"));
     }
 
 

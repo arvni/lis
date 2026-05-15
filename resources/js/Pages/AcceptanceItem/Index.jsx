@@ -67,15 +67,15 @@ const StatisticsIndex = () => {
         {
             field: 'id',
             headerName: 'ID',
-            type: "number",
-            flex: 0.2,
-            hidden: true,
+            display: "flex",
+            width: 50
         },
         {
             field: 'invoice.owner.fullName',
             headerName: 'Client',
             type: "string",
             flex: 0.7,
+            display: "flex",
             sortable: false,
             renderCell: ({ row }) => row?.invoice?.owner?.fullName || "—",
         },
@@ -83,6 +83,7 @@ const StatisticsIndex = () => {
             field: 'patient_fullname',
             headerName: 'Patient Name',
             type: "string",
+            display: "flex",
             flex: 0.7,
             renderCell: ({ value }) => value || "—"
         },
@@ -90,6 +91,7 @@ const StatisticsIndex = () => {
             field: 'patient_idno',
             headerName: 'ID Number',
             type: "string",
+            display: "flex",
             flex: 0.25,
             renderCell: ({ value }) => value || "—"
         },
@@ -97,6 +99,7 @@ const StatisticsIndex = () => {
             field: 'patient_dateofbirth',
             headerName: 'Date of Birth',
             type: "string",
+            display: "flex",
             flex: 0.3,
             renderCell: ({ value }) => formatDate(value)
         },
@@ -104,6 +107,7 @@ const StatisticsIndex = () => {
             field: 'test_testsname',
             headerName: 'Test Name',
             type: "string",
+            display: "flex",
             flex: 0.3,
             renderCell: ({ value }) => value || "—"
         },
@@ -111,6 +115,7 @@ const StatisticsIndex = () => {
             field: 'method_name',
             headerName: 'Method',
             type: "string",
+            display: "flex",
             flex: 0.25,
             renderCell: ({ value }) => value || "—"
         },
@@ -118,8 +123,9 @@ const StatisticsIndex = () => {
             field: 'tags',
             headerName: 'Tags',
             type: "string",
+            display: "flex",
             sortable: false,
-            flex: 0.45,
+            width: 200,
             renderCell: ({ row }) => (
                 <InlineTagManager
                     initialTags={row.tags || []}
@@ -132,6 +138,7 @@ const StatisticsIndex = () => {
             field: 'price',
             headerName: 'Price',
             type: "number",
+            display: "flex",
             flex: 0.15,
             renderCell: ({ value }) => formatCurrency(value)
         },
@@ -139,6 +146,7 @@ const StatisticsIndex = () => {
             field: 'discount',
             headerName: 'Discount',
             type: "number",
+            display: "flex",
             flex: 0.2,
             renderCell: ({ value }) => formatCurrency(value)
         },
@@ -146,6 +154,7 @@ const StatisticsIndex = () => {
             field: 'active_sample_collection_date',
             headerName: 'Sample Date',
             type: "date",
+            display: "flex",
             valueGetter: (value) => value ? new Date(value) : null,
             flex: 0.3,
             renderCell: ({ value }) => value ? value.toLocaleDateString() : "-"
@@ -154,6 +163,7 @@ const StatisticsIndex = () => {
             field: 'status',
             headerName: 'Status',
             type: "string",
+            display: "flex",
             flex: 0.3,
             sortable: false,
         },
@@ -161,6 +171,7 @@ const StatisticsIndex = () => {
             field: 'updated_at',
             headerName: 'Last Updated',
             type: "date",
+            display: "flex",
             valueGetter: (value) => value ? new Date(value) : null,
             flex: 0.4,
             renderCell: ({ value }) => formatDate(value)
@@ -169,6 +180,7 @@ const StatisticsIndex = () => {
             field: 'estimated_report_date',
             headerName: 'Est. Report Date',
             type: "date",
+            display: "flex",
             flex: 0.35,
             sortable: false,
             valueGetter: (value, row) => addWorkingDays(row.created_at, row.method_turnaround_time),
@@ -177,6 +189,7 @@ const StatisticsIndex = () => {
         {
             field: 'action',
             headerName: 'Actions',
+            display: "flex",
             flex: 0.1,
             sortable: false,
             renderCell: ({ row }) => (
@@ -250,8 +263,7 @@ const StatisticsIndex = () => {
     const pageReload = useCallback((page, filters, sort, pageSize) => {
         router.visit(route('acceptanceItems.index'), {
             data: { page, filters, pageSize, sort },
-            only: ["acceptanceItems", "requestInputs"],
-            preserveState: true
+            only: ["acceptanceItems", "requestInputs",],
         });
     }, []);
 

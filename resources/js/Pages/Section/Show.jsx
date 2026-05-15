@@ -1,10 +1,10 @@
-import React, {useMemo, useState} from "react";
-import {Head, Link, router, useForm, usePage} from "@inertiajs/react";
+import React, { useMemo, useState } from "react";
+import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import TableLayout from "@/Layouts/TableLayout";
 import Filter from "./Components/ShowFilter";
 import EnteringForm from "@/Pages/Section/Components/EnteringForm";
-import {ACTION_TYPES, WorkflowActionForm} from "@/Pages/Section/Components/DoneForm";
+import { ACTION_TYPES, WorkflowActionForm } from "@/Pages/Section/Components/DoneForm";
 import {
     Box,
     Button,
@@ -33,34 +33,32 @@ import {
     Dashboard as DashboardIcon,
     LocalOffer as TagIcon,
 } from "@mui/icons-material";
-import TagManagerDialog from "@/Components/TagManagerDialog";
-import TagChip from "@/Components/TagChip";
 import InlineTagManager from "@/Components/InlineTagManager";
-import {GridActionsCellItem} from "@mui/x-data-grid";
+import { GridActionsCellItem } from "@mui/x-data-grid";
 import Avatar from "@mui/material/Avatar";
 
 // Status configurations with icons and colors
 const STATUS_CONFIG = {
     rejected: {
-        icon: <ErrorOutlineIcon fontSize="small"/>,
+        icon: <ErrorOutlineIcon fontSize="small" />,
         label: "Rejected",
         color: "error",
         chipColor: "error"
     },
     finished: {
-        icon: <CheckCircleIcon fontSize="small"/>,
+        icon: <CheckCircleIcon fontSize="small" />,
         label: "Finished",
         color: "success",
         chipColor: "success"
     },
     processing: {
-        icon: <AccessTimeIcon fontSize="small"/>,
+        icon: <AccessTimeIcon fontSize="small" />,
         label: "Processing",
         color: "info",
         chipColor: "info"
     },
     waiting: {
-        icon: <HourglassEmptyIcon fontSize="small"/>,
+        icon: <HourglassEmptyIcon fontSize="small" />,
         label: "Waiting",
         color: "warning",
         chipColor: "warning"
@@ -95,14 +93,12 @@ const ACCEPTANCE_ITEM_STATES_STATUS = {
 
 const Show = () => {
     const theme = useTheme();
-    const {post, setData, data, reset, processing} = useForm({});
+    const { post, setData, data, reset, processing } = useForm({});
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedRows, setSelectedRows] = useState([]);
     const [openEnteringForm, setOpenEnteringForm] = useState(false);
     const [openDoneForm, setOpenDoneForm] = useState(false);
-    const [openTagDialog, setOpenTagDialog] = useState(false);
-    const [tagEntity, setTagEntity] = useState(null);
 
     const {
         section,
@@ -153,7 +149,7 @@ const Show = () => {
             sortable: false,
             flex: 0.8,
             display: "flex",
-            renderCell: ({row}) => (
+            renderCell: ({ row }) => (
                 <Tooltip title={row?.acceptance_item?.test?.name || "No test name"} arrow>
                     <Typography noWrap variant="body2">
                         {(row?.acceptance_item?.test?.name + " >>  " + row?.acceptance_item?.method?.test?.name) || "-"}
@@ -168,7 +164,7 @@ const Show = () => {
             display: "flex",
             type: "string",
             flex: 1,
-            renderCell: ({row}) => {
+            renderCell: ({ row }) => {
                 return (
                     <Tooltip title={row?.sample?.patient?.fullName || "No patient name"} arrow>
                         <Typography noWrap variant="body2">
@@ -185,7 +181,7 @@ const Show = () => {
             display: "flex",
             flex: 0.2,
             type: "string",
-            renderCell: ({row}) => {
+            renderCell: ({ row }) => {
                 return <Typography variant="body2">{row?.sample?.patient?.age || "-"}</Typography>;
             }
         },
@@ -196,13 +192,13 @@ const Show = () => {
             display: "flex",
             sortable: false,
             width: 160,
-            renderCell: ({row}) => {
+            renderCell: ({ row }) => {
                 const date = row?.sample?.created_at
                     ? formatDateTime(new Date(row.sample.created_at))
                     : '-';
                 return (
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                        <ScienceIcon fontSize="small" color="action"/>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <ScienceIcon fontSize="small" color="action" />
                         <Typography variant="body2">{date}</Typography>
                     </Box>
                 );
@@ -214,11 +210,11 @@ const Show = () => {
             type: "string",
             display: "flex",
             width: 160,
-            renderCell: ({row}) => {
+            renderCell: ({ row }) => {
                 const date = row.started_at ? formatDateTime(new Date(row.started_at)) : '-';
                 return (
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                        <AccessTimeIcon fontSize="small" color="action"/>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <AccessTimeIcon fontSize="small" color="action" />
                         <Typography variant="body2">{date}</Typography>
                     </Box>
                 );
@@ -230,7 +226,7 @@ const Show = () => {
             type: "string",
             display: "flex",
             flex: .4,
-            renderCell: ({row}) => {
+            renderCell: ({ row }) => {
                 const statusInfo = STATUS_CONFIG[row.status] || STATUS_CONFIG.waiting;
                 return (
                     <Chip
@@ -238,7 +234,7 @@ const Show = () => {
                         label={statusInfo.label}
                         size="small"
                         color={statusInfo.chipColor}
-                        sx={{fontWeight: 'medium'}}
+                        sx={{ fontWeight: 'medium' }}
                     />
                 );
             }
@@ -250,9 +246,9 @@ const Show = () => {
             sortable: false,
             display: "flex",
             flex: 0.8,
-            renderCell: ({row}) => (
-                <InlineTagManager 
-                    initialTags={row.acceptance_item?.tags || []} 
+            renderCell: ({ row }) => (
+                <InlineTagManager
+                    initialTags={row.acceptance_item?.tags || []}
                     updateUrl={route('acceptanceItems.tags.update', row.acceptance_item?.id)}
                     entityType="acceptanceItem"
                 />
@@ -263,12 +259,12 @@ const Show = () => {
             headerName: 'Actions',
             type: "actions",
             width: 160,
-            getActions: ({row}) => {
+            getActions: ({ row }) => {
                 let output = [
                     <GridActionsCellItem
                         icon={
                             <Tooltip title="View Details">
-                                <RemoveRedEyeIcon/>
+                                <RemoveRedEyeIcon />
                             </Tooltip>
                         }
                         label="Show"
@@ -297,7 +293,7 @@ const Show = () => {
                             key={"done-" + row.id}
                             icon={
                                 <Tooltip title="Mark as Done">
-                                    <DoneIcon/>
+                                    <DoneIcon />
                                 </Tooltip>
                             }
                             label="Done"
@@ -317,7 +313,7 @@ const Show = () => {
                             key={"reject-" + row.id}
                             icon={
                                 <Tooltip title="Reject">
-                                    <CloseIcon/>
+                                    <CloseIcon />
                                 </Tooltip>
                             }
                             label="Reject"
@@ -340,7 +336,7 @@ const Show = () => {
                             key={"edit-" + row.id}
                             icon={
                                 <Tooltip title="Edit">
-                                    <EditIcon/>
+                                    <EditIcon />
                                 </Tooltip>
                             }
                             label="Edit"
@@ -359,22 +355,6 @@ const Show = () => {
                     );
                 }
 
-                output.push(
-                    <GridActionsCellItem
-                        key={"tags-" + row.id}
-                        icon={
-                            <Tooltip title="Manage Tags">
-                                <TagIcon color="secondary"/>
-                            </Tooltip>
-                        }
-                        label="Manage Tags"
-                        onClick={() => {
-                            setTagEntity(row.acceptance_item);
-                            setOpenTagDialog(true);
-                        }}
-                    />
-                );
-
                 return output;
             }
         }
@@ -389,18 +369,18 @@ const Show = () => {
 
     const pageReload = (page, filters, sort, pageSize) => {
         router.visit(route('sections.show', section.id), {
-            data: {page, filters, sort, pageSize},
+            data: { page, filters, sort, pageSize },
             only: ["acceptanceItemStates", "section", "status", "success", "requestInputs"],
             preserveState: true
         });
     };
 
-    const handleBarcodeChange = e => setData({barcode: e.target.value});
+    const handleBarcodeChange = e => setData({ barcode: e.target.value });
 
-    const handleEntering = () => post(route("sections.enter", section.id), {onSuccess});
+    const handleEntering = () => post(route("sections.enter", section.id), { onSuccess });
 
     const handleOpenEnteringForm = () => {
-        setData({barcode: ""});
+        setData({ barcode: "" });
         setOpenEnteringForm(true);
     };
 
@@ -412,7 +392,7 @@ const Show = () => {
     const handleOpenForm = (id, type) => () => {
         setLoading(true);
         axios.get(route("acceptanceItemStates.show", id))
-            .then(res => setData({...res.data.data, actionType: type, "_method": "put"}))
+            .then(res => setData({ ...res.data.data, actionType: type, "_method": "put" }))
             .then(() => {
                 setLoading(false);
                 setOpenDoneForm(true);
@@ -424,13 +404,13 @@ const Show = () => {
         setOpenDoneForm(false);
     };
 
-    const handleChange = (name, value) => setData(prevData => ({...prevData, [name]: value}));
+    const handleChange = (name, value) => setData(prevData => ({ ...prevData, [name]: value }));
 
     const handleSubmit = () => {
         if (data.ids && data.ids.length > 0) {
-            post(route("acceptanceItemStates.bulkUpdate"), {onSuccess});
+            post(route("acceptanceItemStates.bulkUpdate"), { onSuccess });
         } else {
-            post(route("acceptanceItemStates.update", data.id), {onSuccess});
+            post(route("acceptanceItemStates.update", data.id), { onSuccess });
         }
     };
 
@@ -487,7 +467,7 @@ const Show = () => {
             .then(res => {
                 setOptions(res.data.sections);
             }).then(() => axios.get(route("acceptanceItemStates.show", id)))
-            .then(res => setData({...res.data.data, next: null, actionType: ACTION_TYPES.REJECT, "_method": "put"}))
+            .then(res => setData({ ...res.data.data, next: null, actionType: ACTION_TYPES.REJECT, "_method": "put" }))
             .then(() => {
                 setOpenDoneForm(true);
                 setLoading(false);
@@ -497,7 +477,7 @@ const Show = () => {
 
     return (
         <>
-            <Head title={section.name}/>
+            <Head title={section.name} />
 
             {/* Section Header */}
             <Card
@@ -510,13 +490,13 @@ const Show = () => {
                     color: theme.palette.primary.contrastText
                 }}
             >
-  <Grid container spacing={2} sx={{alignItems: "center"}}>
-                    <Grid size={{xs: 12, md: 6}}>
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                            {section.icon ? <Avatar src={section.icon}/> : <DashboardIcon fontSize="large"/>}
+                <Grid container spacing={2} sx={{ alignItems: "center" }}>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            {section.icon ? <Avatar src={section.icon} /> : <DashboardIcon fontSize="large" />}
                             <Box>
                                 <Typography variant="h4"
-                                            fontWeight="bold">
+                                    fontWeight="bold">
                                     {section.name}
                                 </Typography>
                                 <Typography variant="subtitle1">
@@ -526,12 +506,12 @@ const Show = () => {
                         </Box>
                     </Grid>
 
-                    <Grid size={{xs: 12, md: 6}}
-                          sx={{display: 'flex', justifyContent: {xs: 'flex-start', md: 'flex-end'}, gap: 1}}>
+                    <Grid size={{ xs: 12, md: 6 }}
+                        sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' }, gap: 1 }}>
                         {/* Bulk buttons removed from here and moved to TableLayout headerActions below */}
                         <Button
                             variant="contained"
-                            startIcon={<AddIcon/>}
+                            startIcon={<AddIcon />}
                             onClick={handleOpenEnteringForm}
                             color="secondary"
                             sx={{
@@ -559,7 +539,7 @@ const Show = () => {
                                     }
                                 }}
                             >
-                                <RefreshIcon sx={{color: "white"}}/>
+                                <RefreshIcon sx={{ color: "white" }} />
                             </IconButton>
                         </Tooltip>
                     </Grid>
@@ -567,8 +547,8 @@ const Show = () => {
             </Card>
 
             {/* Stats Dashboard */}
-            <Grid container spacing={2} sx={{mb: 3}}>
-                <Grid size={{xs: 12, md: 6, lg: 2.4}}>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid size={{ xs: 12, md: 6, lg: 2.4 }}>
                     <Paper
                         elevation={1}
                         sx={{
@@ -596,12 +576,12 @@ const Show = () => {
                                 display: 'flex'
                             }}
                         >
-                            <DashboardIcon fontSize="large" sx={{color: "white"}}/>
+                            <DashboardIcon fontSize="large" sx={{ color: "white" }} />
                         </Box>
                     </Paper>
                 </Grid>
 
-                <Grid size={{xs: 12, md: 6, lg: 2.4}}>
+                <Grid size={{ xs: 12, md: 6, lg: 2.4 }}>
                     <Paper
                         elevation={1}
                         sx={{
@@ -629,12 +609,12 @@ const Show = () => {
                                 display: 'flex'
                             }}
                         >
-                            <CheckCircleIcon fontSize="large" sx={{color: "white"}}/>
+                            <CheckCircleIcon fontSize="large" sx={{ color: "white" }} />
                         </Box>
                     </Paper>
                 </Grid>
 
-                <Grid size={{xs: 12, md: 6, lg: 2.4}}>
+                <Grid size={{ xs: 12, md: 6, lg: 2.4 }}>
                     <Paper
                         elevation={1}
                         sx={{
@@ -662,12 +642,12 @@ const Show = () => {
                                 display: 'flex'
                             }}
                         >
-                            <AccessTimeIcon fontSize="large" sx={{color: "white"}}/>
+                            <AccessTimeIcon fontSize="large" sx={{ color: "white" }} />
                         </Box>
                     </Paper>
                 </Grid>
 
-                <Grid size={{xs: 12, md: 6, lg: 2.4}}>
+                <Grid size={{ xs: 12, md: 6, lg: 2.4 }}>
                     <Paper
                         elevation={1}
                         sx={{
@@ -695,12 +675,12 @@ const Show = () => {
                                 display: 'flex'
                             }}
                         >
-                            <HourglassEmptyIcon fontSize="large" sx={{color: "white"}}/>
+                            <HourglassEmptyIcon fontSize="large" sx={{ color: "white" }} />
                         </Box>
                     </Paper>
                 </Grid>
 
-                <Grid size={{xs: 12, md: 6, lg: 2.4}}>
+                <Grid size={{ xs: 12, md: 6, lg: 2.4 }}>
                     <Paper
                         elevation={1}
                         sx={{
@@ -728,14 +708,14 @@ const Show = () => {
                                 display: 'flex'
                             }}
                         >
-                            <ErrorOutlineIcon fontSize="large" sx={{color: "white"}}/>
+                            <ErrorOutlineIcon fontSize="large" sx={{ color: "white" }} />
                         </Box>
                     </Paper>
                 </Grid>
             </Grid>
 
             {/* Main Table */}
-            <Card elevation={2} sx={{borderRadius: 2, overflow: 'hidden'}}>
+            <Card elevation={2} sx={{ borderRadius: 2, overflow: 'hidden' }}>
                 <TableLayout
                     defaultValues={requestInputs}
                     success={success}
@@ -760,35 +740,35 @@ const Show = () => {
                                                 size="small"
                                                 color="error"
                                                 variant="outlined"
-                                                sx={{fontWeight: 'bold'}}
+                                                sx={{ fontWeight: 'bold' }}
                                             />
                                         </Tooltip>
                                     )}
                                     <Button
                                         variant="contained"
-                                        startIcon={<DoneIcon/>}
+                                        startIcon={<DoneIcon />}
                                         onClick={handleOpenBulkForm(ACTION_TYPES.COMPLETE)}
                                         color="success"
                                         size="small"
                                         disabled={!isCompatible}
-                                        sx={{borderRadius: 2, textTransform: 'none', px: 2}}
+                                        sx={{ borderRadius: 2, textTransform: 'none', px: 2 }}
                                     >
                                         Bulk Done ({getSelectionIds(selectedRows).length})
                                     </Button>
                                     <Button
                                         variant="contained"
-                                        startIcon={<CloseIcon/>}
+                                        startIcon={<CloseIcon />}
                                         onClick={handleOpenBulkRejectForm()}
                                         color="error"
                                         size="small"
                                         disabled={!isCompatible}
-                                        sx={{borderRadius: 2, textTransform: 'none', px: 2}}
+                                        sx={{ borderRadius: 2, textTransform: 'none', px: 2 }}
                                     >
                                         Bulk Reject ({getSelectionIds(selectedRows).length})
                                     </Button>
                                 </>
                             ) : (
-                                <Typography variant="caption" color="text.secondary" sx={{fontStyle: 'italic'}}>
+                                <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
                                     Select processing items for bulk actions
                                 </Typography>
                             )}
@@ -815,14 +795,6 @@ const Show = () => {
                 onChange={handleChange}
                 onSubmit={handleSubmit}
                 options={options}
-            />
-
-            <TagManagerDialog
-                open={openTagDialog}
-                onClose={() => setOpenTagDialog(false)}
-                tags={tagEntity?.tags || []}
-                updateUrl={tagEntity ? route('acceptanceItems.tags.update', tagEntity.id) : ''}
-                title={`Manage Tags for Test #${tagEntity?.id}`}
             />
         </>
     );

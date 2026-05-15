@@ -6,8 +6,10 @@ namespace App\Domains\Laboratory\Services;
 use App\Domains\Laboratory\DTOs\SectionGroupDTO;
 use App\Domains\Laboratory\Models\SectionGroup;
 use App\Domains\Laboratory\Repositories\SectionGroupRepository;
+use App\Domains\Reception\Models\AcceptanceItem;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
@@ -69,6 +71,48 @@ class SectionGroupService
             },
             'parent']);
         return $sectionGroup;
+    }
+
+    public function listAcceptanceItems(SectionGroup $sectionGroup, array $queryData): LengthAwarePaginator
+    {
+        $query = AcceptanceItem::query()
+            ->with([
+                "acceptance:id,referenceCode,patient_id",
+                "acceptance.patient:id,fullName,idNo,dateOfBirth",
+                "activeSample.patient:id,fullName,idNo,dateOfBirth",
+                "latestState.section:id,name",
+                "method.test",
+                "test",
+            ])
+            ->whereHas("acceptanceItemStates.section", function ($query) use ($sectionGroup) {
+                $query->where("section_group_id", $sectionGroup->id);
+            });
+
+        $filters = $queryData["filters"] ?? [];
+        if (!empty($filters["search"])) {
+            $search = $filters["search"];
+            $query->where(function ($query) use ($search) {
+                $query
+                    ->whereHas("test", fn($testQuery) => $testQuery->where("name", "like", "%{$search}%"))
+                    ->orWhereHas("method", fn($methodQuery) => $methodQuery->where("name", "like", "%{$search}%"))
+                    ->orWhereHas("acceptance", fn($acceptanceQuery) => $acceptanceQuery->where("referenceCode", "like", "%{$search}%"))
+                    ->orWhereHas("acceptance.patient", fn($patientQuery) => $patientQuery
+                        ->where("fullName", "like", "%{$search}%")
+                        ->orWhere("idNo", "like", "%{$search}%"))
+                    ->orWhereHas("activeSample.patient", fn($patientQuery) => $patientQuery
+                        ->where("fullName", "like", "%{$search}%")
+                        ->orWhere("idNo", "like", "%{$search}%"));
+            });
+        }
+
+        $sort = $queryData["sort"] ?? ["field" => "id", "sort" => "desc"];
+        $sortableFields = ["id", "acceptance_id", "price", "discount", "created_at", "updated_at"];
+        $sortField = in_array($sort["field"] ?? null, $sortableFields, true) ? $sort["field"] : "id";
+        $sortDirection = ($sort["sort"] ?? "desc") === "asc" ? "asc" : "desc";
+
+        return $query
+            ->orderBy($sortField, $sortDirection)
+            ->paginate($queryData["pageSize"] ?? 10);
     }
 
 

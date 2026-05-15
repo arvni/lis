@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { router } from "@inertiajs/react";
+import TableLayout from "@/Layouts/TableLayout";
+import { Head, Link, router, useRemember } from "@inertiajs/react";
 import {
     Typography,
     Box,
@@ -22,7 +23,9 @@ import {
     Divider,
     useTheme,
     useMediaQuery,
-    Badge
+    Badge,
+    Tabs,
+    Tab
 } from '@mui/material';
 import {
     Folder as FolderIcon,
@@ -35,18 +38,42 @@ import {
     HourglassEmpty as HourglassEmptyIcon,
     DashboardOutlined as DashboardIcon,
     ArrowBack as ArrowBackIcon,
-    Add as AddIcon,
     Edit as EditIcon
 } from '@mui/icons-material';
 
 // Grid component with better naming
 const Grid = MuiGrid;
 
-const Show = ({ sectionGroup }) => {
+const STATUS_CONFIG = {
+    rejected: { label: "Rejected", color: "error" },
+    finished: { label: "Finished", color: "success" },
+    processing: { label: "Processing", color: "info" },
+    waiting: { label: "Waiting", color: "warning" },
+};
+
+const formatDateTime = (dateTimeStr) => {
+    if (!dateTimeStr) return "-";
+
+    try {
+        return new Intl.DateTimeFormat("default", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+        }).format(new Date(dateTimeStr));
+    } catch (e) {
+        return dateTimeStr;
+    }
+};
+
+const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, errors }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
+    const [activeTab, setActiveTab] = useRemember(0, `section-group-${sectionGroup.id}-tab`);
     const [menuAnchorEl, setMenuAnchorEl] = useState(null);
     const [menuItemId, setMenuItemId] = useState(null);
     const [menuItemType, setMenuItemType] = useState(null);
@@ -61,6 +88,136 @@ const Show = ({ sectionGroup }) => {
             activeSubGroups: sectionGroup.children ? sectionGroup.children.filter(g => g.active).length : 0,
         }
     };
+
+    const acceptanceItemColumns = useMemo(() => [
+        {
+            field: "id",
+            headerName: "ID",
+            width: 80,
+        },
+        {
+            field: "referenceCode",
+            headerName: "Acceptance",
+            sortable: false,
+            flex: 0.35,
+            renderCell: ({ row }) => (
+                <Typography variant="body2" noWrap>
+                    {row.acceptance?.referenceCode || `#${row.acceptance_id}`}
+                </Typography>
+            ),
+        },
+        {
+            field: "patient",
+            headerName: "Patient",
+            sortable: false,
+            flex: 0.7,
+            renderCell: ({ row }) => {
+                const patient = row.active_sample?.patient || row.acceptance?.patient;
+                return (
+                    <Tooltip title={patient?.fullName || "No patient"} arrow>
+                        <Typography variant="body2" noWrap>
+                            {patient?.fullName || "-"}
+                        </Typography>
+                    </Tooltip>
+                );
+            },
+        },
+        {
+            field: "test",
+            headerName: "Test",
+            sortable: false,
+            flex: 0.8,
+            renderCell: ({ row }) => (
+                <Tooltip title={row.test?.name || "No test"} arrow>
+                    <Typography variant="body2" noWrap>
+                        {row.test?.name || "-"}
+                    </Typography>
+                </Tooltip>
+            ),
+        },
+        {
+            field: "method",
+            headerName: "Method",
+            sortable: false,
+            flex: 0.5,
+            renderCell: ({ row }) => (
+                <Typography variant="body2" noWrap>
+                    {row.method?.name || "-"}
+                </Typography>
+            ),
+        },
+        {
+            field: "status",
+            headerName: "Status",
+            sortable: false,
+            flex: 0.55,
+            renderCell: ({ row }) => (
+                <Chip
+                    size="small"
+                    label={row.status || "-"}
+                    color={row.latest_state?.status ? (STATUS_CONFIG[row.latest_state.status]?.color || "default") : "default"}
+                    variant="outlined"
+                />
+            ),
+        },
+        {
+            field: "last_section",
+            headerName: "Last Section",
+            sortable: false,
+            flex: 0.55,
+            renderCell: ({ row }) => {
+                const stateStatus = STATUS_CONFIG[row.latest_state?.status];
+                return (
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
+                        <Typography variant="body2" noWrap>
+                            {row.latest_state?.section?.name || "-"}
+                        </Typography>
+                        {stateStatus && (
+                            <Chip
+                                size="small"
+                                label={stateStatus.label}
+                                color={stateStatus.color}
+                                sx={{ height: 22 }}
+                            />
+                        )}
+                    </Box>
+                );
+            },
+        },
+        {
+            field: "updated_at",
+            headerName: "Last Updated",
+            type: "date",
+            flex: 0.4,
+            valueGetter: (value, row) => row.latest_state?.updated_at ? new Date(row.latest_state.updated_at) : null,
+            renderCell: ({ row }) => (
+                <Typography variant="body2">
+                    {formatDateTime(row.latest_state?.updated_at || row.updated_at)}
+                </Typography>
+            ),
+        },
+        {
+            field: "actions",
+            headerName: "Actions",
+            sortable: false,
+            width: 120,
+            renderCell: ({ row }) => (
+                <Tooltip title="View Acceptance Item">
+                    <IconButton
+                        component={Link}
+                        href={route("acceptanceItems.show", {
+                            acceptanceItem: row.id,
+                            acceptance: row.acceptance_id,
+                        })}
+                        size="small"
+                        color="info"
+                    >
+                        <VisibilityIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+            ),
+        },
+    ], []);
 
     // Handle card menu actions
     const handleMenuOpen = (event, id, type) => {
@@ -91,6 +248,14 @@ const Show = ({ sectionGroup }) => {
         } else {
             router.visit(route('sectionGroups.index'));
         }
+    };
+
+    const pageReload = (page, filters, sort, pageSize) => {
+        router.visit(route("sectionGroups.show", sectionGroup.id), {
+            data: { page, filters, sort, pageSize },
+            only: ["acceptanceItems", "requestInputs", "status", "success", "errors"],
+            preserveState: true,
+        });
     };
 
     // Card hover handlers
@@ -138,6 +303,7 @@ const Show = ({ sectionGroup }) => {
 
     return (
         <Container maxWidth="xl">
+            <Head title={sectionGroup.name} />
             <Box sx={{ pt: 2, pb: 6 }}>
                 {/* Header Card with improved design */}
                 <Card
@@ -256,6 +422,20 @@ const Show = ({ sectionGroup }) => {
                     </Grid>
                 </Card>
 
+                <Paper elevation={0} variant="outlined" sx={{ mb: 3, borderRadius: 2 }}>
+                    <Tabs
+                        value={activeTab}
+                        onChange={(event, value) => setActiveTab(value)}
+                        variant={isMobile ? "fullWidth" : "standard"}
+                        sx={{ px: { xs: 0, sm: 2 } }}
+                    >
+                        <Tab label="Overview" />
+                        <Tab label={`Acceptance Items (${acceptanceItems?.total || 0})`} />
+                    </Tabs>
+                </Paper>
+
+                {activeTab === 0 && (
+                    <>
                 {/* Summary statistics */}
                 <Box sx={{ mb: 4 }}>
                     <Card elevation={2} sx={{ borderRadius: 2 }}>
@@ -639,6 +819,23 @@ const Show = ({ sectionGroup }) => {
                         </Paper>
                     </Fade>
                 )}
+                    </>
+                )}
+
+                <Box sx={{ display: activeTab === 1 ? "block" : "none" }}>
+                    <Card elevation={2} sx={{ borderRadius: 2, overflow: "hidden" }}>
+                        <TableLayout
+                            defaultValues={requestInputs}
+                            success={success}
+                            status={status}
+                            errors={errors}
+                            reload={pageReload}
+                            columns={acceptanceItemColumns}
+                            data={acceptanceItems}
+                            loading={false}
+                        />
+                    </Card>
+                </Box>
             </Box>
 
             {/* Actions menu with improved design */}
