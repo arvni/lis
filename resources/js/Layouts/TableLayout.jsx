@@ -138,6 +138,10 @@ const TableLayout = ({
     defaultValues = { filters: {}, sort: { field: 'id', sort: 'desc' }, pageSize: 10, page: 1, ...defaultValues };
 
     const [filterOpen, setFilterOpen] = useState(Object.keys(defaultValues.filters).length > 0);
+    const [paginationModel, setPaginationModel] = useState({
+        pageSize: Number(defaultValues.pageSize) || 10,
+        page: Number(data.current_page || defaultValues.page || 1) - 1,
+    });
 
     // Process columns to ensure they're formatted correctly
     const processedColumns = useMemo(() => {
@@ -157,12 +161,49 @@ const TableLayout = ({
         }
     }, [processing, props.success]);
 
+    useEffect(() => {
+        const nextPaginationModel = {
+            pageSize: Number(defaultValues.pageSize) || 10,
+            page: Number(data.current_page || defaultValues.page || 1) - 1,
+        };
+
+        setPaginationModel((currentPaginationModel) => {
+            if (
+                currentPaginationModel.page === nextPaginationModel.page &&
+                currentPaginationModel.pageSize === nextPaginationModel.pageSize
+            ) {
+                return currentPaginationModel;
+            }
+
+            return nextPaginationModel;
+        });
+    }, [data.current_page, defaultValues.page, defaultValues.pageSize]);
+
     const resetSuccess = () => setTimeout(() => {
         setSuccess(null);
     }, 3000);
 
     // Handlers for pagination and filtering
     const handlePaginationChange = (pModel) => {
+        const serverPaginationModel = {
+            pageSize: Number(defaultValues.pageSize) || 10,
+            page: Number(defaultValues.page || 1) - 1,
+        };
+
+        if (
+            pModel.page === serverPaginationModel.page &&
+            pModel.pageSize === serverPaginationModel.pageSize &&
+            paginationModel.page !== serverPaginationModel.page
+        ) {
+            return;
+        }
+
+        if (pModel.page === paginationModel.page && pModel.pageSize === paginationModel.pageSize) {
+            return;
+        }
+
+        setPaginationModel(pModel);
+
         if (pModel.pageSize !== Number(defaultValues.pageSize)) {
             reload(1, defaultValues.filters, defaultValues.sort, pModel.pageSize);
         } else if (pModel.page !== Number(defaultValues.page) - 1) {
@@ -332,10 +373,7 @@ const TableLayout = ({
                         pagination
                         paginationMode="server"
                         pageSizeOptions={[10, 20, 50, 100]}
-                        paginationModel={{
-                            pageSize: Number(defaultValues.pageSize) || 10,
-                            page: Number(data.current_page || 1) - 1,
-                        }}
+                        paginationModel={paginationModel}
                         onPaginationModelChange={handlePaginationChange}
                         rowCount={data.total || 0}
                         loading={loading}
