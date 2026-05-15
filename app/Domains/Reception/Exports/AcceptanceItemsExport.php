@@ -81,6 +81,7 @@ class AcceptanceItemsExport implements
                     'method_name' => $first->method_name,
                     'method_turnaround_time' => $first->method_turnaround_time,
                     'activeSamples' => $first->activeSamples,
+                    'tags' => $group->flatMap(fn($item) => $item->tags ?? [])->unique('id')->values(),
                     'status' => $first->status,
                     'created_at' => $first->created_at,
                     'updated_at' => $first->updated_at,
@@ -109,6 +110,7 @@ class AcceptanceItemsExport implements
             'Date of Birth',
             'Test',
             'Method',
+            'Tags',
             'Price',
             'Discount',
             'Sampled At',
@@ -135,6 +137,7 @@ class AcceptanceItemsExport implements
             $row->patient_dateofbirth,
             $row->test_testsname,
             $row->method_name,
+            $this->formatTags($row),
             $this->formatPrice($row->price),
             $this->formatDiscount($row->discount),
             $this->formatDate($row->activeSamples->max("collection_date")),
@@ -153,7 +156,7 @@ class AcceptanceItemsExport implements
      */
     public function styles(Worksheet $sheet): array
     {
-        $sheet->setAutoFilter('A1:Q1');
+        $sheet->setAutoFilter('A1:R1');
 
         return [
             1 => [
@@ -199,6 +202,14 @@ class AcceptanceItemsExport implements
     private function formatDiscount($discount): string
     {
         return number_format((float) $discount, 2);
+    }
+
+    /**
+     * Formats assigned tags as a comma-separated list.
+     */
+    private function formatTags($row): string
+    {
+        return collect($row->tags ?? [])->pluck('name')->filter()->join(', ');
     }
 
     /**

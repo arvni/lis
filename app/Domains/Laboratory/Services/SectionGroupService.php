@@ -7,14 +7,18 @@ use App\Domains\Laboratory\DTOs\SectionGroupDTO;
 use App\Domains\Laboratory\Models\SectionGroup;
 use App\Domains\Laboratory\Repositories\SectionGroupRepository;
 use App\Domains\Reception\Models\AcceptanceItem;
+use App\Domains\Reception\Traits\ExtractsTagFilterIds;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class SectionGroupService
 {
+    use ExtractsTagFilterIds;
+
     public function __construct(private SectionGroupRepository $sectionGroupRepository)
     {
     }
@@ -83,6 +87,7 @@ class SectionGroupService
                 "latestState.section:id,name",
                 "method.test",
                 "test",
+                "tags:id,name,color",
             ])
             ->whereHas("acceptanceItemStates.section", function ($query) use ($sectionGroup) {
                 $query->where("section_group_id", $sectionGroup->id);
@@ -103,6 +108,27 @@ class SectionGroupService
                         ->where("fullName", "like", "%{$search}%")
                         ->orWhere("idNo", "like", "%{$search}%"));
             });
+        }
+
+        $tagIds = $this->extractTagFilterIds($filters);
+        if ($tagIds) {
+            $query->whereHas('tags', fn($tagQuery) => $tagQuery->whereIn('tags.id', $tagIds));
+        }
+
+        if (!empty($filters["status"])) {
+            $query->whereHas("latestState", fn($stateQuery) => $stateQuery->where("status", $filters["status"]));
+        }
+
+        if (!empty($filters["from_date"]) || !empty($filters["to_date"])) {
+            $startDate = !empty($filters["from_date"])
+                ? Carbon::parse($filters["from_date"], "Asia/Muscat")->startOfDay()
+                : Carbon::createFromTimestamp(0);
+
+            $endDate = !empty($filters["to_date"])
+                ? Carbon::parse($filters["to_date"], "Asia/Muscat")->endOfDay()
+                : Carbon::now("Asia/Muscat");
+
+            $query->whereBetween('created_at', [$startDate, $endDate]);
         }
 
         $sort = $queryData["sort"] ?? ["field" => "id", "sort" => "desc"];

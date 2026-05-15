@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import TableLayout from "@/Layouts/TableLayout";
+import AcceptanceItemsFilter from "./Components/AcceptanceItemsFilter";
+import InlineTagManager from "@/Components/InlineTagManager";
 import { Head, Link, router, useRemember } from "@inertiajs/react";
 import {
     Typography,
@@ -93,6 +95,7 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
         {
             field: "id",
             headerName: "ID",
+            display: "flex",
             width: 80,
         },
         {
@@ -151,12 +154,28 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
             headerName: "Status",
             sortable: false,
             flex: 0.55,
+            display: "flex",
             renderCell: ({ row }) => (
                 <Chip
                     size="small"
                     label={row.status || "-"}
                     color={row.latest_state?.status ? (STATUS_CONFIG[row.latest_state.status]?.color || "default") : "default"}
                     variant="outlined"
+                />
+            ),
+        },
+        {
+            field: "tags",
+            headerName: "Tags",
+            sortable: false,
+            flex: 0.65,
+            display: "flex",
+            minWidth: 180,
+            renderCell: ({ row }) => (
+                <InlineTagManager
+                    initialTags={row.tags || []}
+                    updateUrl={route('acceptanceItems.tags.update', row.id)}
+                    entityType="acceptanceItem"
                 />
             ),
         },
@@ -200,7 +219,8 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
             field: "actions",
             headerName: "Actions",
             sortable: false,
-            width: 120,
+            width: 70,
+            display: "flex",
             renderCell: ({ row }) => (
                 <Tooltip title="View Acceptance Item">
                     <IconButton
@@ -255,6 +275,7 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
             data: { page, filters, sort, pageSize },
             only: ["acceptanceItems", "requestInputs", "status", "success", "errors"],
             preserveState: true,
+            queryStringArrayFormat: "indices",
         });
     };
 
@@ -318,8 +339,8 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
                         overflow: 'visible'
                     }}
                 >
-  <Grid container spacing={2} sx={{alignItems: "center"}}>
-                        <Grid size={{xs:12,md:7}} >
+                    <Grid container spacing={2} sx={{ alignItems: "center" }}>
+                        <Grid size={{ xs: 12, md: 7 }} >
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                 {sectionGroup.parent && (
                                     <Tooltip title="Back to parent group">
@@ -371,7 +392,7 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
                             </Box>
                         </Grid>
 
-                        <Grid size={{xs:12,md:5}} >
+                        <Grid size={{ xs: 12, md: 5 }} >
                             <Box sx={{
                                 display: 'flex',
                                 gap: 1.5,
@@ -436,389 +457,389 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
 
                 {activeTab === 0 && (
                     <>
-                {/* Summary statistics */}
-                <Box sx={{ mb: 4 }}>
-                    <Card elevation={2} sx={{ borderRadius: 2 }}>
-                        <CardContent>
-                            <Grid container spacing={3}>
-                                <Grid size={{xs:12,sm:6,md:3}}>
-                                    <Box sx={{ textAlign: 'center', p: 1 }}>
-                                        <Typography variant="h5" fontWeight="bold" color="primary.main">
-                                            {stats.total.subGroups}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Total Sub-groups
-                                        </Typography>
-                                    </Box>
-                                </Grid>
-
-                                <Grid size={{xs:12,sm:6,md:3}}>
-                                    <Box sx={{ textAlign: 'center', p: 1 }}>
-                                        <Typography variant="h5" fontWeight="bold" color="success.main">
-                                            {stats.total.activeSubGroups}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Active Sub-groups
-                                        </Typography>
-                                    </Box>
-                                </Grid>
-
-                                <Grid size={{xs:12,sm:6,md:3}}>
-                                    <Box sx={{ textAlign: 'center', p: 1 }}>
-                                        <Typography variant="h5" fontWeight="bold" color="secondary.main">
-                                            {stats.total.sections}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Total Sections
-                                        </Typography>
-                                    </Box>
-                                </Grid>
-
-                                <Grid size={{xs:12,sm:6,md:3}}>
-                                    <Box sx={{ textAlign: 'center', p: 1 }}>
-                                        <Typography variant="h5" fontWeight="bold" color="success.main">
-                                            {stats.total.activeSections}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Active Sections
-                                        </Typography>
-                                    </Box>
-                                </Grid>
-                            </Grid>
-                        </CardContent>
-                    </Card>
-                </Box>
-
-                {/* Sub-groups section */}
-                {(sectionGroup.children && sectionGroup.children.length > 0) && (
-                    <Box sx={{ mb: 5 }}>
-                        <Box sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            mb: 2
-                        }}>
-                            <Typography
-                                variant="h5"
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    color: theme.palette.primary.main,
-                                    fontWeight: 'medium'
-                                }}
-                            >
-                                <FolderIcon sx={{ mr: 1 }} />
-                                Sub-groups
-                            </Typography>
-
-                        </Box>
-
-                        <Divider sx={{ mb: 3 }} />
-
-                        <Grid container spacing={3}>
-                            {sectionGroup.children.map((item) => (
-                                <Grid size={{xs:12,sm:6,md:getGridSize()}} key={item.id}>
-                                    <Card
-                                        elevation={hoveredCard === item.id ? 4 : 1}
-                                        sx={{
-                                            height: '100%',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            borderRadius: 2,
-                                            transition: 'all 0.3s ease',
-                                            transform: hoveredCard === item.id ? 'translateY(-8px)' : 'none',
-                                            border: item.active ? 'none' : `1px solid ${theme.palette.error.light}`,
-                                            opacity: item.active ? 1 : 0.8,
-                                            position: 'relative',
-                                            overflow: 'visible',
-                                            cursor: 'pointer'
-                                        }}
-                                        onClick={() => router.visit(route('sectionGroups.show', item.id))}
-                                        onMouseEnter={() => handleCardMouseEnter(item.id)}
-                                        onMouseLeave={handleCardMouseLeave}
-                                    >
-                                        {!item.active && (
-                                            <Badge
-                                                badgeContent="Inactive"
-                                                color="error"
-                                                sx={{
-                                                    position: 'absolute',
-                                                    top: -10,
-                                                    right: 16,
-                                                    '& .MuiBadge-badge': {
-                                                        fontSize: '0.7rem',
-                                                        height: 20,
-                                                        minWidth: 20,
-                                                    }
-                                                }}
-                                            />
-                                        )}
-
-                                        <CardHeader
-                                            sx={{ pb: 1 }}
-                                            avatar={
-                                                <Avatar
-                                                    src={item.icon}
-                                                    alt={item.name}
-                                                    sx={{
-                                                        bgcolor: 'primary.light',
-                                                        transition: 'all 0.3s ease',
-                                                        transform: hoveredCard === item.id ? 'scale(1.1)' : 'scale(1)'
-                                                    }}
-                                                >
-                                                    <FolderIcon />
-                                                </Avatar>
-                                            }
-                                            title={
-                                                <Typography variant="h6" noWrap>
-                                                    {item.name}
+                        {/* Summary statistics */}
+                        <Box sx={{ mb: 4 }}>
+                            <Card elevation={2} sx={{ borderRadius: 2 }}>
+                                <CardContent>
+                                    <Grid container spacing={3}>
+                                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                            <Box sx={{ textAlign: 'center', p: 1 }}>
+                                                <Typography variant="h5" fontWeight="bold" color="primary.main">
+                                                    {stats.total.subGroups}
                                                 </Typography>
-                                            }
-                                            action={
-                                                <IconButton
-                                                    aria-label="settings"
-                                                    onClick={(e) => handleMenuOpen(e, item.id, 'sectionGroup')}
-                                                >
-                                                    <MoreVertIcon />
-                                                </IconButton>
-                                            }
-                                        />
-
-                                        <CardContent sx={{ flexGrow: 1, pt: 0 }}>
-                                            {item.sectionsCount > 0 && (
-                                                <Tooltip title={`Contains ${item.sectionsCount} sections`} arrow>
-                                                    <Chip
-                                                        size="small"
-                                                        label={`${item.sectionsCount} sections`}
-                                                        color="primary"
-                                                        variant="outlined"
-                                                        sx={{ mt: 1 }}
-                                                    />
-                                                </Tooltip>
-                                            )}
-                                        </CardContent>
-
-                                        <CardActions>
-                                            <Button
-                                                size="small"
-                                                variant="text"
-                                                color="primary"
-                                                fullWidth
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    router.visit(route('sectionGroups.show', item.id));
-                                                }}
-                                                startIcon={<VisibilityIcon />}
-                                            >
-                                                View Details
-                                            </Button>
-                                        </CardActions>
-                                    </Card>
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Box>
-                )}
-
-                {/* Sections section */}
-                {(sectionGroup.sections && sectionGroup.sections.length > 0) && (
-                    <Box sx={{ mb: 5 }}>
-                        <Box sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            mb: 2
-                        }}>
-                            <Typography
-                                variant="h5"
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    color: theme.palette.secondary.main,
-                                    fontWeight: 'medium'
-                                }}
-                            >
-                                <ScienceIcon sx={{ mr: 1 }} />
-                                Sections
-                            </Typography>
-                        </Box>
-
-                        <Divider sx={{ mb: 3 }} />
-
-                        <Grid container spacing={3}>
-                            {sectionGroup.sections.map((item) => (
-                                <Grid size={{xs:12,sm:6,md:getGridSize()}} key={item.id}>
-                                    <Card
-                                        elevation={hoveredCard === `section-${item.id}` ? 4 : 1}
-                                        sx={{
-                                            height: '100%',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            borderRadius: 2,
-                                            transition: 'all 0.3s ease',
-                                            transform: hoveredCard === `section-${item.id}` ? 'translateY(-8px)' : 'none',
-                                            border: item.active ? 'none' : `1px solid ${theme.palette.error.light}`,
-                                            opacity: item.active ? 1 : 0.8,
-                                            position: 'relative',
-                                            overflow: 'visible',
-                                            cursor: 'pointer'
-                                        }}
-                                        onClick={() => router.visit(route('sections.show', item.id))}
-                                        onMouseEnter={() => handleCardMouseEnter(`section-${item.id}`)}
-                                        onMouseLeave={handleCardMouseLeave}
-                                    >
-                                        {!item.active && (
-                                            <Badge
-                                                badgeContent="Inactive"
-                                                color="error"
-                                                sx={{
-                                                    position: 'absolute',
-                                                    top: -10,
-                                                    right: 16,
-                                                    '& .MuiBadge-badge': {
-                                                        fontSize: '0.7rem',
-                                                        height: 20,
-                                                        minWidth: 20,
-                                                    }
-                                                }}
-                                            />
-                                        )}
-
-                                        <CardHeader
-                                            sx={{ pb: 1 }}
-                                            avatar={
-                                                <Avatar
-                                                    src={item.icon}
-                                                    alt={item.name}
-                                                    sx={{
-                                                        bgcolor: 'secondary.light',
-                                                        transition: 'all 0.3s ease',
-                                                        transform: hoveredCard === `section-${item.id}` ? 'scale(1.1)' : 'scale(1)'
-                                                    }}
-                                                >
-                                                    <ScienceIcon />
-                                                </Avatar>
-                                            }
-                                            title={
-                                                <Typography variant="h6" noWrap>
-                                                    {item.name}
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Total Sub-groups
                                                 </Typography>
-                                            }
-                                            action={
-                                                <IconButton
-                                                    aria-label="settings"
-                                                    onClick={(e) => handleMenuOpen(e, item.id, 'section')}
-                                                >
-                                                    <MoreVertIcon />
-                                                </IconButton>
-                                            }
-                                        />
-
-                                        <CardContent sx={{ flexGrow: 1, pt: 0 }}>
-                                            {/* Stats Dashboard with improved visuals */}
-                                            <Box
-                                                sx={{
-                                                    display: 'flex',
-                                                    flexWrap: 'wrap',
-                                                    gap: 1,
-                                                    mt: 1,
-                                                    justifyContent: 'center'
-                                                }}
-                                            >
-                                                {renderStatusIndicator(
-                                                    item.finished_items_count * 1 + item.rejected_items_count * 1 +
-                                                    item.waiting_items_count * 1 + item.processing_items_count * 1,
-                                                    <DashboardIcon />,
-                                                    'primary',
-                                                    'Total Items'
-                                                )}
-
-                                                {renderStatusIndicator(
-                                                    item.finished_items_count,
-                                                    <CheckCircleIcon />,
-                                                    'success',
-                                                    'Finished Items'
-                                                )}
-
-                                                {renderStatusIndicator(
-                                                    item.processing_items_count,
-                                                    <AccessTimeIcon />,
-                                                    'info',
-                                                    'Processing Items'
-                                                )}
-
-                                                {renderStatusIndicator(
-                                                    item.waiting_items_count,
-                                                    <HourglassEmptyIcon />,
-                                                    'warning',
-                                                    'Waiting Items'
-                                                )}
-
-                                                {renderStatusIndicator(
-                                                    item.rejected_items_count,
-                                                    <ErrorOutlineIcon />,
-                                                    'error',
-                                                    'Rejected Items'
-                                                )}
                                             </Box>
-                                        </CardContent>
+                                        </Grid>
 
-                                        <CardActions>
-                                            <Button
-                                                size="small"
-                                                variant="text"
-                                                color="secondary"
-                                                fullWidth
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    router.visit(route('sections.show', item.id));
+                                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                            <Box sx={{ textAlign: 'center', p: 1 }}>
+                                                <Typography variant="h5" fontWeight="bold" color="success.main">
+                                                    {stats.total.activeSubGroups}
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Active Sub-groups
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
+
+                                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                            <Box sx={{ textAlign: 'center', p: 1 }}>
+                                                <Typography variant="h5" fontWeight="bold" color="secondary.main">
+                                                    {stats.total.sections}
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Total Sections
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
+
+                                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                            <Box sx={{ textAlign: 'center', p: 1 }}>
+                                                <Typography variant="h5" fontWeight="bold" color="success.main">
+                                                    {stats.total.activeSections}
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Active Sections
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
+                                    </Grid>
+                                </CardContent>
+                            </Card>
+                        </Box>
+
+                        {/* Sub-groups section */}
+                        {(sectionGroup.children && sectionGroup.children.length > 0) && (
+                            <Box sx={{ mb: 5 }}>
+                                <Box sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    mb: 2
+                                }}>
+                                    <Typography
+                                        variant="h5"
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            color: theme.palette.primary.main,
+                                            fontWeight: 'medium'
+                                        }}
+                                    >
+                                        <FolderIcon sx={{ mr: 1 }} />
+                                        Sub-groups
+                                    </Typography>
+
+                                </Box>
+
+                                <Divider sx={{ mb: 3 }} />
+
+                                <Grid container spacing={3}>
+                                    {sectionGroup.children.map((item) => (
+                                        <Grid size={{ xs: 12, sm: 6, md: getGridSize() }} key={item.id}>
+                                            <Card
+                                                elevation={hoveredCard === item.id ? 4 : 1}
+                                                sx={{
+                                                    height: '100%',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    borderRadius: 2,
+                                                    transition: 'all 0.3s ease',
+                                                    transform: hoveredCard === item.id ? 'translateY(-8px)' : 'none',
+                                                    border: item.active ? 'none' : `1px solid ${theme.palette.error.light}`,
+                                                    opacity: item.active ? 1 : 0.8,
+                                                    position: 'relative',
+                                                    overflow: 'visible',
+                                                    cursor: 'pointer'
                                                 }}
-                                                startIcon={<VisibilityIcon />}
+                                                onClick={() => router.visit(route('sectionGroups.show', item.id))}
+                                                onMouseEnter={() => handleCardMouseEnter(item.id)}
+                                                onMouseLeave={handleCardMouseLeave}
                                             >
-                                                View Details
-                                            </Button>
-                                        </CardActions>
-                                    </Card>
+                                                {!item.active && (
+                                                    <Badge
+                                                        badgeContent="Inactive"
+                                                        color="error"
+                                                        sx={{
+                                                            position: 'absolute',
+                                                            top: -10,
+                                                            right: 16,
+                                                            '& .MuiBadge-badge': {
+                                                                fontSize: '0.7rem',
+                                                                height: 20,
+                                                                minWidth: 20,
+                                                            }
+                                                        }}
+                                                    />
+                                                )}
+
+                                                <CardHeader
+                                                    sx={{ pb: 1 }}
+                                                    avatar={
+                                                        <Avatar
+                                                            src={item.icon}
+                                                            alt={item.name}
+                                                            sx={{
+                                                                bgcolor: 'primary.light',
+                                                                transition: 'all 0.3s ease',
+                                                                transform: hoveredCard === item.id ? 'scale(1.1)' : 'scale(1)'
+                                                            }}
+                                                        >
+                                                            <FolderIcon />
+                                                        </Avatar>
+                                                    }
+                                                    title={
+                                                        <Typography variant="h6" noWrap>
+                                                            {item.name}
+                                                        </Typography>
+                                                    }
+                                                    action={
+                                                        <IconButton
+                                                            aria-label="settings"
+                                                            onClick={(e) => handleMenuOpen(e, item.id, 'sectionGroup')}
+                                                        >
+                                                            <MoreVertIcon />
+                                                        </IconButton>
+                                                    }
+                                                />
+
+                                                <CardContent sx={{ flexGrow: 1, pt: 0 }}>
+                                                    {item.sectionsCount > 0 && (
+                                                        <Tooltip title={`Contains ${item.sectionsCount} sections`} arrow>
+                                                            <Chip
+                                                                size="small"
+                                                                label={`${item.sectionsCount} sections`}
+                                                                color="primary"
+                                                                variant="outlined"
+                                                                sx={{ mt: 1 }}
+                                                            />
+                                                        </Tooltip>
+                                                    )}
+                                                </CardContent>
+
+                                                <CardActions>
+                                                    <Button
+                                                        size="small"
+                                                        variant="text"
+                                                        color="primary"
+                                                        fullWidth
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            router.visit(route('sectionGroups.show', item.id));
+                                                        }}
+                                                        startIcon={<VisibilityIcon />}
+                                                    >
+                                                        View Details
+                                                    </Button>
+                                                </CardActions>
+                                            </Card>
+                                        </Grid>
+                                    ))}
                                 </Grid>
-                            ))}
-                        </Grid>
-                    </Box>
-                )}
+                            </Box>
+                        )}
 
-                {/* Empty state with improved visual feedback */}
-                {sectionGroup.children.length === 0 && sectionGroup.sections.length === 0 && (
-                    <Fade in={true} timeout={1000}>
-                        <Paper
-                            elevation={2}
-                            sx={{
-                                p: 6,
-                                textAlign: 'center',
-                                borderRadius: 2,
-                                bgcolor: 'background.paper'
-                            }}
-                        >
-                            <Avatar
-                                sx={{
-                                    width: 80,
-                                    height: 80,
-                                    mx: 'auto',
-                                    mb: 2,
-                                    bgcolor: 'primary.light'
-                                }}
-                            >
-                                <FolderIcon sx={{ fontSize: 40 }} />
-                            </Avatar>
+                        {/* Sections section */}
+                        {(sectionGroup.sections && sectionGroup.sections.length > 0) && (
+                            <Box sx={{ mb: 5 }}>
+                                <Box sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    mb: 2
+                                }}>
+                                    <Typography
+                                        variant="h5"
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            color: theme.palette.secondary.main,
+                                            fontWeight: 'medium'
+                                        }}
+                                    >
+                                        <ScienceIcon sx={{ mr: 1 }} />
+                                        Sections
+                                    </Typography>
+                                </Box>
 
-                            <Typography variant="h5" color="text.primary" gutterBottom>
-                                No Sub-groups or Sections Yet
-                            </Typography>
+                                <Divider sx={{ mb: 3 }} />
 
-                            <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
-                                This section group is empty. You can add sub-groups or sections to organize your content.
-                            </Typography>
-                        </Paper>
-                    </Fade>
-                )}
+                                <Grid container spacing={3}>
+                                    {sectionGroup.sections.map((item) => (
+                                        <Grid size={{ xs: 12, sm: 6, md: getGridSize() }} key={item.id}>
+                                            <Card
+                                                elevation={hoveredCard === `section-${item.id}` ? 4 : 1}
+                                                sx={{
+                                                    height: '100%',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    borderRadius: 2,
+                                                    transition: 'all 0.3s ease',
+                                                    transform: hoveredCard === `section-${item.id}` ? 'translateY(-8px)' : 'none',
+                                                    border: item.active ? 'none' : `1px solid ${theme.palette.error.light}`,
+                                                    opacity: item.active ? 1 : 0.8,
+                                                    position: 'relative',
+                                                    overflow: 'visible',
+                                                    cursor: 'pointer'
+                                                }}
+                                                onClick={() => router.visit(route('sections.show', item.id))}
+                                                onMouseEnter={() => handleCardMouseEnter(`section-${item.id}`)}
+                                                onMouseLeave={handleCardMouseLeave}
+                                            >
+                                                {!item.active && (
+                                                    <Badge
+                                                        badgeContent="Inactive"
+                                                        color="error"
+                                                        sx={{
+                                                            position: 'absolute',
+                                                            top: -10,
+                                                            right: 16,
+                                                            '& .MuiBadge-badge': {
+                                                                fontSize: '0.7rem',
+                                                                height: 20,
+                                                                minWidth: 20,
+                                                            }
+                                                        }}
+                                                    />
+                                                )}
+
+                                                <CardHeader
+                                                    sx={{ pb: 1 }}
+                                                    avatar={
+                                                        <Avatar
+                                                            src={item.icon}
+                                                            alt={item.name}
+                                                            sx={{
+                                                                bgcolor: 'secondary.light',
+                                                                transition: 'all 0.3s ease',
+                                                                transform: hoveredCard === `section-${item.id}` ? 'scale(1.1)' : 'scale(1)'
+                                                            }}
+                                                        >
+                                                            <ScienceIcon />
+                                                        </Avatar>
+                                                    }
+                                                    title={
+                                                        <Typography variant="h6" noWrap>
+                                                            {item.name}
+                                                        </Typography>
+                                                    }
+                                                    action={
+                                                        <IconButton
+                                                            aria-label="settings"
+                                                            onClick={(e) => handleMenuOpen(e, item.id, 'section')}
+                                                        >
+                                                            <MoreVertIcon />
+                                                        </IconButton>
+                                                    }
+                                                />
+
+                                                <CardContent sx={{ flexGrow: 1, pt: 0 }}>
+                                                    {/* Stats Dashboard with improved visuals */}
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            flexWrap: 'wrap',
+                                                            gap: 1,
+                                                            mt: 1,
+                                                            justifyContent: 'center'
+                                                        }}
+                                                    >
+                                                        {renderStatusIndicator(
+                                                            item.finished_items_count * 1 + item.rejected_items_count * 1 +
+                                                            item.waiting_items_count * 1 + item.processing_items_count * 1,
+                                                            <DashboardIcon />,
+                                                            'primary',
+                                                            'Total Items'
+                                                        )}
+
+                                                        {renderStatusIndicator(
+                                                            item.finished_items_count,
+                                                            <CheckCircleIcon />,
+                                                            'success',
+                                                            'Finished Items'
+                                                        )}
+
+                                                        {renderStatusIndicator(
+                                                            item.processing_items_count,
+                                                            <AccessTimeIcon />,
+                                                            'info',
+                                                            'Processing Items'
+                                                        )}
+
+                                                        {renderStatusIndicator(
+                                                            item.waiting_items_count,
+                                                            <HourglassEmptyIcon />,
+                                                            'warning',
+                                                            'Waiting Items'
+                                                        )}
+
+                                                        {renderStatusIndicator(
+                                                            item.rejected_items_count,
+                                                            <ErrorOutlineIcon />,
+                                                            'error',
+                                                            'Rejected Items'
+                                                        )}
+                                                    </Box>
+                                                </CardContent>
+
+                                                <CardActions>
+                                                    <Button
+                                                        size="small"
+                                                        variant="text"
+                                                        color="secondary"
+                                                        fullWidth
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            router.visit(route('sections.show', item.id));
+                                                        }}
+                                                        startIcon={<VisibilityIcon />}
+                                                    >
+                                                        View Details
+                                                    </Button>
+                                                </CardActions>
+                                            </Card>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </Box>
+                        )}
+
+                        {/* Empty state with improved visual feedback */}
+                        {sectionGroup.children.length === 0 && sectionGroup.sections.length === 0 && (
+                            <Fade in={true} timeout={1000}>
+                                <Paper
+                                    elevation={2}
+                                    sx={{
+                                        p: 6,
+                                        textAlign: 'center',
+                                        borderRadius: 2,
+                                        bgcolor: 'background.paper'
+                                    }}
+                                >
+                                    <Avatar
+                                        sx={{
+                                            width: 80,
+                                            height: 80,
+                                            mx: 'auto',
+                                            mb: 2,
+                                            bgcolor: 'primary.light'
+                                        }}
+                                    >
+                                        <FolderIcon sx={{ fontSize: 40 }} />
+                                    </Avatar>
+
+                                    <Typography variant="h5" color="text.primary" gutterBottom>
+                                        No Sub-groups or Sections Yet
+                                    </Typography>
+
+                                    <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
+                                        This section group is empty. You can add sub-groups or sections to organize your content.
+                                    </Typography>
+                                </Paper>
+                            </Fade>
+                        )}
                     </>
                 )}
 
@@ -833,6 +854,7 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
                             columns={acceptanceItemColumns}
                             data={acceptanceItems}
                             loading={false}
+                            Filter={AcceptanceItemsFilter}
                         />
                     </Card>
                 </Box>
@@ -844,7 +866,7 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
                 anchorEl={menuAnchorEl}
                 open={Boolean(menuAnchorEl)}
                 onClose={handleMenuClose}
-                slots={{Transition:Fade}}
+                slots={{ Transition: Fade }}
                 anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'right',

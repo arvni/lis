@@ -38,6 +38,7 @@ class AcceptancesExport implements
             'Patient ID',
             'Referrer',
             'Barcodes',
+            'Tags',
             'Out-Patient',
             'Remaining (OMR)',
             'Status',
@@ -56,6 +57,7 @@ class AcceptancesExport implements
             : null;
 
         $barcodes = collect($row->samples ?? [])->pluck('barcode')->filter()->join(', ');
+        $tags = collect($row->tags ?? [])->pluck('name')->filter()->join(', ');
 
         return [
             $row->id,
@@ -63,6 +65,7 @@ class AcceptancesExport implements
             $row->patient_idno,
             $row->referrer_fullname,
             $barcodes,
+            $tags,
             $row->out_patient ? 'Out-Patient' : 'In-Patient',
             number_format((float) $remaining, 3),
             $row->status instanceof \BackedEnum ? $row->status->value : $row->status,
@@ -74,7 +77,7 @@ class AcceptancesExport implements
 
     public function styles(Worksheet $sheet): array
     {
-        $sheet->setAutoFilter('A1:K1');
+        $sheet->setAutoFilter('A1:L1');
 
         return [
             1 => [
