@@ -16,7 +16,8 @@ class ListResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name ?? $this->fullName
+            'name' => $this->name ?? $this->fullName,
+            'color' => $this->color ?? null,
         ];
     }
 }

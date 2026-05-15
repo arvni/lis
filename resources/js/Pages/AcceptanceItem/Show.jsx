@@ -1,5 +1,5 @@
 import Container from "@mui/material/Container";
-import {Box, Button, Stack, FormControlLabel, Switch} from "@mui/material";
+import {Box, Button, Chip, Stack, FormControlLabel, Switch, Typography} from "@mui/material";
 import React from "react";
 import PatientInfo from "@/Pages/Patient/Components/PatientInfo";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
@@ -8,7 +8,10 @@ import TimeLine from "./Components/TimeLine";
 import ReportInfo from "./Components/ReportInfo";
 import SectionsInfo from "./Components/SectionsInfo";
 import {router, Link} from "@inertiajs/react";
-import {Assignment as AssignmentIcon, Timeline as TimelineIcon} from "@mui/icons-material";
+import {Assignment as AssignmentIcon, Timeline as TimelineIcon, LocalOffer as TagIcon} from "@mui/icons-material";
+import TagManager from "@/Components/TagManager";
+import TagChip from "@/Components/TagChip";
+import InlineTagManager from "@/Components/InlineTagManager";
 
 const Show = ({acceptanceItem, canCreateReport = false, canToggleReportless = false, canToggleSampleless = false}) => {
     const handleCheckWorkflow = () => router.visit(route("acceptanceItems.check-workflow", acceptanceItem.id))
@@ -36,6 +39,13 @@ const Show = ({acceptanceItem, canCreateReport = false, canToggleReportless = fa
     return <Container sx={{p: "1em"}}>
         {acceptanceItem.patients.map(patient => <PatientInfo patient={patient} key={patient.id}/>)}
         <TestInfo method={acceptanceItem.method} test={acceptanceItem.test}/>
+        <Box sx={{ mt: 2, mb: 2 }}>
+            <InlineTagManager 
+                initialTags={acceptanceItem.tags || []} 
+                updateUrl={route('acceptanceItems.tags.update', acceptanceItem.id)}
+                entityType="acceptanceItem"
+            />
+        </Box>
         <Box sx={{mt: 2, mb: 2}}>
             {canToggleSampleless && (
                 <FormControlLabel

@@ -19,6 +19,10 @@ import {
     ViewColumn as ViewColumnIcon
 } from "@mui/icons-material";
 import Filter from "./Components/Filter";
+import TagManagerDialog from "@/Components/TagManagerDialog";
+import TagChip from "@/Components/TagChip";
+import { LocalOffer as TagIcon } from "@mui/icons-material";
+import InlineTagManager from "@/Components/InlineTagManager";
 import Excel from "@/../images/excel.svg";
 import {Head, router, usePage} from "@inertiajs/react";
 import {useState, useCallback, useEffect} from "react";
@@ -44,6 +48,8 @@ const StatisticsIndex = () => {
     const [loading, setLoading] = useState(false);
     const [visibleColumns, setVisibleColumns] = useState([]);
     const [columnMenuAnchor, setColumnMenuAnchor] = useState(null);
+    const [openTagDialog, setOpenTagDialog] = useState(false);
+    const [tagEntity, setTagEntity] = useState(null);
 
     // Format currency values consistently
     const formatCurrency = (amount) => {
@@ -141,6 +147,20 @@ const StatisticsIndex = () => {
             renderCell: ({value}) => value || "—"
         },
         {
+            field: 'tags',
+            headerName: 'Tags',
+            type: "string",
+            sortable: false,
+            flex: 0.45,
+            renderCell: ({row}) => (
+                <InlineTagManager 
+                    initialTags={row.tags || []} 
+                    updateUrl={route('acceptanceItems.tags.update', row.id)}
+                    entityType="acceptanceItem"
+                />
+            )
+        },
+        {
             field: 'price',
             headerName: 'Price',
             type: "number",
@@ -193,6 +213,18 @@ const StatisticsIndex = () => {
             sortable: false,
             renderCell: ({row}) => (
                 <Stack spacing={1} direction="row">
+                    <Tooltip title="Manage Tags">
+                        <IconButton
+                            onClick={() => {
+                                setTagEntity(row);
+                                setOpenTagDialog(true);
+                            }}
+                            size="small"
+                            color="secondary"
+                        >
+                            <TagIcon/>
+                        </IconButton>
+                    </Tooltip>
                     <Tooltip title="View Details">
                         <IconButton
                             onClick={showAcceptanceItem(row)}
@@ -381,6 +413,14 @@ const StatisticsIndex = () => {
                 data={acceptanceItems}
                 Filter={Filter}
                 loading={loading}
+            />
+
+            <TagManagerDialog
+                open={openTagDialog}
+                onClose={() => setOpenTagDialog(false)}
+                tags={tagEntity?.tags || []}
+                updateUrl={tagEntity ? route('acceptanceItems.tags.update', tagEntity.id) : ''}
+                title={`Manage Tags for Test #${tagEntity?.id}`}
             />
         </>
     );

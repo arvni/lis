@@ -19,7 +19,7 @@ import InterpreterModeIcon from '@mui/icons-material/InterpreterMode';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BusinessIcon from '@mui/icons-material/Business';
 import ReceiptIcon from "@mui/icons-material/Receipt";
-import {Analytics, AttachMoney, FactCheck, Payments, Publish, BugReport, Inventory as InventoryIcon, Speed as SpeedIcon, Science as ScienceQCIcon, VerifiedUser as AuditIcon} from "@mui/icons-material";
+import {Analytics, AttachMoney, FactCheck, Payments, Publish, BugReport, Inventory as InventoryIcon, Speed as SpeedIcon, Science as ScienceQCIcon, VerifiedUser as AuditIcon, LocalOffer as TagIcon} from "@mui/icons-material";
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import CategoryIcon from '@mui/icons-material/Category';
 import WarehouseIcon from '@mui/icons-material/Warehouse';
@@ -88,6 +88,12 @@ const routes = (sections = []) => {
                     route: "tat.dashboard",
                     permission: 'Reception.TAT.View Dashboard',
                     icon: <SpeedIcon/>,
+                },
+                {
+                    title: "Manage Tags",
+                    route: "tags.index",
+                    permission: 'Reception.Acceptances.List Acceptance',
+                    icon: <TagIcon/>,
                 },
             ]
         },

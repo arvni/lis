@@ -172,7 +172,8 @@ class AcceptanceService
             "doctor",
             "referrer",
             "acceptor",
-            "sampler:name,id"
+            "sampler:name,id",
+            "tags"
         ]);
         return $acceptance;
     }

@@ -9,6 +9,7 @@ use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
+use App\Domains\Reception\Traits\ExtractsTagFilterIds;
 use App\Domains\Setting\Services\SettingService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\DB;
 
 class AcceptanceRepository
 {
-    use LogsUserActivity, FiltersByDateRange;
+    use LogsUserActivity, FiltersByDateRange, ExtractsTagFilterIds;
 
     // Define constants for filter and sort keys for better maintainability
     private const FILTER_SEARCH = 'search';
@@ -72,6 +73,7 @@ class AcceptanceRepository
     {
         $query = Acceptance::query()
             ->withCount('acceptanceItems')
+            ->with('tags:id,name,color')
             ->with('samples:samples.id,barcode')
             ->withSum('payments', 'price')
             ->withAggregate('referrer', 'fullName')
@@ -292,6 +294,11 @@ class AcceptanceRepository
         }
         if (isset($filters[self::FILTER_PATIENT_ID])) {
             $query->where('acceptances.patient_id', $filters[self::FILTER_PATIENT_ID]); // Qualify column name
+        }
+
+        $tagIds = $this->extractTagFilterIds($filters);
+        if ($tagIds) {
+            $query->whereHas('tags', fn($tagQuery) => $tagQuery->whereIn('tags.id', $tagIds));
         }
 
         if (!empty($filters['waiting_for_pooling'])) {

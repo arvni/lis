@@ -1,11 +1,11 @@
-import React, {useCallback, useMemo, useState} from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {GridActionsCellItem} from "@mui/x-data-grid";
+import { GridActionsCellItem } from "@mui/x-data-grid";
 import Filter from "./Components/Filter";
 import TableLayout from "@/Layouts/TableLayout";
 import DeleteForm from "@/Components/DeleteForm";
 import PageHeader from "@/Components/PageHeader.jsx";
-import {router, useForm, usePage, Link} from "@inertiajs/react";
+import { router, useForm, usePage, Link } from "@inertiajs/react";
 import {
     Stack,
     Dialog,
@@ -22,7 +22,7 @@ import {
     Avatar,
     Badge,
     Divider,
-    alpha
+    alpha,
 } from "@mui/material";
 import {
     Edit as EditIcon,
@@ -44,7 +44,8 @@ import {
     FlashOn as FlashOnIcon,
     PriorityHigh as PriorityHighIcon,
 } from "@mui/icons-material";
-import {formatDate} from "@/Services/helper.js";
+import InlineTagManager from "@/Components/InlineTagManager";
+import { formatDate } from "@/Services/helper.js";
 import AddPoolingDialog from "@/Pages/Acceptance/Components/AddPoolingDialog.jsx";
 
 const Index = () => {
@@ -87,47 +88,47 @@ const Index = () => {
         const statusMap = {
             'waiting for payment': {
                 color: 'warning',
-                icon: <HourglassEmptyIcon/>,
+                icon: <HourglassEmptyIcon />,
                 label: 'Waiting for Payment'
             },
             'sampling': {
                 color: 'info',
-                icon: <ScienceIcon/>,
+                icon: <ScienceIcon />,
                 label: 'Sampling'
             },
             'pooling': {
                 color: 'secondary',
-                icon: <MergeTypeIcon/>,
+                icon: <MergeTypeIcon />,
                 label: 'Pooling'
             },
             'waiting for entering': {
                 color: 'warning',
-                icon: <InputIcon/>,
+                icon: <InputIcon />,
                 label: 'Waiting for Entry'
             },
             'processing': {
                 color: 'info',
-                icon: <SettingsIcon/>,
+                icon: <SettingsIcon />,
                 label: 'Processing'
             },
             'reported': {
                 color: 'success',
-                icon: <AssignmentIcon/>,
+                icon: <AssignmentIcon />,
                 label: 'Reported'
             },
             'canceled': {
                 color: 'error',
-                icon: <CancelIcon/>,
+                icon: <CancelIcon />,
                 label: 'Canceled'
             }
         };
 
         // Default case for backward compatibility
         if (!statusMap[status?.toLowerCase()]) {
-            if (status === 'Completed') return {color: 'success', icon: <CheckCircleIcon/>, label: status};
-            if (status === 'Pending') return {color: 'warning', icon: <HourglassEmptyIcon/>, label: status};
-            if (status === 'In Progress') return {color: 'info', icon: <SettingsIcon/>, label: status};
-            return {color: 'default', icon: <WarningIcon/>, label: status || 'Unknown'};
+            if (status === 'Completed') return { color: 'success', icon: <CheckCircleIcon />, label: status };
+            if (status === 'Pending') return { color: 'warning', icon: <HourglassEmptyIcon />, label: status };
+            if (status === 'In Progress') return { color: 'info', icon: <SettingsIcon />, label: status };
+            return { color: 'default', icon: <WarningIcon />, label: status || 'Unknown' };
         }
 
         return statusMap[status.toLowerCase()];
@@ -147,8 +148,8 @@ const Index = () => {
             flex: 1.2,
             display: "flex",
             align: 'left',
-            renderCell: ({row}) => (
-                <Box sx={{display: "flex", flexDirection: "column"}}>
+            renderCell: ({ row }) => (
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
                     <Link href={route('acceptances.show', row.id)} title={row.id}>
                         {row.patient_fullname || "N/A"}
                     </Link>
@@ -164,8 +165,8 @@ const Index = () => {
             type: "string",
             flex: 0.5,
             display: "flex",
-            renderCell: ({row}) => (
-                <Box display="flex" sx={{alignItems: "center"}}>
+            renderCell: ({ row }) => (
+                <Box display="flex" sx={{ alignItems: "center" }}>
                     <Box>
                         <Typography variant="body2">
                             {row.referrer_fullname || "N/A"}
@@ -184,7 +185,7 @@ const Index = () => {
             sortable: false,
             flex: 0.6,
             display: "flex",
-            renderCell: ({row}) => {
+            renderCell: ({ row }) => {
                 const samples = row?.samples || [];
 
                 // If no samples, show "No barcodes"
@@ -205,7 +206,7 @@ const Index = () => {
                         {displayedSamples.map((item, idx) => (
                             <Chip
                                 key={idx}
-                                icon={<QrCodeIcon fontSize="small"/>}
+                                icon={<QrCodeIcon fontSize="small" />}
                                 label={item.barcode}
                                 size="small"
                                 color={getBarcodeChipColor(idx)}
@@ -234,14 +235,28 @@ const Index = () => {
             }
         },
         {
+            field: 'tags',
+            headerName: 'Tags',
+            sortable: false,
+            flex: 0.7,
+            display: "flex",
+            renderCell: ({ row }) => (
+                <InlineTagManager
+                    initialTags={row.tags || []}
+                    updateUrl={route('acceptances.tags.update', row.id)}
+                    entityType="acceptance"
+                />
+            )
+        },
+        {
             field: 'out_patient',
             headerName: 'Patient Type',
             type: "boolean",
             flex: 0.3,
             display: "flex",
-            renderCell: ({row}) => (
+            renderCell: ({ row }) => (
                 <Chip
-                    icon={<LocalHospitalIcon fontSize="small"/>}
+                    icon={<LocalHospitalIcon fontSize="small" />}
                     label={row.out_patient ? "Out patient" : "In patient"}
                     color={row.out_patient ? "info" : "secondary"}
                     variant={row.out_patient ? "filled" : "filled"}
@@ -260,14 +275,14 @@ const Index = () => {
             flex: 0.3,
             display: "flex",
             type: "number",
-            renderCell: ({row}) => {
+            renderCell: ({ row }) => {
                 const remaining = row.payable_amount - row.payments_sum_price;
                 const isPaid = remaining <= 0;
 
                 return (
                     <Tooltip title={isPaid ? "Fully paid" : "Remaining amount to be paid"}>
                         <Chip
-                            icon={<PaymentsIcon fontSize="small"/>}
+                            icon={<PaymentsIcon fontSize="small" />}
                             label={formatCurrency(remaining)}
                             color={isPaid ? "success" : "warning"}
                             size="small"
@@ -288,7 +303,7 @@ const Index = () => {
             type: "string",
             flex: 0.4,
             display: "flex",
-            renderCell: ({row}) => {
+            renderCell: ({ row }) => {
                 const statusInfo = getStatusInfo(row.status);
 
                 return (
@@ -312,11 +327,11 @@ const Index = () => {
             type: "string",
             flex: 0.25,
             display: "flex",
-            renderCell: ({row}) => {
+            renderCell: ({ row }) => {
                 const map = {
-                    stat: {label: 'STAT', color: 'error', icon: <FlashOnIcon fontSize="small"/>},
-                    urgent: {label: 'Urgent', color: 'warning', icon: <PriorityHighIcon fontSize="small"/>},
-                    routine: {label: 'Routine', color: 'default', icon: null},
+                    stat: { label: 'STAT', color: 'error', icon: <FlashOnIcon fontSize="small" /> },
+                    urgent: { label: 'Urgent', color: 'warning', icon: <PriorityHighIcon fontSize="small" /> },
+                    routine: { label: 'Routine', color: 'default', icon: null },
                 };
                 const cfg = map[row.priority] ?? map.routine;
                 if (row.priority === 'routine') return null;
@@ -327,7 +342,7 @@ const Index = () => {
                         color={cfg.color}
                         size="small"
                         variant="filled"
-                        sx={{fontWeight: 600, fontSize: '0.7rem'}}
+                        sx={{ fontWeight: 600, fontSize: '0.7rem' }}
                     />
                 );
             }
@@ -338,7 +353,7 @@ const Index = () => {
             flex: 0.4,
             display: "flex",
             valueGetter: (value) => value && new Date(value),
-            renderCell: ({value, row}) => {
+            renderCell: ({ value, row }) => {
                 // Calculate if report date is today, in the past or future
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
@@ -353,18 +368,18 @@ const Index = () => {
                 const isReported = row.status?.toLowerCase() === 'reported';
 
                 return reportDate ? (
-                    <Box sx={{display: "flex", flexDirection: "row", alignItems: "center"}}>
+                    <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
                         {isReported ? (
-                            <CheckCircleIcon fontSize="small" color="success" sx={{mr: 1}}/>
+                            <CheckCircleIcon fontSize="small" color="success" sx={{ mr: 1 }} />
                         ) : row.waiting_for_pooling ? (
-                            <HourglassEmptyIcon fontSize="small" color="secondary" sx={{mr: 1}}/>
+                            <HourglassEmptyIcon fontSize="small" color="secondary" sx={{ mr: 1 }} />
                         ) : (
                             <Badge
                                 color={isToday ? "warning" : isPast ? "error" : "success"}
                                 variant="dot"
-                                sx={{mr: 1}}
+                                sx={{ mr: 1 }}
                             >
-                                <CalendarTodayIcon fontSize="small" color="action"/>
+                                <CalendarTodayIcon fontSize="small" color="action" />
                             </Badge>
                         )}
                         <Box>
@@ -388,7 +403,7 @@ const Index = () => {
             type: "datetime",
             display: "flex",
             valueGetter: (value) => value && new Date(value),
-            renderCell: ({value}) => formatDate(value)
+            renderCell: ({ value }) => formatDate(value)
         },
         {
             field: 'published_at',
@@ -397,7 +412,7 @@ const Index = () => {
             type: "datetime",
             display: "flex",
             valueGetter: (value) => value && new Date(value),
-            renderCell: ({value}) => value ? formatDate(value) : '-'
+            renderCell: ({ value }) => value ? formatDate(value) : '-'
         },
         {
             field: 'id',
@@ -415,7 +430,7 @@ const Index = () => {
                         <GridActionsCellItem
                             icon={
                                 <Tooltip title="Edit acceptance">
-                                    <EditIcon color="primary"/>
+                                    <EditIcon color="primary" />
                                 </Tooltip>
                             }
                             label="Edit"
@@ -429,7 +444,7 @@ const Index = () => {
                         <GridActionsCellItem
                             icon={
                                 <Tooltip title="Delete acceptance">
-                                    <DeleteIcon color="error"/>
+                                    <DeleteIcon color="error" />
                                 </Tooltip>
                             }
                             label="Delete"
@@ -443,7 +458,7 @@ const Index = () => {
                         <GridActionsCellItem
                             icon={
                                 <Tooltip title="Cancel acceptance">
-                                    <CancelIcon color="warning"/>
+                                    <CancelIcon color="warning" />
                                 </Tooltip>
                             }
                             label="Cancel"
@@ -457,7 +472,7 @@ const Index = () => {
                         <GridActionsCellItem
                             icon={
                                 <Tooltip title="Add pooling sample">
-                                    <MergeTypeIcon color="secondary"/>
+                                    <MergeTypeIcon color="secondary" />
                                 </Tooltip>
                             }
                             label="Add Pooling"
@@ -479,12 +494,12 @@ const Index = () => {
     }, []);
 
     const deleteAcceptance = useCallback((params) => () => {
-        setData({...params, _method: "delete"});
+        setData({ ...params, _method: "delete" });
         setOpenDeleteForm(true);
     }, [setData]);
 
     const cancelAcceptance = useCallback((params) => () => {
-        setData({...params, _method: "put"});
+        setData({ ...params, _method: "put" });
         setOpenCancelForm(true);
     }, [setData]);
 
@@ -500,13 +515,9 @@ const Index = () => {
         });
     }, [post, data?.id, handleCloseCancelForm]);
 
-    const show = useCallback((id) => () => {
-        router.visit(route("acceptances.show", id));
-    }, []);
-
     const pageReload = useCallback((page, filters, sort, pageSize) => {
         router.visit(route("acceptances.index"), {
-            data: {page, filters, sort, pageSize},
+            data: { page, filters, sort, pageSize },
             only: ["acceptances", "status", "requestInputs", "success"],
         });
     }, []);
@@ -540,14 +551,14 @@ const Index = () => {
         <>
             <PageHeader
                 title="Acceptances List"
-                icon={<LocalHospitalIcon fontSize="large" color="primary"/>}
+                icon={<LocalHospitalIcon fontSize="large" color="primary" />}
                 subtitle="Manage and view all patient acceptances"
                 actions={
-                    <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
+                    <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                         <Button
                             variant="outlined"
                             color="success"
-                            startIcon={<FileDownloadIcon/>}
+                            startIcon={<FileDownloadIcon />}
                             href={route('acceptances.export', requestInputs)}
                         >
                             Export Excel
@@ -643,12 +654,12 @@ const Index = () => {
                     display: 'flex',
                     alignItems: 'center'
                 }}>
-                    <CancelIcon sx={{mr: 1.5}}/>
+                    <CancelIcon sx={{ mr: 1.5 }} />
                     Cancel Acceptance #{data?.id}
                 </DialogTitle>
 
-                <DialogContent sx={{pt: 3, pb: 2}}>
-                    <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
+                <DialogContent sx={{ pt: 3, pb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                         <Avatar
                             sx={{
                                 bgcolor: 'warning.light',
@@ -658,14 +669,14 @@ const Index = () => {
                                 height: 40
                             }}
                         >
-                            <WarningIcon/>
+                            <WarningIcon />
                         </Avatar>
                         <Typography variant="h6">
                             Confirm Cancellation
                         </Typography>
                     </Box>
 
-                    <Divider sx={{my: 2}}/>
+                    <Divider sx={{ my: 2 }} />
 
                     <Typography variant="body1">
                         Are you sure you want to cancel the acceptance
@@ -694,13 +705,13 @@ const Index = () => {
                     </Paper>
                 </DialogContent>
 
-                <DialogActions sx={{px: 3, pb: 3}}>
+                <DialogActions sx={{ px: 3, pb: 3 }}>
                     <Button
                         onClick={handleCloseCancelForm}
                         disabled={processing}
                         variant="outlined"
-                        startIcon={<CancelIcon/>}
-                        sx={{borderRadius: 1.5}}
+                        startIcon={<CancelIcon />}
+                        sx={{ borderRadius: 1.5 }}
                     >
                         No, Keep It
                     </Button>
@@ -709,8 +720,8 @@ const Index = () => {
                         variant="contained"
                         onClick={handleCancel}
                         disabled={processing}
-                        startIcon={processing ? <CircularProgress size={20} color="inherit"/> : <CheckCircleIcon/>}
-                        sx={{borderRadius: 1.5}}
+                        startIcon={processing ? <CircularProgress size={20} color="inherit" /> : <CheckCircleIcon />}
+                        sx={{ borderRadius: 1.5 }}
                     >
                         Yes, Cancel Acceptance
                     </Button>
@@ -730,7 +741,7 @@ const breadCrumbs = [
     {
         title: "Acceptances",
         link: null,
-        icon: <LocalHospitalIcon fontSize="small"/>
+        icon: <LocalHospitalIcon fontSize="small" />
     }
 ];
 

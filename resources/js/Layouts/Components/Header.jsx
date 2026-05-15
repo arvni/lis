@@ -8,7 +8,7 @@ const Header = ({breadcrumbs}) => {
             {route().current("dashboard")? <Typography sx={{ display: 'flex', alignItems: 'center', Color:"#fff" }}>Dashboard</Typography>:<Link method="get" href={route("dashboard")} type="button" style={{textDecoration:"none",color:"#fff", fill:"#fff"}}>
                 <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" /> Dashboard
             </Link>}
-        {breadcrumbs.map((item, index)=>item.link?(
+        {breadcrumbs && Array.isArray(breadcrumbs) && breadcrumbs.map((item, index)=>item.link?(
             <Link method="get" key={index} href={item.link} type="button" style={{textDecoration:"none",color:"#fff", fill:"#fff"}}>
                 {item.icon??null} {item.title}
             </Link>

@@ -7,13 +7,14 @@ use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Report;
+use App\Domains\Reception\Traits\ExtractsTagFilterIds;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 
 class AcceptanceItemRepository
 {
-    use LogsUserActivity;
+    use LogsUserActivity, ExtractsTagFilterIds;
 
 
     public function listAcceptanceItems($queryData = [])
@@ -28,7 +29,8 @@ class AcceptanceItemRepository
             },
             "invoice.owner",
             "report",
-            "activeSamples"
+            "activeSamples",
+            "tags:id,name,color",
         ])
             ->withAggregate("method", "name")
             ->withAggregate("method", "turnaround_time")
@@ -45,6 +47,7 @@ class AcceptanceItemRepository
             "invoice.owner",
             "acceptance.referrer",
             "acceptance.patient",
+            "tags:id,name",
             "latestState" => function ($q) {
                 $q->with([
                     "Section",
@@ -197,6 +200,11 @@ class AcceptanceItemRepository
             $date = Carbon::parse($filters["date"]);
             $dateRange = [$date->copy()->startOfDay(), $date->copy()->endOfDay()];
             $query->whereBetween('created_at', $dateRange);
+        }
+
+        $tagIds = $this->extractTagFilterIds($filters);
+        if ($tagIds) {
+            $query->whereHas('tags', fn($tagQuery) => $tagQuery->whereIn('tags.id', $tagIds));
         }
 
         // Apply date range filtering on started_at field using Carbon

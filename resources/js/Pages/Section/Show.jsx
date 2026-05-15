@@ -30,8 +30,12 @@ import {
     ErrorOutlined as ErrorOutlineIcon,
     HourglassEmpty as HourglassEmptyIcon,
     Refresh as RefreshIcon,
-    Dashboard as DashboardIcon
+    Dashboard as DashboardIcon,
+    LocalOffer as TagIcon,
 } from "@mui/icons-material";
+import TagManagerDialog from "@/Components/TagManagerDialog";
+import TagChip from "@/Components/TagChip";
+import InlineTagManager from "@/Components/InlineTagManager";
 import {GridActionsCellItem} from "@mui/x-data-grid";
 import Avatar from "@mui/material/Avatar";
 
@@ -97,6 +101,8 @@ const Show = () => {
     const [selectedRows, setSelectedRows] = useState([]);
     const [openEnteringForm, setOpenEnteringForm] = useState(false);
     const [openDoneForm, setOpenDoneForm] = useState(false);
+    const [openTagDialog, setOpenTagDialog] = useState(false);
+    const [tagEntity, setTagEntity] = useState(null);
 
     const {
         section,
@@ -238,6 +244,21 @@ const Show = () => {
             }
         },
         {
+            field: 'tags',
+            headerName: 'Tags',
+            type: "string",
+            sortable: false,
+            display: "flex",
+            flex: 0.8,
+            renderCell: ({row}) => (
+                <InlineTagManager 
+                    initialTags={row.acceptance_item?.tags || []} 
+                    updateUrl={route('acceptanceItems.tags.update', row.acceptance_item?.id)}
+                    entityType="acceptanceItem"
+                />
+            )
+        },
+        {
             field: 'id',
             headerName: 'Actions',
             type: "actions",
@@ -337,6 +358,22 @@ const Show = () => {
                         />
                     );
                 }
+
+                output.push(
+                    <GridActionsCellItem
+                        key={"tags-" + row.id}
+                        icon={
+                            <Tooltip title="Manage Tags">
+                                <TagIcon color="secondary"/>
+                            </Tooltip>
+                        }
+                        label="Manage Tags"
+                        onClick={() => {
+                            setTagEntity(row.acceptance_item);
+                            setOpenTagDialog(true);
+                        }}
+                    />
+                );
 
                 return output;
             }
@@ -778,6 +815,14 @@ const Show = () => {
                 onChange={handleChange}
                 onSubmit={handleSubmit}
                 options={options}
+            />
+
+            <TagManagerDialog
+                open={openTagDialog}
+                onClose={() => setOpenTagDialog(false)}
+                tags={tagEntity?.tags || []}
+                updateUrl={tagEntity ? route('acceptanceItems.tags.update', tagEntity.id) : ''}
+                title={`Manage Tags for Test #${tagEntity?.id}`}
             />
         </>
     );

@@ -46,6 +46,7 @@ readonly class AcceptanceItemService
         $acceptanceItem->load([
             "acceptance",
             "patients",
+            "tags:id,name",
             "acceptanceItemStates" => function ($query) {
                 return $query->with([
                     'section',

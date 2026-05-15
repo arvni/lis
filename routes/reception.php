@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Reception\ListPatientsController;
 use App\Http\Controllers\Api\Reception\ListReferrerAcceptanceReportedOrExpectedToBeReportedController;
+use App\Http\Controllers\Api\Reception\ListTagsController;
 use App\Http\Controllers\Api\Reception\TATAnalyticsController;
 use App\Http\Controllers\Api\Reception\TATItemsController;
 use App\Http\Controllers\Document\DownloadReportController;
@@ -38,6 +39,8 @@ use App\Http\Controllers\Reception\ReportController;
 use App\Http\Controllers\Reception\SampleCollectionController;
 use App\Http\Controllers\Reception\SampleController;
 use App\Http\Controllers\Reception\ShowAcceptanceItemController;
+use App\Http\Controllers\Reception\TagAssignmentController;
+use App\Http\Controllers\Reception\TagController;
 use App\Http\Controllers\Reception\TATDashboardController;
 use App\Http\Controllers\Reception\ToggleReportlessAcceptanceItemController;
 use App\Http\Controllers\Reception\ToggleSamplelessAcceptanceItemController;
@@ -59,6 +62,7 @@ Route::group(["prefix" => "reception"], function () {
     Route::get("acceptances/{acceptance}/print", PrintAcceptanceController::class)->name("acceptances.print");
     Route::get("acceptances/{acceptance}/print-samples", PrintAcceptanceSamplesController::class)->name("acceptances.printSamples");
     Route::get("acceptances/{acceptance}/barcodes", PrintAcceptanceBarcodeController::class)->name("acceptances.barcodes");
+    Route::put("acceptances/{acceptance}/tags", [TagAssignmentController::class, "syncAcceptance"])->name("acceptances.tags.update");
     Route::put("acceptances/{acceptance}/cancel", CancelAcceptanceController::class)->name("acceptances.cancel");
     Route::patch("acceptances/{acceptance}/priority", UpdateAcceptancePriorityController::class)->name("acceptances.updatePriority");
     Route::get("tat-dashboard", TATDashboardController::class)->name("tat.dashboard");
@@ -78,6 +82,7 @@ Route::group(["prefix" => "reception"], function () {
     Route::resource("acceptanceItemStates", AcceptanceItemStateController::class)->only("show", "update");
     Route::get("acceptanceItems", ListAcceptanceItemsController::class)->name("acceptanceItems.index");
     Route::get("acceptanceItems/export", ExportAcceptanceItemsController::class)->name("acceptanceItems.export");
+    Route::put("acceptanceItems/{acceptanceItem}/tags", [TagAssignmentController::class, "syncAcceptanceItem"])->name("acceptanceItems.tags.update");
     Route::get("acceptanceItems/{acceptanceItem}/check-workflow", CheckAcceptanceItemWorkflowController::class)->name("acceptanceItems.check-workflow");
     Route::put("acceptances/{acceptance}/acceptance-items/{acceptanceItem}/toggle-reportless", ToggleReportlessAcceptanceItemController::class)->name("acceptanceItems.toggleReportless");
     Route::put("acceptances/{acceptance}/acceptance-items/{acceptanceItem}/toggle-sampleless", ToggleSamplelessAcceptanceItemController::class)->name("acceptanceItems.toggleSampleless");
@@ -94,6 +99,7 @@ Route::group(["prefix" => "reception"], function () {
     Route::put("reports/{report}/publish", PublishReportController::class)->name("reports.publish");
     Route::put("reports/{report}/unpublish", UnPublishReportController::class)->name("reports.unpublish");
     Route::put("acceptances/{acceptance}/publish", PublishAcceptanceController::class)->name("acceptances.publish");
+    Route::resource("tags", TagController::class)->only(["index", "update", "destroy"]);
 });
 
 Route::get("sections/{section}", ShowSectionController::class)->name("sections.show");
@@ -104,6 +110,7 @@ Route::group(["prefix" => "api/reception", "as" => "api."], function () {
         ->name("acceptances.reported");
     Route::get("patients/{idNo}", GetPatientWithIdNoController::class)->name("patients.getByIdNo");
     Route::get("patients", ListPatientsController::class)->name("patients.list");
+    Route::get("tags", ListTagsController::class)->name("tags.list");
     Route::get("sample-collection/{acceptance}", ListBarcodesController::class)->name("sampleCollection.list");
     Route::get("acceptances/{acceptance}/pooling-items", GetAcceptancePoolingItemsController::class)->name("acceptances.poolingItems");
     Route::get("tat/items", TATItemsController::class)->name("tat.items");

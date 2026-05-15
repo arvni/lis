@@ -41,6 +41,10 @@ import {Link, router} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 import {BarcodeIcon} from "lucide-react";
 import TestsTable from "@/Pages/Acceptance/Components/TestsSection/TestsTable.jsx";
+import TagManager from "@/Components/TagManager";
+import TagChip from "@/Components/TagChip";
+import InlineTagManager from "@/Components/InlineTagManager";
+import { LocalOffer as TagIcon } from "@mui/icons-material";
 
 
 // Status chip component for better consistency
@@ -345,6 +349,14 @@ const Show = ({
                     </Button>
                 )
             ]}/>
+
+            <Box sx={{ mb: 2 }}>
+                <InlineTagManager 
+                    initialTags={acceptance?.tags || []} 
+                    updateUrl={route('acceptances.tags.update', acceptance.id)}
+                    entityType="acceptance"
+                />
+            </Box>
 
             {/* Header with status and basic info */}
             <Box sx={{mb: 4}}>

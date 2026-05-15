@@ -46,6 +46,7 @@ const TestsTable = ({
                         <TableCell>Type</TableCell>
                         <TableCell>Method</TableCell>
                         <TableCell>Patient</TableCell>
+                        <TableCell>Tags</TableCell>
                         <TableCell>Details</TableCell>
                         <TableCell align="right">Discount</TableCell>
                         <TableCell align="right">Price</TableCell>
@@ -80,7 +81,7 @@ const TestsTable = ({
                 </TableBody>
                 {showTotal && <TableFooter>
                     <TableRow>
-                        <TableCell colSpan={7} align="right">
+                        <TableCell colSpan={8} align="right">
                             <Typography variant="subtitle1" fontWeight="bold">Total:</Typography>
                         </TableCell>
                         <TableCell align="right">

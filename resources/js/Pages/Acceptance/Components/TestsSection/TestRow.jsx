@@ -259,6 +259,7 @@ const TestRow = ({
     const testFullName = test?.method_test?.test?.fullName;
     const testType = test?.method_test?.test?.type;
     const methodName = test?.method_test?.method?.name;
+    const tags = test?.tags || [];
 
     // Handle deleted tests with alert row
     if (isDeleted) {
@@ -388,6 +389,28 @@ const TestRow = ({
                     ))
                 ) : (
                     <PatientChips patients={test?.patients} />
+                )}
+            </TableCell>
+
+            {/* Tags */}
+            <TableCell>
+                {tags.length ? (
+                    <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                        {tags.map((tag) => (
+                            <Chip
+                                key={tag.id ?? tag.name}
+                                label={tag.name}
+                                size="small"
+                                color="secondary"
+                                variant="outlined"
+                                sx={{fontSize: '0.7rem'}}
+                            />
+                        ))}
+                    </Stack>
+                ) : (
+                    <Typography variant="caption" color="text.secondary">
+                        No tags
+                    </Typography>
                 )}
             </TableCell>
 

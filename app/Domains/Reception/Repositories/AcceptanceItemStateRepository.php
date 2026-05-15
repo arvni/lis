@@ -4,13 +4,14 @@ namespace App\Domains\Reception\Repositories;
 
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Reception\Models\AcceptanceItemState;
+use App\Domains\Reception\Traits\ExtractsTagFilterIds;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AcceptanceItemStateRepository
 {
-    use LogsUserActivity;
+    use LogsUserActivity, ExtractsTagFilterIds;
 
 
     public function listAcceptanceItemStates($queryData)
@@ -18,6 +19,7 @@ class AcceptanceItemStateRepository
         $query = AcceptanceItemState::with([
             "acceptanceItem.test",
             "acceptanceItem.method.test",
+            "acceptanceItem.tags:id,name",
             "sample.patient"
         ])
         ->whereHas('acceptanceItem'); // Exclude acceptance item states where acceptance item is soft deleted
@@ -81,6 +83,11 @@ class AcceptanceItemStateRepository
             $query->where("status", $filters["status"]);
         if (isset($filters["search"]))
             $query->search($filters["search"]);
+
+        $tagIds = $this->extractTagFilterIds($filters);
+        if ($tagIds) {
+            $query->whereHas('acceptanceItem.tags', fn($tagQuery) => $tagQuery->whereIn('tags.id', $tagIds));
+        }
 
         // Apply date range filtering on started_at field using Carbon
         if (!empty($filters["from_date"]) || !empty($filters["to_date"])) {
