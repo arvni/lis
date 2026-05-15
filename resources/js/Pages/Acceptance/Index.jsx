@@ -517,6 +517,7 @@ const Index = () => {
         router.visit(route("acceptances.index"), {
             data: { page, filters, sort, pageSize },
             only: ["acceptances", "status", "requestInputs", "success"],
+            queryStringArrayFormat: "indices",
         });
     }, []);
 

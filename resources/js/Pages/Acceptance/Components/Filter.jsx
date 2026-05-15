@@ -153,6 +153,10 @@ const Filter = ({defaultFilter, onFilter}) => {
         setFilter(prevState => ({...prevState, priority: ""}));
     }, []);
 
+    const handleClearTags = useCallback(() => {
+        setFilter(prevState => ({...prevState, tags: []}));
+    }, []);
+
     const handleKeyPress = useCallback((e) => {
         if (e.key === 'Enter' && !dateError && !reportDateError && !publishedAtError) {
             handleSubmit(e);
@@ -341,6 +345,14 @@ const Filter = ({defaultFilter, onFilter}) => {
                             variant="outlined"
                         />
                     )}
+                    {filter?.tags && filter.tags.length > 0 && (
+                        <Chip
+                            label={`Tags: ${filter.tags.length} selected`}
+                            size="small"
+                            onDelete={handleClearTags}
+                            variant="outlined"
+                        />
+                    )}
                     {filter?.waiting_for_pooling && (
                         <Chip
                             label="Waiting for Pooling"
@@ -523,6 +535,18 @@ const Filter = ({defaultFilter, onFilter}) => {
                                 />
                             }
                             label="Waiting for Pooling"
+                        />
+                    </Grid>
+
+                    <Grid size={{xs: 12, sm: 6, md: 4}}>
+                        <SelectSearch
+                            multiple
+                            value={filter?.tags || []}
+                            onChange={handleChange}
+                            label="Tags"
+                            fullWidth
+                            name="tags"
+                            url={route("api.tags.list")}
                         />
                     </Grid>
 

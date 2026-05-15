@@ -264,6 +264,7 @@ const StatisticsIndex = () => {
         router.visit(route('acceptanceItems.index'), {
             data: { page, filters, pageSize, sort },
             only: ["acceptanceItems", "requestInputs",],
+            queryStringArrayFormat: "indices",
         });
     }, []);
 

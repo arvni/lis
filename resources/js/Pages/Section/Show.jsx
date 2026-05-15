@@ -371,7 +371,8 @@ const Show = () => {
         router.visit(route('sections.show', section.id), {
             data: { page, filters, sort, pageSize },
             only: ["acceptanceItemStates", "section", "status", "success", "requestInputs"],
-            preserveState: true
+            preserveState: true,
+            queryStringArrayFormat: "indices",
         });
     };
 

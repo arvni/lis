@@ -11,6 +11,7 @@ import FormControl from "@mui/material/FormControl";
 import {InputLabel, Select, InputAdornment, IconButton, Tooltip, Typography, Chip, Box} from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import ClearIcon from '@mui/icons-material/Clear';
+import SelectSearch from "@/Components/SelectSearch.jsx";
 
 const ShowFilter = memo(({defaultFilter, onFilter}) => {
     const [filter, setFilter] = useState(defaultFilter);
@@ -88,6 +89,7 @@ const ShowFilter = memo(({defaultFilter, onFilter}) => {
     const clearAllFilters = () => setFilter({
         search: "",
         status: null,
+        tags: [],
         from_date: "",
         to_date: ""
     });
@@ -96,6 +98,7 @@ const ShowFilter = memo(({defaultFilter, onFilter}) => {
     const hasActiveFilters =
         filter?.search ||
         filter?.status ||
+        (Array.isArray(filter?.tags) && filter.tags.length > 0) ||
         filter?.from_date ||
         filter?.to_date;
 
@@ -164,6 +167,31 @@ const ShowFilter = memo(({defaultFilter, onFilter}) => {
                             </Select>
                         </FormControl>
                     </Grid>
+
+                    <Grid size={{xs: 12, sm: 6}}>
+                        <SelectSearch
+                            multiple
+                            value={filter?.tags || []}
+                            onChange={handleChange}
+                            label="Tags"
+                            fullWidth
+                            name="tags"
+                            url={route("api.tags.list")}
+                        />
+                    </Grid>
+
+                    {filter?.tags && filter.tags.length > 0 && (
+                        <Grid size={{xs: 12}}>
+                            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 1}}>
+                                <Chip
+                                    label={`Tags: ${filter.tags.length} selected`}
+                                    onDelete={() => setFilter(prevState => ({...prevState, tags: []}))}
+                                    size="small"
+                                    variant="outlined"
+                                />
+                            </Box>
+                        </Grid>
+                    )}
 
                     <Grid size={{xs: 12}}>
                         <Typography variant="subtitle2" sx={{mb: 1, display: 'flex', alignItems: 'center'}}>

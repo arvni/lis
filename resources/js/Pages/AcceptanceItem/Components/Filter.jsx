@@ -5,6 +5,7 @@ import Button from "@mui/material/Button";
 import {Box, Chip, IconButton, InputAdornment, Paper, Tooltip, Typography} from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import SelectSearch from "@/Components/SelectSearch.jsx";
 
 const Filter = memo(({defaultFilter, onFilter}) => {
     const [filter, setFilter] = useState(defaultFilter);
@@ -81,6 +82,7 @@ const Filter = memo(({defaultFilter, onFilter}) => {
 
     const clearAllFilters = () => setFilter({
         search: "",
+        tags: [],
         status: null,
         from_date: "",
         to_date: ""
@@ -89,6 +91,7 @@ const Filter = memo(({defaultFilter, onFilter}) => {
     // Check if any filters are applied
     const hasActiveFilters =
         filter?.search ||
+        (Array.isArray(filter?.tags) && filter.tags.length > 0) ||
         filter?.from_date ||
         filter?.to_date;
 
@@ -120,7 +123,29 @@ const Filter = memo(({defaultFilter, onFilter}) => {
                     />
                 </Grid>
                 <Grid size={{xs: 12, sm: 6}}>
+                    <SelectSearch
+                        multiple
+                        value={filter?.tags || []}
+                        onChange={handleChange}
+                        label="Tags"
+                        fullWidth
+                        name="tags"
+                        url={route("api.tags.list")}
+                    />
                 </Grid>
+
+                {filter?.tags && filter.tags.length > 0 && (
+                    <Grid size={{xs: 12}}>
+                        <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 1}}>
+                            <Chip
+                                label={`Tags: ${filter.tags.length} selected`}
+                                onDelete={() => setFilter(prevState => ({...prevState, tags: []}))}
+                                size="small"
+                                variant="outlined"
+                            />
+                        </Box>
+                    </Grid>
+                )}
 
                 <Grid size={{xs: 12}}>
                     <Typography variant="subtitle2" sx={{mb: 1, display: 'flex', alignItems: 'center'}}>
