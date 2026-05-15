@@ -7,7 +7,6 @@ import {
     Paper,
     Box,
     Tooltip,
-    Chip,
     Menu,
     MenuItem,
     Checkbox,
@@ -19,14 +18,11 @@ import {
     ViewColumn as ViewColumnIcon
 } from "@mui/icons-material";
 import Filter from "./Components/Filter";
-import TagManagerDialog from "@/Components/TagManagerDialog";
-import TagChip from "@/Components/TagChip";
-import { LocalOffer as TagIcon } from "@mui/icons-material";
 import InlineTagManager from "@/Components/InlineTagManager";
 import Excel from "@/../images/excel.svg";
-import {Head, router, usePage} from "@inertiajs/react";
-import {useState, useCallback, useEffect} from "react";
-import {formatDate} from "@/Services/helper.js";
+import { Head, router, usePage } from "@inertiajs/react";
+import { useState, useCallback, useEffect } from "react";
+import { formatDate } from "@/Services/helper.js";
 
 // Adds N working days to a date, skipping Friday (5) and Saturday (6)
 const addWorkingDays = (dateStr, days) => {
@@ -44,12 +40,10 @@ const addWorkingDays = (dateStr, days) => {
 };
 
 const StatisticsIndex = () => {
-    const {acceptanceItems, requestInputs} = usePage().props;
+    const { acceptanceItems, requestInputs } = usePage().props;
     const [loading, setLoading] = useState(false);
     const [visibleColumns, setVisibleColumns] = useState([]);
     const [columnMenuAnchor, setColumnMenuAnchor] = useState(null);
-    const [openTagDialog, setOpenTagDialog] = useState(false);
-    const [tagEntity, setTagEntity] = useState(null);
 
     // Format currency values consistently
     const formatCurrency = (amount) => {
@@ -59,37 +53,11 @@ const StatisticsIndex = () => {
         }).format(amount);
     };
 
-    // Status indicator component
-    const StatusChip = ({status}) => {
-        let color = "default";
-
-        switch (status?.toLowerCase()) {
-            case "completed":
-                color = "success";
-                break;
-            case "in progress":
-            case "processing":
-                color = "warning";
-                break;
-            case "pending":
-                color = "info";
-                break;
-            case "cancelled":
-            case "failed":
-                color = "error";
-                break;
-            default:
-                color = "default";
-        }
-
-        return <Chip label={status || "Unknown"} color={color} size="small"/>;
-    };
-
     // Navigate to item details
     const showAcceptanceItem = useCallback((row) => (e) => {
         e.preventDefault();
         setLoading(true);
-        router.visit(route("acceptanceItems.show", {acceptanceItem: row.id, acceptance: row.acceptance_id}), {
+        router.visit(route("acceptanceItems.show", { acceptanceItem: row.id, acceptance: row.acceptance_id }), {
             onFinish: () => setLoading(false)
         });
     }, []);
@@ -109,42 +77,42 @@ const StatisticsIndex = () => {
             type: "string",
             flex: 0.7,
             sortable: false,
-            renderCell: ({row}) => row?.invoice?.owner?.fullName || "—",
+            renderCell: ({ row }) => row?.invoice?.owner?.fullName || "—",
         },
         {
             field: 'patient_fullname',
             headerName: 'Patient Name',
             type: "string",
             flex: 0.7,
-            renderCell: ({value}) => value || "—"
+            renderCell: ({ value }) => value || "—"
         },
         {
             field: 'patient_idno',
             headerName: 'ID Number',
             type: "string",
             flex: 0.25,
-            renderCell: ({value}) => value || "—"
+            renderCell: ({ value }) => value || "—"
         },
         {
             field: 'patient_dateofbirth',
             headerName: 'Date of Birth',
             type: "string",
             flex: 0.3,
-            renderCell: ({value}) => formatDate(value)
+            renderCell: ({ value }) => formatDate(value)
         },
         {
             field: 'test_testsname',
             headerName: 'Test Name',
             type: "string",
             flex: 0.3,
-            renderCell: ({value}) => value || "—"
+            renderCell: ({ value }) => value || "—"
         },
         {
             field: 'method_name',
             headerName: 'Method',
             type: "string",
             flex: 0.25,
-            renderCell: ({value}) => value || "—"
+            renderCell: ({ value }) => value || "—"
         },
         {
             field: 'tags',
@@ -152,9 +120,9 @@ const StatisticsIndex = () => {
             type: "string",
             sortable: false,
             flex: 0.45,
-            renderCell: ({row}) => (
-                <InlineTagManager 
-                    initialTags={row.tags || []} 
+            renderCell: ({ row }) => (
+                <InlineTagManager
+                    initialTags={row.tags || []}
                     updateUrl={route('acceptanceItems.tags.update', row.id)}
                     entityType="acceptanceItem"
                 />
@@ -165,14 +133,14 @@ const StatisticsIndex = () => {
             headerName: 'Price',
             type: "number",
             flex: 0.15,
-            renderCell: ({value}) => formatCurrency(value)
+            renderCell: ({ value }) => formatCurrency(value)
         },
         {
             field: 'discount',
             headerName: 'Discount',
             type: "number",
             flex: 0.2,
-            renderCell: ({value}) => formatCurrency(value)
+            renderCell: ({ value }) => formatCurrency(value)
         },
         {
             field: 'active_sample_collection_date',
@@ -180,7 +148,7 @@ const StatisticsIndex = () => {
             type: "date",
             valueGetter: (value) => value ? new Date(value) : null,
             flex: 0.3,
-            renderCell: ({value}) => value ? value.toLocaleDateString() : "-"
+            renderCell: ({ value }) => value ? value.toLocaleDateString() : "-"
         },
         {
             field: 'status',
@@ -195,7 +163,7 @@ const StatisticsIndex = () => {
             type: "date",
             valueGetter: (value) => value ? new Date(value) : null,
             flex: 0.4,
-            renderCell: ({value}) => formatDate(value)
+            renderCell: ({ value }) => formatDate(value)
         },
         {
             field: 'estimated_report_date',
@@ -204,41 +172,27 @@ const StatisticsIndex = () => {
             flex: 0.35,
             sortable: false,
             valueGetter: (value, row) => addWorkingDays(row.created_at, row.method_turnaround_time),
-            renderCell: ({value}) => value ? formatDate(value) : "—"
+            renderCell: ({ value }) => value ? formatDate(value) : "—"
         },
         {
             field: 'action',
             headerName: 'Actions',
             flex: 0.1,
             sortable: false,
-            renderCell: ({row}) => (
-                <Stack spacing={1} direction="row">
-                    <Tooltip title="Manage Tags">
-                        <IconButton
-                            onClick={() => {
-                                setTagEntity(row);
-                                setOpenTagDialog(true);
-                            }}
-                            size="small"
-                            color="secondary"
-                        >
-                            <TagIcon/>
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="View Details">
-                        <IconButton
-                            onClick={showAcceptanceItem(row)}
-                            href={route("acceptanceItems.show", {
-                                acceptanceItem: row.id,
-                                acceptance: row.acceptance_id
-                            })}
-                            size="small"
-                            color="info"
-                        >
-                            <RemoveRedEyeIcon/>
-                        </IconButton>
-                    </Tooltip>
-                </Stack>
+            renderCell: ({ row }) => (
+                <Tooltip title="View Details">
+                    <IconButton
+                        onClick={showAcceptanceItem(row)}
+                        href={route("acceptanceItems.show", {
+                            acceptanceItem: row.id,
+                            acceptance: row.acceptance_id
+                        })}
+                        size="small"
+                        color="info"
+                    >
+                        <RemoveRedEyeIcon />
+                    </IconButton>
+                </Tooltip>
             )
         }
     ];
@@ -295,7 +249,7 @@ const StatisticsIndex = () => {
     // Page reload function
     const pageReload = useCallback((page, filters, sort, pageSize) => {
         router.visit(route('acceptanceItems.index'), {
-            data: {page, filters, pageSize, sort},
+            data: { page, filters, pageSize, sort },
             only: ["acceptanceItems", "requestInputs"],
             preserveState: true
         });
@@ -303,12 +257,12 @@ const StatisticsIndex = () => {
 
     return (
         <>
-            <Head title="Test Statistics"/>
+            <Head title="Test Statistics" />
 
-            <Box sx={{mb: 3}}>
-                <Paper sx={{padding: 2, mb: 2}}>
-  <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "center"}}>
-                        <Typography variant="h5" component="h1" sx={{fontWeight: 'bold'}}>
+            <Box sx={{ mb: 3 }}>
+                <Paper sx={{ padding: 2, mb: 2 }}>
+                    <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+                        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
                             Test Statistics
                         </Typography>
 
@@ -324,9 +278,9 @@ const StatisticsIndex = () => {
                                         p: 1
                                     }}
                                 >
-  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
-                                        <ViewColumnIcon/>
-                                        <Typography variant="button" sx={{display: {xs: 'none', sm: 'block'}}}>
+                                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                                        <ViewColumnIcon />
+                                        <Typography variant="button" sx={{ display: { xs: 'none', sm: 'block' } }}>
                                             Columns
                                         </Typography>
                                     </Stack>
@@ -335,7 +289,7 @@ const StatisticsIndex = () => {
 
                             <Tooltip title="Export to Excel">
                                 <IconButton
-                                    href={route("acceptanceItems.export", {...requestInputs, visibleColumns})}
+                                    href={route("acceptanceItems.export", { ...requestInputs, visibleColumns })}
                                     color="success"
                                     sx={{
                                         border: '1px solid #e0e0e0',
@@ -343,9 +297,9 @@ const StatisticsIndex = () => {
                                         p: 1
                                     }}
                                 >
-  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
-                                        <img src={Excel} alt="Excel" width="24px"/>
-                                        <Typography variant="button" sx={{display: {xs: 'none', sm: 'block'}}}>
+                                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                                        <img src={Excel} alt="Excel" width="24px" />
+                                        <Typography variant="button" sx={{ display: { xs: 'none', sm: 'block' } }}>
                                             Export
                                         </Typography>
                                     </Stack>
@@ -370,7 +324,7 @@ const StatisticsIndex = () => {
                     }
                 }}
             >
-                <Box sx={{px: 2, py: 1}}>
+                <Box sx={{ px: 2, py: 1 }}>
                     <Stack direction="row" spacing={1}>
                         <Button
                             size="small"
@@ -401,7 +355,7 @@ const StatisticsIndex = () => {
                                 color="primary"
                                 size="small"
                             />
-                            <ListItemText primary={column.headerName}/>
+                            <ListItemText primary={column.headerName} />
                         </MenuItem>
                     ))}
             </Menu>
@@ -413,14 +367,6 @@ const StatisticsIndex = () => {
                 data={acceptanceItems}
                 Filter={Filter}
                 loading={loading}
-            />
-
-            <TagManagerDialog
-                open={openTagDialog}
-                onClose={() => setOpenTagDialog(false)}
-                tags={tagEntity?.tags || []}
-                updateUrl={tagEntity ? route('acceptanceItems.tags.update', tagEntity.id) : ''}
-                title={`Manage Tags for Test #${tagEntity?.id}`}
             />
         </>
     );
