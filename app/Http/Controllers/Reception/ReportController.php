@@ -129,7 +129,7 @@ class ReportController extends Controller
 
         // Get template URL
         $templates = $this->reportService->getTemplates($reportData->acceptanceItem);
-        $data=$reportData->toArray();
+        $data = $reportData->toArray();
         if (count($reportData->parameters)) {
             $data["parameters"] = $this->convertParameters($reportData->parameters);
         }
@@ -150,10 +150,11 @@ class ReportController extends Controller
     public function update(UpdateReportRequest $request, Report $report)
     {
         $user = auth()->user();
+        $report->loadMissing('acceptanceItem.acceptance');
         $parameters = $request->validated('parameters', []);
         foreach (($request->file('parameters') ?? []) as $parameter => $value) {
             $parameters[$parameter] = $this->documentService->storeDocument(
-                'patient', $request->validated('patient_id'), $value, DocumentTag::IMAGE->value
+                'patient', $report->acceptanceItem->acceptance->patient_id, $value, DocumentTag::IMAGE->value
             );
         }
 
@@ -168,7 +169,6 @@ class ReportController extends Controller
         );
 
         // Check and update acceptance status
-        $report->loadMissing('acceptanceItem.acceptance');
         if ($report->acceptanceItem && $report->acceptanceItem->acceptance) {
             $this->acceptanceService->checkAndUpdateAcceptanceStatus($report->acceptanceItem->acceptance);
         }
