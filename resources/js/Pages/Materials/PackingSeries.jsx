@@ -8,6 +8,7 @@ const MaterialsPackingSeries = () => {
     // const {materials, status, errors, success, requestInputs} = usePage().props;
     const [materials, setMaterials] = useState({data: [], page: 1});
     const [requestInputs, setRequestInputs] = useState();
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         handlePageReload()
@@ -20,9 +21,11 @@ const MaterialsPackingSeries = () => {
             sort,
             pageSize
         });
+        setLoading(true);
         axios.get(route('materials.packing-series') + "?" + searchUrl.toString(), {}).then(({data}) => {
             setRequestInputs(data.requestInputs);
-            setMaterials(data.materials)
+            setMaterials(data.materials);
+            setLoading(false);
         });
     }, []);
 
@@ -91,6 +94,7 @@ const MaterialsPackingSeries = () => {
         <>
             <PageHeader title="Materials Packing Series"/>
             <TableLayout
+                loading={loading}
                 defaultValues={requestInputs}
                 reload={handlePageReload}
                 columns={columns}

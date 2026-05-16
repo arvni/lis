@@ -153,6 +153,11 @@ const TableLayout = ({
         }));
     }, [columns]);
 
+    const sortModel = useMemo(
+        () => (defaultValues.sort?.field ? [defaultValues.sort] : []),
+        [defaultValues.sort?.field, defaultValues.sort?.sort]
+    );
+
     // Effect to handle success message
     useEffect(() => {
         if (props.success && !processing) {
@@ -185,29 +190,16 @@ const TableLayout = ({
 
     // Handlers for pagination and filtering
     const handlePaginationChange = (pModel) => {
-        const serverPaginationModel = {
-            pageSize: Number(defaultValues.pageSize) || 10,
-            page: Number(defaultValues.page || 1) - 1,
-        };
-
-        if (
-            pModel.page === serverPaginationModel.page &&
-            pModel.pageSize === serverPaginationModel.pageSize &&
-            paginationModel.page !== serverPaginationModel.page
-        ) {
-            return;
-        }
-
         if (pModel.page === paginationModel.page && pModel.pageSize === paginationModel.pageSize) {
             return;
         }
 
         setPaginationModel(pModel);
 
-        if (pModel.pageSize !== Number(defaultValues.pageSize)) {
+        if (pModel.pageSize !== paginationModel.pageSize) {
             reload(1, defaultValues.filters, defaultValues.sort, pModel.pageSize);
-        } else if (pModel.page !== Number(defaultValues.page) - 1) {
-            reload(pModel.page + 1, defaultValues.filters, defaultValues.sort, defaultValues.pageSize);
+        } else {
+            reload(pModel.page + 1, defaultValues.filters, defaultValues.sort, paginationModel.pageSize);
         }
     };
 
@@ -363,13 +355,12 @@ const TableLayout = ({
 
                     {/* DataGrid */}
                     <DataGrid
-                        onColumnVisibilityModelChange={console.log}
                         rows={data.data || []}
                         columns={processedColumns}
                         filterMode="server"
                         disableColumnFilter
                         sortingMode="server"
-                        sortModel={defaultValues.sort ? [defaultValues.sort] : []}
+                        sortModel={sortModel}
                         pagination
                         paginationMode="server"
                         pageSizeOptions={[10, 20, 50, 100]}
