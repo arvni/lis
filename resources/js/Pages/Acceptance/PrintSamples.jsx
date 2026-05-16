@@ -380,7 +380,7 @@ const PrintSamples = ({acceptance, samples}) => {
                             Total Tests: {rows.length}
                         </Typography>
                         <Typography variant="caption" sx={{fontSize: '0.65rem', color: 'text.secondary'}}>
-                            Sampler: {acceptance?.sampler?.name || '_______________'}
+                            Phlebotomist: {acceptance?.sampler?.name || '_______________'}
                         </Typography>
                     </Box>
 
@@ -399,7 +399,7 @@ const PrintSamples = ({acceptance, samples}) => {
                                 height: 20,
                             }}/>
                             <Typography variant="caption" sx={{fontSize: '0.6rem', color: 'text.secondary'}}>
-                                Sampler Signature
+                                Phlebotomist Signature
                             </Typography>
                         </Box>
                         <Box sx={{textAlign: 'center'}}>
