@@ -36,8 +36,8 @@ class UpdateReportRequest extends FormRequest
         }
         // Basic rules for document uploads
         $rules = [
+            'acceptance_item_id' => 'required|exists:acceptance_items,id',
             'report_template_id' => 'required|exists:report_templates,id',
-
             'reported_document' => [
                 Rule::excludeIf(fn() => $template && $template->parameters_count > 0),
                 'required',
