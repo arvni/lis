@@ -51,6 +51,11 @@ class Item extends Model
         return $this->hasMany(SupplierItem::class);
     }
 
+    public function barcodes(): HasMany
+    {
+        return $this->hasMany(ItemBarcode::class);
+    }
+
     public function lots(): HasMany
     {
         return $this->hasMany(StockLot::class);

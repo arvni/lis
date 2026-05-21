@@ -58,11 +58,26 @@ const MenuItem = memo(({item, permissions, onNavigate, isNested = false}) => {
         badge: item?.badge || null,
     };
 
+    // Determine if this menu item has child items
+    const hasSubmenu = safeItem.child.length > 0;
+
+    // Recursively check if at least one descendant is accessible to the user
+    const checkChildrenAccessible = (children) =>
+        children.some(child => {
+            const childPermitted = !child.permission || permissions.includes(child.permission);
+            if (!childPermitted) return false;
+            if (Array.isArray(child.child) && child.child.length > 0) {
+                return checkChildrenAccessible(child.child);
+            }
+            return true;
+        });
+
     // Check permissions - but after hooks have been called
     const isPermitted = !Boolean(safeItem.permission) || permissions.includes(safeItem.permission);
 
-    // Determine if this menu item has child items
-    const hasSubmenu = safeItem.child.length > 0;
+    // Group-header items (children but no own route) must also have at least one accessible child
+    const isGroupParent = hasSubmenu && !safeItem.route;
+    const hasAccessibleChild = isGroupParent ? checkChildrenAccessible(safeItem.child) : true;
 
     // Check if current route matches this menu item's route
     const isCurrentRoute = itemURL && url.startsWith(itemURL);
@@ -81,8 +96,8 @@ const MenuItem = memo(({item, permissions, onNavigate, isNested = false}) => {
         }
     }, [hasActiveChild, isCurrentRoute]);
 
-    // Skip rendering if user doesn't have permission
-    if (!isPermitted) return null;
+    // Skip rendering if user doesn't have permission, or is a group header with no accessible children
+    if (!isPermitted || !hasAccessibleChild) return null;
 
     // Define dynamic styles based on the current theme
     const styles = {

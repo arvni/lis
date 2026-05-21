@@ -42,6 +42,8 @@ use App\Http\Controllers\Reception\ShowAcceptanceItemController;
 use App\Http\Controllers\Reception\TagAssignmentController;
 use App\Http\Controllers\Reception\TagController;
 use App\Http\Controllers\Reception\TATDashboardController;
+use App\Http\Controllers\Reception\EjectPanelController;
+use App\Http\Controllers\Reception\PromoteToPanelController;
 use App\Http\Controllers\Reception\ToggleReportlessAcceptanceItemController;
 use App\Http\Controllers\Reception\ToggleSamplelessAcceptanceItemController;
 use App\Http\Controllers\Reception\UnPublishReportController;
@@ -84,6 +86,8 @@ Route::group(["prefix" => "reception"], function () {
     Route::get("acceptanceItems/export", ExportAcceptanceItemsController::class)->name("acceptanceItems.export");
     Route::put("acceptanceItems/{acceptanceItem}/tags", [TagAssignmentController::class, "syncAcceptanceItem"])->name("acceptanceItems.tags.update");
     Route::get("acceptanceItems/{acceptanceItem}/check-workflow", CheckAcceptanceItemWorkflowController::class)->name("acceptanceItems.check-workflow");
+    Route::put("acceptances/{acceptance}/acceptance-items/{acceptanceItem}/eject-panel", EjectPanelController::class)->name("acceptanceItems.ejectPanel");
+    Route::put("acceptances/{acceptance}/promote-to-panel", PromoteToPanelController::class)->name("acceptances.promoteToPanel");
     Route::put("acceptances/{acceptance}/acceptance-items/{acceptanceItem}/toggle-reportless", ToggleReportlessAcceptanceItemController::class)->name("acceptanceItems.toggleReportless");
     Route::put("acceptances/{acceptance}/acceptance-items/{acceptanceItem}/toggle-sampleless", ToggleSamplelessAcceptanceItemController::class)->name("acceptanceItems.toggleSampleless");
     Route::get("acceptanceItemStates/{acceptanceItemState}/prev-sections", GetPrevSectionsController::class)->name("acceptanceItemStates.prevSections");

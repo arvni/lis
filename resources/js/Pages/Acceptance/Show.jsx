@@ -41,6 +41,7 @@ import {Link, router} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 import {BarcodeIcon} from "lucide-react";
 import TestsTable from "@/Pages/Acceptance/Components/TestsSection/TestsTable.jsx";
+import PromoteToPanelDialog from "@/Pages/Acceptance/Components/TestsSection/PromoteToPanelDialog.jsx";
 import TagManager from "@/Components/TagManager";
 import TagChip from "@/Components/TagChip";
 import InlineTagManager from "@/Components/InlineTagManager";
@@ -241,6 +242,34 @@ const Show = ({
         prescription: false,
         payment: true
     });
+
+    const [promotingTests, setPromotingTests] = useState(null); // array of selected tests
+
+    const handleEjectPanel = (panel) => {
+        const firstItem = panel.acceptanceItems?.[0];
+        if (!firstItem) return;
+        router.put(
+            route('acceptanceItems.ejectPanel', { acceptance: acceptance.id, acceptanceItem: firstItem.id }),
+            {},
+            { preserveState: true, only: ['acceptance'] }
+        );
+    };
+
+    const handlePromoteToPanel = (panelMethodTestIds) => {
+        if (!promotingTests?.length) return;
+        router.put(
+            route('acceptances.promoteToPanel', { acceptance: acceptance.id }),
+            {
+                acceptance_item_ids: promotingTests.map(t => t.id),
+                panel_method_tests: panelMethodTestIds,
+            },
+            {
+                preserveState: true,
+                only: ['acceptance'],
+                onSuccess: () => setPromotingTests(null),
+            }
+        );
+    };
 
     // Handle accordion expansion
     const handleAccordionChange = (panel) => (event, isExpanded) => {
@@ -592,8 +621,17 @@ const Show = ({
                             showTotal={false}
                             tests={acceptance?.acceptance_items?.tests || []}
                             panels={acceptance?.acceptance_items?.panels || []}
+                            onEjectPanel={handleEjectPanel}
+                            onPromoteTest={setPromotingTests}
                         />
                     </Paper>
+
+                    <PromoteToPanelDialog
+                        open={Boolean(promotingTests?.length)}
+                        tests={promotingTests ?? []}
+                        onClose={() => setPromotingTests(null)}
+                        onConfirm={handlePromoteToPanel}
+                    />
                     <Box
                         sx={{
                             mt: 3,

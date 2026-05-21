@@ -25,7 +25,8 @@ import {
     ExpandMore as ExpandMoreIcon,
     ExpandLess as ExpandLessIcon,
     Restore as RestoreIcon,
-    Visibility as VisibilityIcon
+    Visibility as VisibilityIcon,
+    CallSplit as EjectIcon,
 } from "@mui/icons-material";
 import { Link } from "@inertiajs/react";
 
@@ -131,8 +132,26 @@ const DeleteConfirmDialog = ({ open, onClose, onConfirm, panelName }) => (
     </Dialog>
 );
 
-const ActionButtons = ({ panel, onEdit, onDelete, onRestore }) => {
+const EjectConfirmDialog = ({ open, onClose, onConfirm, panelName }) => (
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Eject Panel Tests</DialogTitle>
+        <DialogContent>
+            <DialogContentText>
+                This will split all tests in panel <strong>"{panelName}"</strong> into independent tests,
+                each reverting to its method's default test. Prices will be recalculated.
+                Workflow states and reports are kept.
+            </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={onClose} variant="outlined">Cancel</Button>
+            <Button onClick={onConfirm} variant="contained" color="warning">Eject</Button>
+        </DialogActions>
+    </Dialog>
+);
+
+const ActionButtons = ({ panel, onEdit, onDelete, onRestore, onEject }) => {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [ejectDialogOpen, setEjectDialogOpen] = useState(false);
 
     const handleDeleteClick = () => {
         setDeleteDialogOpen(true);
@@ -165,19 +184,26 @@ const ActionButtons = ({ panel, onEdit, onDelete, onRestore }) => {
 
     return (
         <>
-  <Stack direction="row" spacing={1} sx={{justifyContent: "center"}}>
+            <Stack direction="row" spacing={1} sx={{ justifyContent: "center" }}>
+                {onEject && (
+                    <Tooltip title="Eject panel — convert all tests to individual">
+                        <IconButton
+                            onClick={() => setEjectDialogOpen(true)}
+                            size="small"
+                            color="warning"
+                            sx={{ '&:hover': { backgroundColor: 'warning.main', color: 'white' } }}
+                        >
+                            <EjectIcon />
+                        </IconButton>
+                    </Tooltip>
+                )}
                 {onEdit && (
                     <Tooltip title="Edit panel">
                         <IconButton
                             onClick={onEdit}
                             size="small"
                             color="primary"
-                            sx={{
-                                '&:hover': {
-                                    backgroundColor: 'primary.main',
-                                    color: 'white'
-                                }
-                            }}
+                            sx={{ '&:hover': { backgroundColor: 'primary.main', color: 'white' } }}
                         >
                             <EditIcon />
                         </IconButton>
@@ -189,12 +215,7 @@ const ActionButtons = ({ panel, onEdit, onDelete, onRestore }) => {
                             onClick={handleDeleteClick}
                             size="small"
                             color="error"
-                            sx={{
-                                '&:hover': {
-                                    backgroundColor: 'error.main',
-                                    color: 'white'
-                                }
-                            }}
+                            sx={{ '&:hover': { backgroundColor: 'error.main', color: 'white' } }}
                         >
                             <DeleteIcon />
                         </IconButton>
@@ -206,6 +227,12 @@ const ActionButtons = ({ panel, onEdit, onDelete, onRestore }) => {
                 open={deleteDialogOpen}
                 onClose={() => setDeleteDialogOpen(false)}
                 onConfirm={handleDeleteConfirm}
+                panelName={panel?.panel?.name}
+            />
+            <EjectConfirmDialog
+                open={ejectDialogOpen}
+                onClose={() => setEjectDialogOpen(false)}
+                onConfirm={() => { onEject(); setEjectDialogOpen(false); }}
                 panelName={panel?.panel?.name}
             />
         </>
@@ -243,6 +270,8 @@ const PanelRow = ({
                       onEdit,
                       onDelete,
                       onRestore,
+                      onEject,
+                      hasSelectionColumn = false,
                       showButton = false
                   }) => {
     const [collapsed, setCollapsed] = useState(false);
@@ -295,6 +324,12 @@ const PanelRow = ({
                     >
                         {isFirstItem && (
                             <>
+                                {hasSelectionColumn && (
+                                    <TableCell
+                                        padding="checkbox"
+                                        rowSpan={collapsed ? 1 : acceptanceItems.length}
+                                    />
+                                )}
                                 <TableCell
                                     rowSpan={collapsed ? 1 : acceptanceItems.length}
                                     sx={{
@@ -428,7 +463,7 @@ const PanelRow = ({
                                     <PriceDisplay price={panel.price} discount={panel.discount} />
                                 </TableCell>
 
-                                {(onEdit || onDelete || onRestore) && (
+                                {(onEdit || onDelete || onRestore || onEject) && (
                                     <TableCell
                                         rowSpan={collapsed ? 1 : acceptanceItems.length}
                                         align="center"
@@ -438,6 +473,7 @@ const PanelRow = ({
                                             onEdit={onEdit}
                                             onDelete={onDelete}
                                             onRestore={onRestore}
+                                            onEject={onEject}
                                         />
                                     </TableCell>
                                 )}

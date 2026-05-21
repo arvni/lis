@@ -15,9 +15,13 @@ class ListResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name ?? $this->fullName,
-            'color' => $this->color ?? null,
+            'id'         => $this->id,
+            'name'       => $this->name ?? $this->fullName,
+            'color'      => $this->color ?? null,
+            'method_ids' => $this->when(
+                $this->relationLoaded('methodTests'),
+                fn () => $this->methodTests->pluck('method_id')->toArray()
+            ),
         ];
     }
 }

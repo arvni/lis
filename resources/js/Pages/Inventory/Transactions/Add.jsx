@@ -17,6 +17,7 @@ import BarcodeInput from "@/Pages/Inventory/Components/BarcodeInput";
 import SupplierSelect from "@/Pages/Inventory/Components/SupplierSelect";
 import BrandInput from "@/Pages/Inventory/Components/BrandInput";
 import FifoPreview from "@/Pages/Inventory/Components/FifoPreview";
+import LotPickerDialog from "@/Pages/Inventory/Components/LotPickerDialog";
 
 const USES_EXISTING_LOTS = ["EXPORT", "RETURN", "EXPIRED_REMOVAL", "TRANSFER"];
 
@@ -26,6 +27,7 @@ const emptyLine = () => ({
     _location: null,
     _lot: null,
     _barcode_locked: false,
+    _lots_from_scan: [],
     item_id: null,
     unit_id: null,
     quantity: "",
@@ -39,7 +41,7 @@ const emptyLine = () => ({
     notes: "",
 });
 
-const toPayloadLine = ({_item, _unit, _location, _lot, _barcode_locked, ...rest}) => rest;
+const toPayloadLine = ({_item, _unit, _location, _lot, _barcode_locked, _lots_from_scan, ...rest}) => rest;
 
 const lineFromSource = (line) => ({
     _item: line.item ?? null,
@@ -47,6 +49,7 @@ const lineFromSource = (line) => ({
     _location: null,
     _lot: null,
     _barcode_locked: false,
+    _lots_from_scan: [],
     item_id: line.item_id,
     unit_id: line.unit_id,
     quantity: line.quantity ?? "",
@@ -75,15 +78,16 @@ const TransactionAdd = () => {
         lines: defaults?.lines?.map(payloadFromSource) ?? [],
     });
 
-    const [lineItems,   setLineItems]   = useState(() => defaults?.lines?.map(lineFromSource) ?? []);
-    const [supplierObj, setSupplierObj] = useState(defaults?.supplier ?? null);
+    const [lineItems,     setLineItems]     = useState(() => defaults?.lines?.map(lineFromSource) ?? []);
+    const [supplierObj,   setSupplierObj]   = useState(defaults?.supplier ?? null);
+    const [lotPickerLine, setLotPickerLine] = useState(null); // index of line with open lot picker
 
     const syncLines = (updated) => {
         setLineItems(updated);
         setData("lines", updated.map(toPayloadLine));
     };
 
-    const addLine = () => syncLines([...lineItems, emptyLine()]);
+    const addLine    = () => syncLines([...lineItems, emptyLine()]);
     const removeLine = (idx) => syncLines(lineItems.filter((_, i) => i !== idx));
 
     const updateLine = (idx, field, value) => {
@@ -118,10 +122,75 @@ const TransactionAdd = () => {
         ));
     };
 
-    // Barcode scan found a match → auto-fill and lock
+    const isEntry        = ["ENTRY", "RETURN"].includes(data.transaction_type);
+    const usesExistingLots = USES_EXISTING_LOTS.includes(data.transaction_type);
+    const showExpiry     = !usesExistingLots;
+    const showFifo       = ["EXPORT", "TRANSFER"].includes(data.transaction_type);
+    const isTransfer     = data.transaction_type === "TRANSFER";
+
     const handleBarcodeFound = (idx, scanData) => {
         const item = scanData.item ?? null;
         const unit = scanData.unit ?? null;
+        const lots = scanData.lots ?? [];
+
+        if (isEntry) {
+            // Entry: lock item/unit, prefill lot details if available but keep them editable
+            const hint = lots.length === 1 ? lots[0] : null;
+            syncLines(lineItems.map((l, i) => i === idx ? {
+                ...l,
+                _barcode_locked: true,
+                _item: item,
+                _unit: unit,
+                item_id: item?.id ?? null,
+                unit_id: unit?.id ?? null,
+                barcode: scanData.barcode ?? l.barcode,
+                lot_number: hint?.lot_number ?? "",
+                brand: hint?.brand ?? "",
+                expiry_date: hint?.expiry_date ?? "",
+            } : l));
+            return;
+        }
+
+        // Exit types (EXPORT, TRANSFER, RETURN, EXPIRED_REMOVAL)
+        if (lots.length === 1) {
+            const lot = lots[0];
+            syncLines(lineItems.map((l, i) => i === idx ? {
+                ...l,
+                _barcode_locked: true,
+                _item: item,
+                _unit: unit,
+                _lot: lot,
+                item_id: item?.id ?? null,
+                unit_id: unit?.id ?? null,
+                lot_number: lot.lot_number ?? "",
+                brand: lot.brand ?? "",
+                expiry_date: lot.expiry_date ?? "",
+                barcode: scanData.barcode ?? l.barcode,
+            } : l));
+            return;
+        }
+
+        if (lots.length > 1) {
+            // Multiple lots — store them and open the picker
+            syncLines(lineItems.map((l, i) => i === idx ? {
+                ...l,
+                _barcode_locked: false,
+                _item: item,
+                _unit: unit,
+                _lot: null,
+                _lots_from_scan: lots,
+                item_id: item?.id ?? null,
+                unit_id: unit?.id ?? null,
+                barcode: scanData.barcode ?? l.barcode,
+                lot_number: "",
+                brand: "",
+                expiry_date: "",
+            } : l));
+            setLotPickerLine(idx);
+            return;
+        }
+
+        // No active lots — item identified but no stock; lock item only
         syncLines(lineItems.map((l, i) => i === idx ? {
             ...l,
             _barcode_locked: true,
@@ -130,13 +199,9 @@ const TransactionAdd = () => {
             item_id: item?.id ?? null,
             unit_id: unit?.id ?? null,
             barcode: scanData.barcode ?? l.barcode,
-            lot_number: scanData.lot_number ?? "",
-            brand: scanData.brand ?? "",
-            expiry_date: scanData.expiry_date ?? "",
         } : l));
     };
 
-    // Barcode not found → just store barcode, user fills the rest
     const handleBarcodeNotFound = (idx, barcode) => {
         syncLines(lineItems.map((l, i) => i === idx
             ? {...l, barcode, _barcode_locked: false}
@@ -144,7 +209,6 @@ const TransactionAdd = () => {
         ));
     };
 
-    // Unlock a line (clear barcode auto-fill, let user edit)
     const unlockLine = (idx) => {
         syncLines(lineItems.map((l, i) => i === idx
             ? {...emptyLine(), barcode: l.barcode}
@@ -152,11 +216,18 @@ const TransactionAdd = () => {
         ));
     };
 
-    const isTransfer = data.transaction_type === "TRANSFER";
-    const isEntry = ["ENTRY", "RETURN"].includes(data.transaction_type);
-    const usesExistingLots = USES_EXISTING_LOTS.includes(data.transaction_type);
-    const showExpiry = !usesExistingLots;
-    const showFifo = ["EXPORT", "TRANSFER"].includes(data.transaction_type);
+    const handleLotPicked = (lot) => {
+        if (lotPickerLine === null) return;
+        syncLines(lineItems.map((l, i) => i === lotPickerLine ? {
+            ...l,
+            _barcode_locked: true,
+            _lot: lot,
+            lot_number: lot.lot_number ?? "",
+            brand: lot.brand ?? "",
+            expiry_date: lot.expiry_date ?? "",
+        } : l));
+        setLotPickerLine(null);
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -344,9 +415,9 @@ const TransactionAdd = () => {
                                                             disabled={line._barcode_locked}
                                                         />
                                                     ) : (
+                                                        // Entry: lot number is always free-text, never locked
                                                         <TextField size="small" fullWidth label="Lot #"
                                                             value={line.lot_number}
-                                                            disabled={line._barcode_locked}
                                                             onChange={(e) => updateLine(idx, "lot_number", e.target.value)}
                                                         />
                                                     )}
@@ -367,14 +438,12 @@ const TransactionAdd = () => {
                                                             size="small"
                                                             value={line.brand}
                                                             itemId={line._item?.id}
-                                                            disabled={line._barcode_locked}
                                                             onChange={(v) => updateLine(idx, "brand", v)}
                                                         />
                                                     </Grid>
                                                     <Grid size={{xs: 6, sm: 3, md: 4}}>
                                                         <TextField size="small" fullWidth label="Catalog No"
                                                             value={line.cat_no}
-                                                            disabled={line._barcode_locked}
                                                             onChange={(e) => updateLine(idx, "cat_no", e.target.value)}
                                                         />
                                                     </Grid>
@@ -382,7 +451,6 @@ const TransactionAdd = () => {
                                                         <TextField size="small" type="date" fullWidth
                                                             label="Expiry Date"
                                                             value={line.expiry_date}
-                                                            disabled={line._barcode_locked}
                                                             onChange={(e) => updateLine(idx, "expiry_date", e.target.value)}
                                                             slotProps={{ inputLabel: {shrink: true} }}
                                                         />
@@ -422,6 +490,13 @@ const TransactionAdd = () => {
                     </Button>
                 </Box>
             </Box>
+
+            <LotPickerDialog
+                open={lotPickerLine !== null}
+                lots={lotPickerLine !== null ? (lineItems[lotPickerLine]?._lots_from_scan ?? []) : []}
+                onSelect={handleLotPicked}
+                onClose={() => setLotPickerLine(null)}
+            />
         </>
     );
 };

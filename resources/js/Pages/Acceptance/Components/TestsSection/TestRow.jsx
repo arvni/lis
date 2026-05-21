@@ -16,7 +16,8 @@ import {
     DialogContent,
     DialogActions,
     DialogContentText,
-    Badge
+    Badge,
+    Checkbox,
 } from "@mui/material";
 import {
     Edit as EditIcon,
@@ -27,7 +28,8 @@ import {
     ExpandLess as ExpandLessIcon,
     Science as ScienceIcon,
     LocalHospital as ServiceIcon,
-    Warning as WarningIcon
+    Warning as WarningIcon,
+    PlaylistAdd as PromoteIcon,
 } from "@mui/icons-material";
 import { Link } from "@inertiajs/react";
 
@@ -157,7 +159,7 @@ const TestTypeChip = ({ type, testTypes }) => {
     );
 };
 
-const ActionButtons = ({ test, onEdit, onDelete, onRestore }) => {
+const ActionButtons = ({ test, onEdit, onDelete, onRestore, onPromote }) => {
     if (test?.deleted) {
         return (
             <Tooltip title="Restore test">
@@ -179,44 +181,44 @@ const ActionButtons = ({ test, onEdit, onDelete, onRestore }) => {
     }
 
     return (
-        <>
-  <Stack direction="row" spacing={1} sx={{justifyContent: "center"}}>
-                {onEdit && (
-                    <Tooltip title="Edit test">
-                        <IconButton
-                            onClick={onEdit}
-                            size="small"
-                            color="primary"
-                            sx={{
-                                '&:hover': {
-                                    backgroundColor: 'primary.main',
-                                    color: 'white'
-                                }
-                            }}
-                        >
-                            <EditIcon />
-                        </IconButton>
-                    </Tooltip>
-                )}
-                {onDelete && (
-                    <Tooltip title="Remove test">
-                        <IconButton
-                            onClick={onDelete}
-                            size="small"
-                            color="error"
-                            sx={{
-                                '&:hover': {
-                                    backgroundColor: 'error.main',
-                                    color: 'white'
-                                }
-                            }}
-                        >
-                            <DeleteIcon />
-                        </IconButton>
-                    </Tooltip>
-                )}
-            </Stack>
-        </>
+        <Stack direction="row" spacing={1} sx={{ justifyContent: "center" }}>
+            {onPromote && (
+                <Tooltip title="Promote to panel">
+                    <IconButton
+                        onClick={onPromote}
+                        size="small"
+                        color="secondary"
+                        sx={{ '&:hover': { backgroundColor: 'secondary.main', color: 'white' } }}
+                    >
+                        <PromoteIcon />
+                    </IconButton>
+                </Tooltip>
+            )}
+            {onEdit && (
+                <Tooltip title="Edit test">
+                    <IconButton
+                        onClick={onEdit}
+                        size="small"
+                        color="primary"
+                        sx={{ '&:hover': { backgroundColor: 'primary.main', color: 'white' } }}
+                    >
+                        <EditIcon />
+                    </IconButton>
+                </Tooltip>
+            )}
+            {onDelete && (
+                <Tooltip title="Remove test">
+                    <IconButton
+                        onClick={onDelete}
+                        size="small"
+                        color="error"
+                        sx={{ '&:hover': { backgroundColor: 'error.main', color: 'white' } }}
+                    >
+                        <DeleteIcon />
+                    </IconButton>
+                </Tooltip>
+            )}
+        </Stack>
     );
 };
 
@@ -251,6 +253,9 @@ const TestRow = ({
                      onEdit,
                      onDelete,
                      onRestore,
+                     onPromote,
+                     selected = false,
+                     onSelect,
                      showButton = false
                  }) => {
     const isDeleted = test?.deleted;
@@ -295,6 +300,17 @@ const TestRow = ({
                 }
             }}
         >
+            {/* Selection checkbox */}
+            {onSelect && (
+                <TableCell padding="checkbox">
+                    <Checkbox
+                        size="small"
+                        checked={selected}
+                        onChange={e => onSelect(test, e.target.checked)}
+                    />
+                </TableCell>
+            )}
+
             {/* Test Name */}
             <TableCell>
   <Box display="flex" gap={1} sx={{alignItems: "center"}}>
@@ -437,13 +453,14 @@ const TestRow = ({
             </TableCell>
 
             {/* Actions */}
-            {(onEdit || onDelete || onRestore) && (
+            {(onEdit || onDelete || onRestore || onPromote) && (
                 <TableCell align="center">
                     <ActionButtons
                         test={test}
                         onEdit={onEdit}
                         onDelete={onDelete}
                         onRestore={onRestore}
+                        onPromote={onPromote}
                     />
                 </TableCell>
             )}

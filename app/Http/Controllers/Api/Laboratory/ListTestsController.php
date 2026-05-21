@@ -23,6 +23,13 @@ class ListTestsController extends Controller
         $queryData = $request->only(['filters', 'sort', 'pageSize', 'search']);
         $queryData["filters"]["status"] = true;
         $queryData["pageSize"] = 100;
+
+        // Eager-load methodTests for PANEL queries so method_ids are available in the response
+        $typeFilter = $queryData['filters']['type'] ?? '';
+        if ($typeFilter && str_contains($typeFilter, 'PANEL')) {
+            $queryData['with'] = ['methodTests'];
+        }
+
         $tests = $this->testService->listTests($queryData);
         return ListResource::collection($tests);
     }

@@ -17,33 +17,35 @@ import LotSelect from "@/Pages/Inventory/Components/LotSelect";
 import BarcodeInput from "@/Pages/Inventory/Components/BarcodeInput";
 import SupplierSelect from "@/Pages/Inventory/Components/SupplierSelect";
 import BrandInput from "@/Pages/Inventory/Components/BrandInput";
+import LotPickerDialog from "@/Pages/Inventory/Components/LotPickerDialog";
 
 const USES_EXISTING_LOTS = ["EXPORT", "RETURN", "EXPIRED_REMOVAL", "TRANSFER"];
 
-const toPayloadLine = ({_item, _unit, _location, _lot, _barcode_locked, ...rest}) => rest;
+const toPayloadLine = ({_item, _unit, _location, _lot, _barcode_locked, _lots_from_scan, ...rest}) => rest;
 
 // Build a line state object from an existing transaction line (loaded from server)
 const lineFromExisting = (line) => ({
-    _item:           line.item ?? null,
-    _unit:           line.unit ?? null,
-    _location:       line.location ?? null,
-    _lot:            null,
-    _barcode_locked: false,
-    item_id:         line.item_id,
-    unit_id:         line.unit_id,
-    quantity:        line.quantity,
-    barcode:         line.barcode ?? "",
-    lot_number:      line.lot_number ?? "",
-    brand:           line.brand ?? "",
-    cat_no:          line.cat_no ?? "",
-    expiry_date:     line.expiry_date ?? "",
-    unit_price:      line.unit_price ?? "",
+    _item:            line.item ?? null,
+    _unit:            line.unit ?? null,
+    _location:        line.location ?? null,
+    _lot:             null,
+    _barcode_locked:  false,
+    _lots_from_scan:  [],
+    item_id:          line.item_id,
+    unit_id:          line.unit_id,
+    quantity:         line.quantity,
+    barcode:          line.barcode ?? "",
+    lot_number:       line.lot_number ?? "",
+    brand:            line.brand ?? "",
+    cat_no:           line.cat_no ?? "",
+    expiry_date:      line.expiry_date ?? "",
+    unit_price:       line.unit_price ?? "",
     store_location_id: line.store_location_id ?? null,
-    notes:           line.notes ?? "",
+    notes:            line.notes ?? "",
 });
 
 const emptyLine = () => ({
-    _item: null, _unit: null, _location: null, _lot: null, _barcode_locked: false,
+    _item: null, _unit: null, _location: null, _lot: null, _barcode_locked: false, _lots_from_scan: [],
     item_id: null, unit_id: null, quantity: "", barcode: "", lot_number: "",
     brand: "", cat_no: "", expiry_date: "", unit_price: "", store_location_id: null, notes: "",
 });
@@ -61,8 +63,9 @@ const TransactionEdit = () => {
             .map(() => ({})), // will be set by lineItems sync
     });
 
-    const [lineItems,   setLineItems]   = useState(() => (transaction.lines ?? []).map(lineFromExisting));
-    const [supplierObj, setSupplierObj] = useState(transaction.supplier ?? null);
+    const [lineItems,     setLineItems]     = useState(() => (transaction.lines ?? []).map(lineFromExisting));
+    const [supplierObj,   setSupplierObj]   = useState(transaction.supplier ?? null);
+    const [lotPickerLine, setLotPickerLine] = useState(null);
 
     const syncLines = (updated) => {
         setLineItems(updated);
@@ -109,16 +112,56 @@ const TransactionEdit = () => {
         ));
     };
 
+    const txType           = transaction.transaction_type;
+    const isEntry          = ["ENTRY", "RETURN"].includes(txType);
+    const usesExistingLots = USES_EXISTING_LOTS.includes(txType);
+    const showExpiry       = !usesExistingLots;
+
     const handleBarcodeFound = (idx, scanData) => {
         const item = scanData.item ?? null;
         const unit = scanData.unit ?? null;
+        const lots = scanData.lots ?? [];
+
+        if (isEntry) {
+            const hint = lots.length === 1 ? lots[0] : null;
+            syncLines(lineItems.map((l, i) => i === idx ? {
+                ...l, _barcode_locked: true, _item: item, _unit: unit,
+                item_id: item?.id ?? null, unit_id: unit?.id ?? null,
+                barcode: scanData.barcode ?? l.barcode,
+                lot_number: hint?.lot_number ?? "",
+                brand: hint?.brand ?? "",
+                expiry_date: hint?.expiry_date ?? "",
+            } : l));
+            return;
+        }
+
+        if (lots.length === 1) {
+            const lot = lots[0];
+            syncLines(lineItems.map((l, i) => i === idx ? {
+                ...l, _barcode_locked: true, _item: item, _unit: unit, _lot: lot,
+                item_id: item?.id ?? null, unit_id: unit?.id ?? null,
+                lot_number: lot.lot_number ?? "", brand: lot.brand ?? "",
+                expiry_date: lot.expiry_date ?? "", barcode: scanData.barcode ?? l.barcode,
+            } : l));
+            return;
+        }
+
+        if (lots.length > 1) {
+            syncLines(lineItems.map((l, i) => i === idx ? {
+                ...l, _barcode_locked: false, _item: item, _unit: unit, _lot: null,
+                _lots_from_scan: lots,
+                item_id: item?.id ?? null, unit_id: unit?.id ?? null,
+                barcode: scanData.barcode ?? l.barcode,
+                lot_number: "", brand: "", expiry_date: "",
+            } : l));
+            setLotPickerLine(idx);
+            return;
+        }
+
         syncLines(lineItems.map((l, i) => i === idx ? {
             ...l, _barcode_locked: true, _item: item, _unit: unit,
             item_id: item?.id ?? null, unit_id: unit?.id ?? null,
             barcode: scanData.barcode ?? l.barcode,
-            lot_number: scanData.lot_number ?? "",
-            brand: scanData.brand ?? "",
-            expiry_date: scanData.expiry_date ?? "",
         } : l));
     };
 
@@ -130,11 +173,16 @@ const TransactionEdit = () => {
         syncLines(lineItems.map((l, i) => i === idx ? {...emptyLine(), barcode: l.barcode} : l));
     };
 
-    const txType = transaction.transaction_type;
+    const handleLotPicked = (lot) => {
+        if (lotPickerLine === null) return;
+        syncLines(lineItems.map((l, i) => i === lotPickerLine ? {
+            ...l, _barcode_locked: true, _lot: lot,
+            lot_number: lot.lot_number ?? "", brand: lot.brand ?? "",
+            expiry_date: lot.expiry_date ?? "",
+        } : l));
+        setLotPickerLine(null);
+    };
     const isTransfer = txType === "TRANSFER";
-    const isEntry = ["ENTRY", "RETURN"].includes(txType);
-    const usesExistingLots = USES_EXISTING_LOTS.includes(txType);
-    const showExpiry = !usesExistingLots;
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -292,8 +340,9 @@ const TransactionEdit = () => {
                                                         onChange={(lot) => setLineLot(idx, lot)}
                                                         disabled={line._barcode_locked}/>
                                                 ) : (
+                                                    // Entry: lot number always editable
                                                     <TextField size="small" fullWidth label="Lot #"
-                                                        value={line.lot_number} disabled={line._barcode_locked}
+                                                        value={line.lot_number}
                                                         onChange={(e) => updateLine(idx, "lot_number", e.target.value)}/>
                                                 )}
                                             </TableCell>
@@ -302,7 +351,6 @@ const TransactionEdit = () => {
                                                     <BrandInput
                                                         value={line.brand}
                                                         itemId={line._item?.id}
-                                                        disabled={line._barcode_locked}
                                                         onChange={(v) => updateLine(idx, "brand", v)}
                                                     />
                                                 </TableCell>
@@ -310,7 +358,7 @@ const TransactionEdit = () => {
                                             {showExpiry && (
                                                 <TableCell>
                                                     <TextField size="small" fullWidth label="Cat No"
-                                                        value={line.cat_no} disabled={line._barcode_locked}
+                                                        value={line.cat_no}
                                                         onChange={(e) => updateLine(idx, "cat_no", e.target.value)}/>
                                                 </TableCell>
                                             )}
@@ -318,7 +366,7 @@ const TransactionEdit = () => {
                                                 <TableCell>
                                                     <TextField size="small" type="date" fullWidth
                                                         label="Expiry"
-                                                        value={line.expiry_date} disabled={line._barcode_locked}
+                                                        value={line.expiry_date}
                                                         onChange={(e) => updateLine(idx, "expiry_date", e.target.value)}
                                                         slotProps={{ inputLabel: {shrink: true} }}/>
                                                 </TableCell>
@@ -356,6 +404,13 @@ const TransactionEdit = () => {
                     </Button>
                 </Box>
             </Box>
+
+            <LotPickerDialog
+                open={lotPickerLine !== null}
+                lots={lotPickerLine !== null ? (lineItems[lotPickerLine]?._lots_from_scan ?? []) : []}
+                onSelect={handleLotPicked}
+                onClose={() => setLotPickerLine(null)}
+            />
         </>
     );
 };
