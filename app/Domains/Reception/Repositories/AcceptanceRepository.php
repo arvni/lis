@@ -66,7 +66,12 @@ class AcceptanceRepository
 
     public function exportAcceptances(array $queryData): Collection
     {
-        return $this->buildAcceptancesQuery($queryData)->get();
+        $acceptances = $this->buildAcceptancesQuery($queryData)->get();
+        $acceptances->loadMissing([
+            'acceptanceItems.methodTest.test',
+            'acceptanceItems.panelTest',
+        ]);
+        return $acceptances;
     }
 
     private function buildAcceptancesQuery(array $queryData): Builder
@@ -307,6 +312,10 @@ class AcceptanceRepository
 
         if (isset($filters['out_patient']) && $filters['out_patient'] !== '') {
             $query->where('acceptances.out_patient', (bool) $filters['out_patient']);
+        }
+
+        if (!empty($filters['how_found_us'])) {
+            $query->whereIn('acceptances.how_found_us', (array) $filters['how_found_us']);
         }
 
         $this->applyDateFilter($query, $filters, 'acceptances.created_at');

@@ -147,6 +147,7 @@ class StoreAcceptanceRequest extends FormRequest
                 $rules['samplerGender'] = 'required|in:0,1';
                 $rules['out_patient'] = 'boolean';
                 $rules['waiting_for_pooling'] = 'boolean';
+                $rules['how_found_us'] = 'nullable|string|max:255';
 
                 // Report Information
                 $rules['referred'] = 'boolean';
@@ -207,6 +208,7 @@ class StoreAcceptanceRequest extends FormRequest
                 $rules['samplerGender'] = 'required|in:0,1';
                 $rules['out_patient'] = 'boolean';
                 $rules['waiting_for_pooling'] = 'boolean';
+                $rules['how_found_us'] = 'nullable|string|max:255';
 
                 // Report Information
                 $rules['referred'] = 'boolean';

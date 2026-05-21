@@ -46,6 +46,7 @@ class Acceptance extends Model
         "financial_approved_by",
         "financial_approved_at",
         "priority",
+        "how_found_us",
     ];
 
     protected $casts = [

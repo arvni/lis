@@ -413,6 +413,22 @@ const Index = () => {
             renderCell: ({ value }) => value ? formatDate(value) : '-'
         },
         {
+            field: 'how_found_us',
+            headerName: 'How Found Us',
+            type: "string",
+            flex: 0.4,
+            display: "flex",
+            renderCell: ({ row }) => row.how_found_us ? (
+                <Chip
+                    label={row.how_found_us}
+                    size="small"
+                    variant="outlined"
+                    color="secondary"
+                    sx={{ fontSize: '0.7rem', maxWidth: 140 }}
+                />
+            ) : null
+        },
+        {
             field: 'id',
             headerName: 'Actions',
             type: 'actions',

@@ -340,6 +340,7 @@ class AcceptanceService
             'out_patient' => $acceptanceDTO->outPatient,
             'sampler_id' => $acceptanceDTO->samplerId,
             'waiting_for_pooling' => $acceptanceDTO->waitingForPooling,
+            'how_found_us' => $acceptanceDTO->howFoundUs,
         ];
 
         // Process reporting method if it exists

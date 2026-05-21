@@ -39,6 +39,15 @@ const MenuProps = {
     },
 };
 
+const HOW_FOUND_OPTIONS = [
+    { value: 'google', label: 'Google Search' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'friends', label: 'Friends / Family' },
+    { value: 'doctor', label: "Doctor's Recommendation" },
+    { value: 'website', label: 'Website / Online Ad' },
+    { value: 'walk_in', label: 'Walk-in / Signboard' },
+];
+
 const statuses = [
     'pending',
     'waiting for payment',
@@ -155,6 +164,10 @@ const Filter = ({defaultFilter, onFilter}) => {
 
     const handleClearTags = useCallback(() => {
         setFilter(prevState => ({...prevState, tags: []}));
+    }, []);
+
+    const handleClearHowFoundUs = useCallback(() => {
+        setFilter(prevState => ({...prevState, how_found_us: []}));
     }, []);
 
     const handleKeyPress = useCallback((e) => {
@@ -353,6 +366,14 @@ const Filter = ({defaultFilter, onFilter}) => {
                             variant="outlined"
                         />
                     )}
+                    {filter?.how_found_us && filter.how_found_us.length > 0 && (
+                        <Chip
+                            label={`How Found: ${filter.how_found_us.length} selected`}
+                            size="small"
+                            onDelete={handleClearHowFoundUs}
+                            variant="outlined"
+                        />
+                    )}
                     {filter?.waiting_for_pooling && (
                         <Chip
                             label="Waiting for Pooling"
@@ -548,6 +569,36 @@ const Filter = ({defaultFilter, onFilter}) => {
                             name="tags"
                             url={route("api.tags.list")}
                         />
+                    </Grid>
+
+                    <Grid size={{xs: 12, sm: 6, md: 4}}>
+                        <FormControl fullWidth>
+                            <InputLabel id="how-found-us-filter-label">How Found Us</InputLabel>
+                            <Select
+                                labelId="how-found-us-filter-label"
+                                multiple
+                                name="how_found_us"
+                                value={filter?.how_found_us || []}
+                                onChange={handleChange}
+                                input={<OutlinedInput label="How Found Us"/>}
+                                MenuProps={MenuProps}
+                                renderValue={(selected) => (
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                        {selected.map((value) => {
+                                            const opt = HOW_FOUND_OPTIONS.find(o => o.value === value);
+                                            return <Chip key={value} label={opt?.label ?? value} size="small"/>;
+                                        })}
+                                    </Box>
+                                )}
+                            >
+                                {HOW_FOUND_OPTIONS.map((opt) => (
+                                    <MenuItem key={opt.value} value={opt.value}>
+                                        <Checkbox checked={(filter?.how_found_us || []).includes(opt.value)} size="small"/>
+                                        <ListItemText primary={opt.label}/>
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </Grid>
 
                     <Grid size={{xs: 12}}>

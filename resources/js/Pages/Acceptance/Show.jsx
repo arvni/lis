@@ -533,6 +533,15 @@ const Show = ({
                                 />
                             </Grid>
                         </>}
+
+                        {acceptance.how_found_us && (
+                            <Grid size={{xs: 12, sm: 6, md: 4, lg: 3}}>
+                                <InfoItem
+                                    label="How Found Us"
+                                    value={acceptance.how_found_us}
+                                />
+                            </Grid>
+                        )}
                     </Grid>
                 </AccordionDetails>
             </Accordion>

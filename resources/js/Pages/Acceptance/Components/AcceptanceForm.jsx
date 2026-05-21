@@ -483,6 +483,11 @@ const AcceptanceForm = ({
                                                 </Typography>}
                                             </>
                                         )}
+                                        {data?.how_found_us && (
+                                            <Typography variant="body1">
+                                                <strong>How Found Us:</strong> {data.how_found_us}
+                                            </Typography>
+                                        )}
                                     </Box>
                                     <IconButton onClick={handleChangeStep(4)}><EditIcon/></IconButton>
                                 </Box>

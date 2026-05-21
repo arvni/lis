@@ -11,6 +11,7 @@ use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Referrer\Models\Referrer;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
@@ -82,6 +83,11 @@ class AcceptanceItem extends Model
     public function methodTest()
     {
         return $this->belongsTo(MethodTest::class);
+    }
+
+    public function panelTest(): BelongsTo
+    {
+        return $this->belongsTo(Test::class, 'panel_id');
     }
 
     public function method()

@@ -196,6 +196,7 @@ class UpdateAcceptanceRequest extends FormRequest
                     'exists:users,id'];
                 $rules['out_patient'] = 'boolean';
                 $rules['waiting_for_pooling'] = 'boolean';
+                $rules['how_found_us'] = 'nullable|string|max:255';
 
                 // Report Information
                 $rules['referred'] = 'boolean';
@@ -254,6 +255,7 @@ class UpdateAcceptanceRequest extends FormRequest
                 $rules['acceptor_id'] = 'nullable';
                 $rules['out_patient'] = 'boolean';
                 $rules['waiting_for_pooling'] = 'boolean';
+                $rules['how_found_us'] = 'nullable|string|max:255';
 
                 // Report Information
                 $rules['referred'] = 'boolean';

@@ -45,6 +45,8 @@ class AcceptancesExport implements
             'Est. Report Date',
             'Registered At',
             'Published At',
+            'How Found Us',
+            'Tests',
         ];
     }
 
@@ -72,12 +74,14 @@ class AcceptancesExport implements
             $reportDate ?? '',
             $this->formatDateTime($row->created_at),
             $row->published_at ? $this->formatDateTime($row->published_at) : '',
+            $row->how_found_us ?? '',
+            $this->formatTests($row),
         ];
     }
 
     public function styles(Worksheet $sheet): array
     {
-        $sheet->setAutoFilter('A1:L1');
+        $sheet->setAutoFilter('A1:N1');
 
         return [
             1 => [
@@ -91,6 +95,35 @@ class AcceptancesExport implements
                 ],
             ],
         ];
+    }
+
+    private function formatTests($row): string
+    {
+        $items = $row->acceptanceItems ?? collect();
+
+        $standalone  = $items->whereNull('panel_id');
+        $panelGroups = $items->whereNotNull('panel_id')->groupBy('panel_id');
+
+        $parts = [];
+
+        foreach ($standalone as $item) {
+            $name = $item->methodTest?->test?->name;
+            if ($name) $parts[] = $name;
+        }
+
+        foreach ($panelGroups as $panelItems) {
+            $panelName = $panelItems->first()->panelTest?->name;
+            $testNames = $panelItems
+                ->map(fn($i) => $i->methodTest?->test?->name)
+                ->filter()
+                ->join(' + ');
+
+            $parts[] = $panelName
+                ? "{$panelName} ({$testNames})"
+                : "Panel ({$testNames})";
+        }
+
+        return implode(', ', array_unique($parts));
     }
 
     private function formatDateTime($value): string

@@ -1,10 +1,13 @@
-﻿import React from "react";
+﻿import React, { useState } from "react";
 import Grid from "@mui/material/Grid";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import FormGroup from "@mui/material/FormGroup";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
 import { Print, Email, WhatsApp, HelpOutlined } from "@mui/icons-material";
 import { Box, Divider, Paper, Typography, Tooltip, Stack, IconButton } from "@mui/material";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
@@ -281,6 +284,80 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
     );
 };
 
+const HOW_FOUND_OPTIONS = [
+    { value: 'google', label: 'Google Search' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'friends', label: 'Friends / Family' },
+    { value: 'doctor', label: "Doctor's Recommendation" },
+    { value: 'website', label: 'Website / Online Ad' },
+    { value: 'walk_in', label: 'Walk-in / Signboard' },
+    { value: 'other', label: 'Other' },
+];
+
+const PREDEFINED_VALUES = HOW_FOUND_OPTIONS.filter(o => o.value !== 'other').map(o => o.value);
+
+const HowFoundUs = ({ value, onChange, errors }) => {
+    const isOther = value && !PREDEFINED_VALUES.includes(value);
+    const [selected, setSelected] = useState(isOther ? 'other' : (value || ''));
+    const [otherText, setOtherText] = useState(isOther ? value : '');
+
+    const handleSelect = (e) => {
+        const v = e.target.value;
+        setSelected(v);
+        if (v === 'other') {
+            onChange('how_found_us', otherText);
+        } else {
+            onChange('how_found_us', v);
+        }
+    };
+
+    const handleOtherText = (e) => {
+        setOtherText(e.target.value);
+        onChange('how_found_us', e.target.value);
+    };
+
+    return (
+        <Paper elevation={2} sx={{ borderRadius: 2, overflow: 'hidden', mt: 3 }}>
+            <Box sx={{ bgcolor: 'secondary.main', p: 2, color: 'white' }}>
+                <Typography variant="h6" fontWeight="medium">
+                    How Did You Find Our Lab?
+                </Typography>
+            </Box>
+            <Box sx={{ p: 3 }}>
+                <Stack spacing={2}>
+                    <FormControl fullWidth>
+                        <InputLabel id="how-found-us-label">Select an option</InputLabel>
+                        <Select
+                            labelId="how-found-us-label"
+                            value={selected}
+                            label="Select an option"
+                            onChange={handleSelect}
+                        >
+                            <MenuItem value=""><em>— Not specified —</em></MenuItem>
+                            {HOW_FOUND_OPTIONS.map(opt => (
+                                <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    {selected === 'other' && (
+                        <TextField
+                            fullWidth
+                            label="Please specify"
+                            placeholder="Tell us how you found out about us"
+                            value={otherText}
+                            onChange={handleOtherText}
+                            error={Boolean(errors?.how_found_us)}
+                            helperText={errors?.how_found_us || ''}
+                            variant="outlined"
+                        />
+                    )}
+                </Stack>
+            </Box>
+        </Paper>
+    );
+};
+
 const ReportSection = ({ data, errors, onChange }) => {
     return (
         <Box>
@@ -336,6 +413,12 @@ const ReportSection = ({ data, errors, onChange }) => {
                 errors={errors}
                 isReferred={Boolean(data?.referred)}
                 referrer={data?.referrer || null}
+            />
+
+            <HowFoundUs
+                value={data?.how_found_us || ''}
+                onChange={onChange}
+                errors={errors}
             />
         </Box>
     );
