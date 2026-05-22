@@ -1,6 +1,6 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageHeader from "@/Components/PageHeader.jsx";
-import { useForm } from "@inertiajs/react";
+import { Head, useForm } from "@inertiajs/react";
 import { useState } from "react";
 import * as XLSX from 'xlsx';
 import countries from "@/Data/Countries";
@@ -344,6 +344,7 @@ const Create = ({ success, error, patientFields }) => {
 
     return (
         <Box sx={{ position: 'relative' }}>
+            <Head title="Import Excel File"/>
             <PageHeader
                 title="Import Excel File"
                 subtitle="Upload and import patient data from Excel files"

@@ -1,5 +1,5 @@
 import {useEffect, useRef} from "react";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {Box, Button, Grid, Paper, Stack, Tooltip, Typography} from "@mui/material";
 import {styled} from "@mui/material/styles";
 import PrintIcon from "@mui/icons-material/Print";
@@ -90,6 +90,7 @@ const Labels = () => {
 
     return (
         <>
+            <Head title={`Lot Labels — ${reference}`}/>
             <style>{`
                 @media print {
                     .no-print { display: none !important; }

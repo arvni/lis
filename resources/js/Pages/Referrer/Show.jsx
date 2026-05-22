@@ -10,6 +10,7 @@ import ReferrerInfo from "./Components/ReferrerInfo";
 import LoadMore from "@/Components/LoadMore";
 
 import ReferrerTestsTab from "./Components/ReferrerTestsTab";
+import {Head} from "@inertiajs/react";
 
 const Show = ({
                   referrer,
@@ -335,6 +336,7 @@ const Show = ({
 
     return (
         <div>
+            <Head title={`Referrer: ${referrer.fullName}`}/>
             <ReferrerInfo
                 referrer={referrer}
                 editable

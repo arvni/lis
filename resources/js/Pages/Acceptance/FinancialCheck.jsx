@@ -1,5 +1,5 @@
 import React, {useMemo, useState, useCallback} from 'react';
-import {usePage, router, useForm} from '@inertiajs/react';
+import {Head, usePage, router, useForm} from '@inertiajs/react';
 import axios from 'axios';
 import {
     Box,
@@ -303,6 +303,7 @@ const FinancialCheck = () => {
 
     return (
         <>
+            <Head title="Financial Check"/>
             <PageHeader
                 title="Financial Check"
                 subtitle="Review invoices and approve acceptances for publishing"

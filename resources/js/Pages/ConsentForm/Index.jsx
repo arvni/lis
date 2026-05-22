@@ -6,7 +6,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import {useCallback, useMemo, useState} from "react";
 import {Button} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageHeader from "@/Components/PageHeader.jsx";
@@ -100,6 +100,7 @@ const Index = () => {
     ], [editConsentForm, deleteConsentForm]);
     return (
         <>
+            <Head title="Consent Forms"/>
             <PageHeader title="Consent Forms List"
                         actions={<Button onClick={addNew}
                                          key="add-button"

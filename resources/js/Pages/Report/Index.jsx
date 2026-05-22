@@ -6,7 +6,7 @@ import {useState} from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Filter from "./Components/Filter";
 import {RemoveRedEye} from "@mui/icons-material";
-import {router, useForm, usePage} from "@inertiajs/react";
+import {Head, router, useForm, usePage} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 
 const Index = ({auth, canEditAll}) => {
@@ -104,6 +104,7 @@ const Index = ({auth, canEditAll}) => {
     }
     return (
         <>
+            <Head title={title || "Reports"}/>
             <PageHeader title={title || "Reports List"}/>
             <TableLayout defaultValues={requestInputs} success={success} status={status} reload={pageReload}
                          columns={columns} data={reports} processing={processing} Filter={Filter} errors={errors}/>

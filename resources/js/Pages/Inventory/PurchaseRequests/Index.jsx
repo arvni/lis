@@ -1,5 +1,5 @@
 import {useState, useCallback, useMemo} from "react";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {
     Badge, Box, Button, Chip, Collapse, Grid, MenuItem, Tab, Tabs, TextField, Typography,
 } from "@mui/material";
@@ -125,6 +125,7 @@ const PurchaseRequestsIndex = () => {
 
     return (
         <>
+            <Head title="Purchase Requests"/>
             <PageHeader
                 title="Purchase Requests"
                 actions={

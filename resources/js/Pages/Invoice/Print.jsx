@@ -2,6 +2,7 @@ import {Stack, Table, TableBody, TableCell, TableFooter, TableHead, TableRow} fr
 import Typography from "@mui/material/Typography";
 import countries from "@/Data/Countries";
 import Box from "@mui/material/Box";
+import {Head} from "@inertiajs/react";
 
 const Print = ({invoice}) => {
     const address = [invoice.owner?.billingInfo?.address, invoice.owner?.billingInfo?.city, invoice.owner?.billingInfo?.country].filter(item => item !== undefined).join(", ");
@@ -18,6 +19,7 @@ const Print = ({invoice}) => {
         }
     }
     return <>
+        <Head title={`Invoice ${invoice.invoiceNo}`}/>
         <Table sx={{maxWidth: "210mm", border: "none"}}>
             <TableRow>
                 <TableCell sx={{padding: 0}}>

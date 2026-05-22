@@ -1,4 +1,4 @@
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {
     Box, Button, Card, CardContent, CardHeader, Chip, Grid,
     Table, TableBody, TableCell, TableHead, TableRow, Typography,
@@ -24,6 +24,7 @@ const LotShow = () => {
 
     return (
         <>
+            <Head title={`Lot: ${lot.lot_number}`}/>
             <PageHeader
                 title={`Lot: ${lot.lot_number}`}
                 actions={

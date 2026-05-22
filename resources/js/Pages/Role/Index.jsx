@@ -6,7 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForm from "@/Components/DeleteForm";
 import {useState} from "react";
-import {router, useForm, usePage} from "@inertiajs/react";
+import {Head, router, useForm, usePage} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 import AddIcon from "@mui/icons-material/Add";
 import {Button} from "@mui/material";
@@ -81,6 +81,7 @@ const Index = () => {
     };
     const addRole = () => router.visit(route('roles.create'));
     return <>
+        <Head title="Roles"/>
         <PageHeader title="Roles"
                     actions={<Button onClick={addRole}
                                      size="small"

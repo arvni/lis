@@ -1,5 +1,5 @@
 import {useState, useCallback, useMemo} from "react";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {Box, Button, Chip, Grid, MenuItem, TextField} from "@mui/material";
 import {GridActionsCellItem} from "@mui/x-data-grid";
 import AddIcon from "@mui/icons-material/Add";
@@ -136,6 +136,7 @@ const ItemsIndex = () => {
 
     return (
         <>
+            <Head title="Inventory Items"/>
             <PageHeader
                 title="Inventory Items"
                 actions={

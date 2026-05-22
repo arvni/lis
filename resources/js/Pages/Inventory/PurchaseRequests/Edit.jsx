@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {router, usePage, useForm} from "@inertiajs/react";
+import {Head, router, usePage, useForm} from "@inertiajs/react";
 import {
     Box, Button, Card, CardContent, CardHeader, Grid, MenuItem, TextField,
     IconButton, Table, TableHead, TableBody, TableRow, TableCell,
@@ -99,6 +99,7 @@ const Edit = () => {
 
     return (
         <>
+            <Head title={`Edit Purchase Request #${pr.id}`}/>
             <PageHeader title={`Edit Purchase Request #${pr.id}`}/>
             <Box component="form" onSubmit={handleSubmit} sx={{display: "flex", flexDirection: "column", gap: 3}}>
                 <Card>

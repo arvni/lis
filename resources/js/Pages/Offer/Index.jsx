@@ -1,5 +1,5 @@
 import {useCallback, useMemo, useState} from "react";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {Box, Button, Chip, Tooltip, Typography} from "@mui/material";
 import {GridActionsCellItem} from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
@@ -238,6 +238,7 @@ const OffersIndex = () => {
 
     return (
         <>
+            <Head title="Offers"/>
             <PageHeader
                 title="Offers Management"
                 subtitle="Create and manage discount offers for tests and referrals"

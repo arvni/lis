@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {usePage} from "@inertiajs/react";
+import {Head, usePage} from "@inertiajs/react";
 import {
     Box, Button, Card, CardContent, CardHeader, Grid,
     MenuItem, TextField, Typography,
@@ -101,6 +101,7 @@ const ReportsIndex = () => {
 
     return (
         <>
+            <Head title="Inventory Reports"/>
             <PageHeader title="Inventory Reports"/>
             <Box sx={{display: "flex", flexDirection: "column", gap: 3}}>
                 {REPORTS.map((r) => (

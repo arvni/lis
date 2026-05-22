@@ -3,7 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageHeader from "@/Components/PageHeader.jsx";
 import Filter from "@/Pages/Setting/Components/Filter";
 import AddForm from "@/Pages/Setting/Components/AddForm";
-import {useForm} from "@inertiajs/react";
+import {Head, useForm} from "@inertiajs/react";
 import {router, usePage} from "@inertiajs/react";
 import {useMemo, useState} from "react";
 
@@ -199,6 +199,7 @@ const Index = () => {
 
     return (
         <Box sx={{position: 'relative'}}>
+            <Head title="Settings"/>
             <PageHeader
                 title="Settings"
                 subtitle="Manage your application settings"

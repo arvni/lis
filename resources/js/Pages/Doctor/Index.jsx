@@ -1,5 +1,5 @@
 import {useState, useCallback, useMemo} from "react";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {Button} from "@mui/material";
 import {GridActionsCellItem} from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
@@ -133,6 +133,7 @@ const DoctorsIndex = () => {
 
     return (
         <>
+            <Head title="Doctors"/>
             <PageHeader
                 title="Doctors List"
                 actions={

@@ -1,6 +1,6 @@
 import AddForm from './Components/Form';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {router, useForm, usePage} from "@inertiajs/react";
+import {Head, router, useForm, usePage} from "@inertiajs/react";
 
 const Edit = () => {
     const { collectRequest, sampleCollectors, referrers } = usePage().props;
@@ -15,6 +15,8 @@ const Edit = () => {
     const handleCancel = () => router.visit(route('collect-requests.index'));
 
     return (
+        <>
+        <Head title={`Edit Collect Request #${collectRequest.id}`}/>
         <AddForm
             data={data}
             setData={setData}
@@ -26,6 +28,7 @@ const Edit = () => {
             sampleCollectors={sampleCollectors || []}
             referrers={referrers || []}
         />
+        </>
     );
 }
 

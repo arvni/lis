@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {router, usePage, useForm} from "@inertiajs/react";
+import {Head, router, usePage, useForm} from "@inertiajs/react";
 import {
     Alert, Autocomplete, Box, Button, Card, CardContent, CardHeader,
     Chip, Divider, FormControlLabel, Grid, IconButton, MenuItem,
@@ -252,6 +252,7 @@ const WorkflowTemplateForm = () => {
 
     return (
         <>
+            <Head title={isEdit ? `Edit: ${template.name}` : "New Workflow Template"}/>
             <PageHeader
                 title={isEdit ? `Edit: ${template.name}` : "New Workflow Template"}
                 actions={

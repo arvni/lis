@@ -6,7 +6,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForm from "@/Components/DeleteForm";
 import {useState} from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {router, useForm} from "@inertiajs/react";
+import {Head, router, useForm} from "@inertiajs/react";
 import {Button} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import PageHeader from "@/Components/PageHeader.jsx";
@@ -79,6 +79,7 @@ const Index = ({consultants, status, errors, success, requestInputs}) => {
     const handleAddNew = () => router.visit(route('consultants.create'));
     return (
         <>
+            <Head title="Consultants"/>
             <PageHeader title="Consultants" actions={<Button onClick={handleAddNew}
                                                              size="small"
                                                              startIcon={<AddIcon/>}

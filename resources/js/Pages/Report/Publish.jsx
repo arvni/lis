@@ -1,5 +1,5 @@
 import React, {useMemo, useState, useCallback} from 'react';
-import {router, usePage} from '@inertiajs/react';
+import {Head, router, usePage} from '@inertiajs/react';
 import {GridActionsCellItem} from '@mui/x-data-grid';
 import {
     RemoveRedEye,
@@ -305,6 +305,7 @@ const PublishingQueue = () => {
 
     return (
         <>
+            <Head title="Publishing Queue"/>
             <PageHeader
                 title="Publishing Queue"
                 subtitle="Manage acceptance publishing and delivery"

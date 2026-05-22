@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import ConsultantForm, {default_time_table} from "./Components/Form";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { router, useForm } from "@inertiajs/react";
+import { Head, router, useForm } from "@inertiajs/react";
 import {
     Snackbar,
     Alert,
@@ -169,6 +169,7 @@ const Add = ({ errors: initialErrors, auth }) => {
 
     return (
         <>
+            <Head title="Add Consultant"/>
             {/* Show progress indicator when uploading */}
             {progress && (
                 <LinearProgress

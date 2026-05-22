@@ -28,7 +28,7 @@ import AcceptanceForm from "./Components/AcceptanceForm";
 import AddSampleForm from "./Components/AddSampleForm";
 import AddFromExistPatientForm from "./Components/AddFromExistPatientForm";
 import SelectAcceptanceDialog from "./Components/SelectAcceptanceDialog";
-import {router} from "@inertiajs/react";
+import {Head, router} from "@inertiajs/react";
 import {
     Assignment,
     Description,
@@ -672,6 +672,7 @@ const Show = ({referrerOrder, errors = {}}) => {
 
     return (
         <>
+            <Head title={`Referrer Order #${referrerOrder.order_id}`}/>
             {/* Page Header */}
             <PageHeader
                 icon={<Assignment sx={{mr: 1}}/>}

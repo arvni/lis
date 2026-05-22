@@ -1,6 +1,6 @@
 import AddForm from './Components/Form';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {router, useForm} from "@inertiajs/react";
+import {Head, router, useForm} from "@inertiajs/react";
 
 const Add = () => {
     const {data, setData, post, errors, setError, clearErrors} = useForm({
@@ -25,13 +25,16 @@ const Add = () => {
     const handleSubmit = () => post(route('tests.store'))
     const handleCancel = () => router.visit(route('tests.index'));
     return (
-        <AddForm data={data}
-                 setData={setData}
-                 submit={handleSubmit}
-                 cancel={handleCancel}
-                 errors={errors}
-                 setError={setError}
-                 clearErrors={clearErrors}/>
+        <>
+            <Head title="Add Test"/>
+            <AddForm data={data}
+                     setData={setData}
+                     submit={handleSubmit}
+                     cancel={handleCancel}
+                     errors={errors}
+                     setError={setError}
+                     clearErrors={clearErrors}/>
+        </>
     );
 }
 

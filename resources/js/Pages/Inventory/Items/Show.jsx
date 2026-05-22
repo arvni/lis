@@ -1,4 +1,4 @@
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {
     Box, Button, Card, CardContent, CardHeader, Chip, Divider,
     Grid, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography,
@@ -22,6 +22,7 @@ const Show = () => {
 
     return (
         <>
+            <Head title={`${item.item_code} — ${item.name}`}/>
             <PageHeader
                 title={`${item.item_code} — ${item.name}`}
                 actions={

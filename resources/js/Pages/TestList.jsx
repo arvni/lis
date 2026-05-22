@@ -25,7 +25,7 @@ import {
 } from '@mui/icons-material';
 import TableLayout from '@/Layouts/TableLayout';
 import PageHeader from "@/Components/PageHeader.jsx";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
 import FormulaTester from "@/Components/FormulaTester.jsx";
 import {DownloadIcon} from "lucide-react";
@@ -377,6 +377,7 @@ const TestList = () => {
 
     return (
         <>
+            <Head title="Test List"/>
             <PageHeader title="Test List"/>
             <TableLayout
                 Filter={TestFilter}

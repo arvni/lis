@@ -14,7 +14,7 @@ import {
 } from "@mui/icons-material";
 import { useState, useCallback } from "react";
 import DeleteForm from "@/Components/DeleteForm";
-import { router, useForm, usePage } from "@inertiajs/react";
+import { Head, router, useForm, usePage } from "@inertiajs/react";
 
 const PaymentIndex = () => {
     const { payments, status, success, requestInputs, canDelete } = usePage().props;
@@ -131,6 +131,7 @@ const PaymentIndex = () => {
 
     return (
         <>
+            <Head title="Payments"/>
             <Box sx={{ mb: 3 }}>
                 <Paper sx={{ padding: 2 }}>
   <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "center"}}>

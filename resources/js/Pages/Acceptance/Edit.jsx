@@ -9,7 +9,7 @@ import Typography from "@mui/material/Typography";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import {Stack} from "@mui/material";
-import {router, useForm} from "@inertiajs/react";
+import {Head, router, useForm} from "@inertiajs/react";
 
 const Edit = ({acceptance, maxDiscount=100,errors, canAddPrescription = false}) => {
     const {data, setData, post, setError, clearErrors, reset} = useForm({...acceptance, _method: "put"});
@@ -142,6 +142,7 @@ const Edit = ({acceptance, maxDiscount=100,errors, canAddPrescription = false}) 
     }, [setData, validateForm, reset]);
 
     return (<>
+        <Head title={`Edit Acceptance #${acceptance.id}`}/>
         <AcceptanceForm initialData={data}
                         onSubmit={save}
                         errors={errors}

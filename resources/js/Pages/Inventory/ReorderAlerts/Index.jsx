@@ -1,5 +1,5 @@
 import {useState, useCallback} from "react";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {Box, Button, Chip, Grid, MenuItem, TextField} from "@mui/material";
 import {GridActionsCellItem} from "@mui/x-data-grid";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -92,6 +92,7 @@ const ReorderAlertsIndex = () => {
 
     return (
         <>
+            <Head title="Reorder Alerts"/>
             <PageHeader title="Reorder Alerts"/>
             <TableLayout
                 Filter={Filter}

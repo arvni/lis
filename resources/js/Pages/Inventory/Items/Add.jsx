@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {router, usePage, useForm} from "@inertiajs/react";
+import {Head, router, usePage, useForm} from "@inertiajs/react";
 import {
     Box, Button, Stepper, Step, StepLabel, Card, CardContent,
     Grid, TextField, MenuItem, FormControlLabel, Checkbox,
@@ -63,6 +63,7 @@ const Add = () => {
 
     return (
         <>
+            <Head title="New Inventory Item"/>
             <PageHeader title="New Inventory Item"/>
             <Card>
                 <CardContent>

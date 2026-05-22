@@ -1,5 +1,5 @@
 import {useMemo, useState} from "react";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {
     Box, Button, Card, CardContent, Chip, Grid, IconButton, InputAdornment,
     Paper, TextField, Tooltip, Typography, alpha, useTheme,
@@ -139,6 +139,7 @@ const NodesIndex = () => {
 
     return (
         <>
+            <Head title="Sensor Nodes"/>
             <PageHeader
                 title="Sensor Nodes"
                 actions={

@@ -11,7 +11,7 @@ import {
     Male as MaleIcon,
     Female as FemaleIcon, QuestionMark as QuestionMarkIcon
 } from "@mui/icons-material";
-import {router, useForm, usePage} from "@inertiajs/react";
+import {Head, router, useForm, usePage} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 import {
     Box,
@@ -354,6 +354,7 @@ const Index = () => {
 
     return (
         <>
+            <Head title="Patients"/>
             <PageHeader
                 title="Patients"
                 description="Manage patient records and view statistics"

@@ -4,7 +4,7 @@ import {useSnackbar} from "notistack";
 import {Paper, Typography, Grid, Divider} from "@mui/material";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import LoadMore from "@/Components/LoadMore";
-import {usePage} from "@inertiajs/react";
+import {Head, usePage} from "@inertiajs/react";
 
 const Show = () => {
     const {
@@ -78,6 +78,7 @@ const Show = () => {
 
     return (
         <div>
+            <Head title={`Sample Collector: ${sampleCollector?.name ?? ''}`}/>
             <Paper sx={{ p: 3, mb: 3 }}>
                 <Typography variant="h5" gutterBottom>
                     Sample Collector Details

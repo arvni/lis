@@ -1,5 +1,5 @@
 import React, {useState, useCallback, useMemo} from 'react';
-import {router, usePage} from '@inertiajs/react';
+import {Head, router, usePage} from '@inertiajs/react';
 import {
     Button, Box, Typography, Chip, Paper, IconButton, Tooltip,
     ToggleButtonGroup, ToggleButton, Card, CardContent, Stack
@@ -346,6 +346,7 @@ const CollectRequestsIndex = () => {
 
     return (
         <>
+            <Head title="Collect Requests"/>
             <PageHeader
                 title="Collect Requests"
                 actions={

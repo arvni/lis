@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {router, usePage, useForm} from "@inertiajs/react";
+import {Head, router, usePage, useForm} from "@inertiajs/react";
 import {
     Alert, Box, Button, Card, CardContent, CardHeader, Chip, CircularProgress,
     Divider, Grid, IconButton, MenuItem, Stack, TextField, Typography,
@@ -236,6 +236,7 @@ const TransactionAdd = () => {
 
     return (
         <>
+            <Head title="New Stock Transaction"/>
             <PageHeader title="New Stock Transaction"/>
             <Box component="form" onSubmit={handleSubmit}>
                 <Card sx={{mb: 3}}>

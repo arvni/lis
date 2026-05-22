@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {usePage, router} from "@inertiajs/react";
+import {Head, usePage, router} from "@inertiajs/react";
 import {
     Box, Button, Card, CardContent, Chip, FormControlLabel, Grid, MenuItem,
     Switch, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography,
@@ -40,6 +40,7 @@ const StockIndex = () => {
 
     return (
         <>
+            <Head title="Stock Overview"/>
             <PageHeader title="Current Stock Overview"/>
             <Card sx={{mb: 3}}>
                 <CardContent>

@@ -21,7 +21,7 @@ import {
 } from "@mui/icons-material";
 import { useState, useCallback } from "react";
 import DeleteForm from "@/Components/DeleteForm";
-import { router, useForm, usePage } from "@inertiajs/react";
+import { Head, router, useForm, usePage } from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 import Button from "@mui/material/Button";
 import AddForm from "./Components/AddForm.jsx";
@@ -274,6 +274,7 @@ const StatementIndex = () => {
 
     return (
         <>
+            <Head title="Statements"/>
             <PageHeader
                 title="Statement Management"
                 subtitle={`${statements?.data?.length || 0} statements found`}

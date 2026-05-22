@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {router, usePage, useForm} from "@inertiajs/react";
+import {Head, router, usePage, useForm} from "@inertiajs/react";
 import {
     Box, Button, Card, CardContent, Chip, Stepper, Step, StepLabel,
     Grid, TextField, MenuItem, FormControlLabel, Checkbox,
@@ -61,6 +61,7 @@ const Edit = () => {
 
     return (
         <>
+            <Head title={`Edit Item — ${item.item_code}`}/>
             <PageHeader
                 title={`Edit — ${item.item_code}`}
                 actions={

@@ -7,7 +7,7 @@ import {useCallback, useMemo, useState} from "react";
 import Filter from "./Components/Filter";
 import AddForm from "./Components/AddForm";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 import {Button} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -101,6 +101,7 @@ const Index = () => {
     const addNew = useCallback(() => setOpenAddForm(true), []);
     return (
         <>
+            <Head title="Section Groups"/>
             <PageHeader title="Section Group List"
                         actions={<Button onClick={addNew}
                                          color="success"

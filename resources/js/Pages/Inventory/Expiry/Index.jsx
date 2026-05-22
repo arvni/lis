@@ -1,4 +1,4 @@
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {
     Alert, Box, Card, CardContent, CardHeader, Chip, MenuItem,
     Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography,
@@ -76,6 +76,7 @@ const ExpiryIndex = () => {
 
     return (
         <>
+            <Head title="Expiry Dashboard"/>
             <PageHeader title="Expiry Dashboard"/>
 
             <Box sx={{display: "flex", gap: 2, mb: 3, flexWrap: "wrap"}}>

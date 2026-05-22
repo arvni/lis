@@ -1,5 +1,5 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {usePage} from "@inertiajs/react";
+import {Head, usePage} from "@inertiajs/react";
 import {
     Box, Typography, Table, TableBody, TableCell, TableContainer,
     TableHead, TableRow, Paper, Divider, Grid as Grid, Chip, Button,
@@ -173,6 +173,7 @@ const StatementShow = () => {
 
     return (
         <Box sx={{p: {xs: 2, md: 3}}}>
+            <Head title={`Statement ${statement.no ?? ''}`}/>
             <style>{printStyles}</style>
             {/* ── Toolbar (hidden when printing) ── */}
             <Box sx={{display: "flex", justifyContent: "space-between", mb: 2, "@media print": {display: "none"}}}>

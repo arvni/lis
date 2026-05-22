@@ -7,7 +7,7 @@ import TestInfo from "@/Pages/AcceptanceItem/Components/TestInfo";
 import ReportForm from "@/Pages/Report/Components/ReportForm";
 import History from "@/Pages/Report/Components/History";
 import PageHeader from "@/Components/PageHeader.jsx";
-import {useForm, Link} from "@inertiajs/react";
+import {Head, useForm, Link} from "@inertiajs/react";
 import {Button, Tooltip} from "@mui/material";
 import {Visibility as VisibilityIcon} from "@mui/icons-material";
 
@@ -24,6 +24,7 @@ const Add = ({patients, acceptanceItem, templates, history, test, method}) => {
 
     return (
         <>
+            <Head title="Add Report"/>
             <PageHeader
                 title="Add Report"
                 actions={[

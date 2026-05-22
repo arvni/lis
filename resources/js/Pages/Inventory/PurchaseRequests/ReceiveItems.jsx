@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {
     Alert, Box, Button, Card, CardContent, CardHeader, Checkbox,
     CircularProgress, Grid, MenuItem, Table, TableBody, TableCell,
@@ -92,6 +92,7 @@ const ReceiveItems = () => {
 
     return (
         <>
+            <Head title={`Receive Items — PR #${pr.id}`}/>
             <PageHeader title={`Receive Items — PR #${pr.id}`}/>
             {status && (
                 <Alert severity={success ? "success" : "error"} sx={{mb: 2, whiteSpace: "pre-line"}}>

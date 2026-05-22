@@ -1,6 +1,6 @@
 import AddForm from './Components/Form';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {useForm,router} from "@inertiajs/react";
+import {Head, useForm,router} from "@inertiajs/react";
 
 const Edit = ({workflow}) => {
     const section_workflows = (workflow.section_workflows ?? []).map(sw => ({
@@ -13,11 +13,15 @@ const Edit = ({workflow}) => {
     const {data, setData, post, errors} = useForm({...workflow, section_workflows, _method: "put"});
     const handleSubmit = () => post(route('workflows.update', workflow.id));
     const handleCancel = () => router.visit(route('workflows.index'));
-    return (<AddForm data={data}
+    return (
+        <>
+            <Head title={`Edit Workflow: ${workflow.name}`}/>
+            <AddForm data={data}
                      errors={errors}
                      setData={setData}
                      submit={handleSubmit}
                      cancel={handleCancel}/>
+        </>
     );
 }
 

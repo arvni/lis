@@ -1,5 +1,5 @@
 import {useCallback, useMemo, useState} from "react";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {Button, Tab, Tabs,} from "@mui/material";
 import {GridActionsCellItem} from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
@@ -141,6 +141,8 @@ const MaterialsIndex = () => {
         setActiveTab(newValue);
     };
     return (
+        <>
+        <Head title="Materials"/>
         <TabContext value={activeTab}>
             <Tabs value={activeTab} onChange={handleChange} aria-label="basic tabs example">
                 <Tab label="Materials" value="1"/>
@@ -207,6 +209,7 @@ const MaterialsIndex = () => {
                 <PackingSeries/>
             </TabPanel>
         </TabContext>
+        </>
     );
 };
 

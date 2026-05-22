@@ -6,7 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForm from "@/Components/DeleteForm";
 import {useCallback, useMemo, useState} from "react";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 import {Button} from "@mui/material";
 
@@ -81,6 +81,7 @@ const Index = () => {
     ], [editWorkflow, deleteWorkflow]);
 
     return <>
+        <Head title="Workflows"/>
         <PageHeader title="Workflows"
                     actions={<Button onClick={addNew}
                                      color="success">Add Workflow</Button>}/>

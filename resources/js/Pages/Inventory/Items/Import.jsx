@@ -1,6 +1,6 @@
 import {useState, useCallback, useMemo, memo} from "react";
 import * as XLSX from "xlsx";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {
     Alert, Box, Button, Card, CardContent, CardHeader, Chip,
     CircularProgress, IconButton, List, ListItem, Paper, Table,
@@ -194,6 +194,7 @@ const ItemImport = () => {
 
     return (
         <>
+            <Head title="Bulk Import Items"/>
             <PageHeader
                 title="Bulk Import Items"
                 actions={

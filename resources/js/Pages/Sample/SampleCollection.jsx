@@ -6,7 +6,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import AddForm from "@/Pages/Sample/Components/AddForm";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import PageHeader from '@/Components/PageHeader';
 import Filter from './Components/SampleCollectionFilter';
 import {formatDate} from "@/Services/helper.js";
@@ -104,6 +104,7 @@ const Index = () => {
 
     return (
         <>
+            <Head title="Sample Collection"/>
             <PageHeader
                 title="Sample Collection"
             />

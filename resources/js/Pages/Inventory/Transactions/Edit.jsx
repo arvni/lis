@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {router, usePage, useForm} from "@inertiajs/react";
+import {Head, router, usePage, useForm} from "@inertiajs/react";
 import {
     Box, Button, Card, CardContent, CardHeader, CircularProgress,
     Grid, IconButton, MenuItem, Table, TableBody, TableCell, TableHead,
@@ -191,6 +191,7 @@ const TransactionEdit = () => {
 
     return (
         <>
+            <Head title={`Edit Transaction: ${transaction.reference_number}`}/>
             <PageHeader title={`Edit Transaction: ${transaction.reference_number}`}/>
 
             {status && (

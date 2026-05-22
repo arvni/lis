@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import {Head} from '@inertiajs/react';
 import {
     Box,
     Typography,
@@ -339,6 +340,7 @@ const GlobalStyles = () => {
 const BarcodePageComponent = ({barcodes}) => {
     return (
         <>
+            <Head title="Acceptance Barcodes"/>
             <GlobalStyles/>
             <BarcodeComponent barcodes={barcodes}/>
         </>

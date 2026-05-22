@@ -1,6 +1,6 @@
 import AddForm from './Components/Form';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {router, useForm, usePage} from "@inertiajs/react";
+import {Head, router, useForm, usePage} from "@inertiajs/react";
 
 const Add = () => {
     const { sampleCollectors, referrers } = usePage().props;
@@ -21,6 +21,8 @@ const Add = () => {
     };
 
     return (
+        <>
+        <Head title="New Collect Request"/>
         <AddForm
             data={data}
             setData={setData}
@@ -32,6 +34,7 @@ const Add = () => {
             sampleCollectors={sampleCollectors || []}
             referrers={referrers || []}
         />
+        </>
     );
 }
 

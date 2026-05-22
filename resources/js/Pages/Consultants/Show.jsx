@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {router} from "@inertiajs/react";
+import {Head, router} from "@inertiajs/react";
 import {
     Paper, Box, Grid, Typography, Avatar, Chip, Divider,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -82,6 +82,7 @@ const Show = ({consultant, times, recentConsultations}) => {
 
     return (
         <Box>
+            <Head title={consultant?.name ? `Consultant: ${consultant.name}` : 'Consultant'}/>
             <Grid container spacing={3}>
                 {/* ── Sidebar ───────────────────────────────── */}
                 <Grid size={{xs: 12, md: 4, lg: 3}}>

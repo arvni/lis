@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import UserForm from "@/Pages/User/Components/Form";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { router, useForm } from "@inertiajs/react";
+import { Head, router, useForm } from "@inertiajs/react";
 import { Snackbar, Alert } from "@mui/material";
 
 const EditUser = ({ user, errors: serverErrors, auth }) => {
@@ -88,6 +88,7 @@ const EditUser = ({ user, errors: serverErrors, auth }) => {
 
     return (
         <>
+            <Head title={`Edit User: ${user?.name ?? ''}`}/>
             <UserForm
                 values={data}
                 errors={errors}

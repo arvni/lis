@@ -1,6 +1,6 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageHeader from "@/Components/PageHeader.jsx";
-import {router,} from "@inertiajs/react";
+import {Head, router,} from "@inertiajs/react";
 
 // Material UI components
 import {
@@ -88,6 +88,7 @@ const Reservations = ({times, canEdit, canAdd, canDelete}) => {
 
     return (
         <Box sx={{position: 'relative'}}>
+            <Head title="Reservations"/>
             <PageHeader
                 title="Reservation"
                 subtitle="Manage reservations"

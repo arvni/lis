@@ -32,6 +32,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
+import {Head} from '@inertiajs/react';
 
 const fetcher = (...args) => fetch(...args).then(res => res.json());
 
@@ -321,6 +322,7 @@ const Index = () => {
 
     return (
         <Container maxWidth="md" sx={{py: 4}}>
+            <Head title="Notifications"/>
             <Box sx={{display: 'flex', alignItems: 'center', mb: 3}}>
                 <IconButton
                     sx={{mr: 2}}

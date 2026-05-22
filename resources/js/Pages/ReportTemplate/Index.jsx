@@ -6,7 +6,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import {useCallback, useMemo, useState} from "react";
 import {Button} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {Print} from "@mui/icons-material";
 
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
@@ -107,6 +107,7 @@ const Index = () => {
     ], [editReportTemplate, printReportTemplate, deleteReportTemplate]);
     return (
         <>
+            <Head title="Report Templates"/>
             <PageHeader title="Report Templates List"
                         actions={<Button onClick={addNew}
                                          key="add-button"

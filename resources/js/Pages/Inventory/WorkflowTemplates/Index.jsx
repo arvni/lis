@@ -1,4 +1,4 @@
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {
     Alert, Box, Button, Card, CardContent, Chip, IconButton, Stack,
     Table, TableBody, TableCell, TableHead, TableRow, Tooltip, Typography,
@@ -29,6 +29,7 @@ const WorkflowTemplatesIndex = () => {
 
     return (
         <>
+            <Head title="Workflow Templates"/>
             <PageHeader
                 title="Workflow Templates"
                 actions={

@@ -50,7 +50,7 @@ import History from "./Components/History";
 import Signers from "./Components/Signers";
 
 import DialogContent from "@mui/material/DialogContent";
-import {router, useForm, Link} from "@inertiajs/react";
+import {Head, router, useForm, Link} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 
 const formatDate = (date) => {
@@ -200,6 +200,7 @@ const Show = ({
 
     return (
         <Box sx={{mb: 4}}>
+            <Head title={`Report #${report.id}`}/>
             {/* Rejection Alert */}
             {!report.status && (
                 <Alert

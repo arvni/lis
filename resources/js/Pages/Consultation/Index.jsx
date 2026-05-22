@@ -3,7 +3,7 @@ import DeleteForm from "@/Components/DeleteForm";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Filter from "./Components/IndexFilter";
 import PageHeader from "@/Components/PageHeader.jsx";
-import { router, useForm, usePage } from "@inertiajs/react";
+import { Head, router, useForm, usePage } from "@inertiajs/react";
 import { useState, useMemo } from "react";
 
 // Material UI components
@@ -289,6 +289,7 @@ const Index = () => {
 
     return (
         <Box sx={{ position: 'relative' }}>
+            <Head title="Consultations"/>
             <PageHeader
                 title="Consultations"
                 subtitle="Manage patient consultations"

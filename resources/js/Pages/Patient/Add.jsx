@@ -3,7 +3,7 @@ import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import {useEffect, useState} from "react";
-import {router, useForm} from "@inertiajs/react";
+import {Head, router, useForm} from "@inertiajs/react";
 
 const patient = {
     fullName: "",
@@ -42,6 +42,7 @@ const Add = (props) => {
     const handleCancel = () => router.visit(route('patients.index'));
     return (
         <>
+            <Head title="New Patient"/>
             <AddForm data={data}
                      setData={setData}
                      next={save}

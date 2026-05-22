@@ -1,18 +1,21 @@
 import AddForm from './Components/Form';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {router, useForm} from "@inertiajs/react";
+import {Head, router, useForm} from "@inertiajs/react";
 
 const Edit = ({permissions, role}) => {
     const {data, setData, post, processing} = useForm({...role, _method: "put"});
     const handleSubmit = () => post(route('roles.update', role.id));
     const handleCancel = () => router.visit(route('roles.index'));
     return (
+        <>
+            <Head title={`Edit Role: ${role.name}`}/>
             <AddForm data={data}
                      edit
                      setData={setData}
                      submit={handleSubmit}
                      permissions={permissions}
                      cancel={handleCancel}/>
+        </>
     );
 }
 

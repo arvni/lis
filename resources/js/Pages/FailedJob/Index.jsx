@@ -1,5 +1,5 @@
 import React, {useState, useCallback, useMemo} from 'react';
-import {router, usePage} from '@inertiajs/react';
+import {Head, router, usePage} from '@inertiajs/react';
 import {
     Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle,
     IconButton, Paper, Stack, Tooltip, Typography, Alert, Collapse,
@@ -299,6 +299,7 @@ const FailedJobsIndex = () => {
 
     return (
         <>
+            <Head title="Failed Jobs"/>
             <PageHeader
                 title={
                     <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>

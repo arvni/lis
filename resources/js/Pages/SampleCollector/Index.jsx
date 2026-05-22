@@ -1,5 +1,5 @@
 import React, {useState, useCallback, useMemo} from 'react';
-import { router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { Button } from '@mui/material';
 import { GridActionsCellItem } from '@mui/x-data-grid';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -132,6 +132,7 @@ const SampleCollectorsIndex = () => {
 
     return (
         <>
+            <Head title="Sample Collectors"/>
             <PageHeader
                 title="Sample Collectors List"
                 actions={

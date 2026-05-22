@@ -1,4 +1,4 @@
-import {usePage, router} from "@inertiajs/react";
+import {Head, usePage, router} from "@inertiajs/react";
 import {
     Box, Button, Card, CardContent, CardHeader, Chip, Grid, MenuItem,
     Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography,
@@ -19,6 +19,7 @@ const StockCard = () => {
 
     return (
         <>
+            <Head title={`Stock Card — ${item.item_code}`}/>
             <PageHeader title={`${item.item_code} — ${item.name}`}/>
 
             <Grid container spacing={3} sx={{mb: 3}}>

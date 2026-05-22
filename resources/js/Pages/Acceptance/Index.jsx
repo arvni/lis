@@ -5,7 +5,7 @@ import Filter from "./Components/Filter";
 import TableLayout from "@/Layouts/TableLayout";
 import DeleteForm from "@/Components/DeleteForm";
 import PageHeader from "@/Components/PageHeader.jsx";
-import { router, useForm, usePage, Link } from "@inertiajs/react";
+import { Head, router, useForm, usePage, Link } from "@inertiajs/react";
 import {
     Stack,
     Dialog,
@@ -564,6 +564,7 @@ const Index = () => {
 
     return (
         <>
+            <Head title="Acceptances"/>
             <PageHeader
                 title="Acceptances List"
                 icon={<LocalHospitalIcon fontSize="large" color="primary" />}

@@ -1,6 +1,6 @@
 import AddForm from './Components/Form';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {router, useForm, usePage} from "@inertiajs/react";
+import {Head, router, useForm, usePage} from "@inertiajs/react";
 
 const Edit = () => {
     const { sampleCollector } = usePage().props;
@@ -15,15 +15,18 @@ const Edit = () => {
     const handleCancel = () => router.visit(route('sample-collectors.index'));
 
     return (
-        <AddForm
-            data={data}
-            setData={setData}
-            submit={handleSubmit}
-            cancel={handleCancel}
-            errors={errors}
-            clearErrors={clearErrors}
-            setError={setError}
-        />
+        <>
+            <Head title={`Edit Sample Collector: ${sampleCollector.name}`}/>
+            <AddForm
+                data={data}
+                setData={setData}
+                submit={handleSubmit}
+                cancel={handleCancel}
+                errors={errors}
+                clearErrors={clearErrors}
+                setError={setError}
+            />
+        </>
     );
 }
 

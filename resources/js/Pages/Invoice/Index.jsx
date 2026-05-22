@@ -20,7 +20,7 @@ import {useState, useCallback} from "react";
 import InvoiceEditForm from "@/Pages/Invoice/Components/InvoiceEditForm";
 import Excel from "@/../images/excel.svg";
 import DeleteForm from "@/Components/DeleteForm";
-import {Link, router, useForm, usePage} from "@inertiajs/react";
+import {Head, Link, router, useForm, usePage} from "@inertiajs/react";
 import axios from "axios";
 
 
@@ -260,6 +260,7 @@ const InvoiceIndex = () => {
 
     return (
         <>
+            <Head title="Invoice Management"/>
             <Box sx={{mb: 3}}>
                 <Paper sx={{padding: 2}}>
   <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "center"}}>

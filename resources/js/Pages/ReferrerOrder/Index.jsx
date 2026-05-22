@@ -4,7 +4,7 @@ import Filter from "./Components/Filter";
 import TableLayout from "@/Layouts/TableLayout";
 import { useState, useEffect } from "react";
 import { RemoveRedEye, Assignment, MergeType } from "@mui/icons-material";
-import { router, useForm, usePage } from "@inertiajs/react";
+import { Head, router, useForm, usePage } from "@inertiajs/react";
 import { Tooltip, Chip } from "@mui/material";
 
 const Index = () => {
@@ -170,6 +170,7 @@ const Index = () => {
 
     return (
         <div className="referrer-orders-container">
+            <Head title="Referrer Orders"/>
             <TableLayout
                 defaultValues={requestInputs}
                 columns={columns}

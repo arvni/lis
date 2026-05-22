@@ -1,4 +1,4 @@
-import {router, usePage, useForm} from "@inertiajs/react";
+import {Head, router, usePage, useForm} from "@inertiajs/react";
 import {
     Box, Button, Card, CardContent, CardHeader, Divider, Grid, MenuItem,
     TextField, CircularProgress,
@@ -25,6 +25,7 @@ const Add = () => {
 
     return (
         <>
+            <Head title="New Store"/>
             <PageHeader title="New Store"/>
             <Box component="form" onSubmit={handleSubmit}>
                 <Card>

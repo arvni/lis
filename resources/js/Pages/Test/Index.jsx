@@ -8,7 +8,7 @@ import DeleteForm from "@/Components/DeleteForm";
 import {useState} from "react";
 import {Button} from "@mui/material";
 import {Description as ExcelIcon} from "@mui/icons-material";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 import AddIcon from "@mui/icons-material/Add";
 
@@ -109,6 +109,7 @@ const Index = () => {
         router.visit(route('tests.create'));
     }
     return <>
+        <Head title="Tests"/>
         <PageHeader title="List Tests" actions={[
             <Button key="add-button"
                     onClick={addTest}

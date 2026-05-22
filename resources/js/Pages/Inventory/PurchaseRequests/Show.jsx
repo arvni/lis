@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {router, usePage, useForm} from "@inertiajs/react";
+import {Head, router, usePage, useForm} from "@inertiajs/react";
 import axios from "axios";
 import {
     Alert, Box, Button, Card, CardContent, CardHeader, Chip, CircularProgress, Dialog,
@@ -387,6 +387,7 @@ const Show = () => {
 
     return (
         <>
+            <Head title={`Purchase Request #${pr.id}`}/>
             <PageHeader
                 title={`Purchase Request #${pr.id}${pr.po_number ? ` · PO ${pr.po_number}` : ""}`}
                 actions={

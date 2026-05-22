@@ -1,6 +1,6 @@
 import AddForm from './Components/Form';;
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {router, useForm} from "@inertiajs/react";
+import {Head, router, useForm} from "@inertiajs/react";
 
 const Add = () => {
     const {data, setData, post,errors} = useForm({
@@ -11,11 +11,14 @@ const Add = () => {
     });
     const handleSubmit = () => post(route('workflows.store'))
     const handleCancel = () => router.visit(route('workflows.index'));
-    return <AddForm data={data}
-                    errors={errors}
-                    setData={setData}
-                    submit={handleSubmit}
-                    cancel={handleCancel}/>;
+    return <>
+        <Head title="Add Workflow"/>
+        <AddForm data={data}
+                errors={errors}
+                setData={setData}
+                submit={handleSubmit}
+                cancel={handleCancel}/>
+    </>;
 }
 
 const breadCrumbs = [

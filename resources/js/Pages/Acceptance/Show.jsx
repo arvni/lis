@@ -37,7 +37,7 @@ import PatientInfo from "@/Pages/Patient/Components/PatientInfo";
 import Prescription from "./Components/Prescription";
 import Payment from "./Components/Payment";
 import Button from "@mui/material/Button";
-import {Link, router} from "@inertiajs/react";
+import {Head, Link, router} from "@inertiajs/react";
 import PageHeader from "@/Components/PageHeader.jsx";
 import {BarcodeIcon} from "lucide-react";
 import TestsTable from "@/Pages/Acceptance/Components/TestsSection/TestsTable.jsx";
@@ -357,7 +357,7 @@ const Show = ({
             borderRadius: 2,
             boxShadow: {xs: 0, md: 1}
         }}>
-
+            <Head title={`Acceptance #${acceptance.id}`}/>
             <PageHeader title={`Acceptance #${acceptance.id}`}
                         subtitle={`Created: ${new Date(acceptance.created_at).toLocaleString()}`} actions={[
                 <StatusChip key="status" status={acceptance.status}/>,

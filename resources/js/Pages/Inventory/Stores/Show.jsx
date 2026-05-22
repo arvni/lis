@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {router, usePage, useForm} from "@inertiajs/react";
+import {Head, router, usePage, useForm} from "@inertiajs/react";
 import {
     Alert, Box, Button, Card, CardContent, CardHeader, Chip, Collapse,
     Divider, Grid, IconButton, Table, TableBody, TableCell, TableHead, TableRow,
@@ -82,6 +82,7 @@ const Show = () => {
 
     return (
         <>
+            <Head title={`Store: ${store.code} — ${store.name}`}/>
             <PageHeader
                 title={`${store.code} — ${store.name}`}
                 actions={

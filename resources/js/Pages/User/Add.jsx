@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import UserForm from "@/Pages/User/Components/Form";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { router, useForm } from "@inertiajs/react";
+import { Head, router, useForm } from "@inertiajs/react";
 import { Snackbar, Alert } from "@mui/material";
 
 const Add = ({ errors: initialErrors }) => {
@@ -124,6 +124,7 @@ const Add = ({ errors: initialErrors }) => {
 
     return (
         <>
+            <Head title="Add User"/>
             <UserForm
                 values={data}
                 errors={errors}

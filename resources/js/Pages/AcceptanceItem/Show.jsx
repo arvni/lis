@@ -7,7 +7,7 @@ import TestInfo from "./Components/TestInfo";
 import TimeLine from "./Components/TimeLine";
 import ReportInfo from "./Components/ReportInfo";
 import SectionsInfo from "./Components/SectionsInfo";
-import {router, Link} from "@inertiajs/react";
+import {Head, router, Link} from "@inertiajs/react";
 import {Assignment as AssignmentIcon, Timeline as TimelineIcon, LocalOffer as TagIcon} from "@mui/icons-material";
 import TagManager from "@/Components/TagManager";
 import TagChip from "@/Components/TagChip";
@@ -37,6 +37,7 @@ const Show = ({acceptanceItem, canCreateReport = false, canToggleReportless = fa
     };
 
     return <Container sx={{p: "1em"}}>
+        <Head title={`Acceptance Item #${acceptanceItem.id}`}/>
         {acceptanceItem.patients.map(patient => <PatientInfo patient={patient} key={patient.id}/>)}
         <TestInfo method={acceptanceItem.method} test={acceptanceItem.test}/>
         <Box sx={{ mt: 2, mb: 2 }}>

@@ -4,7 +4,7 @@ import Filter from "./Components/Filter";
 import EditSampleModal from "./Components/EditSampleModal";
 import TableLayout from "@/Layouts/TableLayout";
 import PageHeader from "@/Components/PageHeader.jsx";
-import {router, Link} from "@inertiajs/react";
+import {Head, router, Link} from "@inertiajs/react";
 import {
     IconButton,
     Chip,
@@ -233,6 +233,7 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
 
     return (
         <>
+            <Head title="Samples"/>
             <EditSampleModal
                 open={Boolean(editSample)}
                 sample={editSample}

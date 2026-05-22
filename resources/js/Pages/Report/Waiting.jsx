@@ -2,7 +2,7 @@ import TableLayout from "@/Layouts/TableLayout";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Filter from "./Components/Filter";
 import PageHeader from "@/Components/PageHeader.jsx";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {useState, useMemo} from "react";
 
 // Material UI components
@@ -274,6 +274,7 @@ const Waiting = () => {
 
     return (
         <Box sx={{position: 'relative'}}>
+            <Head title="Ready For Reporting"/>
             <PageHeader
                 title="Ready For Reporting"
                 subtitle={`${waitingCount} tests waiting for reports`}

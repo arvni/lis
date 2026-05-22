@@ -1,5 +1,5 @@
 import {useMemo, useState} from "react";
-import {router, useForm, usePage} from "@inertiajs/react";
+import {Head, router, useForm, usePage} from "@inertiajs/react";
 import dayjs from "dayjs";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
@@ -306,6 +306,7 @@ const Show = () => {
 
     return (
         <>
+            <Head title={`Node: ${node.name || node.nodeId}`}/>
             <PageHeader
                 title={node.name || node.nodeId}
                 actions={

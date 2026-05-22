@@ -2,7 +2,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PatientInfo from "@/Pages/Patient/Components/PatientInfo";
 import DoneForm from "@/Pages/Consultation/Components/DoneForm";
 import Counter from "@/Components/Counter";
-import {router, useForm} from "@inertiajs/react";
+import {Head, router, useForm} from "@inertiajs/react";
 import React, {useState} from "react";
 import {useSnackbar} from "notistack";
 
@@ -288,6 +288,7 @@ const Show = ({
 
     return (
         <>
+            <Head title={`Consultation #${consultation.id}`}/>
             <PageHeader
                 title={`Consultation #${consultation.id}`}
   actions={<Stack direction="row" spacing={2} sx={{alignItems: "center"}}>

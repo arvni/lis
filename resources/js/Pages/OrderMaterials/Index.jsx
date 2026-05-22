@@ -1,5 +1,5 @@
 import {useCallback, useMemo, useState} from "react";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {GridActionsCellItem} from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import TableLayout from "@/Layouts/TableLayout";
@@ -139,6 +139,7 @@ const OrderMaterialsIndex = () => {
     ]);
     return (
         <>
+            <Head title="Order Materials"/>
             <PageHeader
                 title="Order Materials Management"
                 subtitle="Create and manage discount order materials for tests and referrals"

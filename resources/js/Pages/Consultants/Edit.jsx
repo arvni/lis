@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import ConsultantForm, {default_time_table} from "./Components/Form";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { router, useForm } from "@inertiajs/react";
+import { Head, router, useForm } from "@inertiajs/react";
 import {
     Snackbar,
     Alert,
@@ -205,6 +205,7 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
 
     return (
         <>
+            <Head title={consultant?.name ? `Edit Consultant: ${consultant.name}` : "Edit Consultant"}/>
             {/* Show progress indicator when uploading */}
             {progress && (
                 <LinearProgress

@@ -1,6 +1,6 @@
 import AddForm from './Components/Form';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {router, useForm} from "@inertiajs/react";
+import {Head, router, useForm} from "@inertiajs/react";
 
 const Edit = ({referrer}) => {
     const {data, setData, post, errors, setError, clearErrors} = useForm({...referrer, _method: "put"});
@@ -8,6 +8,7 @@ const Edit = ({referrer}) => {
     const handleCancel = () => router.visit(route('referrers.index'));
     return (
         <>
+            <Head title={`Edit Referrer: ${referrer.fullName}`}/>
             <AddForm data={data}
                      setData={setData}
                      submit={handleSubmit}

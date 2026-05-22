@@ -8,7 +8,7 @@ import {useState} from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import {Password} from "@mui/icons-material";
 import ChangePassword from "@/Pages/User/Components/ChangePassword";
-import {router, useForm} from "@inertiajs/react";
+import {Head, router, useForm} from "@inertiajs/react";
 import {Button} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import PageHeader from "@/Components/PageHeader.jsx";
@@ -90,6 +90,7 @@ const Index = ({users, status, errors, success, requestInputs}) => {
     const handleAddNew = () => router.visit(route('users.create'));
     return (
         <>
+            <Head title="Users"/>
             <PageHeader title="Users" actions={<Button onClick={handleAddNew}
                                                        size="small"
                                                        startIcon={<AddIcon/>}

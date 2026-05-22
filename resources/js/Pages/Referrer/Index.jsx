@@ -1,5 +1,5 @@
 import React, {useState, useCallback, useMemo} from 'react';
-import { router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { Button } from '@mui/material';
 import { GridActionsCellItem } from '@mui/x-data-grid';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -157,6 +157,7 @@ const ReferrersIndex = () => {
 
     return (
         <>
+            <Head title="Referrers"/>
             <PageHeader
                 title="Referrers List"
                 actions={

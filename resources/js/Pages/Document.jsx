@@ -1,5 +1,6 @@
 // DocumentPage.jsx
 import React, { useEffect, useState } from 'react';
+import { Head } from '@inertiajs/react';
 import {
     Dialog,
     DialogContent,
@@ -107,6 +108,8 @@ const Document = ({ document, onClose }) => {
     const dialogProps = getDialogProps();
 
     return (
+        <>
+        <Head title="Document"/>
         <Dialog
             open={open}
             onClose={handleClose}
@@ -131,6 +134,7 @@ const Document = ({ document, onClose }) => {
                 />
             </DialogContent>
         </Dialog>
+        </>
     );
 };
 

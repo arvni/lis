@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {router, usePage} from "@inertiajs/react";
+import {Head, router, usePage} from "@inertiajs/react";
 import {
     Alert, Box, Button, Card, CardContent, CardHeader, Chip, Dialog,
     DialogActions, DialogContent, DialogTitle, Divider, Grid,
@@ -70,6 +70,7 @@ const Show = () => {
 
     return (
         <>
+            <Head title={`Transaction: ${transaction.reference_number}`}/>
             <PageHeader
                 title={transaction.reference_number}
                 actions={
