@@ -4,21 +4,20 @@ namespace App\Domains\Billing\Services;
 
 
 use App\Domains\Billing\DTOs\InvoiceDTO;
-use App\Domains\Billing\Events\AcceptanceItemPricingEvent;
 use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Models\Invoice;
+use App\Domains\Billing\Models\InvoiceItem;
 use App\Domains\Billing\Models\Statement;
 use App\Domains\Billing\Repositories\InvoiceRepository;
-use App\Domains\Laboratory\Enums\TestType;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 
 readonly class InvoiceService
 {
     public function __construct(
         private InvoiceRepository $invoiceRepository,
+        private InvoiceComposer $invoiceComposer,
     )
     {
     }
@@ -40,82 +39,64 @@ readonly class InvoiceService
 
     public function loadForShow(Invoice $invoice)
     {
+        $this->invoiceComposer->recompose($invoice);
+
         $invoice->load([
             "patientPayments.cashier",
             "acceptance.patient",
             "acceptance.referrerOrder",
-            "acceptanceItems.method",
-            "acceptanceItems.test",
-            "acceptanceItems.patients",
+            "invoiceItems.test",
             "owner",
-            "payments.payer"
+            "payments.payer",
         ])
             ->loadSum("payments", "price")
             ->loadSum("patientPayments", "price")
             ->loadSum("sponsorPayments", "price")
-            ->loadSum("acceptanceItems", "discount")
-            ->loadSum("acceptanceItems", "price");
+            ->loadSum("invoiceItems", "discount")
+            ->loadSum("invoiceItems", "price");
 
         $invoice->invoiceNo = $this->invoiceRepository->getInvoiceNo($invoice);
         $invoice->has_different_owner = $invoice->owner_type === "referrer";
-        $output = $invoice->toArray();
 
-        $output["acceptance_items"] = Arr::flatten(
-            array_values(
-                $invoice->acceptanceItems
-                    ->groupBy("test.type")
-                    ->map(function ($item, $key) {
-                        if ($key !== TestType::PANEL->value)
-                            return $item;
-                        else
-                            return array_values($item
-                                ->groupBy("panel_id")
-                                ->map(function ($item, $key) {
-                                    return collect([
-                                        "id" => $key,
-                                        "price" => $item->sum("price"),
-                                        "discount" => $item->sum("discount"),
-                                        "test" => $item->first()->test,
-                                        "items" => $item,
-                                        "customParameters" => $item->first()->customParameters,
-                                    ]);
-                                })->toArray());
-                    })
-                    ->toArray()
-            )
-            , 1);
-        $uniqueTests = collect($output["acceptance_items"])->unique(function ($item) {
-            if ($item['test']['can_merge'])
-                $postfix = "";
-            else
-                $postfix = "-" . uuid_create(4);
-            return $item['test']['id'] . $postfix;
-        });
-        $output["acceptance_items"] = $uniqueTests
-            ->map(function ($item, $key) use ($output) {
-                $items = collect($output["acceptance_items"])->filter(fn($testItem) => $item["test"]["can_merge"] && ($item["test"]["id"] == $testItem["test"]["id"]));
-                $qty = $items->count() ?? $items->first()["customParameters"]["qty"] ?? 1;
-                if ($qty < 1) {
-                    $qty = 1;
-                    $items = collect([$item]);
-                }
-                $description = [];
-                collect($item["customParameters"]["price"] ?? [])->each(function ($value, $key) use (&$description) {
-                    $newKey = Str::title(implode(" ", (Str::ucsplit($key))));
-                    $description[] = "$newKey=$value";
-                });
-                return [
-                    ...$item,
-                    "qty" => $qty,
-                    "price" => $items->sum("price"),
-                    "unit_price" => $item["price"],
-                    "discount" => $items->sum("discount"),
-                    "description" => implode(", ", $description),
-                ];
-            })
-            ->values();
+        $output = $invoice->toArray();
+        $output["acceptance_items"] = $invoice->invoiceItems
+            ->map(fn(InvoiceItem $item) => $this->presentInvoiceItem($item))
+            ->values()
+            ->toArray();
+
+        // Frontend reads acceptance_items_sum_*; keep those aliases pointing at the new totals.
+        $output["acceptance_items_sum_price"] = $output["invoice_items_sum_price"] ?? 0;
+        $output["acceptance_items_sum_discount"] = $output["invoice_items_sum_discount"] ?? 0;
 
         return $output;
+    }
+
+    private function presentInvoiceItem(InvoiceItem $item): array
+    {
+        $test = $item->test;
+        return [
+            "id"               => $item->id,
+            "kind"             => $item->kind?->value,
+            "test"             => $test ? [
+                "id"        => $test->id,
+                "name"      => $test->name,
+                "fullName"  => $test->fullName,
+                "code"      => $test->code,
+                "can_merge" => (bool) $test->can_merge,
+                "type"      => $test->type?->value,
+            ] : null,
+            "title"            => $item->title,
+            "code"             => $item->code,
+            "description"      => $item->description,
+            "qty"              => $item->qty,
+            "unit_price"       => (float) $item->unit_price,
+            "price"            => (float) $item->price,
+            "discount"         => (float) $item->discount,
+            "customParameters" => $item->customParameters,
+            "panel_id"         => $item->panel_id,
+            "acceptance_id"    => $item->acceptance_id,
+            "locked"           => $item->isLocked(),
+        ];
     }
 
     public function updateInvoice(Invoice $invoice, InvoiceDTO $invoiceDTO): Invoice
@@ -142,11 +123,6 @@ readonly class InvoiceService
             $invoice->update(["status" => InvoiceStatus::PARTIALLY_PAID]);
         } else
             $invoice->update(["status" => InvoiceStatus::WAITING_FOR_PAYMENT]);
-    }
-
-    public function updateInvoiceItems($invoiceItems): void
-    {
-        AcceptanceItemPricingEvent::dispatch($invoiceItems);
     }
 
     public function updateInvoicesStatementID(Statement $statement, $invoices)

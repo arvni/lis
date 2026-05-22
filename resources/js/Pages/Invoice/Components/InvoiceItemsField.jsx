@@ -1,659 +1,347 @@
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {
     Box,
-    Table,
-    TableHead,
-    TableBody,
-    TableRow,
-    TableCell,
-    IconButton,
-    TextField,
-    Typography,
-    Chip,
-    Paper,
-    TableContainer,
-    TableFooter,
-    Collapse,
     Button,
+    Chip,
+    IconButton,
+    Paper,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
     Tooltip,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    FormControl,
-    MenuItem,
-    Select,
-    InputAdornment,
-    Grid as Grid
+    Typography,
 } from '@mui/material';
+import {router} from '@inertiajs/react';
 import {
-    Edit as EditIcon,
-    Save as SaveIcon,
-    Cancel as CancelIcon,
-    ExpandMore as ExpandMoreIcon,
-    ExpandLess as ExpandLessIcon,
-    Receipt as ReceiptIcon,
-    Close as CloseIcon,
     Add as AddIcon,
-    Delete as DeleteIcon
+    AutoAwesome as AutoIcon,
+    Delete as DeleteIcon,
+    Lock as LockIcon,
+    Notes as NotesIcon,
+    Receipt as ReceiptIcon,
+    RestartAlt as ResetIcon,
+    Undo as UndoIcon,
 } from '@mui/icons-material';
 
-// Define discount types
-const DISCOUNT_TYPES = [
-    {id: 'PERCENTAGE', name: 'Percentage', icon: '%'},
-    {id: 'FIXED', name: 'Fixed Amount', icon: 'OMR'}
-];
-
-// Advanced Discount Manager Component
-const AdvancedDiscountManager = ({
-                                     discounts = [],
-                                     price = 0,
-                                     maxDiscount = 100,
-                                     onChange,
-                                     errors = {}
-                                 }) => {
-    // Calculate total discount amount
-    const calculateTotalDiscount = (discountArray) => {
-        return discountArray.reduce((total, discount) => {
-            if (discount.type === 'PERCENTAGE') {
-                return total + (price * discount.value / 100);
-            } else {
-                return total + Number(discount.value);
-            }
-        }, 0);
-    };
-
-    // Calculate total discount percentage
-    const calculateTotalDiscountPercentage = (discountArray) => {
-        return discountArray.reduce((total, discount) => {
-            if (discount.type === 'PERCENTAGE') {
-                return total + Number(discount.value);
-            } else {
-                return total + (discount.value / price * 100);
-            }
-        }, 0);
-    };
-
-    // Add a new discount
-    const handleAddDiscount = () => {
-        const newDiscounts = [
-            ...discounts,
-            {id: Date.now(), type: 'PERCENTAGE', value: 0, reason: ''}
-        ];
-        onChange(newDiscounts);
-    };
-
-    // Remove a discount
-    const handleRemoveDiscount = (id) => {
-        const newDiscounts = discounts.filter(discount => discount.id !== id);
-        onChange(newDiscounts);
-    };
-
-    // Update a discount field
-    const handleDiscountChange = (id, field, value) => {
-        const newDiscounts = discounts.map(discount => {
-            if (discount.id === id) {
-                return {...discount, [field]: value};
-            }
-            return discount;
-        });
-
-        // Calculate total discount
-        const totalDiscount = calculateTotalDiscount(newDiscounts);
-        const totalDiscountPercentage = calculateTotalDiscountPercentage(newDiscounts);
-
-        // Check if exceeding max discount
-        const maxAmount = maxDiscount * price * 0.01;
-        let adjustedDiscounts = [...newDiscounts];
-
-        if (totalDiscount > maxAmount && adjustedDiscounts.length > 0) {
-            const lastIndex = adjustedDiscounts.length - 1;
-            const lastDiscount = adjustedDiscounts[lastIndex];
-
-            if (lastDiscount.type === 'PERCENTAGE') {
-                const excess = totalDiscountPercentage - maxDiscount;
-                const newValue = Math.max(0, Number(lastDiscount.value) - excess);
-                adjustedDiscounts[lastIndex] = {...lastDiscount, value: newValue};
-            } else {
-                const excess = totalDiscount - maxAmount;
-                const newValue = Math.max(0, Number(lastDiscount.value) - excess);
-                adjustedDiscounts[lastIndex] = {...lastDiscount, value: newValue};
-            }
-        }
-
-        onChange(totalDiscount > maxAmount ? adjustedDiscounts : newDiscounts);
-    };
-
-    // Calculate remaining available discount
-    const remainingDiscountPercentage = Math.max(0, maxDiscount - calculateTotalDiscountPercentage(discounts));
-    const remainingDiscountAmount = Math.max(0, (maxDiscount * price * 0.01) - calculateTotalDiscount(discounts));
-
-    return (
-        <Box>
-            <Box sx={{mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <Typography variant="subtitle2">
-                    Discounts
-                </Typography>
-                <Box>
-                    <Tooltip
-                        title={`Remaining available discount: ${remainingDiscountPercentage.toFixed(2)}% (${remainingDiscountAmount.toFixed(2)} OMR)`}>
-                        <Chip
-                            label={`Available: ${remainingDiscountPercentage.toFixed(2)}%`}
-                            color={remainingDiscountPercentage > 0 ? "success" : "error"}
-                            size="small"
-                            sx={{mr: 1}}
-                        />
-                    </Tooltip>
-                    <Button
-                        size="small"
-                        startIcon={<AddIcon/>}
-                        variant="outlined"
-                        onClick={handleAddDiscount}
-                        disabled={remainingDiscountPercentage <= 0}
-                    >
-                        Add Discount
-                    </Button>
-                </Box>
-            </Box>
-
-            {discounts.length === 0 ? (
-                <Typography variant="body2" color="text.secondary" sx={{textAlign: 'center', py: 2}}>
-                    No discounts applied. Click "Add Discount" to apply one.
-                </Typography>
-            ) : (
-                discounts.map((discount, index) => (
-                    <Box
-                        key={discount.id}
-                        sx={{
-                            mb: 2,
-                            p: 2,
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            borderRadius: 1,
-                            bgcolor: 'background.paper'
-                        }}
-                    >
-                        <Grid container spacing={2}>
-                            <Grid size={{xs: 12, sm: 3}}>
-                                <FormControl fullWidth>
-                                    <Select
-                                        size="small"
-                                        value={discount.type}
-                                        onChange={(e) => handleDiscountChange(discount.id, 'type', e.target.value)}
-                                    >
-                                        {DISCOUNT_TYPES.map(type => (
-                                            <MenuItem key={type.id} value={type.id}>
-                                                {type.name}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-
-                            <Grid size={{xs: 12, sm: 3}}>
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    type="number"
-                                    label="Value"
-                                    value={discount.value}
-                                    onChange={(e) => {
-                                        const newValue = Math.max(0, parseFloat(e.target.value) || 0);
-                                        handleDiscountChange(discount.id, 'value', newValue);
-                                    }}
-                                    slotProps={{
-                                        input: {
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    {discount.type === 'PERCENTAGE' ? '%' : 'OMR'}
-                                                </InputAdornment>
-                                            ),
-                                        }
-                                    }}
-                                />
-                            </Grid>
-
-                            <Grid size={{xs: 12, sm: 4}}>
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    label="Reason"
-                                    value={discount.reason || ''}
-                                    onChange={(e) => handleDiscountChange(discount.id, 'reason', e.target.value)}
-                                    placeholder="Why is this discount applied?"
-                                />
-                            </Grid>
-
-                            <Grid size={{xs: 12, sm: 2}}
-                                  sx={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                                <Tooltip title="Remove discount">
-                                    <IconButton
-                                        color="error"
-                                        onClick={() => handleRemoveDiscount(discount.id)}
-                                        size="small"
-                                    >
-                                        <DeleteIcon/>
-                                    </IconButton>
-                                </Tooltip>
-                            </Grid>
-                        </Grid>
-
-                        <Box sx={{mt: 1, display: 'flex', justifyContent: 'flex-end'}}>
-                            <Typography variant="body2" color="text.secondary">
-                                Amount:
-                                <Typography
-                                    component="span"
-                                    fontWeight="medium"
-                                    color="primary.main"
-                                    sx={{ml: 1}}
-                                >
-                                    {discount.type === 'PERCENTAGE'
-                                        ? (price * discount.value / 100).toFixed(2)
-                                        : Number(discount.value).toFixed(2)
-                                    } OMR
-                                </Typography>
-                            </Typography>
-                        </Box>
-                    </Box>
-                ))
-            )}
-
-            {discounts.length > 0 && (
-                <Box sx={{
-                    p: 2,
-                    bgcolor: 'primary.50',
-                    borderRadius: 1,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                }}>
-                    <Typography variant="subtitle2">
-                        Total Discount:
-                    </Typography>
-                    <Typography variant="h6" fontWeight="bold" color="primary.main">
-                        {calculateTotalDiscount(discounts).toFixed(2)} OMR
-                        <Typography component="span" variant="body2" color="text.secondary" sx={{ml: 1}}>
-                            ({calculateTotalDiscountPercentage(discounts).toFixed(2)}%)
-                        </Typography>
-                    </Typography>
-                </Box>
-            )}
-        </Box>
-    );
+const KIND_LABEL = {
+    test: 'Test',
+    panel: 'Panel',
+    manual_fee: 'Manual',
+    adjustment: 'Adjustment',
 };
 
-const InvoiceItemsField = ({items = [], onChange, maxDiscount = 100}) => {
-    const [editingItem, setEditingItem] = useState(null);
-    const [editValues, setEditValues] = useState({});
-    const [errors, setErrors] = useState({});
-    const [expandedPanels, setExpandedPanels] = useState({});
-    const [discountDialogOpen, setDiscountDialogOpen] = useState(false);
-    const [tempDiscounts, setTempDiscounts] = useState([]);
+const KIND_COLOR = {
+    test: 'primary',
+    panel: 'secondary',
+    manual_fee: 'warning',
+    adjustment: 'info',
+};
 
-    // Group items by type
-    const tests = items?.TEST || [];
-    const services = items?.SERVICE || [];
-    const panels = items?.PANEL || [];
+const num = (v) => {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : 0;
+};
 
-    // Calculate totals
-    const calculateTotals = (itemsList) => {
-        // Group items by type
-        const tests = itemsList?.TEST || [];
-        const services = itemsList?.SERVICE || [];
-        const panels = itemsList?.PANEL || [];
-        const testsTotals = tests.reduce((acc, item) => ({
-            totalPrice: acc.totalPrice + (parseFloat(item.price) || 0),
-            totalDiscount: acc.totalDiscount + (parseFloat(item.discount) || 0),
-            netAmount: acc.netAmount + ((parseFloat(item.price) || 0) - (parseFloat(item.discount) || 0))
-        }), {totalPrice: 0, totalDiscount: 0, netAmount: 0});
-        const servicesTotals = services.reduce((acc, item) => ({
-            totalPrice: acc.totalPrice + (parseFloat(item.price) || 0),
-            totalDiscount: acc.totalDiscount + (parseFloat(item.discount) || 0),
-            netAmount: acc.netAmount + ((parseFloat(item.price) || 0) - (parseFloat(item.discount) || 0))
-        }), {totalPrice: 0, totalDiscount: 0, netAmount: 0});
-        const panelsTotals = panels.reduce((acc, item) => ({
-            totalPrice: acc.totalPrice + (parseFloat(item.price) || 0),
-            totalDiscount: acc.totalDiscount + (parseFloat(item.discount) || 0),
-            netAmount: acc.netAmount + ((parseFloat(item.price) || 0) - (parseFloat(item.discount) || 0))
-        }), {totalPrice: 0, totalDiscount: 0, netAmount: 0});
-        return {
-            totalPrice: testsTotals.totalPrice + servicesTotals.totalPrice + panelsTotals.totalPrice,
-            totalDiscount: testsTotals.totalDiscount + servicesTotals.totalDiscount + panelsTotals.totalDiscount,
-            netAmount: testsTotals.netAmount + servicesTotals.netAmount + panelsTotals.netAmount,
-        };
-    };
+const blankItem = () => ({
+    id: null,
+    _new_id: `new-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    kind: 'manual_fee',
+    title: '',
+    description: '',
+    qty: 1,
+    unit_price: 0,
+    discount: 0,
+    price: 0,
+    locked: true,
+    test: null,
+});
 
-    const grandTotals = calculateTotals(items);
+/**
+ * Flat editable invoice_items table.
+ * - Auto rows (from acceptance_items) can be edited; editing locks them so the composer stops overwriting.
+ * - Manual rows can be added freely (kind=manual_fee by default).
+ * - Soft-deletes are staged via _destroy so the parent submits them as part of the form payload.
+ * - "Reset to auto" clears _destroy and removes the local _dirty flag so the row can be unlocked server-side
+ *   (not implemented here; would require a separate endpoint to clear locked_at).
+ */
+const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
+    const [openDescriptions, setOpenDescriptions] = useState({});
 
-    // Calculate discount from discount array
-    const calculateDiscountFromArray = (discountArray, price) => {
-        return discountArray.reduce((total, discount) => {
-            if (discount.type === 'PERCENTAGE') {
-                return total + (price * discount.value / 100);
-            } else {
-                return total + Number(discount.value);
+    const safeItems = Array.isArray(items) ? items : [];
+
+    const visibleItems = useMemo(
+        () => safeItems.filter((it) => !it._destroy),
+        [safeItems],
+    );
+
+    const emit = (next) => onChange('invoice_items', next);
+
+    const replaceItem = (key, patch) => {
+        const next = safeItems.map((it) => {
+            const matchKey = it.id ?? it._new_id;
+            if (matchKey === key) {
+                return {...it, ...patch};
             }
-        }, 0);
-    };
-
-    // Handle edit start
-    const handleEdit = (itemId, type) => {
-
-        const item = items?.[type].find(i => i.id === itemId);
-        if (item) {
-            setEditingItem({id: itemId, type});
-            setEditValues({
-                price: item.price || 0,
-            });
-            // Get existing discounts from customParameters or create empty array
-            const existingDiscounts = item.customParameters?.discounts || [];
-            setTempDiscounts(existingDiscounts);
-            setErrors({});
-        }
-    };
-
-    // Handle input changes during editing
-    const handleEditChange = (field, value) => {
-        const numValue = parseFloat(value) || 0;
-        setEditValues(prev => ({...prev, [field]: numValue}));
-
-        // Clear errors when user starts typing
-        if (errors[field]) {
-            setErrors(prev => ({...prev, [field]: null}));
-        }
-    };
-
-    // Handle discount dialog
-    const handleDiscountDialog = () => {
-        setDiscountDialogOpen(true);
-    };
-
-    const handleDiscountDialogClose = () => {
-        setDiscountDialogOpen(false);
-    };
-
-    const handleDiscountDialogSave = () => {
-        setDiscountDialogOpen(false);
-    };
-
-    // Validate edit values
-    const validateEdit = () => {
-        const newErrors = {};
-
-        if (editValues.price < 0) {
-            newErrors.price = "Price cannot be negative";
-        }
-
-        const totalDiscount = calculateDiscountFromArray(tempDiscounts, editValues.price);
-
-        if (totalDiscount > editValues.price) {
-            newErrors.discount = "Total discount cannot exceed price";
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    // Handle save
-    const handleSave = () => {
-        if (!validateEdit()) return;
-
-        const totalDiscount = calculateDiscountFromArray(tempDiscounts, editValues.price);
-
-        const updatedItems = items?.[editingItem?.type]?.map(item =>
-            item.id === editingItem?.id
-                ? {
-                    ...item,
-                    ...editValues,
-                    discount: totalDiscount,
-                    customParameters: {
-                        ...item.customParameters,
-                        discounts: tempDiscounts
-                    }
-                }
-                : item
-        );
-
-        onChange("acceptance_items", {
-            ...items,
-            [editingItem.type]: updatedItems
+            return it;
         });
-        setEditingItem(null);
-        setEditValues({});
-        setErrors({});
-        setTempDiscounts([]);
+        emit(next);
     };
 
-    // Handle cancel
-    const handleCancel = () => {
-        setEditingItem(null);
-        setEditValues({});
-        setErrors({});
-        setTempDiscounts([]);
+    const handleField = (key, field, value) => {
+        const item = safeItems.find((it) => (it.id ?? it._new_id) === key);
+        if (!item) return;
+
+        const patch = {[field]: value};
+        if (field === 'qty' || field === 'unit_price') {
+            const qty = Math.max(1, parseInt(field === 'qty' ? value : item.qty, 10) || 1);
+            const unit = num(field === 'unit_price' ? value : item.unit_price);
+            patch.qty = qty;
+            patch.unit_price = unit;
+            patch.price = qty * unit;
+        }
+        // Touching an unlocked row marks it locked locally so the server-side sync also locks it.
+        if (item.id && !item.locked) {
+            patch.locked = true;
+        }
+        replaceItem(key, patch);
     };
 
-    // Toggle panel expansion
-    const togglePanel = (panelId) => {
-        setExpandedPanels(prev => ({
-            ...prev,
-            [panelId]: !prev[panelId]
-        }));
+    const handleDelete = (key) => {
+        const item = safeItems.find((it) => (it.id ?? it._new_id) === key);
+        if (!item) return;
+
+        if (!item.id) {
+            // Pure local row — drop it entirely.
+            emit(safeItems.filter((it) => (it.id ?? it._new_id) !== key));
+            return;
+        }
+        replaceItem(key, {_destroy: true});
     };
 
-    // Render price cell (editable)
-    const renderPriceCell = (item) => {
-        const isEditing = editingItem?.id === item.id;
+    const handleUndoDelete = (key) => {
+        replaceItem(key, {_destroy: false});
+    };
 
-        if (!isEditing) {
+    const handleAdd = () => {
+        emit([...safeItems, blankItem()]);
+    };
+
+    const handleResetToAuto = (item) => {
+        if (!invoiceId || !item.id) return;
+        if (!window.confirm(
+            `Reset "${item.title}" to auto? The composer will recompute its price/qty/discount from the underlying acceptance items.`,
+        )) {
+            return;
+        }
+        router.post(
+            route('invoices.items.unlock', {invoice: invoiceId, item: item.id}),
+            {},
+            {preserveScroll: true},
+        );
+    };
+
+    const canResetToAuto = (item) =>
+        Boolean(invoiceId && item.id && item.locked && (item.kind === 'test' || item.kind === 'panel'));
+
+    const toggleDescription = (key) =>
+        setOpenDescriptions((prev) => ({...prev, [key]: !prev[key]}));
+
+    // Description editor is collapsed by default — even when content exists.
+    // Existing content is shown as a small caption under the title row instead.
+    const isDescriptionOpen = (key) => Boolean(openDescriptions[key]);
+
+    const renderKindChip = (item) => (
+        <Chip
+            size="small"
+            label={KIND_LABEL[item.kind] ?? item.kind}
+            color={KIND_COLOR[item.kind] ?? 'default'}
+            variant="outlined"
+        />
+    );
+
+    const renderLockBadge = (item) => {
+        if (item.locked) {
             return (
-                <TableCell align="right">
-                    <Typography variant="body2">
-                        {parseFloat(item.price || 0).toFixed(2)}
-                    </Typography>
-                </TableCell>
+                <Tooltip title="Locked — composer won't overwrite this row">
+                    <LockIcon fontSize="small" sx={{color: 'warning.main'}}/>
+                </Tooltip>
+            );
+        }
+        return (
+            <Tooltip title="Auto-managed by composer">
+                <AutoIcon fontSize="small" sx={{color: 'text.disabled'}}/>
+            </Tooltip>
+        );
+    };
+
+    const renderRow = (item) => {
+        const key = item.id ?? item._new_id;
+        const isDeleting = !!item._destroy;
+
+        if (isDeleting) {
+            return (
+                <TableRow key={key} sx={{backgroundColor: 'error.50', opacity: 0.7}}>
+                    <TableCell colSpan={6}>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                            <DeleteIcon fontSize="small" color="error"/>
+                            <Typography variant="body2" color="error.main">
+                                <strong>{item.title}</strong> will be removed on save
+                                {item.kind !== 'manual_fee' && item.kind !== 'adjustment' &&
+                                    ' (acceptance items will be unlinked)'}.
+                            </Typography>
+                            <Box sx={{flex: 1}}/>
+                            <Button
+                                size="small"
+                                startIcon={<UndoIcon/>}
+                                onClick={() => handleUndoDelete(key)}
+                            >
+                                Undo
+                            </Button>
+                        </Stack>
+                    </TableCell>
+                </TableRow>
             );
         }
 
-        return (
-            <TableCell align="right">
-                <TextField
-                    size="small"
-                    type="number"
-                    value={editValues.price || 0}
-                    onChange={(e) => handleEditChange('price', e.target.value)}
-                    error={Boolean(errors.price)}
-                    helperText={errors.price}
-                    slotProps={{
-                        htmlInput: {
-                            min: 0,
-                            step: 0.01,
-                            style: {textAlign: 'right'}
-                        }
-                    }}
-                    sx={{width: 100}}
-                />
-            </TableCell>
-        );
-    };
-
-    // Render discount cell (advanced)
-    const renderDiscountCell = (item) => {
-        const isEditing = editingItem?.id === item.id;
-        const totalDiscount = isEditing
-            ? calculateDiscountFromArray(tempDiscounts, editValues.price)
-            : item.discount;
+        const descriptionOpen = isDescriptionOpen(key);
+        const hasDescription = Boolean(item.description);
 
         return (
-            <TableCell align="right">
-  <Box display="flex" sx={{alignItems: "center", justifyContent: "flex-end"}}>
-                    <Typography variant="body2">
-                        {parseFloat(totalDiscount || 0).toFixed(2)}
-                    </Typography>
-                    {isEditing && (
-                        <Button
-                            size="small"
-                            variant="outlined"
-                            onClick={handleDiscountDialog}
-                            sx={{ml: 1, minWidth: 'auto', px: 1}}
-                        >
-                            Edit
-                        </Button>
-                    )}
-                </Box>
-            </TableCell>
-        );
-    };
-
-    // Render action buttons
-    const renderActions = (item) => {
-        const isEditing = editingItem?.id === item.id;
-
-        return (
-            <TableCell align="center">
-                {isEditing ? (
-                    <Box display="flex" gap={0.5}>
-                        <Tooltip title="Save changes">
-                            <IconButton
+            <React.Fragment key={key}>
+                <TableRow hover sx={{'& > td': {verticalAlign: 'middle', borderBottom: descriptionOpen ? 0 : undefined}}}>
+                    <TableCell sx={{minWidth: 260}}>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                            {renderKindChip(item)}
+                            {renderLockBadge(item)}
+                            <TextField
                                 size="small"
-                                color="primary"
-                                onClick={handleSave}
-                            >
-                                <SaveIcon fontSize="small"/>
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Cancel editing">
-                            <IconButton
+                                value={item.code || ''}
+                                placeholder="Code"
+                                onChange={(e) => handleField(key, 'code', e.target.value)}
+                                sx={{width: 110, flexShrink: 0}}
+                                slotProps={{htmlInput: {style: {fontFamily: 'monospace', fontSize: '0.8125rem'}}}}
+                            />
+                            <TextField
                                 size="small"
-                                color="inherit"
-                                onClick={handleCancel}
+                                fullWidth
+                                value={item.title || ''}
+                                placeholder="Item title"
+                                onChange={(e) => handleField(key, 'title', e.target.value)}
+                            />
+                        </Stack>
+                        {hasDescription && !descriptionOpen && (
+                            <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                onClick={() => toggleDescription(key)}
+                                sx={{
+                                    display: 'block',
+                                    mt: 0.5,
+                                    ml: 0.5,
+                                    cursor: 'pointer',
+                                    fontStyle: 'italic',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    maxWidth: 380,
+                                    '&:hover': {color: 'primary.main'},
+                                }}
                             >
-                                <CancelIcon fontSize="small"/>
-                            </IconButton>
-                        </Tooltip>
-                    </Box>
-                ) : (
-                    <Tooltip title="Edit price and discount">
-                        <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => handleEdit(item.id, item.method_test.test.type)}
-                        >
-                            <EditIcon fontSize="small"/>
-                        </IconButton>
-                    </Tooltip>
-                )}
-            </TableCell>
-        );
-    };
-
-    // Render item row
-    const renderItemRow = (item, isSubItem = false) => (
-        <TableRow
-            key={item.id}
-            sx={{
-                backgroundColor: isSubItem ? 'grey.50' : 'inherit',
-                '&:hover': {backgroundColor: isSubItem ? 'grey.100' : 'grey.50'}
-            }}
-        >
-            <TableCell sx={{pl: isSubItem ? 4 : 2}}>
-  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
-                    {!isSubItem && (
-                        <Chip
-                            label={item.method_test.test?.type || 'Unknown'}
-                            size="small"
-                            color={
-                                item.method_test?.test?.type === 'TEST' ? 'primary' :
-                                    item.test?.type === 'SERVICE' ? 'secondary' : 'default'
-                            }
-                        />
-                    )}
-                    <Typography variant="body2" fontWeight={isSubItem ? 'normal' : 'medium'}>
-                        {item.method_test?.test?.name || 'Unknown Test'}
-                    </Typography>
-                </Box>
-            </TableCell>
-
-            <TableCell>
-                <Typography variant="body2" color="text.secondary">
-                    {item.patients?.map(patient => patient.fullName || patient.name).join(", ") || 'No patients'}
-                </Typography>
-            </TableCell>
-
-            {renderPriceCell(item)}
-            {renderDiscountCell(item)}
-
-            <TableCell align="right">
-                <Typography
-                    variant="body2"
-                    fontWeight="medium"
-                    color="primary.main"
-                >
-                    {((parseFloat(item.price) || 0) - (parseFloat(item.discount) || 0)).toFixed(2)}
-                </Typography>
-            </TableCell>
-
-            {renderActions(item)}
-        </TableRow>
-    );
-
-    // Render panel with sub-items
-    const renderPanelRow = (panel) => {
-        const isExpanded = expandedPanels[panel.id];
-        const subItems = panel.acceptance_items || [];
-        return (
-            <React.Fragment key={panel.id}>
-                <TableRow>
-                    <TableCell>
-  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
-                            <Chip label="PANEL" size="small" color="default"/>
-                            <Typography fontWeight="medium">
-                                {panel.test?.name || panel.method_test.test?.name || 'Unknown Panel'}
+                                {item.description}
                             </Typography>
-                            {subItems.length > 0 && (
-                                <Button
+                        )}
+                    </TableCell>
+
+                    <TableCell align="right" sx={{width: 90}}>
+                        <TextField
+                            size="small"
+                            type="number"
+                            value={item.qty ?? 1}
+                            onChange={(e) => handleField(key, 'qty', e.target.value)}
+                            slotProps={{htmlInput: {min: 1, step: 1, style: {textAlign: 'right'}}}}
+                            fullWidth
+                        />
+                    </TableCell>
+
+                    <TableCell align="right" sx={{width: 130}}>
+                        <TextField
+                            size="small"
+                            type="number"
+                            value={item.unit_price ?? 0}
+                            onChange={(e) => handleField(key, 'unit_price', e.target.value)}
+                            slotProps={{htmlInput: {min: 0, step: 0.001, style: {textAlign: 'right'}}}}
+                            fullWidth
+                        />
+                    </TableCell>
+
+                    <TableCell align="right" sx={{width: 130}}>
+                        <TextField
+                            size="small"
+                            type="number"
+                            value={item.discount ?? 0}
+                            onChange={(e) => handleField(key, 'discount', num(e.target.value))}
+                            slotProps={{htmlInput: {min: 0, step: 0.001, style: {textAlign: 'right'}}}}
+                            fullWidth
+                        />
+                    </TableCell>
+
+                    <TableCell align="right" sx={{width: 120}}>
+                        <Typography variant="body2" fontWeight="medium" color="primary.main">
+                            {(num(item.price) - num(item.discount)).toFixed(3)}
+                        </Typography>
+                    </TableCell>
+
+                    <TableCell align="center" sx={{width: 130}}>
+                        <Stack direction="row" spacing={0.25} justifyContent="center">
+                            <Tooltip title={descriptionOpen ? 'Hide description' : (hasDescription ? 'Edit description' : 'Add description')}>
+                                <IconButton
                                     size="small"
-                                    onClick={() => togglePanel(panel.id)}
-                                    endIcon={isExpanded ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
+                                    color={hasDescription ? 'primary' : 'default'}
+                                    onClick={() => toggleDescription(key)}
                                 >
-                                    {subItems.length} tests
-                                </Button>
+                                    <NotesIcon fontSize="small"/>
+                                </IconButton>
+                            </Tooltip>
+                            {canResetToAuto(item) && (
+                                <Tooltip title="Reset to auto">
+                                    <IconButton
+                                        size="small"
+                                        color="info"
+                                        onClick={() => handleResetToAuto(item)}
+                                    >
+                                        <ResetIcon fontSize="small"/>
+                                    </IconButton>
+                                </Tooltip>
                             )}
-                        </Box>
+                            <Tooltip title="Remove">
+                                <IconButton size="small" color="error" onClick={() => handleDelete(key)}>
+                                    <DeleteIcon fontSize="small"/>
+                                </IconButton>
+                            </Tooltip>
+                        </Stack>
                     </TableCell>
-
-                    <TableCell>
-                        <Typography variant="body2">
-                            {subItems.reduce((a,item)=>[...a,...item.patients?.map(patient => patient.fullName || patient.name)],[]).join(", ") || 'No patients'}
-                        </Typography>
-                    </TableCell>
-
-                    {renderPriceCell(panel)}
-                    {renderDiscountCell(panel)}
-
-                    <TableCell align="right">
-                        <Typography
-                            variant="body2"
-                            fontWeight="medium"
-                            color="primary.main"
-                        >
-                            {((parseFloat(panel.price) || 0) - (parseFloat(panel.discount) || 0)).toFixed(2)}
-                        </Typography>
-                    </TableCell>
-
-                    {renderActions(panel)}
                 </TableRow>
 
-                {/* Sub-items collapse */}
-                {subItems.length > 0 && (
+                {descriptionOpen && (
                     <TableRow>
-                        <TableCell colSpan={6} sx={{p: 0, border: 'none'}}>
-                            <Collapse in={isExpanded}>
-                                <Table size="small">
-                                    <TableBody>
-                                        {subItems.map(subItem => renderItemRow(subItem, true))}
-                                    </TableBody>
-                                </Table>
-                            </Collapse>
+                        <TableCell sx={{pt: 0, pb: 1.5}} colSpan={6}>
+                            <Box sx={{pl: 6}}>
+                                <TextField
+                                    size="small"
+                                    fullWidth
+                                    multiline
+                                    minRows={1}
+                                    maxRows={3}
+                                    value={item.description || ''}
+                                    placeholder="Description (optional)"
+                                    onChange={(e) => handleField(key, 'description', e.target.value)}
+                                />
+                            </Box>
                         </TableCell>
                     </TableRow>
                 )}
@@ -661,134 +349,64 @@ const InvoiceItemsField = ({items = [], onChange, maxDiscount = 100}) => {
         );
     };
 
-    if (items.length === 0) {
+    if (visibleItems.length === 0 && safeItems.length === 0) {
         return (
             <Paper elevation={0} sx={{p: 4, textAlign: 'center', backgroundColor: 'grey.50'}}>
                 <ReceiptIcon sx={{fontSize: 48, color: 'grey.400', mb: 2}}/>
                 <Typography variant="h6" color="text.secondary">
-                    No items in invoice
+                    No items on this invoice yet
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                    Add tests or panels to see them here
+                <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
+                    Add a manual line item below, or add an acceptance to this invoice.
                 </Typography>
+                <Button startIcon={<AddIcon/>} variant="contained" onClick={handleAdd}>
+                    Add Item
+                </Button>
             </Paper>
         );
     }
 
     return (
         <Box>
+            <Stack sx={{mb: 2,flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
+                <Typography variant="subtitle1" fontWeight="medium">
+                    Invoice Items
+                </Typography>
+                <Button startIcon={<AddIcon/>} variant="outlined" size="small" onClick={handleAdd}>
+                    Add Item
+                </Button>
+            </Stack>
+
             <TableContainer component={Paper} elevation={1}>
                 <Table size="small">
                     <TableHead>
                         <TableRow sx={{backgroundColor: 'grey.100'}}>
                             <TableCell>
-                                <Typography variant="subtitle2" fontWeight="bold">
-                                    Test/Service
-                                </Typography>
-                            </TableCell>
-                            <TableCell>
-                                <Typography variant="subtitle2" fontWeight="bold">
-                                    Patients
-                                </Typography>
+                                <Typography variant="subtitle2" fontWeight="bold">Item</Typography>
                             </TableCell>
                             <TableCell align="right">
-                                <Typography variant="subtitle2" fontWeight="bold">
-                                    Price
-                                </Typography>
+                                <Typography variant="subtitle2" fontWeight="bold">Qty</Typography>
                             </TableCell>
                             <TableCell align="right">
-                                <Typography variant="subtitle2" fontWeight="bold">
-                                    Discount
-                                </Typography>
+                                <Typography variant="subtitle2" fontWeight="bold">Unit Price</Typography>
                             </TableCell>
                             <TableCell align="right">
-                                <Typography variant="subtitle2" fontWeight="bold">
-                                    Net Amount
-                                </Typography>
+                                <Typography variant="subtitle2" fontWeight="bold">Discount</Typography>
+                            </TableCell>
+                            <TableCell align="right">
+                                <Typography variant="subtitle2" fontWeight="bold">Net</Typography>
                             </TableCell>
                             <TableCell align="center">
-                                <Typography variant="subtitle2" fontWeight="bold">
-                                    Actions
-                                </Typography>
+                                <Typography variant="subtitle2" fontWeight="bold">Actions</Typography>
                             </TableCell>
                         </TableRow>
                     </TableHead>
 
                     <TableBody>
-                        {/* Render panels first */}
-                        {panels.map(panel => renderPanelRow(panel))}
-
-                        {/* Render individual tests */}
-                        {tests.map(test => renderItemRow(test))}
-
-                        {/* Render services */}
-                        {services.map(service => renderItemRow(service))}
+                        {safeItems.map(renderRow)}
                     </TableBody>
-
-                    {/* Totals footer */}
-                    <TableFooter>
-                        <TableRow>
-                            <TableCell colSpan={2}>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    Grand Total
-                                </Typography>
-                            </TableCell>
-                            <TableCell align="right">
-                                <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
-                                    {grandTotals?.totalPrice?.toFixed(2)}
-                                </Typography>
-                            </TableCell>
-                            <TableCell align="right">
-                                <Typography variant="subtitle1" fontWeight="bold" color="success.main">
-                                    {grandTotals?.totalDiscount?.toFixed(2)}
-                                </Typography>
-                            </TableCell>
-                            <TableCell align="right">
-                                <Typography variant="subtitle1" fontWeight="bold" color="primary.main">
-                                    {grandTotals?.netAmount?.toFixed(2)}
-                                </Typography>
-                            </TableCell>
-                            <TableCell/>
-                        </TableRow>
-                    </TableFooter>
                 </Table>
             </TableContainer>
-
-            {/* Advanced Discount Dialog */}
-            <Dialog
-                open={discountDialogOpen}
-                onClose={handleDiscountDialogClose}
-                maxWidth="lg"
-                fullWidth
-            >
-                <DialogTitle>
-  <Box display="flex" sx={{alignItems: "center", justifyContent: "space-between"}}>
-                        <Typography variant="h6" component="span">
-                            Manage Discounts
-                        </Typography>
-                        <IconButton onClick={handleDiscountDialogClose}>
-                            <CloseIcon/>
-                        </IconButton>
-                    </Box>
-                </DialogTitle>
-                <DialogContent>
-                    <AdvancedDiscountManager
-                        discounts={tempDiscounts}
-                        price={editValues.price || 0}
-                        maxDiscount={maxDiscount}
-                        onChange={setTempDiscounts}
-                        errors={errors}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleDiscountDialogClose} color="inherit">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleDiscountDialogSave} variant="contained" color="primary">
-                        Apply Discounts
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </Box>
     );
 };

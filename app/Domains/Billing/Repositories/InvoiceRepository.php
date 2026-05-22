@@ -91,6 +91,8 @@ class InvoiceRepository
             ->selectRaw("invoices.*,CONCAT(YEAR(invoices.created_at),'-',MONTH(invoices.created_at),'/',numberedInvoices.row_num) AS invoiceNo")
             ->with($with)
             ->withSum("payments", "price")
+            ->withSum("invoiceItems", "price")
+            ->withSum("invoiceItems", "discount")
             ->withSum("acceptanceItems", "price")
             ->withSum("acceptanceItems", "discount")
             ->withAggregate("acceptance", "id");

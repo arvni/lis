@@ -283,6 +283,12 @@ const FinancialCheck = () => {
         setSelectedAcceptance(null);
     };
 
+    const handleInvoiceCreated = useCallback(async (invoiceId) => {
+        setOpenCreateInvoice(false);
+        setSelectedAcceptance(null);
+        await handleEditInvoice(invoiceId);
+    }, [handleEditInvoice]);
+
     const summaryStats = useMemo(() => {
         const total = acceptances?.data?.length || 0;
         const withInvoice = acceptances?.data?.filter(a => a.invoice).length || 0;
@@ -340,6 +346,7 @@ const FinancialCheck = () => {
                 <CreateInvoiceForm
                     open={openCreateInvoice}
                     onClose={handleCreateInvoiceClose}
+                    onCreated={handleInvoiceCreated}
                     initialData={{
                         acceptance_id: selectedAcceptance.id,
                         owner_type: "patient",

@@ -8,6 +8,7 @@ use App\Http\Controllers\Billing\BillingDashboardController;
 use App\Http\Controllers\Billing\DailyCashReportController;
 use App\Http\Controllers\Billing\ExportInvoicesController;
 use App\Http\Controllers\Billing\InvoiceController;
+use App\Http\Controllers\Billing\InvoiceItemController;
 use App\Http\Controllers\Billing\PaymentController;
 use App\Http\Controllers\Billing\ShowStatementController;
 use App\Http\Controllers\Billing\StatementController;
@@ -18,6 +19,8 @@ Route::group(["prefix" => "billing"], function () {
     Route::get("dashboard", BillingDashboardController::class)->name("billing.dashboard");
     Route::get("invoices/export", ExportInvoicesController::class)->name("invoices.export");
     Route::resource("invoices", InvoiceController::class);
+    Route::post("invoices/{invoice}/items/{item}/unlock", [InvoiceItemController::class, "unlock"])
+        ->name("invoices.items.unlock");
     Route::get("statements/{statement}/export", StatementExportController::class)->name("statements.export");
     Route::get("statements/{statement}/view", ShowStatementController::class)->name("statements.view");
     Route::resource("statements", StatementController::class)->except("show");

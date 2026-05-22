@@ -2,6 +2,7 @@
 
 namespace App\Domains\Billing\Requests;
 
+use App\Domains\Billing\Enums\InvoiceItemKind;
 use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Enums\PaymentMethod;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -11,47 +12,54 @@ use Illuminate\Validation\Rule;
 
 class UpdateInvoiceRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return Gate::allows('update', $this->route()->parameter('invoice'));
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
+        $invoiceId = $this->route()->parameter('invoice')->id;
+
         return [
-            "owner_id" => "required",
+            "owner_id"   => "required",
             "owner_type" => "required",
-            "status" => ["required", Rule::enum(InvoiceStatus::class)],
-            "acceptance_items" => ["required", "array"],
-            "acceptance_items.*" => ["array"],
-            "acceptance_items.TEST.*.id" => ["required", Rule::exists("acceptance_items", "id")],
-            "acceptance_items.TEST.*.price" => ["required", "numeric", "gt:0"],
-            "acceptance_items.TEST.*.discount" => ["required", "numeric"],
-            "acceptance_items.TEST.*.customParameters.discounts" => ["nullable", "array"],
-            "acceptance_items.SERVICE.*.id" => ["required", Rule::exists("acceptance_items", "id")],
-            "acceptance_items.SERVICE.*.price" => ["required", "numeric", "gt:0"],
-            "acceptance_items.SERVICE.*.discount" => ["required", "numeric"],
-            "acceptance_items.SERVICE.*.customParameters.discounts" => ["nullable", "array"],
-            "acceptance_items.PANEL.*.id" => ["required", Rule::exists("acceptance_items", "panel_id")],
-            "acceptance_items.PANEL.*.acceptance_items" => ["array", "nullable"],
-            "acceptance_items.PANEL.*.price" => ["required", "numeric", "gt:0"],
-            "acceptance_items.PANEL.*.discount" => ["required", "numeric"],
-            "acceptance_items.PANEL.*.customParameters.discounts" => ["nullable", "array"],
-            "payments" => ["nullable","array"],
-            "payments.*.id" => ["nullable", Rule::exists("payments", "id")],
-            "payments.*.price" => ["required", "numeric"],
-            "payments.*.payer_id" => ["required"],
-            "payments.*.payer_type" => ["required"],
-            "payments.*.paymentMethod" => ["required", Rule::enum(PaymentMethod::class)],
-            "payments.*.information" => ["array", "nullable"],
+            "status"     => ["required", Rule::enum(InvoiceStatus::class)],
+
+            "subject"              => ["nullable", "array"],
+            "subject.title"        => ["nullable", "string", "max:255"],
+            "subject.lines"        => ["nullable", "array"],
+            "subject.lines.*.label" => ["nullable", "string", "max:120"],
+            "subject.lines.*.value" => ["nullable", "string", "max:500"],
+
+            "invoice_items"                       => ["required", "array"],
+            "invoice_items.*.id"                  => [
+                "nullable",
+                Rule::exists("invoice_items", "id")->where("invoice_id", $invoiceId),
+            ],
+            "invoice_items.*._destroy"            => ["nullable", "boolean"],
+            "invoice_items.*.kind"                => ["nullable", Rule::enum(InvoiceItemKind::class)],
+            "invoice_items.*.title"               => ["required_without:invoice_items.*._destroy", "string", "max:255"],
+            "invoice_items.*.code"                => ["nullable", "string", "max:255"],
+            "invoice_items.*.description"         => ["nullable", "string"],
+            "invoice_items.*.unit_price"          => ["required_without:invoice_items.*._destroy", "numeric", "min:0"],
+            "invoice_items.*.qty"                 => ["required_without:invoice_items.*._destroy", "integer", "min:1"],
+            "invoice_items.*.discount"            => ["nullable", "numeric", "min:0"],
+            "invoice_items.*.test_id"             => ["nullable", "integer", Rule::exists("tests", "id")],
+            "invoice_items.*.acceptance_id"       => ["nullable", "integer", Rule::exists("acceptances", "id")],
+            "invoice_items.*.panel_id"            => ["nullable", "uuid"],
+            "invoice_items.*.customParameters"    => ["nullable", "array"],
+
+            "payments"                  => ["nullable", "array"],
+            "payments.*.id"             => ["nullable", Rule::exists("payments", "id")],
+            "payments.*.price"          => ["required", "numeric"],
+            "payments.*.payer_id"       => ["required"],
+            "payments.*.payer_type"     => ["required"],
+            "payments.*.paymentMethod"  => ["required", Rule::enum(PaymentMethod::class)],
+            "payments.*.information"    => ["array", "nullable"],
         ];
     }
 }

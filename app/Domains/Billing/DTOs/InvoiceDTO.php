@@ -12,6 +12,7 @@ class InvoiceDTO
                                 public int           $userId,
                                 public InvoiceStatus $status = InvoiceStatus::WAITING_FOR_PAYMENT,
                                 public int           $discount = 0,
+                                public ?array        $subject = null,
     )
     {
     }
@@ -23,7 +24,8 @@ class InvoiceDTO
             $data['owner_id'],
             $data['user_id'],
             InvoiceStatus::find($data['status'])?? InvoiceStatus::WAITING_FOR_PAYMENT,
-            $data['discount']??0
+            $data['discount']??0,
+            array_key_exists('subject', $data) ? $data['subject'] : null,
         );
     }
 
@@ -34,7 +36,8 @@ class InvoiceDTO
             "owner_id" => $this->ownerId,
             "user_id" => $this->userId,
             "discount" => $this->discount,
-            "status" => $this->status
+            "status" => $this->status,
+            "subject" => $this->subject,
         ];
     }
 }

@@ -60,10 +60,11 @@ class HandleInertiaRequests extends Middleware
             ];
         }
 
-        $data['success']       = $request->session()->get('success');
-        $data['status']        = $request->session()->get('status');
-        $data['import_errors'] = $request->session()->get('import_errors', []);
-        $data['appTimezone']   = config('app.timezone');
+        $data['success']            = $request->session()->get('success');
+        $data['status']             = $request->session()->get('status');
+        $data['import_errors']      = $request->session()->get('import_errors', []);
+        $data['created_invoice_id'] = $request->session()->get('created_invoice_id');
+        $data['appTimezone']        = config('app.timezone');
 
         return $data;
     }

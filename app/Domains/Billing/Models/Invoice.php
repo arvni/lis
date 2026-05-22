@@ -10,6 +10,7 @@ use App\Domains\User\Models\User;
 use App\Traits\Searchable;
 use DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Invoice extends Model
 {
@@ -23,8 +24,13 @@ class Invoice extends Model
         'owner_id',
         'owner_type',
         'status',
+        'subject',
         'total_price',
         'discount',
+    ];
+
+    protected $casts = [
+        'subject' => 'array',
     ];
 
     protected $searchable = [
@@ -58,6 +64,11 @@ class Invoice extends Model
         return $this->hasManyThrough(AcceptanceItem::class, Acceptance::class);
     }
 
+    public function invoiceItems(): HasMany
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
+
     public function payments()
     {
         return $this->hasMany(Payment::class);
@@ -88,28 +99,19 @@ class Invoice extends Model
         return $this->belongsTo(Statement::class);
     }
 
-    /**
-     * Check if this invoice is fully paid
-     *
-     * @return bool
-     */
-    public function isPaid(): bool
+    public function totalAmount(): float
     {
-        $totalAmount = $this->acceptanceItems()->sum(DB::raw('price - discount'));
-        $totalPaid = $this->payments()->sum('price');
-        return $totalPaid >= $totalAmount;
+        return (float) $this->invoiceItems()->sum(DB::raw('price - discount'));
     }
 
-    /**
-     * Check if this invoice is partially paid
-     *
-     * @return bool
-     */
+    public function isPaid(): bool
+    {
+        return (float) $this->payments()->sum('price') >= $this->totalAmount();
+    }
+
     public function isPartiallyPaid(): bool
     {
-        $totalAmount = $this->acceptanceItems()->sum(DB::raw('price - discount'));
-        $totalPaid = $this->payments()->sum('price');
-
-        return $totalPaid > 0 && $totalPaid < $totalAmount;
+        $totalPaid = (float) $this->payments()->sum('price');
+        return $totalPaid > 0 && $totalPaid < $this->totalAmount();
     }
 }

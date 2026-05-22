@@ -3,6 +3,7 @@
 namespace App\Domains\Reception\Models;
 
 use App\Domains\Billing\Models\Invoice;
+use App\Domains\Billing\Models\InvoiceItem;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Laboratory\Models\Method;
 use App\Domains\Laboratory\Models\MethodTest;
@@ -28,6 +29,7 @@ class AcceptanceItem extends Model
         'timeline',
         'customParameters',
         'panel_id',
+        'invoice_item_id',
         'no_sample',
         'reportless',
         'sampleless',
@@ -130,6 +132,11 @@ class AcceptanceItem extends Model
     public function invoice()
     {
         return $this->hasOneThrough(Invoice::class, Acceptance::class, "id", "id", "acceptance_id", "invoice_id");
+    }
+
+    public function invoiceItem(): BelongsTo
+    {
+        return $this->belongsTo(InvoiceItem::class);
     }
 
     public function referrer()

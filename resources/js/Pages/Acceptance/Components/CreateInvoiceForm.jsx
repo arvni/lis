@@ -34,7 +34,7 @@ import {
     Info,
     ArrowForward
 } from "@mui/icons-material";
-import { router } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 
 /**
  * Enhanced CreateInvoiceForm component with improved UI/UX
@@ -45,8 +45,9 @@ import { router } from "@inertiajs/react";
  * @param {Function} props.onClose - Function to close the dialog
  * @returns {JSX.Element}
  */
-const CreateInvoiceForm = ({ open, initialData, onClose }) => {
+const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
     const theme = useTheme();
+    const page = usePage();
 
     // State for form data, errors, and processing status
     const [formData, setFormData] = useState(initialData);
@@ -78,7 +79,12 @@ const CreateInvoiceForm = ({ open, initialData, onClose }) => {
         router.post(route("invoices.store"), formData, {
             onSuccess: () => {
                 setProcessing(false);
-                onClose();
+                const newId = page.props.created_invoice_id;
+                if (onCreated && newId) {
+                    onCreated(newId);
+                } else {
+                    onClose();
+                }
             },
             onError: (errors) => {
                 setErrors(errors);

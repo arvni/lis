@@ -171,35 +171,63 @@ const Print = ({invoice}) => {
                                 </Table>
                             </TableCell>
                             <TableCell sx={{padding: 0, width: "105mm", border: "2px solid"}}>
-                                <Table sx={{"& td": {paddingY: "5px", border: "none"}}}>
-                                    <TableRow>
-                                        <TableCell colSpan={2}>
-                                            <strong>Patient: </strong>{invoice?.acceptance?.patient?.fullName}
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell colSpan={2}>
-                                            <strong>ID/Reference
-                                                No.: </strong>{invoice?.acceptance?.referrer_order?.orderInformation?.patient?.reference_id ?? invoice?.acceptance?.referenceCode ?? invoice?.acceptance?.patient?.idNo}
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>
-                                            <strong>Age: </strong>{invoice?.acceptance?.patient?.age}
-                                        </TableCell>
-                                        <TableCell>
-                                            <strong>Nationality: </strong>{countries.find(item => item.code === invoice?.acceptance?.patient?.nationality)?.label}
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>
-                                            <strong>Gender: </strong>{invoice?.acceptance?.patient?.gender}
-                                        </TableCell>
-                                        <TableCell>
-                                            <strong>Phone: </strong>{invoice?.acceptance?.patient?.phone}
-                                        </TableCell>
-                                    </TableRow>
-                                </Table>
+                                {(() => {
+                                    const subject = invoice?.subject;
+                                    const populatedLines = (subject?.lines || [])
+                                        .filter((l) => l && (l.label || l.value));
+                                    const hasCustomSubject = Boolean(subject?.title) || populatedLines.length > 0;
+                                    return hasCustomSubject;
+                                })() ? (
+                                    <Table sx={{"& td": {paddingY: "5px", border: "none"}}}>
+                                        {invoice.subject.title && (
+                                            <TableRow>
+                                                <TableCell colSpan={2}>
+                                                    <strong>{invoice.subject.title}</strong>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                        {(invoice.subject.lines || [])
+                                            .filter((l) => l && (l.label || l.value))
+                                            .map((line, idx) => (
+                                                <TableRow key={idx}>
+                                                    <TableCell colSpan={2}>
+                                                        {line.label && <strong>{line.label}: </strong>}
+                                                        {line.value}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                    </Table>
+                                ) : (
+                                    <Table sx={{"& td": {paddingY: "5px", border: "none"}}}>
+                                        <TableRow>
+                                            <TableCell colSpan={2}>
+                                                <strong>Patient: </strong>{invoice?.acceptance?.patient?.fullName}
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell colSpan={2}>
+                                                <strong>ID/Reference
+                                                    No.: </strong>{invoice?.acceptance?.referrer_order?.orderInformation?.patient?.reference_id ?? invoice?.acceptance?.referenceCode ?? invoice?.acceptance?.patient?.idNo}
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell>
+                                                <strong>Age: </strong>{invoice?.acceptance?.patient?.age}
+                                            </TableCell>
+                                            <TableCell>
+                                                <strong>Nationality: </strong>{countries.find(item => item.code === invoice?.acceptance?.patient?.nationality)?.label}
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell>
+                                                <strong>Gender: </strong>{invoice?.acceptance?.patient?.gender}
+                                            </TableCell>
+                                            <TableCell>
+                                                <strong>Phone: </strong>{invoice?.acceptance?.patient?.phone}
+                                            </TableCell>
+                                        </TableRow>
+                                    </Table>
+                                )}
                             </TableCell>
                         </TableRow>
                     </Table>
@@ -244,8 +272,8 @@ const Print = ({invoice}) => {
                         </TableHead>
                         <TableBody sx={{"& td": {paddingY: "1mm"}}}>
                             {invoice?.acceptance_items?.map((item) => <TableRow key={item.id}>
-                                <TableCell>{item.test.code}</TableCell>
-                                <TableCell>{item.test.name} </TableCell>
+                                <TableCell>{item.test?.code ?? item.code ?? ""}</TableCell>
+                                <TableCell>{item.test?.name ?? item.title ?? ""} </TableCell>
                                 <TableCell sx={{textAlign: "center"}}>{item.qty}</TableCell>
                                 <TableCell sx={{textAlign: "center"}}>{item.unit_price}</TableCell>
                                 <TableCell sx={{textAlign: "center"}}>{Math.ceil(item.discount)}</TableCell>

@@ -3,25 +3,53 @@
 namespace App\Domains\Reception\Listeners;
 
 use App\Domains\Billing\Events\AcceptanceItemPricingEvent;
+use App\Domains\Billing\Services\InvoiceComposer;
+use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Repositories\AcceptanceItemRepository;
 
 class AcceptanceItemPricingListener
 {
-    public function __construct(private AcceptanceItemRepository $acceptanceItemRepository)
+    public function __construct(
+        private AcceptanceItemRepository $acceptanceItemRepository,
+        private InvoiceComposer $invoiceComposer,
+    )
     {
     }
 
     public function handle(AcceptanceItemPricingEvent $event): void
     {
+        $touchedAcceptanceItemIds = [];
         foreach ($event->invoiceItems as $type => $items) {
             foreach ($items as $item) {
-                $this->updateAcceptanceItem($item, $type);
+                $touchedAcceptanceItemIds = array_merge(
+                    $touchedAcceptanceItemIds,
+                    $this->updateAcceptanceItem($item, $type)
+                );
             }
+        }
+        $this->recomposeInvoicesFor($touchedAcceptanceItemIds);
+    }
+
+    private function recomposeInvoicesFor(array $acceptanceItemIds): void
+    {
+        if (empty($acceptanceItemIds)) {
+            return;
+        }
+        $invoices = AcceptanceItem::query()
+            ->whereIn('id', $acceptanceItemIds)
+            ->with('invoice')
+            ->get()
+            ->pluck('invoice')
+            ->filter()
+            ->unique('id');
+        foreach ($invoices as $invoice) {
+            $this->invoiceComposer->recompose($invoice);
         }
     }
 
-    private function updateAcceptanceItem(array $acceptanceItemData, ?string $type): void
+    private function updateAcceptanceItem(array $acceptanceItemData, ?string $type): array
     {
+        $touched = [];
         if ($type === 'PANEL') {
             $acceptanceItems = $this->acceptanceItemRepository->getPanelItems(
                 $acceptanceItemData['id'],
@@ -36,6 +64,7 @@ class AcceptanceItemPricingListener
                         ...($acceptanceItemData['customParameters'] ?? []),
                     ],
                 ]);
+                $touched[] = $acceptanceItem->id;
             }
         } else {
             $acceptanceItem = $this->acceptanceItemRepository->findAcceptanceItemById($acceptanceItemData['id']);
@@ -48,7 +77,9 @@ class AcceptanceItemPricingListener
                         ...($acceptanceItemData['customParameters'] ?? []),
                     ],
                 ]);
+                $touched[] = $acceptanceItem->id;
             }
         }
+        return $touched;
     }
 }

@@ -8,6 +8,7 @@ use App\Domains\Billing\Events\InvoiceAcceptanceUpdateEvent;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Requests\StoreInvoiceRequest;
 use App\Domains\Billing\Requests\UpdateInvoiceRequest;
+use App\Domains\Billing\Services\InvoiceItemSyncService;
 use App\Domains\Billing\Services\InvoiceService;
 use App\Domains\Billing\Services\PaymentService;
 use App\Http\Controllers\Controller;
@@ -19,7 +20,11 @@ use Inertia\Response;
 
 class InvoiceController extends Controller
 {
-    public function __construct(private readonly InvoiceService $invoiceService, private readonly PaymentService $paymentService)
+    public function __construct(
+        private readonly InvoiceService $invoiceService,
+        private readonly PaymentService $paymentService,
+        private readonly InvoiceItemSyncService $invoiceItemSync,
+    )
     {
         $this->middleware("indexProvider")->only("index");
     }
@@ -53,7 +58,11 @@ class InvoiceController extends Controller
                 $request->validated("discount") ?? 0
             ));
         InvoiceAcceptanceUpdateEvent::dispatch($request->validated("acceptance_id"), $invoice->id);
-        return redirect()->back()->with(["success" => true, "status" => "Invoice created successfully."]);
+        return redirect()->back()->with([
+            "success" => true,
+            "status" => "Invoice created successfully.",
+            "created_invoice_id" => $invoice->id,
+        ]);
 
     }
 
@@ -81,8 +90,8 @@ class InvoiceController extends Controller
         $data = $request->validated();
         $invoiceDto = InvoiceDTO::fromArray(array_merge($invoice->toArray(), $data));
         $this->invoiceService->updateInvoice($invoice, $invoiceDto);
-        $this->invoiceService->updateInvoiceItems($data["acceptance_items"]);
-        $this->paymentService->updatePayments($invoice, $data["payments"]);
+        $this->invoiceItemSync->sync($invoice, $data["invoice_items"] ?? []);
+        $this->paymentService->updatePayments($invoice, $data["payments"] ?? []);
         return redirect()->back()->with(["success" => true, "status" => "Invoice updated successfully."]);
     }
 
