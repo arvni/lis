@@ -84,7 +84,7 @@ const InvoiceIndex = () => {
             renderCell: ({row}) => row?.patient?.fullName || "—"
         },
         {
-            field: 'acceptance_items_sum_price',
+            field: 'invoice_items_sum_price',
             headerName: 'Amount',
             type: "number",
             width: 100,
@@ -92,7 +92,7 @@ const InvoiceIndex = () => {
             renderCell: ({value}) => formatCurrency(value)
         },
         {
-            field: 'acceptance_items_sum_discount',
+            field: 'invoice_items_sum_discount',
             headerName: 'Discount',
             type: "number",
             width: 100,
