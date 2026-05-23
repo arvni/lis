@@ -3,7 +3,7 @@
 namespace App\Domains\Referrer\Listeners;
 
 use App\Domains\Reception\Models\Acceptance;
-use App\Domains\Referrer\Events\ReferrerOrderCreated;
+use App\Domains\Referrer\Events\ReferrerOrderUpdated;
 use App\Domains\Referrer\Support\ReferrerOrderPayloadBuilder;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -11,19 +11,19 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-class SendReferrerOrderWebhook implements ShouldQueue
+class SendReferrerOrderUpdateWebhook implements ShouldQueue
 {
     use InteractsWithQueue;
 
     public int $tries = 3;
     public array $backoff = [10, 30, 60];
 
-    public function handle(ReferrerOrderCreated $event): void
+    public function handle(ReferrerOrderUpdated $event): void
     {
         $referrerOrder = $event->referrerOrder;
 
         if (!$referrerOrder->acceptance_id) {
-            Log::info("SendReferrerOrderWebhook: skipped — no acceptance linked", [
+            Log::info("SendReferrerOrderUpdateWebhook: skipped — no acceptance linked", [
                 'referrer_order_id' => $referrerOrder->id,
             ]);
             return;
@@ -38,7 +38,7 @@ class SendReferrerOrderWebhook implements ShouldQueue
         ])->find($referrerOrder->acceptance_id);
 
         if (!$acceptance) {
-            Log::warning("SendReferrerOrderWebhook: acceptance not found", [
+            Log::warning("SendReferrerOrderUpdateWebhook: acceptance not found", [
                 'acceptance_id'     => $referrerOrder->acceptance_id,
                 'referrer_order_id' => $referrerOrder->id,
             ]);
@@ -46,7 +46,7 @@ class SendReferrerOrderWebhook implements ShouldQueue
         }
 
         if (!$acceptance->referrer_id) {
-            Log::info("SendReferrerOrderWebhook: skipped — acceptance has no referrer", [
+            Log::info("SendReferrerOrderUpdateWebhook: skipped — acceptance has no referrer", [
                 'acceptance_id' => $acceptance->id,
             ]);
             return;
@@ -55,7 +55,7 @@ class SendReferrerOrderWebhook implements ShouldQueue
         $referrerOrder->loadMissing('collectRequest.sampleCollector');
 
         $webhookDomain = config('services.provider_app.webhook_domain');
-        $webhookUrl    = config('services.provider_app.acceptance_webhook_url', '/api/orders/webhook');
+        $webhookUrl    = config('services.provider_app.acceptance_update_webhook_url', '/api/orders/webhook/update');
         $secret        = config('services.provider_app.webhook_secret');
 
         $payload = ReferrerOrderPayloadBuilder::build($acceptance, $referrerOrder);
@@ -65,7 +65,7 @@ class SendReferrerOrderWebhook implements ShouldQueue
 
         $signature = hash_hmac('sha256', json_encode($payload), $secret);
 
-        Log::debug("SendReferrerOrderWebhook URL: " . $fullWebhookUrl);
+        Log::debug("SendReferrerOrderUpdateWebhook URL: " . $fullWebhookUrl);
 
         try {
             $response = Http::timeout(30)
@@ -79,13 +79,13 @@ class SendReferrerOrderWebhook implements ShouldQueue
                 throw new \Exception("Webhook failed with status: " . $response->status() . " - " . $response->body());
             }
 
-            Log::info("SendReferrerOrderWebhook sent successfully", [
+            Log::info("SendReferrerOrderUpdateWebhook sent successfully", [
                 'referrer_order_id' => $referrerOrder->id,
                 'acceptance_id'     => $acceptance->id,
             ]);
 
         } catch (\Exception $e) {
-            Log::error("SendReferrerOrderWebhook failed", [
+            Log::error("SendReferrerOrderUpdateWebhook failed", [
                 'referrer_order_id' => $referrerOrder->id,
                 'acceptance_id'     => $acceptance->id,
                 'error'             => $e->getMessage(),

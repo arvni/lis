@@ -31,7 +31,7 @@ class AddPoolingController extends Controller
 
         $createdItems = $this->createPoolingItems($acceptance, $request->validated('acceptanceItems'));
 
-        if ($createdItems->isNotEmpty() && $acceptance->referrer_id && $acceptance->out_patient) {
+        if ($createdItems->isNotEmpty() && $acceptance->referrer_id) {
             $this->createPoolingReferrerOrder($acceptance, $createdItems);
         }
 

@@ -38,6 +38,8 @@ use App\Domains\Referrer\Events\OrderMaterialCreated;
 use App\Domains\Referrer\Events\OrderMaterialUpdated;
 use App\Domains\Referrer\Events\CollectRequestEvent;
 use App\Domains\Referrer\Events\ReferrerOrderCreated;
+use App\Domains\Referrer\Events\ReferrerOrderUpdated;
+use App\Domains\Referrer\Listeners\SendReferrerOrderUpdateWebhook;
 use App\Domains\Referrer\Listeners\SendReferrerOrderWebhook;
 use App\Domains\User\Events\UserDocumentUpdateEvent;
 use App\Events\ReferrerOrderPatientCreated;
@@ -116,5 +118,6 @@ class EventServiceProvider extends ServiceProvider
         Event::listen(CollectRequestEvent::class, [NotifyLogisticsAppOfCollectRequestUpdate::class, 'handle']);
         Event::listen(ReferrerOrderPatientCreated::class, [SendPatientToProviderWebhook::class, 'handle']);
         Event::listen(ReferrerOrderCreated::class, [SendReferrerOrderWebhook::class, 'handle']);
+        Event::listen(ReferrerOrderUpdated::class, [SendReferrerOrderUpdateWebhook::class, 'handle']);
     }
 }

@@ -60,10 +60,17 @@ class SampleController extends Controller
             : null;
 
         $collectRequestId = $request->validated('collect_request.id');
-        if ($collectRequestId && $acceptance) {
-            $this->referrerOrderService->createFromBarcodes($barcodes, $acceptance, (int) $collectRequestId);
-        } elseif (!$collectRequestId) {
+
+        if ($acceptance) {
             $this->referrerOrderService->createPoolingOrderIfNeeded($barcodes, $acceptance);
+
+            if ($acceptance->referrer_id) {
+                $this->referrerOrderService->createOrUpdateFromBarcodes(
+                    $barcodes,
+                    $acceptance,
+                    $collectRequestId ? (int) $collectRequestId : null,
+                );
+            }
         }
 
         return redirect()->back()->with(["success" => true, "status" => "Sample created successfully."]);

@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
@@ -101,9 +100,9 @@ class Acceptance extends Model
         return $this->belongsTo(Referrer::class);
     }
 
-    public function referrerOrder(): HasOne
+    public function referrerOrders(): HasMany
     {
-        return $this->hasOne(ReferrerOrder::class);
+        return $this->hasMany(ReferrerOrder::class);
     }
 
     public function acceptor(): BelongsTo

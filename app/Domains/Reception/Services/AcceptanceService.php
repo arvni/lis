@@ -315,6 +315,8 @@ class AcceptanceService
         }
         // Remove items not in the update
         $acceptance->acceptanceItems()->whereNotIn("id", collect($updatedAcceptanceItems)->pluck("id")->toArray())->delete();
+
+        $this->referrerOrderService->syncReferrerOrdersForAcceptance($acceptance);
     }
 
     /**
@@ -384,9 +386,11 @@ class AcceptanceService
     public function updateAcceptanceStatus(Acceptance $acceptance, AcceptanceStatus $status): void
     {
         $this->acceptanceRepository->updateAcceptance($acceptance, ["status" => $status]);
-        $acceptance->load("referrerOrder");
-        if ($acceptance->referrerOrder && $status == AcceptanceStatus::PROCESSING) {
-            $this->referrerOrderService->updateReferrerOrderStatus($acceptance->referrerOrder, 'processing');
+        if ($status == AcceptanceStatus::PROCESSING) {
+            $acceptance->load("referrerOrders");
+            foreach ($acceptance->referrerOrders as $referrerOrder) {
+                $this->referrerOrderService->updateReferrerOrderStatus($referrerOrder, 'processing');
+            }
         }
     }
 
@@ -822,10 +826,11 @@ class AcceptanceService
                     foreach ($referrer->reportReceivers ?? [] as $reportReceiver) {
                         Notification::route('mail', $reportReceiver)->notify(new ReferrerReportPublished($acceptance));
                     }
-                    $acceptance->load("referrerOrder");
-                    // Update referrer order status
-                    if ($acceptance->referrerOrder)
-                        $this->referrerOrderService->updateReferrerOrderStatus($acceptance->referrerOrder, 'reported');
+                    $acceptance->load("referrerOrders");
+                    // Update referrer order status across all linked referrer orders (pooling + non-pooling)
+                    foreach ($acceptance->referrerOrders as $referrerOrder) {
+                        $this->referrerOrderService->updateReferrerOrderStatus($referrerOrder, 'reported');
+                    }
                 }
             }
         }

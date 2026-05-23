@@ -44,7 +44,7 @@ readonly class InvoiceService
         $invoice->load([
             "patientPayments.cashier",
             "acceptance.patient",
-            "acceptance.referrerOrder",
+            "acceptance.referrerOrders",
             "invoiceItems.test",
             "owner",
             "payments.payer",
