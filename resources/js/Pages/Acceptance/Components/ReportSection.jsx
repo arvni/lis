@@ -8,7 +8,7 @@ import TextField from "@mui/material/TextField";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
-import { Print, Email, WhatsApp, HelpOutlined } from "@mui/icons-material";
+import { Print, WhatsApp, Sms, HelpOutlined } from "@mui/icons-material";
 import { Box, Divider, Paper, Typography, Tooltip, Stack, IconButton } from "@mui/material";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
 import Checkbox from "@mui/material/Checkbox";
@@ -72,12 +72,10 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
     };
 
     const deliveryMethods = [
-        { key: 'print', icon: <Print />, label: 'Print Report' },
-        { key: 'email', icon: <Email />, label: 'Email Report' },
-        { key: 'whatsapp', icon: <WhatsApp />, label: 'WhatsApp Report' }
+        { key: 'print', icon: <Print />, label: 'Print' },
+        { key: 'sms', icon: <Sms />, label: 'SMS' },
+        { key: 'whatsapp', icon: <WhatsApp />, label: 'WhatsApp' }
     ];
-
-    const hasSelectedMethods = deliveryMethods.some(method => howReport?.[method.key]);
 
     return (
         <Paper
@@ -93,19 +91,19 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
         >
             <Box sx={{ bgcolor: "primary.main", p: 2, color: "white" }}>
                 <Typography variant="h6" fontWeight="medium">
-                    How Would You Like to Receive Your Report?
+                    How to Notify
                 </Typography>
             </Box>
 
             <Box sx={{ p: 3 }}>
                 <Stack spacing={3}>
-                    {/* Delivery Methods Section */}
+                    {/* Notification Methods Section */}
                     <Box>
                         <Typography variant="subtitle1" fontWeight="medium" gutterBottom>
-                            Select Delivery Method(s) *
+                            Select Notification Method(s) *
                         </Typography>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
-                            Choose one or more ways to receive your report
+                            Choose one or more ways to be notified
                         </Typography>
 
                         {errors?.howReport && (
@@ -168,116 +166,6 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
                             </FormGroup>
                         </FormControl>
                     </Box>
-
-                    {/* Only show divider and inputs if at least one method is selected */}
-                    {hasSelectedMethods && <Divider />}
-
-                    {/* Conditional Input Fields based on selection */}
-                    {hasSelectedMethods && (
-                        <Stack spacing={3}>
-                            {howReport?.print && (
-                                <Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                        <Typography variant="subtitle2" fontWeight="medium">
-                                            Print Pickup Details
-                                        </Typography>
-                                        <Tooltip title="Please provide the name of the person who will collect the printed report">
-                                            <IconButton size="small" sx={{ ml: 1 }}>
-                                                <HelpOutlined fontSize="small" />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Box>
-
-                                    <TextField
-                                        value={howReport?.printReceiver || ''}
-                                        required
-                                        fullWidth
-                                        name="printReceiver"
-                                        error={Boolean(errors?.["howReport.printReceiver"])}
-                                        id="how-report-print-receiver"
-                                        label="Recipient's Full Name"
-                                        placeholder="Enter the name of the person collecting the report"
-                                        onChange={e => onChange('howReport.printReceiver', e.target.value)}
-                                        helperText={errors?.["howReport.printReceiver"] || ""}
-                                        variant="outlined"
-                                        size="medium"
-                                        slotProps={{ htmlInput: {
-                                            'aria-describedby': 'print-receiver-helper'
-                                        } }}
-                                    />
-                                </Box>
-                            )}
-
-                            {howReport?.email && (
-                                <Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                        <Typography variant="subtitle2" fontWeight="medium">
-                                            Email Delivery
-                                        </Typography>
-                                        <Tooltip title="We'll send your test results to this email address">
-                                            <IconButton size="small" sx={{ ml: 1 }}>
-                                                <HelpOutlined fontSize="small" />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Box>
-
-                                    <TextField
-                                        value={howReport?.emailAddress || ''}
-                                        required
-                                        fullWidth
-                                        name="emailAddress"
-                                        error={Boolean(errors?.["howReport.emailAddress"])}
-                                        id="how-report-email"
-                                        label="Email Address"
-                                        placeholder="example@email.com"
-                                        onChange={e => onChange('howReport.emailAddress', e.target.value)}
-                                        helperText={errors?.["howReport.emailAddress"] || ""}
-                                        variant="outlined"
-                                        type="email"
-                                        size="medium"
-                                        slotProps={{ htmlInput: {
-                                            'aria-describedby': 'email-helper',
-                                            autoComplete: 'email'
-                                        } }}
-                                    />
-                                </Box>
-                            )}
-
-                            {howReport?.whatsapp && (
-                                <Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                        <Typography variant="subtitle2" fontWeight="medium">
-                                            WhatsApp Delivery
-                                        </Typography>
-                                        <Tooltip title="We'll send your test results to this WhatsApp number">
-                                            <IconButton size="small" sx={{ ml: 1 }}>
-                                                <HelpOutlined fontSize="small" />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Box>
-
-                                    <TextField
-                                        value={howReport?.whatsappNumber || ''}
-                                        required
-                                        fullWidth
-                                        name="whatsappNumber"
-                                        error={Boolean(errors?.["howReport.whatsappNumber"])}
-                                        id="how-report-whatsapp"
-                                        label="WhatsApp Number"
-                                        placeholder="+968 1234 5678"
-                                        onChange={e => onChange('howReport.whatsappNumber', e.target.value)}
-                                        helperText={errors?.["howReport.whatsappNumber"] || "Include country code (e.g., +968)"}
-                                        variant="outlined"
-                                        size="medium"
-                                        slotProps={{ htmlInput: {
-                                            'aria-describedby': 'whatsapp-helper',
-                                            autoComplete: 'tel'
-                                        } }}
-                                    />
-                                </Box>
-                            )}
-                        </Stack>
-                    )}
                 </Stack>
             </Box>
         </Paper>

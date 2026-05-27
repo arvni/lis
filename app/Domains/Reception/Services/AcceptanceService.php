@@ -5,9 +5,6 @@ namespace App\Domains\Reception\Services;
 
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Laboratory\Enums\TestType;
-use App\Domains\Notification\Enums\WhatsappMessageType;
-use App\Domains\Notification\Enums\WhatsappMessageWritten;
-use App\Domains\Notification\Models\WhatsappMessage;
 use App\Domains\Reception\Adapters\LaboratoryAdapter;
 use App\Domains\Reception\DTOs\AcceptanceDTO;
 use App\Domains\Reception\DTOs\AcceptanceItemDTO;
@@ -771,61 +768,14 @@ class AcceptanceService
         $referrer = $acceptance->referrer;
         if (count($acceptance->acceptanceItems)) {
             $howReport = $acceptance->howReport ?? [];
-            // Send notification to patient
+            // Send notification to patient (SMS always; WhatsApp text notification if checked)
             if (!$silent) {
                 Notification::send($patient, new PatientReportPublished($acceptance));
-                if ($howReport["whatsappNumber"] ?? null) {
-                    $to = $this->formatNumber($howReport["whatsappNumber"]);
-                    foreach ($acceptance->acceptanceItems as $acceptanceItem) {
-                        $data = [
-                            'contentSid' => config('services.twilio.templates.send_report_file'),
-                            'to' => 'whatsapp:' . $to,
-                            'contentVariables' => [
-                                "1" => $acceptanceItem->test->name, // {{1}} - Caption
-                                "2" => $acceptanceItem->report->publishedDocument->hash, // {{2}} - File
-                            ]
-                        ];
-                        $whatsappMessage = new WhatsappMessage([
-                            "data" => $data,
-                            "status" => "initial",
-                            "waId" => Str::startsWith($to, "+") ? Str::substr($to, 1) : $to,
-                            'type' => WhatsappMessageType::OUTBOUND,
-                            'written' => WhatsappMessageWritten::TEMPLATE,
-                        ]);
-                        $whatsappMessage->messageable()->associate($patient);
-                        $whatsappMessage->save();
-
-                        if ($acceptanceItem?->report?->clinicalCommentDocument) {
-                            $data = [
-                                'contentSid' => config('services.twilio.templates.send_report_file'),
-                                'to' => 'whatsapp:' . $to,
-                                'contentVariables' => [
-                                    "1" => $acceptanceItem->test->name . "( Clinical Comment )", // {{1}} - Caption
-                                    "2" => $acceptanceItem->report->clinicalCommentDocument->hash, // {{2}} -  File
-                                ]
-                            ];
-                            $whatsappMessage = new WhatsappMessage([
-                                "data" => $data,
-                                "status" => "initial",
-                                "waId" => Str::startsWith($to, "+") ? Str::substr($to, 1) : $to,
-                                'type' => WhatsappMessageType::OUTBOUND,
-                                'written' => WhatsappMessageWritten::TEMPLATE,
-                            ]);
-                            $whatsappMessage->messageable()->associate($patient);
-                            $whatsappMessage->save();
-                        }
-
-                    }
-                }
             }
 
             if (!$silent && $referrer) {
                 if ($howReport["sendToReferrer"] ?? false) {
-                    $notification = new ReferrerReportPublished($acceptance);
-                    $referrer->notify($notification);
-                    foreach ($referrer->reportReceivers ?? [] as $reportReceiver) {
-                        Notification::route('mail', $reportReceiver)->notify(new ReferrerReportPublished($acceptance));
-                    }
+                    $referrer->notify(new ReferrerReportPublished($acceptance));
                     $acceptance->load("referrerOrders");
                     // Update referrer order status across all linked referrer orders (pooling + non-pooling)
                     foreach ($acceptance->referrerOrders as $referrerOrder) {
@@ -893,22 +843,6 @@ class AcceptanceService
             "tests" => [...$tests, ...$services],
             "panels" => $groupedItems->get(TestType::PANEL->value, []),
         ];
-    }
-
-    protected function formatNumber($number): string
-    {
-        // Remove any non-numeric characters except +
-        $number = preg_replace('/[^0-9+]/', '', $number);
-
-        if (strlen($number) <= 9)
-            $number = '968' . $number;
-
-        // Ensure it has international format
-        if (!str_starts_with($number, '+')) {
-            $number = '+' . $number;
-        }
-
-        return $number;
     }
 
     public function checkAcceptanceStatus(Acceptance $acceptance): void

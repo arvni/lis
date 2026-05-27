@@ -51,6 +51,9 @@ return [
         'password' => env('OMANTEL_PASSWORD'),
         'sender_id' => env('OMANTEL_SENDER_ID'),
     ],
+    'patient_portal' => [
+        'url' => env('PATIENT_PORTAL_URL', 'http://localhost:8002'),
+    ],
     'provider_app' => [
         'webhook_domain' => env('PROVIDER_APP_WEBHOOK_DOMAIN',"http://localhost:8003"),
         'webhook_secret' => env('PROVIDER_APP_WEBHOOK_SECRET'),

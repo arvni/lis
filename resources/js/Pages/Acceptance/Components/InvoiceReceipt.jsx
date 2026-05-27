@@ -303,7 +303,7 @@ const OptimizedInvoiceReceipt = ({acceptance, onPrint, showLogo}) => {
                             />
                             <InfoItem
                                 label="Report Via"
-                                value={Object.keys(acceptance?.howReport || {}).filter(item => ["print","email", "whatsapp", "sendToReferrer"].includes(item) && Boolean(acceptance.howReport[item]))}
+                                value={Object.keys(acceptance?.howReport || {}).filter(item => ["print", "sms", "whatsapp", "sendToReferrer"].includes(item) && Boolean(acceptance.howReport[item]))}
                             />
                         </Grid>
                     </Grid>

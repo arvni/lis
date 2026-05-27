@@ -38,54 +38,7 @@ const Edit = ({acceptance, maxDiscount=100,errors, canAddPrescription = false}) 
         return true;
     }, [data?.referred, data?.referrer, setError]);
 
-    const validateReporting = useCallback((formData) => {
-        const howReport = formData?.howReport || {};
-
-        // Validate print option
-        if (howReport.print) {
-            if (!howReport.printReceiver || howReport.printReceiver.trim() === '') {
-                setError("howReport.printReceiver", "Please enter the name of the person who will collect the report");
-                document.getElementById("how-report-print-receiver")?.focus();
-                return false;
-            }
-        }
-
-        // Validate email option
-        if (howReport.email) {
-            if (!howReport.emailAddress || howReport.emailAddress.trim() === '') {
-                setError("howReport.emailAddress", "Please enter an email address");
-                document.getElementById("how-report-email")?.focus();
-                return false;
-            }
-
-            // Basic email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(howReport.emailAddress)) {
-                setError("howReport.emailAddress", "Please enter a valid email address");
-                document.getElementById("how-report-email")?.focus();
-                return false;
-            }
-        }
-
-        // Validate WhatsApp option
-        if (howReport.whatsapp) {
-            if (!howReport.whatsappNumber || howReport.whatsappNumber.trim() === '') {
-                setError("howReport.whatsappNumber", "Please enter a WhatsApp number");
-                document.getElementById("how-report-whatsapp")?.focus();
-                return false;
-            }
-
-            // Basic phone number validation (should contain digits and possibly +, -, (), spaces)
-            const phoneRegex = /^[+\d\s\-()]{7,20}$/;
-            if (!phoneRegex.test(howReport.whatsappNumber.replace(/\s/g, ''))) {
-                setError("howReport.whatsappNumber", "Please enter a valid phone number with country code");
-                document.getElementById("how-report-whatsapp")?.focus();
-                return false;
-            }
-        }
-
-        return true;
-    }, [setError]);
+    const validateReporting = useCallback(() => true, []);
 
     // Combined validation function
     // Step-based validation for Edit.jsx

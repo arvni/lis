@@ -479,7 +479,7 @@ const AcceptanceForm = ({
                                             <>
                                                 {data?.howReport && <Typography variant="body1">
                                                     <strong>Report
-                                                        Method:</strong> {Object.keys(data?.howReport).filter(method => data.howReport[method] && ["print", "email", "whatsapp", "sendToReferrer"].includes(method)).map(method => method.toUpperCase()).join(", ")}
+                                                        Method:</strong> {Object.keys(data?.howReport).filter(method => data.howReport[method] && ["print", "sms", "whatsapp", "sendToReferrer"].includes(method)).map(method => method.toUpperCase()).join(", ")}
                                                 </Typography>}
                                             </>
                                         )}

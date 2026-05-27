@@ -17,8 +17,8 @@ import {
     ExpandMore as ExpandMoreIcon,
     LocalHospital,
     Person,
-    Email,
     Print,
+    Sms,
     Timeline,
     Receipt,
     RequestQuote,
@@ -206,17 +206,17 @@ const ReportMethodItem = ({icon: Icon, color = "info", text}) => (
 
 // Define the mapping of methods to their display components
 const methodConfig = {
-    email: {
-        icon: Email,
-        getText: (data) => data.emailAddress
-    },
     print: {
         icon: Print,
-        getText: (data) => data.printReceiver
+        label: 'Print'
+    },
+    sms: {
+        icon: Sms,
+        label: 'SMS'
     },
     whatsapp: {
         icon: WhatsApp,
-        getText: (data) => data.whatsappNumber
+        label: 'WhatsApp'
     }
 };
 
@@ -346,7 +346,7 @@ const Show = ({
     // Get the active report methods
     const activeReportMethods = Object.keys(acceptance?.howReport || {})
         .filter(method =>
-            ["print", "email", "whatsapp"].includes(method) &&
+            ["print", "sms", "whatsapp"].includes(method) &&
             acceptance.howReport[method]
         );
 
@@ -500,7 +500,7 @@ const Show = ({
                                             <ReportMethodItem
                                                 key={method}
                                                 icon={methodConfig[method].icon}
-                                                text={methodConfig[method].getText(acceptance.howReport)}
+                                                text={methodConfig[method].label}
                                             />
                                         ))
                                     ) : (
