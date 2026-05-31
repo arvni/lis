@@ -45,7 +45,11 @@ readonly class AcceptanceItemService
     {
         $acceptanceItem->load([
             "acceptance",
-            "patients",
+            "patients" => function ($q) {
+                $q->with(["ownedDocuments" => function ($q) {
+                    $q->allowedTag();
+                }]);
+            },
             "tags:id,name",
             "acceptanceItemStates" => function ($query) {
                 return $query->with([
