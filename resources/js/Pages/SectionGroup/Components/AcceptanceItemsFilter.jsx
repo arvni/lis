@@ -113,7 +113,7 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
                         value={filter?.search || ""}
                         onChange={handleChange}
                         label="Search"
-                        placeholder="Acceptance, patient, test, method"
+                        placeholder="Acceptance, patient, test, method, barcode"
                         slotProps={{
                             input: {
                                 endAdornment: filter?.search ? (

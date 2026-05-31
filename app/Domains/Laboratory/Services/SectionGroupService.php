@@ -106,7 +106,8 @@ class SectionGroupService
                         ->orWhere("idNo", "like", "%{$search}%"))
                     ->orWhereHas("activeSample.patient", fn($patientQuery) => $patientQuery
                         ->where("fullName", "like", "%{$search}%")
-                        ->orWhere("idNo", "like", "%{$search}%"));
+                        ->orWhere("idNo", "like", "%{$search}%"))
+                    ->orWhereHas("samples", fn($sampleQuery) => $sampleQuery->where("barcode", "like", "%{$search}%"));
             });
         }
 
