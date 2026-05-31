@@ -38,7 +38,7 @@ const Show = ({acceptanceItem, canCreateReport = false, canToggleReportless = fa
 
     return <Container sx={{p: "1em"}}>
         <Head title={`Acceptance Item #${acceptanceItem.id}`}/>
-        {acceptanceItem.patients.map(patient => <PatientInfo patient={patient} key={patient.id}/>)}
+        {acceptanceItem.patients.map(patient => <PatientInfo patient={patient} key={patient.id} showDocuments defaultExpanded={false}/>)}
         <TestInfo method={acceptanceItem.method} test={acceptanceItem.test}/>
         <Box sx={{ mt: 2, mb: 2 }}>
             <InlineTagManager 
