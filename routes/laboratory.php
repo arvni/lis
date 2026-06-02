@@ -50,7 +50,7 @@ Route::group(["prefix" => "laboratory"], function () {
     Route::resource("instructions", InstructionController::class)->except("edit", "show");
 });
 
-Route::get("test-list", ShowTestListController::class)->name("test-list");
+Route::get("test-list", ShowTestListController::class)->middleware("can:Test List")->name("test-list");
 
 Route::group(["prefix" => "api/laboratory", "as" => "api."], function () {
     Route::get("section-groups", ListSectionGroupsController::class)->name("sectionGroups.list");

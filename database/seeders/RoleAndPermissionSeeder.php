@@ -334,6 +334,7 @@ class RoleAndPermissionSeeder extends Seeder
                 "Total Reports Waiting For Approving",
             ],
             "Statistics",
+            "Test List",
             "System" => [
                 "Failed Jobs" => [
                     "List Failed Jobs",

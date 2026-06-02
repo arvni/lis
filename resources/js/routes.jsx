@@ -311,7 +311,7 @@ const routes = (sections = []) => {
         {
             title: "Test Lists",
             route: "test-list",
-            permission: null,
+            permission: 'Test List',
             icon: <VaccinesIcon/>
         },
         {
