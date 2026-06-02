@@ -190,22 +190,15 @@ class SectionGroupService
         $result = [];
 
         foreach ($groups as $group) {
-            if (!Gate::allows("view", $group))
-                continue;
-            $groupData = [
-                'id' => $group->id,
-                'icon' => $group->icon,
-                'title' => $group->name, // renamed 'name' to 'title'
-                'child' => [],// will contain merged sections and children
-                'type' => 'group',
-                'route' => 'sectionGroups.show.' . $group->id
-            ];
+            $canViewGroup = Gate::allows("view", $group);
+
+            $children = [];
 
             // Add sections to items
             foreach ($group->sections as $section) {
                 if (!Gate::allows("view", $section))
                     continue;
-                $groupData['child'][] = [
+                $children[] = [
                     'id' => $section->id,
                     'icon' => $section->icon,
                     'title' => $section->name, // renamed 'name' to 'title'
@@ -219,9 +212,30 @@ class SectionGroupService
                 $transformedChildren = $this->transformGroups($group->recursiveChildren);
                 foreach ($transformedChildren as $child) {
                     $child['type'] = 'group'; // to differentiate between sections and groups
-                    $groupData['child'][] = $child;
+                    $children[] = $child;
                 }
             }
+
+            // Skip the branch only when the user can neither view the group
+            // itself nor any of its descendants. This keeps accessible
+            // sections/sub-groups reachable even if the user lacks the
+            // ancestor group's permission (mirrors the per-entity
+            // authorization done on the show pages).
+            if (!$canViewGroup && empty($children))
+                continue;
+
+            $groupData = [
+                'id' => $group->id,
+                'icon' => $group->icon,
+                'title' => $group->name, // renamed 'name' to 'title'
+                'child' => $children,// merged sections and children
+                'type' => 'group',
+            ];
+
+            // Only expose a navigable route when the user may view the group
+            // itself; otherwise it acts as a non-clickable container header.
+            if ($canViewGroup)
+                $groupData['route'] = 'sectionGroups.show.' . $group->id;
 
             $result[] = $groupData;
         }
