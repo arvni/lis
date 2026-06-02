@@ -60,6 +60,14 @@ class SendReferrerOrderUpdateWebhook implements ShouldQueue
 
         $payload = ReferrerOrderPayloadBuilder::build($acceptance, $referrerOrder);
 
+        if (empty($payload['order']['orderItems'])) {
+            Log::info("SendReferrerOrderUpdateWebhook: skipped — no sendable order items", [
+                'referrer_order_id' => $referrerOrder->id,
+                'acceptance_id'     => $acceptance->id,
+            ]);
+            return;
+        }
+
         $fullWebhookUrl = (Str::endsWith($webhookDomain, '/') ? Str::substr($webhookDomain, 0, -1) : $webhookDomain)
             . (Str::startsWith($webhookUrl, '/') ? $webhookUrl : '/' . $webhookUrl);
 

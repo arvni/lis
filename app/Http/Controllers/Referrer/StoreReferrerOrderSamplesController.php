@@ -41,6 +41,7 @@ class StoreReferrerOrderSamplesController extends Controller
                 if ($material->referrer->id == $referrerOrder->referrer->id && !$material->sample_id)
                     $barcode["material"] = $material->toArray();
             }
+            $barcode["collect_request_id"] = $referrerOrder->collect_request_id;
             $this->sampleService->storeSample(SampleDTO::fromArray($barcode), $key,$referrerOrder->pooling);
         }
 

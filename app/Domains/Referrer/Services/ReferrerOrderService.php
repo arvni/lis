@@ -10,8 +10,10 @@ use App\Domains\Referrer\Events\ReferrerOrderCreated;
 use App\Domains\Referrer\Events\ReferrerOrderUpdated;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Referrer\Repositories\ReferrerOrderRepository;
+use App\Domains\Referrer\Support\ReferrerOrderPayloadBuilder;
 use Exception;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 
 class ReferrerOrderService
 {
@@ -24,8 +26,26 @@ class ReferrerOrderService
         return $this->referrerRepository->listReferrerOrder($filters);
     }
 
-    public function createReferrerOrder(ReferrerOrderDTO $referrerDTO): ReferrerOrder
+    public function createReferrerOrder(ReferrerOrderDTO $referrerDTO): ?ReferrerOrder
     {
+        // Don't create a non-pooling order when the acceptance has nothing
+        // worth sending to the provider (no sampled, reportable items).
+        // Pooling orders are placeholders created before sampling, so they
+        // are exempt from this check.
+        if (!$referrerDTO->pooling && $referrerDTO->acceptanceId) {
+            $acceptance = Acceptance::with([
+                'acceptanceItems.methodTest.test',
+                'acceptanceItems.samples',
+            ])->find($referrerDTO->acceptanceId);
+
+            if ($acceptance && !ReferrerOrderPayloadBuilder::hasSendableItems($acceptance)) {
+                Log::info("createReferrerOrder: skipped — acceptance has no sendable items", [
+                    'acceptance_id' => $referrerDTO->acceptanceId,
+                ]);
+                return null;
+            }
+        }
+
         $referrerOrder = $this->referrerRepository->createReferrerOrder($referrerDTO->toArray());
         ReferrerOrderCreated::dispatch($referrerOrder);
         return $referrerOrder;
@@ -105,7 +125,7 @@ class ReferrerOrderService
             'is_main'     => true,
         ];
 
-        [$itemPatients, $itemSamplesMap, $samples] = $this->buildBarcodeMaps($barcodes, $patient);
+        [$itemPatients, $itemSamplesMap, $samples] = $this->buildBarcodeMaps($barcodes, $patient, $collectRequestId);
 
         $orderItems = $this->buildGroupedOrderItems($acceptanceItems, $itemPatients, $itemSamplesMap, $patientData);
 
@@ -159,55 +179,43 @@ class ReferrerOrderService
         return $existing;
     }
 
-    public function createPoolingOrderIfNeeded(array $barcodes, ?Acceptance $acceptance): ?ReferrerOrder
+    /**
+     * Pooling no longer spawns a separate referrer order. Instead the
+     * acceptance's existing order is refreshed (and tagged with the pooling
+     * samples' collect request) so the provider receives the update. The
+     * sampleless pooling items themselves stay filtered out of the payload;
+     * only the collect request rides along on the order.
+     */
+    public function updateExistingOrderForPooling(Acceptance $acceptance, ?int $collectRequestId = null): ?ReferrerOrder
     {
-        if (!$acceptance) return null;
-        if (!$acceptance->waiting_for_pooling || !$acceptance->referrer_id) return null;
+        if (!$acceptance->referrer_id) return null;
 
-        $alreadyHasPoolingOrder = ReferrerOrder::where('acceptance_id', $acceptance->id)
-            ->where('pooling', true)
-            ->exists();
-        if ($alreadyHasPoolingOrder) return null;
+        // Prefer the most recent non-pooling order on the acceptance.
+        $order = ReferrerOrder::where('acceptance_id', $acceptance->id)
+            ->orderBy('pooling')
+            ->latest('id')
+            ->first();
 
-        $poolingItems = AcceptanceItem::where('acceptance_id', $acceptance->id)
-            ->where('is_pooling', true)
-            ->with(['test', 'panelTest'])
-            ->get();
-        if ($poolingItems->isEmpty()) return null;
+        if (!$order) {
+            Log::info("updateExistingOrderForPooling: skipped — no existing order", [
+                'acceptance_id' => $acceptance->id,
+            ]);
+            return null;
+        }
 
-        $acceptance->loadMissing('patient');
-        $patient = $acceptance->patient;
-        if (!$patient) return null;
+        if ($collectRequestId && $order->collect_request_id !== $collectRequestId) {
+            $this->referrerRepository->updateReferrerOrder($order, [
+                'collect_request_id' => $collectRequestId,
+            ]);
+            $order = $order->fresh();
+        }
 
-        $patientData = [
-            'server_id'   => $patient->id,
-            'fullName'    => $patient->fullName,
-            'id_no'       => $patient->idNo,
-            'gender'      => $patient->gender,
-            'dateOfBirth' => $patient->dateOfBirth?->format('Y-m-d'),
-            'is_main'     => true,
-        ];
-
-        [$itemPatientsUnused, $itemSamplesMap, $samples] = $this->buildBarcodeMaps($barcodes, $patient);
-        unset($itemPatientsUnused);
-
-        $orderItems = $this->buildGroupedOrderItems($poolingItems, [], $itemSamplesMap, $patientData);
-
-        $order = $this->createReferrerOrder(new ReferrerOrderDTO(
-            referrerId:       $acceptance->referrer_id,
-            orderId:          'POOL-' . $acceptance->id . '-' . now()->timestamp,
-            orderInformation: ['status' => 'processing', 'patient' => $patientData, 'patients' => [$patientData], 'orderItems' => $orderItems, 'samples' => $samples],
-            status:           'processing',
-            userId:           auth()->id(),
-            patientId:        $patient->id,
-            acceptanceId:     $acceptance->id,
-            needsAddSample:   false,
-            pooling:          true,
-        ));
-
+        // Pooling items have served their purpose for this batch.
         AcceptanceItem::where('acceptance_id', $acceptance->id)
             ->where('is_pooling', true)
             ->update(['is_pooling' => false]);
+
+        ReferrerOrderUpdated::dispatch($order);
 
         return $order;
     }
@@ -291,12 +299,13 @@ class ReferrerOrderService
 
             $itemSamples = $item->samples->map(function ($s) {
                 return [
-                    'sampleType'     => null,
-                    'collectionDate' => $s->collection_date,
-                    'receivedAt'     => $s->received_at ?? null,
-                    'sampleLocation' => null,
-                    'sampleId'       => $s->barcode,
-                    'materialId'     => null,
+                    'sampleType'         => null,
+                    'collectionDate'     => $s->collection_date,
+                    'receivedAt'         => $s->received_at ?? null,
+                    'sampleLocation'     => null,
+                    'sampleId'           => $s->barcode,
+                    'collect_request_id' => $s->collect_request_id,
+                    'materialId'         => null,
                 ];
             })->all();
 
@@ -341,7 +350,7 @@ class ReferrerOrderService
                 ->values()->all();
         }
 
-        $this->createReferrerOrder(new ReferrerOrderDTO(
+        $order = $this->createReferrerOrder(new ReferrerOrderDTO(
             referrerId:       $acceptance->referrer_id,
             orderId:          'SYNC-' . $acceptance->id . '-' . now()->timestamp,
             orderInformation: [
@@ -358,6 +367,10 @@ class ReferrerOrderService
             collectRequestId: null,
             needsAddSample:   $samplesByKey ? false : true,
         ));
+
+        if (!$order) {
+            return ['action' => 'skipped', 'count' => 0, 'reason' => 'no_sendable_items'];
+        }
 
         return ['action' => 'created', 'count' => 1];
     }
@@ -384,7 +397,7 @@ class ReferrerOrderService
             ?? $query->latest('id')->first();
     }
 
-    private function buildBarcodeMaps(array $barcodes, $patient): array
+    private function buildBarcodeMaps(array $barcodes, $patient, ?int $collectRequestId = null): array
     {
         $itemPatients   = [];
         $itemSamplesMap = [];
@@ -392,12 +405,13 @@ class ReferrerOrderService
             $barcodePatient = $barcode['patient'] ?? null;
             $material       = $barcode['material'] ?? null;
             $sampleData     = [
-                'sampleType'     => $barcode['sampleType'] ?? null,
-                'collectionDate' => $barcode['collection_date'] ?? null,
-                'receivedAt'     => $barcode['received_at'] ?? null,
-                'sampleLocation' => $barcode['sampleLocation'] ?? null,
-                'sampleId'       => $material['barcode'] ?? null,
-                'materialId'     => $material['id'] ?? null,
+                'sampleType'         => $barcode['sampleType'] ?? null,
+                'collectionDate'     => $barcode['collection_date'] ?? null,
+                'receivedAt'         => $barcode['received_at'] ?? null,
+                'sampleLocation'     => $barcode['sampleLocation'] ?? null,
+                'sampleId'           => $material['barcode'] ?? null,
+                'collect_request_id' => $barcode['collect_request_id'] ?? $collectRequestId,
+                'materialId'         => $material['id'] ?? null,
             ];
             foreach ($barcode['items'] ?? [] as $item) {
                 if ($barcodePatient) {
@@ -411,17 +425,18 @@ class ReferrerOrderService
             }
         }
 
-        $samples = collect($barcodes)->map(function ($barcode) use ($patient) {
+        $samples = collect($barcodes)->map(function ($barcode) use ($patient, $collectRequestId) {
             $material = $barcode['material'] ?? null;
             return [
-                'sampleType'     => $barcode['sampleType'] ?? null,
-                'collectionDate' => $barcode['collection_date'] ?? null,
-                'receivedAt'     => $barcode['received_at'] ?? null,
-                'sampleLocation' => $barcode['sampleLocation'] ?? null,
-                'patientId'      => $patient->id,
-                'itemIds'        => collect($barcode['items'] ?? [])->pluck('id')->values()->toArray(),
-                'sampleId'       => $material['barcode'] ?? null,
-                'materialId'     => $material['id'] ?? null,
+                'sampleType'         => $barcode['sampleType'] ?? null,
+                'collectionDate'     => $barcode['collection_date'] ?? null,
+                'receivedAt'         => $barcode['received_at'] ?? null,
+                'sampleLocation'     => $barcode['sampleLocation'] ?? null,
+                'patientId'          => $patient->id,
+                'itemIds'            => collect($barcode['items'] ?? [])->pluck('id')->values()->toArray(),
+                'sampleId'           => $material['barcode'] ?? null,
+                'collect_request_id' => $barcode['collect_request_id'] ?? $collectRequestId,
+                'materialId'         => $material['id'] ?? null,
             ];
         })->values()->toArray();
 

@@ -3,6 +3,7 @@
 namespace App\Domains\Reception\Models;
 
 use App\Domains\Laboratory\Models\SampleType;
+use App\Domains\Referrer\Models\CollectRequest;
 use App\Domains\Referrer\Models\Material;
 use App\Domains\User\Models\User;
 use App\Traits\Searchable;
@@ -23,6 +24,7 @@ class Sample extends Model
         "storeAddress",
         "sample_type_id",
         "patient_id",
+        "collect_request_id",
         "collection_date",
         "sampler_id",
         "material_id",
@@ -121,5 +123,10 @@ class Sample extends Model
     public function material()
     {
         return $this->belongsTo(Material::class);
+    }
+
+    public function collectRequest()
+    {
+        return $this->belongsTo(CollectRequest::class);
     }
 }
