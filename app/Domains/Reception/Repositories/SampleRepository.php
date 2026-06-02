@@ -57,6 +57,7 @@ class SampleRepository
             "sampler_id" => auth()->user()->id,
             "patient_id" => $sampleData["patient_id"],
             "received_at" => isset($sampleData["received_at"]) ? Carbon::parse($sampleData["received_at"]) : Carbon::now(),
+            "collect_request_id" => $sampleData["collect_request_id"] ?? null,
         ]);
         $this->syncAcceptanceItems($sample, collect($sampleData["acceptance_items"])->pluck("id")->unique()->toArray());
         $this->logCreated($sample);

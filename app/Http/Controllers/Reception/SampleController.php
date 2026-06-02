@@ -49,8 +49,11 @@ class SampleController extends Controller
     public function store(StoreSampleRequest $request)
     {
         $barcodes = $request->validated('barcodes', []);
+        $collectRequestId = $request->validated('collect_request.id');
+        $collectRequestId = $collectRequestId ? (int) $collectRequestId : null;
 
         foreach ($barcodes as $key => $barcode) {
+            $barcode['collect_request_id'] = $collectRequestId;
             $this->sampleService->storeSample(SampleDTO::fromArray($barcode), $key);
         }
 
@@ -59,16 +62,16 @@ class SampleController extends Controller
             ? AcceptanceItem::with('acceptance.patient')->find($firstItemId)?->acceptance
             : null;
 
-        $collectRequestId = $request->validated('collect_request.id');
-
         if ($acceptance) {
-            $this->referrerOrderService->createPoolingOrderIfNeeded($barcodes, $acceptance);
-
-            if ($acceptance->referrer_id) {
+            // Pooling acceptances update their existing order (carrying the
+            // collect request) instead of spawning a new referrer order.
+            if ($acceptance->waiting_for_pooling) {
+                $this->referrerOrderService->updateExistingOrderForPooling($acceptance, $collectRequestId);
+            } elseif ($acceptance->referrer_id) {
                 $this->referrerOrderService->createOrUpdateFromBarcodes(
                     $barcodes,
                     $acceptance,
-                    $collectRequestId ? (int) $collectRequestId : null,
+                    $collectRequestId,
                 );
             }
         }

@@ -2,6 +2,7 @@
 
 namespace App\Domains\Referrer\Models;
 
+use App\Domains\Reception\Models\Sample;
 use App\Domains\Referrer\Enums\CollectRequestStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -41,5 +42,10 @@ class CollectRequest extends Model
     public function referrerOrders(): HasMany
     {
         return $this->hasMany(ReferrerOrder::class);
+    }
+
+    public function samples(): HasMany
+    {
+        return $this->hasMany(Sample::class);
     }
 }

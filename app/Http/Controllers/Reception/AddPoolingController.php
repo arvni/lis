@@ -7,7 +7,6 @@ use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Requests\AddPoolingRequest;
 use App\Domains\Reception\Services\AcceptanceItemService;
-use App\Domains\Referrer\DTOs\ReferrerOrderDTO;
 use App\Domains\Referrer\Services\ReferrerOrderService;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
@@ -32,7 +31,9 @@ class AddPoolingController extends Controller
         $createdItems = $this->createPoolingItems($acceptance, $request->validated('acceptanceItems'));
 
         if ($createdItems->isNotEmpty() && $acceptance->referrer_id) {
-            $this->createPoolingReferrerOrder($acceptance, $createdItems);
+            // Don't create a new referrer order for pooling — refresh the
+            // acceptance's existing order so the provider sees the update.
+            $this->referrerOrderService->updateExistingOrderForPooling($acceptance);
         }
 
         return back()->with(['success' => true, 'status' => 'Pooling items added successfully.']);
@@ -115,56 +116,5 @@ class AddPoolingController extends Controller
         }
 
         return $created;
-    }
-
-    private function createPoolingReferrerOrder(Acceptance $acceptance, Collection $items): void
-    {
-        $acceptance->loadMissing('patient');
-        $patient = $acceptance->patient;
-        if (!$patient) return;
-
-        $patientData = [
-            'server_id'   => $patient->id,
-            'fullName'    => $patient->fullName,
-            'id_no'       => $patient->idNo,
-            'gender'      => $patient->gender,
-            'dateOfBirth' => $patient->dateOfBirth?->format('Y-m-d'),
-            'is_main'     => true,
-        ];
-
-        $items->each(fn($item) => $item->load('test'));
-
-        $orderItems = $items->map(fn($item) => [
-            'id'       => $item->id,
-            'test'     => [
-                'id'   => $item->test?->id,
-                'name' => $item->test?->name,
-                'code' => $item->test?->code ?? null,
-            ],
-            'patients' => [$patientData],
-            'samples'  => [],
-        ])->values()->toArray();
-
-        $orderInformation = [
-            'status'     => 'processing',
-            'patient'    => $patientData,
-            'patients'   => [$patientData],
-            'orderItems' => $orderItems,
-            'samples'    => [],
-        ];
-
-        $this->referrerOrderService->createReferrerOrder(new ReferrerOrderDTO(
-            referrerId:       $acceptance->referrer_id,
-            orderId:          'POOL-' . $acceptance->id . '-' . now()->timestamp,
-            orderInformation: $orderInformation,
-            status:           'processing',
-            userId:           auth()->id(),
-            patientId:        $patient->id,
-            acceptanceId:     $acceptance->id,
-            needsAddSample:   false,
-            pooling:          true,
-        ));
-
-        $items->each(fn($item) => $item->update(['is_pooling' => false]));
     }
 }

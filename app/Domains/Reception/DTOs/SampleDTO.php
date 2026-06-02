@@ -15,7 +15,8 @@ class SampleDTO
         public array   $barcodeGroup,
         public ?string $barcode = null,
         public ?int    $materialId = null,
-        public string  $receivedAt
+        public string  $receivedAt,
+        public ?int    $collectRequestId = null,
     )
     {
     }
@@ -36,6 +37,7 @@ class SampleDTO
                 : (($data['material']['barcode'] ?? null) ? strtoupper($data['material']['barcode']) : null),
             materialId: $data['material']['id'] ?? null,
             receivedAt: $data['received_at'] ?? null,
+            collectRequestId: $data['collect_request_id'] ?? null,
         );
     }
 
@@ -53,6 +55,7 @@ class SampleDTO
             "barcode" => $this->barcode,
             "material_id" => $this->materialId,
             "received_at" => $this->receivedAt,
+            "collect_request_id" => $this->collectRequestId,
         ];
     }
 }

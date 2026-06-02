@@ -4,6 +4,7 @@ namespace App\Domains\Referrer\Support;
 
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Referrer\Models\ReferrerOrder;
 
 class ReferrerOrderPayloadBuilder
@@ -12,6 +13,31 @@ class ReferrerOrderPayloadBuilder
         'male'   => 1,
         'female' => 0,
     ];
+
+    /**
+     * Whether an acceptance item should be sent to the provider: it must
+     * map to a real test, be reportable, not flagged sampleless, and have
+     * at least one sample.
+     */
+    public static function isSendableItem(AcceptanceItem $item): bool
+    {
+        $test = $item->methodTest?->test;
+        if (!$test || $item->reportless) {
+            return false;
+        }
+
+        return !$item->sampleless && $item->samples->isNotEmpty();
+    }
+
+    /**
+     * Whether the acceptance has any item worth sending to the provider.
+     */
+    public static function hasSendableItems(Acceptance $acceptance): bool
+    {
+        return $acceptance->acceptanceItems->contains(
+            fn(AcceptanceItem $item) => self::isSendableItem($item)
+        );
+    }
 
     public static function build(Acceptance $acceptance, ReferrerOrder $referrerOrder): array
     {
@@ -28,19 +54,23 @@ class ReferrerOrderPayloadBuilder
 
         $orderItems = [];
         foreach ($acceptance->acceptanceItems as $item) {
-            $test = $item->methodTest?->test;
-            if (!$test || $item->reportless) {
+            // Skip reportless / sampleless / not-yet-sampled items — only
+            // actually sampled, reportable items go to the provider.
+            if (!self::isSendableItem($item)) {
                 continue;
             }
+
+            $test = $item->methodTest->test;
 
             $samples = [];
             foreach ($item->samples as $sample) {
                 $samples[] = [
-                    'id'             => $sample->id,
-                    'sampleId'       => $sample->barcode,
-                    'patientId'      => $sample->patient_id,
-                    'collectionDate' => $sample->collection_date,
-                    'sample_type_id' => $sample->sample_type_id,
+                    'id'                 => $sample->id,
+                    'sampleId'           => $sample->barcode,
+                    'patientId'          => $sample->patient_id,
+                    'collectionDate'     => $sample->collection_date,
+                    'collect_request_id' => $sample->collect_request_id,
+                    'sample_type_id'     => $sample->sample_type_id,
                     'sampleType'     => [
                         'id'   => $sample->sampleType?->id,
                         'name' => $sample->sampleType?->name ?? 'Unknown',

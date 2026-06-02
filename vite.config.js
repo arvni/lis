@@ -9,7 +9,13 @@ export default defineConfig({
         host: '0.0.0.0',
         port: 5173,
         strictPort: true,
-        hmr: { host: 'localhost', protocol: 'ws', clientPort: 5173 },
+        cors: true,
+        allowedHosts: true,
+        hmr: {
+            host: process.env.VITE_HMR_HOST || 'localhost',
+            protocol: 'ws',
+            clientPort: Number(process.env.VITE_HMR_CLIENT_PORT || 5173),
+        },
         watch: { usePolling: true },
     },
     plugins: [
