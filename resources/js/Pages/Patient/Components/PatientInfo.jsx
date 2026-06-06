@@ -27,7 +27,7 @@ import {
     Phone as PhoneIcon,
     Cake as CakeIcon,
     Badge as BadgeIcon,
-    OpenInNew as OpenInNewIcon, AccessibilityNew, LocationCity, Home
+    OpenInNew as OpenInNewIcon, AccessibilityNew, LocationCity, Home, Map as MapIcon
 } from "@mui/icons-material";
 import {useForm,Link} from "@inertiajs/react";
 import countries from "@/Data/Countries.js";
@@ -105,6 +105,18 @@ const PatientInfo = ({
                     label: 'Female',
                     color: 'secondary'
                 };
+            case 'ambiguous':
+                return {
+                    icon: <QuestionMarkIcon/>,
+                    label: 'Ambiguous',
+                    color: 'default'
+                };
+            case 'none':
+                return {
+                    icon: <QuestionMarkIcon/>,
+                    label: 'None',
+                    color: 'default'
+                };
             default:
                 return {
                     icon: <QuestionMarkIcon/>,
@@ -127,7 +139,7 @@ const PatientInfo = ({
             <Box
                 onClick={handleClickImage}
                 component="img"
-                src={data.avatar || `/images/${data.gender || 'unknown'}.png`}
+                src={data.avatar || `/images/${['male', 'female'].includes(data.gender) ? data.gender : 'unknown'}.png`}
                 alt={data.fullName}
                 sx={{
                     width: 100,
@@ -141,7 +153,7 @@ const PatientInfo = ({
                 }}
             />
             <Dialog open={openImage} onClose={closeImgViewer} maxWidth="lg">
-                <img src={data.avatar || `/images/${data.gender || 'unknown'}.png`} alt={data.fullName || ""}/>
+                <img src={data.avatar || `/images/${['male', 'female'].includes(data.gender) ? data.gender : 'unknown'}.png`} alt={data.fullName || ""}/>
             </Dialog>
         </>
     );
@@ -224,6 +236,14 @@ const PatientInfo = ({
                                 </Box>
                             </Grid>
                             {data.nationality.code === "OM" && <>
+                                <Grid size={{xs: 12, sm: 6, md: 3}}>
+                                    <Box sx={{display: 'flex', alignItems: 'center'}}>
+                                        <MapIcon fontSize="medium" sx={{color: 'text.secondary', mr: 1}}/>
+                                        <Typography variant="body1" color="text.secondary">
+                                            Governorate: {data.governorate || 'N/A'}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
                                 <Grid size={{xs: 12, sm: 6, md: 3}}>
                                     <Box sx={{display: 'flex', alignItems: 'center'}}>
                                         <LocationCity fontSize="medium" sx={{color: 'text.secondary', mr: 1}}/>

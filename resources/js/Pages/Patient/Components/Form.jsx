@@ -42,8 +42,19 @@ export default function ({data, setData, back, edit, next, step, ...rest}) {
     }
     const checkPatientForm = () => {
         let tmp = {}
-        if (!data.fullName)
-            tmp = {fullName: "Please Enter Full Name"};
+        const isOmani = data?.nationality?.code === "OM";
+        if (!data.firstName)
+            tmp = {firstName: "Please Enter First Name"};
+        if (!data.lastName)
+            tmp = {...tmp, lastName: "Please Enter Last Name"};
+        if (isOmani && !data.secondName)
+            tmp = {...tmp, secondName: "Please Enter Second Name"};
+        if (isOmani && !data.thirdName)
+            tmp = {...tmp, thirdName: "Please Enter Third Name"};
+        if (isOmani && !data.governorate)
+            tmp = {...tmp, governorate: "Please Select Governorate"};
+        if (isOmani && !data.wilayat)
+            tmp = {...tmp, wilayat: "Please Select Wilayat"};
         if (!data.nationality || !countries.filter((item) => item.code == data.nationality.code).length)
             tmp = {...tmp, nationality: "Please Select Nationality"};
         if (!data.dateOfBirth)

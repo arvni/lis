@@ -6,7 +6,10 @@ import {useEffect, useState} from "react";
 import {Head, router, useForm} from "@inertiajs/react";
 
 const patient = {
-    fullName: "",
+    firstName: "",
+    secondName: "",
+    thirdName: "",
+    lastName: "",
     idNo: "",
     nationality: {
         code: "OM",
