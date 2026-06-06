@@ -26,6 +26,8 @@ import {
     Man2,
     QuestionMark,
     Woman2,
+    Transgender,
+    Block,
     CalendarMonth,
     Phone,
     Badge,
@@ -125,6 +127,28 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
 
     // Helper function to check if a field has an error
     const hasError = (fieldName) => !!errors && errors.hasOwnProperty(fieldName);
+
+    // Omani nationals must provide second and third names
+    const isOmani = data?.nationality?.code === "OM";
+
+    // Governorate / wilayat are cascading: wilayat options depend on the chosen governorate.
+    const governorateOptions = Object.keys(omanWilayats);
+    // Legacy patients may have a stored wilayat but no governorate — derive it so the
+    // wilayat still resolves and displays when editing them.
+    const selectedGovernorate = data?.governorate
+        || (data?.wilayat ? governorateOptions.find(g => omanWilayats[g].includes(data.wilayat)) : "")
+        || "";
+    const wilayatOptions = selectedGovernorate ? omanWilayats[selectedGovernorate] : [];
+
+    const handleGovernorateChange = (e, v) => {
+        onChange({target: {name: "governorate", value: v || ""}});
+        // A wilayat belongs to a single governorate; clear it when the governorate changes.
+        if (v !== selectedGovernorate) {
+            onChange({target: {name: "wilayat", value: ""}});
+        }
+    };
+
+    const handleWilayatChange = (e, v) => onChange({target: {name: "wilayat", value: v || ""}});
 
     // Toggle section expansion
     const toggleSection = (section) => {
@@ -370,22 +394,91 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                     </FormControl>
                                 </Grid>
 
-                                {/* Full Name Field */}
+                                {/* First Name Field */}
                                 <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <FormControl fullWidth variant="outlined" error={hasError("fullName")}>
+                                    <FormControl fullWidth variant="outlined" error={hasError("firstName")}>
                                         <TextField
-                                            id="fullName"
-                                            error={hasError("fullName")}
-                                            helperText={errors?.fullName}
-                                            value={data?.fullName || ''}
+                                            id="firstName"
+                                            error={hasError("firstName")}
+                                            helperText={errors?.firstName}
+                                            value={data?.firstName || ''}
                                             disabled={!editable}
                                             fullWidth
-                                            name="fullName"
+                                            name="firstName"
                                             onChange={onChange}
                                             required
-                                            placeholder="Enter full name"
+                                            placeholder="Enter first name"
                                             variant="outlined"
-                                            label="Full Name"
+                                            label="First Name"
+                                            slotProps={{
+                                                input: {startAdornment: <Person color="primary" sx={{mr: 1}}/>}
+                                            }}
+                                        />
+                                    </FormControl>
+                                </Grid>
+
+                                {/* Second Name Field */}
+                                <Grid size={{xs: 12, sm: 6, md: 4}}>
+                                    <FormControl fullWidth variant="outlined" error={hasError("secondName")}>
+                                        <TextField
+                                            id="secondName"
+                                            error={hasError("secondName")}
+                                            helperText={errors?.secondName}
+                                            value={data?.secondName || ''}
+                                            disabled={!editable}
+                                            fullWidth
+                                            name="secondName"
+                                            onChange={onChange}
+                                            required={isOmani}
+                                            placeholder="Enter second name"
+                                            variant="outlined"
+                                            label={isOmani ? "Second Name" : "Second Name (optional)"}
+                                            slotProps={{
+                                                input: {startAdornment: <Person color="primary" sx={{mr: 1}}/>}
+                                            }}
+                                        />
+                                    </FormControl>
+                                </Grid>
+
+                                {/* Third Name Field */}
+                                <Grid size={{xs: 12, sm: 6, md: 4}}>
+                                    <FormControl fullWidth variant="outlined" error={hasError("thirdName")}>
+                                        <TextField
+                                            id="thirdName"
+                                            error={hasError("thirdName")}
+                                            helperText={errors?.thirdName}
+                                            value={data?.thirdName || ''}
+                                            disabled={!editable}
+                                            fullWidth
+                                            name="thirdName"
+                                            onChange={onChange}
+                                            required={isOmani}
+                                            placeholder="Enter third name"
+                                            variant="outlined"
+                                            label={isOmani ? "Third Name" : "Third Name (optional)"}
+                                            slotProps={{
+                                                input: {startAdornment: <Person color="primary" sx={{mr: 1}}/>}
+                                            }}
+                                        />
+                                    </FormControl>
+                                </Grid>
+
+                                {/* Last Name Field */}
+                                <Grid size={{xs: 12, sm: 6, md: 4}}>
+                                    <FormControl fullWidth variant="outlined" error={hasError("lastName")}>
+                                        <TextField
+                                            id="lastName"
+                                            error={hasError("lastName")}
+                                            helperText={errors?.lastName}
+                                            value={data?.lastName || ''}
+                                            disabled={!editable}
+                                            fullWidth
+                                            name="lastName"
+                                            onChange={onChange}
+                                            required
+                                            placeholder="Enter last name"
+                                            variant="outlined"
+                                            label="Last Name"
                                             slotProps={{
                                                 input: {startAdornment: <Person color="primary" sx={{mr: 1}}/>}
                                             }}
@@ -455,8 +548,11 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                                               <ToggleButton value="male" aria-label="Male">
                                                                   <Man2 sx={{mr: 1}}/> Male
                                                               </ToggleButton>
-                                                              <ToggleButton value="unknown" aria-label="Other">
-                                                                  <QuestionMark sx={{mr: 1}}/> Other
+                                                              <ToggleButton value="ambiguous" aria-label="Ambiguous">
+                                                                  <Transgender sx={{mr: 1}}/> Ambiguous
+                                                              </ToggleButton>
+                                                              <ToggleButton value="none" aria-label="None">
+                                                                  <Block sx={{mr: 1}}/> None
                                                               </ToggleButton>
                                                           </ToggleButtonGroup>
                                                       }
@@ -633,42 +729,56 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                         </Grid>
                                         {/* Oman-specific fields */}
                                         <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                            <FormControl fullWidth sx={{mb: 2}} error={hasError("wilayat")}>
+                                            <FormControl fullWidth sx={{mb: 2}} error={hasError("governorate")}>
                                                 <Autocomplete
-                                                    id="wilayat"
-                                                    lablel="Wilayat"
+                                                    id="governorate"
                                                     fullWidth
-                                                    options={Object.entries(omanWilayats).flatMap(([governorate, cities]) =>
-                                                        cities.map(city => ({city, governorate}))
-                                                    )}
-                                                    value={data?.wilayat ?
-                                                        Object.entries(omanWilayats)
-                                                            .flatMap(([governorate, cities]) =>
-                                                                cities.includes(data.wilayat) ? {
-                                                                    city: data.wilayat,
-                                                                    governorate
-                                                                } : null
-                                                            )
-                                                            .filter(Boolean)[0] || null
-                                                        : null
-                                                    }
-                                                    onChange={(e, newValue) => {
-                                                        onChange({
-                                                            target: {
-                                                                name: "wilayat",
-                                                                value: newValue ? newValue.city : ""
-                                                            }
-                                                        });
-                                                    }}
-                                                    groupBy={(option) => option.governorate}
-                                                    getOptionLabel={(option) => option.city || ''}
-                                                    isOptionEqualToValue={(option, value) => option.city === value.city}
+                                                    options={governorateOptions}
+                                                    value={selectedGovernorate || null}
+                                                    onChange={handleGovernorateChange}
+                                                    getOptionLabel={(option) => option || ''}
+                                                    isOptionEqualToValue={(option, value) => option === value}
                                                     disabled={!editable}
                                                     renderInput={(params) => (
                                                         <TextField
                                                             {...params}
                                                             required
-                                                            placeholder="Search wilayat..."
+                                                            label="Governorate"
+                                                            placeholder="Select governorate"
+                                                            error={hasError("governorate")}
+                                                            helperText={errors?.governorate}
+                                                            variant="outlined"
+                                                        />
+                                                    )}
+                                                    renderOption={({key, ...props}, option) => (
+                                                        <li key={key} {...props}>
+                                                            <Box sx={{display: 'flex', alignItems: 'center'}}>
+                                                                <Flag fontSize="small" color="action"
+                                                                      sx={{mr: 1}}/>
+                                                                {option}
+                                                            </Box>
+                                                        </li>
+                                                    )}
+                                                />
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid size={{xs: 12, sm: 6, md: 4}}>
+                                            <FormControl fullWidth sx={{mb: 2}} error={hasError("wilayat")}>
+                                                <Autocomplete
+                                                    id="wilayat"
+                                                    fullWidth
+                                                    options={wilayatOptions}
+                                                    value={data?.wilayat || null}
+                                                    onChange={handleWilayatChange}
+                                                    getOptionLabel={(option) => option || ''}
+                                                    isOptionEqualToValue={(option, value) => option === value}
+                                                    disabled={!editable || !selectedGovernorate}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            required
+                                                            label="Wilayat"
+                                                            placeholder={selectedGovernorate ? "Search wilayat..." : "Select governorate first"}
                                                             error={hasError("wilayat")}
                                                             helperText={errors?.wilayat}
                                                             variant="outlined"
@@ -679,7 +789,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                                             <Box sx={{display: 'flex', alignItems: 'center'}}>
                                                                 <LocationCity fontSize="small" color="action"
                                                                               sx={{mr: 1}}/>
-                                                                {option.city}
+                                                                {option}
                                                             </Box>
                                                         </li>
                                                     )}

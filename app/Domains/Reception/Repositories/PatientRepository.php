@@ -80,6 +80,22 @@ class PatientRepository
     {
         if (isset($filters["search"]))
             $query->search($filters["search"]);
+        if (!empty($filters["nationality"]))
+            $query->where("nationality", $filters["nationality"]);
+        if (!empty($filters["gender"]))
+            $query->where("gender", $filters["gender"]);
+        if (!empty($filters["governorate"]))
+            $query->where("governorate", $filters["governorate"]);
+        if (!empty($filters["wilayat"]))
+            $query->where("wilayat", $filters["wilayat"]);
+        if (!empty($filters["dobFrom"]))
+            $query->whereDate("dateOfBirth", ">=", $filters["dobFrom"]);
+        if (!empty($filters["dobTo"]))
+            $query->whereDate("dateOfBirth", "<=", $filters["dobTo"]);
+        if (!empty($filters["registeredFrom"]))
+            $query->whereDate("created_at", ">=", $filters["registeredFrom"]);
+        if (!empty($filters["registeredTo"]))
+            $query->whereDate("created_at", "<=", $filters["registeredTo"]);
         if (isset($filters["patient"]))
             $query->where("patients.id", $filters["patient"])
                 ->orWhereHas("relatives", fn($q) => $q->where("relatives.patient_id", $filters["patient"]))

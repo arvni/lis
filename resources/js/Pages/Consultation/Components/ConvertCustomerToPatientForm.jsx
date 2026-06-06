@@ -52,7 +52,10 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
     });
 
     const {data, setData, post, processing, errors, clearErrors, reset, setError} = useForm({
-        fullName: time?.reservable?.name || "",
+        firstName: time?.reservable?.name || "",
+        secondName: "",
+        thirdName: "",
+        lastName: "",
         phone: time?.reservable?.phone || "",
         _method: "put"
     });
@@ -81,7 +84,10 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
     // Handle form submission
     const handleSubmit = () => {
         // Validate form before submission
-        const requiredFields = ['fullName', 'phone', 'idNo', 'nationality', 'avatar'];
+        const requiredFields = ['firstName', 'lastName', 'phone', 'idNo', 'nationality', 'avatar'];
+        if (data?.nationality?.code === "OM") {
+            requiredFields.push('secondName', 'thirdName', 'governorate', 'wilayat');
+        }
         let hasError = false;
 
         requiredFields.forEach(field => {

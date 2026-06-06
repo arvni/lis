@@ -169,6 +169,18 @@ const getGenderInfo = (gender) => {
                 label: 'Female',
                 color: 'secondary'
             };
+        case 'ambiguous':
+            return {
+                icon: <QuestionMarkIcon/>,
+                label: 'Ambiguous',
+                color: 'default'
+            };
+        case 'none':
+            return {
+                icon: <QuestionMarkIcon/>,
+                label: 'None',
+                color: 'default'
+            };
         default:
             return {
                 icon: <QuestionMarkIcon/>,
@@ -182,7 +194,8 @@ const GenderStats = ({stats}) => {
     const genderColors = {
         'male': 'primary.light',
         'female': 'secondary.light',
-        'unknown': 'info.light'
+        'ambiguous': 'info.light',
+        'none': 'grey.300'
     };
 
     return (
@@ -298,6 +311,14 @@ const Index = () => {
                     <span>{value}</span>
                 </Stack>
             )
+        },
+        {
+            field: 'governorate',
+            headerName: 'Governorate',
+            type: "string",
+            flex: .4,
+            display: "flex",
+            renderCell: ({value}) => value || "-"
         },
         {
             field: 'dateOfBirth',

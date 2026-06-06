@@ -21,6 +21,10 @@ class Patient extends Model
 
     protected $fillable = [
         "fullName",
+        "firstName",
+        "secondName",
+        "thirdName",
+        "lastName",
         "idNo",
         "nationality",
         "dateOfBirth",
@@ -29,6 +33,7 @@ class Patient extends Model
         "phone",
         "tribe",
         "wilayat",
+        "governorate",
         "village",
         "registrar_id"
     ];
@@ -43,10 +48,32 @@ class Patient extends Model
 
     protected $searchable = [
         "fullName",
+        "firstName",
+        "secondName",
+        "thirdName",
+        "lastName",
         "idNo",
         "phone",
         "samples.barcode"
     ];
+
+    protected static function booted(): void
+    {
+        // Keep fullName in sync with its structured parts on every save,
+        // regardless of which entry point created/updated the patient.
+        static::saving(function (Patient $patient) {
+            $parts = array_filter([
+                $patient->firstName,
+                $patient->secondName,
+                $patient->thirdName,
+                $patient->lastName,
+            ], fn($part) => filled($part));
+
+            if ($parts) {
+                $patient->fullName = implode(' ', $parts);
+            }
+        });
+    }
 
     public function getNameAttribute()
     {

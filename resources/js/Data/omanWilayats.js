@@ -1,3 +1,6 @@
+// Governorates of Oman and their wilayats.
+// Source: official administrative divisions of Oman (11 governorates, 63 wilayats)
+// https://en.wikipedia.org/wiki/Provinces_of_Oman
 export const omanWilayats={
     "Muscat": [
         "Muscat",
@@ -16,7 +19,8 @@ export const omanWilayats={
         "Thumrait",
         "Maqshin",
         "Shaleem and the Hallaniyat Islands",
-        "Sadah"
+        "Sadah",
+        "Al Mazyunah"
     ],
     "Musandam": [
         "Khasab",
@@ -37,7 +41,8 @@ export const omanWilayats={
         "Izki",
         "Samail",
         "Al Hamra",
-        "Bidbid"
+        "Bidbid",
+        "Jebel Akhdar"
     ],
     "Al Dhahirah": [
         "Ibri",
@@ -50,13 +55,15 @@ export const omanWilayats={
         "Bidiya",
         "Al Qabil",
         "Wadi Bani Khalid",
-        "Dema Wa Thaieen"
+        "Dema Wa Thaieen",
+        "Sinaw"
     ],
     "Al Sharqiyah South": [
         "Sur",
         "Jalan Bani Bu Ali",
         "Jalan Bani Bu Hassan",
-        "Masirah"
+        "Masirah",
+        "Al Kamil Wal Wafi"
     ],
     "Al Batinah North": [
         "Sohar",
@@ -71,7 +78,8 @@ export const omanWilayats={
         "Barka",
         "Nakhal",
         "Al Awabi",
-        "Wadi Al Maawil"
+        "Wadi Al Maawil",
+        "Al Musanaah"
     ],
     "Al Wusta": [
         "Haima",
@@ -80,4 +88,3 @@ export const omanWilayats={
         "Mahout"
     ]
 }
-

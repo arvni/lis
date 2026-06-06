@@ -60,7 +60,10 @@ const RelativeForm = ({
                       }) => {
     const {data, setData, post, processing, reset, errors, setError} = useForm({
         avatar: "",
-        fullName: "",
+        firstName: "",
+        secondName: "",
+        thirdName: "",
+        lastName: "",
         idNo: "",
         nationality: null,
         dateOfBirth: "",
