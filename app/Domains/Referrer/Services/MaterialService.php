@@ -6,7 +6,9 @@ namespace App\Domains\Referrer\Services;
 use App\Domains\Laboratory\Services\SampleTypeService;
 use App\Domains\Referrer\DTOs\GroupMaterialDTO;
 use App\Domains\Referrer\DTOs\MaterialDTO;
+use App\Domains\Referrer\Enums\OrderMaterialStatus;
 use App\Domains\Referrer\Models\Material;
+use App\Domains\Referrer\Models\OrderMaterial;
 use App\Domains\Referrer\Repositories\MaterialRepository;
 use Carbon\Carbon;
 use Exception;
@@ -39,7 +41,9 @@ readonly class MaterialService
                 "sample_type_id" => $groupMaterialDTO->sampleTypeId,
                 "barcode" => $this->generateBarcode($now, $sampleType->name, $key),
                 "tube_barcode" => $tube["tube_barcode"],
+                "tube_series" => $tube["tube_series"] ?? null,
                 "expire_date" => $tube["expire_date"],
+                "manufactured_date" => $tube["manufactured_date"] ?? null,
                 "packing_series" => $packingSeries,
             ]);
         }
@@ -48,7 +52,48 @@ readonly class MaterialService
 
     public function updateMaterial(Material $material, MaterialDTO $materialDTO): Material
     {
-        return $this->materialRepository->updateMaterial($material, $materialDTO->toArray());
+        $data = $materialDTO->toArray();
+
+        if ($materialDTO->referrerId) {
+            // Assigned to a referrer: link to that referrer's order material for
+            // the same sample type, then stamp the assignment date.
+            $orderMaterial = $this->resolveOrderMaterial($material, $materialDTO->referrerId, $materialDTO->sampleTypeId);
+            $data['order_material_id'] = $orderMaterial->id;
+            $data['assigned_at'] = $materialDTO->assignedAt
+                ? Carbon::parse($materialDTO->assignedAt)
+                : ($material->assigned_at ?? Carbon::now('Asia/Muscat'));
+        } else {
+            // No referrer: material is unassigned.
+            $data['order_material_id'] = null;
+            $data['assigned_at'] = null;
+        }
+
+        return $this->materialRepository->updateMaterial($material, $data);
+    }
+
+    /**
+     * Find (or create) the order material that links this material to the given
+     * referrer + sample type. Created directly so provider webhooks are not fired
+     * for an administrative reassignment.
+     */
+    private function resolveOrderMaterial(Material $material, int $referrerId, int $sampleTypeId): OrderMaterial
+    {
+        $current = $material->orderMaterial;
+        if ($current && $current->referrer_id === $referrerId && $current->sample_type_id === $sampleTypeId) {
+            return $current;
+        }
+
+        return OrderMaterial::query()
+            ->where('referrer_id', $referrerId)
+            ->where('sample_type_id', $sampleTypeId)
+            ->latest('id')
+            ->firstOr(fn() => OrderMaterial::query()->create([
+                'referrer_id' => $referrerId,
+                'sample_type_id' => $sampleTypeId,
+                'server_id' => auth()->id() ?? 0,
+                'amount' => 1,
+                'status' => OrderMaterialStatus::PROCESSED->value,
+            ]));
     }
 
     /**

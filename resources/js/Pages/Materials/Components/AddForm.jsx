@@ -41,7 +41,9 @@ const AddForm = ({open, onClose, defaultValue}) => {
         tubes: [
             {
                 tube_barcode: "",
-                expire_date: ""
+                tube_series: "",
+                expire_date: "",
+                manufactured_date: ""
             }
         ],
         ...defaultValue
@@ -62,7 +64,7 @@ const AddForm = ({open, onClose, defaultValue}) => {
 
 const FormContent = () => {
     const {data, setData, errors} = useFormState();
-    const [tubesList, setTubesList] = useState(data.tubes || [{tube_barcode: "", expire_date: ""}]);
+    const [tubesList, setTubesList] = useState(data.tubes || [{tube_barcode: "", tube_series: "", expire_date: "", manufactured_date: ""}]);
 
     useEffect(() => {
         // Update tubes list when number changes
@@ -73,7 +75,7 @@ const FormContent = () => {
             // Add new empty tubes
             const newTubes = [...tubesList];
             for (let i = currentCount; i < newCount; i++) {
-                newTubes.push({tube_barcode: "", expire_date: ""});
+                newTubes.push({tube_barcode: "", tube_series: "", expire_date: "", manufactured_date: ""});
             }
             setTubesList(newTubes);
             setData(prev => ({...prev, tubes: newTubes}));
@@ -217,6 +219,8 @@ const FormContent = () => {
                                     <TableRow>
                                         <TableCell width={60}>#</TableCell>
                                         <TableCell>Tube Barcode</TableCell>
+                                        <TableCell>Tube Series</TableCell>
+                                        <TableCell>Manufactured Date</TableCell>
                                         <TableCell>Expire Date</TableCell>
                                         <TableCell width={50}></TableCell>
                                     </TableRow>
@@ -234,6 +238,31 @@ const FormContent = () => {
                                                     onChange={(e) => handleTubeChange(index, 'tube_barcode', e.target.value)}
                                                     error={!!errors?.[`tubes.${index}.tube_barcode`]}
                                                     helperText={errors?.[`tubes.${index}.tube_barcode`]}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField
+                                                    size="small"
+                                                    fullWidth
+                                                    placeholder="Enter tube series"
+                                                    value={tube.tube_series || ""}
+                                                    onChange={(e) => handleTubeChange(index, 'tube_series', e.target.value)}
+                                                    error={!!errors?.[`tubes.${index}.tube_series`]}
+                                                    helperText={errors?.[`tubes.${index}.tube_series`]}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField
+                                                    size="small"
+                                                    fullWidth
+                                                    type="date"
+                                                    value={tube.manufactured_date || ""}
+                                                    onChange={(e) => handleTubeChange(index, 'manufactured_date', e.target.value)}
+                                                    error={!!errors?.[`tubes.${index}.manufactured_date`]}
+                                                    helperText={errors?.[`tubes.${index}.manufactured_date`]}
+                                                    slotProps={{
+                                                        inputLabel: {shrink: true}
+                                                    }}
                                                 />
                                             </TableCell>
                                             <TableCell>
@@ -312,6 +341,50 @@ const FormContent = () => {
                                                                 </InputAdornment>
                                                             ),
                                                         }
+                                                    }}
+                                                />
+                                            </Grid>
+                                            <Grid size={{xs: 12, sm: 6}}>
+                                                <TextField
+                                                    label="Tube Series"
+                                                    fullWidth
+                                                    variant="outlined"
+                                                    size="small"
+                                                    value={tube.tube_series || ""}
+                                                    onChange={(e) => handleTubeChange(index, 'tube_series', e.target.value)}
+                                                    error={!!errors?.[`tubes.${index}.tube_series`]}
+                                                    helperText={errors?.[`tubes.${index}.tube_series`] || "Optional tube series"}
+                                                    slotProps={{
+                                                        input: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start">
+                                                                    <Numbers fontSize="small"/>
+                                                                </InputAdornment>
+                                                            ),
+                                                        }
+                                                    }}
+                                                />
+                                            </Grid>
+                                            <Grid size={{xs: 12, sm: 6}}>
+                                                <TextField
+                                                    label="Manufactured Date"
+                                                    fullWidth
+                                                    type="date"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    value={tube.manufactured_date || ""}
+                                                    onChange={(e) => handleTubeChange(index, 'manufactured_date', e.target.value)}
+                                                    error={!!errors?.[`tubes.${index}.manufactured_date`]}
+                                                    helperText={errors?.[`tubes.${index}.manufactured_date`] || "Optional manufactured date"}
+                                                    slotProps={{
+                                                        input: {
+                                                            startAdornment: (
+                                                                <InputAdornment position="start">
+                                                                    <CalendarToday fontSize="small"/>
+                                                                </InputAdornment>
+                                                            ),
+                                                        },
+                                                        inputLabel: {shrink: true}
                                                     }}
                                                 />
                                             </Grid>

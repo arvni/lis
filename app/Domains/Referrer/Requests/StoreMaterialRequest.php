@@ -28,7 +28,9 @@ class StoreMaterialRequest extends FormRequest
             'number_of_tubes' => 'required|integer|min:1|max:100',
             'tubes' => 'required|array|min:1',
             'tubes.*.tube_barcode' => 'nullable|string|unique:materials,tube_barcode',
+            'tubes.*.tube_series' => 'nullable|string',
             'tubes.*.expire_date' => 'nullable|date|after:today',
+            'tubes.*.manufactured_date' => 'nullable|date|before_or_equal:today',
         ];
     }
 }

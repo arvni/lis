@@ -11,6 +11,7 @@ import DeleteForm from "@/Components/DeleteForm";
 import PageHeader from "@/Components/PageHeader.jsx";
 import Filter from "./Components/Filter";
 import AddForm from "./Components/AddForm";
+import EditForm from "./Components/EditForm";
 import {TabContext, TabPanel} from "@mui/lab";
 import PackingSeries from "@/Pages/Materials/PackingSeries.jsx";
 
@@ -19,6 +20,7 @@ const MaterialsIndex = () => {
 
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const [openAddForm, setOpenAddForm] = useState(false);
+    const [openEditForm, setOpenEditForm] = useState(false);
     const [selectedMaterial, setSelectedMaterial] = useState(null);
     const [activeTab, setActiveTab] = useState("1")
 
@@ -29,8 +31,8 @@ const MaterialsIndex = () => {
 
     // Create handlers with useCallback to prevent unnecessary re-renders
     const handleEditMaterial = useCallback((id) => () => {
-        setSelectedMaterial({...findMaterial(id), _method: "put"});
-        setOpenAddForm(true);
+        setSelectedMaterial(findMaterial(id));
+        setOpenEditForm(true);
     }, [findMaterial]);
 
     const handleDeleteMaterial = useCallback((id) => () => {
@@ -41,6 +43,7 @@ const MaterialsIndex = () => {
     const handleCloseForm = useCallback(() => {
         setSelectedMaterial(null);
         setOpenAddForm(false);
+        setOpenEditForm(false);
         setOpenDeleteForm(false);
     }, []);
 
@@ -91,6 +94,20 @@ const MaterialsIndex = () => {
         {
             field: 'tube_barcode',
             headerName: 'Tube Barcode',
+            type: "string",
+            width: 200,
+            flex: 1,
+        },
+        {
+            field: 'tube_series',
+            headerName: 'Tube Series',
+            type: "string",
+            width: 200,
+            flex: 1,
+        },
+        {
+            field: 'manufactured_date',
+            headerName: 'Manufactured Date',
             type: "string",
             width: 200,
             flex: 1,
@@ -199,6 +216,14 @@ const MaterialsIndex = () => {
                     {openAddForm && (
                         <AddForm
                             open={openAddForm}
+                            defaultValue={selectedMaterial}
+                            onClose={handleCloseForm}
+                        />
+                    )}
+
+                    {openEditForm && selectedMaterial && (
+                        <EditForm
+                            open={openEditForm}
                             defaultValue={selectedMaterial}
                             onClose={handleCloseForm}
                         />

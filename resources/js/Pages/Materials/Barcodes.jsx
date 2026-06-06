@@ -178,7 +178,7 @@ const BarcodeComponent = ({materials}) => {
                 </Typography>
                 <Box>
                     <FormControlLabel sx={{mt: 1}}
-                                      label="Print The Barcode"
+                                      label="Print Series & Dates"
                                       control={<Checkbox checked={printOnlyBarcode}
                                                          name="printBarcode"
                                                          onChange={handleChange}/>}/>
@@ -202,11 +202,11 @@ const BarcodeComponent = ({materials}) => {
                             <BarcodeItem printOnlyBarcode={printOnlyBarcode}>
                                 {printOnlyBarcode ? <Stack direction="column"
                                                            sx={{height:"100%", justifyContent: "space-around"}}>
-                                    <BarcodeText printOnlyBarcode>{material.barcode}</BarcodeText>
+                                    <BarcodeText printOnlyBarcode>{material.tube_series}</BarcodeText>
                                     <Divider/>
-                                    <BarcodeText printOnlyBarcode>{material.barcode}</BarcodeText>
+                                    <BarcodeText printOnlyBarcode>{formatDate(material.manufactured_date)}</BarcodeText>
                                     <Divider/>
-                                    <BarcodeText printOnlyBarcode>{material.barcode}</BarcodeText>
+                                    <BarcodeText printOnlyBarcode>{formatDate(material.expire_date)}</BarcodeText>
                                 </Stack> : <>
                                     <Box sx={{
                                         width: '100%',

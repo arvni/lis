@@ -2,7 +2,6 @@
 
 namespace App\Domains\Referrer\Requests;
 
-use App\Domains\Laboratory\Enums\OfferType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -22,52 +21,32 @@ class UpdateMaterialRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules(): array
     {
-        $rules = [
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'type' => ['required', Rule::in(OfferType::names())],
-            'tests' => 'nullable|array',
-            'tests.*.id' => 'exists:tests,id',
-            'referrers' => 'nullable|array',
-            'referrers.*.id' => 'exists:referrers,id',
-            'started_at' => 'nullable|date',
-            'ended_at' => 'nullable|date|after_or_equal:started_at',
-            'active' => 'boolean',
+        $materialId = $this->route()->parameter("material")?->id;
+
+        return [
+            'sample_type' => ['required', 'array'],
+            'sample_type.id' => ['required', 'exists:sample_types,id'],
+            'packing_series' => ['required', 'string', 'max:255'],
+            'tube_series' => ['nullable', 'string', 'max:255'],
+            'barcode' => ['required', 'string', 'max:255', Rule::unique('materials', 'barcode')->ignore($materialId)],
+            'tube_barcode' => ['nullable', 'string', 'max:255', Rule::unique('materials', 'tube_barcode')->ignore($materialId)],
+            'manufactured_date' => ['nullable', 'date'],
+            'expire_date' => ['nullable', 'date'],
+            'assigned_at' => ['nullable', 'date'],
+            'referrer' => ['nullable', 'array'],
+            'referrer.id' => ['nullable', 'exists:referrers,id'],
         ];
-
-        // Add specific validation for amount based on type
-        if ($this->input('type') === 'PERCENTAGE') {
-            $rules['amount'] = 'required|numeric|min:0|max:100'; // Ensure percentage is between 0-100
-        } else {
-            $rules['amount'] = 'required|numeric|min:0'; // Ensure fixed amount is not negative
-        }
-
-        return $rules;
     }
 
-    /**
-     * Get the error messages for the defined validation rules.
-     *
-     * @return array
-     */
-    public function messages()
+    public function messages(): array
     {
         return [
-            'title.required' => 'The material title is required.',
-            'title.max' => 'The material title must not exceed 255 characters.',
-            'type.required' => 'Please select an material type.',
-            'type.in' => 'The selected material type is invalid.',
-            'amount.required' => 'The amount is required.',
-            'amount.numeric' => 'The amount must be a number.',
-            'amount.min' => 'The amount cannot be negative.',
-            'amount.max' => 'The percentage cannot exceed 100%.',
-            'tests.*.exists' => 'One or more selected tests do not exist.',
-            'referrers.*.exists' => 'One or more selected referrers do not exist.',
-            'started_at.date' => 'The start date must be a valid date.',
-            'ended_at.date' => 'The end date must be a valid date.',
-            'ended_at.after_or_equal' => 'The end date must be after or equal to the start date.',
+            'sample_type.id.required' => 'Please select a sample type.',
+            'barcode.required' => 'The barcode is required.',
+            'barcode.unique' => 'This barcode is already in use.',
+            'tube_barcode.unique' => 'This tube barcode is already in use.',
         ];
     }
 }

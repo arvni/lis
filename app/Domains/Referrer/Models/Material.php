@@ -11,20 +11,23 @@ class Material extends Model
 {
     use Searchable;
 
-    protected $searchable = ['barcode', 'tube_barcode', 'packing_series'];
+    protected $searchable = ['barcode', 'tube_barcode', 'packing_series', 'tube_series'];
     protected $fillable = [
         "sample_type_id",
         "order_material_id",
         "sample_id",
         "packing_series",
+        "tube_series",
         "barcode",
         "tube_barcode",
         "expire_date",
+        "manufactured_date",
         "assigned_at",
     ];
 
     protected $casts = [
         "expire_date" => "date:Y-m-d",
+        "manufactured_date" => "date:Y-m-d",
     ];
 
     public function sampleType()

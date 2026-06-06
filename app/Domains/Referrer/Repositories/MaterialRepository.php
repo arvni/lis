@@ -19,6 +19,7 @@ class MaterialRepository
     public function listMaterials(array $queryData): LengthAwarePaginator
     {
         $query = Material::query()
+            ->with(["referrer:referrers.id,referrers.fullName", "sampleType:id,name"])
             ->withAggregate("referrer", "fullName")
             ->withAggregate("sampleType", "name");
         if (isset($queryData["filters"]))

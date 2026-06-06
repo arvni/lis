@@ -2,19 +2,18 @@
 
 namespace App\Domains\Referrer\DTOs;
 
-use Carbon\Carbon;
-
 class MaterialDTO
 {
     public function __construct(
         public int     $sampleTypeId,
+        public string  $packingSeries,
+        public ?string $tubeSeries,
         public string  $barcode,
-        public int     $no,
         public ?string $tubeBarcode,
         public ?string $expireDate,
+        public ?string $manufacturedDate,
+        public ?string $assignedAt,
         public ?int    $referrerId,
-        public Carbon  $assignedAt,
-        public ?int    $sample_id,
     )
     {
     }
@@ -22,27 +21,32 @@ class MaterialDTO
     public static function fromArray(array $data): self
     {
         return new self(
-            $data['sample_type_id'],
+            $data['sample_type']['id'] ?? $data['sample_type_id'],
+            $data['packing_series'],
+            $data['tube_series'] ?? null,
             $data['barcode'],
-            $data['no'],
             $data['tube_barcode'] ?? null,
             $data['expire_date'] ?? null,
-            $data['referrer_id'] ?? null,
-            ($data['assigned_at'] ?? null) ? Carbon::parse($data['assigned_at']) : null,
-            $data['sample_id'] ?? null,);
+            $data['manufactured_date'] ?? null,
+            $data['assigned_at'] ?? null,
+            $data['referrer']['id'] ?? null,
+        );
     }
 
+    /**
+     * Material's own columns. The referrer/assignment link
+     * (order_material_id, assigned_at) is resolved in the service.
+     */
     public function toArray(): array
     {
         return [
             "sample_type_id" => $this->sampleTypeId,
-            "referrer_id" => $this->referrerId,
-            "sample_id" => $this->sample_id,
-            "no" => $this->no,
+            "packing_series" => $this->packingSeries,
+            "tube_series" => $this->tubeSeries,
             "barcode" => $this->barcode,
             "tube_barcode" => $this->tubeBarcode,
             "expire_date" => $this->expireDate,
-            "assigned_at" => $this->assignedAt,
+            "manufactured_date" => $this->manufacturedDate,
         ];
     }
 }
