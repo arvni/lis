@@ -62,6 +62,8 @@ class Patient extends Model
         // Keep fullName in sync with its structured parts on every save,
         // regardless of which entry point created/updated the patient.
         static::saving(function (Patient $patient) {
+            self::deriveMissingNameParts($patient);
+
             $parts = array_filter([
                 $patient->firstName,
                 $patient->secondName,
@@ -73,6 +75,41 @@ class Patient extends Model
                 $patient->fullName = implode(' ', $parts);
             }
         });
+    }
+
+    /**
+     * When the second and third names are both empty but the last name carries
+     * several words (e.g. firstName "Arvin", lastName "Eizadi Raeini"), treat the
+     * last name as the family chain and split it: first leftover word becomes the
+     * second name, any remaining middle words the third name, and the final word
+     * the family/last name. With a single leftover word the third name mirrors the
+     * second so all slots are populated ("Arvin Eizadi Eizadi Raeini").
+     *
+     * Only runs when both slots are empty and the last name is actually being set,
+     * so re-saving a patient for unrelated edits never re-splits an existing name.
+     */
+    protected static function deriveMissingNameParts(Patient $patient): void
+    {
+        if (filled($patient->secondName) || filled($patient->thirdName)) {
+            return;
+        }
+
+        if ($patient->exists && !$patient->isDirty('lastName')) {
+            return;
+        }
+
+        $words = preg_split('/\s+/', trim((string) $patient->lastName), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        if (count($words) < 2) {
+            return;
+        }
+
+        $lastName = array_pop($words);
+        $secondName = array_shift($words);
+        $thirdName = $words ? implode(' ', $words) : $secondName;
+
+        $patient->secondName = $secondName;
+        $patient->thirdName = $thirdName;
+        $patient->lastName = $lastName;
     }
 
     public function getNameAttribute()
