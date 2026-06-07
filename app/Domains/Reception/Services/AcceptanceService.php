@@ -383,11 +383,16 @@ class AcceptanceService
     public function updateAcceptanceStatus(Acceptance $acceptance, AcceptanceStatus $status): void
     {
         $this->acceptanceRepository->updateAcceptance($acceptance, ["status" => $status]);
-        if ($status == AcceptanceStatus::PROCESSING) {
-            $acceptance->load("referrerOrders");
-            foreach ($acceptance->referrerOrders as $referrerOrder) {
-                $this->referrerOrderService->updateReferrerOrderStatus($referrerOrder, 'processing');
-            }
+
+        // Mirror the acceptance status onto every linked referrer order so the
+        // provider stays in sync on any status change. The webhook payload
+        // collapses the acceptance status to processing/reported, so we map to
+        // the same two values here. updateReferrerOrderStatus only dispatches a
+        // webhook when the order's status actually changes.
+        $referrerOrderStatus = $status === AcceptanceStatus::REPORTED ? 'reported' : 'processing';
+        $acceptance->load("referrerOrders");
+        foreach ($acceptance->referrerOrders as $referrerOrder) {
+            $this->referrerOrderService->updateReferrerOrderStatus($referrerOrder, $referrerOrderStatus);
         }
     }
 
