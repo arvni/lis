@@ -60,6 +60,8 @@ class UpdateReportRequest extends FormRequest
             // Signers validation if included
             'signers' => 'nullable|array',
             'signers.*.user_id' => 'required|exists:users,id',
+            'signers.*.title' => 'nullable|string|max:255',
+            'signers.*.row' => 'nullable|integer|min:1',
         ];
 
         // Add dynamic parameter rules if we have a template

@@ -166,6 +166,7 @@ class ReportController extends Controller
             $request->validated('reported_document'),
             $parameters,
             $request->validated('files', []),
+            $request->validated('signers', []),
         );
 
         // Check and update acceptance status

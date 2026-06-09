@@ -159,6 +159,7 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
             setSigner(prevState => ({
                 ...prevState,
                 [key]: value,
+                user_id: value.id,
                 title: value.title || '',
                 name: value.name || '',
                 signature: value.signature || null

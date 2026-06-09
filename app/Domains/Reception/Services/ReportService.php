@@ -146,7 +146,8 @@ class ReportService
                                  int    $reportTemplateId,
                                  ?array $reportedDocument = null,
                                  array  $parameters = [],
-                                 ?array $additionalFiles = []): Report
+                                 ?array $additionalFiles = [],
+                                 array  $signers = []): Report
     {
         // Get acceptance item
         $acceptanceItem = $this->acceptanceItemRepository->findAcceptanceItemById($acceptanceItemId);
@@ -161,10 +162,8 @@ class ReportService
                 'approver_id' => null,
                 'approved_at' => null,
             ]);
-        // Create signer
-        $report->signers()->delete();
-        $signer = $this->signerFactory->createFromUser($user, $report);
-        $this->signerRepository->save($signer);
+        // Persist signers
+        $this->syncSigners($report, $user, $signers);
         $report->load("reportTemplate.template", "acceptanceItem.patient");
 
         // Associate additional files
@@ -443,6 +442,45 @@ class ReportService
             $this->documentService->deleteDocument($report->publishedDocument);
         }
 
+    }
+
+    /**
+     * Replace a report's signers with the submitted list.
+     *
+     * Each submitted signer's name/signature/stamp are sourced from the
+     * authoritative User record; the title and row are taken from the request.
+     * Falls back to seeding the reporter as the sole signer when none provided.
+     *
+     * @param Report $report
+     * @param User $reporter
+     * @param array $signers
+     * @return void
+     */
+    private function syncSigners(Report $report, User $reporter, array $signers): void
+    {
+        $report->signers()->delete();
+
+        if (empty($signers)) {
+            $signer = $this->signerFactory->createFromUser($reporter, $report);
+            $this->signerRepository->save($signer);
+            return;
+        }
+
+        foreach (array_values($signers) as $index => $signerData) {
+            $signerUser = User::find($signerData['user_id']);
+            if (!$signerUser) {
+                continue;
+            }
+
+            $row = $signerData['row'] ?? ($index + 1);
+            $signer = $this->signerFactory->createFromUser($signerUser, $report, $row);
+
+            if (array_key_exists('title', $signerData) && $signerData['title'] !== null) {
+                $signer->title = $signerData['title'];
+            }
+
+            $this->signerRepository->save($signer);
+        }
     }
 
     /**
