@@ -63,6 +63,7 @@ class GetAcceptancePoolingItemsController extends Controller
                     'type' => 'test',
                     'id'   => $testId,
                     'name' => $test->name,
+                    'acceptance_item_id' => $item->id,
                     'initialData' => [
                         'method_test' => array_merge($methodTest->toArray(), [
                             'test'   => $test->toArray(),

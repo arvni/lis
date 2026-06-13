@@ -141,11 +141,20 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
     };
 
     const handleTestSubmit = (testData) => {
-        submit({tests: [{...testData, sampleless: true, reportless: true}]});
+        // Carry the originally-selected acceptance item so the backend can bump
+        // its no_sample — the method may have been changed in the configure step,
+        // so matching by method_test_id alone is not reliable.
+        const originalIds = selectedItem?.acceptance_item_id ? [selectedItem.acceptance_item_id] : [];
+        submit({tests: [{...testData, sampleless: true, reportless: true, original_acceptance_item_ids: originalIds}]});
     };
 
     const handlePanelSubmit = (data) => {
-        submit({panels: [{...data, sampleless: true, reportless: true}]});
+        // The panel's original acceptance items (with their real ids) are carried
+        // on the selected list item; bump no_sample on every one of them.
+        const originalIds = (selectedItem?.panelData?.acceptanceItems ?? [])
+            .map(i => i.id)
+            .filter(Boolean);
+        submit({panels: [{...data, sampleless: true, reportless: true, original_acceptance_item_ids: originalIds}]});
     };
 
     const patient = acceptance

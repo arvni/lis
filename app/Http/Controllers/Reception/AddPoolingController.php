@@ -55,7 +55,7 @@ class AddPoolingController extends Controller
                 discount:         $item['discount'] ?? 0,
                 customParameters: array_merge(
                     $item['customParameters'] ?? [],
-                    Arr::except($item, ['method_test', 'price', 'discount', 'timeLine', 'id', 'customParameters', 'sampleless', 'reportless'])
+                    Arr::except($item, ['method_test', 'price', 'discount', 'timeLine', 'id', 'customParameters', 'sampleless', 'reportless', 'original_acceptance_item_ids'])
                 ),
                 timeline:  [Carbon::now()->format('Y-m-d H:i:s') => 'Created By ' . $user->name . ' (Pooling)'],
                 noSample:  1,
@@ -67,12 +67,8 @@ class AddPoolingController extends Controller
             $createdItem->update(['is_pooling' => true]);
             $created->push($createdItem);
 
-            // Increment no_sample on the original acceptance item
-            $acceptance->acceptanceItems()
-                ->where('method_test_id', $item['method_test']['id'])
-                ->where('is_pooling', false)
-                ->where('sampleless', false)
-                ->increment('no_sample');
+            // Bump no_sample on the originally-selected acceptance item(s)
+            $this->incrementOriginalNoSample($acceptance, $item['original_acceptance_item_ids'] ?? []);
         }
 
         // Process panels
@@ -105,16 +101,37 @@ class AddPoolingController extends Controller
                 $createdItem = $this->acceptanceItemService->storeAcceptanceItem($dto);
                 $createdItem->update(['is_pooling' => true]);
                 $created->push($createdItem);
-
-                // Increment no_sample on the original acceptance item
-                $acceptance->acceptanceItems()
-                    ->where('method_test_id', $item['method_test']['id'])
-                    ->where('is_pooling', false)
-                    ->where('sampleless', false)
-                    ->increment('no_sample');
             }
+
+            // Bump no_sample on every originally-selected acceptance item of the panel
+            $this->incrementOriginalNoSample($acceptance, $panelData['original_acceptance_item_ids'] ?? []);
         }
 
         return $created;
+    }
+
+    /**
+     * Increment no_sample by one on the given original (non-pooling) acceptance
+     * items, so each pooled test requires one additional sample, and record the
+     * bump on each item's timeline.
+     */
+    private function incrementOriginalNoSample(Acceptance $acceptance, array $ids): void
+    {
+        $ids = array_filter($ids);
+        if (empty($ids)) return;
+
+        $user  = auth()->user();
+        $items = $acceptance->acceptanceItems()
+            ->whereIn('id', $ids)
+            ->where('is_pooling', false)
+            ->get();
+
+        foreach ($items as $item) {
+            $item->increment('no_sample');
+            $this->acceptanceItemService->updateAcceptanceItemTimeline(
+                $item,
+                "Sample count increased to {$item->no_sample} by {$user->name} (Pooling)"
+            );
+        }
     }
 }
