@@ -481,9 +481,41 @@ class AcceptanceService
      * @param Acceptance $acceptance
      * @return void
      */
-    public function checkAndUpdateAcceptanceStatus(Acceptance $acceptance): void
+    /**
+     * Set the acceptance status only when it actually differs, so we avoid
+     * redundant updates and referrer-order webhook dispatches.
+     */
+    private function setStatusIfChanged(Acceptance $acceptance, AcceptanceStatus $status): void
     {
-        // Mark SERVICE type items as reportless and sampleless
+        if ($acceptance->status !== $status) {
+            $this->updateAcceptanceStatus($acceptance, $status);
+        }
+    }
+
+    /**
+     * Pooling takes priority: while the acceptance is flagged as waiting for
+     * pooling, its status must be POOLING regardless of the rest of the
+     * workflow. The flag is cleared manually once pooling is complete, after
+     * which a subsequent check recomputes the real downstream status.
+     *
+     * @return bool True when pooling handled the status (caller should stop).
+     */
+    private function applyPoolingPriority(Acceptance $acceptance): bool
+    {
+        if (!$acceptance->waiting_for_pooling) {
+            return false;
+        }
+
+        $this->setStatusIfChanged($acceptance, AcceptanceStatus::POOLING);
+        return true;
+    }
+
+    /**
+     * SERVICE type items never carry a sample or a report, so normalise them
+     * before computing the acceptance status.
+     */
+    private function markServiceItemsAsReportless(Acceptance $acceptance): void
+    {
         $acceptance->load(['acceptanceItems.test']);
         foreach ($acceptance->acceptanceItems as $item) {
             if ($item->test && $item->test->type === TestType::SERVICE) {
@@ -492,6 +524,29 @@ class AcceptanceService
                 }
             }
         }
+    }
+
+    /**
+     * Terminal step shared by the status checks: REPORTED once finance has
+     * approved, otherwise hold at WAITING_FOR_PUBLISHING.
+     */
+    private function finalizeReportedOrWaiting(Acceptance $acceptance): void
+    {
+        $this->setStatusIfChanged(
+            $acceptance,
+            $acceptance->financial_approved
+                ? AcceptanceStatus::REPORTED
+                : AcceptanceStatus::WAITING_FOR_PUBLISHING
+        );
+    }
+
+    public function checkAndUpdateAcceptanceStatus(Acceptance $acceptance): void
+    {
+        if ($this->applyPoolingPriority($acceptance)) {
+            return;
+        }
+
+        $this->markServiceItemsAsReportless($acceptance);
 
         // Load acceptance items with reports
         $acceptance->load([
@@ -503,62 +558,45 @@ class AcceptanceService
 
         $reportableItems = $acceptance->acceptanceItems;
 
-        // If no reportable items, check financial approval before setting to REPORTED
+        // If no reportable items, finance approval decides REPORTED vs waiting
         if ($reportableItems->isEmpty()) {
-            if ($acceptance->financial_approved) {
-                $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
-            } else {
-                if ($acceptance->status !== AcceptanceStatus::WAITING_FOR_PUBLISHING) {
-                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
-                }
-            }
+            $this->finalizeReportedOrWaiting($acceptance);
             return;
         }
+
         // Check if all reportable items have reports
         $allHaveReports = $reportableItems->every(function ($item) {
             return $item->report !== null;
         });
         if (!$allHaveReports) {
-            // Not all items have reports yet, check if items started or should be pooling
+            // Not all items have reports yet; if any item has started processing,
+            // move to PROCESSING. (Pooling is handled by the early return above.)
             $startedItems = $this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
             if ($startedItems) {
-                if ($acceptance->status !== AcceptanceStatus::PROCESSING) {
-                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::PROCESSING);
-                }
-            } elseif ($acceptance->waiting_for_pooling && $acceptance->status !== AcceptanceStatus::POOLING) {
-                $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::POOLING);
+                $this->setStatusIfChanged($acceptance, AcceptanceStatus::PROCESSING);
             }
             return;
         }
+
         // Check if all reports are approved
         $allApproved = $reportableItems->every(function ($item) {
             return $item->report && $item->report->approved_at !== null;
         });
+        if (!$allApproved) {
+            return;
+        }
 
-        if ($allApproved) {
-            // Check if all are published
-            $allPublished = $reportableItems->every(function ($item) {
-                return $item->report && $item->report->published_at !== null;
-            });
+        // Check if all are published
+        $allPublished = $reportableItems->every(function ($item) {
+            return $item->report && $item->report->published_at !== null;
+        });
 
-            if ($allPublished) {
-                // All reports are published, check financial approval before setting to REPORTED
-                if ($acceptance->financial_approved) {
-                    if ($acceptance->status !== AcceptanceStatus::REPORTED) {
-                        $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
-                    }
-                } else {
-                    // Stay at WAITING_FOR_PUBLISHING until financial is approved
-                    if ($acceptance->status !== AcceptanceStatus::WAITING_FOR_PUBLISHING) {
-                        $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
-                    }
-                }
-            } else {
-                // All approved but not all published
-                if ($acceptance->status !== AcceptanceStatus::WAITING_FOR_PUBLISHING) {
-                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
-                }
-            }
+        if ($allPublished) {
+            // All published, finance approval decides REPORTED vs waiting
+            $this->finalizeReportedOrWaiting($acceptance);
+        } else {
+            // All approved but not all published
+            $this->setStatusIfChanged($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
         }
     }
 
@@ -855,47 +893,32 @@ class AcceptanceService
         if ($acceptance->status == AcceptanceStatus::REPORTED)
             return;
 
-        // Mark SERVICE type items as reportless and sampleless
-        $acceptance->load(['acceptanceItems.test']);
-        foreach ($acceptance->acceptanceItems as $item) {
-            if ($item->test && $item->test->type === TestType::SERVICE) {
-                if (!$item->reportless || !$item->sampleless) {
-                    $item->update(['reportless' => true, 'sampleless' => true]);
-                }
-            }
+        if ($this->applyPoolingPriority($acceptance)) {
+            return;
         }
+
+        $this->markServiceItemsAsReportless($acceptance);
 
         $reportableTest = $this->acceptanceRepository->countReportableTests($acceptance);
 
-        if ($reportableTest) {
-            $publishedTest = $this->acceptanceRepository->countPublishedTests($acceptance);
-            if ($publishedTest == $reportableTest) {
-                // All tests are published, check financial approval before setting to REPORTED
-                if ($acceptance->financial_approved) {
-                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
-                } else {
-                    // Stay at WAITING_FOR_PUBLISHING until financial is approved
-                    if ($acceptance->status !== AcceptanceStatus::WAITING_FOR_PUBLISHING) {
-                        $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
-                    }
-                }
-            } else {
-                $startedItems = $this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
-                if ($startedItems) {
-                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::PROCESSING);
-                } elseif ($acceptance->waiting_for_pooling && $acceptance->status !== AcceptanceStatus::POOLING) {
-                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::POOLING);
-                }
-            }
-        } else {
-            // No reportable tests, check financial approval before setting to REPORTED
-            if ($acceptance->financial_approved) {
-                $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
-            } else {
-                if ($acceptance->status !== AcceptanceStatus::WAITING_FOR_PUBLISHING) {
-                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
-                }
-            }
+        // No reportable tests, finance approval decides REPORTED vs waiting
+        if (!$reportableTest) {
+            $this->finalizeReportedOrWaiting($acceptance);
+            return;
+        }
+
+        // All tests published, finance approval decides REPORTED vs waiting
+        $publishedTest = $this->acceptanceRepository->countPublishedTests($acceptance);
+        if ($publishedTest == $reportableTest) {
+            $this->finalizeReportedOrWaiting($acceptance);
+            return;
+        }
+
+        // Some tests still in progress; if any started, move to PROCESSING.
+        // (Pooling is handled by the early return above.)
+        $startedItems = $this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
+        if ($startedItems) {
+            $this->setStatusIfChanged($acceptance, AcceptanceStatus::PROCESSING);
         }
     }
 
