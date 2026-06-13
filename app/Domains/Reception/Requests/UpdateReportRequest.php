@@ -34,21 +34,25 @@ class UpdateReportRequest extends FormRequest
                 ->withCount('parameters')
                 ->findOrFail($templateId);
         }
+        $hasParameters = $template && $template->parameters_count > 0;
         // Basic rules for document uploads
         $rules = [
             'acceptance_item_id' => 'required|exists:acceptance_items,id',
             'report_template_id' => 'required|exists:report_templates,id',
             'reported_document' => [
-                Rule::excludeIf(fn() => $template && $template->parameters_count > 0),
+                // Optional only when the template has parameters AND nothing was attached
+                // (the report is then generated from parameters). When a file IS attached
+                // it must always be kept and validated so it can be used as-is.
+                Rule::excludeIf(fn() => $hasParameters && !$this->filled('reported_document')),
                 'required',
                 'array'
             ], // 10MB max
             'reported_document.id' => [
-                Rule::excludeIf(fn() => ($template && $template->parameters_count > 0) || $this->input("reported_document.hash")),
+                Rule::excludeIf(fn() => !$this->filled('reported_document') || $this->input("reported_document.hash")),
                 'required', 'exists:documents,hash'
             ],
             'reported_document.hash' => [
-                Rule::excludeIf(fn() => ($template && $template->parameters_count > 0) || $this->input("reported_document.id")),
+                Rule::excludeIf(fn() => !$this->filled('reported_document') || $this->input("reported_document.id")),
                 'required', 'exists:documents,hash'
             ],
 

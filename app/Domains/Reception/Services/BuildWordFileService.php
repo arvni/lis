@@ -32,8 +32,13 @@ class BuildWordFileService
             // Configure PhpWord
             Settings::loadConfig();
             Settings::setOutputEscapingEnabled(true);
+            // Ensure the template file exists before PhpWord tries to copy it
+            $templatePath = storage_path("app/private/" . $docPath);
+            if (!is_file($templatePath)) {
+                throw new \RuntimeException("Report template file is missing: {$docPath}. Please re-upload the template.");
+            }
             // Create template processor
-            $templateProcessor = new TemplateProcessor(storage_path("app/private/" . $docPath));
+            $templateProcessor = new TemplateProcessor($templatePath);
 
             foreach (Arr::except($data, "images") as $key => $value) {
                 $templateProcessor->setValue($key, htmlspecialchars((string) $value));
