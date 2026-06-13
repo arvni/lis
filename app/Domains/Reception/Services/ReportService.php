@@ -182,9 +182,9 @@ class ReportService
             $this->createOrUpdateReportParameters($report, $parameters);
         $this->acceptanceItemService->updateAcceptanceItemTimeline($acceptanceItem, "Report Updated By $user->name");
 
-        if (isset($reportedDocument['id']))
-            $this->processDocument($reportedDocument['id'], $report, DocumentTag::REPORTED);
-        elseif (count($parameters) > 0) {
+        if (isset($reportedDocument['id']) || isset($reportedDocument['hash']))
+            $this->processDocument($reportedDocument['id'] ?? $reportedDocument['hash'], $report, DocumentTag::REPORTED);
+        elseif (count($parameters) > 0 && !$report->reportedDocument()->exists()) {
             $data = $this->getReportData($report);
             $docAddr = $this->buildWordFileService->build($report->reportTemplate->template->path, $data);
             $this->documentService->storeDocument(

@@ -286,6 +286,24 @@ const TabbedReportForm = ({
                                 </Box>
                             )}
 
+                            {hasParameters && data?.report_template?.id && (
+                                <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 2}}>
+                                    <Tooltip title="Download the Excel parameters template">
+                                        <Button
+                                            href={route("reportTemplates.export-parameters", data.report_template.id)}
+                                            target="_blank"
+                                            variant="outlined"
+                                            startIcon={<TuneIcon/>}
+                                            size="medium"
+                                            color="info"
+                                            sx={{borderRadius: 6}}
+                                        >
+                                            Download Parameters
+                                        </Button>
+                                    </Tooltip>
+                                </Box>
+                            )}
+
                             <Alert
                                 severity="info"
                                 icon={<AssignmentIcon/>}
