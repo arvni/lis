@@ -1,8 +1,6 @@
-import {useState, useEffect, useCallback} from "react";
+import {useState, useEffect, useCallback, useRef} from "react";
 import {Autocomplete, TextField, CircularProgress, Typography, Box} from "@mui/material";
 import axios from "axios";
-
-let debounceTimer = null;
 
 /**
  * Searchable lot selector for outbound transactions.
@@ -19,20 +17,33 @@ const LotSelect = ({itemId, storeId, value, onChange, size = "medium", disabled 
     const [loading, setLoading] = useState(false);
     const [inputValue, setInputValue] = useState("");
 
+    // Per-instance debounce timer and request token so that multiple LotSelect
+    // rows on the same page don't cancel each other's fetches, and a slow
+    // response can't overwrite a newer one.
+    const debounceTimer = useRef(null);
+    const requestId = useRef(0);
+
     const fetchLots = useCallback((search = "") => {
         if (!itemId) {
             setOptions([]);
             return;
         }
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
+        clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(() => {
+            const myRequest = ++requestId.current;
             setLoading(true);
             const params = {search};
             if (storeId) params.store_id = storeId;
             axios.get(route("api.inventory.items.lots", itemId), {params})
-                .then(({data}) => setOptions(data))
-                .catch(() => setOptions([]))
-                .finally(() => setLoading(false));
+                .then(({data}) => {
+                    if (myRequest === requestId.current) setOptions(data);
+                })
+                .catch(() => {
+                    if (myRequest === requestId.current) setOptions([]);
+                })
+                .finally(() => {
+                    if (myRequest === requestId.current) setLoading(false);
+                });
         }, 250);
     }, [itemId, storeId]);
 
@@ -58,7 +69,9 @@ const LotSelect = ({itemId, storeId, value, onChange, size = "medium", disabled 
             filterOptions={(x) => x}
             isOptionEqualToValue={(opt, val) => opt.id === val?.id}
             getOptionLabel={getLabel}
+            openOnFocus
             noOptionsText={!itemId ? "Select an item first" : "No matching lots"}
+            onOpen={() => fetchLots(value ? "" : inputValue)}
             onInputChange={(_, newInput, reason) => {
                 setInputValue(newInput);
                 if (reason === "input") fetchLots(newInput);
