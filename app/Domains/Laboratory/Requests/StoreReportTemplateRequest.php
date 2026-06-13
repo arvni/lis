@@ -26,6 +26,7 @@ class StoreReportTemplateRequest extends FormRequest
     {
         return [
             "name" => ["required", "string", "max:255", "unique:report_templates,name"],
+            "approval_flow_id" => ["nullable", "exists:approval_flows,id"],
             "template" => ["required", "array"],
             "template.id" => ["required", "exists:documents,hash"],
             'parameters' => ['required', 'array', 'min:1'],

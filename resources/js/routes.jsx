@@ -3,6 +3,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import GroupsIcon from "@mui/icons-material/Groups";
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import FlipCameraAndroidIcon from '@mui/icons-material/FlipCameraAndroid';
+import ApprovalIcon from '@mui/icons-material/Approval';
 import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import HorizontalSplitIcon from '@mui/icons-material/HorizontalSplit';
 import SummarizeIcon from '@mui/icons-material/Summarize';
@@ -336,6 +337,12 @@ const routes = (sections = []) => {
                     route: "workflows.index",
                     permission: 'Advance Settings.Workflows.List Workflows',
                     icon: <FlipCameraAndroidIcon/>
+                },
+                {
+                    title: "Approval Flows",
+                    route: "approvalFlows.index",
+                    permission: 'Advance Settings.Approval Flows.List Approval Flows',
+                    icon: <ApprovalIcon/>
                 },
                 {
                     title: "Sample Types",

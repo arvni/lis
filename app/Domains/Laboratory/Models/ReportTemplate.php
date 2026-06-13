@@ -7,6 +7,7 @@ use App\Domains\Document\Models\Document;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -18,7 +19,13 @@ class ReportTemplate extends Model
 
     protected $fillable = [
         "name",
+        "approval_flow_id",
     ];
+
+    public function approvalFlow(): BelongsTo
+    {
+        return $this->belongsTo(ApprovalFlow::class);
+    }
 
     public function template(): MorphOne
     {

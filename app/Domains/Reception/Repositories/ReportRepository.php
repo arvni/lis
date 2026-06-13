@@ -49,7 +49,8 @@ class ReportRepository
         $query = Report::query()
             ->notApproved()
             ->isActive()
-            ->with(array_merge($this->reportListEagerLoads(), ["reporter:id"]))
+            ->approvableBy(auth()->user())
+            ->with(array_merge($this->reportListEagerLoads(), ["reporter:id", "reportTemplate.approvalFlow.steps"]))
             ->withAggregate("reporter", "name");
         if (isset($queryData["filters"]))
             $this->applyFilters($query, $queryData["filters"]);
@@ -162,7 +163,10 @@ class ReportRepository
             "reporter:name,id",
             "approver:name,id",
             "publisher:name,id",
-            "signers"
+            "signers",
+            "approvals",
+            "reportTemplate.approvalFlow.steps.role:id,name",
+            "reportTemplate.approvalFlow.steps.user:id,name"
         ]);
 
         return $report;

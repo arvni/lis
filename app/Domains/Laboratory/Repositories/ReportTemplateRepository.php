@@ -13,7 +13,7 @@ class ReportTemplateRepository
 
     public function listReportTemplates(array $queryData): LengthAwarePaginator
     {
-        $query = ReportTemplate::with("template", "activeParameters")->withCount(["tests","activeParameters"]);
+        $query = ReportTemplate::with("template", "activeParameters", "approvalFlow:id,name")->withCount(["tests","activeParameters"]);
         if (isset($queryData["filters"]))
             $this->applyFilters($query, $queryData["filters"]);
         if (isset($queryData["sort"]))

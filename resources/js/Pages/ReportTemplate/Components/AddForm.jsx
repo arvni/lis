@@ -24,6 +24,7 @@ import Divider from "@mui/material/Divider";
 
 import Upload from "@/Components/Upload";
 import { FormProvider, useFormState } from "@/Components/FormTemplate.jsx";
+import { usePage } from "@inertiajs/react";
 
 const TYPE_DESCRIPTIONS = {
     text: "Single line text input",
@@ -40,6 +41,7 @@ const AddForm = ({ open, onClose, defaultValue }) => {
         : route('reportTemplates.store');
     const defaultData = {
         name: "",
+        approval_flow_id: null,
         template: null,
         parameters: [
             {
@@ -69,6 +71,7 @@ const AddForm = ({ open, onClose, defaultValue }) => {
 
 const FormContent = () => {
     const { data, setData } = useFormState();
+    const { approvalFlows = [] } = usePage().props;
     const handleChange = (e) => setData(prevState => ({ ...prevState, [e.target.name]: e.target.value }));
 
     // Handle parameter changes
@@ -120,6 +123,33 @@ const FormContent = () => {
                             required
                             helperText="This title will be displayed to users when selecting templates"
                         />
+                    </Grid>
+
+                    <Grid size={12} >
+                        <FormControl fullWidth>
+                            <InputLabel id="approval-flow-label">Approval Flow</InputLabel>
+                            <Select
+                                labelId="approval-flow-label"
+                                name="approval_flow_id"
+                                value={data?.approval_flow_id ?? ""}
+                                label="Approval Flow"
+                                onChange={(e) => setData(prevState => ({
+                                    ...prevState,
+                                    approval_flow_id: e.target.value === "" ? null : e.target.value
+                                }))}
+                            >
+                                <MenuItem value="">
+                                    <em>None — single approval</em>
+                                </MenuItem>
+                                {approvalFlows.map((flow) => (
+                                    <MenuItem value={flow.id} key={flow.id}>{flow.name}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                            Reports created from this template will require each step of the selected flow to be
+                            approved in order. Without a flow, one approval publishes the report.
+                        </Typography>
                     </Grid>
 
                     <Grid size={12} >

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Laboratory;
 
 use App\Domains\Laboratory\DTOs\ReportTemplateDTO;
+use App\Domains\Laboratory\Models\ApprovalFlow;
 use App\Domains\Laboratory\Models\ReportTemplate;
 use App\Domains\Laboratory\Requests\StoreReportTemplateRequest;
 use App\Domains\Laboratory\Requests\UpdateReportTemplateRequest;
@@ -31,6 +32,7 @@ class ReportTemplateController extends Controller
         $reportTemplates = $this->reportTemplateService->listReportTemplates($request->all());
         return Inertia::render('ReportTemplate/Index', [
             'reportTemplates' => $reportTemplates,
+            'approvalFlows' => ApprovalFlow::isActive()->get(["id", "name"]),
             'requestInputs' => $request->all()
         ]);
     }
@@ -41,7 +43,8 @@ class ReportTemplateController extends Controller
         $reportTemplateDto = new ReportTemplateDTO(
             $validated['name'],
             $validated['template'],
-            $validated['parameters']
+            $validated['parameters'],
+            $validated['approval_flow_id'] ?? null
         );
         $this->reportTemplateService->storeReportTemplate($reportTemplateDto);
         return redirect()->route('reportTemplates.index')->with('success', 'Report Template created successfully.');
@@ -60,7 +63,8 @@ class ReportTemplateController extends Controller
         $reportTemplateDto = new ReportTemplateDTO(
             $validated['name'],
             $validated['template'],
-            $validated['parameters']
+            $validated['parameters'],
+            $validated['approval_flow_id'] ?? null
         );
         $this->reportTemplateService->updateReportTemplate($reportTemplate, $reportTemplateDto);
         return redirect()->route('reportTemplates.index')->with('success', 'Report Template updated successfully.');

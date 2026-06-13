@@ -5,6 +5,7 @@ use Database\Seeders\AddSampleToAcceptanceItemStatesTableSeeder;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
@@ -21,10 +22,15 @@ return new class extends Migration {
 
             });
 
-            Artisan::call('db:seed', [
-                '--class' => AddSampleToAcceptanceItemStatesTableSeeder::class,
-                '--force' => true,
-            ]);
+            // Backfill only when there is data; on a fresh install the table is
+            // empty and the seeder's model query would reference the deleted_at
+            // column, which is only added by a later migration.
+            if (DB::table('acceptance_item_states')->exists()) {
+                Artisan::call('db:seed', [
+                    '--class' => AddSampleToAcceptanceItemStatesTableSeeder::class,
+                    '--force' => true,
+                ]);
+            }
         }
     }
 

@@ -54,6 +54,20 @@ const Approving = () => {
             flex: .6,
         },
         {
+            field: 'approval_step',
+            headerName: 'Approval Step',
+            type: "string",
+            flex: .7,
+            sortable: false,
+            renderCell: ({row}) => {
+                const steps = row.report_template?.approval_flow?.steps;
+                if (!steps?.length) return "Single approval";
+                const position = row.current_step_position ?? steps[0].position;
+                const index = steps.findIndex(step => step.position === position);
+                return `${index + 1}/${steps.length} — ${steps[index]?.name ?? ""}`;
+            }
+        },
+        {
             field: 'reported_at',
             headerName: 'Reported At',
             type: "datetime",

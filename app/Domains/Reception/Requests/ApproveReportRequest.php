@@ -5,6 +5,7 @@ namespace App\Domains\Reception\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 
 class ApproveReportRequest extends FormRequest
 {
@@ -19,13 +20,22 @@ class ApproveReportRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
+     * The published PDF is only produced on the step that completes the
+     * flow; intermediate steps just need an optional comment.
+     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
+        $report = $this->route()->parameter("report");
+
         return [
             "clinical_comment_document.id" => "exists:documents,hash",
-            "published_report_document.hash" => "required|exists:documents,hash",
+            "published_report_document.hash" => [
+                Rule::requiredIf(fn() => $report->isOnFinalApprovalStep()),
+                "exists:documents,hash",
+            ],
+            "comment" => "nullable|string",
         ];
     }
 }

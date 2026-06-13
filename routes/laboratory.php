@@ -28,6 +28,7 @@ use App\Http\Controllers\Laboratory\SectionGroupController;
 use App\Http\Controllers\Laboratory\ShowTestListController;
 use App\Http\Controllers\Laboratory\TestController;
 use App\Http\Controllers\Laboratory\TestGroupController;
+use App\Http\Controllers\Laboratory\ApprovalFlowController;
 use App\Http\Controllers\Laboratory\WorkflowController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,7 @@ Route::group(["prefix" => "laboratory"], function () {
     Route::resource("sectionGroups", SectionGroupController::class)->except("create", "edit");
     Route::resource("sections", SectionController::class)->except("create", "edit", "show");
     Route::resource("workflows", WorkflowController::class)->except("show");
+    Route::resource("approvalFlows", ApprovalFlowController::class)->except("create", "edit", "show");
     Route::resource("sampleTypes", SampleTypeController::class)->except("create", "edit", "show");
     Route::resource("barcodeGroups", BarcodeGroupController::class)->except("create", "edit", "show");
     Route::resource("offers", OfferController::class)->except("create", "edit", "show");

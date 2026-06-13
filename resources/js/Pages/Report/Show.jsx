@@ -45,9 +45,11 @@ import TestInfo from "@/Pages/AcceptanceItem/Components/TestInfo";
 import SectionsInfo from "@/Pages/AcceptanceItem/Components/SectionsInfo";
 
 import ApproveForm from "./Components/ApproveForm";
+import ApprovalFlowStepper from "./Components/ApprovalFlowStepper";
 import RejectForm from "./Components/RejectForm";
 import History from "./Components/History";
 import Signers from "./Components/Signers";
+import TextField from "@mui/material/TextField";
 
 import DialogContent from "@mui/material/DialogContent";
 import {Head, router, useForm, Link} from "@inertiajs/react";
@@ -97,8 +99,16 @@ const Show = ({
               }) => {
     const {post, data, setData, wasSuccessful, hasErrors, errors, reset, processing} = useForm({_method: "put"});
     const [openApprove, setOpenApprove] = useState(false);
+    const [openStepApprove, setOpenStepApprove] = useState(false);
     const [openReject, setOpenReject] = useState(false);
     const [openUnpublish, setOpenUnpublish] = useState(false);
+
+    // Approval flow context: which step is awaiting action and whether it is the last one
+    const approvalFlow = report.report_template?.approval_flow;
+    const flowSteps = (approvalFlow?.active && approvalFlow.steps?.length) ? approvalFlow.steps : null;
+    const currentStepPosition = report.current_step_position ?? flowSteps?.[0]?.position;
+    const currentStep = flowSteps?.find(step => step.position === currentStepPosition);
+    const isFinalStep = !flowSteps || currentStepPosition === flowSteps[flowSteps.length - 1].position;
     const {enqueueSnackbar} = useSnackbar();
     const [activeAccordions, setActiveAccordions] = useState({
         report: true,
@@ -106,8 +116,13 @@ const Show = ({
         signers: true
     });
 
-    // Handle approval dialog open
+    // Handle approval dialog open: intermediate steps only collect an optional
+    // comment, the final step uploads the published PDF
     const handleApprove = () => {
+        if (!isFinalStep) {
+            setOpenStepApprove(true);
+            return;
+        }
         setData(previousData => ({
             ...previousData,
             clinical_comment: report.clinical_comment,
@@ -130,6 +145,7 @@ const Show = ({
     // Cancel any open dialog
     const cancel = () => {
         setOpenApprove(false);
+        setOpenStepApprove(false);
         setOpenReject(false);
         setOpenUnpublish(false);
         reset();
@@ -149,7 +165,12 @@ const Show = ({
 
     // Submit approval
     const approve = () => {
-        post(route("reports.approve", report.id), {onSuccess: () => setOpenApprove(false)});
+        post(route("reports.approve", report.id), {
+            onSuccess: () => {
+                setOpenApprove(false);
+                setOpenStepApprove(false);
+            }
+        });
     };
 
     // Submit rejection
@@ -192,6 +213,13 @@ const Show = ({
         }
         if (report.approver) {
             return {label: "Approved", color: "primary", icon: <ThumbUpAlt fontSize="small"/>};
+        }
+        if (report.approval_status === 'in_approval' && currentStep) {
+            return {
+                label: `In Approval — ${currentStep.name}`,
+                color: "info",
+                icon: <HistoryOutlined fontSize="small"/>
+            };
         }
         return {label: "Pending", color: "warning", icon: <HistoryOutlined fontSize="small"/>};
     };
@@ -359,6 +387,9 @@ const Show = ({
                 acceptanceItemStates={report.acceptance_item.acceptance_item_states}
                 defaultExpanded={false}
             />
+
+            {/* Approval Flow Progress */}
+            <ApprovalFlowStepper report={report}/>
 
             {/* History */}
             {history.length > 0 && report.status ? <History history={history}/> : null}
@@ -600,6 +631,48 @@ const Show = ({
                 onSubmit={reject}
                 data={data}
             />
+
+            {/* Intermediate Step Approval Dialog */}
+            <Dialog
+                open={openStepApprove}
+                onClose={!processing ? cancel : undefined}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>
+                    Approve Step{currentStep ? `: ${currentStep.name}` : ""}
+                </DialogTitle>
+                <DialogContent>
+                    <Alert severity="info" sx={{mb: 2}}>
+                        This approval moves the report to the next step of the
+                        "{approvalFlow?.name}" flow. The published PDF is uploaded at the final
+                        sign-off step.
+                    </Alert>
+                    <TextField
+                        fullWidth
+                        multiline
+                        minRows={3}
+                        label="Comment (optional)"
+                        name="comment"
+                        value={data.comment || ""}
+                        onChange={handleChange}
+                        disabled={processing}
+                    />
+                </DialogContent>
+                <DialogActions sx={{p: 2, pt: 1}}>
+                    <Button onClick={cancel} color="inherit" disabled={processing}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={approve}
+                        disabled={processing}
+                        startIcon={<ThumbUpAlt/>}
+                    >
+                        Approve Step
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <Dialog
                 open={openUnpublish}

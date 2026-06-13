@@ -31,7 +31,9 @@ use App\Domains\Laboratory\Services\SectionLookupService;
 use App\Domains\Shared\Contracts\SectionLookupInterface;
 use App\Domains\Laboratory\Models\Test;
 use App\Domains\Laboratory\Models\TestGroup;
+use App\Domains\Laboratory\Models\ApprovalFlow;
 use App\Domains\Laboratory\Models\Workflow;
+use App\Domains\Laboratory\Policies\ApprovalFlowPolicy;
 use App\Domains\Laboratory\Policies\BarcodeGroupPolicy;
 use App\Domains\Laboratory\Policies\ConsentFormPolicy;
 use App\Domains\Laboratory\Policies\InstructionPolicy;
@@ -158,6 +160,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(SectionGroup::class, SectionGroupPolicy::class);
         Gate::policy(Section::class, SectionPolicy::class);
         Gate::policy(Workflow::class, WorkflowPolicy::class);
+        Gate::policy(ApprovalFlow::class, ApprovalFlowPolicy::class);
         Gate::policy(SampleType::class, SampleTypePolicy::class);
         Gate::policy(BarcodeGroup::class, BarcodeGroupPolicy::class);
         Gate::policy(TestGroup::class, TestGroupPolicy::class);

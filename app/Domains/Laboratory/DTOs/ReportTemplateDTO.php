@@ -7,7 +7,8 @@ class ReportTemplateDTO
     public function __construct(
         public string $name,
         public array  $template,
-        public array  $parameters
+        public array  $parameters,
+        public ?int   $approvalFlowId = null
     )
     {
     }
@@ -17,7 +18,8 @@ class ReportTemplateDTO
         return [
             "name" => $this->name,
             "template" => $this->template,
-            "parameters" => $this->parameters
+            "parameters" => $this->parameters,
+            "approval_flow_id" => $this->approvalFlowId
         ];
     }
 }

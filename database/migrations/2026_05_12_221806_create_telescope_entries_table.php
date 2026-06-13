@@ -21,6 +21,12 @@ return new class extends Migration
     {
         $schema = Schema::connection($this->getConnection());
 
+        // The Telescope package ships the same migration; on a fresh database
+        // it runs first and this published copy must not recreate the tables.
+        if ($schema->hasTable('telescope_entries')) {
+            return;
+        }
+
         $schema->create('telescope_entries', function (Blueprint $table) {
             $table->bigIncrements('sequence');
             $table->uuid('uuid');

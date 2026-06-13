@@ -3,6 +3,7 @@
 namespace App\Domains\Reception\Policies;
 
 use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
+use App\Domains\Reception\Enums\ReportApprovalAction;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Report;
 use App\Domains\User\Models\User;
@@ -78,7 +79,29 @@ class ReportPolicy
 
     public function approve(User $authUser, Report $report): bool
     {
-        return $authUser->can("Report.Approve Report");
+        if (!$authUser->can("Report.Approve Report")) {
+            return false;
+        }
+
+        // No (active) flow on the template: legacy single-approval behavior.
+        $step = $report->currentApprovalStep();
+        if (!$step) {
+            return true;
+        }
+
+        if (!$step->allow_self_approval && $report->reporter_id === $authUser->id) {
+            return false;
+        }
+
+        // One user may approve only one step per approval cycle.
+        if ($report->approvals()
+            ->where("user_id", $authUser->id)
+            ->where("action", ReportApprovalAction::APPROVED)
+            ->exists()) {
+            return false;
+        }
+
+        return $step->isActionableBy($authUser);
     }
 
     public function print(User $authUser, Report $report): bool

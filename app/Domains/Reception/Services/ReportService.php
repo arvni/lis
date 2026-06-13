@@ -7,6 +7,7 @@ use App\Domains\Document\Services\DocumentService;
 use App\Domains\Laboratory\Models\Method;
 use App\Domains\Laboratory\Models\Test;
 use App\Domains\Reception\Adapters\LaboratoryAdapter;
+use App\Domains\Reception\Enums\ReportApprovalStatus;
 use App\Domains\Reception\Events\PatientDocumentUpdateEvent;
 use App\Domains\Reception\Events\ReportPublishedEvent;
 use App\Domains\Reception\Factories\SignerFactory;
@@ -152,6 +153,9 @@ class ReportService
         // Get acceptance item
         $acceptanceItem = $this->acceptanceItemRepository->findAcceptanceItemById($acceptanceItemId);
 
+        // Editing invalidates any approvals collected so far: the flow restarts.
+        $report->approvals()->delete();
+
         // Create report
         $report = $this->reportRepository->update($report,
             [
@@ -161,6 +165,8 @@ class ReportService
                 'report_template_id' => $reportTemplateId,
                 'approver_id' => null,
                 'approved_at' => null,
+                'approval_status' => ReportApprovalStatus::PENDING,
+                'current_step_position' => null,
             ]);
         // Persist signers
         $this->syncSigners($report, $user, $signers);

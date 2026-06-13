@@ -203,6 +203,12 @@ class RoleAndPermissionSeeder extends Seeder
                     "Delete Workflow",
                     "List Workflows",
                 ],
+                "Approval Flows" => [
+                    "Create Approval Flow",
+                    "Edit Approval Flow",
+                    "Delete Approval Flow",
+                    "List Approval Flows",
+                ],
                 "Sample Types" => [
                     "Create Sample Type",
                     "Edit Sample Type",
