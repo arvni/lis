@@ -8,6 +8,7 @@ use App\Domains\Billing\Models\InvoiceItem;
 use App\Domains\Billing\Services\InvoiceComposer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class InvoiceItemController extends Controller
@@ -41,6 +42,36 @@ class InvoiceItemController extends Controller
         return redirect()->back()->with([
             'success' => true,
             'status'  => 'Item reset to auto.',
+        ]);
+    }
+
+    /**
+     * Rebuild the invoice's test/panel lines from its current acceptance_items.
+     * Clears user-deletion tombstones (so removed lines come back) and resets derived
+     * test/panel rows to auto. Manual fee / adjustment rows are left untouched.
+     *
+     * This is an explicit, user-triggered override: it forces a recompose even on settled
+     * or statemented invoices, so it can change the invoice's (and its statement's) totals.
+     */
+    public function rebuild(Request $request, Invoice $invoice)
+    {
+        $this->authorize('update', $invoice);
+
+        DB::transaction(function () use ($invoice) {
+            // Drop deletion tombstones (and any swept rows) so removed test/panel lines return.
+            $invoice->invoiceItems()->onlyTrashed()->forceDelete();
+            // Reset derived rows to auto so the composer recomputes their price/qty/discount.
+            $invoice->invoiceItems()
+                ->whereIn('kind', [InvoiceItemKind::TEST->value, InvoiceItemKind::PANEL->value])
+                ->update(['locked_at' => null]);
+        });
+
+        // force: bypass the composer's paid/statemented lock so settled invoices still rebuild.
+        $this->composer->recompose($invoice, force: true);
+
+        return redirect()->back()->with([
+            'success' => true,
+            'status'  => 'Invoice items rebuilt from acceptance items.',
         ]);
     }
 }

@@ -24,6 +24,7 @@ import {
     Lock as LockIcon,
     Notes as NotesIcon,
     Receipt as ReceiptIcon,
+    Replay as RebuildIcon,
     RestartAlt as ResetIcon,
     Undo as UndoIcon,
 } from '@mui/icons-material';
@@ -131,6 +132,31 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
         emit([...safeItems, blankItem()]);
     };
 
+    const handleRebuild = () => {
+        if (!invoiceId) return;
+        if (!window.confirm(
+            'Rebuild invoice items from acceptance items?\n\n' +
+            '• Brings back deleted test/panel lines and resets their price, qty and discount to auto.\n' +
+            '• Manual lines are not affected.\n' +
+            '• This recomputes the invoice total even if it is paid or part of a statement — ' +
+            'the statement total will change too.\n\n' +
+            'Save any unsaved edits first — they are not included.',
+        )) {
+            return;
+        }
+        router.post(
+            route('invoices.items.rebuild', {invoice: invoiceId}),
+            {},
+            {
+                preserveScroll: true,
+                onError: (errs) => {
+                    const msg = errs?.invoice || Object.values(errs || {})[0] || 'Rebuild failed.';
+                    window.alert(msg);
+                },
+            },
+        );
+    };
+
     const handleResetToAuto = (item) => {
         if (!invoiceId || !item.id) return;
         if (!window.confirm(
@@ -192,7 +218,7 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
                             <Typography variant="body2" color="error.main">
                                 <strong>{item.title}</strong> will be removed on save
                                 {item.kind !== 'manual_fee' && item.kind !== 'adjustment' &&
-                                    ' (acceptance items will be unlinked)'}.
+                                    ' (the test stays on the acceptance; use “Rebuild from acceptance” to bring it back)'}.
                             </Typography>
                             <Box sx={{flex: 1}}/>
                             <Button
@@ -372,9 +398,19 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
                 <Typography variant="subtitle1" fontWeight="medium">
                     Invoice Items
                 </Typography>
-                <Button startIcon={<AddIcon/>} variant="outlined" size="small" onClick={handleAdd}>
-                    Add Item
-                </Button>
+                <Stack direction="row" spacing={1}>
+                    {invoiceId && (
+                        <Tooltip title="Bring back deleted test/panel lines and reset them to auto from the acceptance items">
+                            <Button startIcon={<RebuildIcon/>} variant="text" size="small" color="info"
+                                    onClick={handleRebuild}>
+                                Rebuild from acceptance
+                            </Button>
+                        </Tooltip>
+                    )}
+                    <Button startIcon={<AddIcon/>} variant="outlined" size="small" onClick={handleAdd}>
+                        Add Item
+                    </Button>
+                </Stack>
             </Stack>
 
             <TableContainer component={Paper} elevation={1}>

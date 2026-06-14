@@ -5,7 +5,6 @@ namespace App\Domains\Billing\Services;
 use App\Domains\Billing\Enums\InvoiceItemKind;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\InvoiceItem;
-use App\Domains\Reception\Models\AcceptanceItem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
@@ -59,8 +58,13 @@ class InvoiceItemSyncService
         if (! $item) {
             return false;
         }
-        AcceptanceItem::where('invoice_item_id', $item->id)
-            ->update(['invoice_item_id' => null]);
+        // Tombstone the row instead of just dropping it: lock + soft-delete, and KEEP its
+        // acceptance_items linked. The composer matches this row by key on the next recompose,
+        // sees a locked + trashed tombstone, and honors the deletion rather than regenerating
+        // the line from the still-present acceptance_items. "Rebuild from acceptance items"
+        // clears these tombstones so the line can come back.
+        $item->locked_at = $item->locked_at ?? now();
+        $item->save();
         $item->delete();
         return true;
     }

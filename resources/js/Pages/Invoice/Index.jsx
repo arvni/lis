@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import {
     RemoveRedEye,
-    EditNote,
+    ReceiptLong,
     Edit as EditIcon,
     Delete as DeleteIcon,
 } from "@mui/icons-material";
@@ -173,14 +173,14 @@ const InvoiceIndex = () => {
                         </Tooltip>)}
 
                         {Boolean(row?.acceptance?.id) && (
-                            <Tooltip title="Edit Acceptance">
+                            <Tooltip title="View Acceptance">
                                 <IconButton
                                     component={Link}
-                                    href={route("acceptances.edit", row.acceptance.id)}
+                                    href={route("acceptances.show", row.acceptance.id)}
                                     size="small"
                                     color="secondary"
                                 >
-                                    <EditNote/>
+                                    <ReceiptLong/>
                                 </IconButton>
                             </Tooltip>
                         )}

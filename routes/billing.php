@@ -21,6 +21,8 @@ Route::group(["prefix" => "billing"], function () {
     Route::resource("invoices", InvoiceController::class);
     Route::post("invoices/{invoice}/items/{item}/unlock", [InvoiceItemController::class, "unlock"])
         ->name("invoices.items.unlock");
+    Route::post("invoices/{invoice}/items/rebuild", [InvoiceItemController::class, "rebuild"])
+        ->name("invoices.items.rebuild");
     Route::get("statements/{statement}/export", StatementExportController::class)->name("statements.export");
     Route::get("statements/{statement}/view", ShowStatementController::class)->name("statements.view");
     Route::resource("statements", StatementController::class)->except("show");

@@ -33,7 +33,10 @@ class InvoiceComposer
             ->filter(fn($ai) => $ai->methodTest && $ai->methodTest->test);
 
         $buckets = $this->bucketize($acceptanceItems);
+        // Include trashed rows so user-deletion tombstones (locked + soft-deleted) are matched
+        // by key and can suppress regeneration of the line they represent.
         $allExisting = $invoice->invoiceItems()
+            ->withTrashed()
             ->with(['test', 'acceptanceItems:id,invoice_item_id'])
             ->get()
             ->keyBy(fn($item) => $this->keyFor($item));
@@ -43,6 +46,16 @@ class InvoiceComposer
 
             foreach ($buckets as $key => $bucket) {
                 $item = $allExisting->get($key);
+
+                if ($item && $item->trashed()) {
+                    // Locked + trashed = a deliberate user deletion (tombstone): honor it and
+                    // leave the line gone until "Rebuild from acceptance items" clears it.
+                    if ($item->isLocked()) {
+                        continue;
+                    }
+                    // Trashed but unlocked = leftover from a previous sweep: rebuild a fresh row.
+                    $item = null;
+                }
 
                 // Locked items are user-managed: don't touch their fields.
                 // Their bucket's acceptance_items still link to them so the totals make sense.
@@ -66,13 +79,13 @@ class InvoiceComposer
                 $keptIds[] = $item->id;
             }
 
-            // Sweep unlocked items that no longer have a bucket. Locked items (manual fees,
-            // user-deleted lines, paid invoices' rows) are always preserved.
+            // Sweep unlocked, live items that no longer have a bucket. Locked items (manual fees,
+            // user-deleted tombstones, paid invoices' rows) are always preserved.
             $allExisting
-                ->reject(fn($item) => $item->isLocked() || in_array($item->id, $keptIds, true))
+                ->reject(fn($item) => $item->trashed() || $item->isLocked() || in_array($item->id, $keptIds, true))
                 ->each(fn($item) => $item->delete());
 
-            return count($keptIds) + $allExisting->filter(fn($i) => $i->isLocked())->count();
+            return $invoice->invoiceItems()->count();
         });
     }
 
