@@ -18,7 +18,9 @@ use App\Domains\Reception\Notifications\PatientReportPublished;
 use App\Domains\Reception\Services\AcceptanceItemService;
 use App\Domains\Reception\Services\AcceptanceService;
 use App\Domains\User\Models\User;
+use App\Notifications\Channels\TwilioWhatsAppTemplateChannel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Twilio\Rest\Client as TwilioClient;
 use Illuminate\Support\Facades\Notification;
 use Mockery;
 use Tests\TestCase;
@@ -141,13 +143,23 @@ class AcceptanceNotificationTest extends TestCase
 
     public function test_acceptance_service_creates_whatsapp_message_records_on_publish(): void
     {
-        // WhatsappMessage rows are only written by TwilioWhatsAppTemplateChannel::send,
-        // which talks to the live Twilio API. Under Notification::fake() the channel never
-        // runs, so this side-effect is unreachable without mocking the Twilio client —
-        // an integration concern beyond this unit test.
-        $this->markTestSkipped('Requires a mocked Twilio client; channel side-effect not exercised under Notification::fake().');
+        // The WhatsApp template channel persists a WhatsappMessage row (status "initial")
+        // before it calls Twilio. Mock the Twilio client so the outbound API call fails
+        // (we never hit the real API in tests): the row is still saved and the failure is
+        // swallowed, leaving the record in its "initial" state.
+        $messages = Mockery::mock();
+        $messages->shouldReceive('create')->andThrow(new \Exception('Twilio is not called in tests'));
+        $twilio = Mockery::mock(TwilioClient::class);
+        $twilio->shouldReceive('__get')->with('messages')->andReturn($messages);
 
-        Notification::fake();
+        $this->app->instance(
+            TwilioWhatsAppTemplateChannel::class,
+            new TwilioWhatsAppTemplateChannel($twilio, 'whatsapp:+96890000000', 'MG-test-ssid'),
+        );
+
+        // toWhatsAppTemplate() short-circuits without a template name, which would skip the
+        // save entirely — provide one so the channel reaches saveWhatsAppMessage().
+        config(['services.twilio.templates.acceptance_report_published' => 'HX-test-template']);
 
         $acceptance = $this->createAcceptance([
             'whatsappNumber' => '91234567',
