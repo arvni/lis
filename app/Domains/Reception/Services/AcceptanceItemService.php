@@ -12,11 +12,11 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 
-readonly class AcceptanceItemService
+class AcceptanceItemService
 {
     public function __construct(
-        private AcceptanceItemRepository $acceptanceItemRepository,
-        private ReportRepository         $reportRepository,
+        private readonly AcceptanceItemRepository $acceptanceItemRepository,
+        private readonly ReportRepository         $reportRepository,
     )
     {
     }

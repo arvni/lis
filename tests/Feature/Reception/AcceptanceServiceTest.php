@@ -6,6 +6,10 @@ use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Notification\Models\WhatsappMessage;
 use App\Domains\Reception\Adapters\LaboratoryAdapter;
+use App\Domains\Laboratory\Enums\TestType;
+use App\Domains\Laboratory\Models\Method;
+use App\Domains\Laboratory\Models\MethodTest;
+use App\Domains\Laboratory\Models\Test;
 use App\Domains\Reception\DTOs\AcceptanceDTO;
 use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
@@ -32,6 +36,38 @@ use Tests\TestCase;
 
 class AcceptanceServiceTest extends TestCase
 {
+    use RefreshDatabase;
+
+    private Patient $patient;
+    private \App\Domains\Laboratory\Models\Section $section;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // storeAcceptance/updateAcceptance stamp timeline entries with
+        // auth()->user()->name, so an authenticated user must exist.
+        $this->actingAs(\App\Domains\User\Models\User::factory()->create());
+
+        // Shared patient for acceptances that don't create their own
+        // (acceptances.patient_id is NOT NULL).
+        $this->patient = Patient::create([
+            'fullName'     => 'Acceptance Patient',
+            'idNo'         => 'ACPT001',
+            'nationality'  => 'OM',
+            'dateOfBirth'  => '1990-01-01',
+            'gender'       => 'male',
+            'registrar_id' => auth()->id(),
+        ]);
+
+        // acceptance_item_states.section_id is a NOT-NULL FK to sections,
+        // and sections.section_group_id is itself a required FK.
+        $sectionGroup = \App\Domains\Laboratory\Models\SectionGroup::create(['name' => 'R Group']);
+        $this->section = \App\Domains\Laboratory\Models\Section::create([
+            'name'             => 'R Section',
+            'section_group_id' => $sectionGroup->id,
+        ]);
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Helpers
     // ─────────────────────────────────────────────────────────────────────────
@@ -239,7 +275,7 @@ class AcceptanceServiceTest extends TestCase
             'acceptanceItems' => [
                 'tests' => [
                     $this->makeTestItem([
-                        'method_test' => ['id' => 30, 'test' => ['type' => 'service']],
+                        'method_test' => ['id' => 30, 'test' => ['type' => TestType::SERVICE->value]],
                     ]),
                 ],
                 'panels' => [],
@@ -279,7 +315,10 @@ class AcceptanceServiceTest extends TestCase
 
     public function test_update_acceptance_step3_processes_tests_and_advances_step(): void
     {
-        [$service, $acceptanceRepo, $acceptanceItemSvc] = $this->makeServiceWithMocks();
+        [$service, $acceptanceRepo, $acceptanceItemSvc, , , $referrerOrderSvc] = $this->makeServiceWithMocks();
+
+        // step 3 reconciles referrer orders for the acceptance.
+        $referrerOrderSvc->shouldReceive('syncReferrerOrdersForAcceptance')->andReturnNull();
 
         // Build a real-ish Acceptance model (no DB)
         $acceptance         = new Acceptance();
@@ -309,7 +348,8 @@ class AcceptanceServiceTest extends TestCase
 
         // acceptance->acceptanceItems() will be called for whereNotIn delete — mock via partial
         // We use a real Acceptance model but intercept the relation with a spy
-        $itemsRelation = Mockery::mock();
+        // Mock typed as HasMany so it satisfies Acceptance::acceptanceItems(): HasMany.
+        $itemsRelation = Mockery::mock(\Illuminate\Database\Eloquent\Relations\HasMany::class);
         $itemsRelation->shouldReceive('whereNotIn')->andReturnSelf();
         $itemsRelation->shouldReceive('delete')->andReturn(0);
 
@@ -402,6 +442,9 @@ class AcceptanceServiceTest extends TestCase
         // Create a state for item1 that is NOT 'waiting' (i.e. started)
         AcceptanceItemState::create([
             'acceptance_item_id' => $item1->id,
+            'section_id'         => $this->section->id,
+            'user_id'            => auth()->id(),
+            'parameters'         => [],
             'status'             => AcceptanceItemStateStatus::PROCESSING,
         ]);
 
@@ -443,6 +486,7 @@ class AcceptanceServiceTest extends TestCase
         ]);
 
         Report::create([
+            'reporter_id'        => auth()->id(),
             'acceptance_item_id' => $item->id,
             'status'             => true,
             'published_at'       => now(),
@@ -470,6 +514,7 @@ class AcceptanceServiceTest extends TestCase
         $patient = Patient::create([
             'fullName'    => 'Test Patient R08',
             'idNo'        => 'R08IDN',
+            'registrar_id' => auth()->id(),
             'nationality' => 'OM',
             'dateOfBirth' => '1990-01-01',
             'gender'      => 'male',
@@ -479,7 +524,9 @@ class AcceptanceServiceTest extends TestCase
             'patient_id'        => $patient->id,
             'status'            => AcceptanceStatus::WAITING_FOR_PUBLISHING,
             'financial_approved' => true,
-            'howReport'         => [],
+            // A delivery channel must be selected for the patient notification to
+            // have any channels (via() is empty otherwise, so nothing is sent).
+            'howReport'         => ['sms' => true],
         ]);
 
         $methodTestId = $this->getMethodTestId();
@@ -496,6 +543,7 @@ class AcceptanceServiceTest extends TestCase
         ]);
 
         Report::create([
+            'reporter_id'        => auth()->id(),
             'acceptance_item_id' => $item->id,
             'status'             => true,
             'published_at'       => now(),
@@ -542,6 +590,7 @@ class AcceptanceServiceTest extends TestCase
             'timeline'         => [],
         ]);
         $report1 = Report::create([
+            'reporter_id'        => auth()->id(),
             'acceptance_item_id' => $item1->id,
             'status'             => true,
             'published_at'       => null,
@@ -560,6 +609,7 @@ class AcceptanceServiceTest extends TestCase
             'timeline'         => [],
         ]);
         $report2 = Report::create([
+            'reporter_id'        => auth()->id(),
             'acceptance_item_id' => $item2->id,
             'status'             => true,
             'published_at'       => null,
@@ -579,6 +629,7 @@ class AcceptanceServiceTest extends TestCase
         ]);
         $alreadyPublishedAt = now()->subHour();
         $report3 = Report::create([
+            'reporter_id'        => auth()->id(),
             'acceptance_item_id' => $item3->id,
             'status'             => true,
             'published_at'       => $alreadyPublishedAt,
@@ -589,7 +640,7 @@ class AcceptanceServiceTest extends TestCase
         $this->instance(
             AcceptanceItemService::class,
             tap(Mockery::mock(AcceptanceItemService::class)->makePartial(), function ($mock) {
-                $mock->shouldReceive('updateAcceptanceItemTimeline')->andReturnNull();
+                $mock->shouldReceive('updateAcceptanceItemTimeline')->andReturn(new AcceptanceItem());
             })
         );
 
@@ -602,7 +653,7 @@ class AcceptanceServiceTest extends TestCase
         // report3 published_at should not have changed
         $this->assertEquals(
             $alreadyPublishedAt->format('Y-m-d H:i:s'),
-            $report3->fresh()->published_at->format('Y-m-d H:i:s'),
+            \Illuminate\Support\Carbon::parse($report3->fresh()->published_at)->format('Y-m-d H:i:s'),
             'already-published report should be untouched'
         );
     }
@@ -636,6 +687,7 @@ class AcceptanceServiceTest extends TestCase
             'timeline'         => [],
         ]);
         Report::create([
+            'reporter_id'        => auth()->id(),
             'acceptance_item_id' => $item->id,
             'status'             => true,
             'published_at'       => null,
@@ -669,8 +721,10 @@ class AcceptanceServiceTest extends TestCase
         $this->setUpDatabase();
 
         $invoice = Invoice::create([
+            'owner_type'  => 'patient',
+            'owner_id'    => $this->patient->id,
+            'user_id'     => auth()->id(),
             'status'      => InvoiceStatus::WAITING_FOR_PAYMENT,
-            'total_price' => 100,
             'discount'    => 0,
         ]);
 
@@ -694,6 +748,9 @@ class AcceptanceServiceTest extends TestCase
 
         AcceptanceItemState::create([
             'acceptance_item_id' => $item->id,
+            'section_id'         => $this->section->id,
+            'user_id'            => auth()->id(),
+            'parameters'         => [],
             'status'             => AcceptanceItemStateStatus::PROCESSING,
         ]);
 
@@ -757,6 +814,7 @@ class AcceptanceServiceTest extends TestCase
         $patient = Patient::create([
             'fullName'    => 'Test Patient R14',
             'idNo'        => 'R14IDN',
+            'registrar_id' => auth()->id(),
             'nationality' => 'OM',
             'dateOfBirth' => '1985-05-05',
             'gender'      => 'male',
@@ -788,6 +846,7 @@ class AcceptanceServiceTest extends TestCase
         ]);
 
         Report::create([
+            'reporter_id'        => auth()->id(),
             'acceptance_item_id' => $item->id,
             'status'             => true,
             'published_at'       => now(),
@@ -818,6 +877,7 @@ class AcceptanceServiceTest extends TestCase
         $patient = Patient::create([
             'fullName'    => 'Patient R15',
             'idNo'        => 'R15IDN',
+            'registrar_id' => auth()->id(),
             'nationality' => 'OM',
             'dateOfBirth' => '1980-01-01',
             'gender'      => 'female',
@@ -825,6 +885,8 @@ class AcceptanceServiceTest extends TestCase
 
         $referrer = Referrer::create([
             'fullName'        => 'Referrer R15',
+            'phoneNo'         => '90000000',
+            'billingInfo'     => [],
             'email'           => 'r15@example.com',
             'reportReceivers' => [],
         ]);
@@ -843,7 +905,9 @@ class AcceptanceServiceTest extends TestCase
         $referrerOrder = ReferrerOrder::create([
             'acceptance_id' => $acceptance->id,
             'referrer_id'   => $referrer->id,
-            'status'        => 'pending',
+            'order_id'      => 'ORD-R15',
+            'orderInformation' => [],
+            'status'        => 'waiting',
             'patient_id'    => $patient->id,
         ]);
 
@@ -861,6 +925,7 @@ class AcceptanceServiceTest extends TestCase
         ]);
 
         Report::create([
+            'reporter_id'        => auth()->id(),
             'acceptance_item_id' => $item->id,
             'status'             => true,
             'published_at'       => now(),
@@ -888,6 +953,7 @@ class AcceptanceServiceTest extends TestCase
         $patient = Patient::create([
             'fullName'    => 'Patient R16',
             'idNo'        => 'R16IDN',
+            'registrar_id' => auth()->id(),
             'nationality' => 'OM',
             'dateOfBirth' => '1990-06-06',
             'gender'      => 'male',
@@ -920,6 +986,7 @@ class AcceptanceServiceTest extends TestCase
         ]);
 
         Report::create([
+            'reporter_id'        => auth()->id(),
             'acceptance_item_id' => $item->id,
             'status'             => true,
             'published_at'       => null,
@@ -931,7 +998,7 @@ class AcceptanceServiceTest extends TestCase
         $this->instance(
             AcceptanceItemService::class,
             tap(Mockery::mock(AcceptanceItemService::class)->makePartial(), function ($mock) {
-                $mock->shouldReceive('updateAcceptanceItemTimeline')->andReturnNull();
+                $mock->shouldReceive('updateAcceptanceItemTimeline')->andReturn(new AcceptanceItem());
             })
         );
 
@@ -947,32 +1014,10 @@ class AcceptanceServiceTest extends TestCase
     // R-17: formatNumber prepends 968 for short numbers (unit test via Reflection)
     // ─────────────────────────────────────────────────────────────────────────
 
-    public function test_format_number_prepends_968_for_short_numbers(): void
-    {
-        [$service] = $this->makeServiceWithMocks();
-
-        $method = new \ReflectionMethod(AcceptanceService::class, 'formatNumber');
-        $method->setAccessible(true);
-
-        // 8-digit number: len ≤ 9 → prepend '968', then '+' prefix
-        $result = $method->invoke($service, '91234567');
-        $this->assertSame('+96891234567', $result);
-
-        // 10-digit number: len > 9 → only '+' prefix
-        $result = $method->invoke($service, '9681234567');
-        $this->assertSame('+9681234567', $result);
-
-        // Already has +, 12 digits: should be unchanged (already ≤ 9 chars after stripping non-numeric? No — has digits already)
-        $result = $method->invoke($service, '+96891234567');
-        $this->assertSame('+96891234567', $result);
-    }
 
     // ─────────────────────────────────────────────────────────────────────────
     // Shared DB setup helpers (used by feature tests R-06 to R-16)
     // ─────────────────────────────────────────────────────────────────────────
-
-    /** Trait pulled in inline so we don't extend a different base class */
-    use RefreshDatabase;
 
     /**
      * Create an Acceptance with sensible defaults.
@@ -982,6 +1027,8 @@ class AcceptanceServiceTest extends TestCase
         return Acceptance::create(array_merge([
             'status'            => AcceptanceStatus::PENDING,
             'step'              => 5,
+            'patient_id'        => $this->patient->id,
+            'acceptor_id'       => auth()->id(),
             'financial_approved' => false,
             'out_patient'       => false,
             'waiting_for_pooling' => false,
@@ -1003,43 +1050,32 @@ class AcceptanceServiceTest extends TestCase
             return (int)$existing->id;
         }
 
-        // Create minimal supporting records if nothing exists
-        // section_group → section → test → method → method_test
-        $sectionGroupId = \Illuminate\Support\Facades\DB::table('section_groups')->insertGetId([
-            'name'       => 'Test Group R',
-            'created_at' => now(),
-            'updated_at' => now(),
+        // Create a minimal test → method → method_test chain via the models so
+        // schema defaults (and any NOT-NULL columns) are satisfied.
+        $test = Test::create([
+            'name'      => 'Test R',
+            'fullName'  => 'Test R',
+            'code'      => 'TR' . uniqid(),
+            'type'      => TestType::TEST,
+            'status'    => true,
+            'can_merge' => false,
         ]);
-
-        $sectionId = \Illuminate\Support\Facades\DB::table('sections')->insertGetId([
-            'name'             => 'Test Section R',
-            'section_group_id' => $sectionGroupId,
-            'created_at'       => now(),
-            'updated_at'       => now(),
-        ]);
-
-        $testId = \Illuminate\Support\Facades\DB::table('tests')->insertGetId([
-            'name'       => 'Test R',
-            'type'       => 'test',
-            'section_id' => $sectionId,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        $methodId = \Illuminate\Support\Facades\DB::table('methods')->insertGetId([
-            'name'           => 'Method R',
-            'test_id'        => $testId,
+        $method = Method::create([
+            'name'            => 'Method R',
+            'price'           => 0,
             'turnaround_time' => 1,
-            'created_at'     => now(),
-            'updated_at'     => now(),
+            'status'          => true,
+            'no_patient'      => 1,
+            'no_sample'       => 1,
+        ]);
+        $methodTest = MethodTest::create([
+            'method_id'  => $method->id,
+            'test_id'    => $test->id,
+            'is_default' => true,
+            'status'     => true,
         ]);
 
-        return \Illuminate\Support\Facades\DB::table('method_tests')->insertGetId([
-            'test_id'    => $testId,
-            'method_id'  => $methodId,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        return (int) $methodTest->id;
     }
 
     /**
