@@ -1,0 +1,20 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    # Level 6 keeps return-type/argument analysis strict enough to catch the class
+    # of bug we hit (declared `: array` returning a Collection) without requiring
+    # full property/generics typing. Bump toward 8 over time as the baseline shrinks.
+    level: 6
+
+    paths:
+        - app
+
+    # Treat PHPDoc types as authoritative where present.
+    treatPhpDocTypesAsCertain: false
+
+    # Laravel facades / magic that PHPStan can't see without booting the app.
+    ignoreErrors:
+        - identifier: missingType.generics
+        - identifier: missingType.iterableValue
