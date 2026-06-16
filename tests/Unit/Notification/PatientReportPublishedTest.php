@@ -4,8 +4,8 @@ namespace Tests\Unit\Notification;
 
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Notifications\PatientReportPublished;
+use App\Notifications\Channels\OmantelIsmartSmsChannel;
 use App\Notifications\Channels\TwilioWhatsAppTemplateChannel;
-use Illuminate\Notifications\Messages\MailMessage;
 use Mockery;
 use Tests\TestCase;
 
@@ -31,17 +31,18 @@ class PatientReportPublishedTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // N-12: via() includes 'mail' when howReport.email = true
+    // N-12: via() includes the SMS channel when howReport.sms = true
+    // (patient reports are delivered over SMS/WhatsApp, not email).
     // -------------------------------------------------------------------------
 
-    public function test_patient_report_published_via_returns_mail_when_email_flag_set(): void
+    public function test_patient_report_published_via_returns_sms_channel_when_flag_set(): void
     {
-        $acceptance = $this->makeAcceptance(['email' => true, 'whatsapp' => false]);
+        $acceptance = $this->makeAcceptance(['sms' => true, 'whatsapp' => false]);
         $notification = new PatientReportPublished($acceptance);
 
         $via = $notification->via(new \stdClass());
 
-        $this->assertContains('mail', $via);
+        $this->assertContains(OmantelIsmartSmsChannel::class, $via);
         $this->assertNotContains(TwilioWhatsAppTemplateChannel::class, $via);
     }
 
@@ -75,23 +76,25 @@ class PatientReportPublishedTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // N-15: toMail() returns a MailMessage (with no files when none available)
+    // N-15: toSms() returns [phone, message] with the patient portal link.
     // -------------------------------------------------------------------------
 
-    public function test_patient_report_published_to_mail_returns_mail_message(): void
+    public function test_patient_report_published_to_sms_returns_phone_and_portal_message(): void
     {
-        $acceptance = $this->makeAcceptance(['email' => true]);
+        config(['services.patient_portal.url' => 'https://portal.example.com']);
+
+        $acceptance = $this->makeAcceptance(['sms' => true]);
         $notification = new PatientReportPublished($acceptance);
 
         $notifiable = new \stdClass();
-        $notifiable->email = 'patient@example.com';
         $notifiable->fullName = 'Test Patient';
+        $notifiable->phone = '+96891234567';
 
-        $mail = $notification->toMail($notifiable);
+        [$to, $message] = $notification->toSms($notifiable);
 
-        $this->assertInstanceOf(MailMessage::class, $mail);
-        // Subject should be set
-        $this->assertNotEmpty($mail->subject);
+        $this->assertEquals('+96891234567', $to);
+        $this->assertStringContainsString('Test Patient', $message);
+        $this->assertStringContainsString('https://portal.example.com', $message);
     }
 
     // -------------------------------------------------------------------------
