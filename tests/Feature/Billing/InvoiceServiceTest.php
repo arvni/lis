@@ -2,10 +2,12 @@
 
 namespace Tests\Feature\Billing;
 
-use App\Domains\Billing\Adapters\ReceptionAdapter;
 use App\Domains\Billing\DTOs\InvoiceDTO;
+use App\Domains\Billing\Enums\InvoiceItemKind;
 use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Models\Invoice;
+use App\Domains\Billing\Services\InvoiceComposer;
+use App\Domains\Billing\Services\InvoiceItemSyncService;
 use App\Domains\Billing\Services\InvoiceService;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Laboratory\Models\Method;
@@ -38,6 +40,7 @@ class InvoiceServiceTest extends TestCase
             'nationality' => 'OM',
             'dateOfBirth' => '1990-01-01',
             'gender' => 'male',
+            'registrar_id' => $this->user->id,
         ]);
 
         $this->service = app(InvoiceService::class);
@@ -80,6 +83,7 @@ class InvoiceServiceTest extends TestCase
         $acceptance = Acceptance::create([
             'patient_id' => $this->patient->id,
             'invoice_id' => $invoice->id,
+            'acceptor_id' => $this->user->id,
             'status' => 'pending',
             'step' => 1,
             'financial_approved' => false,
@@ -87,8 +91,8 @@ class InvoiceServiceTest extends TestCase
             'waiting_for_pooling' => false,
         ]);
 
-        $method = Method::create(['name' => 'M1', 'status' => true, 'no_patient' => 1, 'no_sample' => 1]);
-        $test = Test::create(['name' => 'T1', 'code' => 'T001', 'type' => TestType::TEST, 'status' => true, 'can_merge' => false]);
+        $method = Method::create(['name' => 'M1', 'price' => 100, 'status' => true, 'no_patient' => 1, 'no_sample' => 1]);
+        $test = Test::create(['name' => 'T1', 'fullName' => 'T1', 'code' => 'T001', 'type' => TestType::TEST, 'status' => true, 'can_merge' => false]);
         $methodTest = MethodTest::create(['method_id' => $method->id, 'test_id' => $test->id, 'is_default' => true, 'status' => true]);
 
         AcceptanceItem::create([
@@ -97,6 +101,10 @@ class InvoiceServiceTest extends TestCase
             'price' => 100,
             'discount' => 0,
         ]);
+
+        // updateStatus derives status from invoice_items totals, so compose them first;
+        // otherwise totalAmount() is 0 and an unpaid invoice reads as fully paid.
+        app(InvoiceComposer::class)->recompose($invoice);
 
         $this->service->updateStatus($invoice);
 
@@ -122,6 +130,7 @@ class InvoiceServiceTest extends TestCase
         $acceptance = Acceptance::create([
             'patient_id' => $this->patient->id,
             'invoice_id' => $invoice->id,
+            'acceptor_id' => $this->user->id,
             'status' => 'pending',
             'step' => 1,
             'financial_approved' => false,
@@ -129,8 +138,8 @@ class InvoiceServiceTest extends TestCase
             'waiting_for_pooling' => false,
         ]);
 
-        $method = Method::create(['name' => 'Panel Method', 'status' => true, 'no_patient' => 1, 'no_sample' => 1]);
-        $panelTest = Test::create(['name' => 'Panel Test', 'code' => 'P001', 'type' => TestType::PANEL, 'status' => true, 'can_merge' => false]);
+        $method = Method::create(['name' => 'Panel Method', 'price' => 50, 'status' => true, 'no_patient' => 1, 'no_sample' => 1]);
+        $panelTest = Test::create(['name' => 'Panel Test', 'fullName' => 'Panel Test', 'code' => 'P001', 'type' => TestType::PANEL, 'status' => true, 'can_merge' => false]);
         $methodTest = MethodTest::create(['method_id' => $method->id, 'test_id' => $panelTest->id, 'is_default' => true, 'status' => true]);
 
         $panelId = 99;
@@ -152,13 +161,16 @@ class InvoiceServiceTest extends TestCase
 
         $result = $this->service->loadForShow($invoice);
 
+        // loadForShow now returns composed invoice_items; panels collapse into one PANEL line
+        // tagged with panel_id (the line's own id is the invoice_item id).
         $panelItems = collect($result['acceptance_items'])->filter(
-            fn($item) => isset($item['id']) && $item['id'] == $panelId
+            fn($item) => ($item['panel_id'] ?? null) == $panelId
         );
 
         $this->assertCount(1, $panelItems, 'Panel items with same panel_id must be grouped into one entry');
 
         $grouped = $panelItems->first();
+        $this->assertEquals('panel', $grouped['kind']);
         $this->assertEquals(120, $grouped['price']);
         $this->assertEquals(15, $grouped['discount']);
     }
@@ -179,6 +191,7 @@ class InvoiceServiceTest extends TestCase
         $acceptance = Acceptance::create([
             'patient_id' => $this->patient->id,
             'invoice_id' => $invoice->id,
+            'acceptor_id' => $this->user->id,
             'status' => 'pending',
             'step' => 1,
             'financial_approved' => false,
@@ -186,8 +199,8 @@ class InvoiceServiceTest extends TestCase
             'waiting_for_pooling' => false,
         ]);
 
-        $method = Method::create(['name' => 'Merge Method', 'status' => true, 'no_patient' => 1, 'no_sample' => 1]);
-        $mergeableTest = Test::create(['name' => 'CBC', 'code' => 'CBC01', 'type' => TestType::TEST, 'status' => true, 'can_merge' => true]);
+        $method = Method::create(['name' => 'Merge Method', 'price' => 30, 'status' => true, 'no_patient' => 1, 'no_sample' => 1]);
+        $mergeableTest = Test::create(['name' => 'CBC', 'fullName' => 'CBC', 'code' => 'CBC01', 'type' => TestType::TEST, 'status' => true, 'can_merge' => true]);
         $methodTest = MethodTest::create(['method_id' => $method->id, 'test_id' => $mergeableTest->id, 'is_default' => true, 'status' => true]);
 
         AcceptanceItem::create([
@@ -217,32 +230,30 @@ class InvoiceServiceTest extends TestCase
     }
 
     /**
-     * B-14: updateInvoiceItems delegates to ReceptionAdapter::updateAcceptanceItem for every item.
+     * B-14: a manual line submitted without an id is created as a locked manual_fee row
+     * with price = unit_price * qty. (Replaces the removed InvoiceService::updateInvoiceItems;
+     * user-submitted item edits now go through InvoiceItemSyncService.)
      */
-    public function test_update_invoice_items_delegates_to_reception_adapter(): void
+    public function test_sync_creates_and_locks_a_manual_line(): void
     {
-        $adapterMock = Mockery::mock(ReceptionAdapter::class);
-
-        $adapterMock->shouldReceive('updateAcceptanceItem')
-            ->once()
-            ->with(['id' => 1, 'price' => 50, 'discount' => 0, 'customParameters' => []], 'TEST');
-
-        $adapterMock->shouldReceive('updateAcceptanceItem')
-            ->once()
-            ->with(['id' => 2, 'price' => 80, 'discount' => 5, 'customParameters' => []], 'TEST');
-
-        $this->app->instance(ReceptionAdapter::class, $adapterMock);
-
-        $service = app(InvoiceService::class);
-
-        $service->updateInvoiceItems([
-            'TEST' => [
-                ['id' => 1, 'price' => 50, 'discount' => 0, 'customParameters' => []],
-                ['id' => 2, 'price' => 80, 'discount' => 5, 'customParameters' => []],
-            ],
+        $invoice = Invoice::create([
+            'owner_type' => 'patient',
+            'owner_id' => $this->patient->id,
+            'user_id' => $this->user->id,
+            'status' => InvoiceStatus::WAITING_FOR_PAYMENT,
+            'discount' => 0,
         ]);
 
-        Mockery::close();
+        $summary = app(InvoiceItemSyncService::class)->sync($invoice, [
+            ['title' => 'Extra handling fee', 'unit_price' => 25, 'qty' => 2],
+        ]);
+
+        $this->assertSame(1, $summary['created']);
+
+        $item = $invoice->invoiceItems()->firstOrFail();
+        $this->assertSame(InvoiceItemKind::MANUAL_FEE, $item->kind);
+        $this->assertTrue($item->isLocked());
+        $this->assertEquals(50, $item->price);
     }
 
     protected function tearDown(): void
