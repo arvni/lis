@@ -186,7 +186,7 @@ class ReferrerTestExport implements
     private function getPrice(ReferrerTest $referrerTest): string
     {
         if ($referrerTest->test->type == TestType::PANEL) {
-            return $referrerTest->price;
+            return (string) $referrerTest->price;
         }
 
         if ($referrerTest->test->methodTests->where("status", true)->count() ==1) {

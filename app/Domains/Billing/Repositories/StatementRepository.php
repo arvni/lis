@@ -47,9 +47,9 @@ class StatementRepository
         return Statement::find($id);
     }
 
-    public function getTotalStatementsForDateRange($dateRange): float
+    public function getTotalStatementsForDateRange($dateRange): int
     {
-        return Statement::whereBetween("created_at", $dateRange);
+        return Statement::whereBetween("created_at", $dateRange)->count();
     }
 
     private function applyFilters($query, array $filters)

@@ -535,12 +535,6 @@ parameters:
 			path: app/Domains/Billing/Repositories/StatementRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\StatementRepository\:\:getTotalStatementsForDateRange\(\) should return float but returns Illuminate\\Database\\Eloquent\\Builder\<App\\Domains\\Billing\\Models\\Statement\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Domains/Billing/Repositories/StatementRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Billing\\Repositories\\StatementRepository\:\:listStatements\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6367,18 +6361,6 @@ parameters:
 			path: app/Domains/Reception/Services/TATService.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Services\\TATService\:\:calcOnTimePct\(\) never returns int so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: app/Domains/Reception/Services/TATService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\TATService\:\:calcOnTimePct\(\) should return int\|null but returns float\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Domains/Reception/Services/TATService.php
-
-		-
 			message: '#^Parameter \#1 \$acceptance of method App\\Domains\\Reception\\Services\\TATService\:\:mapAcceptance\(\) expects App\\Domains\\Reception\\Models\\Acceptance, Illuminate\\Database\\Eloquent\\Model given\.$#'
 			identifier: argument.type
 			count: 2
@@ -6526,12 +6508,6 @@ parameters:
 			message: '#^Access to an undefined property App\\Domains\\Referrer\\Models\\ReferrerTest\:\:\$test\.$#'
 			identifier: property.notFound
 			count: 7
-			path: app/Domains/Referrer/Exports/ReferrerTestExport.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Exports\\ReferrerTestExport\:\:getPrice\(\) should return string but returns float\|null\.$#'
-			identifier: return.type
-			count: 1
 			path: app/Domains/Referrer/Exports/ReferrerTestExport.php
 
 		-

@@ -328,6 +328,6 @@ class TATService
             return $publishedAt && $publishedAt->lte($deadline);
         })->count();
 
-        return round(($onTime / $total) * 100);
+        return (int) round(($onTime / $total) * 100);
     }
 }
