@@ -11,13 +11,13 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
-readonly class StockTransactionService
+class StockTransactionService
 {
     public function __construct(
-        private StockTransactionRepository $transactionRepository,
-        private ReferenceNumberService     $referenceNumberService,
-        private UnitConversionService      $unitConversionService,
-        private StockMutationService       $stockMutationService,
+        private readonly StockTransactionRepository $transactionRepository,
+        private readonly ReferenceNumberService     $referenceNumberService,
+        private readonly UnitConversionService      $unitConversionService,
+        private readonly StockMutationService       $stockMutationService,
     ) {}
 
     public function listTransactions(array $filters): LengthAwarePaginator

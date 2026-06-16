@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Spatie\Permission\Models\Role;
 
-readonly class PurchaseRequestWorkflowService
+class PurchaseRequestWorkflowService
 {
     public function initiate(PurchaseRequest $pr): void
     {

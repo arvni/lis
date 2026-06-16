@@ -55,7 +55,7 @@ class StockMutationServiceTest extends TestCase
             'item_code'       => 'ITM-001',
             'name'            => 'Test Item',
             'department'      => 'LAB',
-            'material_type'   => 'REAGENT',
+            'material_type'   => 'RGT',
             'storage_condition' => 'ROOM_TEMP',
             'default_unit_id' => $this->unit->id,
             'is_active'       => true,

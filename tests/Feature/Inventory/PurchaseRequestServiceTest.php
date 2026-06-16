@@ -12,6 +12,7 @@ use App\Domains\Inventory\Models\PurchaseRequestLine;
 use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\StockTransaction;
 use App\Domains\Inventory\Models\Unit;
+use App\Domains\Inventory\Models\WorkflowTemplate;
 use App\Domains\Inventory\Services\PurchaseRequestService;
 use App\Domains\Inventory\Services\PurchaseRequestWorkflowService;
 use App\Domains\Inventory\Services\StockTransactionService;
@@ -46,7 +47,7 @@ class PurchaseRequestServiceTest extends TestCase
             'item_code'         => 'PR-ITEM-001',
             'name'              => 'PR Test Item',
             'department'        => 'LAB',
-            'material_type'     => 'REAGENT',
+            'material_type'     => 'RGT',
             'storage_condition' => 'ROOM_TEMP',
             'default_unit_id'   => $this->unit->id,
             'is_active'         => true,
@@ -80,12 +81,12 @@ class PurchaseRequestServiceTest extends TestCase
 
     public function test_create_pr_matches_workflow_template_after_lines_saved(): void
     {
-        $fakeTemplateId = 99;
+        $template = WorkflowTemplate::create(['name' => 'Match Template']);
 
         $matcher = $this->mock(WorkflowTemplateMatcher::class);
         $matcher->shouldReceive('find')
             ->once()
-            ->andReturn((object)['id' => $fakeTemplateId]);
+            ->andReturn($template);
 
         // Other deps: workflow service not called during create
         $this->mock(PurchaseRequestWorkflowService::class)
@@ -106,7 +107,7 @@ class PurchaseRequestServiceTest extends TestCase
 
         $this->assertDatabaseHas('purchase_requests', [
             'id'                  => $pr->id,
-            'workflow_template_id'=> $fakeTemplateId,
+            'workflow_template_id'=> $template->id,
         ]);
     }
 
@@ -116,12 +117,13 @@ class PurchaseRequestServiceTest extends TestCase
 
     public function test_submit_pr_initiates_workflow_when_template_matched(): void
     {
-        $pr = $this->makePr(['workflow_template_id' => 7]);
+        $template = WorkflowTemplate::create(['name' => 'Submit Template']);
+        $pr = $this->makePr(['workflow_template_id' => $template->id]);
         $this->addLine($pr);
         $pr->load('lines');
 
         $matcher = $this->mock(WorkflowTemplateMatcher::class);
-        $matcher->shouldReceive('find')->andReturn((object)['id' => 7]);
+        $matcher->shouldReceive('find')->andReturn($template);
 
         $workflowMock = $this->mock(PurchaseRequestWorkflowService::class);
         $workflowMock->shouldReceive('initiate')->once()->with(Mockery::type(PurchaseRequest::class));
@@ -168,8 +170,11 @@ class PurchaseRequestServiceTest extends TestCase
         // Create a submitted PR
         $pr = $this->makePr(['status' => PurchaseRequestStatus::SUBMITTED->value]);
 
+        $template = WorkflowTemplate::create(['name' => 'Scope Template']);
+
         $templateStep1 = \Illuminate\Support\Facades\DB::table('workflow_steps')->insertGetId([
-            'workflow_template_id' => null,
+            'name'                 => 'Step 1',
+            'workflow_template_id' => $template->id,
             'sort_order'           => 1,
             'approver_user_id'     => null,
             'approver_role'        => 'other_role',
@@ -178,7 +183,8 @@ class PurchaseRequestServiceTest extends TestCase
         ]);
 
         $templateStep2 = \Illuminate\Support\Facades\DB::table('workflow_steps')->insertGetId([
-            'workflow_template_id' => null,
+            'name'                 => 'Step 2',
+            'workflow_template_id' => $template->id,
             'sort_order'           => 2,
             'approver_user_id'     => $this->user->id,
             'approver_role'        => null,

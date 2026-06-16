@@ -41,7 +41,7 @@ class StockTransactionServiceTest extends TestCase
             'item_code'         => 'I-TX-001',
             'name'              => 'Transaction Item',
             'department'        => 'LAB',
-            'material_type'     => 'REAGENT',
+            'material_type'     => 'RGT',
             'storage_condition' => 'ROOM_TEMP',
             'default_unit_id'   => $this->unit->id,
             'is_active'         => true,

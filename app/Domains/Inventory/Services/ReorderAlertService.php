@@ -10,10 +10,10 @@ use App\Domains\Inventory\Repositories\ReorderAlertRepository;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\Notification;
 
-readonly class ReorderAlertService
+class ReorderAlertService
 {
     public function __construct(
-        private ReorderAlertRepository $alertRepository,
+        private readonly ReorderAlertRepository $alertRepository,
     ) {}
 
     public function checkAndAlert(int $itemId, int $storeId): void

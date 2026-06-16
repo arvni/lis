@@ -10,11 +10,11 @@ use App\Domains\Inventory\Repositories\StockLotRepository;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
-readonly class StockMutationService
+class StockMutationService
 {
     public function __construct(
-        private StockLotRepository    $lotRepository,
-        private ReorderAlertService   $reorderAlertService,
+        private readonly StockLotRepository    $lotRepository,
+        private readonly ReorderAlertService   $reorderAlertService,
     ) {}
 
     /**
