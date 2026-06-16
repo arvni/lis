@@ -8,6 +8,7 @@ use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\Statement;
 use App\Domains\Billing\Services\StatementService;
 use App\Domains\Reception\Models\Patient;
+use App\Domains\Referrer\Models\Referrer;
 use App\Domains\User\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -19,6 +20,7 @@ class StatementServiceTest extends TestCase
     private StatementService $service;
     private User $user;
     private Patient $patient;
+    private Referrer $referrer;
 
     protected function setUp(): void
     {
@@ -31,6 +33,13 @@ class StatementServiceTest extends TestCase
             'nationality' => 'OM',
             'dateOfBirth' => '1978-03-20',
             'gender' => 'female',
+            'registrar_id' => $this->user->id,
+        ]);
+        $this->referrer = Referrer::create([
+            'fullName' => 'Test Referrer',
+            'email' => 'referrer@example.com',
+            'phoneNo' => '90000000',
+            'billingInfo' => [],
         ]);
 
         $this->service = app(StatementService::class);
@@ -56,7 +65,7 @@ class StatementServiceTest extends TestCase
         $invoiceB = $this->makeInvoice();
 
         $dto = new StatementDTO(
-            referrerId: 1,
+            referrerId: $this->referrer->id,
             issueDate: '2026-04-01',
             invoices: [
                 ['id' => $invoiceA->id],
@@ -66,7 +75,7 @@ class StatementServiceTest extends TestCase
 
         $statement = $this->service->storeStatement($dto);
 
-        $this->assertDatabaseHas('statements', ['id' => $statement->id, 'referrer_id' => 1]);
+        $this->assertDatabaseHas('statements', ['id' => $statement->id, 'referrer_id' => $this->referrer->id]);
 
         $this->assertDatabaseHas('invoices', ['id' => $invoiceA->id, 'statement_id' => $statement->id]);
         $this->assertDatabaseHas('invoices', ['id' => $invoiceB->id, 'statement_id' => $statement->id]);
@@ -82,7 +91,7 @@ class StatementServiceTest extends TestCase
         $invoiceC = $this->makeInvoice();
 
         $createDto = new StatementDTO(
-            referrerId: 1,
+            referrerId: $this->referrer->id,
             issueDate: '2026-04-01',
             invoices: [
                 ['id' => $invoiceA->id],
@@ -93,7 +102,7 @@ class StatementServiceTest extends TestCase
         $statement = $this->service->storeStatement($createDto);
 
         $updateDto = new StatementDTO(
-            referrerId: 1,
+            referrerId: $this->referrer->id,
             issueDate: '2026-04-01',
             invoices: [
                 ['id' => $invoiceB->id],
