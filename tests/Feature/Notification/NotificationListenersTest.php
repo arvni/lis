@@ -6,9 +6,11 @@ use App\Domains\Notification\Jobs\SendCollectRequestWebhook;
 use App\Domains\Notification\Jobs\SendOrderMaterialUpdateWebhook;
 use App\Domains\Notification\Listeners\NotifyLogisticsAppOfCollectRequestUpdate;
 use App\Domains\Notification\Listeners\NotifyProviderOfOrderMaterialUpdate;
+use App\Domains\Laboratory\Models\SampleType;
 use App\Domains\Referrer\Enums\OrderMaterialStatus;
 use App\Domains\Referrer\Events\CollectRequestEvent;
 use App\Domains\Referrer\Models\OrderMaterial;
+use App\Domains\Referrer\Models\Referrer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
@@ -25,9 +27,18 @@ class NotificationListenersTest extends TestCase
     {
         Queue::fake();
 
+        $referrer = Referrer::create([
+            'fullName' => 'OM Referrer',
+            'email' => 'om@example.com',
+            'phoneNo' => '90000000',
+            'billingInfo' => [],
+        ]);
         $orderMaterial = OrderMaterial::create([
-            'server_id' => 10,
-            'status'    => OrderMaterialStatus::ORDERED,
+            'server_id'      => 10,
+            'referrer_id'    => $referrer->id,
+            'sample_type_id' => SampleType::create(['name' => 'ST10'])->id,
+            'amount'         => 1,
+            'status'         => OrderMaterialStatus::ORDERED,
         ]);
 
         // Create a plain object event with the orderMaterial property

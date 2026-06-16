@@ -15,6 +15,7 @@ use App\Domains\Notification\Jobs\SendSampleTypeUpdateWebhook;
 use App\Domains\Referrer\Enums\OrderMaterialStatus;
 use App\Domains\Referrer\Models\CollectRequest;
 use App\Domains\Referrer\Models\OrderMaterial;
+use App\Domains\Referrer\Models\Referrer;
 use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -23,6 +24,16 @@ use Tests\TestCase;
 class WebhookJobsTest extends TestCase
 {
     use RefreshDatabase;
+
+    private function makeReferrer(): Referrer
+    {
+        return Referrer::create([
+            'fullName'    => 'Webhook Referrer',
+            'email'       => 'wh' . uniqid() . '@example.com',
+            'phoneNo'     => '90000000',
+            'billingInfo' => [],
+        ]);
+    }
 
     // -------------------------------------------------------------------------
     // N-01: SendOrderMaterialUpdateWebhook posts with HMAC signature
@@ -40,8 +51,11 @@ class WebhookJobsTest extends TestCase
 
         // Create the order material without actual materials (load returns empty collection)
         $orderMaterial = OrderMaterial::create([
-            'server_id' => 42,
-            'status'    => OrderMaterialStatus::ORDERED,
+            'server_id'      => 42,
+            'referrer_id'    => $this->makeReferrer()->id,
+            'sample_type_id' => SampleType::create(['name' => 'ST42'])->id,
+            'amount'         => 1,
+            'status'         => OrderMaterialStatus::ORDERED,
         ]);
 
         $job = new SendOrderMaterialUpdateWebhook($orderMaterial);
@@ -80,8 +94,11 @@ class WebhookJobsTest extends TestCase
         ]);
 
         $orderMaterial = OrderMaterial::create([
-            'server_id' => 99,
-            'status'    => OrderMaterialStatus::ORDERED,
+            'server_id'      => 99,
+            'referrer_id'    => $this->makeReferrer()->id,
+            'sample_type_id' => SampleType::create(['name' => 'ST99'])->id,
+            'amount'         => 1,
+            'status'         => OrderMaterialStatus::ORDERED,
         ]);
 
         $this->expectException(Exception::class);
@@ -123,8 +140,9 @@ class WebhookJobsTest extends TestCase
 
         // Create a CollectRequest in the DB so the job can load it with relationships
         $collectRequest = CollectRequest::create([
-            'status'   => null,
-            'barcode'  => 'BC-TEST-001',
+            'referrer_id' => $this->makeReferrer()->id,
+            'status'      => 'pending',
+            'barcode'     => 'BC-TEST-001',
         ]);
 
         $job = new SendCollectRequestWebhook($collectRequest->id, 'update');
@@ -251,6 +269,7 @@ class WebhookJobsTest extends TestCase
 
         $requestForm = RequestForm::create([
             'name'      => 'Test Request Form',
+            'form_data' => [],
             'is_active' => true,
         ]);
 
