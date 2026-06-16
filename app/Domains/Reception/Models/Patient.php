@@ -85,11 +85,18 @@ class Patient extends Model
      * the family/last name. With a single leftover word the third name mirrors the
      * second so all slots are populated ("Arvin Eizadi Eizadi Raeini").
      *
-     * Only runs when both slots are empty and the last name is actually being set,
-     * so re-saving a patient for unrelated edits never re-splits an existing name.
+     * Only runs for Omani nationals, when both slots are empty and the last name
+     * is actually being set, so non-Omani patients keep their last name intact and
+     * re-saving a patient for unrelated edits never re-splits an existing name.
      */
     protected static function deriveMissingNameParts(Patient $patient): void
     {
+        // Only Omani nationals carry a multi-part family chain that should be
+        // split into second/third names; everyone else keeps lastName intact.
+        if ($patient->nationality !== "OM") {
+            return;
+        }
+
         if (filled($patient->secondName) || filled($patient->thirdName)) {
             return;
         }
