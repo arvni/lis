@@ -7,6 +7,7 @@ use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Models\Tag;
 use App\Domains\Reception\Services\TagService;
 use App\Domains\User\Models\User;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -127,6 +128,28 @@ class TagServiceTest extends TestCase
 
         $this->expectException(ValidationException::class);
         $this->service->syncTags($acceptance, ['   ']);
+    }
+
+    // ── Inverse (taggable) relations on the Tag model ────────────────────────────
+    // These return a MorphToMany; the model previously type-hinted a non-existent
+    // MorphedByMany class, so calling them would have fatally errored.
+
+    public function test_tag_acceptances_relation_resolves_tagged_acceptances(): void
+    {
+        $acceptance = $this->makeAcceptance();
+        $this->service->syncTags($acceptance, ['Urgent']);
+        $tag = Tag::firstWhere('name', 'Urgent');
+
+        $this->assertInstanceOf(MorphToMany::class, $tag->acceptances());
+        $this->assertTrue($tag->acceptances()->where('acceptances.id', $acceptance->id)->exists());
+    }
+
+    public function test_tag_acceptance_items_relation_returns_morph_to_many(): void
+    {
+        $tag = Tag::create(['name' => 'Pooled']);
+
+        $this->assertInstanceOf(MorphToMany::class, $tag->acceptanceItems());
+        $this->assertCount(0, $tag->acceptanceItems()->get());
     }
 
     private function makeAcceptance(): Acceptance

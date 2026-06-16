@@ -4933,30 +4933,6 @@ parameters:
 			path: app/Domains/Reception/Models/Signer.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Tag\:\:acceptanceItems\(\) has invalid return type Illuminate\\Database\\Eloquent\\Relations\\MorphedByMany\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Domains/Reception/Models/Tag.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Tag\:\:acceptanceItems\(\) should return Illuminate\\Database\\Eloquent\\Relations\\MorphedByMany but returns Illuminate\\Database\\Eloquent\\Relations\\MorphToMany\<App\\Domains\\Reception\\Models\\AcceptanceItem, \$this\(App\\Domains\\Reception\\Models\\Tag\), Illuminate\\Database\\Eloquent\\Relations\\MorphPivot, string\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Domains/Reception/Models/Tag.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Tag\:\:acceptances\(\) has invalid return type Illuminate\\Database\\Eloquent\\Relations\\MorphedByMany\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Domains/Reception/Models/Tag.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Tag\:\:acceptances\(\) should return Illuminate\\Database\\Eloquent\\Relations\\MorphedByMany but returns Illuminate\\Database\\Eloquent\\Relations\\MorphToMany\<App\\Domains\\Reception\\Models\\Acceptance, \$this\(App\\Domains\\Reception\\Models\\Tag\), Illuminate\\Database\\Eloquent\\Relations\\MorphPivot, string\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Domains/Reception/Models/Tag.php
-
-		-
 			message: '#^Property App\\Domains\\Reception\\Models\\Tag\:\:\$searchable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1

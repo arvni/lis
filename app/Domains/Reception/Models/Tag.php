@@ -4,7 +4,7 @@ namespace App\Domains\Reception\Models;
 
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphedByMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Tag extends Model
 {
@@ -39,12 +39,12 @@ class Tag extends Model
         return (bool) preg_match('/^[A-Za-z0-9 ]+$/', $name);
     }
 
-    public function acceptances(): MorphedByMany
+    public function acceptances(): MorphToMany
     {
         return $this->morphedByMany(Acceptance::class, 'taggable');
     }
 
-    public function acceptanceItems(): MorphedByMany
+    public function acceptanceItems(): MorphToMany
     {
         return $this->morphedByMany(AcceptanceItem::class, 'taggable');
     }
