@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\User;
 
+use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\User\Repositories\PermissionRepository;
 use App\Domains\User\Services\PermissionService;
 use Illuminate\Support\Collection;
@@ -50,17 +51,22 @@ class PermissionServiceTest extends TestCase
         $this->assertSame($permission, $this->service->getPermissionByName('A'));
     }
 
-    public function test_get_user_allowed_document_tags_has_return_type_bug(): void
+    public function test_get_user_allowed_document_tags_resolves_permissions_to_tags(): void
     {
-        // Characterization test: getUserAllowedDocumentTags() is declared `: array`
-        // but its body returns a Collection (->filter()->map()), so the method
-        // always raises a TypeError. This pins the current (buggy) behaviour so a
-        // future fix that returns an array will visibly flip this test.
+        // Permission names are "Documents.<Tag Title>" (title is the tag value with
+        // underscores replaced by spaces, title-cased). The service reverses that to
+        // a DocumentTag, ignores non-document permissions, and drops CRUD permissions
+        // ("View Document") that don't map to a tag.
         $this->repo->shouldReceive('getUserAllPermissions')->once()->andReturn(new Collection([
             (object) ['name' => 'Documents.Avatar'],
+            (object) ['name' => 'Documents.Medical History'],
+            (object) ['name' => 'Documents.View Document'], // CRUD perm → not a tag
+            (object) ['name' => 'Acceptance.View'],         // unrelated permission
         ]));
 
-        $this->expectException(\TypeError::class);
-        $this->service->getUserAllowedDocumentTags();
+        $tags = $this->service->getUserAllowedDocumentTags();
+
+        $this->assertIsArray($tags);
+        $this->assertSame([DocumentTag::AVATAR, DocumentTag::MEDICAL_HISTORY], $tags);
     }
 }

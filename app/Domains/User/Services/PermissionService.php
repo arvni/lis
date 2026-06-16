@@ -36,11 +36,20 @@ class PermissionService
 
     public function getUserAllowedDocumentTags(): array
     {
-        $permissions = $this->permissionRepository->getUserAllPermissions();
-        return $permissions
+        // Document permissions are named "Documents.<Tag Title>", where the title is the
+        // tag value with underscores replaced by spaces and title-cased (see
+        // RoleAndPermissionSeeder::getDocumentsPermissions). Reverse that mapping to
+        // resolve each permission back to its DocumentTag, dropping permissions that
+        // don't correspond to a tag (e.g. the CRUD "View Document" entries).
+        return $this->permissionRepository->getUserAllPermissions()
             ->pluck('name')
-            ->filter(fn($permission) => Str::startsWith("Documents.", $permission))
-            ->map(fn($permission) => DocumentTag::find(Str::snake(Str::upper(Str::after($permission, "Documents.")))));
+            ->filter(fn($permission) => Str::startsWith($permission, "Documents."))
+            ->map(fn($permission) => DocumentTag::find(
+                Str::upper(str_replace(' ', '_', Str::after($permission, "Documents.")))
+            ))
+            ->filter()
+            ->values()
+            ->all();
     }
 
 }
