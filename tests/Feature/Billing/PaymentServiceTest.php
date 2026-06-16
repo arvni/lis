@@ -7,6 +7,7 @@ use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Events\PaymentsAddedEvent;
 use App\Domains\Billing\Models\Invoice;
+use App\Domains\Billing\Services\InvoiceComposer;
 use App\Domains\Billing\Services\PaymentService;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Laboratory\Models\Method;
@@ -50,6 +51,7 @@ class PaymentServiceTest extends TestCase
             'nationality' => 'OM',
             'dateOfBirth' => '1985-06-15',
             'gender' => 'male',
+            'registrar_id' => $this->cashier->id,
         ]);
 
         $this->invoice = Invoice::create([
@@ -63,6 +65,7 @@ class PaymentServiceTest extends TestCase
         $this->acceptance = Acceptance::create([
             'patient_id' => $this->patient->id,
             'invoice_id' => $this->invoice->id,
+            'acceptor_id' => $this->cashier->id,
             'status' => 'pending',
             'step' => 1,
             'financial_approved' => false,
@@ -70,8 +73,8 @@ class PaymentServiceTest extends TestCase
             'waiting_for_pooling' => false,
         ]);
 
-        $method = Method::create(['name' => 'Test Method', 'status' => true, 'no_patient' => 1, 'no_sample' => 1]);
-        $test = Test::create(['name' => 'Blood Test', 'code' => 'BT01', 'type' => TestType::TEST, 'status' => true, 'can_merge' => false]);
+        $method = Method::create(['name' => 'Test Method', 'price' => 200, 'status' => true, 'no_patient' => 1, 'no_sample' => 1]);
+        $test = Test::create(['name' => 'Blood Test', 'fullName' => 'Blood Test', 'code' => 'BT01', 'type' => TestType::TEST, 'status' => true, 'can_merge' => false]);
         $this->methodTest = MethodTest::create(['method_id' => $method->id, 'test_id' => $test->id, 'is_default' => true, 'status' => true]);
 
         AcceptanceItem::create([
@@ -80,6 +83,11 @@ class PaymentServiceTest extends TestCase
             'price' => 200,
             'discount' => 0,
         ]);
+
+        // Invoice status is derived from invoice_items totals (totalAmount sums invoice_items),
+        // so compose them from the acceptance item — otherwise the payable total is 0 and any
+        // payment reads as fully paid.
+        app(InvoiceComposer::class)->recompose($this->invoice);
 
         $this->service = app(PaymentService::class);
     }
