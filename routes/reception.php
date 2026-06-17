@@ -27,6 +27,7 @@ use App\Http\Controllers\Reception\ListAcceptanceItemReadyReportController;
 use App\Http\Controllers\Reception\ListAcceptanceItemsController;
 use App\Http\Controllers\Reception\ListApprovingReportController;
 use App\Http\Controllers\Reception\ListBarcodesController;
+use App\Http\Controllers\Reception\MergePatientController;
 use App\Http\Controllers\Reception\PatientController;
 use App\Http\Controllers\Reception\PrintAcceptanceBarcodeController;
 use App\Http\Controllers\Reception\PrintAcceptanceController;
@@ -54,6 +55,8 @@ use App\Http\Controllers\ShowSectionController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(["prefix" => "reception"], function () {
+    Route::get("patients/merge", [MergePatientController::class, "create"])->name("patients.merge.create");
+    Route::post("patients/merge", [MergePatientController::class, "merge"])->name("patients.merge");
     Route::resource("patients", PatientController::class);
     Route::put("/patients/{patient}/patient-metas", UpdatePatientMetaController::class)
         ->name("patients.updateMetas");
@@ -112,6 +115,7 @@ Route::post("sections/{section}/enter", EnterSectionSampleController::class)->na
 Route::group(["prefix" => "api/reception", "as" => "api."], function () {
     Route::get("acceptances/reported", ListReferrerAcceptanceReportedOrExpectedToBeReportedController::class)
         ->name("acceptances.reported");
+    Route::get("patients/merge-compare", [MergePatientController::class, "compare"])->name("patients.mergeCompare");
     Route::get("patients/{idNo}", GetPatientWithIdNoController::class)->name("patients.getByIdNo");
     Route::get("patients", ListPatientsController::class)->name("patients.list");
     Route::get("tags", ListTagsController::class)->name("tags.list");

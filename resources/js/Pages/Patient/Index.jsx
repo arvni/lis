@@ -34,6 +34,7 @@ import {
     Divider
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import MergeIcon from "@mui/icons-material/Merge";
 import countries from "@/Data/Countries.js";
 import Grid from "@mui/material/Grid";
 import Accordion from "@mui/material/Accordion";
@@ -223,7 +224,7 @@ const GenderStats = ({stats}) => {
 
 const Index = () => {
     const {post, setData, data, reset, processing} = useForm();
-    const {patients, status, success, requestInputs, stats,canDelete} = usePage().props;
+    const {patients, status, success, requestInputs, stats,canDelete,canMerge} = usePage().props;
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const [statsExpanded, setStatsExpanded] = useState(false);
 
@@ -253,6 +254,8 @@ const Index = () => {
     }), [data.id]);
 
     const addPatient = useCallback(() => router.visit(route('patients.create')), []);
+
+    const mergePatients = useCallback(() => router.visit(route('patients.merge.create')), []);
 
     const toggleStats = useCallback(() => {
         setStatsExpanded(prev => !prev);
@@ -380,6 +383,17 @@ const Index = () => {
                 title="Patients"
                 description="Manage patient records and view statistics"
                 actions={[
+                    canMerge && (
+                        <Button
+                            onClick={mergePatients}
+                            key="merge-button"
+                            variant="outlined"
+                            color="primary"
+                            startIcon={<MergeIcon/>}
+                        >
+                            Merge Patients
+                        </Button>
+                    ),
                     <Button
                         onClick={addPatient}
                         key="add-button"

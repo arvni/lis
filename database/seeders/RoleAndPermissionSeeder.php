@@ -161,6 +161,7 @@ class RoleAndPermissionSeeder extends Seeder
                     "Edit Patient",
                     "Delete Patient",
                     "List Patients",
+                    "Merge Patients",
                 ],
                 "Acceptances" => [
                     "View Acceptance",

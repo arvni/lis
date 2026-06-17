@@ -46,4 +46,12 @@ class PatientPolicy
     {
         return $authUser->can("Reception.Patients.Delete Patient");
     }
+
+        /**
+         * Determine whether the user can merge two patients into one.
+         */
+        public function merge(User $authUser): bool
+    {
+        return $authUser->can("Reception.Patients.Merge Patients");
+    }
 }

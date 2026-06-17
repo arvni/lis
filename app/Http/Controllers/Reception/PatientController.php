@@ -36,7 +36,8 @@ class PatientController extends Controller
         $patients = $this->patientService->listPatients($requestInputs);
         $stats = $this->patientService->getPatientStats();
         $canDelete = Gate::allows('delete', new Patient());
-        return Inertia::render('Patient/Index', compact("patients", "requestInputs", "stats", "canDelete"));
+        $canMerge = Gate::allows('merge', Patient::class);
+        return Inertia::render('Patient/Index', compact("patients", "requestInputs", "stats", "canDelete", "canMerge"));
     }
 
     /**
