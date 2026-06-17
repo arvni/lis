@@ -95,6 +95,23 @@ const MenuItem = memo(({ item, permissions, onNavigate, isNested = false }) => {
         }
     }, [hasActiveChild, isCurrentRoute]);
 
+    const handleToggle = useCallback(() => {
+        setOpen((prev) => !prev);
+    }, []);
+
+    const handleClick = useCallback(
+        (route) => (e) => {
+            e?.preventDefault();
+            if (route) {
+                onNavigate(route)();
+            }
+            if (hasSubmenu) {
+                handleToggle();
+            }
+        },
+        [onNavigate, handleToggle, hasSubmenu],
+    );
+
     // Skip rendering if user doesn't have permission, or is a group header with no accessible children
     if (!isPermitted || !hasAccessibleChild) return null;
 
@@ -193,23 +210,6 @@ const MenuItem = memo(({ item, permissions, onNavigate, isNested = false }) => {
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
         },
     };
-
-    const handleToggle = useCallback(() => {
-        setOpen((prev) => !prev);
-    }, []);
-
-    const handleClick = useCallback(
-        (route) => (e) => {
-            e?.preventDefault();
-            if (route) {
-                onNavigate(route)();
-            }
-            if (hasSubmenu) {
-                handleToggle();
-            }
-        },
-        [onNavigate, handleToggle, hasSubmenu],
-    );
 
     const renderIcon = () => {
         if (safeItem.icon && React.isValidElement(safeItem.icon)) {

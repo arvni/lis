@@ -1475,10 +1475,7 @@ const PedigreeChart = ({
 
     // Improved Element Editor Panel
     const ElementEditor = () => {
-        if (disabled) return null; // Hide editor completely if disabled
-
-        const showNodeEditor = singleSelectedNode && selectedEdges.length === 0;
-        const showEdgeEditor = singleSelectedEdge && selectedNodes.length === 0;
+        // Hooks must run unconditionally, before any early return.
         const [localLabel, setLocalLabel] = useState('');
 
         useEffect(() => {
@@ -1486,6 +1483,11 @@ const PedigreeChart = ({
                 setLocalLabel(singleSelectedNode.data.label || '');
             }
         }, [singleSelectedNode]);
+
+        if (disabled) return null; // Hide editor completely if disabled
+
+        const showNodeEditor = singleSelectedNode && selectedEdges.length === 0;
+        const showEdgeEditor = singleSelectedEdge && selectedNodes.length === 0;
 
         const handleLabelChange = (event) => {
             setLocalLabel(event.target.value);
@@ -1760,8 +1762,6 @@ const PedigreeChart = ({
 
     // --- Edge Settings Modal Component ---
     const EdgeSettingsModal = () => {
-        if (disabled) return null; // Don't render modal if disabled
-
         const getInitialStyle = () => {
             if (!singleSelectedEdge) return 'solid';
             if (singleSelectedEdge.type === 'consanguineous') return 'double';
@@ -1769,11 +1769,14 @@ const PedigreeChart = ({
             return 'solid';
         };
 
+        // Hooks must run unconditionally, before any early return.
         const [selectedStyle, setSelectedStyle] = useState(getInitialStyle());
 
         useEffect(() => {
             setSelectedStyle(getInitialStyle());
         }, [singleSelectedEdge]);
+
+        if (disabled) return null; // Don't render modal if disabled
 
         const handleStyleChange = (event) => {
             setSelectedStyle(event.target.value);

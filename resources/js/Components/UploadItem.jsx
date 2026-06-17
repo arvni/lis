@@ -51,6 +51,11 @@ const UploadItem = ({
     editable = true,
     showFileSize = false,
 }) => {
+    // Tag editing state (only used in the success branch, but hooks must be
+    // declared unconditionally at the top level of the component).
+    const [isEditingTag, setIsEditingTag] = useState(false);
+    const [selectedTag, setSelectedTag] = useState(value?.tag || 'TEMP');
+
     // Format file size to human-readable format
     const formatFileSize = (bytes) => {
         if (!bytes) return '';
@@ -236,10 +241,6 @@ const UploadItem = ({
 
     // Success state (default) - Regular display of uploaded file with actions
     if (value?.id || value?.hasOwnProperty('id') || status === 'success') {
-        // State for tag editing
-        const [isEditingTag, setIsEditingTag] = useState(false);
-        const [selectedTag, setSelectedTag] = useState(value?.tag || 'TEMP');
-
         // Handle tag selection
         const handleTagSelect = (event) => {
             const newTag = event.target.value;
