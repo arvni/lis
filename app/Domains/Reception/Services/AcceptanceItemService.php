@@ -86,6 +86,7 @@ class AcceptanceItemService
      */
     public function updateItemPrices(Acceptance $acceptance, array $items): void
     {
+        /** @var Collection<int, AcceptanceItem> $existingItems */
         $existingItems = $acceptance->acceptanceItems()->get()->keyBy("id");
         $editor = auth()->user()?->name;
 
