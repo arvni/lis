@@ -1022,6 +1022,93 @@ class AcceptanceServiceTest extends TestCase
     /**
      * Create an Acceptance with sensible defaults.
      */
+    // ─────────────────────────────────────────────────────────────────────────
+    // updateAcceptanceItemsFromEditor
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_update_items_from_editor_updates_matching_item_with_custom_parameters(): void
+    {
+        [$service, , $itemSvc, , , $referrerSvc] = $this->makeServiceWithMocks();
+
+        $acceptance = $this->createAcceptance();
+        $methodTestId = $this->getMethodTestId();
+        $item = AcceptanceItem::create([
+            'acceptance_id'    => $acceptance->id,
+            'method_test_id'   => $methodTestId,
+            'price'            => 100,
+            'discount'         => 0,
+            'reportless'       => false,
+            'sampleless'       => false,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]);
+
+        $itemSvc->shouldReceive('findAcceptanceItemById')->once()->with($item->id)->andReturn($item);
+        $captured = null;
+        $itemSvc->shouldReceive('updateAcceptanceItem')->once()->andReturnUsing(function ($i, $dto) use (&$captured) {
+            $captured = $dto;
+            return $i;
+        });
+        $referrerSvc->shouldReceive('syncReferrerOrdersForAcceptance')->once();
+
+        $service->updateAcceptanceItemsFromEditor($acceptance, [
+            'tests' => [[
+                'id'               => $item->id,
+                'method_test'      => ['id' => $methodTestId, 'test' => ['type' => 'TEST']],
+                'price'            => 80,
+                'discount'         => 5,
+                'no_sample'        => 1,
+                'customParameters' => ['sampleType' => 3],
+                'details'          => 'note',
+            ]],
+            'panels' => [],
+        ]);
+
+        $this->assertSame(80.0, $captured->price);
+        $this->assertSame(5.0, $captured->discount);
+        $this->assertSame(3, $captured->customParameters['sampleType']);
+        $this->assertSame('note', $captured->customParameters['details']);
+    }
+
+    public function test_update_items_from_editor_skips_items_from_another_acceptance(): void
+    {
+        [$service, , $itemSvc, , , $referrerSvc] = $this->makeServiceWithMocks();
+
+        $acceptance = $this->createAcceptance();
+        $other = $this->createAcceptance();
+        $methodTestId = $this->getMethodTestId();
+        $foreign = AcceptanceItem::create([
+            'acceptance_id'    => $other->id,
+            'method_test_id'   => $methodTestId,
+            'price'            => 200,
+            'discount'         => 0,
+            'reportless'       => false,
+            'sampleless'       => false,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]);
+
+        $itemSvc->shouldReceive('findAcceptanceItemById')->once()->with($foreign->id)->andReturn($foreign);
+        $itemSvc->shouldReceive('updateAcceptanceItem')->never();
+        $referrerSvc->shouldReceive('syncReferrerOrdersForAcceptance')->once();
+
+        $service->updateAcceptanceItemsFromEditor($acceptance, [
+            'tests' => [[
+                'id'               => $foreign->id,
+                'method_test'      => ['id' => $methodTestId, 'test' => ['type' => 'TEST']],
+                'price'            => 1,
+                'discount'         => 0,
+                'no_sample'        => 1,
+                'customParameters' => [],
+            ]],
+            'panels' => [],
+        ]);
+
+        $this->assertTrue(true);
+    }
+
     private function createAcceptance(array $attributes = []): Acceptance
     {
         return Acceptance::create(array_merge([

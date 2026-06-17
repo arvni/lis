@@ -145,6 +145,8 @@ class AcceptanceController extends Controller
             "canPrintBarcode" => $acceptance->status === AcceptanceStatus::PROCESSING || $acceptance->status === AcceptanceStatus::REPORTED || $acceptance->status === AcceptanceStatus::WAITING_FOR_ENTERING || $acceptance->status === AcceptanceStatus::POOLING,
             "canCheckStatus" => Gate::allows("checkStatus", $acceptance),
             "canUpdatePriority" => Gate::allows("Reception.Acceptances.Update Priority"),
+            "canEditItemPrices" => Gate::allows("editItemPrices", $acceptance),
+            "maxDiscount" => $this->settingRepository->getSettingsByClassAndKey('Payment', 'maxDiscount'),
         ];
         return Inertia::render('Acceptance/Show', $data);
     }

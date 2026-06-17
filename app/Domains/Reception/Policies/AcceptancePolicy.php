@@ -70,6 +70,19 @@ class AcceptancePolicy
         return $authUser->can("Reception.Acceptances.Edit Invoiced Acceptance");
     }
 
+    /**
+     * Determine whether the user can edit the price and discount of an
+     * acceptance's items. This is only allowed before an invoice has been
+     * created for the acceptance.
+     */
+    public function editItemPrices(User $authUser, Acceptance $acceptance): bool
+    {
+        if ($acceptance->invoice_id) {
+            return false;
+        }
+        return $authUser->can("Reception.Acceptances.Edit Item Prices");
+    }
+
     public function sampleCollection(User $authUser): bool
     {
         return $authUser->can("Sample Collection");

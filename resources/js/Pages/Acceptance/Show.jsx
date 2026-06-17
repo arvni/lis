@@ -42,6 +42,8 @@ import PageHeader from "@/Components/PageHeader.jsx";
 import {BarcodeIcon} from "lucide-react";
 import TestsTable from "@/Pages/Acceptance/Components/TestsSection/TestsTable.jsx";
 import PromoteToPanelDialog from "@/Pages/Acceptance/Components/TestsSection/PromoteToPanelDialog.jsx";
+import EditItemPricesForm from "@/Pages/Acceptance/Components/EditItemPricesForm.jsx";
+import AddTestOrPanel from "@/Pages/Acceptance/Components/AddTestOrPanel.jsx";
 import TagManager from "@/Components/TagManager";
 import TagChip from "@/Components/TagChip";
 import InlineTagManager from "@/Components/InlineTagManager";
@@ -231,6 +233,8 @@ const Show = ({
                   canPrintBarcode,
                   canCheckStatus,
                   canUpdatePriority,
+                  canEditItemPrices,
+                  maxDiscount = 0,
               }) => {
 
     // State
@@ -244,6 +248,34 @@ const Show = ({
     });
 
     const [promotingTests, setPromotingTests] = useState(null); // array of selected tests
+    const [editingPrices, setEditingPrices] = useState(false);
+    const [editItem, setEditItem] = useState({open: false, mode: null, test: null, panel: null});
+
+    const handleEditTest = (id) => {
+        const test = (acceptance?.acceptance_items?.tests || []).find(t => t.id === id);
+        if (test) setEditItem({open: true, mode: 'editTest', test, panel: null});
+    };
+
+    const handleEditPanel = (id) => {
+        const panel = (acceptance?.acceptance_items?.panels || []).find(p => p.id === id);
+        if (panel) setEditItem({open: true, mode: 'editPanel', test: null, panel});
+    };
+
+    const closeEditItem = () => setEditItem({open: false, mode: null, test: null, panel: null});
+
+    const submitEditedTest = (testItem) => {
+        router.put(route('acceptances.updateItem', acceptance.id), {tests: [testItem]}, {
+            preserveScroll: true,
+            onSuccess: closeEditItem,
+        });
+    };
+
+    const submitEditedPanel = (panelItem) => {
+        router.put(route('acceptances.updateItem', acceptance.id), {panels: [panelItem]}, {
+            preserveScroll: true,
+            onSuccess: closeEditItem,
+        });
+    };
 
     const handleEjectPanel = (panel) => {
         const firstItem = panel.acceptanceItems?.[0];
@@ -624,6 +656,18 @@ const Show = ({
                     <SectionTitle icon={Science} title="Test Items"/>
                 </AccordionSummary>
                 <AccordionDetails sx={{backgroundColor: 'background.default', p: 3}}>
+                    {canEditItemPrices && (
+                        <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 2}}>
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                startIcon={<RequestQuote/>}
+                                onClick={() => setEditingPrices(true)}
+                            >
+                                Edit Prices
+                            </Button>
+                        </Box>
+                    )}
                     <Paper elevation={1} sx={{borderRadius: 2, overflow: 'hidden'}}>
                         <TestsTable
                             showButton
@@ -632,6 +676,8 @@ const Show = ({
                             panels={acceptance?.acceptance_items?.panels || []}
                             onEjectPanel={handleEjectPanel}
                             onPromoteTest={setPromotingTests}
+                            onEditTest={canEditItemPrices ? handleEditTest : undefined}
+                            onEditPanel={canEditItemPrices ? handleEditPanel : undefined}
                         />
                     </Paper>
 
@@ -641,6 +687,29 @@ const Show = ({
                         onClose={() => setPromotingTests(null)}
                         onConfirm={handlePromoteToPanel}
                     />
+
+                    {editingPrices && (
+                        <EditItemPricesForm
+                            open={editingPrices}
+                            acceptance={acceptance}
+                            acceptanceItems={acceptanceItems}
+                            onClose={() => setEditingPrices(false)}
+                        />
+                    )}
+
+                    {editItem.open && (
+                        <AddTestOrPanel
+                            open={editItem.open}
+                            onClose={closeEditItem}
+                            onSubmitTest={submitEditedTest}
+                            onSubmitPanel={submitEditedPanel}
+                            initialTestData={editItem.mode === 'editTest' ? editItem.test : null}
+                            initialPanelData={editItem.mode === 'editPanel' ? editItem.panel : null}
+                            referrer={acceptance.referrer}
+                            maxDiscount={maxDiscount}
+                            patient={patient}
+                        />
+                    )}
                     <Box
                         sx={{
                             mt: 3,

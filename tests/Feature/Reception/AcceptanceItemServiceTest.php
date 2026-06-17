@@ -3,12 +3,14 @@
 namespace Tests\Feature\Reception;
 
 use App\Domains\Reception\DTOs\AcceptanceItemDTO;
+use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Repositories\AcceptanceItemRepository;
 use App\Domains\Reception\Repositories\ReportRepository;
 use App\Domains\Reception\Services\AcceptanceItemService;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Mockery;
 use Tests\TestCase;
@@ -136,6 +138,82 @@ class AcceptanceItemServiceTest extends TestCase
         $this->reportRepo->shouldReceive('getHistoryForAcceptanceItem')->once()->with($item)->andReturn($history);
 
         $this->assertSame($history, $this->service->getReportHistory(7));
+    }
+
+    /**
+     * Build a mocked Acceptance whose acceptanceItems()->get() returns the
+     * given items, so updateItemPrices can be exercised without a database.
+     */
+    private function acceptanceWithItems(array $items): Acceptance
+    {
+        $relation = Mockery::mock(HasMany::class);
+        $relation->shouldReceive('get')->once()->andReturn(new Collection($items));
+
+        $acceptance = Mockery::mock(Acceptance::class)->makePartial();
+        $acceptance->setRawAttributes(['id' => 1]);
+        $acceptance->shouldReceive('acceptanceItems')->once()->andReturn($relation);
+
+        return $acceptance;
+    }
+
+    public function test_update_item_prices_persists_changed_price_discount_and_timeline(): void
+    {
+        $this->actingAs(User::factory()->make(['name' => 'Cashier']));
+
+        $item = new AcceptanceItem();
+        $item->setRawAttributes(['id' => 5, 'price' => 100, 'discount' => 0, 'timeline' => '[]']);
+        $acceptance = $this->acceptanceWithItems([$item]);
+
+        $captured = null;
+        $this->itemRepo->shouldReceive('updateAcceptanceItem')->once()->andReturnUsing(function ($i, $data) use (&$captured) {
+            $captured = $data;
+            return $i;
+        });
+
+        $this->service->updateItemPrices($acceptance, [
+            ['id' => 5, 'price' => 80, 'discount' => 10],
+        ]);
+
+        $this->assertSame(80.0, $captured['price']);
+        $this->assertSame(10.0, $captured['discount']);
+        $this->assertStringContainsString(
+            'Price set to 80 and discount to 10 by Cashier',
+            implode(' ', $captured['timeline'])
+        );
+    }
+
+    public function test_update_item_prices_skips_unchanged_item(): void
+    {
+        $this->actingAs(User::factory()->make(['name' => 'Cashier']));
+
+        $item = new AcceptanceItem();
+        $item->setRawAttributes(['id' => 5, 'price' => 100, 'discount' => 0, 'timeline' => '[]']);
+        $acceptance = $this->acceptanceWithItems([$item]);
+
+        $this->itemRepo->shouldReceive('updateAcceptanceItem')->never();
+
+        $this->service->updateItemPrices($acceptance, [
+            ['id' => 5, 'price' => 100, 'discount' => 0],
+        ]);
+
+        $this->assertTrue(true);
+    }
+
+    public function test_update_item_prices_ignores_unknown_item_ids(): void
+    {
+        $this->actingAs(User::factory()->make(['name' => 'Cashier']));
+
+        $item = new AcceptanceItem();
+        $item->setRawAttributes(['id' => 5, 'price' => 100, 'discount' => 0, 'timeline' => '[]']);
+        $acceptance = $this->acceptanceWithItems([$item]);
+
+        $this->itemRepo->shouldReceive('updateAcceptanceItem')->never();
+
+        $this->service->updateItemPrices($acceptance, [
+            ['id' => 999, 'price' => 1, 'discount' => 0],
+        ]);
+
+        $this->assertTrue(true);
     }
 
     public function test_reject_sample_deactivates_link_and_logs_timeline(): void

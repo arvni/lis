@@ -317,12 +317,39 @@ class AcceptanceService
     }
 
     /**
-     * Process and update sampling and delivery data
+     * Update the price, discount and custom parameters of existing acceptance
+     * items from the test/panel editor payload, reusing the same transform the
+     * acceptance edit flow uses. Unlike processTestsData this never creates or
+     * deletes items — it only updates rows that already belong to the given
+     * acceptance, so it is safe to call with a single edited test or panel.
      *
      * @param Acceptance $acceptance
-     * @param AcceptanceDTO $acceptanceDTO
+     * @param array $acceptanceItems editor payload: ["tests" => [...], "panels" => [...]]
      * @return void
+     * @throws Throwable
      */
+    public function updateAcceptanceItemsFromEditor(Acceptance $acceptance, array $acceptanceItems): void
+    {
+        DB::beginTransaction();
+        try {
+            $prepared = $this->prepareAcceptanceItems($acceptance, $acceptanceItems);
+            foreach ($prepared as $dto) {
+                if ($dto->deleted || !$dto->id) {
+                    continue;
+                }
+                $existing = $this->acceptanceItemService->findAcceptanceItemById($dto->id);
+                if ($existing && (int)$existing->acceptance_id === (int)$acceptance->id) {
+                    $this->acceptanceItemService->updateAcceptanceItem($existing, $dto);
+                }
+            }
+            $this->referrerOrderService->syncReferrerOrdersForAcceptance($acceptance);
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
     /**
      * Process and update sampling and delivery data
      *

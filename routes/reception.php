@@ -48,6 +48,8 @@ use App\Http\Controllers\Reception\PromoteToPanelController;
 use App\Http\Controllers\Reception\ToggleReportlessAcceptanceItemController;
 use App\Http\Controllers\Reception\ToggleSamplelessAcceptanceItemController;
 use App\Http\Controllers\Reception\UnPublishReportController;
+use App\Http\Controllers\Reception\UpdateAcceptanceItemController;
+use App\Http\Controllers\Reception\UpdateAcceptanceItemPricesController;
 use App\Http\Controllers\Reception\UpdateAcceptancePriorityController;
 use App\Http\Controllers\Reception\UpdatePatientMetaController;
 use App\Http\Controllers\Reception\WaitingForPublishController;
@@ -70,6 +72,8 @@ Route::group(["prefix" => "reception"], function () {
     Route::put("acceptances/{acceptance}/tags", [TagAssignmentController::class, "syncAcceptance"])->name("acceptances.tags.update");
     Route::put("acceptances/{acceptance}/cancel", CancelAcceptanceController::class)->name("acceptances.cancel");
     Route::patch("acceptances/{acceptance}/priority", UpdateAcceptancePriorityController::class)->name("acceptances.updatePriority");
+    Route::put("acceptances/{acceptance}/item-prices", UpdateAcceptanceItemPricesController::class)->name("acceptances.updateItemPrices");
+    Route::put("acceptances/{acceptance}/items", UpdateAcceptanceItemController::class)->name("acceptances.updateItem");
     Route::get("tat-dashboard", TATDashboardController::class)->name("tat.dashboard");
     Route::post("acceptances/{acceptance}/pooling", AddPoolingController::class)->name("acceptances.addPooling");
     Route::put("acceptances/{acceptance}/check-status", CheckAcceptanceStatusController::class)->name("acceptances.checkStatus");

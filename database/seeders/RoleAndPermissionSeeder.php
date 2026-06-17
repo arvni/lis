@@ -175,6 +175,7 @@ class RoleAndPermissionSeeder extends Seeder
                     "Check Status",
                     "Update Priority",
                     "Edit Invoiced Acceptance",
+                    "Edit Item Prices",
                     "Assign Tag",
                 ],
                 "TAT" => [
