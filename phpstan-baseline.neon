@@ -3541,12 +3541,6 @@ parameters:
 			path: app/Domains/Laboratory/Services/WorkflowService.php
 
 		-
-			message: '#^Method App\\Domains\\Monitoring\\Models\\MonitoringSample\:\:asDateTime\(\) should return Illuminate\\Support\\Carbon but returns Carbon\\Carbon\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Domains/Monitoring/Models/MonitoringSample.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 2
