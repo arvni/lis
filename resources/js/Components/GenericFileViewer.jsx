@@ -1,18 +1,20 @@
-import {Box, Button, Chip, Paper, Typography} from "@mui/material";
-import {CloudDownload} from "@mui/icons-material";
-import React from "react";
+import { Box, Button, Chip, Paper, Typography } from '@mui/material';
+import { CloudDownload } from '@mui/icons-material';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 const GenericFileViewer = ({ fileUrl, fileType, fileName, fileSize, onDownload }) => {
     return (
-        <Box sx={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            p: 3
-        }}>
+        <Box
+            sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                p: 3,
+            }}
+        >
             <Paper
                 elevation={3}
                 sx={{
@@ -20,7 +22,7 @@ const GenericFileViewer = ({ fileUrl, fileType, fileName, fileSize, onDownload }
                     borderRadius: 2,
                     maxWidth: 400,
                     width: '100%',
-                    textAlign: 'center'
+                    textAlign: 'center',
                 }}
             >
                 <Box sx={{ mb: 3, color: 'primary.main', fontSize: 60 }}>
@@ -40,11 +42,7 @@ const GenericFileViewer = ({ fileUrl, fileType, fileName, fileSize, onDownload }
                         sx={{ mr: 1 }}
                     />
                     {fileSize && (
-                        <Chip
-                            label={formatFileSize(fileSize)}
-                            variant="outlined"
-                            size="small"
-                        />
+                        <Chip label={formatFileSize(fileSize)} variant="outlined" size="small" />
                     )}
                 </Box>
 

@@ -1,13 +1,5 @@
 import React, { Component } from 'react';
-import {
-    Box,
-    Container,
-    Paper,
-    Typography,
-    Button,
-    Alert,
-    Stack
-} from '@mui/material';
+import { Box, Container, Paper, Typography, Button, Alert, Stack } from '@mui/material';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlined';
 import PropTypes from 'prop-types';
 
@@ -27,7 +19,7 @@ export default class ErrorBoundary extends Component {
 
     componentDidCatch(error, errorInfo) {
         // You can log the error to an error reporting service
-        console.error("Uncaught error:", error, errorInfo);
+        console.error('Uncaught error:', error, errorInfo);
         this.setState({ errorInfo });
     }
 
@@ -40,7 +32,7 @@ export default class ErrorBoundary extends Component {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        bgcolor: 'grey.50'
+                        bgcolor: 'grey.50',
                     }}
                 >
                     <Container maxWidth="sm">
@@ -50,20 +42,29 @@ export default class ErrorBoundary extends Component {
                                 p: 4,
                                 display: 'flex',
                                 flexDirection: 'column',
-                                alignItems: 'center'
+                                alignItems: 'center',
                             }}
                         >
-                            <ErrorOutlineIcon
-                                color="error"
-                                sx={{ fontSize: 64, mb: 2 }}
-                            />
+                            <ErrorOutlineIcon color="error" sx={{ fontSize: 64, mb: 2 }} />
 
-                            <Typography variant="h5" component="h1" gutterBottom align="center" fontWeight="bold">
+                            <Typography
+                                variant="h5"
+                                component="h1"
+                                gutterBottom
+                                align="center"
+                                fontWeight="bold"
+                            >
                                 Something went wrong
                             </Typography>
 
-                            <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 4 }}>
-                                The application encountered an unexpected error. Please try refreshing the page.
+                            <Typography
+                                variant="body1"
+                                color="text.secondary"
+                                align="center"
+                                sx={{ mb: 4 }}
+                            >
+                                The application encountered an unexpected error. Please try
+                                refreshing the page.
                             </Typography>
 
                             <Button
@@ -83,7 +84,7 @@ export default class ErrorBoundary extends Component {
                                         overflow: 'auto',
                                         bgcolor: 'grey.100',
                                         borderRadius: 1,
-                                        p: 2
+                                        p: 2,
                                     }}
                                 >
                                     <Alert severity="error" sx={{ mb: 1 }}>
@@ -96,10 +97,11 @@ export default class ErrorBoundary extends Component {
                                             fontFamily: 'monospace',
                                             fontSize: 12,
                                             color: 'text.secondary',
-                                            mt: 1
+                                            mt: 1,
                                         }}
                                     >
-                                        {this.state.errorInfo && this.state.errorInfo.componentStack}
+                                        {this.state.errorInfo &&
+                                            this.state.errorInfo.componentStack}
                                     </Stack>
                                 </Box>
                             )}

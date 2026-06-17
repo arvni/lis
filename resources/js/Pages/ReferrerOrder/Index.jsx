@@ -1,11 +1,11 @@
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { GridActionsCellItem } from "@mui/x-data-grid";
-import Filter from "./Components/Filter";
-import TableLayout from "@/Layouts/TableLayout";
-import { useState, useEffect } from "react";
-import { RemoveRedEye, Assignment, MergeType } from "@mui/icons-material";
-import { Head, router, useForm, usePage } from "@inertiajs/react";
-import { Tooltip, Chip } from "@mui/material";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { GridActionsCellItem } from '@mui/x-data-grid';
+import Filter from './Components/Filter';
+import TableLayout from '@/Layouts/TableLayout';
+import { useState, useEffect } from 'react';
+import { RemoveRedEye, Assignment, MergeType } from '@mui/icons-material';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Tooltip, Chip } from '@mui/material';
 
 const Index = () => {
     const { referrerOrders, status, success, requestInputs } = usePage().props;
@@ -30,7 +30,7 @@ const Index = () => {
         {
             field: 'id',
             headerName: 'ID',
-            type: "number",
+            type: 'number',
             width: 70,
             headerAlign: 'center',
             align: 'center',
@@ -38,21 +38,22 @@ const Index = () => {
         {
             field: 'referrer.name',
             headerName: 'Referrer',
-            type: "string",
+            type: 'string',
             width: 200,
             flex: 1,
-            renderCell: ({ row }) => (
+            renderCell: ({ row }) =>
                 row?.referrer?.fullName ? (
                     <Tooltip title={`Email: ${row?.referrer?.email || 'N/A'}`}>
                         <span>{row?.referrer?.fullName}</span>
                     </Tooltip>
-                ) : 'N/A'
-            )
+                ) : (
+                    'N/A'
+                ),
         },
         {
             field: 'status',
             headerName: 'Status',
-            type: "string",
+            type: 'string',
             width: 140,
             renderCell: ({ row }) => (
                 <Chip
@@ -61,14 +62,14 @@ const Index = () => {
                     size="small"
                     variant="outlined"
                 />
-            )
+            ),
         },
         {
             field: 'pooling',
             headerName: 'Pooling',
-            type: "boolean",
+            type: 'boolean',
             width: 100,
-            renderCell: ({ row }) => (
+            renderCell: ({ row }) =>
                 row.pooling ? (
                     <Chip
                         icon={<MergeType fontSize="small" />}
@@ -77,32 +78,32 @@ const Index = () => {
                         size="small"
                         variant="outlined"
                     />
-                ) : null
-            )
+                ) : null,
         },
         {
             field: 'patient.fullName',
             headerName: 'Patient',
-            type: "string",
+            type: 'string',
             width: 200,
             flex: 1,
-            renderCell: ({ row }) => (
+            renderCell: ({ row }) =>
                 row?.patient?.fullName ? (
                     <Tooltip title={`Patient ID: ${row?.patient?.id || 'N/A'}`}>
                         <span>{row?.patient?.fullName}</span>
                     </Tooltip>
-                ) : 'N/A'
-            )
+                ) : (
+                    'N/A'
+                ),
         },
         {
             field: 'created_at',
             headerName: 'Created',
-            type: "date",
+            type: 'date',
             width: 130,
             valueFormatter: (value) => {
                 if (!value) return 'N/A';
                 return new Date(value).toLocaleDateString();
-            }
+            },
         },
         {
             field: 'action',
@@ -122,9 +123,9 @@ const Index = () => {
                     label="View Report"
                     onClick={handleViewReport(params.row.id)}
                     showInMenu={true}
-                />
-            ]
-        }
+                />,
+            ],
+        },
     ];
 
     const handleViewOrder = (id) => (e) => {
@@ -132,7 +133,7 @@ const Index = () => {
         e.stopPropagation();
         setProcessing(true);
         router.visit(route('referrer-orders.show', id), {
-            onFinish: () => setProcessing(false)
+            onFinish: () => setProcessing(false),
         });
     };
 
@@ -147,12 +148,12 @@ const Index = () => {
         setProcessing(true);
         setFilter(filters);
 
-        router.visit(route("referrer-orders.index"), {
+        router.visit(route('referrer-orders.index'), {
             data: { page, filters, sort, pageSize },
-            only: ["referrerOrders", "status", "success", "requestInputs"],
+            only: ['referrerOrders', 'status', 'success', 'requestInputs'],
             preserveState: true,
             onFinish: () => setProcessing(false),
-            onError: () => setProcessing(false)
+            onError: () => setProcessing(false),
         });
     };
 
@@ -170,7 +171,7 @@ const Index = () => {
 
     return (
         <div className="referrer-orders-container">
-            <Head title="Referrer Orders"/>
+            <Head title="Referrer Orders" />
             <TableLayout
                 defaultValues={requestInputs}
                 columns={columns}
@@ -193,23 +194,19 @@ const Index = () => {
 
 const breadCrumbs = [
     {
-        title: "Referrers",
-        link: route("referrers.index"),
-        icon: null
+        title: 'Referrers',
+        link: route('referrers.index'),
+        icon: null,
     },
     {
-        title: "Referrer Orders",
+        title: 'Referrer Orders',
         link: null,
-        icon: null
-    }
+        icon: null,
+    },
 ];
 
-Index.layout = page => (
-    <AuthenticatedLayout
-        auth={page.props.auth}
-        children={page}
-        breadcrumbs={breadCrumbs}
-    />
+Index.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
 );
 
 export default Index;

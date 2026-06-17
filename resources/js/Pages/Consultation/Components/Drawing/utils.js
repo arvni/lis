@@ -28,16 +28,20 @@ export const isValueBetweenLimits = (value, C1, type1, C2, type2) => {
     let lowerBoundOk = false;
     if (value > minC + EPSILON) lowerBoundOk = true;
     else if (Math.abs(value - minC) < EPSILON) {
-        if ((Math.abs(C1 - minC) < EPSILON && type1 === 'solid') ||
-            (Math.abs(C2 - minC) < EPSILON && type2 === 'solid')) {
+        if (
+            (Math.abs(C1 - minC) < EPSILON && type1 === 'solid') ||
+            (Math.abs(C2 - minC) < EPSILON && type2 === 'solid')
+        ) {
             lowerBoundOk = true;
         }
     }
     let upperBoundOk = false;
     if (value < maxC - EPSILON) upperBoundOk = true;
     else if (Math.abs(value - maxC) < EPSILON) {
-        if ((Math.abs(C1 - maxC) < EPSILON && type1 === 'solid') ||
-            (Math.abs(C2 - maxC) < EPSILON && type2 === 'solid')) {
+        if (
+            (Math.abs(C1 - maxC) < EPSILON && type1 === 'solid') ||
+            (Math.abs(C2 - maxC) < EPSILON && type2 === 'solid')
+        ) {
             upperBoundOk = true;
         }
     }
@@ -63,7 +67,7 @@ export const isElementBetweenParallelLines = (element, line1Eq, line1Type, line2
             { x, y },
             { x: x + width, y },
             { x, y: y + height },
-            { x: x + width, y: y + height }
+            { x: x + width, y: y + height },
         );
     } else if (element.item.shape === ElementTypes.CIRCLE) {
         const { cx, cy, radius } = element.item;
@@ -72,7 +76,7 @@ export const isElementBetweenParallelLines = (element, line1Eq, line1Type, line2
             { x: cx + radius, y: cy },
             { x: cx - radius, y: cy },
             { x: cx, y: cy + radius },
-            { x: cx, y: cy - radius }
+            { x: cx, y: cy - radius },
         );
     } else if (element.item.shape === ElementTypes.TEXT) {
         const { x, y, width, height } = element.item;
@@ -80,7 +84,7 @@ export const isElementBetweenParallelLines = (element, line1Eq, line1Type, line2
             { x, y },
             { x: x + width, y },
             { x, y: y + height },
-            { x: x + width, y: y + height }
+            { x: x + width, y: y + height },
         );
     }
 
@@ -104,7 +108,7 @@ export const calculateTextDimensions = (text, fontSize, fontFamily = 'Arial') =>
     const height = fontSize * 1.2; // Approximate height
     return {
         width: metrics.width,
-        height: height
+        height: height,
     };
 };
 
@@ -113,45 +117,44 @@ export const pointIsInElement = (point, element) => {
     const { x, y } = point;
 
     if (element.item.shape === ElementTypes.SQUARE) {
-        return x >= element.item.x &&
+        return (
+            x >= element.item.x &&
             x <= element.item.x + element.item.width &&
             y >= element.item.y &&
-            y <= element.item.y + element.item.height;
-    }
-
-    else if (element.item.shape === ElementTypes.CIRCLE) {
+            y <= element.item.y + element.item.height
+        );
+    } else if (element.item.shape === ElementTypes.CIRCLE) {
         const distance = Math.sqrt(
-            Math.pow(x - element.item.cx, 2) +
-            Math.pow(y - element.item.cy, 2)
+            Math.pow(x - element.item.cx, 2) + Math.pow(y - element.item.cy, 2),
         );
         return distance <= element.item.radius;
-    }
-
-    else if (element.item.shape === ElementTypes.STRAIGHT_LINE) {
+    } else if (element.item.shape === ElementTypes.STRAIGHT_LINE) {
         // Distance from point to line segment
         const A = element.item.end.y - element.item.start.y;
         const B = element.item.start.x - element.item.end.x;
-        const C = element.item.end.x * element.item.start.y - element.item.start.x * element.item.end.y;
+        const C =
+            element.item.end.x * element.item.start.y - element.item.start.x * element.item.end.y;
 
         const distance = Math.abs(A * x + B * y + C) / Math.sqrt(A * A + B * B);
         const lineLength = Math.sqrt(
             Math.pow(element.item.end.x - element.item.start.x, 2) +
-            Math.pow(element.item.end.y - element.item.start.y, 2)
+                Math.pow(element.item.end.y - element.item.start.y, 2),
         );
 
         // Check if projection is on the line segment
-        const dot = ((x - element.item.start.x) * (element.item.end.x - element.item.start.x) +
+        const dot =
+            ((x - element.item.start.x) * (element.item.end.x - element.item.start.x) +
                 (y - element.item.start.y) * (element.item.end.y - element.item.start.y)) /
             (lineLength * lineLength);
 
         return distance < 5 && dot >= 0 && dot <= 1; // 5px tolerance
-    }
-
-    else if (element.item.shape === ElementTypes.TEXT) {
-        return x >= element.item.x &&
+    } else if (element.item.shape === ElementTypes.TEXT) {
+        return (
+            x >= element.item.x &&
             x <= element.item.x + element.item.width &&
             y >= element.item.y &&
-            y <= element.item.y + element.item.height;
+            y <= element.item.y + element.item.height
+        );
     }
 
     return false;
@@ -161,6 +164,6 @@ export const pointIsInElement = (point, element) => {
 export const snapToGrid = (point, gridSize) => {
     return {
         x: Math.round(point.x / gridSize) * gridSize,
-        y: Math.round(point.y / gridSize) * gridSize
+        y: Math.round(point.y / gridSize) * gridSize,
     };
 };

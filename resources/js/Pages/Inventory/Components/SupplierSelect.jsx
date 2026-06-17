@@ -1,6 +1,6 @@
-import {useState, useEffect} from "react";
-import {Autocomplete, TextField, CircularProgress} from "@mui/material";
-import axios from "axios";
+import { useState, useEffect } from 'react';
+import { Autocomplete, TextField, CircularProgress } from '@mui/material';
+import axios from 'axios';
 
 let debounceTimer = null;
 
@@ -20,16 +20,16 @@ let debounceTimer = null;
 const SupplierSelect = ({
     value = null,
     onChange,
-    label = "Supplier",
+    label = 'Supplier',
     required = false,
     error = false,
-    helperText = "",
-    size = "medium",
+    helperText = '',
+    size = 'medium',
     disabled = false,
 }) => {
-    const [options,     setOptions]     = useState([]);
-    const [loading,     setLoading]     = useState(false);
-    const [inputValue,  setInputValue]  = useState("");
+    const [options, setOptions] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [inputValue, setInputValue] = useState('');
 
     // Seed options with current value so it renders on load
     useEffect(() => {
@@ -42,8 +42,8 @@ const SupplierSelect = ({
         debounceTimer = setTimeout(async () => {
             setLoading(true);
             try {
-                const {data} = await axios.get(route("api.inventory.suppliers.lookup"), {
-                    params: {search: query},
+                const { data } = await axios.get(route('api.inventory.suppliers.lookup'), {
+                    params: { search: query },
                 });
                 setOptions(data);
             } catch {
@@ -63,16 +63,20 @@ const SupplierSelect = ({
             disabled={disabled}
             filterOptions={(x) => x}
             isOptionEqualToValue={(opt, val) => opt.id === val?.id}
-            getOptionLabel={(opt) => opt ? `${opt.name}${opt.code ? ` (${opt.code})` : ""}` : ""}
+            getOptionLabel={(opt) => (opt ? `${opt.name}${opt.code ? ` (${opt.code})` : ''}` : '')}
             onInputChange={(_, newInput, reason) => {
                 setInputValue(newInput);
-                if (reason === "input") search(newInput);
-                if (reason === "clear") search("");
+                if (reason === 'input') search(newInput);
+                if (reason === 'clear') search('');
             }}
-            onOpen={() => { if (!options.length) search(""); }}
+            onOpen={() => {
+                if (!options.length) search('');
+            }}
             onChange={(_, newValue) => {
                 onChange(newValue);
-                setInputValue(newValue ? `${newValue.name}${newValue.code ? ` (${newValue.code})` : ""}` : "");
+                setInputValue(
+                    newValue ? `${newValue.name}${newValue.code ? ` (${newValue.code})` : ''}` : '',
+                );
             }}
             renderInput={(params) => (
                 <TextField
@@ -88,7 +92,7 @@ const SupplierSelect = ({
                             ...params.slotProps?.input,
                             endAdornment: (
                                 <>
-                                    {loading && <CircularProgress size={16}/>}
+                                    {loading && <CircularProgress size={16} />}
                                     {params.slotProps?.input?.endAdornment}
                                 </>
                             ),

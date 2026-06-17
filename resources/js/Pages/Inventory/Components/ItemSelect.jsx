@@ -1,6 +1,6 @@
-import {useState, useCallback} from "react";
-import {Autocomplete, TextField, CircularProgress} from "@mui/material";
-import axios from "axios";
+import { useState, useCallback } from 'react';
+import { Autocomplete, TextField, CircularProgress } from '@mui/material';
+import axios from 'axios';
 
 let debounceTimer = null;
 
@@ -16,10 +16,18 @@ let debounceTimer = null;
  *   helperText   – string
  *   size         – MUI size ("small" | "medium")
  */
-const ItemSelect = ({value, onChange, label = "Item", required = false, error = false, helperText = "", size = "medium"}) => {
+const ItemSelect = ({
+    value,
+    onChange,
+    label = 'Item',
+    required = false,
+    error = false,
+    helperText = '',
+    size = 'medium',
+}) => {
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [inputValue, setInputValue] = useState("");
+    const [inputValue, setInputValue] = useState('');
 
     const search = useCallback((query) => {
         clearTimeout(debounceTimer);
@@ -30,7 +38,9 @@ const ItemSelect = ({value, onChange, label = "Item", required = false, error = 
         debounceTimer = setTimeout(async () => {
             setLoading(true);
             try {
-                const {data} = await axios.get(route("api.inventory.items.lookup"), {params: {search: query}});
+                const { data } = await axios.get(route('api.inventory.items.lookup'), {
+                    params: { search: query },
+                });
                 setOptions(data);
             } catch {
                 setOptions([]);
@@ -48,14 +58,14 @@ const ItemSelect = ({value, onChange, label = "Item", required = false, error = 
             loading={loading}
             filterOptions={(x) => x}
             isOptionEqualToValue={(opt, val) => opt.id === val?.id}
-            getOptionLabel={(opt) => opt ? `${opt.item_code} — ${opt.name}` : ""}
+            getOptionLabel={(opt) => (opt ? `${opt.item_code} — ${opt.name}` : '')}
             onInputChange={(_, newInput, reason) => {
                 setInputValue(newInput);
-                if (reason === "input") search(newInput);
+                if (reason === 'input') search(newInput);
             }}
             onChange={(_, newValue) => {
                 onChange(newValue);
-                setInputValue(newValue ? `${newValue.item_code} — ${newValue.name}` : "");
+                setInputValue(newValue ? `${newValue.item_code} — ${newValue.name}` : '');
             }}
             renderInput={(params) => (
                 <TextField
@@ -71,7 +81,7 @@ const ItemSelect = ({value, onChange, label = "Item", required = false, error = 
                             ...params.slotProps?.input,
                             endAdornment: (
                                 <>
-                                    {loading && <CircularProgress size={16}/>}
+                                    {loading && <CircularProgress size={16} />}
                                     {params.slotProps?.input?.endAdornment}
                                 </>
                             ),

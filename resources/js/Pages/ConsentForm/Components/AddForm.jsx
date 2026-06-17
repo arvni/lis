@@ -1,20 +1,18 @@
-import {
-    TextField,
-} from "@mui/material";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
+import { TextField } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
 
-import Upload from "@/Components/Upload";
-import {FormProvider, useFormState} from "@/Components/FormTemplate.jsx";
+import Upload from '@/Components/Upload';
+import { FormProvider, useFormState } from '@/Components/FormTemplate.jsx';
 
 const AddForm = ({ open, onClose, defaultValue }) => {
     const url = defaultValue?.id
         ? route('consentForms.update', defaultValue.id)
         : route('consentForms.store');
     const defaultData = {
-        name: "",
+        name: '',
         document: null,
-        ...defaultValue
+        ...defaultValue,
     };
 
     return (
@@ -33,7 +31,8 @@ const AddForm = ({ open, onClose, defaultValue }) => {
 
 const FormContent = () => {
     const { data, setData } = useFormState();
-    const handleChange = (e) => setData(prevState => ({ ...prevState, [e.target.name]: e.target.value }));
+    const handleChange = (e) =>
+        setData((prevState) => ({ ...prevState, [e.target.name]: e.target.value }));
 
     return (
         <>
@@ -43,7 +42,7 @@ const FormContent = () => {
                     label="Title"
                     name="name"
                     onChange={handleChange}
-                    value={data?.name || ""}
+                    value={data?.name || ''}
                     placeholder="Enter a descriptive title for this consent form"
                     required
                     helperText="This title will be displayed to users when selecting consent forms"
@@ -61,13 +60,18 @@ const FormContent = () => {
                     onChange={setData}
                     required
                     accept=".pdf,application/pdf"
-                    url={route("documents.store")}
+                    url={route('documents.store')}
                 />
-                <Typography variant="caption" color="text.secondary" sx={{display: 'block', mt: 1}}>
+                <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: 'block', mt: 1 }}
+                >
                     Accepted formats: .pdf
                 </Typography>
             </Grid>
-        </>);
+        </>
+    );
 };
 
 export default AddForm;

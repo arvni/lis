@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
     Accordion,
     AccordionDetails,
@@ -9,14 +9,14 @@ import {
     Paper,
     Stack,
     Typography,
-    useTheme
-} from "@mui/material";
+    useTheme,
+} from '@mui/material';
 import {
     ArrowDownward,
     ExpandMore as ExpandMoreIcon,
     CheckCircle,
-    Info as InfoIcon
-} from "@mui/icons-material";
+    Info as InfoIcon,
+} from '@mui/icons-material';
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import {
     Timeline,
@@ -24,10 +24,16 @@ import {
     TimelineContent,
     TimelineDot,
     TimelineItem,
-    TimelineSeparator
-} from "@mui/lab";
+    TimelineSeparator,
+} from '@mui/lab';
 
-const TestInfo = ({ method,test, defaultExpanded = true, showSections = true, showParameters = true }) => {
+const TestInfo = ({
+    method,
+    test,
+    defaultExpanded = true,
+    showSections = true,
+    showParameters = true,
+}) => {
     const theme = useTheme();
 
     return (
@@ -40,11 +46,11 @@ const TestInfo = ({ method,test, defaultExpanded = true, showSections = true, sh
                         '&:before': {
                             display: 'none',
                         },
-                    }
+                    },
                 }}
             >
                 <AccordionSummary
-                    expandIcon={<ExpandMoreIcon  sx={{color:"white"}} />}
+                    expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
                     aria-controls="test-information"
                     id="test-information"
                     sx={{
@@ -52,22 +58,26 @@ const TestInfo = ({ method,test, defaultExpanded = true, showSections = true, sh
                         color: theme.palette.primary.contrastText,
                         '&:hover': {
                             backgroundColor: theme.palette.primary.main,
-                        }
+                        },
                     }}
                 >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <InfoIcon />
-                        <Typography variant="h5" fontWeight="medium">Test Information</Typography>
+                        <Typography variant="h5" fontWeight="medium">
+                            Test Information
+                        </Typography>
                     </Box>
                 </AccordionSummary>
 
                 <AccordionDetails sx={{ p: 3 }}>
-                    <Box sx={{
-                        backgroundColor: theme.palette.background.paper,
-                        p: 2,
-                        borderRadius: 1,
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                    }}>
+                    <Box
+                        sx={{
+                            backgroundColor: theme.palette.background.paper,
+                            p: 2,
+                            borderRadius: 1,
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                        }}
+                    >
                         <Stack
                             direction={{ xs: 'column', sm: 'row' }}
                             spacing={1}
@@ -79,7 +89,12 @@ const TestInfo = ({ method,test, defaultExpanded = true, showSections = true, sh
                                 size="medium"
                                 sx={{ fontWeight: 500 }}
                             />
-                            <KeyboardDoubleArrowRightIcon sx={{ color: theme.palette.text.secondary, display: { xs: 'none', sm: 'block' } }} />
+                            <KeyboardDoubleArrowRightIcon
+                                sx={{
+                                    color: theme.palette.text.secondary,
+                                    display: { xs: 'none', sm: 'block' },
+                                }}
+                            />
                             <Chip
                                 label={test.name}
                                 color="primary"
@@ -87,7 +102,12 @@ const TestInfo = ({ method,test, defaultExpanded = true, showSections = true, sh
                                 size="medium"
                                 sx={{ fontWeight: 500 }}
                             />
-                            <KeyboardDoubleArrowRightIcon sx={{ color: theme.palette.text.secondary, display: { xs: 'none', sm: 'block' } }} />
+                            <KeyboardDoubleArrowRightIcon
+                                sx={{
+                                    color: theme.palette.text.secondary,
+                                    display: { xs: 'none', sm: 'block' },
+                                }}
+                            />
                             <Typography
                                 variant="h5"
                                 component="span"
@@ -96,7 +116,7 @@ const TestInfo = ({ method,test, defaultExpanded = true, showSections = true, sh
                                     color: theme.palette.primary.main,
                                     p: 1,
                                     borderRadius: 1,
-                                    backgroundColor: theme.palette.action.hover
+                                    backgroundColor: theme.palette.action.hover,
                                 }}
                             >
                                 {method.name}
@@ -114,7 +134,7 @@ const TestInfo = ({ method,test, defaultExpanded = true, showSections = true, sh
                                 '&:before': {
                                     display: 'none',
                                 },
-                                overflow: 'hidden'
+                                overflow: 'hidden',
                             }}
                         >
                             <AccordionSummary
@@ -124,15 +144,17 @@ const TestInfo = ({ method,test, defaultExpanded = true, showSections = true, sh
                                 sx={{
                                     backgroundColor: theme.palette.background.default,
                                     '&:hover': {
-                                        backgroundColor: theme.palette.action.hover
-                                    }
+                                        backgroundColor: theme.palette.action.hover,
+                                    },
                                 }}
                             >
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <CheckCircle fontSize="small" color="primary" />
-                                    <Typography variant="h6" fontWeight="medium">Workflow</Typography>
+                                    <Typography variant="h6" fontWeight="medium">
+                                        Workflow
+                                    </Typography>
                                     <Chip
-                                        label={method.workflow.sections.length + " steps"}
+                                        label={method.workflow.sections.length + ' steps'}
                                         size="small"
                                         color="primary"
                                         sx={{ ml: 1 }}
@@ -147,19 +169,23 @@ const TestInfo = ({ method,test, defaultExpanded = true, showSections = true, sh
                                             <TimelineSeparator>
                                                 <TimelineDot
                                                     color="primary"
-                                                    variant={index === 0 ? "filled" : "outlined"}
+                                                    variant={index === 0 ? 'filled' : 'outlined'}
                                                     sx={{
                                                         boxShadow: index === 0 ? 3 : 1,
                                                         transition: 'all 0.2s',
                                                         '&:hover': {
                                                             transform: 'scale(1.1)',
-                                                        }
+                                                        },
                                                     }}
                                                 >
                                                     <ArrowDownward fontSize="small" />
                                                 </TimelineDot>
                                                 {index < method.workflow.sections.length - 1 && (
-                                                    <TimelineConnector sx={{ bgcolor: theme.palette.primary.light }} />
+                                                    <TimelineConnector
+                                                        sx={{
+                                                            bgcolor: theme.palette.primary.light,
+                                                        }}
+                                                    />
                                                 )}
                                             </TimelineSeparator>
 
@@ -168,16 +194,21 @@ const TestInfo = ({ method,test, defaultExpanded = true, showSections = true, sh
                                                     elevation={1}
                                                     sx={{
                                                         p: 2,
-                                                        backgroundColor: theme.palette.background.paper,
+                                                        backgroundColor:
+                                                            theme.palette.background.paper,
                                                         borderLeft: `4px solid ${theme.palette.primary.main}`,
                                                         transition: 'all 0.2s',
                                                         '&:hover': {
                                                             boxShadow: 3,
-                                                            transform: 'translateY(-2px)'
-                                                        }
+                                                            transform: 'translateY(-2px)',
+                                                        },
                                                     }}
                                                 >
-                                                    <Typography variant="h6" fontWeight="medium" gutterBottom>
+                                                    <Typography
+                                                        variant="h6"
+                                                        fontWeight="medium"
+                                                        gutterBottom
+                                                    >
                                                         {section.name}
                                                     </Typography>
 
@@ -187,24 +218,29 @@ const TestInfo = ({ method,test, defaultExpanded = true, showSections = true, sh
                                                         sx={{
                                                             mt: 1,
                                                             gap: 0.5,
-                                                            justifyContent: index % 2 ? "flex-end" : "flex-start",
-                                                            flexWrap: "wrap"
+                                                            justifyContent:
+                                                                index % 2
+                                                                    ? 'flex-end'
+                                                                    : 'flex-start',
+                                                            flexWrap: 'wrap',
                                                         }}
                                                     >
-                                                        {JSON.parse(section.pivot.parameters).map((parameter, paramIndex) => (
-                                                            <Chip
-                                                                key={paramIndex}
-                                                                label={parameter.name}
-                                                                size="small"
-                                                                variant="outlined"
-                                                                color="secondary"
-                                                                sx={{
-                                                                    borderRadius: 1,
-                                                                    fontWeight: 400,
-                                                                    fontSize: '0.8rem'
-                                                                }}
-                                                            />
-                                                        ))}
+                                                        {JSON.parse(section.pivot.parameters).map(
+                                                            (parameter, paramIndex) => (
+                                                                <Chip
+                                                                    key={paramIndex}
+                                                                    label={parameter.name}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                    color="secondary"
+                                                                    sx={{
+                                                                        borderRadius: 1,
+                                                                        fontWeight: 400,
+                                                                        fontSize: '0.8rem',
+                                                                    }}
+                                                                />
+                                                            ),
+                                                        )}
                                                     </Stack>
                                                 </Paper>
                                             </TimelineContent>

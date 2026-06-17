@@ -1,59 +1,58 @@
 import {
-    Button, Checkbox,
+    Button,
+    Checkbox,
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle, FormControlLabel,
+    DialogTitle,
+    FormControlLabel,
     Grid as Grid,
     Typography,
     Box,
     Tooltip,
     Alert,
-    DialogContentText
-} from "@mui/material";
-import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
-import React, { useState, useEffect } from "react";
-import PropTypes from "prop-types";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import {
-    DeleteOutlined as DeleteIcon,
-    WarningAmber as WarningIcon
-} from '@mui/icons-material';
+    DialogContentText,
+} from '@mui/material';
+import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
+import dayjs from 'dayjs';
+import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DeleteOutlined as DeleteIcon, WarningAmber as WarningIcon } from '@mui/icons-material';
 
 // Helper functions
-export const getDayjs = (hours, minutes = 0, seconds = 0) => dayjs(new Date(new Date(new Date().setHours(hours)).setMinutes(minutes)).setSeconds(seconds))
+export const getDayjs = (hours, minutes = 0, seconds = 0) =>
+    dayjs(new Date(new Date(new Date().setHours(hours)).setMinutes(minutes)).setSeconds(seconds));
 
 export const convertValue = (v) => {
     if (v) {
-        let tmp = v.split(":");
+        let tmp = v.split(':');
         return getDayjs(tmp[0], tmp[1]);
     }
     return v;
-}
-
+};
 
 // Time configuration
 const minTime = getDayjs(9);
 const maxTime = getDayjs(21);
 const timeSlotPresets = [
-    { label: "Morning (9:00-13:00)", start: "9:00", end: "13:00" },
-    { label: "Afternoon (14:00-17:00)", start: "13:00", end: "17:00" },
-    { label: "Full Day (9:00-17:00)", start: "9:00", end: "17:00" }
+    { label: 'Morning (9:00-13:00)', start: '9:00', end: '13:00' },
+    { label: 'Afternoon (14:00-17:00)', start: '13:00', end: '17:00' },
+    { label: 'Full Day (9:00-17:00)', start: '9:00', end: '17:00' },
 ];
 
 const AddTimeSlotForm = ({ open, setData, data, title, onClose, onsubmit, onDelete }) => {
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-    const [error, setError] = useState("");
+    const [error, setError] = useState('');
 
     useEffect(() => {
         // Reset error when form opens or data changes
-        setError("");
+        setError('');
     }, [open, data]);
 
     const handleSubmit = () => {
         if (!data.started_at || !data.ended_at) {
-            setError("Please select both start and end times");
+            setError('Please select both start and end times');
             return;
         }
 
@@ -61,20 +60,21 @@ const AddTimeSlotForm = ({ open, setData, data, title, onClose, onsubmit, onDele
         const endTime = convertValue(data.ended_at).toDate().getTime();
 
         if (startTime >= endTime) {
-            setError("End time must be after start time");
+            setError('End time must be after start time');
             return;
         }
 
-        setError("");
+        setError('');
         onsubmit();
     };
 
     const handleChange = (name) => (v) => {
-        setData(prevData => ({...prevData, [name]: dayjs(v).format("H:mm")}));
-        setError(""); // Clear error on change
+        setData((prevData) => ({ ...prevData, [name]: dayjs(v).format('H:mm') }));
+        setError(''); // Clear error on change
     };
 
-    const handleOnlyOnlineChanged = (_, v) => setData(prevData => ({...prevData, only_online: v}));
+    const handleOnlyOnlineChanged = (_, v) =>
+        setData((prevData) => ({ ...prevData, only_online: v }));
 
     const handleOpenDeleteConfirm = () => setConfirmDeleteOpen(true);
     const handleCloseDeleteConfirm = () => setConfirmDeleteOpen(false);
@@ -85,12 +85,12 @@ const AddTimeSlotForm = ({ open, setData, data, title, onClose, onsubmit, onDele
     };
 
     const applyPreset = (preset) => {
-        setData(prevData => ({
+        setData((prevData) => ({
             ...prevData,
             started_at: preset.start,
-            ended_at: preset.end
+            ended_at: preset.end,
         }));
-        setError("");
+        setError('');
     };
 
     return (
@@ -99,7 +99,7 @@ const AddTimeSlotForm = ({ open, setData, data, title, onClose, onsubmit, onDele
             <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
                 <DialogTitle>
                     <Typography variant="h6" component="div">
-                        {title || "Schedule Time Slot"}
+                        {title || 'Schedule Time Slot'}
                     </Typography>
                 </DialogTitle>
 
@@ -118,7 +118,7 @@ const AddTimeSlotForm = ({ open, setData, data, title, onClose, onsubmit, onDele
                         <Typography variant="subtitle2" gutterBottom>
                             Quick Select:
                         </Typography>
-                        <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap'}}>
+                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                             {timeSlotPresets.map((preset, idx) => (
                                 <Button
                                     key={idx}
@@ -134,20 +134,20 @@ const AddTimeSlotForm = ({ open, setData, data, title, onClose, onsubmit, onDele
 
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <Grid container spacing={2}>
-                            <Grid size={{xs:12, sm:5}}>
+                            <Grid size={{ xs: 12, sm: 5 }}>
                                 <TimePicker
                                     ampm={false}
                                     slotProps={{
                                         digitalClockSectionItem: {
-                                            sx: {"&.Mui-disabled": {display: "none"}}
+                                            sx: { '&.Mui-disabled': { display: 'none' } },
                                         },
                                         textField: {
                                             fullWidth: true,
-                                            error: Boolean(error && !data.started_at)
-                                        }
+                                            error: Boolean(error && !data.started_at),
+                                        },
                                     }}
-                                    sx={{ width: "100%" }}
-                                    onAccept={handleChange("started_at")}
+                                    sx={{ width: '100%' }}
+                                    onAccept={handleChange('started_at')}
                                     label="Start Time"
                                     required
                                     value={convertValue(data?.started_at)}
@@ -158,20 +158,20 @@ const AddTimeSlotForm = ({ open, setData, data, title, onClose, onsubmit, onDele
                                 />
                             </Grid>
 
-                            <Grid size={{xs:12, sm:5}}>
+                            <Grid size={{ xs: 12, sm: 5 }}>
                                 <TimePicker
                                     ampm={false}
-                                    sx={{ width: "100%" }}
+                                    sx={{ width: '100%' }}
                                     slotProps={{
                                         digitalClockSectionItem: {
-                                            sx: {"&.Mui-disabled": {display: "none"}}
+                                            sx: { '&.Mui-disabled': { display: 'none' } },
                                         },
                                         textField: {
                                             fullWidth: true,
-                                            error: Boolean(error && !data.ended_at)
-                                        }
+                                            error: Boolean(error && !data.ended_at),
+                                        },
                                     }}
-                                    onAccept={handleChange("ended_at")}
+                                    onAccept={handleChange('ended_at')}
                                     label="End Time"
                                     required
                                     value={convertValue(data?.ended_at)}
@@ -182,7 +182,7 @@ const AddTimeSlotForm = ({ open, setData, data, title, onClose, onsubmit, onDele
                                 />
                             </Grid>
 
-                            <Grid size={{xs:12, sm:2}}>
+                            <Grid size={{ xs: 12, sm: 2 }}>
                                 <Tooltip title="Sessions are online only (no in-person appointments)">
                                     <FormControlLabel
                                         control={<Checkbox />}
@@ -211,11 +211,7 @@ const AddTimeSlotForm = ({ open, setData, data, title, onClose, onsubmit, onDele
                         <Button onClick={onClose} sx={{ mr: 1 }}>
                             Cancel
                         </Button>
-                        <Button
-                            onClick={handleSubmit}
-                            variant="contained"
-                            color="primary"
-                        >
+                        <Button onClick={handleSubmit} variant="contained" color="primary">
                             Save
                         </Button>
                     </Box>
@@ -240,24 +236,17 @@ const AddTimeSlotForm = ({ open, setData, data, title, onClose, onsubmit, onDele
                     <DialogContentText>
                         Are you sure you want to delete this time slot?
                         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            This action cannot be undone. The time slot will be permanently removed from the schedule.
+                            This action cannot be undone. The time slot will be permanently removed
+                            from the schedule.
                         </Typography>
                     </DialogContentText>
                 </DialogContent>
 
                 <DialogActions sx={{ p: 2 }}>
-                    <Button
-                        onClick={handleCloseDeleteConfirm}
-                        variant="outlined"
-                    >
+                    <Button onClick={handleCloseDeleteConfirm} variant="outlined">
                         Cancel
                     </Button>
-                    <Button
-                        onClick={handleDelete}
-                        variant="contained"
-                        color="error"
-                        autoFocus
-                    >
+                    <Button onClick={handleDelete} variant="contained" color="error" autoFocus>
                         Delete
                     </Button>
                 </DialogActions>
@@ -273,7 +262,7 @@ AddTimeSlotForm.propTypes = {
     title: PropTypes.string.isRequired,
     onClose: PropTypes.func.isRequired,
     onsubmit: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired
+    onDelete: PropTypes.func.isRequired,
 };
 
 export default AddTimeSlotForm;

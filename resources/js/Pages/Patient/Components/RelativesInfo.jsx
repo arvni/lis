@@ -1,31 +1,24 @@
-import React, { useState } from "react";
-import {
-    Accordion,
-    AccordionActions,
-    AccordionDetails,
-    Paper,
-    Tooltip,
-    Box
-} from "@mui/material";
-import AccordionSummary from "@mui/material/AccordionSummary";
+import React, { useState } from 'react';
+import { Accordion, AccordionActions, AccordionDetails, Paper, Tooltip, Box } from '@mui/material';
+import AccordionSummary from '@mui/material/AccordionSummary';
 import {
     ExpandMore as ExpandMoreIcon,
     FamilyRestroom as FamilyIcon,
     Edit as EditIcon,
-    Cancel as CancelIcon
-} from "@mui/icons-material";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
+    Cancel as CancelIcon,
+} from '@mui/icons-material';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
 
-import RelativeForm from "./RelativeForm";
+import RelativeForm from './RelativeForm';
 
 const RelativesInfo = ({
-                           relatives,
-                           patientId,
-                           defaultExpanded = false,
-                           canAddPatient = false
-                       }) => {
+    relatives,
+    patientId,
+    defaultExpanded = false,
+    canAddPatient = false,
+}) => {
     const [edit, setEdit] = useState(false);
 
     const handleCancel = () => {
@@ -65,7 +58,9 @@ const RelativesInfo = ({
                             Family Members
                         </Typography>
                         {relatives && relatives.length > 0 && (
-                            <Tooltip title={`${relatives.length} family member${relatives.length !== 1 ? 's' : ''}`}>
+                            <Tooltip
+                                title={`${relatives.length} family member${relatives.length !== 1 ? 's' : ''}`}
+                            >
                                 <Box
                                     component="span"
                                     sx={{
@@ -79,7 +74,7 @@ const RelativesInfo = ({
                                         color: 'primary.contrastText',
                                         fontSize: '0.75rem',
                                         fontWeight: 'bold',
-                                        ml: 1
+                                        ml: 1,
                                     }}
                                 >
                                     {relatives.length}
@@ -103,7 +98,7 @@ const RelativesInfo = ({
                                 p: 3,
                                 textAlign: 'center',
                                 bgcolor: 'background.default',
-                                borderRadius: 1
+                                borderRadius: 1,
                             }}
                         >
                             <Typography variant="body1" color="text.secondary">
@@ -128,7 +123,7 @@ const RelativesInfo = ({
                         sx={{
                             justifyContent: 'flex-end',
                             p: 2,
-                            backgroundColor: 'background.default'
+                            backgroundColor: 'background.default',
                         }}
                     >
                         {edit ? (
@@ -143,7 +138,8 @@ const RelativesInfo = ({
                                 </Button>
                             </Stack>
                         ) : (
-                            relatives && relatives.length > 0 && (
+                            relatives &&
+                            relatives.length > 0 && (
                                 <Tooltip title="Add or edit family members">
                                     <Button
                                         onClick={handleEdit}

@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from "react";
-import Button from "@mui/material/Button";
-import DialogTitle from "@mui/material/DialogTitle";
+import React, { useState, useEffect } from 'react';
+import Button from '@mui/material/Button';
+import DialogTitle from '@mui/material/DialogTitle';
 import {
     Dialog,
     DialogActions,
@@ -13,17 +13,18 @@ import {
     CircularProgress,
     IconButton,
     Tooltip,
-    Fade, Checkbox
-} from "@mui/material";
-import Upload from "@/Components/Upload";
+    Fade,
+    Checkbox,
+} from '@mui/material';
+import Upload from '@/Components/Upload';
 import {
     Share,
     InfoOutlined,
     Close,
     FilePresentOutlined,
-    CloudUploadOutlined
-} from "@mui/icons-material";
-import FormControlLabel from "@mui/material/FormControlLabel";
+    CloudUploadOutlined,
+} from '@mui/icons-material';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 /**
  * PublishForm Component - A dialog for publishing reports with document upload
@@ -36,7 +37,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
  * @param {Function} props.setData - Function to update form data
  * @param {boolean} props.processing - Whether the form is processing a submission
  */
-const PublishForm = ({onSubmit, open, onCancel, data, setData, processing = false}) => {
+const PublishForm = ({ onSubmit, open, onCancel, data, setData, processing = false }) => {
     const [errors, setErrors] = useState({});
     const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
@@ -53,7 +54,7 @@ const PublishForm = ({onSubmit, open, onCancel, data, setData, processing = fals
         const newErrors = {};
 
         if (!data?.published_document?.id && !data?.published_document?.hash) {
-            newErrors.published_document = "A PDF document is required to publish the report";
+            newErrors.published_document = 'A PDF document is required to publish the report';
         }
 
         setErrors(newErrors);
@@ -68,7 +69,8 @@ const PublishForm = ({onSubmit, open, onCancel, data, setData, processing = fals
             onSubmit();
         }
     };
-    const handleChange = (e) => setData(prevState => ({...prevState, silently_publish: e.target.checked}));
+    const handleChange = (e) =>
+        setData((prevState) => ({ ...prevState, silently_publish: e.target.checked }));
 
     return (
         <Dialog
@@ -76,69 +78,68 @@ const PublishForm = ({onSubmit, open, onCancel, data, setData, processing = fals
             onClose={!processing ? onCancel : undefined}
             fullWidth
             maxWidth="sm"
-            slots={{Transition: Fade}}
+            slots={{ Transition: Fade }}
             transitionDuration={300}
             slotProps={{
                 Paper: {
                     sx: {
                         borderRadius: 2,
-                        overflow: 'hidden'
-                    }
-                }
+                        overflow: 'hidden',
+                    },
+                },
             }}
         >
-            <DialogTitle sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                p: 2.5,
-                bgcolor: 'background.default'
-            }}>
-  <Stack direction="row" spacing={1.5} sx={{alignItems: "center"}}>
-                    <Share color="primary"/>
-                    <Typography variant="h6" component="span">Publish Report</Typography>
+            <DialogTitle
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    p: 2.5,
+                    bgcolor: 'background.default',
+                }}
+            >
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+                    <Share color="primary" />
+                    <Typography variant="h6" component="span">
+                        Publish Report
+                    </Typography>
                 </Stack>
 
                 <Tooltip title="Close">
-          <span>
-            <IconButton
-                edge="end"
-                color="inherit"
-                onClick={onCancel}
-                disabled={processing}
-                aria-label="close"
-                size="small"
-            >
-              <Close/>
-            </IconButton>
-          </span>
+                    <span>
+                        <IconButton
+                            edge="end"
+                            color="inherit"
+                            onClick={onCancel}
+                            disabled={processing}
+                            aria-label="close"
+                            size="small"
+                        >
+                            <Close />
+                        </IconButton>
+                    </span>
                 </Tooltip>
             </DialogTitle>
 
-            <Divider/>
+            <Divider />
 
-            <DialogContent sx={{p: 3}}>
-                <Alert
-                    severity="info"
-                    variant="outlined"
-                    icon={<InfoOutlined/>}
-                    sx={{mb: 3}}
-                >
-                    Publishing this report will make it available to authorized users. You must upload a PDF version of
-                    the report to continue.
+            <DialogContent sx={{ p: 3 }}>
+                <Alert severity="info" variant="outlined" icon={<InfoOutlined />} sx={{ mb: 3 }}>
+                    Publishing this report will make it available to authorized users. You must
+                    upload a PDF version of the report to continue.
                 </Alert>
 
-                <Box sx={{mb: 2}}>
+                <Box sx={{ mb: 2 }}>
                     <Typography
                         variant="subtitle1"
                         gutterBottom
                         sx={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 1
+                            gap: 1,
                         }}
                     >
-                        <FilePresentOutlined fontSize="small"/>
+                        <FilePresentOutlined fontSize="small" />
                         Report Document
                     </Typography>
 
@@ -149,19 +150,19 @@ const PublishForm = ({onSubmit, open, onCancel, data, setData, processing = fals
                         editable={!processing}
                         onChange={setData}
                         required
-                        accept={".pdf"}
-                        url={route("documents.store")}
+                        accept={'.pdf'}
+                        url={route('documents.store')}
                         error={hasAttemptedSubmit && errors.published_document}
                         helperText={hasAttemptedSubmit && errors.published_document}
                         placeholder="Select or drag and drop a PDF file"
-                        icon={<CloudUploadOutlined/>}
+                        icon={<CloudUploadOutlined />}
                     />
 
                     {hasAttemptedSubmit && errors.published_document && (
                         <Typography
                             color="error"
                             variant="caption"
-                            sx={{display: 'block', mt: 1}}
+                            sx={{ display: 'block', mt: 1 }}
                         >
                             {errors.published_document}
                         </Typography>
@@ -169,23 +170,14 @@ const PublishForm = ({onSubmit, open, onCancel, data, setData, processing = fals
                 </Box>
                 <FormControlLabel
                     label="Publish This Report Silently"
-                    control={
-                        <Checkbox
-                            checked={data.silently_publish}
-                            onChange={handleChange}
-                        />
-                    }
+                    control={<Checkbox checked={data.silently_publish} onChange={handleChange} />}
                 />
             </DialogContent>
 
-            <Divider/>
+            <Divider />
 
-            <DialogActions sx={{p: 2.5, justifyContent: 'space-between'}}>
-                <Button
-                    onClick={onCancel}
-                    color="inherit"
-                    disabled={processing}
-                >
+            <DialogActions sx={{ p: 2.5, justifyContent: 'space-between' }}>
+                <Button onClick={onCancel} color="inherit" disabled={processing}>
                     Cancel
                 </Button>
 
@@ -194,7 +186,9 @@ const PublishForm = ({onSubmit, open, onCancel, data, setData, processing = fals
                     variant="contained"
                     color="primary"
                     disabled={processing}
-                    startIcon={processing ? <CircularProgress size={20} color="inherit"/> : <Share/>}
+                    startIcon={
+                        processing ? <CircularProgress size={20} color="inherit" /> : <Share />
+                    }
                 >
                     {processing ? 'Publishing...' : 'Publish Report'}
                 </Button>

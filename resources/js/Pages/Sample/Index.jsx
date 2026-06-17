@@ -1,19 +1,11 @@
-import React, {useState} from "react";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import Filter from "./Components/Filter";
-import EditSampleModal from "./Components/EditSampleModal";
-import TableLayout from "@/Layouts/TableLayout";
-import PageHeader from "@/Components/PageHeader.jsx";
-import {Head, router, Link} from "@inertiajs/react";
-import {
-    IconButton,
-    Chip,
-    Box,
-    Tooltip,
-    Typography,
-    Stack,
-    Badge,
-} from "@mui/material";
+import React, { useState } from 'react';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import Filter from './Components/Filter';
+import EditSampleModal from './Components/EditSampleModal';
+import TableLayout from '@/Layouts/TableLayout';
+import PageHeader from '@/Components/PageHeader.jsx';
+import { Head, router, Link } from '@inertiajs/react';
+import { IconButton, Chip, Box, Tooltip, Typography, Stack, Badge } from '@mui/material';
 import {
     Print as PrintIcon,
     CheckCircle as CheckCircleIcon,
@@ -25,16 +17,16 @@ import {
     HourglassEmpty as PendingIcon,
     Person as ApproverIcon,
     Edit as EditIcon,
-} from "@mui/icons-material";
-import {formatDate} from "@/Services/helper.js";
+} from '@mui/icons-material';
+import { formatDate } from '@/Services/helper.js';
 
 const qcStatusConfig = {
-    approved: {label: 'Approved', color: 'success', icon: <CheckCircleIcon fontSize="small"/>},
-    rejected: {label: 'Rejected', color: 'error', icon: <CancelIcon fontSize="small"/>},
-    pending: {label: 'Pending', color: 'warning', icon: <PendingIcon fontSize="small"/>},
+    approved: { label: 'Approved', color: 'success', icon: <CheckCircleIcon fontSize="small" /> },
+    rejected: { label: 'Rejected', color: 'error', icon: <CancelIcon fontSize="small" /> },
+    pending: { label: 'Pending', color: 'warning', icon: <PendingIcon fontSize="small" /> },
 };
 
-const Index = ({samples, status, requestInputs, canEdit}) => {
+const Index = ({ samples, status, requestInputs, canEdit }) => {
     const [editSample, setEditSample] = useState(null);
 
     const columns = [
@@ -43,9 +35,9 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
             headerName: 'Barcode',
             type: 'string',
             width: 160,
-            renderCell: ({row}) => (
-                <Stack direction="row" spacing={0.5} sx={{alignItems: 'center'}}>
-                    <QrCodeIcon fontSize="small" color="action"/>
+            renderCell: ({ row }) => (
+                <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+                    <QrCodeIcon fontSize="small" color="action" />
                     <Typography variant="body2" fontWeight={500} fontFamily="monospace">
                         {row.barcode || '—'}
                     </Typography>
@@ -58,8 +50,8 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
             sortable: false,
             type: 'string',
             width: 300,
-            renderCell: ({row}) => (
-                <Box sx={{display: 'flex', flexDirection: 'column'}}>
+            renderCell: ({ row }) => (
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Typography variant="body2" fontWeight={500}>
                         {row.patient?.fullName || 'N/A'}
                     </Typography>
@@ -76,19 +68,19 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
             sortable: false,
             display: 'flex',
             width: 130,
-            renderCell: ({row}) => (
-                row.acceptance_items?.[0]?.acceptance_id &&
-                <Link href={route('acceptances.show', row.acceptance_items[0].acceptance_id)}>
-                    <Chip
-                        icon={<AssignmentIcon/>}
-                        label={row.acceptance_items[0].acceptance_id}
-                        variant="outlined"
-                        color="primary"
-                        size="small"
-                        sx={{fontWeight: 500}}
-                    />
-                </Link>
-            ),
+            renderCell: ({ row }) =>
+                row.acceptance_items?.[0]?.acceptance_id && (
+                    <Link href={route('acceptances.show', row.acceptance_items[0].acceptance_id)}>
+                        <Chip
+                            icon={<AssignmentIcon />}
+                            label={row.acceptance_items[0].acceptance_id}
+                            variant="outlined"
+                            color="primary"
+                            size="small"
+                            sx={{ fontWeight: 500 }}
+                        />
+                    </Link>
+                ),
         },
         {
             field: 'tests',
@@ -96,15 +88,21 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
             type: 'string',
             sortable: false,
             width: 200,
-            renderCell: ({row}) => (
-                <Stack direction="row" spacing={0.5} sx={{flexWrap: 'wrap'}}>
+            renderCell: ({ row }) => (
+                <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap' }}>
                     {row?.acceptance_items?.map((item, index) => (
                         <Tooltip key={index} title={`Method: ${item.method?.name || 'N/A'}`}>
                             <Chip
-                                icon={<ScienceIcon fontSize="small"/>}
+                                icon={<ScienceIcon fontSize="small" />}
                                 label={item?.test?.name || 'N/A'}
                                 size="small"
-                                sx={{my: 0.25, bgcolor: 'info.50', color: 'info.main', fontSize: '0.7rem', height: 24}}
+                                sx={{
+                                    my: 0.25,
+                                    bgcolor: 'info.50',
+                                    color: 'info.main',
+                                    fontSize: '0.7rem',
+                                    height: 24,
+                                }}
                             />
                         </Tooltip>
                     ))}
@@ -117,8 +115,12 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
             type: 'string',
             width: 130,
             display: 'flex',
-            renderCell: ({row}) => {
-                const cfg = qcStatusConfig[row.qc_status] ?? {label: row.qc_status, color: 'default', icon: null};
+            renderCell: ({ row }) => {
+                const cfg = qcStatusConfig[row.qc_status] ?? {
+                    label: row.qc_status,
+                    color: 'default',
+                    icon: null,
+                };
                 const chip = (
                     <Chip
                         icon={cfg.icon}
@@ -130,7 +132,10 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
                             fontWeight: 500,
                             fontSize: '0.7rem',
                             height: 24,
-                            cursor: row.qc_status === 'rejected' && row.rejection_reason ? 'help' : 'default'
+                            cursor:
+                                row.qc_status === 'rejected' && row.rejection_reason
+                                    ? 'help'
+                                    : 'default',
                         }}
                     />
                 );
@@ -150,20 +155,21 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
             type: 'string',
             sortable: false,
             width: 160,
-            renderCell: ({row}) => (
+            renderCell: ({ row }) =>
                 row.qc_approved_by ? (
-                    <Stack >
-                            <Typography variant="body2">{row.qc_approved_by.name}</Typography>
-                            {row.qc_approved_at && (
-                                <Typography variant="caption" color="text.secondary">
-                                    {formatDate(row.qc_approved_at)}
-                                </Typography>
-                            )}
+                    <Stack>
+                        <Typography variant="body2">{row.qc_approved_by.name}</Typography>
+                        {row.qc_approved_at && (
+                            <Typography variant="caption" color="text.secondary">
+                                {formatDate(row.qc_approved_at)}
+                            </Typography>
+                        )}
                     </Stack>
                 ) : (
-                    <Typography variant="body2" color="text.disabled">—</Typography>
-                )
-            ),
+                    <Typography variant="body2" color="text.disabled">
+                        —
+                    </Typography>
+                ),
         },
         {
             field: 'received_at',
@@ -171,8 +177,10 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
             width: 150,
             type: 'datetime',
             valueGetter: (value) => value && new Date(value),
-            renderCell: ({value}) => (
-                <Typography variant="body2" color="text.secondary">{formatDate(value)}</Typography>
+            renderCell: ({ value }) => (
+                <Typography variant="body2" color="text.secondary">
+                    {formatDate(value)}
+                </Typography>
             ),
         },
         {
@@ -181,8 +189,10 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
             width: 150,
             type: 'datetime',
             valueGetter: (value) => value && new Date(value),
-            renderCell: ({value}) => (
-                <Typography variant="body2" color="text.secondary">{formatDate(value)}</Typography>
+            renderCell: ({ value }) => (
+                <Typography variant="body2" color="text.secondary">
+                    {formatDate(value)}
+                </Typography>
             ),
         },
         {
@@ -191,7 +201,7 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
             type: 'actions',
             width: canEdit ? 120 : 80,
             sortable: false,
-            renderCell: ({row}) => (
+            renderCell: ({ row }) => (
                 <Stack direction="row" spacing={0.5}>
                     {canEdit && (
                         <Tooltip title="Edit Barcode">
@@ -199,9 +209,13 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
                                 onClick={() => setEditSample(row)}
                                 color="warning"
                                 size="small"
-                                sx={{border: '1px solid', borderColor: 'warning.light', '&:hover': {bgcolor: 'warning.50'}}}
+                                sx={{
+                                    border: '1px solid',
+                                    borderColor: 'warning.light',
+                                    '&:hover': { bgcolor: 'warning.50' },
+                                }}
                             >
-                                <EditIcon fontSize="small"/>
+                                <EditIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
                     )}
@@ -211,9 +225,13 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
                             target="_blank"
                             color="primary"
                             size="small"
-                            sx={{border: '1px solid', borderColor: 'primary.light', '&:hover': {bgcolor: 'primary.50'}}}
+                            sx={{
+                                border: '1px solid',
+                                borderColor: 'primary.light',
+                                '&:hover': { bgcolor: 'primary.50' },
+                            }}
                         >
-                            <PrintIcon fontSize="small"/>
+                            <PrintIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
                 </Stack>
@@ -224,7 +242,7 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
     const pageReload = (page, filters, sort, pageSize) => {
         router.visit(route('samples.index'), {
             only: ['samples', 'status', 'requestInputs'],
-            data: {page, filters, sort, pageSize},
+            data: { page, filters, sort, pageSize },
             preserveState: true,
         });
     };
@@ -233,7 +251,7 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
 
     return (
         <>
-            <Head title="Samples"/>
+            <Head title="Samples" />
             <EditSampleModal
                 open={Boolean(editSample)}
                 sample={editSample}
@@ -241,10 +259,12 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
             />
             <PageHeader
                 title={
-                    <Box sx={{display: 'flex', alignItems: 'center'}}>
-                        <ScienceIcon sx={{mr: 1.5, color: 'primary.main'}}/>
-                        <Typography variant="h5" fontWeight={600}>Samples List</Typography>
-                        <Badge badgeContent={samplesCount} color="primary" sx={{ml: 2}}/>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <ScienceIcon sx={{ mr: 1.5, color: 'primary.main' }} />
+                        <Typography variant="h5" fontWeight={600}>
+                            Samples List
+                        </Typography>
+                        <Badge badgeContent={samplesCount} color="primary" sx={{ ml: 2 }} />
                     </Box>
                 }
             />
@@ -258,8 +278,11 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
                 status={status}
                 customProps={{
                     sx: {
-                        '& .MuiDataGrid-row:hover': {bgcolor: 'action.hover', transition: 'background-color 0.2s'},
-                        '& .MuiDataGrid-columnHeaders': {bgcolor: 'grey.100', fontWeight: 'bold'},
+                        '& .MuiDataGrid-row:hover': {
+                            bgcolor: 'action.hover',
+                            transition: 'background-color 0.2s',
+                        },
+                        '& .MuiDataGrid-columnHeaders': { bgcolor: 'grey.100', fontWeight: 'bold' },
                     },
                 }}
             />
@@ -267,10 +290,10 @@ const Index = ({samples, status, requestInputs, canEdit}) => {
     );
 };
 
-const breadCrumbs = [
-    {title: 'Samples List', link: null, icon: <ScienceIcon fontSize="small"/>},
-];
+const breadCrumbs = [{ title: 'Samples List', link: null, icon: <ScienceIcon fontSize="small" /> }];
 
-Index.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>;
+Index.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
+);
 
 export default Index;

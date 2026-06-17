@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from 'react';
 import {
     Box,
     Divider,
@@ -11,19 +11,19 @@ import {
     Button,
     Card,
     Avatar,
-    alpha
-} from "@mui/material";
+    alpha,
+} from '@mui/material';
 import {
     PersonAdd as PersonAddIcon,
     Delete as DeleteIcon,
     Edit as EditIcon,
     Visibility as VisibilityIcon,
-    Person as PersonIcon
-} from "@mui/icons-material";
-import Grid from "@mui/material/Grid";
-import AddRelative from "./AddRelative";
-import DeleteForm from "@/Components/DeleteForm";
-import {useForm} from "@inertiajs/react";
+    Person as PersonIcon,
+} from '@mui/icons-material';
+import Grid from '@mui/material/Grid';
+import AddRelative from './AddRelative';
+import DeleteForm from '@/Components/DeleteForm';
+import { useForm } from '@inertiajs/react';
 
 // Utility function to get the relationship color
 const getRelationshipColor = (relationship) => {
@@ -39,7 +39,7 @@ const getRelationshipColor = (relationship) => {
         'mother in law': 'primary',
         'brother in law': 'info',
         'sister in law': 'info',
-        default: 'default'
+        default: 'default',
     };
 
     return colors[relationship] || colors.default;
@@ -49,27 +49,22 @@ const getRelationshipColor = (relationship) => {
 const getRelationshipIcon = (relationship, gender) => {
     // This would be better with actual icons for each relationship type
     // For simplicity, we're just returning a person icon for now
-    return <PersonIcon fontSize="small"/>;
+    return <PersonIcon fontSize="small" />;
 };
 
-const RelativeForm = ({
-                          relatives = [],
-                          patientId,
-                          edit = false,
-                          canEdit = false
-                      }) => {
-    const {data, setData, post, processing, reset, errors, setError} = useForm({
-        avatar: "",
-        firstName: "",
-        secondName: "",
-        thirdName: "",
-        lastName: "",
-        idNo: "",
+const RelativeForm = ({ relatives = [], patientId, edit = false, canEdit = false }) => {
+    const { data, setData, post, processing, reset, errors, setError } = useForm({
+        avatar: '',
+        firstName: '',
+        secondName: '',
+        thirdName: '',
+        lastName: '',
+        idNo: '',
         nationality: null,
-        dateOfBirth: "",
+        dateOfBirth: '',
         gender: null,
-        relationship: "",
-        patient_id: patientId
+        relationship: '',
+        patient_id: patientId,
     });
 
     const [open, setOpen] = useState(false);
@@ -77,39 +72,39 @@ const RelativeForm = ({
 
     const add = () => {
         reset();
-        setData(prevData => ({
+        setData((prevData) => ({
             ...prevData,
-            patient_id: patientId
+            patient_id: patientId,
         }));
         setOpen(true);
     };
 
-    const editRelative = index => () => {
-        setData(prevData => ({
+    const editRelative = (index) => () => {
+        setData((prevData) => ({
             ...prevData,
             ...relatives[index],
-            _method: "put",
+            _method: 'put',
             relative_id: relatives[index].id,
             id: relatives[index].relative_id,
-            relationship: relatives[index].relationship
+            relationship: relatives[index].relationship,
         }));
         setOpen(true);
     };
 
-    const destroy = (index) => e => {
-        setData(prevData => ({
+    const destroy = (index) => (e) => {
+        setData((prevData) => ({
             ...prevData,
             ...relatives[index],
-            _method: "delete",
+            _method: 'delete',
             relative_id: relatives[index].id,
             id: relatives[index].relative_id,
-            relationship: relatives[index].relationship
+            relationship: relatives[index].relationship,
         }));
         setOpenDeleteForm(true);
     };
 
     const handleDestroy = () => {
-        post(route("relatives.destroy", data.id));
+        post(route('relatives.destroy', data.id));
         closeDestroy();
     };
 
@@ -123,18 +118,19 @@ const RelativeForm = ({
         reset();
     };
 
-    const submit = () => post(data.id ? route('relatives.update', data.id) : route('relatives.store'), {
-        onSuccess: close
-    });
+    const submit = () =>
+        post(data.id ? route('relatives.update', data.id) : route('relatives.store'), {
+            onSuccess: close,
+        });
 
     return (
         <Box>
             {/* Add Family Member Button - Prominently displayed if in edit mode */}
             {edit && (
-                <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 2}}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
                     <Button
                         variant="contained"
-                        startIcon={<PersonAddIcon/>}
+                        startIcon={<PersonAddIcon />}
                         onClick={add}
                         color="primary"
                     >
@@ -145,31 +141,33 @@ const RelativeForm = ({
 
             {/* Family Members List */}
             {relatives.length > 0 ? (
-                <Card variant="outlined" sx={{mb: 3}}>
-                    <Box sx={{
-                        bgcolor: 'background.paper',
-                        borderBottom: '1px solid',
-                        borderColor: 'divider',
-                        px: 3,
-                        py: 1.5
-                    }}>
-  <Grid container spacing={2} sx={{alignItems: "center"}}>
-                            <Grid size={{xs: 4}}>
+                <Card variant="outlined" sx={{ mb: 3 }}>
+                    <Box
+                        sx={{
+                            bgcolor: 'background.paper',
+                            borderBottom: '1px solid',
+                            borderColor: 'divider',
+                            px: 3,
+                            py: 1.5,
+                        }}
+                    >
+                        <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+                            <Grid size={{ xs: 4 }}>
                                 <Typography variant="subtitle2" color="text.secondary">
                                     Full Name
                                 </Typography>
                             </Grid>
-                            <Grid size={{xs: 3}}>
+                            <Grid size={{ xs: 3 }}>
                                 <Typography variant="subtitle2" color="text.secondary">
                                     ID Number
                                 </Typography>
                             </Grid>
-                            <Grid size={{xs: 3}}>
+                            <Grid size={{ xs: 3 }}>
                                 <Typography variant="subtitle2" color="text.secondary">
                                     Relationship
                                 </Typography>
                             </Grid>
-                            <Grid size={{xs: 2}} sx={{textAlign: 'right'}}>
+                            <Grid size={{ xs: 2 }} sx={{ textAlign: 'right' }}>
                                 <Typography variant="subtitle2" color="text.secondary">
                                     Actions
                                 </Typography>
@@ -184,14 +182,18 @@ const RelativeForm = ({
                                     sx={{
                                         py: 1.5,
                                         ':hover': {
-                                            bgcolor: alpha('#000', 0.03)
+                                            bgcolor: alpha('#000', 0.03),
                                         },
-                                        width: "100%"
+                                        width: '100%',
                                     }}
                                 >
-  <Grid container spacing={2} sx={{alignItems: "center", width: "100%"}}>
-                                        <Grid size={{xs: 4}}>
-                                            <Box sx={{display: 'flex', alignItems: 'center'}}>
+                                    <Grid
+                                        container
+                                        spacing={2}
+                                        sx={{ alignItems: 'center', width: '100%' }}
+                                    >
+                                        <Grid size={{ xs: 4 }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                 <Avatar
                                                     src={item.avatar}
                                                     alt={item.fullName}
@@ -199,37 +201,56 @@ const RelativeForm = ({
                                                         width: 32,
                                                         height: 32,
                                                         mr: 1.5,
-                                                        bgcolor: getRelationshipColor(item.relationship) + '.main'
+                                                        bgcolor:
+                                                            getRelationshipColor(
+                                                                item.relationship,
+                                                            ) + '.main',
                                                     }}
                                                 >
-                                                    {item.fullName ? item.fullName.charAt(0).toUpperCase() : 'U'}
+                                                    {item.fullName
+                                                        ? item.fullName.charAt(0).toUpperCase()
+                                                        : 'U'}
                                                 </Avatar>
-                                                <Typography variant="body1">{item.fullName}</Typography>
+                                                <Typography variant="body1">
+                                                    {item.fullName}
+                                                </Typography>
                                             </Box>
                                         </Grid>
-                                        <Grid size={{xs: 3}}>
+                                        <Grid size={{ xs: 3 }}>
                                             <Typography variant="body2">{item.idNo}</Typography>
                                         </Grid>
-                                        <Grid size={{xs: 3}}>
+                                        <Grid size={{ xs: 3 }}>
                                             <Chip
-                                                icon={getRelationshipIcon(item.relationship, item.gender)}
-                                                label={item.relationship ? item.relationship.charAt(0).toUpperCase() + item.relationship.slice(1) : ''}
+                                                icon={getRelationshipIcon(
+                                                    item.relationship,
+                                                    item.gender,
+                                                )}
+                                                label={
+                                                    item.relationship
+                                                        ? item.relationship
+                                                              .charAt(0)
+                                                              .toUpperCase() +
+                                                          item.relationship.slice(1)
+                                                        : ''
+                                                }
                                                 size="small"
                                                 color={getRelationshipColor(item.relationship)}
                                                 variant="outlined"
                                             />
                                         </Grid>
-                                        <Grid size={{xs: 2}}>
-                                            <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
+                                        <Grid size={{ xs: 2 }}>
+                                            <Box
+                                                sx={{ display: 'flex', justifyContent: 'flex-end' }}
+                                            >
                                                 <Tooltip title="View Details">
                                                     <IconButton
-                                                        href={route("patients.show", item.id)}
+                                                        href={route('patients.show', item.id)}
                                                         target="_blank"
                                                         size="small"
                                                         color="primary"
-                                                        sx={{mr: 0.5}}
+                                                        sx={{ mr: 0.5 }}
                                                     >
-                                                        <VisibilityIcon fontSize="small"/>
+                                                        <VisibilityIcon fontSize="small" />
                                                     </IconButton>
                                                 </Tooltip>
 
@@ -240,9 +261,9 @@ const RelativeForm = ({
                                                                 onClick={editRelative(index)}
                                                                 size="small"
                                                                 color="info"
-                                                                sx={{mr: 0.5}}
+                                                                sx={{ mr: 0.5 }}
                                                             >
-                                                                <EditIcon fontSize="small"/>
+                                                                <EditIcon fontSize="small" />
                                                             </IconButton>
                                                         </Tooltip>
                                                         <Tooltip title="Remove">
@@ -251,7 +272,7 @@ const RelativeForm = ({
                                                                 size="small"
                                                                 color="error"
                                                             >
-                                                                <DeleteIcon fontSize="small"/>
+                                                                <DeleteIcon fontSize="small" />
                                                             </IconButton>
                                                         </Tooltip>
                                                     </>
@@ -260,7 +281,7 @@ const RelativeForm = ({
                                         </Grid>
                                     </Grid>
                                 </ListItem>
-                                {index < relatives.length - 1 && <Divider/>}
+                                {index < relatives.length - 1 && <Divider />}
                             </React.Fragment>
                         ))}
                     </List>
@@ -274,19 +295,15 @@ const RelativeForm = ({
                         border: '1px dashed',
                         borderColor: 'divider',
                         borderRadius: 1,
-                        mb: 3
+                        mb: 3,
                     }}
                 >
-                    <Typography variant="body1" color="text.secondary" sx={{mb: 2}}>
+                    <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
                         No family members have been added yet.
                     </Typography>
 
                     {edit && (
-                        <Button
-                            variant="outlined"
-                            startIcon={<PersonAddIcon/>}
-                            onClick={add}
-                        >
+                        <Button variant="outlined" startIcon={<PersonAddIcon />} onClick={add}>
                             Add Family Member
                         </Button>
                     )}
@@ -294,16 +311,18 @@ const RelativeForm = ({
             )}
 
             {/* Dialogs */}
-            {open && <AddRelative
-                onClose={close}
-                setRelative={setData}
-                errors={errors}
-                setError={setError}
-                open={open}
-                OnSubmit={submit}
-                relative={data}
-                processing={processing}
-            />}
+            {open && (
+                <AddRelative
+                    onClose={close}
+                    setRelative={setData}
+                    errors={errors}
+                    setError={setError}
+                    open={open}
+                    OnSubmit={submit}
+                    relative={data}
+                    processing={processing}
+                />
+            )}
 
             <DeleteForm
                 title={`Remove ${data.fullName}${data.relationship ? ` (${data.relationship})` : ''}`}

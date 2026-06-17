@@ -1,5 +1,5 @@
 // EnhancedDocumentViewer.jsx
-import React, {useState, useEffect, lazy, Suspense} from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import PropTypes from 'prop-types';
 import {
     Box,
@@ -19,7 +19,7 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    CircularProgress
+    CircularProgress,
 } from '@mui/material';
 import {
     Close,
@@ -35,22 +35,32 @@ import {
     Info,
     CloudDownload,
     TextFields,
-    Error as ErrorIcon
+    Error as ErrorIcon,
 } from '@mui/icons-material';
 
 // Lazy load all viewer components
-const GenericFileViewer = lazy(() => import("@/Components/GenericFileViewer.jsx"));
-const TextViewer = lazy(() => import("@/Components/TextViewer.jsx"));
-const ExcelViewer = lazy(() => import("@/Components/ExcelViewer.jsx"));
-const DOCXViewer = lazy(() => import("@/Components/DOCXViewer.jsx"));
-const PDFViewer = lazy(() => import("@/Components/PDFViewer.jsx"));
-const ImageViewer = lazy(() => import("@/Components/ImageViewer.jsx"));
+const GenericFileViewer = lazy(() => import('@/Components/GenericFileViewer.jsx'));
+const TextViewer = lazy(() => import('@/Components/TextViewer.jsx'));
+const ExcelViewer = lazy(() => import('@/Components/ExcelViewer.jsx'));
+const DOCXViewer = lazy(() => import('@/Components/DOCXViewer.jsx'));
+const PDFViewer = lazy(() => import('@/Components/PDFViewer.jsx'));
+const ImageViewer = lazy(() => import('@/Components/ImageViewer.jsx'));
 
 // Loading component to show while lazy components are loading
 const LoadingComponent = () => (
-    <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%'}}>
-        <CircularProgress/>
-        <Typography variant="body2" sx={{ml: 2}}>Loading viewer...</Typography>
+    <Box
+        sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+            width: '100%',
+        }}
+    >
+        <CircularProgress />
+        <Typography variant="body2" sx={{ ml: 2 }}>
+            Loading viewer...
+        </Typography>
     </Box>
 );
 
@@ -65,19 +75,19 @@ const formatFileSize = (bytes) => {
 };
 
 // File Type icon component
-const FileTypeIcon = ({fileType}) => {
-    if (!fileType) return <Description/>;
+const FileTypeIcon = ({ fileType }) => {
+    if (!fileType) return <Description />;
 
     switch (fileType.toLowerCase()) {
         case 'pdf':
-            return <PictureAsPdf/>;
+            return <PictureAsPdf />;
         case 'doc':
         case 'docx':
-            return <Description/>;
+            return <Description />;
         case 'xls':
         case 'xlsx':
         case 'csv':
-            return <TableChart/>;
+            return <TableChart />;
         case 'jpg':
         case 'jpeg':
         case 'png':
@@ -85,11 +95,11 @@ const FileTypeIcon = ({fileType}) => {
         case 'bmp':
         case 'svg':
         case 'webp':
-            return <ImageIcon/>;
+            return <ImageIcon />;
         case 'txt':
-            return <TextFields/>;
+            return <TextFields />;
         default:
-            return <Description/>;
+            return <Description />;
     }
 };
 
@@ -97,33 +107,35 @@ const FileTypeIcon = ({fileType}) => {
 class ErrorBoundary extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {hasError: false, error: null, errorInfo: null};
+        this.state = { hasError: false, error: null, errorInfo: null };
     }
 
     static getDerivedStateFromError(error) {
-        return {hasError: true, error};
+        return { hasError: true, error };
     }
 
     componentDidCatch(error, errorInfo) {
-        console.error("Viewer Error:", error, errorInfo);
-        this.setState({errorInfo});
+        console.error('Viewer Error:', error, errorInfo);
+        this.setState({ errorInfo });
     }
 
     render() {
         if (this.state.hasError) {
             return (
-                <Box sx={{p: 3, textAlign: 'center'}}>
-                    <Paper elevation={3} sx={{p: 3, maxWidth: 500, mx: 'auto'}}>
-                        <ErrorIcon color="error" sx={{fontSize: 48, mb: 2}}/>
+                <Box sx={{ p: 3, textAlign: 'center' }}>
+                    <Paper elevation={3} sx={{ p: 3, maxWidth: 500, mx: 'auto' }}>
+                        <ErrorIcon color="error" sx={{ fontSize: 48, mb: 2 }} />
                         <Typography variant="h6" color="error" gutterBottom>
                             Something went wrong loading this component
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                             {this.state.error?.message || 'Unknown error occurred'}
                         </Typography>
                         <Button
                             variant="contained"
-                            onClick={() => this.setState({hasError: false, error: null, errorInfo: null})}
+                            onClick={() =>
+                                this.setState({ hasError: false, error: null, errorInfo: null })
+                            }
                         >
                             Try Again
                         </Button>
@@ -137,9 +149,13 @@ class ErrorBoundary extends React.Component {
 }
 
 // Main Document Viewer Component
-const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
+const EnhancedDocumentViewer = ({ document, fullScreen = false, onClose }) => {
     const [isFullScreen, setIsFullScreen] = useState(fullScreen);
-    const [notification, setNotification] = useState({open: false, message: '', severity: 'info'});
+    const [notification, setNotification] = useState({
+        open: false,
+        message: '',
+        severity: 'info',
+    });
     const [infoDialogOpen, setInfoDialogOpen] = useState(false);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -169,7 +185,7 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
 
     if (!document) {
         return (
-            <Paper elevation={1} sx={{p: 3, textAlign: 'center', m: 2}}>
+            <Paper elevation={1} sx={{ p: 3, textAlign: 'center', m: 2 }}>
                 <Typography variant="body1" color="textSecondary">
                     No document selected or document data is incomplete.
                 </Typography>
@@ -181,11 +197,11 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
     const getFileUrl = () => {
         try {
             // Using the route helper if available
-            return route("documents.download", (document.hash || document.id));
+            return route('documents.download', document.hash || document.id);
         } catch (e) {
             // Fallback in case route function is not defined
-            console.warn("route function not found, using direct URL construction");
-            return route("documents.download", (document.hash || document.id));
+            console.warn('route function not found, using direct URL construction');
+            return route('documents.download', document.hash || document.id);
         }
     };
 
@@ -199,7 +215,7 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
         setNotification({
             open: true,
             message: 'Download started',
-            severity: 'success'
+            severity: 'success',
         });
     };
 
@@ -207,16 +223,17 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
     const handleShare = () => {
         // Attempt to use Web Share API if available
         if (navigator.share) {
-            navigator.share({
-                title: document.originalName,
-                text: `Check out this document: ${document.originalName}`,
-                url: window.location.href,
-            })
+            navigator
+                .share({
+                    title: document.originalName,
+                    text: `Check out this document: ${document.originalName}`,
+                    url: window.location.href,
+                })
                 .then(() => {
                     setNotification({
                         open: true,
                         message: 'Document shared successfully',
-                        severity: 'success'
+                        severity: 'success',
                     });
                 })
                 .catch((error) => {
@@ -232,19 +249,20 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
 
     // Helper to copy link to clipboard
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(window.location.href)
+        navigator.clipboard
+            .writeText(window.location.href)
             .then(() => {
                 setNotification({
                     open: true,
                     message: 'Link copied to clipboard',
-                    severity: 'success'
+                    severity: 'success',
                 });
             })
             .catch(() => {
                 setNotification({
                     open: true,
                     message: 'Failed to copy link',
-                    severity: 'error'
+                    severity: 'error',
                 });
             });
     };
@@ -256,13 +274,13 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
             setNotification({
                 open: true,
                 message: 'Print dialog opened in new tab',
-                severity: 'info'
+                severity: 'info',
             });
         } else {
             setNotification({
                 open: true,
                 message: 'Printing is only available for PDF documents',
-                severity: 'warning'
+                severity: 'warning',
             });
         }
     };
@@ -274,16 +292,17 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
 
     // Determine which viewer to use based on file extension
     // Safely get the file extension
-    const ext = document.ext ? document.ext.toLowerCase() : document.originalName.split(".")[document.originalName.split(".").length - 1];
+    const ext = document.ext
+        ? document.ext.toLowerCase()
+        : document.originalName.split('.')[document.originalName.split('.').length - 1];
     const renderViewer = () => {
-
         // Image file types
         const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'];
         if (imageTypes.includes(ext)) {
             return (
                 <ErrorBoundary>
-                    <Suspense fallback={<LoadingComponent/>}>
-                        <ImageViewer fileUrl={fileUrl} fullScreen={isFullScreen}/>
+                    <Suspense fallback={<LoadingComponent />}>
+                        <ImageViewer fileUrl={fileUrl} fullScreen={isFullScreen} />
                     </Suspense>
                 </ErrorBoundary>
             );
@@ -293,8 +312,8 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
         if (ext === 'pdf') {
             return (
                 <ErrorBoundary>
-                    <Suspense fallback={<LoadingComponent/>}>
-                        <PDFViewer fileUrl={fileUrl} fullScreen={isFullScreen}/>
+                    <Suspense fallback={<LoadingComponent />}>
+                        <PDFViewer fileUrl={fileUrl} fullScreen={isFullScreen} />
                     </Suspense>
                 </ErrorBoundary>
             );
@@ -303,8 +322,8 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
         if (['doc', 'docx'].includes(ext)) {
             return (
                 <ErrorBoundary>
-                    <Suspense fallback={<LoadingComponent/>}>
-                        <DOCXViewer fileUrl={fileUrl} fullScreen={isFullScreen}/>
+                    <Suspense fallback={<LoadingComponent />}>
+                        <DOCXViewer fileUrl={fileUrl} fullScreen={isFullScreen} />
                     </Suspense>
                 </ErrorBoundary>
             );
@@ -314,8 +333,8 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
         if (['xls', 'xlsx', 'csv'].includes(ext)) {
             return (
                 <ErrorBoundary>
-                    <Suspense fallback={<LoadingComponent/>}>
-                        <ExcelViewer fileUrl={fileUrl} fullScreen={isFullScreen}/>
+                    <Suspense fallback={<LoadingComponent />}>
+                        <ExcelViewer fileUrl={fileUrl} fullScreen={isFullScreen} />
                     </Suspense>
                 </ErrorBoundary>
             );
@@ -325,8 +344,8 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
         if (['txt', 'md', 'json', 'xml', 'html', 'css', 'js'].includes(ext)) {
             return (
                 <ErrorBoundary>
-                    <Suspense fallback={<LoadingComponent/>}>
-                        <TextViewer fileUrl={fileUrl} fullScreen={isFullScreen}/>
+                    <Suspense fallback={<LoadingComponent />}>
+                        <TextViewer fileUrl={fileUrl} fullScreen={isFullScreen} />
                     </Suspense>
                 </ErrorBoundary>
             );
@@ -335,7 +354,7 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
         // Generic fallback for unsupported types
         return (
             <ErrorBoundary>
-                <Suspense fallback={<LoadingComponent/>}>
+                <Suspense fallback={<LoadingComponent />}>
                     <GenericFileViewer
                         fileUrl={fileUrl}
                         fileType={ext}
@@ -351,14 +370,13 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
     // Close notification
     const handleCloseNotification = (event, reason) => {
         if (reason === 'clickaway') return;
-        setNotification({...notification, open: false});
+        setNotification({ ...notification, open: false });
     };
 
-    const handleClose=()=>{
-        setInfoDialogOpen(false)
-        if(onClose)
-            onClose();
-    }
+    const handleClose = () => {
+        setInfoDialogOpen(false);
+        if (onClose) onClose();
+    };
 
     return (
         <Box
@@ -378,7 +396,7 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
                 border: !isFullScreen ? '1px solid #e0e0e0' : 'none',
                 boxShadow: !isFullScreen ? 1 : 0,
                 overflow: 'hidden',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
             }}
         >
             {/* Header bar */}
@@ -387,15 +405,16 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
                 color="primary"
                 elevation={1}
                 sx={{
-                    background: theme.palette.mode === 'dark' ?
-                        'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)' :
-                        'linear-gradient(45deg, #2196f3 30%, #21cbf3 90%)',
+                    background:
+                        theme.palette.mode === 'dark'
+                            ? 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)'
+                            : 'linear-gradient(45deg, #2196f3 30%, #21cbf3 90%)',
                 }}
             >
-                <Toolbar variant="dense" sx={{minHeight: '48px'}}>
+                <Toolbar variant="dense" sx={{ minHeight: '48px' }}>
                     {/* File Type Icon */}
-                    <Box sx={{mr: 1.5, display: 'flex', alignItems: 'center'}}>
-                        <FileTypeIcon fileType={document?.ext}/>
+                    <Box sx={{ mr: 1.5, display: 'flex', alignItems: 'center' }}>
+                        <FileTypeIcon fileType={document?.ext} />
                     </Box>
 
                     {/* Filename */}
@@ -406,7 +425,7 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
-                            mr: 1
+                            mr: 1,
                         }}
                         title={document.originalName}
                     >
@@ -421,7 +440,7 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
                             onClick={handleDownload}
                             aria-label="Download document"
                         >
-                            <SaveAlt/>
+                            <SaveAlt />
                         </IconButton>
                     </Tooltip>
 
@@ -433,10 +452,10 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
                                         size="small"
                                         color="inherit"
                                         onClick={handlePrint}
-                                        disabled={(document?.ext?.toLowerCase()||ext) !== 'pdf'}
+                                        disabled={(document?.ext?.toLowerCase() || ext) !== 'pdf'}
                                         aria-label="Print document"
                                     >
-                                        <Print/>
+                                        <Print />
                                     </IconButton>
                                 </span>
                             </Tooltip>
@@ -448,7 +467,7 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
                                     onClick={handleShare}
                                     aria-label="Share document"
                                 >
-                                    <Share/>
+                                    <Share />
                                 </IconButton>
                             </Tooltip>
 
@@ -459,20 +478,20 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
                                     onClick={showInfo}
                                     aria-label="File information"
                                 >
-                                    <Info/>
+                                    <Info />
                                 </IconButton>
                             </Tooltip>
                         </>
                     )}
 
-                    <Tooltip title={isFullScreen ? "Exit Fullscreen" : "Fullscreen"}>
+                    <Tooltip title={isFullScreen ? 'Exit Fullscreen' : 'Fullscreen'}>
                         <IconButton
                             size="small"
                             color="inherit"
                             onClick={() => setIsFullScreen(!isFullScreen)}
-                            aria-label={isFullScreen ? "Exit fullscreen" : "Enter fullscreen"}
+                            aria-label={isFullScreen ? 'Exit fullscreen' : 'Enter fullscreen'}
                         >
-                            {isFullScreen ? <FullscreenExit/> : <Fullscreen/>}
+                            {isFullScreen ? <FullscreenExit /> : <Fullscreen />}
                         </IconButton>
                     </Tooltip>
 
@@ -484,7 +503,7 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
                                 onClick={onClose}
                                 aria-label="Close viewer"
                             >
-                                <Close/>
+                                <Close />
                             </IconButton>
                         </Tooltip>
                     )}
@@ -505,8 +524,11 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
                         gap: 2,
                     }}
                 >
-                    <Box sx={{display: 'flex', alignItems: 'center'}}>
-                        <Info fontSize="small" sx={{mr: 0.5, fontSize: 16, color: 'text.secondary'}}/>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Info
+                            fontSize="small"
+                            sx={{ mr: 0.5, fontSize: 16, color: 'text.secondary' }}
+                        />
                         <Typography variant="caption" color="text.secondary">
                             {formatFileSize(document.size || 0)}
                         </Typography>
@@ -527,7 +549,7 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
             )}
 
             {/* Document viewer content area */}
-            <Box sx={{flex: 1, overflow: 'hidden', position: 'relative',height:'100%'}}>
+            <Box sx={{ flex: 1, overflow: 'hidden', position: 'relative', height: '100%' }}>
                 {renderViewer()}
             </Box>
 
@@ -539,74 +561,99 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
             >
                 <DialogTitle id="file-info-dialog-title">File Information</DialogTitle>
                 <DialogContent dividers>
-                    <Box sx={{minWidth: 300}}>
+                    <Box sx={{ minWidth: 300 }}>
                         <Typography variant="subtitle1" gutterBottom>
                             {document.originalName}
                         </Typography>
 
-                        <Box sx={{my: 2}}>
-                            <Box sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                py: 1,
-                                borderBottom: '1px solid',
-                                borderColor: 'divider'
-                            }}>
-                                <Typography variant="body2" color="text.secondary">Type</Typography>
-                                <Typography
-                                    variant="body2">{ext ? ext.toUpperCase() : 'Unknown'}</Typography>
-                            </Box>
-
-                            {document.size && (
-                                <Box sx={{
+                        <Box sx={{ my: 2 }}>
+                            <Box
+                                sx={{
                                     display: 'flex',
                                     justifyContent: 'space-between',
                                     py: 1,
                                     borderBottom: '1px solid',
-                                    borderColor: 'divider'
-                                }}>
-                                    <Typography variant="body2" color="text.secondary">Size</Typography>
-                                    <Typography variant="body2">{formatFileSize(document.size)}</Typography>
+                                    borderColor: 'divider',
+                                }}
+                            >
+                                <Typography variant="body2" color="text.secondary">
+                                    Type
+                                </Typography>
+                                <Typography variant="body2">
+                                    {ext ? ext.toUpperCase() : 'Unknown'}
+                                </Typography>
+                            </Box>
+
+                            {document.size && (
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        py: 1,
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider',
+                                    }}
+                                >
+                                    <Typography variant="body2" color="text.secondary">
+                                        Size
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        {formatFileSize(document.size)}
+                                    </Typography>
                                 </Box>
                             )}
 
                             {document.created_at && (
-                                <Box sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    py: 1,
-                                    borderBottom: '1px solid',
-                                    borderColor: 'divider'
-                                }}>
-                                    <Typography variant="body2" color="text.secondary">Uploaded</Typography>
-                                    <Typography
-                                        variant="body2">{new Date(document.created_at).toLocaleString()}</Typography>
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        py: 1,
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider',
+                                    }}
+                                >
+                                    <Typography variant="body2" color="text.secondary">
+                                        Uploaded
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        {new Date(document.created_at).toLocaleString()}
+                                    </Typography>
                                 </Box>
                             )}
 
                             {document.updated_at && (
-                                <Box sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    py: 1,
-                                    borderBottom: '1px solid',
-                                    borderColor: 'divider'
-                                }}>
-                                    <Typography variant="body2" color="text.secondary">Last modified</Typography>
-                                    <Typography
-                                        variant="body2">{new Date(document.updated_at).toLocaleString()}</Typography>
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        py: 1,
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider',
+                                    }}
+                                >
+                                    <Typography variant="body2" color="text.secondary">
+                                        Last modified
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        {new Date(document.updated_at).toLocaleString()}
+                                    </Typography>
                                 </Box>
                             )}
 
                             {document.mime_type && (
-                                <Box sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    py: 1,
-                                    borderBottom: '1px solid',
-                                    borderColor: 'divider'
-                                }}>
-                                    <Typography variant="body2" color="text.secondary">MIME type</Typography>
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        py: 1,
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider',
+                                    }}
+                                >
+                                    <Typography variant="body2" color="text.secondary">
+                                        MIME type
+                                    </Typography>
                                     <Typography variant="body2">{document.mime_type}</Typography>
                                 </Box>
                             )}
@@ -615,7 +662,11 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setInfoDialogOpen(false)}>Close</Button>
-                    <Button variant="contained" onClick={handleDownload} startIcon={<CloudDownload/>}>
+                    <Button
+                        variant="contained"
+                        onClick={handleDownload}
+                        startIcon={<CloudDownload />}
+                    >
                         Download
                     </Button>
                 </DialogActions>
@@ -626,13 +677,13 @@ const EnhancedDocumentViewer = ({document, fullScreen = false, onClose}) => {
                 open={notification.open}
                 autoHideDuration={4000}
                 onClose={handleCloseNotification}
-                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
                 <Alert
                     onClose={handleCloseNotification}
                     severity={notification.severity}
                     variant="filled"
-                    sx={{width: '100%'}}
+                    sx={{ width: '100%' }}
                 >
                     {notification.message}
                 </Alert>

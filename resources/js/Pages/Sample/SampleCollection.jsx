@@ -1,113 +1,121 @@
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
-import TableLayout from "@/Layouts/TableLayout.jsx";
-import React, {useCallback, useMemo, useState} from "react";
-import PrintIcon from "@mui/icons-material/Print";
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import AddForm from "@/Pages/Sample/Components/AddForm";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import {Head, router, usePage} from "@inertiajs/react";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.jsx';
+import TableLayout from '@/Layouts/TableLayout.jsx';
+import React, { useCallback, useMemo, useState } from 'react';
+import PrintIcon from '@mui/icons-material/Print';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import AddForm from '@/Pages/Sample/Components/AddForm';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import { Head, router, usePage } from '@inertiajs/react';
 import PageHeader from '@/Components/PageHeader';
 import Filter from './Components/SampleCollectionFilter';
-import {formatDate} from "@/Services/helper.js";
-
+import { formatDate } from '@/Services/helper.js';
 
 const Index = () => {
     // Destructure props with type safety
-    const {acceptances, status, success, requestInputs} = usePage().props;
+    const { acceptances, status, success, requestInputs } = usePage().props;
 
     const [openPrint, setOpenPrint] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [barcodes, setBarcodes] = useState({barcodes:[]});
+    const [barcodes, setBarcodes] = useState({ barcodes: [] });
 
     const print = (id) => () => {
         if (id) {
             setLoading(true);
-            axios.get(route("api.sampleCollection.list", id)).then(res => {
-                setBarcodes({...res.data, acceptanceId: id});
-            }).then(() => {
-                setLoading(false);
-                setOpenPrint(true)
-            });
+            axios
+                .get(route('api.sampleCollection.list', id))
+                .then((res) => {
+                    setBarcodes({ ...res.data, acceptanceId: id });
+                })
+                .then(() => {
+                    setLoading(false);
+                    setOpenPrint(true);
+                });
         }
-    }
+    };
     const handleCloseBarcodes = () => {
         setOpenPrint(false);
-      setBarcodes({barcodes:[]});
-      pageReload();
-    }
+        setBarcodes({ barcodes: [] });
+        pageReload();
+    };
     // Page reload handler with explicit parameters
-    const pageReload = useCallback((
-        page=1,
-        filters=[],
-        sort={field: 'id', sort: 'desc'},
-        pageSize=20
-    ) => {
-        router.visit(route('sampleCollection'), {
-            data: {page, filters, sort, pageSize},
-            only: ['acceptances', 'status', 'success', 'requestInputs'],
-        });
-    }, []);
-
+    const pageReload = useCallback(
+        (page = 1, filters = [], sort = { field: 'id', sort: 'desc' }, pageSize = 20) => {
+            router.visit(route('sampleCollection'), {
+                data: { page, filters, sort, pageSize },
+                only: ['acceptances', 'status', 'success', 'requestInputs'],
+            });
+        },
+        [],
+    );
 
     // Columns definition with improved type safety
-    const columns = useMemo(() => [
-        {
-            field: 'patient_fullname',
-            headerName: 'Name',
-            type: "string",
-            width: 200,
-            display:"flex"
-        },
-        {
-            field: 'patient_idno',
-            headerName: 'ID No./Passport No.',
-            type: "string",
-            width: 150,
-            display:"flex"
-        },
-        {
-            field: 'status',
-            headerName: 'Status',
-            type: "string",
-            width: 150,
-            display:"flex"
-        },
+    const columns = useMemo(
+        () => [
+            {
+                field: 'patient_fullname',
+                headerName: 'Name',
+                type: 'string',
+                width: 200,
+                display: 'flex',
+            },
+            {
+                field: 'patient_idno',
+                headerName: 'ID No./Passport No.',
+                type: 'string',
+                width: 150,
+                display: 'flex',
+            },
+            {
+                field: 'status',
+                headerName: 'Status',
+                type: 'string',
+                width: 150,
+                display: 'flex',
+            },
 
-        {
-            field: 'created_at',
-            headerName: 'Added Date',
-            valueGetter: (value) => value?formatDate(new Date(value)):"-",
-            width: 170,
-            display:"flex"
-        },
-        {
-            field: 'id',
-            headerName: 'Action',
-            type: 'actions',
-            display:"flex",
-            width: 130,
-            sortable: false,
-            renderCell: (params) => <>
-                <Tooltip title="View Acceptance">
-                    <IconButton component="a" href={route("acceptances.show", params.row.id)} target="_blank" rel="noopener noreferrer">
-                        <OpenInNewIcon/>
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title="Collect Sample">
-                    <IconButton onClick={print(params.row.id)}><PrintIcon/></IconButton>
-                </Tooltip>
-            </>,
-        }
-    ], [print]);
-
+            {
+                field: 'created_at',
+                headerName: 'Added Date',
+                valueGetter: (value) => (value ? formatDate(new Date(value)) : '-'),
+                width: 170,
+                display: 'flex',
+            },
+            {
+                field: 'id',
+                headerName: 'Action',
+                type: 'actions',
+                display: 'flex',
+                width: 130,
+                sortable: false,
+                renderCell: (params) => (
+                    <>
+                        <Tooltip title="View Acceptance">
+                            <IconButton
+                                component="a"
+                                href={route('acceptances.show', params.row.id)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <OpenInNewIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Collect Sample">
+                            <IconButton onClick={print(params.row.id)}>
+                                <PrintIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </>
+                ),
+            },
+        ],
+        [print],
+    );
 
     return (
         <>
-            <Head title="Sample Collection"/>
-            <PageHeader
-                title="Sample Collection"
-            />
+            <Head title="Sample Collection" />
+            <PageHeader title="Sample Collection" />
             <TableLayout
                 defaultValues={requestInputs}
                 columns={columns}
@@ -118,7 +126,9 @@ const Index = () => {
                 success={success}
                 status={status}
             />
-            {openPrint && <AddForm open={openPrint} defaultValue={barcodes} onClose={handleCloseBarcodes}/>}
+            {openPrint && (
+                <AddForm open={openPrint} defaultValue={barcodes} onClose={handleCloseBarcodes} />
+            )}
         </>
     );
 };
@@ -131,8 +141,8 @@ Index.layout = (page) => (
             {
                 title: 'Sample Collection',
                 link: null,
-                icon: null
-            }
+                icon: null,
+            },
         ]}
     >
         {page}
@@ -140,4 +150,3 @@ Index.layout = (page) => (
 );
 
 export default Index;
-

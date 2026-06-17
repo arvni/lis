@@ -1,20 +1,13 @@
-import TableLayout from "@/Layouts/TableLayout";
-import DeleteForm from "@/Components/DeleteForm";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import Filter from "./Components/IndexFilter";
-import PageHeader from "@/Components/PageHeader.jsx";
-import { Head, router, useForm, usePage } from "@inertiajs/react";
-import { useState, useMemo } from "react";
+import TableLayout from '@/Layouts/TableLayout';
+import DeleteForm from '@/Components/DeleteForm';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import Filter from './Components/IndexFilter';
+import PageHeader from '@/Components/PageHeader.jsx';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { useState, useMemo } from 'react';
 
 // Material UI components
-import {
-    Paper,
-    Box,
-    Chip,
-    Tooltip,
-    IconButton,
-    Typography,
-} from "@mui/material";
+import { Paper, Box, Chip, Tooltip, IconButton, Typography } from '@mui/material';
 
 // Material UI icons
 import {
@@ -22,23 +15,23 @@ import {
     MedicalServicesOutlined,
     AccessTimeOutlined,
     CalendarToday,
-    LocalHospitalOutlined
-} from "@mui/icons-material";
+    LocalHospitalOutlined,
+} from '@mui/icons-material';
 
 // Status colors mapping
 const statusColors = {
-    waiting: "warning",
-    completed: "success",
-    cancelled: "error",
-    "in-progress": "info",
-    scheduled: "secondary",
+    waiting: 'warning',
+    completed: 'success',
+    cancelled: 'error',
+    'in-progress': 'info',
+    scheduled: 'secondary',
     // Default color for any other status
-    default: "default"
+    default: 'default',
 };
 
 // Format duration for better readability
 const formatDuration = (duration) => {
-    if (!duration) return "—";
+    if (!duration) return '—';
 
     // If it's already formatted, return as is
     if (typeof duration === 'string' && duration.includes(':')) {
@@ -57,11 +50,13 @@ const formatDuration = (duration) => {
 
 // Format waiting time for better readability
 const formatWaitingTime = (waitingTime) => {
-    if (!waitingTime) return "—";
+    if (!waitingTime) return '—';
 
     // If it looks like it contains a date or time unit, return as is
-    if (typeof waitingTime === 'string' &&
-        (waitingTime.includes(':') || waitingTime.includes('day') || waitingTime.includes('hour'))) {
+    if (
+        typeof waitingTime === 'string' &&
+        (waitingTime.includes(':') || waitingTime.includes('day') || waitingTime.includes('hour'))
+    ) {
         return waitingTime;
     }
 
@@ -85,7 +80,7 @@ const formatWaitingTime = (waitingTime) => {
 
 // Format dates for better readability
 const formatDate = (dateString) => {
-    if (!dateString) return "—";
+    if (!dateString) return '—';
 
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
@@ -102,11 +97,15 @@ const formatDate = (dateString) => {
     } else if (isTomorrow) {
         return `Tomorrow, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`;
     } else {
-        return date.toLocaleDateString([], {
-            month: 'short',
-            day: 'numeric',
-            year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
-        }) + ', ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return (
+            date.toLocaleDateString([], {
+                month: 'short',
+                day: 'numeric',
+                year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined,
+            }) +
+            ', ' +
+            date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        );
     }
 };
 
@@ -116,163 +115,168 @@ const Index = () => {
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
 
     // Enhanced columns with better visual presentation
-    const columns = useMemo(() => [
-        {
-            field: 'patient_fullname',
-            headerName: 'Patient',
-            type: "string",
-            display:"flex",
-            flex: 0.5,
-            renderCell: (params) => (
-                <Tooltip title="View consultation" placement="top">
-                    <Typography
-                        variant="body2"
-                        onClick={(e) => { e.stopPropagation(); show(params.row.id)(); }}
-                        sx={{
-                            fontWeight: 500,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            color: 'primary.main',
-                            cursor: 'pointer',
-                            '&:hover': { textDecoration: 'underline' },
-                        }}
-                    >
-                        {params.value || "Unknown"}
-                    </Typography>
-                </Tooltip>
-            )
-        },
-        {
-            field: 'consultant_name',
-            headerName: 'Consultant',
-            type: "string",
-            flex: 0.5,
-            display:"flex",
-            renderCell: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <LocalHospitalOutlined fontSize="small" color="primary" />
-                    <Tooltip title={params.value || "Unassigned"} placement="top">
+    const columns = useMemo(
+        () => [
+            {
+                field: 'patient_fullname',
+                headerName: 'Patient',
+                type: 'string',
+                display: 'flex',
+                flex: 0.5,
+                renderCell: (params) => (
+                    <Tooltip title="View consultation" placement="top">
                         <Typography
                             variant="body2"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                show(params.row.id)();
+                            }}
                             sx={{
+                                fontWeight: 500,
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap'
+                                whiteSpace: 'nowrap',
+                                color: 'primary.main',
+                                cursor: 'pointer',
+                                '&:hover': { textDecoration: 'underline' },
                             }}
                         >
-                            {params.value || "Unassigned"}
+                            {params.value || 'Unknown'}
                         </Typography>
                     </Tooltip>
-                </Box>
-            )
-        },
-        {
-            field: 'status',
-            headerName: 'Status',
-            type: "string",
-            flex: 0.2,
-            display:"flex",
-            renderCell: (params) => {
-                const status = params.value?.toLowerCase() || 'default';
-                const color = statusColors[status] || statusColors.default;
-
-                return (
-                    <Chip
-                        label={params.value || "Unknown"}
-                        color={color}
-                        size="small"
-                        variant={status === 'waiting' ? 'filled' : 'outlined'}
-                        sx={{
-                            textTransform: 'capitalize',
-                            fontWeight: status === 'waiting' ? 500 : 400
-                        }}
-                    />
-                );
-            }
-        },
-        {
-            field: 'waiting_time',
-            headerName: 'Waiting From',
-            type: "string",
-            flex: 0.25,
-            display:"flex",
-            renderCell: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <AccessTimeOutlined fontSize="small" color="action" />
-                    <Typography variant="body2">
-                        {formatWaitingTime(params.value)}
-                    </Typography>
-                </Box>
-            )
-        },
-        {
-            field: 'duration',
-            headerName: 'Duration',
-            type: "string",
-            sortable: false,
-            flex: 0.2,
-            display:"flex",
-            renderCell: (params) => (
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    {formatDuration(params.value)}
-                </Typography>
-            )
-        },
-        {
-            field: 'dueDate',
-            headerName: 'Due Date',
-            type: "datetime",
-            flex: 0.3,
-            display:"flex",
-            renderCell: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CalendarToday fontSize="small" color="action" />
-                    <Tooltip title={params.value }>
-                        <Typography variant="body2">
-                            {formatDate(params.value)}
-                        </Typography>
-                    </Tooltip>
-                </Box>
-            )
-        },
-        {
-            field: 'id',
-            headerName: 'Actions',
-            type: 'actions',
-            flex: 0.2,
-            sortable: false,
-            renderCell: (params) => (
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                    {params.row.status?.toLowerCase() === 'waiting' && (
-                        <Tooltip title="Delete Consultation">
-                            <IconButton
-                                onClick={(e) => { e.stopPropagation(); deleteConsultation(params.row)(); }}
-                                size="small"
-                                color="error"
+                ),
+            },
+            {
+                field: 'consultant_name',
+                headerName: 'Consultant',
+                type: 'string',
+                flex: 0.5,
+                display: 'flex',
+                renderCell: (params) => (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <LocalHospitalOutlined fontSize="small" color="primary" />
+                        <Tooltip title={params.value || 'Unassigned'} placement="top">
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                }}
                             >
-                                <DeleteOutlined fontSize="small" />
-                            </IconButton>
+                                {params.value || 'Unassigned'}
+                            </Typography>
                         </Tooltip>
-                    )}
-                </Box>
-            )
-        }
-    ], []);
+                    </Box>
+                ),
+            },
+            {
+                field: 'status',
+                headerName: 'Status',
+                type: 'string',
+                flex: 0.2,
+                display: 'flex',
+                renderCell: (params) => {
+                    const status = params.value?.toLowerCase() || 'default';
+                    const color = statusColors[status] || statusColors.default;
+
+                    return (
+                        <Chip
+                            label={params.value || 'Unknown'}
+                            color={color}
+                            size="small"
+                            variant={status === 'waiting' ? 'filled' : 'outlined'}
+                            sx={{
+                                textTransform: 'capitalize',
+                                fontWeight: status === 'waiting' ? 500 : 400,
+                            }}
+                        />
+                    );
+                },
+            },
+            {
+                field: 'waiting_time',
+                headerName: 'Waiting From',
+                type: 'string',
+                flex: 0.25,
+                display: 'flex',
+                renderCell: (params) => (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <AccessTimeOutlined fontSize="small" color="action" />
+                        <Typography variant="body2">{formatWaitingTime(params.value)}</Typography>
+                    </Box>
+                ),
+            },
+            {
+                field: 'duration',
+                headerName: 'Duration',
+                type: 'string',
+                sortable: false,
+                flex: 0.2,
+                display: 'flex',
+                renderCell: (params) => (
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        {formatDuration(params.value)}
+                    </Typography>
+                ),
+            },
+            {
+                field: 'dueDate',
+                headerName: 'Due Date',
+                type: 'datetime',
+                flex: 0.3,
+                display: 'flex',
+                renderCell: (params) => (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CalendarToday fontSize="small" color="action" />
+                        <Tooltip title={params.value}>
+                            <Typography variant="body2">{formatDate(params.value)}</Typography>
+                        </Tooltip>
+                    </Box>
+                ),
+            },
+            {
+                field: 'id',
+                headerName: 'Actions',
+                type: 'actions',
+                flex: 0.2,
+                sortable: false,
+                renderCell: (params) => (
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                        {params.row.status?.toLowerCase() === 'waiting' && (
+                            <Tooltip title="Delete Consultation">
+                                <IconButton
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        deleteConsultation(params.row)();
+                                    }}
+                                    size="small"
+                                    color="error"
+                                >
+                                    <DeleteOutlined fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+                    </Box>
+                ),
+            },
+        ],
+        [],
+    );
 
     const deleteConsultation = (params) => () => {
-        setData({...params, _method: "delete"});
+        setData({ ...params, _method: 'delete' });
         setOpenDeleteForm(true);
     };
 
     const show = (id) => () => {
-        router.visit(route("consultations.show", id));
+        router.visit(route('consultations.show', id));
     };
 
     const pageReload = (page, filters, sort, pageSize) => {
         router.visit(route('consultations.index'), {
-            data: {page, filters, sort, pageSize},
-            only: ["consultations", "status", "success", "requestInputs"],
+            data: { page, filters, sort, pageSize },
+            only: ['consultations', 'status', 'success', 'requestInputs'],
         });
     };
 
@@ -283,13 +287,13 @@ const Index = () => {
 
     const handleDestroy = async () => {
         post(route('consultations.destroy', data.id), {
-            onSuccess: handleCloseDeleteForm
+            onSuccess: handleCloseDeleteForm,
         });
     };
 
     return (
         <Box sx={{ position: 'relative' }}>
-            <Head title="Consultations"/>
+            <Head title="Consultations" />
             <PageHeader
                 title="Consultations"
                 subtitle="Manage patient consultations"
@@ -301,7 +305,7 @@ const Index = () => {
                 sx={{
                     borderRadius: 2,
                     overflow: 'hidden',
-                    mb: 4
+                    mb: 4,
                 }}
             >
                 <TableLayout
@@ -327,7 +331,7 @@ const Index = () => {
                         },
                         '& .MuiDataGrid-cell': {
                             padding: '8px 16px',
-                        }
+                        },
                     }}
                     onRowClick={(params) => show(params.id)()}
                 />
@@ -345,23 +349,19 @@ const Index = () => {
 
 const breadCrumbs = [
     {
-        title: "Dashboard",
+        title: 'Dashboard',
         link: route('dashboard'),
-        icon: null
+        icon: null,
     },
     {
-        title: "Consultations",
+        title: 'Consultations',
         link: null,
-        icon: <MedicalServicesOutlined fontSize="small" />
-    }
+        icon: <MedicalServicesOutlined fontSize="small" />,
+    },
 ];
 
-Index.layout = page => (
-    <AuthenticatedLayout
-        auth={page.props.auth}
-        children={page}
-        breadcrumbs={breadCrumbs}
-    />
+Index.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
 );
 
 export default Index;

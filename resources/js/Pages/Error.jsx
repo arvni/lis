@@ -1,5 +1,5 @@
 import React from 'react';
-import {Head, Link as InertiaLink} from '@inertiajs/react';
+import { Head, Link as InertiaLink } from '@inertiajs/react';
 import {
     Box,
     Typography,
@@ -11,7 +11,7 @@ import {
     Chip,
     Fade,
     useTheme,
-    alpha
+    alpha,
 } from '@mui/material';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlined';
 import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
@@ -22,50 +22,56 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
 export default function Error({ status, message }) {
     const theme = useTheme();
 
-    const title = {
-        503: 'Service Unavailable',
-        500: 'Server Error',
-        404: 'Page Not Found',
-        403: 'Forbidden',
-        401: 'Unauthorized',
-    }[status] || 'Error';
+    const title =
+        {
+            503: 'Service Unavailable',
+            500: 'Server Error',
+            404: 'Page Not Found',
+            403: 'Forbidden',
+            401: 'Unauthorized',
+        }[status] || 'Error';
 
-    const description = message || {
-        503: 'Sorry, we are doing some maintenance. Please check back soon.',
-        500: 'Whoops, something went wrong on our servers.',
-        404: 'Sorry, the page you are looking for could not be found.',
-        403: 'Sorry, you are forbidden from accessing this page.',
-        401: 'Sorry, you are not authorized to access this page.',
-    }[status] || 'An unexpected error occurred.';
+    const description =
+        message ||
+        {
+            503: 'Sorry, we are doing some maintenance. Please check back soon.',
+            500: 'Whoops, something went wrong on our servers.',
+            404: 'Sorry, the page you are looking for could not be found.',
+            403: 'Sorry, you are forbidden from accessing this page.',
+            401: 'Sorry, you are not authorized to access this page.',
+        }[status] ||
+        'An unexpected error occurred.';
 
     // Determine the appropriate icon and color based on status code
     const getErrorInfo = () => {
-        switch(status) {
+        switch (status) {
             case 404:
                 return {
                     icon: <SentimentDissatisfiedIcon sx={{ fontSize: 80 }} />,
                     color: theme.palette.info.main,
-                    suggestion: 'The page might have been moved or deleted. Please check the URL and try again.'
+                    suggestion:
+                        'The page might have been moved or deleted. Please check the URL and try again.',
                 };
             case 401:
             case 403:
                 return {
                     icon: <ErrorOutlineIcon sx={{ fontSize: 80 }} />,
                     color: theme.palette.warning.main,
-                    suggestion: 'You may need to log in or request access to view this resource.'
+                    suggestion: 'You may need to log in or request access to view this resource.',
                 };
             case 500:
             case 503:
                 return {
                     icon: <ErrorOutlineIcon sx={{ fontSize: 80 }} />,
                     color: theme.palette.error.main,
-                    suggestion: 'Our team has been notified. Please try again later or contact support if the issue persists.'
+                    suggestion:
+                        'Our team has been notified. Please try again later or contact support if the issue persists.',
                 };
             default:
                 return {
                     icon: <ErrorOutlineIcon sx={{ fontSize: 80 }} />,
                     color: theme.palette.error.main,
-                    suggestion: 'Please try again or contact support if the issue persists.'
+                    suggestion: 'Please try again or contact support if the issue persists.',
                 };
         }
     };
@@ -84,7 +90,7 @@ export default function Error({ status, message }) {
                     justifyContent: 'center',
                     background: `linear-gradient(135deg, ${alpha(theme.palette.background.default, 0.95)}, ${alpha(theme.palette.background.default, 0.85)})`,
                     backgroundSize: 'cover',
-                    py: 3
+                    py: 3,
                 }}
             >
                 <Fade in timeout={800}>
@@ -97,7 +103,7 @@ export default function Error({ status, message }) {
                                 width: '100%',
                                 borderRadius: 2,
                                 overflow: 'hidden',
-                                position: 'relative'
+                                position: 'relative',
                             }}
                         >
                             {/* Color accent bar at the top */}
@@ -108,7 +114,7 @@ export default function Error({ status, message }) {
                                     left: 0,
                                     right: 0,
                                     height: 6,
-                                    bgcolor: errorInfo.color
+                                    bgcolor: errorInfo.color,
                                 }}
                             />
 
@@ -118,7 +124,7 @@ export default function Error({ status, message }) {
                                 sx={{
                                     display: 'flex',
                                     justifyContent: 'center',
-                                    color: errorInfo.color
+                                    color: errorInfo.color,
                                 }}
                             >
                                 {errorInfo.icon}
@@ -126,7 +132,9 @@ export default function Error({ status, message }) {
 
                             <Chip
                                 label={`Error ${status}`}
-                                color={status === 404 ? "info" : status >= 500 ? "error" : "warning"}
+                                color={
+                                    status === 404 ? 'info' : status >= 500 ? 'error' : 'warning'
+                                }
                                 size="medium"
                                 sx={{ mb: 2 }}
                             />
@@ -141,11 +149,7 @@ export default function Error({ status, message }) {
                                 {title}
                             </Typography>
 
-                            <Typography
-                                variant="body1"
-                                color="text.secondary"
-                                sx={{ mb: 2 }}
-                            >
+                            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
                                 {description}
                             </Typography>
 
@@ -157,7 +161,7 @@ export default function Error({ status, message }) {
                                     mb: 3,
                                     display: 'flex',
                                     alignItems: 'flex-start',
-                                    gap: 1
+                                    gap: 1,
                                 }}
                             >
                                 <HelpOutlineIcon color="action" sx={{ mt: 0.5 }} />
@@ -181,7 +185,7 @@ export default function Error({ status, message }) {
                                     sx={{
                                         py: 1.2,
                                         fontWeight: 'medium',
-                                        boxShadow: 2
+                                        boxShadow: 2,
                                     }}
                                 >
                                     Go to Dashboard
@@ -200,7 +204,12 @@ export default function Error({ status, message }) {
                             </Stack>
                         </Paper>
 
-                        <Typography variant="caption" color="text.secondary" align="center" sx={{ mt: 3, display: 'block' }}>
+                        <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            align="center"
+                            sx={{ mt: 3, display: 'block' }}
+                        >
                             If you continue to experience issues, please contact support.
                         </Typography>
                     </Container>
@@ -211,4 +220,4 @@ export default function Error({ status, message }) {
 }
 
 // This page deliberately doesn't use the default layout
-Error.layout = page => page;
+Error.layout = (page) => page;

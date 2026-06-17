@@ -1,61 +1,65 @@
 import AddForm from './Components/Form';
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {Head, router, useForm} from "@inertiajs/react";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head, router, useForm } from '@inertiajs/react';
 
 const Add = () => {
-    const {data, setData, post, errors, setError, clearErrors} = useForm({
-        fullName: "",
-        email: "",
-        phoneNo: "",
+    const { data, setData, post, errors, setError, clearErrors } = useForm({
+        fullName: '',
+        email: '',
+        phoneNo: '',
         billingInfo: {
-            name: "",
-            address: "",
-            vatIn: "",
-            phone: "",
-            email: "",
-            city: "",
-            country: "",
+            name: '',
+            address: '',
+            vatIn: '',
+            phone: '',
+            email: '',
+            city: '',
+            country: '',
         },
         logisticInfo: {
-            address: "",
+            address: '',
             latitude: null,
             longitude: null,
         },
         reportReceivers: [],
         isActive: true,
     });
-    const handleSubmit = () => post(route('referrers.store'))
+    const handleSubmit = () => post(route('referrers.store'));
     const handleCancel = (e) => {
         e.preventDefault();
         e.stopPropagation();
         router.visit(route('referrers.index'));
-    }
-    return <>
-        <Head title="Add Referrer"/>
-        <AddForm data={data}
+    };
+    return (
+        <>
+            <Head title="Add Referrer" />
+            <AddForm
+                data={data}
                 setData={setData}
                 submit={handleSubmit}
                 cancel={handleCancel}
                 errors={errors}
                 setError={setError}
-                clearErrors={clearErrors}/>
-    </>;
-}
+                clearErrors={clearErrors}
+            />
+        </>
+    );
+};
 
 const breadCrumbs = [
     {
-        title: "Referrers",
-        link: route("referrers.index"),
+        title: 'Referrers',
+        link: route('referrers.index'),
         icon: null,
     },
     {
-        title: "Add New Referrer",
-        link: "",
-        icon: null
-    }
-]
+        title: 'Add New Referrer',
+        link: '',
+        icon: null,
+    },
+];
 
-Add.layout = page => <AuthenticatedLayout auth={page.props.auth}
-                                          children={page}
-                                          breadcrumbs={breadCrumbs}/>
+Add.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
+);
 export default Add;

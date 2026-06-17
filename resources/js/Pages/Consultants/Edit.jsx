@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import ConsultantForm, {default_time_table} from "./Components/Form";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, router, useForm } from "@inertiajs/react";
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import ConsultantForm, { default_time_table } from './Components/Form';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head, router, useForm } from '@inertiajs/react';
 import {
     Snackbar,
     Alert,
@@ -12,10 +12,9 @@ import {
     DialogActions,
     Button,
     LinearProgress,
-    Box
-} from "@mui/material";
+    Box,
+} from '@mui/material';
 import { AssignmentInd as ConsultantIcon, ArrowBack as BackIcon } from '@mui/icons-material';
-
 
 const EditConsultant = ({ consultant, errors: serverErrors }) => {
     // Handle case where consultant data might be incomplete
@@ -23,7 +22,7 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
         return {
             ...consultant,
             default_time_table: consultant.default_time_table || default_time_table,
-            active: consultant.active !== undefined ? consultant.active : true
+            active: consultant.active !== undefined ? consultant.active : true,
         };
     }, [consultant]);
 
@@ -33,21 +32,21 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
     // Initialize form with consultant data and method
     const { data, setData, post, processing, reset, progress } = useForm({
         ...consultantWithDefaults,
-        _method: "put"
+        _method: 'put',
     });
 
     // Local state for UI management
     const [errors, setErrors] = useState(serverErrors || {});
     const [notification, setNotification] = useState({
         open: false,
-        message: "",
-        type: "info"
+        message: '',
+        type: 'info',
     });
     const [confirmDialog, setConfirmDialog] = useState({
         open: false,
-        title: "",
-        message: "",
-        confirmAction: null
+        title: '',
+        message: '',
+        confirmAction: null,
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formDirty, setFormDirty] = useState(false);
@@ -67,16 +66,16 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
     useEffect(() => {
         if (Object.keys(serverErrors || {}).length) {
             setErrors(serverErrors);
-            showNotification("Please correct the errors in the form", "error");
+            showNotification('Please correct the errors in the form', 'error');
         }
     }, [serverErrors]);
 
     // Utility function to show notifications
-    const showNotification = (message, type = "info") => {
+    const showNotification = (message, type = 'info') => {
         setNotification({
             open: true,
             message,
-            type
+            type,
         });
     };
 
@@ -85,17 +84,18 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
         const newErrors = {};
 
         // More comprehensive validation
-        if (!data.name?.trim()) newErrors.name = "Name is required";
-        if (data.name?.trim().length < 2) newErrors.name = "Name must be at least 2 characters";
+        if (!data.name?.trim()) newErrors.name = 'Name is required';
+        if (data.name?.trim().length < 2) newErrors.name = 'Name must be at least 2 characters';
 
         if (data.email?.trim()) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(data.email)) newErrors.email = "Please enter a valid email address";
+            if (!emailRegex.test(data.email))
+                newErrors.email = 'Please enter a valid email address';
         }
 
         if (data.phone?.trim()) {
             const phoneRegex = /^\+?[0-9\s-()]{8,15}$/;
-            if (!phoneRegex.test(data.phone)) newErrors.phone = "Please enter a valid phone number";
+            if (!phoneRegex.test(data.phone)) newErrors.phone = 'Please enter a valid phone number';
         }
 
         return newErrors;
@@ -105,7 +105,7 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
     const handleSubmit = useCallback(() => {
         // Don't submit if no changes
         if (!formDirty) {
-            showNotification("No changes to save", "info");
+            showNotification('No changes to save', 'info');
             return;
         }
 
@@ -114,7 +114,7 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
 
         if (Object.keys(formErrors).length > 0) {
             setErrors(formErrors);
-            showNotification("Please correct the errors in the form", "error");
+            showNotification('Please correct the errors in the form', 'error');
             return;
         }
 
@@ -123,7 +123,7 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
         // Submit the form
         post(route('consultants.update', consultant.id), {
             onSuccess: () => {
-                showNotification("Consultant updated successfully", "success");
+                showNotification('Consultant updated successfully', 'success');
                 setFormDirty(false);
 
                 // Redirect after a short delay to allow notification to be seen
@@ -133,12 +133,12 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
             },
             onError: (errors) => {
                 setErrors(errors);
-                showNotification("Please correct the errors in the form", "error");
+                showNotification('Please correct the errors in the form', 'error');
                 setIsSubmitting(false);
             },
             onFinish: () => {
                 setIsSubmitting(false);
-            }
+            },
         });
     }, [data, formDirty, post, consultant.id, validateForm]);
 
@@ -147,12 +147,13 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
         if (formDirty) {
             setConfirmDialog({
                 open: true,
-                title: "Discard Changes?",
-                message: "You have unsaved changes. Are you sure you want to leave this page? All changes will be lost.",
+                title: 'Discard Changes?',
+                message:
+                    'You have unsaved changes. Are you sure you want to leave this page? All changes will be lost.',
                 confirmAction: () => {
-                    setConfirmDialog(prev => ({ ...prev, open: false }));
+                    setConfirmDialog((prev) => ({ ...prev, open: false }));
                     router.visit(route('consultants.index'));
-                }
+                },
             });
         } else {
             router.visit(route('consultants.index'));
@@ -167,7 +168,7 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
 
     // Handle dialog close
     const handleCloseDialog = () => {
-        setConfirmDialog(prev => ({ ...prev, open: false }));
+        setConfirmDialog((prev) => ({ ...prev, open: false }));
     };
 
     // Reset form to original data
@@ -175,14 +176,14 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
         if (formDirty) {
             setConfirmDialog({
                 open: true,
-                title: "Reset Form?",
-                message: "This will revert all changes back to the original values. Continue?",
+                title: 'Reset Form?',
+                message: 'This will revert all changes back to the original values. Continue?',
                 confirmAction: () => {
                     reset();
                     setErrors({});
-                    setConfirmDialog(prev => ({ ...prev, open: false }));
-                    showNotification("Form has been reset to original values", "info");
-                }
+                    setConfirmDialog((prev) => ({ ...prev, open: false }));
+                    showNotification('Form has been reset to original values', 'info');
+                },
             });
         }
     }, [formDirty, reset]);
@@ -205,7 +206,9 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
 
     return (
         <>
-            <Head title={consultant?.name ? `Edit Consultant: ${consultant.name}` : "Edit Consultant"}/>
+            <Head
+                title={consultant?.name ? `Edit Consultant: ${consultant.name}` : 'Edit Consultant'}
+            />
             {/* Show progress indicator when uploading */}
             {progress && (
                 <LinearProgress
@@ -217,7 +220,7 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
                         left: 0,
                         right: 0,
                         zIndex: 1100,
-                        height: 4
+                        height: 4,
                     }}
                 />
             )}
@@ -276,9 +279,7 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
             >
-                <DialogTitle id="alert-dialog-title">
-                    {confirmDialog.title}
-                </DialogTitle>
+                <DialogTitle id="alert-dialog-title">{confirmDialog.title}</DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
                         {confirmDialog.message}
@@ -305,19 +306,19 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
 // Define breadcrumbs for layout with better labels and icons
 const getBreadcrumbs = (consultant) => [
     {
-        title: "Consultants",
-        link: route("consultants.index"),
-        icon: <ConsultantIcon fontSize="small" />
+        title: 'Consultants',
+        link: route('consultants.index'),
+        icon: <ConsultantIcon fontSize="small" />,
     },
     {
-        title: consultant?.name ? `Edit: ${consultant.name}` : "Edit Consultant",
+        title: consultant?.name ? `Edit: ${consultant.name}` : 'Edit Consultant',
         link: null,
-        icon: null
-    }
+        icon: null,
+    },
 ];
 
 // Apply layout with dynamic breadcrumbs
-EditConsultant.layout = page => {
+EditConsultant.layout = (page) => {
     const consultant = page.props.consultant || {};
 
     return (
@@ -325,7 +326,7 @@ EditConsultant.layout = page => {
             auth={page.props.auth}
             children={page}
             breadcrumbs={getBreadcrumbs(consultant)}
-            title={consultant?.name ? `Edit Consultant: ${consultant.name}` : "Edit Consultant"}
+            title={consultant?.name ? `Edit Consultant: ${consultant.name}` : 'Edit Consultant'}
         />
     );
 };

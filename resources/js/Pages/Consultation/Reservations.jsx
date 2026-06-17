@@ -1,27 +1,21 @@
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import PageHeader from "@/Components/PageHeader.jsx";
-import {Head, router,} from "@inertiajs/react";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PageHeader from '@/Components/PageHeader.jsx';
+import { Head, router } from '@inertiajs/react';
 
 // Material UI components
-import {
-    Paper,
-    Box,
-} from "@mui/material";
+import { Paper, Box } from '@mui/material';
 
 // Material UI icons
-import {
-    MedicalServicesOutlined,
-} from "@mui/icons-material";
-import TimeCalendar from "./Components/TimeCalendar.jsx";
-import Button from "@mui/material/Button";
-import AddForm from "./Components/AddForm.jsx"
-import EditForm from "./Components/EditForm.jsx"
-import {useState} from "react";
-import ConvertCustomerToPatientForm from "./Components/ConvertCustomerToPatientForm.jsx";
-import {useSnackbar} from "notistack";
+import { MedicalServicesOutlined } from '@mui/icons-material';
+import TimeCalendar from './Components/TimeCalendar.jsx';
+import Button from '@mui/material/Button';
+import AddForm from './Components/AddForm.jsx';
+import EditForm from './Components/EditForm.jsx';
+import { useState } from 'react';
+import ConvertCustomerToPatientForm from './Components/ConvertCustomerToPatientForm.jsx';
+import { useSnackbar } from 'notistack';
 
-
-const Reservations = ({times, canEdit, canAdd, canDelete}) => {
+const Reservations = ({ times, canEdit, canAdd, canDelete }) => {
     const [openAdd, setOpenAdd] = useState(false);
     const [openEdit, setOpenEdit] = useState(false);
     const [openConversion, setOpenConversion] = useState(false);
@@ -67,33 +61,50 @@ const Reservations = ({times, canEdit, canAdd, canDelete}) => {
     };
 
     const handleDelete = (time) => {
-        if (time.reservable_type === "customer" || (time.reservable_type === "consultation" && time.reservable.status === "booked")) {
-            router.post(route('times.destroy', time.id),
-                {_method: "delete"},
+        if (
+            time.reservable_type === 'customer' ||
+            (time.reservable_type === 'consultation' && time.reservable.status === 'booked')
+        ) {
+            router.post(
+                route('times.destroy', time.id),
+                { _method: 'delete' },
                 {
                     onError: (errors) => {
                         if (typeof errors === 'object' && errors !== null) {
-                            Object.values(errors).forEach(error => {
+                            Object.values(errors).forEach((error) => {
                                 enqueueSnackbar(error, { variant: 'error' });
                             });
                         } else
-                            enqueueSnackbar('An error occurred while deleting the time', { variant: 'error' });
+                            enqueueSnackbar('An error occurred while deleting the time', {
+                                variant: 'error',
+                            });
                     },
-                    onSuccess: () => enqueueSnackbar('Time slot deleted successfully', { variant: 'success' })
-                });
+                    onSuccess: () =>
+                        enqueueSnackbar('Time slot deleted successfully', { variant: 'success' }),
+                },
+            );
         } else {
-            enqueueSnackbar("This reservation cannot be deleted because the consultation has already taken place.", { variant: 'error' });
+            enqueueSnackbar(
+                'This reservation cannot be deleted because the consultation has already taken place.',
+                { variant: 'error' },
+            );
         }
     };
 
     return (
-        <Box sx={{position: 'relative'}}>
-            <Head title="Reservations"/>
+        <Box sx={{ position: 'relative' }}>
+            <Head title="Reservations" />
             <PageHeader
                 title="Reservation"
                 subtitle="Manage reservations"
-                icon={<MedicalServicesOutlined fontSize="large" sx={{mr: 2}}/>}
-                actions={canAdd && <Button variant="contained" onClick={handleAddNew}>Add Reservation</Button>}
+                icon={<MedicalServicesOutlined fontSize="large" sx={{ mr: 2 }} />}
+                actions={
+                    canAdd && (
+                        <Button variant="contained" onClick={handleAddNew}>
+                            Add Reservation
+                        </Button>
+                    )
+                }
             />
 
             <Paper
@@ -101,7 +112,7 @@ const Reservations = ({times, canEdit, canAdd, canDelete}) => {
                 sx={{
                     borderRadius: 2,
                     overflow: 'hidden',
-                    mb: 4
+                    mb: 4,
                 }}
             >
                 <TimeCalendar
@@ -120,10 +131,7 @@ const Reservations = ({times, canEdit, canAdd, canDelete}) => {
             </Paper>
 
             {/* Add Form */}
-            <AddForm
-                openAdd={openAdd}
-                onClose={handleCloseAddNew}
-            />
+            <AddForm openAdd={openAdd} onClose={handleCloseAddNew} />
 
             {/* Edit Form */}
             <EditForm
@@ -146,23 +154,19 @@ const Reservations = ({times, canEdit, canAdd, canDelete}) => {
 
 const breadCrumbs = [
     {
-        title: "Dashboard",
+        title: 'Dashboard',
         link: route('dashboard'),
-        icon: null
+        icon: null,
     },
     {
-        title: "Reservations",
+        title: 'Reservations',
         link: null,
-        icon: <MedicalServicesOutlined fontSize="small"/>
-    }
+        icon: <MedicalServicesOutlined fontSize="small" />,
+    },
 ];
 
-Reservations.layout = page => (
-    <AuthenticatedLayout
-        auth={page.props.auth}
-        children={page}
-        breadcrumbs={breadCrumbs}
-    />
+Reservations.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
 );
 
 export default Reservations;

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
     Accordion,
     AccordionDetails,
@@ -10,8 +10,8 @@ import {
     useTheme,
     Card,
     Tooltip,
-    useMediaQuery
-} from "@mui/material";
+    useMediaQuery,
+} from '@mui/material';
 import {
     Timeline,
     TimelineConnector,
@@ -19,13 +19,13 @@ import {
     TimelineDot,
     TimelineItem,
     TimelineOppositeContent,
-    TimelineSeparator
-} from "@mui/lab";
+    TimelineSeparator,
+} from '@mui/lab';
 import {
     ExpandMore as ExpandMoreIcon,
     AccessTime as TimeIcon,
-    Event as EventIcon
-} from "@mui/icons-material";
+    Event as EventIcon,
+} from '@mui/icons-material';
 
 const TimeLine = ({ timeline }) => {
     const theme = useTheme();
@@ -34,11 +34,10 @@ const TimeLine = ({ timeline }) => {
     // Format date strings if they appear to be dates
     const formatTimeValue = (value) => {
         // Check if value might be a date string
-        if (typeof value === 'string' && (
-            value.includes('/') ||
-            value.includes('-') ||
-            value.match(/\d{1,2}:\d{2}/)
-        )) {
+        if (
+            typeof value === 'string' &&
+            (value.includes('/') || value.includes('-') || value.match(/\d{1,2}:\d{2}/))
+        ) {
             try {
                 const date = new Date(value);
                 // Check if valid date
@@ -48,7 +47,7 @@ const TimeLine = ({ timeline }) => {
                         month: 'short',
                         day: 'numeric',
                         hour: '2-digit',
-                        minute: '2-digit'
+                        minute: '2-digit',
                     }).format(date);
                 }
             } catch (e) {
@@ -85,7 +84,7 @@ const TimeLine = ({ timeline }) => {
                 transition: 'all 0.3s ease',
                 '&:hover': {
                     boxShadow: theme.shadows[4],
-                }
+                },
             }}
         >
             <Accordion
@@ -96,7 +95,7 @@ const TimeLine = ({ timeline }) => {
                         '&:before': {
                             display: 'none',
                         },
-                    }
+                    },
                 }}
             >
                 <AccordionSummary
@@ -110,8 +109,8 @@ const TimeLine = ({ timeline }) => {
                             backgroundColor: theme.palette.primary.dark,
                         },
                         '& .MuiAccordionSummary-expandIconWrapper': {
-                            color: theme.palette.primary.contrastText
-                        }
+                            color: theme.palette.primary.contrastText,
+                        },
                     }}
                 >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -129,7 +128,7 @@ const TimeLine = ({ timeline }) => {
                 </AccordionSummary>
 
                 <AccordionDetails sx={{ p: 3 }}>
-                    <Timeline position={isMobile ? "right" : "alternate"}>
+                    <Timeline position={isMobile ? 'right' : 'alternate'}>
                         {Object.keys(timeline).map((key, index) => {
                             const dotColor = generateColor(key);
                             const formattedValue = formatTimeValue(timeline[key]);
@@ -140,7 +139,7 @@ const TimeLine = ({ timeline }) => {
                                         <TimelineOppositeContent
                                             sx={{
                                                 pt: 3,
-                                                maxWidth: '40%'
+                                                maxWidth: '40%',
                                             }}
                                             color="text.secondary"
                                         >
@@ -153,13 +152,14 @@ const TimeLine = ({ timeline }) => {
                                                         display: 'inline-flex',
                                                         alignItems: 'center',
                                                         gap: 1,
-                                                        backgroundColor: theme.palette.background.paper,
+                                                        backgroundColor:
+                                                            theme.palette.background.paper,
                                                         border: `1px solid ${theme.palette.divider}`,
                                                         transition: 'all 0.2s ease',
                                                         '&:hover': {
                                                             boxShadow: theme.shadows[3],
-                                                            transform: 'translateY(-2px)'
-                                                        }
+                                                            transform: 'translateY(-2px)',
+                                                        },
                                                     }}
                                                 >
                                                     <EventIcon fontSize="small" color="action" />
@@ -176,9 +176,10 @@ const TimeLine = ({ timeline }) => {
                                             <TimelineConnector
                                                 sx={{
                                                     minHeight: 20,
-                                                    bgcolor: theme.palette.mode === 'dark'
-                                                        ? 'rgba(255,255,255,0.1)'
-                                                        : 'rgba(0,0,0,0.1)'
+                                                    bgcolor:
+                                                        theme.palette.mode === 'dark'
+                                                            ? 'rgba(255,255,255,0.1)'
+                                                            : 'rgba(0,0,0,0.1)',
                                                 }}
                                             />
                                         )}
@@ -188,12 +189,13 @@ const TimeLine = ({ timeline }) => {
                                                 sx={{
                                                     bgcolor: dotColor,
                                                     boxShadow: theme.shadows[3],
-                                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                    transition:
+                                                        'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                                     '&:hover': {
                                                         transform: 'scale(1.2)',
-                                                        boxShadow: theme.shadows[5]
+                                                        boxShadow: theme.shadows[5],
                                                     },
-                                                    cursor: 'pointer'
+                                                    cursor: 'pointer',
                                                 }}
                                             />
                                         </Tooltip>
@@ -202,9 +204,10 @@ const TimeLine = ({ timeline }) => {
                                             <TimelineConnector
                                                 sx={{
                                                     minHeight: 20,
-                                                    bgcolor: theme.palette.mode === 'dark'
-                                                        ? 'rgba(255,255,255,0.1)'
-                                                        : 'rgba(0,0,0,0.1)'
+                                                    bgcolor:
+                                                        theme.palette.mode === 'dark'
+                                                            ? 'rgba(255,255,255,0.1)'
+                                                            : 'rgba(0,0,0,0.1)',
                                                 }}
                                             />
                                         )}
@@ -220,8 +223,8 @@ const TimeLine = ({ timeline }) => {
                                                 transition: 'all 0.2s ease',
                                                 '&:hover': {
                                                     boxShadow: theme.shadows[4],
-                                                    transform: 'translateY(-2px)'
-                                                }
+                                                    transform: 'translateY(-2px)',
+                                                },
                                             }}
                                         >
                                             <Typography
@@ -240,11 +243,14 @@ const TimeLine = ({ timeline }) => {
                                                         borderTop: `1px dashed ${theme.palette.divider}`,
                                                         display: 'flex',
                                                         alignItems: 'center',
-                                                        gap: 1
+                                                        gap: 1,
                                                     }}
                                                 >
                                                     <EventIcon fontSize="small" color="action" />
-                                                    <Typography variant="body2" color="text.secondary">
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                    >
                                                         {formattedValue}
                                                     </Typography>
                                                 </Box>

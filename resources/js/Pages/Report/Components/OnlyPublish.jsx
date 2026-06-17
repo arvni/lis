@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from "react";
-import Button from "@mui/material/Button";
-import DialogTitle from "@mui/material/DialogTitle";
+import React, { useState, useEffect } from 'react';
+import Button from '@mui/material/Button';
+import DialogTitle from '@mui/material/DialogTitle';
 import {
     Dialog,
     DialogActions,
@@ -21,9 +21,9 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    Collapse
-} from "@mui/material";
-import FormControlLabel from "@mui/material/FormControlLabel";
+    Collapse,
+} from '@mui/material';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import {
     Share,
     Close,
@@ -36,9 +36,9 @@ import {
     Info,
     Send,
     ExpandMore,
-    ExpandLess
-} from "@mui/icons-material";
-import {useForm} from "@inertiajs/react";
+    ExpandLess,
+} from '@mui/icons-material';
+import { useForm } from '@inertiajs/react';
 
 /**
  * PublishForm Component - A dialog for publishing acceptance reports
@@ -48,32 +48,33 @@ import {useForm} from "@inertiajs/react";
  * @param {Function} props.onCancel - Function to handle dialog close/cancel
  * @param {Object} props.acceptance - Acceptance data
  */
-const PublishForm = ({open, onCancel, acceptance}) => {
+const PublishForm = ({ open, onCancel, acceptance }) => {
     const [showRecipients, setShowRecipients] = useState(true);
     const [publishSuccess, setPublishSuccess] = useState(false);
 
-    const {data, setData, post, errors, processing, wasSuccessful} = useForm({
-        _method: "put",
-        silently_publish: false
+    const { data, setData, post, errors, processing, wasSuccessful } = useForm({
+        _method: 'put',
+        silently_publish: false,
     });
 
     // Handle form submission
     const handleSubmit = () => {
-        post(route("acceptances.publish", acceptance.id), {
+        post(route('acceptances.publish', acceptance.id), {
             onSuccess: () => {
                 setPublishSuccess(true);
                 setTimeout(() => {
                     onCancel();
                     setPublishSuccess(false);
                 }, 2000);
-            }
+            },
         });
     };
 
-    const handleChange = (e) => setData(prevState => ({
-        ...prevState,
-        silently_publish: e.target.checked
-    }));
+    const handleChange = (e) =>
+        setData((prevState) => ({
+            ...prevState,
+            silently_publish: e.target.checked,
+        }));
 
     // Get recipients from acceptance data
     const getRecipients = () => {
@@ -85,7 +86,7 @@ const PublishForm = ({open, onCancel, acceptance}) => {
                 type: 'whatsapp',
                 label: 'WhatsApp',
                 value: howReport.whatsappNumber,
-                icon: <WhatsApp />
+                icon: <WhatsApp />,
             });
         }
 
@@ -94,7 +95,7 @@ const PublishForm = ({open, onCancel, acceptance}) => {
                 type: 'email',
                 label: 'Email',
                 value: howReport.emailAddress,
-                icon: <Email />
+                icon: <Email />,
             });
         }
 
@@ -103,16 +104,16 @@ const PublishForm = ({open, onCancel, acceptance}) => {
                 type: 'referrer',
                 label: 'Referrer Email',
                 value: acceptance.referrer.email,
-                icon: <Person />
+                icon: <Person />,
             });
-            if(acceptance.referrer.reportReceivers && acceptance.referrer.reportReceivers.length){
-                let reportReceivers = acceptance.referrer.reportReceivers.map(email => ({
+            if (acceptance.referrer.reportReceivers && acceptance.referrer.reportReceivers.length) {
+                let reportReceivers = acceptance.referrer.reportReceivers.map((email) => ({
                     type: 'referrer',
                     label: 'Referrer Email',
                     value: email,
-                    icon: <Person />
-                }))
-                recipients = [...recipients, ...reportReceivers]
+                    icon: <Person />,
+                }));
+                recipients = [...recipients, ...reportReceivers];
             }
         }
 
@@ -125,7 +126,7 @@ const PublishForm = ({open, onCancel, acceptance}) => {
     // Get acceptance items info
     const acceptanceItems = acceptance?.acceptance_items || [];
     const totalTests = acceptanceItems.length;
-    const testsToPublish = acceptanceItems.filter(item => !item.report?.published_at).length;
+    const testsToPublish = acceptanceItems.filter((item) => !item.report?.published_at).length;
 
     // Reset success state when dialog closes
     useEffect(() => {
@@ -140,33 +141,36 @@ const PublishForm = ({open, onCancel, acceptance}) => {
             onClose={!processing ? onCancel : undefined}
             fullWidth
             maxWidth="sm"
-            slots={{Transition: Fade}}
+            slots={{ Transition: Fade }}
             transitionDuration={300}
             slotProps={{
                 Paper: {
                     sx: {
                         borderRadius: 3,
-                        overflow: 'hidden'
-                    }
-                }
+                        overflow: 'hidden',
+                    },
+                },
             }}
         >
-            <DialogTitle sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                p: 3,
-                bgcolor: 'primary.main',
-                color: 'primary.contrastText'
-            }}>
-  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
+            <DialogTitle
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    p: 3,
+                    bgcolor: 'primary.main',
+                    color: 'primary.contrastText',
+                }}
+            >
+                <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
                     <Share />
                     <Box>
                         <Typography variant="h6" fontWeight="600" component="span">
                             Publish Acceptance #{acceptance?.id}
                         </Typography>
                         <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                            Publishing {testsToPublish} of {totalTests} report{totalTests !== 1 ? 's' : ''}
+                            Publishing {testsToPublish} of {totalTests} report
+                            {totalTests !== 1 ? 's' : ''}
                         </Typography>
                     </Box>
                 </Stack>
@@ -201,21 +205,20 @@ const PublishForm = ({open, onCancel, acceptance}) => {
 
                 {/* Tests Info */}
                 {testsToPublish > 0 && (
-                    <Alert
-                        severity="info"
-                        sx={{ m: 3, mb: 0, borderRadius: 2 }}
-                    >
+                    <Alert severity="info" sx={{ m: 3, mb: 0, borderRadius: 2 }}>
                         <Typography variant="body2" fontWeight="500" gutterBottom>
                             Tests to be published:
                         </Typography>
                         <Box component="ul" sx={{ mt: 1, mb: 0, pl: 2 }}>
-                            {acceptanceItems.filter(item => !item.report?.published_at).map((item, index) => (
-                                <li key={index}>
-                                    <Typography variant="body2">
-                                        {item.test?.name || 'Unknown Test'}
-                                    </Typography>
-                                </li>
-                            ))}
+                            {acceptanceItems
+                                .filter((item) => !item.report?.published_at)
+                                .map((item, index) => (
+                                    <li key={index}>
+                                        <Typography variant="body2">
+                                            {item.test?.name || 'Unknown Test'}
+                                        </Typography>
+                                    </li>
+                                ))}
                         </Box>
                     </Alert>
                 )}
@@ -228,7 +231,7 @@ const PublishForm = ({open, onCancel, acceptance}) => {
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             mb: 2,
-                            cursor: 'pointer'
+                            cursor: 'pointer',
                         }}
                         onClick={() => setShowRecipients(!showRecipients)}
                     >
@@ -247,7 +250,7 @@ const PublishForm = ({open, onCancel, acceptance}) => {
                                 sx={{
                                     borderRadius: 2,
                                     overflow: 'hidden',
-                                    mb: 3
+                                    mb: 3,
                                 }}
                             >
                                 <List sx={{ py: 0 }}>
@@ -256,16 +259,27 @@ const PublishForm = ({open, onCancel, acceptance}) => {
                                             key={index}
                                             sx={{
                                                 borderBottom: index < recipients.length - 1 ? 1 : 0,
-                                                borderColor: 'divider'
+                                                borderColor: 'divider',
                                             }}
                                         >
-                                            <ListItemIcon sx={{ color: 'primary.main', minWidth: 40 }}>
+                                            <ListItemIcon
+                                                sx={{ color: 'primary.main', minWidth: 40 }}
+                                            >
                                                 {recipient.icon}
                                             </ListItemIcon>
                                             <ListItemText
                                                 primary={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <Typography variant="body2" fontWeight="500">
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 1,
+                                                        }}
+                                                    >
+                                                        <Typography
+                                                            variant="body2"
+                                                            fontWeight="500"
+                                                        >
                                                             {recipient.label}
                                                         </Typography>
                                                         <Chip
@@ -301,7 +315,7 @@ const PublishForm = ({open, onCancel, acceptance}) => {
                         sx={{
                             p: 2,
                             borderRadius: 2,
-                            bgcolor: data.silently_publish ? 'action.hover' : 'background.paper'
+                            bgcolor: data.silently_publish ? 'action.hover' : 'background.paper',
                         }}
                     >
                         <FormControlLabel
@@ -319,7 +333,8 @@ const PublishForm = ({open, onCancel, acceptance}) => {
                                         Publish Silently
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
-                                        Recipients won't receive notifications for these {testsToPublish} report{testsToPublish !== 1 ? 's' : ''}
+                                        Recipients won't receive notifications for these{' '}
+                                        {testsToPublish} report{testsToPublish !== 1 ? 's' : ''}
                                     </Typography>
                                 </Box>
                             }
@@ -338,17 +353,14 @@ const PublishForm = ({open, onCancel, acceptance}) => {
 
             <Divider />
 
-            <DialogActions sx={{
-                p: 3,
-                justifyContent: 'space-between',
-                bgcolor: 'background.default'
-            }}>
-                <Button
-                    onClick={onCancel}
-                    color="inherit"
-                    disabled={processing}
-                    size="large"
-                >
+            <DialogActions
+                sx={{
+                    p: 3,
+                    justifyContent: 'space-between',
+                    bgcolor: 'background.default',
+                }}
+            >
+                <Button onClick={onCancel} color="inherit" disabled={processing} size="large">
                     Cancel
                 </Button>
 
@@ -359,15 +371,13 @@ const PublishForm = ({open, onCancel, acceptance}) => {
                     disabled={processing}
                     size="large"
                     startIcon={
-                        processing ?
-                            <CircularProgress size={20} color="inherit" /> :
-                            <Send />
+                        processing ? <CircularProgress size={20} color="inherit" /> : <Send />
                     }
                     sx={{
                         minWidth: 140,
                         borderRadius: 2,
                         textTransform: 'none',
-                        fontWeight: 600
+                        fontWeight: 600,
                     }}
                 >
                     {processing ? 'Publishing...' : 'Publish Report'}

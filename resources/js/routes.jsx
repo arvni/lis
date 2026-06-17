@@ -1,6 +1,6 @@
-import React from "react";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import GroupsIcon from "@mui/icons-material/Groups";
+import React from 'react';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import GroupsIcon from '@mui/icons-material/Groups';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import FlipCameraAndroidIcon from '@mui/icons-material/FlipCameraAndroid';
 import ApprovalIcon from '@mui/icons-material/Approval';
@@ -19,8 +19,20 @@ import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import InterpreterModeIcon from '@mui/icons-material/InterpreterMode';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BusinessIcon from '@mui/icons-material/Business';
-import ReceiptIcon from "@mui/icons-material/Receipt";
-import {Analytics, AttachMoney, FactCheck, Payments, Publish, BugReport, Inventory as InventoryIcon, Speed as SpeedIcon, Science as ScienceQCIcon, VerifiedUser as AuditIcon, LocalOffer as TagIcon} from "@mui/icons-material";
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import {
+    Analytics,
+    AttachMoney,
+    FactCheck,
+    Payments,
+    Publish,
+    BugReport,
+    Inventory as InventoryIcon,
+    Speed as SpeedIcon,
+    Science as ScienceQCIcon,
+    VerifiedUser as AuditIcon,
+    LocalOffer as TagIcon,
+} from '@mui/icons-material';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import CategoryIcon from '@mui/icons-material/Category';
 import WarehouseIcon from '@mui/icons-material/Warehouse';
@@ -37,469 +49,477 @@ import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import RequestPageIcon from '@mui/icons-material/RequestPage';
 import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import {PercentDiamond, Stethoscope as Doctor, Hospital, ClipboardCheck, Truck, FlaskConical, Package, ShoppingCart, Thermometer} from "lucide-react";
+import {
+    PercentDiamond,
+    Stethoscope as Doctor,
+    Hospital,
+    ClipboardCheck,
+    Truck,
+    FlaskConical,
+    Package,
+    ShoppingCart,
+    Thermometer,
+} from 'lucide-react';
 
 export const refactorRoute = (addr) => {
-    if (!addr)
-        return null;
-    if (route().has(addr))
-        return route(addr);
+    if (!addr) return null;
+    if (route().has(addr)) return route(addr);
     let id = null;
-    let splitAddr = addr.split(".");
+    let splitAddr = addr.split('.');
     if (splitAddr.length > 2) {
-        id = addr.split(".")[2];
+        id = addr.split('.')[2];
         splitAddr.pop();
     }
-    return id != null ? route(splitAddr.join("."), id) : route(addr);
-}
+    return id != null ? route(splitAddr.join('.'), id) : route(addr);
+};
 
 const routes = (sections = []) => {
     return [
         {
-            title: "Dashboard",
+            title: 'Dashboard',
             route: 'dashboard',
             permission: 'Dashboard',
-            icon: <DashboardIcon/>
+            icon: <DashboardIcon />,
         },
         {
-            title: "Reception",
+            title: 'Reception',
             permission: 'Reception',
-            icon: <ManageAccountsIcon/>,
+            icon: <ManageAccountsIcon />,
             child: [
                 {
-                    title: "Patient List",
-                    route: "patients.index",
+                    title: 'Patient List',
+                    route: 'patients.index',
                     permission: 'Reception.Patients.List Patients',
-                    icon: <GroupsIcon/>,
+                    icon: <GroupsIcon />,
                 },
                 {
-                    title: "Add Patient",
-                    route: "patients.create",
+                    title: 'Add Patient',
+                    route: 'patients.create',
                     permission: 'Reception.Patient.Create Patient',
-                    icon: <PersonAddIcon/>
+                    icon: <PersonAddIcon />,
                 },
                 {
-                    title: "Acceptance List",
-                    route: "acceptances.index",
+                    title: 'Acceptance List',
+                    route: 'acceptances.index',
                     permission: 'Reception.Acceptances.List Acceptance',
-                    icon: <GroupsIcon/>,
+                    icon: <GroupsIcon />,
                 },
                 {
-                    title: "TAT Dashboard",
-                    route: "tat.dashboard",
+                    title: 'TAT Dashboard',
+                    route: 'tat.dashboard',
                     permission: 'Reception.TAT.View Dashboard',
-                    icon: <SpeedIcon/>,
+                    icon: <SpeedIcon />,
                 },
-            ]
+            ],
         },
         {
-            title: "Consultations",
+            title: 'Consultations',
             permission: 'Consultation',
-            icon: <InterpreterModeIcon/>,
+            icon: <InterpreterModeIcon />,
             child: [
                 {
-                    title: "Waiting Consultations",
-                    route: "consultations.waiting-list",
+                    title: 'Waiting Consultations',
+                    route: 'consultations.waiting-list',
                     permission: 'Consultation.Consultations.Waiting List Consultations',
                     icon: null,
                 },
                 {
-                    title: "Consultations List",
-                    route: "consultations.index",
+                    title: 'Consultations List',
+                    route: 'consultations.index',
                     permission: 'Consultation.Consultations.List Consultations',
                     icon: null,
                 },
                 {
-                    title: "Consultants",
-                    route: "consultants.index",
+                    title: 'Consultants',
+                    route: 'consultants.index',
                     permission: 'Consultation.Consultants.List Consultants',
                     icon: null,
                 },
                 {
-                    title: "Reservations",
-                    route: "times.index",
+                    title: 'Reservations',
+                    route: 'times.index',
                     permission: 'Consultation.Reservations.List Reservations',
                     icon: null,
                 },
-            ]
+            ],
         },
         {
-            title: "Sampling",
+            title: 'Sampling',
             permission: 'Sample Collection',
-            icon: <VaccinesIcon/>,
+            icon: <VaccinesIcon />,
             child: [
                 {
-                    title: "Sample Collection",
-                    route: "sampleCollection",
+                    title: 'Sample Collection',
+                    route: 'sampleCollection',
                     permission: 'Sample Collection',
                     icon: null,
                 },
                 {
-                    title: "Sample QC",
-                    route: "qc.samples.index",
+                    title: 'Sample QC',
+                    route: 'qc.samples.index',
                     permission: 'QC.Samples.List Samples',
                     icon: null,
                 },
                 {
-                    title: "Samples List",
-                    route: "samples.index",
+                    title: 'Samples List',
+                    route: 'samples.index',
                     permission: 'Sample Collection.Samples.List Samples',
                     icon: null,
                 },
-            ]
+            ],
         },
         ...sections,
         {
-            title: "Reports",
+            title: 'Reports',
             permission: 'Report',
-            icon: <DescriptionIcon/>,
+            icon: <DescriptionIcon />,
             child: [
                 {
-                    title: "Waiting For Creating",
-                    route: "reports.waitingList",
+                    title: 'Waiting For Creating',
+                    route: 'reports.waitingList',
                     permission: 'Report.Create Report',
-                    icon: <PostAddIcon/>
+                    icon: <PostAddIcon />,
                 },
                 {
-                    title: "Waiting For Approving",
-                    route: "reports.approvingList",
+                    title: 'Waiting For Approving',
+                    route: 'reports.approvingList',
                     permission: 'Report.Approve Report',
-                    icon: <FactCheck/>
+                    icon: <FactCheck />,
                 },
                 {
-                    title: "Financial Check",
-                    route: "acceptances.financialCheck",
+                    title: 'Financial Check',
+                    route: 'acceptances.financialCheck',
                     permission: 'Report.Financial Check',
-                    icon: <AttachMoney/>
+                    icon: <AttachMoney />,
                 },
                 {
-                    title: "Waiting For Publishing",
-                    route: "reports.publishing",
+                    title: 'Waiting For Publishing',
+                    route: 'reports.publishing',
                     permission: 'Report.Publish Report',
-                    icon: <Publish/>
+                    icon: <Publish />,
                 },
                 {
-                    title: "List",
+                    title: 'List',
                     permission: 'Report.List Report',
-                    route: "reports.index",
-                    icon: <AutoAwesomeMotionIcon/>
-                }
-            ]
+                    route: 'reports.index',
+                    icon: <AutoAwesomeMotionIcon />,
+                },
+            ],
         },
         {
-            title: "Billing",
-            permission: "Billing",
-            icon: <ReceiptIcon/>,
+            title: 'Billing',
+            permission: 'Billing',
+            icon: <ReceiptIcon />,
             child: [
                 {
-                    title: "Dashboard",
-                    icon: <Analytics/>,
-                    route: "billing.dashboard",
+                    title: 'Dashboard',
+                    icon: <Analytics />,
+                    route: 'billing.dashboard',
                     permission: 'Billing.Dashboard.View Dashboard',
                 },
                 {
-                    title: "Invoices",
-                    icon: <ReceiptIcon/>,
-                    route: "invoices.index",
+                    title: 'Invoices',
+                    icon: <ReceiptIcon />,
+                    route: 'invoices.index',
                     permission: 'Billing.Invoices.List Invoices',
                 },
                 {
-                    title: "Payments",
-                    icon: <Payments/>,
-                    route: "payments.index",
+                    title: 'Payments',
+                    icon: <Payments />,
+                    route: 'payments.index',
                     permission: 'Billing.Payments.List Payments',
                 },
                 {
-                    title: "Statements",
-                    icon: <ReceiptLongIcon/>,
-                    route: "statements.index",
+                    title: 'Statements',
+                    icon: <ReceiptLongIcon />,
+                    route: 'statements.index',
                     permission: 'Billing.Statements.List Statements',
                 },
-            ]
+            ],
         },
         {
-            title: "Inventory",
+            title: 'Inventory',
             permission: 'Inventory.Items.List Items',
-            icon: <InventoryIcon/>,
+            icon: <InventoryIcon />,
             child: [
                 {
-                    title: "Items",
-                    route: "inventory.items.index",
+                    title: 'Items',
+                    route: 'inventory.items.index',
                     permission: 'Inventory.Items.List Items',
-                    icon: <CategoryIcon fontSize="small"/>,
+                    icon: <CategoryIcon fontSize="small" />,
                 },
                 {
-                    title: "Current Stock",
-                    route: "inventory.stock.index",
+                    title: 'Current Stock',
+                    route: 'inventory.stock.index',
                     permission: 'Inventory.Stock.View Stock',
-                    icon: <WarehouseIcon fontSize="small"/>,
+                    icon: <WarehouseIcon fontSize="small" />,
                 },
                 {
-                    title: "Transactions",
-                    route: "inventory.transactions.index",
+                    title: 'Transactions',
+                    route: 'inventory.transactions.index',
                     permission: 'Inventory.Transactions.List Transactions',
-                    icon: <SwapHorizIcon fontSize="small"/>,
+                    icon: <SwapHorizIcon fontSize="small" />,
                 },
                 {
-                    title: "Purchase Requests",
-                    route: "inventory.purchase-requests.index",
+                    title: 'Purchase Requests',
+                    route: 'inventory.purchase-requests.index',
                     permission: 'Inventory.PurchaseRequests.List Purchase Requests',
-                    icon: <AddShoppingCartIcon fontSize="small"/>,
+                    icon: <AddShoppingCartIcon fontSize="small" />,
                 },
                 {
-                    title: "Workflow Templates",
-                    route: "inventory.workflow-templates.index",
+                    title: 'Workflow Templates',
+                    route: 'inventory.workflow-templates.index',
                     permission: 'Inventory.WorkflowTemplates.List Workflow Templates',
-                    icon: <AccountTreeIcon fontSize="small"/>,
+                    icon: <AccountTreeIcon fontSize="small" />,
                 },
                 {
-                    title: "Reorder Alerts",
-                    route: "inventory.reorder-alerts.index",
+                    title: 'Reorder Alerts',
+                    route: 'inventory.reorder-alerts.index',
                     permission: 'Inventory.ReorderAlerts.View Reorder Alerts',
-                    icon: <NotificationsActiveIcon fontSize="small"/>,
+                    icon: <NotificationsActiveIcon fontSize="small" />,
                 },
                 {
-                    title: "Expiry Dashboard",
-                    route: "inventory.expiry.index",
+                    title: 'Expiry Dashboard',
+                    route: 'inventory.expiry.index',
                     permission: 'Inventory.Transactions.List Transactions',
-                    icon: <EventBusyIcon fontSize="small"/>,
+                    icon: <EventBusyIcon fontSize="small" />,
                 },
                 {
-                    title: "Reports",
-                    route: "inventory.reports.index",
+                    title: 'Reports',
+                    route: 'inventory.reports.index',
                     permission: 'Inventory.Transactions.List Transactions',
-                    icon: <AssessmentIcon fontSize="small"/>,
+                    icon: <AssessmentIcon fontSize="small" />,
                 },
                 {
-                    title: "Suppliers",
-                    route: "inventory.suppliers.index",
+                    title: 'Suppliers',
+                    route: 'inventory.suppliers.index',
                     permission: 'Inventory.Suppliers.List Suppliers',
-                    icon: <LocalShippingIcon fontSize="small"/>,
+                    icon: <LocalShippingIcon fontSize="small" />,
                 },
                 {
-                    title: "Stores",
-                    route: "inventory.stores.index",
+                    title: 'Stores',
+                    route: 'inventory.stores.index',
                     permission: 'Inventory.Stores.List Stores',
-                    icon: <StoreIcon fontSize="small"/>,
+                    icon: <StoreIcon fontSize="small" />,
                 },
                 {
-                    title: "Units",
-                    route: "inventory.units.index",
+                    title: 'Units',
+                    route: 'inventory.units.index',
                     permission: null,
-                    icon: <StraightenIcon fontSize="small"/>,
+                    icon: <StraightenIcon fontSize="small" />,
                 },
-            ]
+            ],
         },
         {
-            title: "Monitoring",
+            title: 'Monitoring',
             permission: 'Monitoring.Nodes.List Nodes',
-            icon: <Thermometer size={20}/>,
+            icon: <Thermometer size={20} />,
             child: [
                 {
-                    title: "Sensor Nodes",
-                    route: "monitoring.nodes.index",
+                    title: 'Sensor Nodes',
+                    route: 'monitoring.nodes.index',
                     permission: 'Monitoring.Nodes.List Nodes',
-                    icon: <SensorsIcon fontSize="small"/>,
+                    icon: <SensorsIcon fontSize="small" />,
                 },
-            ]
+            ],
         },
         {
-            title: "Statistics",
-            icon: <Analytics/>,
-            route: "acceptanceItems.index",
+            title: 'Statistics',
+            icon: <Analytics />,
+            route: 'acceptanceItems.index',
             permission: 'Statistics',
         },
         {
-            title: "Test Lists",
-            route: "test-list",
+            title: 'Test Lists',
+            route: 'test-list',
             permission: 'Test List',
-            icon: <VaccinesIcon/>
+            icon: <VaccinesIcon />,
         },
         {
-            title: "Advance Settings",
+            title: 'Advance Settings',
             permission: 'Advance Settings',
-            icon: <TuneIcon/>,
+            icon: <TuneIcon />,
             child: [
                 {
-                    title: "Section Groups",
-                    route: "sectionGroups.index",
+                    title: 'Section Groups',
+                    route: 'sectionGroups.index',
                     permission: 'Advance Settings.Section Groups.List Section Groups',
-                    icon: <BusinessIcon/>
+                    icon: <BusinessIcon />,
                 },
                 {
-                    title: "Sections",
-                    route: "sections.index",
+                    title: 'Sections',
+                    route: 'sections.index',
                     permission: 'Advance Settings.Sections.List Sections',
-                    icon: <AccountTreeIcon/>
+                    icon: <AccountTreeIcon />,
                 },
                 {
-                    title: "Workflows",
-                    route: "workflows.index",
+                    title: 'Workflows',
+                    route: 'workflows.index',
                     permission: 'Advance Settings.Workflows.List Workflows',
-                    icon: <FlipCameraAndroidIcon/>
+                    icon: <FlipCameraAndroidIcon />,
                 },
                 {
-                    title: "Approval Flows",
-                    route: "approvalFlows.index",
+                    title: 'Approval Flows',
+                    route: 'approvalFlows.index',
                     permission: 'Advance Settings.Approval Flows.List Approval Flows',
-                    icon: <ApprovalIcon/>
+                    icon: <ApprovalIcon />,
                 },
                 {
-                    title: "Sample Types",
-                    route: "sampleTypes.index",
+                    title: 'Sample Types',
+                    route: 'sampleTypes.index',
                     permission: 'Advance Settings.Sample Types.List Sample Types',
-                    icon: <VaccinesIcon/>
+                    icon: <VaccinesIcon />,
                 },
                 {
-                    title: "Barcode Groups",
-                    route: "barcodeGroups.index",
+                    title: 'Barcode Groups',
+                    route: 'barcodeGroups.index',
                     permission: 'Advance Settings.Barcode Groups.List Barcode Groups',
-                    icon: <HorizontalSplitIcon/>
+                    icon: <HorizontalSplitIcon />,
                 },
                 {
-                    title: "Test Groups",
-                    route: "testGroups.index",
+                    title: 'Test Groups',
+                    route: 'testGroups.index',
                     permission: 'Advance Settings.Test Groups.List Test Groups',
-                    icon: <GroupWorkIcon/>
+                    icon: <GroupWorkIcon />,
                 },
                 {
-                    title: "Request Forms",
-                    route: "requestForms.index",
+                    title: 'Request Forms',
+                    route: 'requestForms.index',
                     permission: 'Advance Settings.Request Form.List Request Forms',
-                    icon: <RequestPageIcon/>
+                    icon: <RequestPageIcon />,
                 },
                 {
-                    title: "Consent Forms",
-                    route: "consentForms.index",
+                    title: 'Consent Forms',
+                    route: 'consentForms.index',
                     permission: 'Advance Settings.Consent Form.List Consent Forms',
-                    icon: <HistoryEduIcon/>
+                    icon: <HistoryEduIcon />,
                 },
                 {
-                    title: "Instruction",
-                    route: "instructions.index",
+                    title: 'Instruction',
+                    route: 'instructions.index',
                     permission: 'Advance Settings.Instruction.List Instructions',
-                    icon: <MenuBookIcon/>
+                    icon: <MenuBookIcon />,
                 },
                 {
-                    title: "Report Templates",
-                    route: "reportTemplates.index",
+                    title: 'Report Templates',
+                    route: 'reportTemplates.index',
                     permission: 'Advance Settings.Report Templates.List Report Templates',
-                    icon: <SummarizeIcon/>
+                    icon: <SummarizeIcon />,
                 },
                 {
-                    title: "Tests",
-                    route: "tests.index",
+                    title: 'Tests',
+                    route: 'tests.index',
                     permission: 'Advance Settings.Test.List Tests',
-                    icon: <BiotechIcon/>
+                    icon: <BiotechIcon />,
                 },
                 {
-                    title: "Doctors",
-                    route: "doctors.index",
+                    title: 'Doctors',
+                    route: 'doctors.index',
                     permission: 'Advance Settings.Doctors.List Doctors',
-                    icon: <Doctor/>
+                    icon: <Doctor />,
                 },
                 {
-                    title: "Offers List",
-                    route: "offers.index",
+                    title: 'Offers List',
+                    route: 'offers.index',
                     permission: 'Advance Settings.Offers.List Offers',
-                    icon: <PercentDiamond/>,
+                    icon: <PercentDiamond />,
                 },
                 {
-                    title: "Setting List",
-                    route: "settings.index",
+                    title: 'Setting List',
+                    route: 'settings.index',
                     permission: 'Advance Settings.Settings.List Settings',
-                    icon: <SettingsIcon/>,
+                    icon: <SettingsIcon />,
                 },
                 {
-                    title: "Tags",
-                    route: "tags.index",
+                    title: 'Tags',
+                    route: 'tags.index',
                     permission: 'Advance Settings.Tags.List Tags',
-                    icon: <TagIcon/>,
+                    icon: <TagIcon />,
                 },
-            ]
+            ],
         },
         {
-            title: "Referrers",
-            route: "referrers.index",
+            title: 'Referrers',
+            route: 'referrers.index',
             permission: 'Referrer.List Referrers',
-            icon: <Hospital/>,
+            icon: <Hospital />,
             child: [
                 {
-                    title: "Referrer Orders",
-                    icon: <ClipboardCheck size={20}/>,
-                    route: "referrer-orders.index",
+                    title: 'Referrer Orders',
+                    icon: <ClipboardCheck size={20} />,
+                    route: 'referrer-orders.index',
                     permission: 'Referrer.Referrer Orders.List Referrer Orders',
                 },
                 {
-                    title: "Collect Requests",
-                    icon: <Truck size={20}/>,
-                    route: "collect-requests.index",
+                    title: 'Collect Requests',
+                    icon: <Truck size={20} />,
+                    route: 'collect-requests.index',
                     permission: 'Referrer.Collect Request.List Collect Requests',
                 },
                 {
-                    title: "Sample Collector",
-                    icon: <FlaskConical size={20}/>,
-                    route: "sample-collectors.index",
+                    title: 'Sample Collector',
+                    icon: <FlaskConical size={20} />,
+                    route: 'sample-collectors.index',
                     permission: 'Referrer.Sample Collector.List Sample Collectors',
                 },
                 {
-                    title: "Materials",
-                    icon: <Package size={20}/>,
-                    route: "materials.index",
+                    title: 'Materials',
+                    icon: <Package size={20} />,
+                    route: 'materials.index',
                     permission: 'Referrer.Materials.List Materials',
                 },
                 {
-                    title: "Order Materials",
-                    icon: <ShoppingCart size={20}/>,
-                    route: "orderMaterials.index",
+                    title: 'Order Materials',
+                    icon: <ShoppingCart size={20} />,
+                    route: 'orderMaterials.index',
                     permission: 'Referrer.Order Materials.List Order Materials',
                 },
-            ]
+            ],
         },
         {
-            title: "System",
+            title: 'System',
             permission: 'System',
-            icon: <BugReport/>,
+            icon: <BugReport />,
             child: [
                 {
-                    title: "Audit Log",
-                    route: "system.auditLog",
+                    title: 'Audit Log',
+                    route: 'system.auditLog',
                     permission: 'System.Audit Log.View Audit Log',
-                    icon: <AuditIcon fontSize="small"/>,
+                    icon: <AuditIcon fontSize="small" />,
                 },
                 {
-                    title: "Failed Jobs",
-                    route: "system.failed-jobs",
+                    title: 'Failed Jobs',
+                    route: 'system.failed-jobs',
                     permission: 'System.Failed Jobs.List Failed Jobs',
-                    icon: <BugReport fontSize="small"/>,
+                    icon: <BugReport fontSize="small" />,
                 },
-            ]
+            ],
         },
         {
-            title: "User Management",
+            title: 'User Management',
             permission: 'User Management',
-            icon: <ManageAccountsIcon/>,
+            icon: <ManageAccountsIcon />,
             child: [
                 {
-                    title: "Users List",
-                    route: "users.index",
+                    title: 'Users List',
+                    route: 'users.index',
                     permission: 'User Management.Users.List Users',
-                    icon: <GroupsIcon/>,
+                    icon: <GroupsIcon />,
                 },
                 {
-                    title: "Add New User",
-                    route: "users.create",
+                    title: 'Add New User',
+                    route: 'users.create',
                     permission: 'User Management.Users.Create User',
-                    icon: <PersonAddIcon/>
+                    icon: <PersonAddIcon />,
                 },
                 {
-                    title: "Roles",
-                    route: "roles.index",
+                    title: 'Roles',
+                    route: 'roles.index',
                     permission: 'User Management.Roles.List Roles',
-                    icon: <AdminPanelSettingsIcon/>
+                    icon: <AdminPanelSettingsIcon />,
                 },
-            ]
+            ],
         },
-    ]
+    ];
 };
 export default routes;

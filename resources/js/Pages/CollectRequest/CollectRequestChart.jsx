@@ -1,6 +1,15 @@
 import React from 'react';
 import { Paper, Typography } from '@mui/material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import {
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    Legend,
+} from 'recharts';
 
 const CollectRequestChart = ({ temperatureData }) => (
     <ResponsiveContainer width="100%" height={300}>
@@ -13,9 +22,7 @@ const CollectRequestChart = ({ temperatureData }) => (
                 textAnchor="end"
                 height={80}
             />
-            <YAxis
-                label={{ value: 'Temperature (°C)', angle: -90, position: 'insideLeft' }}
-            />
+            <YAxis label={{ value: 'Temperature (°C)', angle: -90, position: 'insideLeft' }} />
             <Tooltip
                 content={({ active, payload }) => {
                     if (active && payload && payload.length) {

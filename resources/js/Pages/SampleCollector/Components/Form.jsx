@@ -1,14 +1,7 @@
-import React, { useCallback } from "react";
-import {
-    Button,
-    Container,
-    Divider,
-    Stack,
-    TextField,
-    Typography
-} from "@mui/material";
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
+import React, { useCallback } from 'react';
+import { Button, Container, Divider, Stack, TextField, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
 
 export default function SampleCollectorForm({
     data,
@@ -17,12 +10,15 @@ export default function SampleCollectorForm({
     cancel,
     errors,
     setError,
-    clearErrors
+    clearErrors,
 }) {
-    const handleChange = useCallback((e) => {
-        const { name, value } = e.target;
-        setData(prevState => ({ ...prevState, [name]: value }));
-    }, [setData]);
+    const handleChange = useCallback(
+        (e) => {
+            const { name, value } = e.target;
+            setData((prevState) => ({ ...prevState, [name]: value }));
+        },
+        [setData],
+    );
 
     const validateForm = useCallback(() => {
         clearErrors();
@@ -30,38 +26,39 @@ export default function SampleCollectorForm({
 
         if (!data?.name) {
             isValid = false;
-            setError("name", "Please enter name");
+            setError('name', 'Please enter name');
         }
 
         if (!data?.email) {
             isValid = false;
-            setError("email", "Please enter email");
+            setError('email', 'Please enter email');
         }
 
         return isValid;
     }, [data, clearErrors, setError]);
 
-    const handleSubmit = useCallback((e) => {
-        e.preventDefault();
-        e.stopPropagation();
+    const handleSubmit = useCallback(
+        (e) => {
+            e.preventDefault();
+            e.stopPropagation();
 
-        if (validateForm()) {
-            submit();
-        }
-    }, [validateForm, submit]);
+            if (validateForm()) {
+                submit();
+            }
+        },
+        [validateForm, submit],
+    );
 
     return (
-        <Container sx={{ p: "1em" }}>
-            <Typography variant="h4">
-                {data.id ? "Edit" : "Add New"} Sample Collector
-            </Typography>
-            <Divider sx={{ my: "1em" }} />
+        <Container sx={{ p: '1em' }}>
+            <Typography variant="h4">{data.id ? 'Edit' : 'Add New'} Sample Collector</Typography>
+            <Divider sx={{ my: '1em' }} />
 
             <Box component="form" onSubmit={handleSubmit}>
                 <Grid container spacing={2} rowSpacing={5}>
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
-                            value={data.name || ""}
+                            value={data.name || ''}
                             fullWidth
                             required
                             name="name"
@@ -74,7 +71,7 @@ export default function SampleCollectorForm({
 
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
-                            value={data.email || ""}
+                            value={data.email || ''}
                             fullWidth
                             required
                             type="email"

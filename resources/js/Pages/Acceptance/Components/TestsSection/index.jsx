@@ -1,10 +1,10 @@
-import React from "react";
-import TestsTable from "./TestsTable";
-import AddTestOrPanel from "../AddTestOrPanel.jsx";
-import DeleteForm from "@/Components/DeleteForm.jsx";
-import { Box, Typography, Paper, Alert, Button } from "@mui/material";
-import ScienceIcon from "@mui/icons-material/Science";
-import AddIcon from "@mui/icons-material/Add";
+import React from 'react';
+import TestsTable from './TestsTable';
+import AddTestOrPanel from '../AddTestOrPanel.jsx';
+import DeleteForm from '@/Components/DeleteForm.jsx';
+import { Box, Typography, Paper, Alert, Button } from '@mui/material';
+import ScienceIcon from '@mui/icons-material/Science';
+import AddIcon from '@mui/icons-material/Add';
 
 const TestsSection = ({
     data,
@@ -35,8 +35,14 @@ const TestsSection = ({
                         }}
                     >
                         <ScienceIcon sx={{ fontSize: 56, color: 'primary.light', mb: 2 }} />
-                        <Typography variant="h6" gutterBottom>No Tests Selected</Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 420, mx: 'auto' }}>
+                        <Typography variant="h6" gutterBottom>
+                            No Tests Selected
+                        </Typography>
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ mb: 3, maxWidth: 420, mx: 'auto' }}
+                        >
                             Add laboratory tests, services, or panels for this acceptance
                         </Typography>
                         <Button
@@ -54,7 +60,14 @@ const TestsSection = ({
 
                 {hasItems && (
                     <Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                mb: 2,
+                            }}
+                        >
                             <Typography variant="h6">Selected Tests & Panels</Typography>
                             <Button
                                 onClick={handlers.openAddModal}
@@ -109,7 +122,7 @@ const TestsSection = ({
                 openDelete={deleteConfirmState.open}
                 agreeCB={handlers.confirmDeleteTest}
                 disAgreeCB={handlers.cancelDelete}
-                title={`${deleteConfirmState.item?.method_test?.test?.name || ""} Test`}
+                title={`${deleteConfirmState.item?.method_test?.test?.name || ''} Test`}
             />
         </>
     );

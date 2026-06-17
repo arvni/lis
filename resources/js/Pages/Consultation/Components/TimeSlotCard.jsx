@@ -1,4 +1,4 @@
-import React, {useState, useMemo} from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     Box,
     Button,
@@ -14,8 +14,8 @@ import {
     Tooltip,
     Stack,
     useTheme,
-    useMediaQuery
-} from "@mui/material";
+    useMediaQuery,
+} from '@mui/material';
 import {
     Event as EventIcon,
     MedicalServices,
@@ -32,9 +32,9 @@ import {
     VisibilityOutlined,
     PersonOutlined,
     SwapHoriz,
-    LocationOn
-} from "@mui/icons-material";
-import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
+    LocationOn,
+} from '@mui/icons-material';
+import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 
 /**
  * Formats time from date string to HH:MM AM/PM format
@@ -79,13 +79,13 @@ const getDuration = (startTime, endTime) => {
 const getStatusConfig = (status) => {
     switch (status?.toLowerCase()) {
         case 'done':
-            return {color: 'success', icon: <CheckCircle fontSize="small"/>};
+            return { color: 'success', icon: <CheckCircle fontSize="small" /> };
         case 'pending':
-            return {color: 'warning', icon: <Schedule fontSize="small"/>};
+            return { color: 'warning', icon: <Schedule fontSize="small" /> };
         case 'cancelled':
-            return {color: 'error', icon: <Cancel fontSize="small"/>};
+            return { color: 'error', icon: <Cancel fontSize="small" /> };
         default:
-            return {color: 'default', icon: <AccessTime fontSize="small"/>};
+            return { color: 'default', icon: <AccessTime fontSize="small" /> };
     }
 };
 
@@ -106,17 +106,17 @@ const getStatusConfig = (status) => {
  * @returns {JSX.Element} The TimeSlotCard component
  */
 const TimeSlotCard = ({
-                          timeSlot,
-                          onClick,
-                          canCheckConsultation = false,
-                          canCheckPatient = false,
-                          canConversion = false,
-                          canDelete = false,
-                          canEdit = false,
-                          canDeleteConsultantReserve = false,
-                          onDelete,
-                          onEdit
-                      }) => {
+    timeSlot,
+    onClick,
+    canCheckConsultation = false,
+    canCheckPatient = false,
+    canConversion = false,
+    canDelete = false,
+    canEdit = false,
+    canDeleteConsultantReserve = false,
+    onDelete,
+    onEdit,
+}) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isDark = theme.palette.mode === 'dark';
@@ -124,24 +124,26 @@ const TimeSlotCard = ({
     const [isDeleting, setIsDeleting] = useState(false);
 
     // Theme-aware color helpers
-    const getThemedColor = useMemo(() => (lightColor, darkColor) =>
-        isDark ? darkColor : lightColor, [isDark]);
+    const getThemedColor = useMemo(
+        () => (lightColor, darkColor) => (isDark ? darkColor : lightColor),
+        [isDark],
+    );
 
-    const getThemedBgColor = useMemo(() => (lightColor, darkColor) =>
-        isDark ? darkColor : lightColor, [isDark]);
+    const getThemedBgColor = useMemo(
+        () => (lightColor, darkColor) => (isDark ? darkColor : lightColor),
+        [isDark],
+    );
 
     // Get duration between start and end time
-    const duration = useMemo(() =>
-            getDuration(timeSlot.started_at, timeSlot.ended_at),
-        [timeSlot.started_at, timeSlot.ended_at]
+    const duration = useMemo(
+        () => getDuration(timeSlot.started_at, timeSlot.ended_at),
+        [timeSlot.started_at, timeSlot.ended_at],
     );
 
     // Get status configuration
-    const statusConfig = useMemo(() =>
-            timeSlot.reservable?.status
-                ? getStatusConfig(timeSlot.reservable.status)
-                : null,
-        [timeSlot.reservable?.status]
+    const statusConfig = useMemo(
+        () => (timeSlot.reservable?.status ? getStatusConfig(timeSlot.reservable.status) : null),
+        [timeSlot.reservable?.status],
     );
 
     // Handlers
@@ -178,9 +180,9 @@ const TimeSlotCard = ({
         if (timeSlot.reservable_type === 'consultation') {
             return "This will also cancel the associated medical consultation and may affect the patient's treatment schedule.";
         } else if (timeSlot.reservable_type === 'customer') {
-            return "This will cancel the customer appointment. The customer will need to be notified separately.";
+            return 'This will cancel the customer appointment. The customer will need to be notified separately.';
         }
-        return "This will remove the time slot from the schedule.";
+        return 'This will remove the time slot from the schedule.';
     };
 
     const getItemName = () => {
@@ -198,8 +200,12 @@ const TimeSlotCard = ({
     };
 
     // Determine if we should show action buttons
-    const showActions = canEdit || canDelete || canConversion ||
-        canCheckConsultation || canCheckPatient ||
+    const showActions =
+        canEdit ||
+        canDelete ||
+        canConversion ||
+        canCheckConsultation ||
+        canCheckPatient ||
         canDeleteConsultantReserve;
 
     return (
@@ -224,16 +230,16 @@ const TimeSlotCard = ({
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
-                    cursor: (onClick && !canEdit && !canDelete) ? 'pointer' : 'default'
+                    cursor: onClick && !canEdit && !canDelete ? 'pointer' : 'default',
                 }}
                 onClick={handleCardClick}
             >
-                <CardContent sx={{flexGrow: 1, p: {xs: 2, sm: 3}}}>
+                <CardContent sx={{ flexGrow: 1, p: { xs: 2, sm: 3 } }}>
                     {/* Header with Title and Status */}
                     <Stack
                         direction="row"
                         spacing={2}
-                        sx={{ mb: 2, justifyContent: "space-between", alignItems: "flex-start" }}
+                        sx={{ mb: 2, justifyContent: 'space-between', alignItems: 'flex-start' }}
                     >
                         <Typography
                             variant="h6"
@@ -241,22 +247,22 @@ const TimeSlotCard = ({
                             sx={{
                                 color: getThemedColor('text.primary', 'grey.100'),
                                 flex: 1,
-                                wordBreak: 'break-word'
+                                wordBreak: 'break-word',
                             }}
                         >
                             {timeSlot.title || getItemName()}
                         </Typography>
                         <Chip
                             size="small"
-                            label={timeSlot.active ? "Active" : "Inactive"}
-                            color={timeSlot.active ? "success" : "default"}
-                            variant={timeSlot.active ? "filled" : "outlined"}
+                            label={timeSlot.active ? 'Active' : 'Inactive'}
+                            color={timeSlot.active ? 'success' : 'default'}
+                            variant={timeSlot.active ? 'filled' : 'outlined'}
                             sx={{
                                 fontWeight: 500,
                                 minWidth: 70,
                                 color: timeSlot.active
                                     ? undefined
-                                    : getThemedColor('text.secondary', 'grey.400')
+                                    : getThemedColor('text.secondary', 'grey.400'),
                             }}
                         />
                     </Stack>
@@ -272,24 +278,24 @@ const TimeSlotCard = ({
                             borderRadius: 1.5,
                             border: '1px solid',
                             borderColor: getThemedColor('grey.200', 'grey.600'),
-                            mb: 2
+                            mb: 2,
                         }}
                     >
                         <EventIcon
                             fontSize="small"
-                            sx={{color: getThemedColor('primary.main', 'primary.light')}}
+                            sx={{ color: getThemedColor('primary.main', 'primary.light') }}
                         />
-                        <Box sx={{flex: 1}}>
+                        <Box sx={{ flex: 1 }}>
                             <Typography
                                 variant="body1"
                                 fontWeight="500"
-                                sx={{color: getThemedColor('text.primary', 'grey.100')}}
+                                sx={{ color: getThemedColor('text.primary', 'grey.100') }}
                             >
                                 {formatTime(timeSlot.started_at)} - {formatTime(timeSlot.ended_at)}
                             </Typography>
                             <Typography
                                 variant="body2"
-                                sx={{color: getThemedColor('text.secondary', 'grey.400')}}
+                                sx={{ color: getThemedColor('text.secondary', 'grey.400') }}
                             >
                                 Duration: {duration}
                             </Typography>
@@ -303,22 +309,27 @@ const TimeSlotCard = ({
                                 variant="subtitle2"
                                 sx={{
                                     color: getThemedColor('text.secondary', 'grey.400'),
-                                    mb: 1
+                                    mb: 1,
                                 }}
                             >
                                 Consultant
                             </Typography>
-                            <Box sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1.5,
-                                mb: 2,
-                                p: 1.5,
-                                borderRadius: 1.5,
-                                backgroundColor: getThemedBgColor('background.paper', 'grey.800'),
-                                border: '1px solid',
-                                borderColor: getThemedColor('grey.200', 'grey.600')
-                            }}>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1.5,
+                                    mb: 2,
+                                    p: 1.5,
+                                    borderRadius: 1.5,
+                                    backgroundColor: getThemedBgColor(
+                                        'background.paper',
+                                        'grey.800',
+                                    ),
+                                    border: '1px solid',
+                                    borderColor: getThemedColor('grey.200', 'grey.600'),
+                                }}
+                            >
                                 <Avatar
                                     src={timeSlot.consultant.avatar}
                                     alt={timeSlot.consultant.name}
@@ -326,23 +337,29 @@ const TimeSlotCard = ({
                                         width: 48,
                                         height: 48,
                                         border: '2px solid',
-                                        borderColor: getThemedColor('primary.light', 'primary.dark'),
-                                        backgroundColor: getThemedBgColor('primary.light', 'primary.dark')
+                                        borderColor: getThemedColor(
+                                            'primary.light',
+                                            'primary.dark',
+                                        ),
+                                        backgroundColor: getThemedBgColor(
+                                            'primary.light',
+                                            'primary.dark',
+                                        ),
                                     }}
                                 >
                                     {timeSlot.consultant.name?.charAt(0) || 'C'}
                                 </Avatar>
-                                <Box sx={{flex: 1}}>
+                                <Box sx={{ flex: 1 }}>
                                     <Typography
                                         variant="body1"
                                         fontWeight="600"
-                                        sx={{color: getThemedColor('text.primary', 'grey.100')}}
+                                        sx={{ color: getThemedColor('text.primary', 'grey.100') }}
                                     >
                                         {timeSlot.consultant.name}
                                     </Typography>
                                     <Typography
                                         variant="body2"
-                                        sx={{color: getThemedColor('text.secondary', 'grey.400')}}
+                                        sx={{ color: getThemedColor('text.secondary', 'grey.400') }}
                                     >
                                         {timeSlot.consultant.title || 'Consultant'}
                                     </Typography>
@@ -354,102 +371,174 @@ const TimeSlotCard = ({
                     {/* Reservation Information */}
                     {timeSlot.reservable_type && (
                         <>
-                            <Divider sx={{
-                                my: 2,
-                                borderColor: getThemedColor('grey.200', 'grey.700')
-                            }}/>
+                            <Divider
+                                sx={{
+                                    my: 2,
+                                    borderColor: getThemedColor('grey.200', 'grey.700'),
+                                }}
+                            />
 
                             {/* Customer Reservation */}
                             {timeSlot.reservable_type === 'customer' && timeSlot.reservable && (
-                                <Box sx={{
-                                    p: 2,
-                                    backgroundColor: getThemedBgColor('blue.50', 'blue.900'),
-                                    borderRadius: 2,
-                                    border: '1px solid',
-                                    borderColor: getThemedColor('blue.200', 'blue.700')
-                                }}>
+                                <Box
+                                    sx={{
+                                        p: 2,
+                                        backgroundColor: getThemedBgColor('blue.50', 'blue.900'),
+                                        borderRadius: 2,
+                                        border: '1px solid',
+                                        borderColor: getThemedColor('blue.200', 'blue.700'),
+                                    }}
+                                >
                                     <Stack spacing={2}>
-                                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                            <Person sx={{
-                                                color: getThemedColor('blue.600', 'blue.300')
-                                            }}/>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Person
+                                                sx={{
+                                                    color: getThemedColor('blue.600', 'blue.300'),
+                                                }}
+                                            />
                                             <Typography
                                                 variant="subtitle1"
                                                 fontWeight="600"
-                                                sx={{color: getThemedColor('blue.800', 'blue.100')}}
+                                                sx={{
+                                                    color: getThemedColor('blue.800', 'blue.100'),
+                                                }}
                                             >
                                                 Customer Appointment
                                             </Typography>
                                         </Box>
 
                                         <Stack spacing={1}>
-                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 1,
+                                                }}
+                                            >
                                                 <PersonOutlined
                                                     fontSize="small"
-                                                    sx={{color: getThemedColor('text.secondary', 'grey.400')}}
+                                                    sx={{
+                                                        color: getThemedColor(
+                                                            'text.secondary',
+                                                            'grey.400',
+                                                        ),
+                                                    }}
                                                 />
                                                 <Typography
                                                     variant="body2"
-                                                    sx={{color: getThemedColor('text.primary', 'grey.100')}}
+                                                    sx={{
+                                                        color: getThemedColor(
+                                                            'text.primary',
+                                                            'grey.100',
+                                                        ),
+                                                    }}
                                                 >
-                                                    <strong>Name:</strong> {timeSlot.reservable.name}
+                                                    <strong>Name:</strong>{' '}
+                                                    {timeSlot.reservable.name}
                                                 </Typography>
                                             </Box>
-                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 1,
+                                                }}
+                                            >
                                                 <Phone
                                                     fontSize="small"
-                                                    sx={{color: getThemedColor('text.secondary', 'grey.400')}}
+                                                    sx={{
+                                                        color: getThemedColor(
+                                                            'text.secondary',
+                                                            'grey.400',
+                                                        ),
+                                                    }}
                                                 />
                                                 <Typography
                                                     component="a"
                                                     href={`tel:${timeSlot.reservable.phone}`}
                                                     variant="body2"
                                                     sx={{
-                                                        color: getThemedColor('text.primary', 'grey.100'),
+                                                        color: getThemedColor(
+                                                            'text.primary',
+                                                            'grey.100',
+                                                        ),
                                                         textDecoration: 'none',
                                                         '&:hover': {
                                                             textDecoration: 'underline',
-                                                            color: 'primary.main'
-                                                        }
+                                                            color: 'primary.main',
+                                                        },
                                                     }}
                                                 >
-                                                    <strong>Phone:</strong> {timeSlot.reservable.phone}
+                                                    <strong>Phone:</strong>{' '}
+                                                    {timeSlot.reservable.phone}
                                                 </Typography>
                                             </Box>
                                             {timeSlot.reservable.email && (
-                                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: 1,
+                                                    }}
+                                                >
                                                     <Email
                                                         fontSize="small"
-                                                        sx={{color: getThemedColor('text.secondary', 'grey.400')}}
+                                                        sx={{
+                                                            color: getThemedColor(
+                                                                'text.secondary',
+                                                                'grey.400',
+                                                            ),
+                                                        }}
                                                     />
                                                     <Typography
                                                         component="a"
                                                         href={`mailto:${timeSlot.reservable.email}`}
                                                         variant="body2"
                                                         sx={{
-                                                            color: getThemedColor('text.primary', 'grey.100'),
+                                                            color: getThemedColor(
+                                                                'text.primary',
+                                                                'grey.100',
+                                                            ),
                                                             textDecoration: 'none',
                                                             '&:hover': {
                                                                 textDecoration: 'underline',
-                                                                color: 'primary.main'
-                                                            }
+                                                                color: 'primary.main',
+                                                            },
                                                         }}
                                                     >
-                                                        <strong>Email:</strong> {timeSlot.reservable.email}
+                                                        <strong>Email:</strong>{' '}
+                                                        {timeSlot.reservable.email}
                                                     </Typography>
                                                 </Box>
                                             )}
                                             {timeSlot.reservable.location && (
-                                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: 1,
+                                                    }}
+                                                >
                                                     <LocationOn
                                                         fontSize="small"
-                                                        sx={{color: getThemedColor('text.secondary', 'grey.400')}}
+                                                        sx={{
+                                                            color: getThemedColor(
+                                                                'text.secondary',
+                                                                'grey.400',
+                                                            ),
+                                                        }}
                                                     />
                                                     <Typography
                                                         variant="body2"
-                                                        sx={{color: getThemedColor('text.primary', 'grey.100')}}
+                                                        sx={{
+                                                            color: getThemedColor(
+                                                                'text.primary',
+                                                                'grey.100',
+                                                            ),
+                                                        }}
                                                     >
-                                                        <strong>Location:</strong> {timeSlot.reservable.location}
+                                                        <strong>Location:</strong>{' '}
+                                                        {timeSlot.reservable.location}
                                                     </Typography>
                                                 </Box>
                                             )}
@@ -460,27 +549,54 @@ const TimeSlotCard = ({
 
                             {/* Consultation Reservation */}
                             {timeSlot.reservable_type === 'consultation' && timeSlot.reservable && (
-                                <Box sx={{
-                                    p: 2,
-                                    borderRadius: 2,
-                                    border: '2px solid',
-                                    borderColor: getThemedColor('primary.main', 'primary.light'),
-                                    backgroundColor: getThemedBgColor('primary.50', 'primary.900')
-                                }}>
+                                <Box
+                                    sx={{
+                                        p: 2,
+                                        borderRadius: 2,
+                                        border: '2px solid',
+                                        borderColor: getThemedColor(
+                                            'primary.main',
+                                            'primary.light',
+                                        ),
+                                        backgroundColor: getThemedBgColor(
+                                            'primary.50',
+                                            'primary.900',
+                                        ),
+                                    }}
+                                >
                                     <Stack spacing={2}>
                                         {/* Header */}
                                         <Stack
                                             direction="row"
-                                            sx={{ justifyContent: "space-between", alignItems: "center" }}
+                                            sx={{
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                            }}
                                         >
-                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                                <MedicalServices sx={{
-                                                    color: getThemedColor('primary.main', 'primary.light')
-                                                }}/>
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 1,
+                                                }}
+                                            >
+                                                <MedicalServices
+                                                    sx={{
+                                                        color: getThemedColor(
+                                                            'primary.main',
+                                                            'primary.light',
+                                                        ),
+                                                    }}
+                                                />
                                                 <Typography
                                                     variant="subtitle1"
                                                     fontWeight="600"
-                                                    sx={{color: getThemedColor('primary.dark', 'primary.light')}}
+                                                    sx={{
+                                                        color: getThemedColor(
+                                                            'primary.dark',
+                                                            'primary.light',
+                                                        ),
+                                                    }}
                                                 >
                                                     Medical Consultation
                                                 </Typography>
@@ -493,31 +609,49 @@ const TimeSlotCard = ({
                                                     label={timeSlot.reservable.status}
                                                     color={statusConfig.color}
                                                     variant="filled"
-                                                    sx={{fontWeight: 500}}
+                                                    sx={{ fontWeight: 500 }}
                                                 />
                                             )}
                                         </Stack>
 
                                         {/* Patient Information */}
                                         {timeSlot.reservable.patient && (
-                                            <Box sx={{
-                                                p: 1.5,
-                                                backgroundColor: getThemedBgColor('white', 'grey.800'),
-                                                borderRadius: 1.5,
-                                                border: '1px solid',
-                                                borderColor: getThemedColor('primary.light', 'primary.dark')
-                                            }}>
+                                            <Box
+                                                sx={{
+                                                    p: 1.5,
+                                                    backgroundColor: getThemedBgColor(
+                                                        'white',
+                                                        'grey.800',
+                                                    ),
+                                                    borderRadius: 1.5,
+                                                    border: '1px solid',
+                                                    borderColor: getThemedColor(
+                                                        'primary.light',
+                                                        'primary.dark',
+                                                    ),
+                                                }}
+                                            >
                                                 <Typography
                                                     variant="subtitle2"
                                                     sx={{
-                                                        color: getThemedColor('text.secondary', 'grey.400'),
-                                                        mb: 1
+                                                        color: getThemedColor(
+                                                            'text.secondary',
+                                                            'grey.400',
+                                                        ),
+                                                        mb: 1,
                                                     }}
                                                 >
                                                     Patient Details
                                                 </Typography>
 
-                                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5}}>
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: 1.5,
+                                                        mb: 1.5,
+                                                    }}
+                                                >
                                                     <Avatar
                                                         src={timeSlot.reservable.patient.avatar}
                                                         alt={timeSlot.reservable.patient.fullName}
@@ -525,36 +659,63 @@ const TimeSlotCard = ({
                                                             width: 48,
                                                             height: 48,
                                                             border: '2px solid',
-                                                            borderColor: getThemedColor('primary.main', 'primary.light'),
-                                                            backgroundColor: getThemedBgColor('primary.light', 'primary.dark')
+                                                            borderColor: getThemedColor(
+                                                                'primary.main',
+                                                                'primary.light',
+                                                            ),
+                                                            backgroundColor: getThemedBgColor(
+                                                                'primary.light',
+                                                                'primary.dark',
+                                                            ),
                                                         }}
                                                     >
-                                                        {timeSlot.reservable.patient.fullName?.charAt(0) || 'P'}
+                                                        {timeSlot.reservable.patient.fullName?.charAt(
+                                                            0,
+                                                        ) || 'P'}
                                                     </Avatar>
-                                                    <Box sx={{flex: 1}}>
+                                                    <Box sx={{ flex: 1 }}>
                                                         <Typography
                                                             variant="body1"
                                                             fontWeight="600"
-                                                            sx={{color: getThemedColor('text.primary', 'grey.100')}}
+                                                            sx={{
+                                                                color: getThemedColor(
+                                                                    'text.primary',
+                                                                    'grey.100',
+                                                                ),
+                                                            }}
                                                         >
                                                             {timeSlot.reservable.patient.fullName}
                                                         </Typography>
-                                                        <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                                        <Box
+                                                            sx={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: 0.5,
+                                                            }}
+                                                        >
                                                             <Phone
                                                                 fontSize="small"
-                                                                sx={{color: getThemedColor('text.secondary', 'grey.400')}}
+                                                                sx={{
+                                                                    color: getThemedColor(
+                                                                        'text.secondary',
+                                                                        'grey.400',
+                                                                    ),
+                                                                }}
                                                             />
                                                             <Typography
                                                                 component="a"
                                                                 href={`tel:${timeSlot.reservable.patient.phone}`}
                                                                 variant="body2"
                                                                 sx={{
-                                                                    color: getThemedColor('text.secondary', 'grey.400'),
+                                                                    color: getThemedColor(
+                                                                        'text.secondary',
+                                                                        'grey.400',
+                                                                    ),
                                                                     textDecoration: 'none',
                                                                     '&:hover': {
                                                                         textDecoration: 'underline',
-                                                                        color: 'primary.main'
-                                                                    }
+                                                                        color: 'primary.main',
+                                                                    },
                                                                 }}
                                                             >
                                                                 {timeSlot.reservable.patient.phone}
@@ -564,16 +725,33 @@ const TimeSlotCard = ({
                                                 </Box>
 
                                                 {timeSlot?.reservable?.patient?.idNo && (
-                                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 1,
+                                                        }}
+                                                    >
                                                         <Badge
                                                             fontSize="small"
-                                                            sx={{color: getThemedColor('text.secondary', 'grey.400')}}
+                                                            sx={{
+                                                                color: getThemedColor(
+                                                                    'text.secondary',
+                                                                    'grey.400',
+                                                                ),
+                                                            }}
                                                         />
                                                         <Typography
                                                             variant="body2"
-                                                            sx={{color: getThemedColor('text.primary', 'grey.100')}}
+                                                            sx={{
+                                                                color: getThemedColor(
+                                                                    'text.primary',
+                                                                    'grey.100',
+                                                                ),
+                                                            }}
                                                         >
-                                                            <strong>ID:</strong> {timeSlot.reservable.patient.idNo}
+                                                            <strong>ID:</strong>{' '}
+                                                            {timeSlot.reservable.patient.idNo}
                                                         </Typography>
                                                     </Box>
                                                 )}
@@ -583,17 +761,23 @@ const TimeSlotCard = ({
                                                         sx={{
                                                             mt: 1.5,
                                                             p: 1.5,
-                                                            backgroundColor: getThemedBgColor('grey.50', 'grey.700'),
+                                                            backgroundColor: getThemedBgColor(
+                                                                'grey.50',
+                                                                'grey.700',
+                                                            ),
                                                             borderRadius: 1,
                                                             borderLeft: '3px solid',
-                                                            borderColor: 'primary.main'
+                                                            borderColor: 'primary.main',
                                                         }}
                                                     >
                                                         <Typography
                                                             variant="body2"
                                                             sx={{
-                                                                color: getThemedColor('text.secondary', 'grey.300'),
-                                                                fontStyle: 'italic'
+                                                                color: getThemedColor(
+                                                                    'text.secondary',
+                                                                    'grey.300',
+                                                                ),
+                                                                fontStyle: 'italic',
                                                             }}
                                                         >
                                                             {timeSlot.reservable.notes}
@@ -607,61 +791,77 @@ const TimeSlotCard = ({
                             )}
                         </>
                     )}
-                    {timeSlot.note && <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1.5,
-                        my: 2,
-                        p: 1.5,
-                        borderRadius: 1.5,
-                        border: '1px solid',
-                        borderColor: getThemedColor('grey.200', 'grey.600')
-                    }}>
-                        {timeSlot.note}
-                    </Box>}
-
+                    {timeSlot.note && (
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1.5,
+                                my: 2,
+                                p: 1.5,
+                                borderRadius: 1.5,
+                                border: '1px solid',
+                                borderColor: getThemedColor('grey.200', 'grey.600'),
+                            }}
+                        >
+                            {timeSlot.note}
+                        </Box>
+                    )}
                 </CardContent>
 
                 {/* Action Buttons */}
                 {showActions && (
                     <>
-                        <Divider sx={{
-                            borderColor: getThemedColor('grey.200', 'grey.700')
-                        }}/>
-                        <CardActions sx={{
-                            justifyContent: 'space-between',
-                            px: {xs: 2, sm: 3},
-                            py: 1.5,
-                            gap: 1,
-                            flexWrap: 'wrap',
-                            backgroundColor: getThemedBgColor('grey.50', 'grey.850')
-                        }}>
+                        <Divider
+                            sx={{
+                                borderColor: getThemedColor('grey.200', 'grey.700'),
+                            }}
+                        />
+                        <CardActions
+                            sx={{
+                                justifyContent: 'space-between',
+                                px: { xs: 2, sm: 3 },
+                                py: 1.5,
+                                gap: 1,
+                                flexWrap: 'wrap',
+                                backgroundColor: getThemedBgColor('grey.50', 'grey.850'),
+                            }}
+                        >
                             {/* Primary Action Buttons */}
                             <Stack
-                                direction={isMobile ? "column" : "row"}
+                                direction={isMobile ? 'column' : 'row'}
                                 spacing={1}
                                 sx={{
                                     flex: 1,
-                                    width: isMobile ? '100%' : 'auto'
+                                    width: isMobile ? '100%' : 'auto',
                                 }}
                             >
                                 {/* Conversion Button */}
-                                {canConversion && timeSlot.reservable_type === "customer" && (
+                                {canConversion && timeSlot.reservable_type === 'customer' && (
                                     <Button
                                         onClick={handleConversion}
                                         variant="outlined"
                                         size="small"
-                                        startIcon={<SwapHoriz/>}
+                                        startIcon={<SwapHoriz />}
                                         fullWidth={isMobile}
                                         sx={{
                                             textTransform: 'none',
                                             fontWeight: 500,
-                                            borderColor: getThemedColor('primary.main', 'primary.light'),
+                                            borderColor: getThemedColor(
+                                                'primary.main',
+                                                'primary.light',
+                                            ),
                                             color: getThemedColor('primary.main', 'primary.light'),
                                             '&:hover': {
-                                                borderColor: getThemedColor('primary.dark', 'primary.main'),
-                                                backgroundColor: getThemedBgColor('primary.50', 'primary.900')
-                                            }
+                                                borderColor: getThemedColor(
+                                                    'primary.dark',
+                                                    'primary.main',
+                                                ),
+                                                backgroundColor: getThemedBgColor(
+                                                    'primary.50',
+                                                    'primary.900',
+                                                ),
+                                            },
                                         }}
                                     >
                                         Convert to Patient
@@ -669,25 +869,33 @@ const TimeSlotCard = ({
                                 )}
 
                                 {/* Consultation Actions */}
-                                {canCheckConsultation && timeSlot.reservable_type === "consultation" && timeSlot?.reservable?.id && (
-                                    <Button
-                                        variant="contained"
-                                        size="small"
-                                        component={Link}
-                                        href={route("consultations.show", timeSlot?.reservable?.id)}
-                                        startIcon={<VisibilityOutlined/>}
-                                        fullWidth={isMobile}
-                                        sx={{
-                                            textTransform: 'none',
-                                            fontWeight: 500,
-                                            '&:hover': {
-                                                backgroundColor: getThemedColor('primary.dark', 'primary.main')
-                                            }
-                                        }}
-                                    >
-                                        View Consultation
-                                    </Button>
-                                )}
+                                {canCheckConsultation &&
+                                    timeSlot.reservable_type === 'consultation' &&
+                                    timeSlot?.reservable?.id && (
+                                        <Button
+                                            variant="contained"
+                                            size="small"
+                                            component={Link}
+                                            href={route(
+                                                'consultations.show',
+                                                timeSlot?.reservable?.id,
+                                            )}
+                                            startIcon={<VisibilityOutlined />}
+                                            fullWidth={isMobile}
+                                            sx={{
+                                                textTransform: 'none',
+                                                fontWeight: 500,
+                                                '&:hover': {
+                                                    backgroundColor: getThemedColor(
+                                                        'primary.dark',
+                                                        'primary.main',
+                                                    ),
+                                                },
+                                            }}
+                                        >
+                                            View Consultation
+                                        </Button>
+                                    )}
 
                                 {timeSlot.reservable?.patient && canCheckPatient && (
                                     <Button
@@ -695,18 +903,30 @@ const TimeSlotCard = ({
                                         size="small"
                                         color="primary"
                                         component={Link}
-                                        href={route("patients.show", timeSlot?.reservable?.patient?.id)}
-                                        startIcon={<PersonOutlined/>}
+                                        href={route(
+                                            'patients.show',
+                                            timeSlot?.reservable?.patient?.id,
+                                        )}
+                                        startIcon={<PersonOutlined />}
                                         fullWidth={isMobile}
                                         sx={{
                                             textTransform: 'none',
                                             fontWeight: 500,
-                                            borderColor: getThemedColor('primary.main', 'primary.light'),
+                                            borderColor: getThemedColor(
+                                                'primary.main',
+                                                'primary.light',
+                                            ),
                                             color: getThemedColor('primary.main', 'primary.light'),
                                             '&:hover': {
-                                                borderColor: getThemedColor('primary.dark', 'primary.main'),
-                                                backgroundColor: getThemedBgColor('primary.50', 'primary.900')
-                                            }
+                                                borderColor: getThemedColor(
+                                                    'primary.dark',
+                                                    'primary.main',
+                                                ),
+                                                backgroundColor: getThemedBgColor(
+                                                    'primary.50',
+                                                    'primary.900',
+                                                ),
+                                            },
                                         }}
                                     >
                                         Patient Profile
@@ -721,7 +941,7 @@ const TimeSlotCard = ({
                                 sx={{
                                     mt: isMobile ? 1 : 0,
                                     justifyContent: isMobile ? 'flex-end' : 'flex-start',
-                                    width: isMobile ? '100%' : 'auto'
+                                    width: isMobile ? '100%' : 'auto',
                                 }}
                             >
                                 {canEdit && (
@@ -730,17 +950,24 @@ const TimeSlotCard = ({
                                             onClick={() => onEdit(timeSlot)}
                                             size="small"
                                             sx={{
-                                                color: getThemedColor('primary.main', 'primary.light'),
+                                                color: getThemedColor(
+                                                    'primary.main',
+                                                    'primary.light',
+                                                ),
                                                 '&:hover': {
-                                                    backgroundColor: getThemedBgColor('primary.50', 'primary.900')
-                                                }
+                                                    backgroundColor: getThemedBgColor(
+                                                        'primary.50',
+                                                        'primary.900',
+                                                    ),
+                                                },
                                             }}
                                         >
-                                            <EditOutlined fontSize="small"/>
+                                            <EditOutlined fontSize="small" />
                                         </IconButton>
                                     </Tooltip>
                                 )}
-                                {((canDelete && !!timeSlot.reservable_type) || (canDeleteConsultantReserve && !timeSlot.reservable_type)) && (
+                                {((canDelete && !!timeSlot.reservable_type) ||
+                                    (canDeleteConsultantReserve && !timeSlot.reservable_type)) && (
                                     <Tooltip title="Delete time slot">
                                         <IconButton
                                             onClick={handleDeleteClick}
@@ -748,11 +975,14 @@ const TimeSlotCard = ({
                                             sx={{
                                                 color: getThemedColor('error.main', 'error.light'),
                                                 '&:hover': {
-                                                    backgroundColor: getThemedBgColor('error.50', 'error.900')
-                                                }
+                                                    backgroundColor: getThemedBgColor(
+                                                        'error.50',
+                                                        'error.900',
+                                                    ),
+                                                },
                                             }}
                                         >
-                                            <DeleteOutlined fontSize="small"/>
+                                            <DeleteOutlined fontSize="small" />
                                         </IconButton>
                                     </Tooltip>
                                 )}
@@ -772,7 +1002,7 @@ const TimeSlotCard = ({
                 itemType="time slot"
                 description={getDeleteDescription()}
                 isLoading={isDeleting}
-                severity={timeSlot.reservable_type ? "error" : "warning"}
+                severity={timeSlot.reservable_type ? 'error' : 'warning'}
             />
         </>
     );

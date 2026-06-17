@@ -1,22 +1,22 @@
-import React, { useEffect, useState, useCallback } from "react";
-import UserForm from "@/Pages/User/Components/Form";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, router, useForm } from "@inertiajs/react";
-import { Snackbar, Alert } from "@mui/material";
+import React, { useEffect, useState, useCallback } from 'react';
+import UserForm from '@/Pages/User/Components/Form';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head, router, useForm } from '@inertiajs/react';
+import { Snackbar, Alert } from '@mui/material';
 
 const EditUser = ({ user, errors: serverErrors, auth }) => {
     // Initialize form with user data and method
     const { data, setData, post, processing, reset } = useForm({
         ...user,
-        _method: "put"
+        _method: 'put',
     });
 
     // Local state for client-side errors and notifications
     const [errors, setErrors] = useState({});
     const [notification, setNotification] = useState({
         open: false,
-        message: "",
-        type: "info"
+        message: '',
+        type: 'info',
     });
 
     // Update errors when they come from the server
@@ -25,8 +25,8 @@ const EditUser = ({ user, errors: serverErrors, auth }) => {
             setErrors(serverErrors);
             setNotification({
                 open: true,
-                message: "Please correct the errors in the form",
-                type: "error"
+                message: 'Please correct the errors in the form',
+                type: 'error',
             });
         }
     }, [serverErrors]);
@@ -43,8 +43,8 @@ const EditUser = ({ user, errors: serverErrors, auth }) => {
             setErrors(formErrors);
             setNotification({
                 open: true,
-                message: "Please correct the errors in the form",
-                type: "error"
+                message: 'Please correct the errors in the form',
+                type: 'error',
             });
             return;
         }
@@ -54,15 +54,15 @@ const EditUser = ({ user, errors: serverErrors, auth }) => {
             onSuccess: () => {
                 setNotification({
                     open: true,
-                    message: "User updated successfully",
-                    type: "success"
+                    message: 'User updated successfully',
+                    type: 'success',
                 });
 
                 // Redirect after a short delay to allow notification to be seen
                 setTimeout(() => {
                     router.visit(route('users.index'));
                 }, 1500);
-            }
+            },
         });
     }, [data, post, user.id]);
 
@@ -70,7 +70,7 @@ const EditUser = ({ user, errors: serverErrors, auth }) => {
     const handleCancel = useCallback(() => {
         // Confirm if user has made changes
         if (JSON.stringify(user) !== JSON.stringify(data)) {
-            if (window.confirm("You have unsaved changes. Are you sure you want to leave?")) {
+            if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
                 router.visit(route('users.index'));
             }
         } else {
@@ -88,7 +88,7 @@ const EditUser = ({ user, errors: serverErrors, auth }) => {
 
     return (
         <>
-            <Head title={`Edit User: ${user?.name ?? ''}`}/>
+            <Head title={`Edit User: ${user?.name ?? ''}`} />
             <UserForm
                 values={data}
                 errors={errors}
@@ -122,24 +122,20 @@ const EditUser = ({ user, errors: serverErrors, auth }) => {
 // Define breadcrumbs for layout
 const breadcrumbs = [
     {
-        title: "Users",
-        link: route("users.index"),
-        icon: null
+        title: 'Users',
+        link: route('users.index'),
+        icon: null,
     },
     {
-        title: "Edit User",
+        title: 'Edit User',
         link: null,
-        icon: null
-    }
+        icon: null,
+    },
 ];
 
 // Apply layout with breadcrumbs
-EditUser.layout = page => (
-    <AuthenticatedLayout
-        auth={page.props.auth}
-        children={page}
-        breadcrumbs={breadcrumbs}
-    />
+EditUser.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadcrumbs} />
 );
 
 export default EditUser;

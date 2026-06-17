@@ -6,7 +6,7 @@ import {
     DEFAULT_PEN_SIZE,
     DEFAULT_PEN_COLOR,
     DEFAULT_FILL_COLOR,
-    DEFAULT_TEXT_SIZE
+    DEFAULT_TEXT_SIZE,
 } from './constants';
 
 const initialState = {
@@ -56,7 +56,7 @@ const initialState = {
     // Notification state
     notificationOpen: false,
     notificationMessage: '',
-    notificationSeverity: 'info'
+    notificationSeverity: 'info',
 };
 
 export default initialState;

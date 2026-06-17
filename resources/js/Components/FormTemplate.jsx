@@ -1,5 +1,5 @@
-import {createContext, useContext, useEffect} from "react";
-import {useForm} from "@inertiajs/react";
+import { createContext, useContext, useEffect } from 'react';
+import { useForm } from '@inertiajs/react';
 import {
     Dialog,
     DialogTitle,
@@ -7,17 +7,25 @@ import {
     DialogContent,
     Button,
     Container,
-    CircularProgress
-} from "@mui/material";
-import Grid from "@mui/material/Grid";
+    CircularProgress,
+} from '@mui/material';
+import Grid from '@mui/material/Grid';
 import PropTypes from 'prop-types';
 
 const FormContext = createContext();
 export const useFormState = () => useContext(FormContext);
 
-
-export const FormProvider = ({open, onClose, url, children, defaultValue = {}, generalTitle = "", maxWidth = "sm"}) => {
-    const {data, setData, post, processing, errors, reset, clearErrors, setError} = useForm(defaultValue);
+export const FormProvider = ({
+    open,
+    onClose,
+    url,
+    children,
+    defaultValue = {},
+    generalTitle = '',
+    maxWidth = 'sm',
+}) => {
+    const { data, setData, post, processing, errors, reset, clearErrors, setError } =
+        useForm(defaultValue);
 
     useEffect(() => {
         setData(defaultValue);
@@ -35,19 +43,17 @@ export const FormProvider = ({open, onClose, url, children, defaultValue = {}, g
     // Submit the form
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(url,
-            {
-                onSuccess: handleClose,
-                preserveScroll: true,
-            });
+        post(url, {
+            onSuccess: handleClose,
+            preserveScroll: true,
+        });
     };
 
     const isEditing = !!data?.id;
-    const formTitle = isEditing ? "Edit" : "Add New";
-
+    const formTitle = isEditing ? 'Edit' : 'Add New';
 
     return (
-        <FormContext.Provider value={{data, setData, errors, processing, clearErrors, setError}}>
+        <FormContext.Provider value={{ data, setData, errors, processing, clearErrors, setError }}>
             <Dialog
                 open={open}
                 onClose={handleClose}
@@ -60,7 +66,7 @@ export const FormProvider = ({open, onClose, url, children, defaultValue = {}, g
                 </DialogTitle>
 
                 <form onSubmit={handleSubmit}>
-                    <DialogContent sx={{p: 3}}>
+                    <DialogContent sx={{ p: 3 }}>
                         <Container>
                             <Grid container spacing={3}>
                                 {children}
@@ -68,11 +74,8 @@ export const FormProvider = ({open, onClose, url, children, defaultValue = {}, g
                         </Container>
                     </DialogContent>
 
-                    <DialogActions sx={{px: 3, pb: 2}}>
-                        <Button
-                            onClick={handleClose}
-                            disabled={processing}
-                        >
+                    <DialogActions sx={{ px: 3, pb: 2 }}>
+                        <Button onClick={handleClose} disabled={processing}>
                             Cancel
                         </Button>
                         <Button
@@ -80,9 +83,9 @@ export const FormProvider = ({open, onClose, url, children, defaultValue = {}, g
                             variant="contained"
                             color="primary"
                             disabled={processing}
-                            startIcon={processing && <CircularProgress size={20} color="inherit"/>}
+                            startIcon={processing && <CircularProgress size={20} color="inherit" />}
                         >
-                            {processing ? "Submitting..." : "Submit"}
+                            {processing ? 'Submitting...' : 'Submit'}
                         </Button>
                     </DialogActions>
                 </form>

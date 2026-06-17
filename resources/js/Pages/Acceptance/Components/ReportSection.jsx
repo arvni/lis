@@ -1,21 +1,21 @@
-﻿import React, { useState } from "react";
-import Grid from "@mui/material/Grid";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import FormGroup from "@mui/material/FormGroup";
-import FormControl from "@mui/material/FormControl";
-import TextField from "@mui/material/TextField";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
-import { Print, WhatsApp, Sms, HelpOutlined } from "@mui/icons-material";
-import { Box, Divider, Paper, Typography, Tooltip, Stack, IconButton } from "@mui/material";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
-import Checkbox from "@mui/material/Checkbox";
-import SelectSearch from "@/Components/SelectSearch.jsx";
+﻿import React, { useState } from 'react';
+import Grid from '@mui/material/Grid';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+import FormGroup from '@mui/material/FormGroup';
+import FormControl from '@mui/material/FormControl';
+import TextField from '@mui/material/TextField';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import { Print, WhatsApp, Sms, HelpOutlined } from '@mui/icons-material';
+import { Box, Divider, Paper, Typography, Tooltip, Stack, IconButton } from '@mui/material';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
+import Checkbox from '@mui/material/Checkbox';
+import SelectSearch from '@/Components/SelectSearch.jsx';
 
 const OutPatientToggle = ({ value, onChange }) => (
-    <Box sx={{ display: "flex", alignItems: "center" }}>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <FormControlLabel
             label="Out Patient"
             control={
@@ -35,7 +35,7 @@ const OutPatientToggle = ({ value, onChange }) => (
 );
 
 const WaitingForPoolingToggle = ({ value, onChange }) => (
-    <Box sx={{ display: "flex", alignItems: "center" }}>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <FormControlLabel
             label="Waiting for Pooling"
             control={
@@ -65,7 +65,13 @@ const WaitingForPoolingToggle = ({ value, onChange }) => (
  * @param {Object} props.referrer - Referrer information
  * @returns {JSX.Element}
  */
-const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = false, referrer = null }) => {
+const ReportOptions = ({
+    howReport = {},
+    onChange,
+    errors = {},
+    isReferred = false,
+    referrer = null,
+}) => {
     // Handler for delivery method selection with better performance
     const handleDeliveryMethodChange = (method, checked) => {
         onChange(`howReport.${method}`, checked);
@@ -74,7 +80,7 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
     const deliveryMethods = [
         { key: 'print', icon: <Print />, label: 'Print' },
         { key: 'sms', icon: <Sms />, label: 'SMS' },
-        { key: 'whatsapp', icon: <WhatsApp />, label: 'WhatsApp' }
+        { key: 'whatsapp', icon: <WhatsApp />, label: 'WhatsApp' },
     ];
 
     return (
@@ -85,11 +91,11 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
                 overflow: 'hidden',
                 transition: 'box-shadow 0.3s ease-in-out',
                 '&:hover': {
-                    boxShadow: 4
-                }
+                    boxShadow: 4,
+                },
             }}
         >
-            <Box sx={{ bgcolor: "primary.main", p: 2, color: "white" }}>
+            <Box sx={{ bgcolor: 'primary.main', p: 2, color: 'white' }}>
                 <Typography variant="h6" fontWeight="medium">
                     How to Notify
                 </Typography>
@@ -123,13 +129,18 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
                             error={Boolean(errors?.howReport)}
                         >
                             <FormGroup row>
-                                {deliveryMethods.map(method => (
+                                {deliveryMethods.map((method) => (
                                     <FormControlLabel
                                         key={method.key}
                                         control={
                                             <Checkbox
                                                 checked={Boolean(howReport?.[method.key])}
-                                                onChange={e => handleDeliveryMethodChange(method.key, e.target.checked)}
+                                                onChange={(e) =>
+                                                    handleDeliveryMethodChange(
+                                                        method.key,
+                                                        e.target.checked,
+                                                    )
+                                                }
                                                 color="primary"
                                                 size="medium"
                                             />
@@ -137,7 +148,9 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
                                         label={
                                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                 {method.icon}
-                                                <Typography sx={{ ml: 1 }}>{method.label}</Typography>
+                                                <Typography sx={{ ml: 1 }}>
+                                                    {method.label}
+                                                </Typography>
                                             </Box>
                                         }
                                         sx={{ mr: 4, mb: 1 }}
@@ -150,14 +163,20 @@ const ReportOptions = ({ howReport = {}, onChange, errors = {}, isReferred = fal
                                         control={
                                             <Checkbox
                                                 checked={Boolean(howReport?.sendToReferrer)}
-                                                onChange={e => onChange('howReport.sendToReferrer', e.target.checked)}
+                                                onChange={(e) =>
+                                                    onChange(
+                                                        'howReport.sendToReferrer',
+                                                        e.target.checked,
+                                                    )
+                                                }
                                                 color="primary"
                                                 size="medium"
                                             />
                                         }
                                         label={
                                             <Typography>
-                                                Send a copy to Referrer ({referrer?.fullName || 'Unknown'})
+                                                Send a copy to Referrer (
+                                                {referrer?.fullName || 'Unknown'})
                                             </Typography>
                                         }
                                         sx={{ mb: 1 }}
@@ -182,11 +201,11 @@ const HOW_FOUND_OPTIONS = [
     { value: 'other', label: 'Other' },
 ];
 
-const PREDEFINED_VALUES = HOW_FOUND_OPTIONS.filter(o => o.value !== 'other').map(o => o.value);
+const PREDEFINED_VALUES = HOW_FOUND_OPTIONS.filter((o) => o.value !== 'other').map((o) => o.value);
 
 const HowFoundUs = ({ value, onChange, errors }) => {
     const isOther = value && !PREDEFINED_VALUES.includes(value);
-    const [selected, setSelected] = useState(isOther ? 'other' : (value || ''));
+    const [selected, setSelected] = useState(isOther ? 'other' : value || '');
     const [otherText, setOtherText] = useState(isOther ? value : '');
 
     const handleSelect = (e) => {
@@ -221,9 +240,13 @@ const HowFoundUs = ({ value, onChange, errors }) => {
                             label="Select an option"
                             onChange={handleSelect}
                         >
-                            <MenuItem value=""><em>— Not specified —</em></MenuItem>
-                            {HOW_FOUND_OPTIONS.map(opt => (
-                                <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                            <MenuItem value="">
+                                <em>— Not specified —</em>
+                            </MenuItem>
+                            {HOW_FOUND_OPTIONS.map((opt) => (
+                                <MenuItem key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </MenuItem>
                             ))}
                         </Select>
                     </FormControl>
@@ -254,13 +277,13 @@ const ReportSection = ({ data, errors, onChange }) => {
                 sx={{
                     p: 2,
                     mb: 3,
-                    bgcolor: "grey.50",
+                    bgcolor: 'grey.50',
                     borderRadius: 2,
                     border: '1px solid',
-                    borderColor: 'grey.200'
+                    borderColor: 'grey.200',
                 }}
             >
-  <Grid container spacing={3} sx={{alignItems: "center"}}>
+                <Grid container spacing={3} sx={{ alignItems: 'center' }}>
                     <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                         <OutPatientToggle
                             value={data?.out_patient}
@@ -278,12 +301,12 @@ const ReportSection = ({ data, errors, onChange }) => {
                     {!data?.out_patient && (
                         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                             <SelectSearch
-                                helperText={errors?.["sampler.id"]}
-                                onChange={(e) => onChange("sampler", e.target.value)}
-                                error={Boolean(errors?.["sampler.id"])}
+                                helperText={errors?.['sampler.id']}
+                                onChange={(e) => onChange('sampler', e.target.value)}
+                                error={Boolean(errors?.['sampler.id'])}
                                 value={data?.sampler || null}
                                 name="sampler"
-                                url={route("api.users.list")}
+                                url={route('api.users.list')}
                                 required
                                 label="Sampler"
                                 fullWidth
@@ -303,11 +326,7 @@ const ReportSection = ({ data, errors, onChange }) => {
                 referrer={data?.referrer || null}
             />
 
-            <HowFoundUs
-                value={data?.how_found_us || ''}
-                onChange={onChange}
-                errors={errors}
-            />
+            <HowFoundUs value={data?.how_found_us || ''} onChange={onChange} errors={errors} />
         </Box>
     );
 };

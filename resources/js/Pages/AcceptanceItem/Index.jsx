@@ -1,5 +1,5 @@
-import TableLayout from "@/Layouts/TableLayout";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import TableLayout from '@/Layouts/TableLayout';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {
     Typography,
     IconButton,
@@ -11,18 +11,18 @@ import {
     MenuItem,
     Checkbox,
     ListItemText,
-    Button
-} from "@mui/material";
+    Button,
+} from '@mui/material';
 import {
     RemoveRedEye as RemoveRedEyeIcon,
-    ViewColumn as ViewColumnIcon
-} from "@mui/icons-material";
-import Filter from "./Components/Filter";
-import InlineTagManager from "@/Components/InlineTagManager";
-import Excel from "@/../images/excel.svg";
-import { Head, router, usePage } from "@inertiajs/react";
-import { useState, useCallback, useEffect } from "react";
-import { formatDate } from "@/Services/helper.js";
+    ViewColumn as ViewColumnIcon,
+} from '@mui/icons-material';
+import Filter from './Components/Filter';
+import InlineTagManager from '@/Components/InlineTagManager';
+import Excel from '@/../images/excel.svg';
+import { Head, router, usePage } from '@inertiajs/react';
+import { useState, useCallback, useEffect } from 'react';
+import { formatDate } from '@/Services/helper.js';
 
 // Adds N working days to a date, skipping Friday (5) and Saturday (6)
 const addWorkingDays = (dateStr, days) => {
@@ -49,81 +49,90 @@ const StatisticsIndex = () => {
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('en-US', {
             minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            maximumFractionDigits: 2,
         }).format(amount);
     };
 
     // Navigate to item details
-    const showAcceptanceItem = useCallback((row) => (e) => {
-        e.preventDefault();
-        setLoading(true);
-        router.visit(route("acceptanceItems.show", { acceptanceItem: row.id, acceptance: row.acceptance_id }), {
-            onFinish: () => setLoading(false)
-        });
-    }, []);
+    const showAcceptanceItem = useCallback(
+        (row) => (e) => {
+            e.preventDefault();
+            setLoading(true);
+            router.visit(
+                route('acceptanceItems.show', {
+                    acceptanceItem: row.id,
+                    acceptance: row.acceptance_id,
+                }),
+                {
+                    onFinish: () => setLoading(false),
+                },
+            );
+        },
+        [],
+    );
 
     // All available columns
     const allColumns = [
         {
             field: 'id',
             headerName: 'ID',
-            display: "flex",
-            width: 50
+            display: 'flex',
+            width: 50,
         },
         {
             field: 'invoice.owner.fullName',
             headerName: 'Client',
-            type: "string",
+            type: 'string',
             flex: 0.7,
-            display: "flex",
+            display: 'flex',
             sortable: false,
-            renderCell: ({ row }) => row?.invoice?.owner?.fullName || "—",
+            renderCell: ({ row }) => row?.invoice?.owner?.fullName || '—',
         },
         {
             field: 'patient_fullname',
             headerName: 'Patient Name',
-            type: "string",
-            display: "flex",
+            type: 'string',
+            display: 'flex',
             flex: 0.7,
-            renderCell: ({ value }) => value || "—"
+            renderCell: ({ value }) => value || '—',
         },
         {
             field: 'patient_idno',
             headerName: 'ID Number',
-            type: "string",
-            display: "flex",
+            type: 'string',
+            display: 'flex',
             flex: 0.25,
-            renderCell: ({ value }) => value || "—"
+            renderCell: ({ value }) => value || '—',
         },
         {
             field: 'patient_dateofbirth',
             headerName: 'Date of Birth',
-            type: "string",
-            display: "flex",
+            type: 'string',
+            display: 'flex',
             flex: 0.3,
-            renderCell: ({ value }) => formatDate(value)
+            renderCell: ({ value }) => formatDate(value),
         },
         {
             field: 'test_testsname',
             headerName: 'Test Name',
-            type: "string",
-            display: "flex",
+            type: 'string',
+            display: 'flex',
             flex: 0.3,
-            renderCell: ({ value }) => value || "—"
+            renderCell: ({ value }) => value || '—',
         },
         {
             field: 'method_name',
             headerName: 'Method',
-            type: "string",
-            display: "flex",
+            type: 'string',
+            display: 'flex',
             flex: 0.25,
-            renderCell: ({ value }) => value || "—"
+            renderCell: ({ value }) => value || '—',
         },
         {
             field: 'tags',
             headerName: 'Tags',
-            type: "string",
-            display: "flex",
+            type: 'string',
+            display: 'flex',
             sortable: false,
             width: 200,
             renderCell: ({ row }) => (
@@ -132,73 +141,73 @@ const StatisticsIndex = () => {
                     updateUrl={route('acceptanceItems.tags.update', row.id)}
                     entityType="acceptanceItem"
                 />
-            )
+            ),
         },
         {
             field: 'price',
             headerName: 'Price',
-            type: "number",
-            display: "flex",
+            type: 'number',
+            display: 'flex',
             flex: 0.15,
-            renderCell: ({ value }) => formatCurrency(value)
+            renderCell: ({ value }) => formatCurrency(value),
         },
         {
             field: 'discount',
             headerName: 'Discount',
-            type: "number",
-            display: "flex",
+            type: 'number',
+            display: 'flex',
             flex: 0.2,
-            renderCell: ({ value }) => formatCurrency(value)
+            renderCell: ({ value }) => formatCurrency(value),
         },
         {
             field: 'active_sample_collection_date',
             headerName: 'Sample Date',
-            type: "date",
-            display: "flex",
-            valueGetter: (value) => value ? new Date(value) : null,
+            type: 'date',
+            display: 'flex',
+            valueGetter: (value) => (value ? new Date(value) : null),
             flex: 0.3,
-            renderCell: ({ value }) => value ? value.toLocaleDateString() : "-"
+            renderCell: ({ value }) => (value ? value.toLocaleDateString() : '-'),
         },
         {
             field: 'status',
             headerName: 'Status',
-            type: "string",
-            display: "flex",
+            type: 'string',
+            display: 'flex',
             flex: 0.3,
             sortable: false,
         },
         {
             field: 'updated_at',
             headerName: 'Last Updated',
-            type: "date",
-            display: "flex",
-            valueGetter: (value) => value ? new Date(value) : null,
+            type: 'date',
+            display: 'flex',
+            valueGetter: (value) => (value ? new Date(value) : null),
             flex: 0.4,
-            renderCell: ({ value }) => formatDate(value)
+            renderCell: ({ value }) => formatDate(value),
         },
         {
             field: 'estimated_report_date',
             headerName: 'Est. Report Date',
-            type: "date",
-            display: "flex",
+            type: 'date',
+            display: 'flex',
             flex: 0.35,
             sortable: false,
             valueGetter: (value, row) => addWorkingDays(row.created_at, row.method_turnaround_time),
-            renderCell: ({ value }) => value ? formatDate(value) : "—"
+            renderCell: ({ value }) => (value ? formatDate(value) : '—'),
         },
         {
             field: 'action',
             headerName: 'Actions',
-            display: "flex",
+            display: 'flex',
             flex: 0.1,
             sortable: false,
             renderCell: ({ row }) => (
                 <Tooltip title="View Details">
                     <IconButton
                         onClick={showAcceptanceItem(row)}
-                        href={route("acceptanceItems.show", {
+                        href={route('acceptanceItems.show', {
                             acceptanceItem: row.id,
-                            acceptance: row.acceptance_id
+                            acceptance: row.acceptance_id,
                         })}
                         size="small"
                         color="info"
@@ -206,30 +215,30 @@ const StatisticsIndex = () => {
                         <RemoveRedEyeIcon />
                     </IconButton>
                 </Tooltip>
-            )
-        }
+            ),
+        },
     ];
 
     // Initialize visible columns on component mount
     useEffect(() => {
         // Exclude the 'id' column which is hidden by default
         const initialVisibleColumns = allColumns
-            .filter(column => !column.hidden)
-            .map(column => column.field);
+            .filter((column) => !column.hidden)
+            .map((column) => column.field);
         setVisibleColumns(initialVisibleColumns);
     }, []);
 
     // Get currently visible columns
-    const columns = allColumns.map(column => ({
+    const columns = allColumns.map((column) => ({
         ...column,
-        hidden: !visibleColumns.includes(column.field)
+        hidden: !visibleColumns.includes(column.field),
     }));
 
     // Handle column visibility toggle
     const handleColumnToggle = (field) => {
-        setVisibleColumns(prev => {
+        setVisibleColumns((prev) => {
             if (prev.includes(field)) {
-                return prev.filter(col => col !== field);
+                return prev.filter((col) => col !== field);
             } else {
                 return [...prev, field];
             }
@@ -249,8 +258,8 @@ const StatisticsIndex = () => {
     // Show all columns
     const showAllColumns = () => {
         const allFields = allColumns
-            .filter(column => column.field !== 'id') // Keep 'id' hidden
-            .map(column => column.field);
+            .filter((column) => column.field !== 'id') // Keep 'id' hidden
+            .map((column) => column.field);
         setVisibleColumns(allFields);
     };
 
@@ -263,8 +272,8 @@ const StatisticsIndex = () => {
     const pageReload = useCallback((page, filters, sort, pageSize) => {
         router.visit(route('acceptanceItems.index'), {
             data: { page, filters, pageSize, sort },
-            only: ["acceptanceItems", "requestInputs",],
-            queryStringArrayFormat: "indices",
+            only: ['acceptanceItems', 'requestInputs'],
+            queryStringArrayFormat: 'indices',
         });
     }, []);
 
@@ -274,7 +283,10 @@ const StatisticsIndex = () => {
 
             <Box sx={{ mb: 3 }}>
                 <Paper sx={{ padding: 2, mb: 2 }}>
-                    <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+                    <Stack
+                        direction="row"
+                        sx={{ justifyContent: 'space-between', alignItems: 'center' }}
+                    >
                         <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
                             Test Statistics
                         </Typography>
@@ -288,12 +300,19 @@ const StatisticsIndex = () => {
                                     sx={{
                                         border: '1px solid #e0e0e0',
                                         borderRadius: 1,
-                                        p: 1
+                                        p: 1,
                                     }}
                                 >
-                                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                                    <Stack
+                                        direction="row"
+                                        spacing={1}
+                                        sx={{ alignItems: 'center' }}
+                                    >
                                         <ViewColumnIcon />
-                                        <Typography variant="button" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                                        <Typography
+                                            variant="button"
+                                            sx={{ display: { xs: 'none', sm: 'block' } }}
+                                        >
                                             Columns
                                         </Typography>
                                     </Stack>
@@ -302,17 +321,27 @@ const StatisticsIndex = () => {
 
                             <Tooltip title="Export to Excel">
                                 <IconButton
-                                    href={route("acceptanceItems.export", { ...requestInputs, visibleColumns })}
+                                    href={route('acceptanceItems.export', {
+                                        ...requestInputs,
+                                        visibleColumns,
+                                    })}
                                     color="success"
                                     sx={{
                                         border: '1px solid #e0e0e0',
                                         borderRadius: 1,
-                                        p: 1
+                                        p: 1,
                                     }}
                                 >
-                                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                                    <Stack
+                                        direction="row"
+                                        spacing={1}
+                                        sx={{ alignItems: 'center' }}
+                                    >
                                         <img src={Excel} alt="Excel" width="24px" />
-                                        <Typography variant="button" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                                        <Typography
+                                            variant="button"
+                                            sx={{ display: { xs: 'none', sm: 'block' } }}
+                                        >
                                             Export
                                         </Typography>
                                     </Stack>
@@ -334,29 +363,21 @@ const StatisticsIndex = () => {
                             maxHeight: 300,
                             width: 250,
                         },
-                    }
+                    },
                 }}
             >
                 <Box sx={{ px: 2, py: 1 }}>
                     <Stack direction="row" spacing={1}>
-                        <Button
-                            size="small"
-                            onClick={showAllColumns}
-                            variant="outlined"
-                        >
+                        <Button size="small" onClick={showAllColumns} variant="outlined">
                             Show All
                         </Button>
-                        <Button
-                            size="small"
-                            onClick={hideAllColumns}
-                            variant="outlined"
-                        >
+                        <Button size="small" onClick={hideAllColumns} variant="outlined">
                             Hide All
                         </Button>
                     </Stack>
                 </Box>
                 {allColumns
-                    .filter(column => column.field !== 'id') // Don't show 'id' in the selector
+                    .filter((column) => column.field !== 'id') // Don't show 'id' in the selector
                     .map((column) => (
                         <MenuItem
                             key={column.field}
@@ -387,18 +408,14 @@ const StatisticsIndex = () => {
 
 const breadCrumbs = [
     {
-        title: "Test Statistics",
+        title: 'Test Statistics',
         link: null,
-        icon: null
-    }
+        icon: null,
+    },
 ];
 
-StatisticsIndex.layout = page => (
-    <AuthenticatedLayout
-        auth={page.props.auth}
-        children={page}
-        breadcrumbs={breadCrumbs}
-    />
+StatisticsIndex.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
 );
 
 export default StatisticsIndex;

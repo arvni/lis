@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, useForm } from "@inertiajs/react";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head, useForm } from '@inertiajs/react';
 import {
     Box,
     Card,
@@ -18,21 +18,29 @@ import {
     Tooltip,
     Paper,
     Divider,
-} from "@mui/material";
+} from '@mui/material';
 import {
     Edit as EditIcon,
     Delete as DeleteIcon,
     LocalOffer as TagIcon,
     ColorLens as ColorIcon,
-} from "@mui/icons-material";
-import TableLayout from "@/Layouts/TableLayout";
+} from '@mui/icons-material';
+import TableLayout from '@/Layouts/TableLayout';
 
 const Index = ({ auth, tags }) => {
     const [openEdit, setOpenEdit] = useState(false);
     const [selectedTag, setSelectedTag] = useState(null);
     const canEdit = auth.permissions.includes('Advance Settings.Tags.Edit Tag');
     const canDelete = auth.permissions.includes('Advance Settings.Tags.Delete Tag');
-    const { data, setData, put, delete: destroy, processing, reset, errors } = useForm({
+    const {
+        data,
+        setData,
+        put,
+        delete: destroy,
+        processing,
+        reset,
+        errors,
+    } = useForm({
         name: '',
         color: '#7c4dff',
     });
@@ -60,7 +68,11 @@ const Index = ({ auth, tags }) => {
     };
 
     const handleDelete = (id) => {
-        if (confirm('Are you sure you want to delete this tag? This will remove it from all associated items.')) {
+        if (
+            confirm(
+                'Are you sure you want to delete this tag? This will remove it from all associated items.',
+            )
+        ) {
             destroy(route('tags.destroy', id));
         }
     };
@@ -77,7 +89,7 @@ const Index = ({ auth, tags }) => {
                         {params.value}
                     </Typography>
                 </Stack>
-            )
+            ),
         },
         {
             field: 'color',
@@ -92,14 +104,14 @@ const Index = ({ auth, tags }) => {
                             borderRadius: '50%',
                             bgcolor: params.value || '#7c4dff',
                             border: '1px solid',
-                            borderColor: 'divider'
+                            borderColor: 'divider',
                         }}
                     />
                     <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
                         {params.value || '#7c4dff'}
                     </Typography>
                 </Box>
-            )
+            ),
         },
         {
             field: 'preview',
@@ -114,10 +126,10 @@ const Index = ({ auth, tags }) => {
                         color: params.row.color || 'text.primary',
                         borderColor: params.row.color || 'divider',
                         border: '1px solid',
-                        fontWeight: 'bold'
+                        fontWeight: 'bold',
                     }}
                 />
-            )
+            ),
         },
         {
             field: 'actions',
@@ -128,27 +140,35 @@ const Index = ({ auth, tags }) => {
                 <Stack direction="row" spacing={0.5}>
                     {canEdit && (
                         <Tooltip title="Edit Tag">
-                            <IconButton size="small" onClick={() => handleEdit(params.row)} color="primary">
+                            <IconButton
+                                size="small"
+                                onClick={() => handleEdit(params.row)}
+                                color="primary"
+                            >
                                 <EditIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
                     )}
                     {canDelete && (
                         <Tooltip title="Delete Tag">
-                            <IconButton size="small" onClick={() => handleDelete(params.row.id)} color="error">
+                            <IconButton
+                                size="small"
+                                onClick={() => handleDelete(params.row.id)}
+                                color="error"
+                            >
                                 <DeleteIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
                     )}
                 </Stack>
-            )
-        }
+            ),
+        },
     ];
 
     return (
         <>
             <Head title="Manage Tags" />
-            
+
             <Box sx={{ p: 3 }}>
                 <Box sx={{ mb: 4 }}>
                     <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -159,12 +179,11 @@ const Index = ({ auth, tags }) => {
                     </Typography>
                 </Box>
 
-                <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-                    <TableLayout
-                        columns={columns}
-                        data={tags}
-                        loading={processing}
-                    />
+                <Card
+                    elevation={0}
+                    sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider' }}
+                >
+                    <TableLayout columns={columns} data={tags} loading={processing} />
                 </Card>
             </Box>
 
@@ -182,12 +201,12 @@ const Index = ({ auth, tags }) => {
                                 label="Tag Name"
                                 fullWidth
                                 value={data.name}
-                                onChange={e => setData('name', e.target.value)}
+                                onChange={(e) => setData('name', e.target.value)}
                                 error={!!errors.name}
                                 helperText={errors.name}
                                 required
                             />
-                            
+
                             <Box>
                                 <Typography variant="subtitle2" gutterBottom>
                                     Pick a Color
@@ -196,28 +215,40 @@ const Index = ({ auth, tags }) => {
                                     <input
                                         type="color"
                                         value={data.color}
-                                        onChange={e => setData('color', e.target.value)}
+                                        onChange={(e) => setData('color', e.target.value)}
                                         style={{
                                             width: 50,
                                             height: 50,
                                             padding: 0,
                                             border: 'none',
                                             borderRadius: 4,
-                                            cursor: 'pointer'
+                                            cursor: 'pointer',
                                         }}
                                     />
                                     <TextField
                                         size="small"
                                         value={data.color}
-                                        onChange={e => setData('color', e.target.value)}
+                                        onChange={(e) => setData('color', e.target.value)}
                                         sx={{ width: 120 }}
                                         inputProps={{ style: { fontFamily: 'monospace' } }}
                                     />
                                 </Stack>
                             </Box>
 
-                            <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 2, textAlign: 'center' }}>
-                                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+                            <Box
+                                sx={{
+                                    p: 2,
+                                    bgcolor: 'grey.50',
+                                    borderRadius: 2,
+                                    textAlign: 'center',
+                                }}
+                            >
+                                <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    display="block"
+                                    sx={{ mb: 1 }}
+                                >
                                     Live Preview
                                 </Typography>
                                 <Chip
@@ -228,7 +259,7 @@ const Index = ({ auth, tags }) => {
                                         borderColor: data.color,
                                         border: '1px solid',
                                         fontWeight: 'bold',
-                                        px: 1
+                                        px: 1,
                                     }}
                                 />
                             </Box>
@@ -238,9 +269,9 @@ const Index = ({ auth, tags }) => {
                         <Button onClick={handleClose} variant="outlined" color="inherit">
                             Cancel
                         </Button>
-                        <Button 
-                            type="submit" 
-                            variant="contained" 
+                        <Button
+                            type="submit"
+                            variant="contained"
                             disabled={processing}
                             startIcon={<TagIcon />}
                         >
@@ -255,15 +286,22 @@ const Index = ({ auth, tags }) => {
 
 const breadCrumbs = [
     {
-        title: "Advance Settings",
+        title: 'Advance Settings',
         link: null,
     },
     {
-        title: "Tags",
+        title: 'Tags',
         link: null,
-    }
+    },
 ];
 
-Index.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} title="Manage Tags" />;
+Index.layout = (page) => (
+    <AuthenticatedLayout
+        auth={page.props.auth}
+        children={page}
+        breadcrumbs={breadCrumbs}
+        title="Manage Tags"
+    />
+);
 
 export default Index;

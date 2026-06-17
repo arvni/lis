@@ -8,15 +8,10 @@ import {
     useTheme,
     useMediaQuery,
     Button,
-    Stack
+    Stack,
 } from '@mui/material';
-import {
-    ArrowBackIos,
-    ArrowForwardIos,
-    Today,
-    CalendarMonth
-} from '@mui/icons-material';
-import TimeSlotCard from "./TimeSlotCard";
+import { ArrowBackIos, ArrowForwardIos, Today, CalendarMonth } from '@mui/icons-material';
+import TimeSlotCard from './TimeSlotCard';
 
 /**
  * A calendar component that displays time slots with the ability to manage appointments
@@ -37,19 +32,19 @@ import TimeSlotCard from "./TimeSlotCard";
  * @returns {JSX.Element} The TimeCalendar component
  */
 const TimeCalendar = ({
-                          timeSlots = [],
-                          onTimeSlotSelect,
-                          onDateSelect = () => {},
-                          onMonthChange,
-                          onTimeSlotEdit = () => {},
-                          onTimeSlotDelete = () => {},
-                          canViewPatient = false,
-                          canViewConsultation = false,
-                          canConvertToPatient = false,
-                          canEditTimeSlot = false,
-                          canDeleteTimeSlot = false,
-                          canDeleteConsultantReserve = false
-                      }) => {
+    timeSlots = [],
+    onTimeSlotSelect,
+    onDateSelect = () => {},
+    onMonthChange,
+    onTimeSlotEdit = () => {},
+    onTimeSlotDelete = () => {},
+    canViewPatient = false,
+    canViewConsultation = false,
+    canConvertToPatient = false,
+    canEditTimeSlot = false,
+    canDeleteTimeSlot = false,
+    canDeleteConsultantReserve = false,
+}) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -65,11 +60,24 @@ const TimeCalendar = ({
     }, []);
 
     // Days of week and month names
-    const daysOfWeek = useMemo(() => [ 'Mon', 'Tue', 'Wed', 'Thu', 'Fri','Sat', 'Sun',], []);
-    const monthNames = useMemo(() => [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ], []);
+    const daysOfWeek = useMemo(() => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], []);
+    const monthNames = useMemo(
+        () => [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
+        ],
+        [],
+    );
 
     // Calendar data and helpers
     const calendarData = useMemo(() => {
@@ -89,13 +97,13 @@ const TimeCalendar = ({
 
         // Add empty cells for days before the first day of month
         for (let i = 0; i < firstDayOfMonth; i++) {
-            days.push({day: null, date: null});
+            days.push({ day: null, date: null });
         }
 
         // Add days of the month
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(year, month, day);
-            days.push({day, date});
+            days.push({ day, date });
         }
 
         return days;
@@ -122,48 +130,67 @@ const TimeCalendar = ({
     }, [selectedDate, timeSlotsByDate, formatDateISO]);
 
     // Helper functions
-    const hasTimeSlots = useCallback((date) => {
-        if (!date) return false;
-        const dateStr = formatDateISO(date);
-        return !!timeSlotsByDate[dateStr]?.length;
-    }, [timeSlotsByDate, formatDateISO]);
+    const hasTimeSlots = useCallback(
+        (date) => {
+            if (!date) return false;
+            const dateStr = formatDateISO(date);
+            return !!timeSlotsByDate[dateStr]?.length;
+        },
+        [timeSlotsByDate, formatDateISO],
+    );
 
-    const hasActiveTimeSlots = useCallback((date) => {
-        if (!date) return false;
-        const dateStr = formatDateISO(date);
-        return timeSlotsByDate[dateStr]?.some(slot => slot.active) || false;
-    }, [timeSlotsByDate, formatDateISO]);
+    const hasActiveTimeSlots = useCallback(
+        (date) => {
+            if (!date) return false;
+            const dateStr = formatDateISO(date);
+            return timeSlotsByDate[dateStr]?.some((slot) => slot.active) || false;
+        },
+        [timeSlotsByDate, formatDateISO],
+    );
 
-    const countTimeSlots = useCallback((date) => {
-        if (!date) return 0;
-        const dateStr = formatDateISO(date);
-        return timeSlotsByDate[dateStr]?.length || 0;
-    }, [timeSlotsByDate, formatDateISO]);
+    const countTimeSlots = useCallback(
+        (date) => {
+            if (!date) return 0;
+            const dateStr = formatDateISO(date);
+            return timeSlotsByDate[dateStr]?.length || 0;
+        },
+        [timeSlotsByDate, formatDateISO],
+    );
 
     // Date helper functions
     const isToday = useCallback((date) => {
         if (!date) return false;
         const today = new Date();
-        return date.getDate() === today.getDate() &&
+        return (
+            date.getDate() === today.getDate() &&
             date.getMonth() === today.getMonth() &&
-            date.getFullYear() === today.getFullYear();
+            date.getFullYear() === today.getFullYear()
+        );
     }, []);
 
-    const isSelected = useCallback((date) => {
-        if (!date || !selectedDate) return false;
-        return date.getDate() === selectedDate.getDate() &&
-            date.getMonth() === selectedDate.getMonth() &&
-            date.getFullYear() === selectedDate.getFullYear();
-    }, [selectedDate]);
+    const isSelected = useCallback(
+        (date) => {
+            if (!date || !selectedDate) return false;
+            return (
+                date.getDate() === selectedDate.getDate() &&
+                date.getMonth() === selectedDate.getMonth() &&
+                date.getFullYear() === selectedDate.getFullYear()
+            );
+        },
+        [selectedDate],
+    );
 
-    const formatDate = useCallback((date) => {
-        if (!date) return '';
-        const day = date.getDate();
-        const month = monthNames[date.getMonth()];
-        const year = date.getFullYear();
-        const weekday = daysOfWeek[(date.getDay() + 6) % 7]; // Convert to our Saturday-first system
-        return `${weekday}, ${month} ${day}, ${year}`;
-    }, [daysOfWeek, monthNames]);
+    const formatDate = useCallback(
+        (date) => {
+            if (!date) return '';
+            const day = date.getDate();
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear();
+            const weekday = daysOfWeek[(date.getDay() + 6) % 7]; // Convert to our Saturday-first system
+            return `${weekday}, ${month} ${day}, ${year}`;
+        },
+        [daysOfWeek, monthNames],
+    );
 
     // Navigation handlers
     const goToPreviousMonth = useCallback(() => {
@@ -217,19 +244,25 @@ const TimeCalendar = ({
     }, [onMonthChange, onDateSelect]);
 
     // Handle day selection
-    const handleDayClick = useCallback((date) => {
-        if (date) {
-            setSelectedDate(date);
-            onDateSelect(date);
-        }
-    }, [onDateSelect]);
+    const handleDayClick = useCallback(
+        (date) => {
+            if (date) {
+                setSelectedDate(date);
+                onDateSelect(date);
+            }
+        },
+        [onDateSelect],
+    );
 
     // Handle time slot selection
-    const handleTimeSlotClick = useCallback((timeSlot) => {
-        if (onTimeSlotSelect) {
-            onTimeSlotSelect(timeSlot);
-        }
-    }, [onTimeSlotSelect]);
+    const handleTimeSlotClick = useCallback(
+        (timeSlot) => {
+            if (onTimeSlotSelect) {
+                onTimeSlotSelect(timeSlot);
+            }
+        },
+        [onTimeSlotSelect],
+    );
 
     return (
         <Paper
@@ -239,7 +272,7 @@ const TimeCalendar = ({
                 borderRadius: 2,
                 overflow: 'hidden',
                 backgroundColor: theme.palette.background.paper,
-                boxShadow: theme.shadows[3]
+                boxShadow: theme.shadows[3],
             }}
         >
             {/* Calendar Header */}
@@ -247,7 +280,7 @@ const TimeCalendar = ({
                 <Stack
                     direction="row"
                     spacing={1}
-                    sx={{ alignItems: "center", justifyContent: "space-between" }}
+                    sx={{ alignItems: 'center', justifyContent: 'space-between' }}
                 >
                     <Typography variant="h5" fontWeight="600" color="text.primary">
                         {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
@@ -257,25 +290,25 @@ const TimeCalendar = ({
                             onClick={goToPreviousMonth}
                             color="primary"
                             aria-label="Previous month"
-                            size={isMobile ? "small" : "medium"}
+                            size={isMobile ? 'small' : 'medium'}
                         >
-                            <ArrowBackIos fontSize={isMobile ? "small" : "medium"} />
+                            <ArrowBackIos fontSize={isMobile ? 'small' : 'medium'} />
                         </IconButton>
                         <IconButton
                             onClick={goToToday}
                             color="primary"
                             aria-label="Go to today"
-                            size={isMobile ? "small" : "medium"}
+                            size={isMobile ? 'small' : 'medium'}
                         >
-                            <Today fontSize={isMobile ? "small" : "medium"} />
+                            <Today fontSize={isMobile ? 'small' : 'medium'} />
                         </IconButton>
                         <IconButton
                             onClick={goToNextMonth}
                             color="primary"
                             aria-label="Next month"
-                            size={isMobile ? "small" : "medium"}
+                            size={isMobile ? 'small' : 'medium'}
                         >
-                            <ArrowForwardIos fontSize={isMobile ? "small" : "medium"} />
+                            <ArrowForwardIos fontSize={isMobile ? 'small' : 'medium'} />
                         </IconButton>
                     </Stack>
                 </Stack>
@@ -286,7 +319,7 @@ const TimeCalendar = ({
                 <Grid container>
                     {/* Days of week header */}
                     {daysOfWeek.map((day, index) => (
-                        <Grid size={12/7} key={`header-${index}`} >
+                        <Grid size={12 / 7} key={`header-${index}`}>
                             <Box
                                 sx={{
                                     textAlign: 'center',
@@ -294,7 +327,7 @@ const TimeCalendar = ({
                                     fontWeight: 'bold',
                                     color: 'text.secondary',
                                     borderBottom: 1,
-                                    borderColor: 'divider'
+                                    borderColor: 'divider',
                                 }}
                             >
                                 {day}
@@ -304,7 +337,7 @@ const TimeCalendar = ({
 
                     {/* Calendar days */}
                     {calendarData.map((dayObj, index) => (
-                        <Grid size={12/7} key={`day-${index}`} >
+                        <Grid size={12 / 7} key={`day-${index}`}>
                             <Box
                                 sx={{
                                     height: { xs: 40, sm: 50 },
@@ -320,19 +353,20 @@ const TimeCalendar = ({
                                     backgroundColor: isSelected(dayObj.date)
                                         ? theme.palette.primary.main
                                         : isToday(dayObj.date)
-                                            ? theme.palette.primary.light
-                                            : 'transparent',
-                                    color: (isSelected(dayObj.date) || isToday(dayObj.date))
-                                        ? theme.palette.primary.contrastText
-                                        : theme.palette.text.primary,
+                                          ? theme.palette.primary.light
+                                          : 'transparent',
+                                    color:
+                                        isSelected(dayObj.date) || isToday(dayObj.date)
+                                            ? theme.palette.primary.contrastText
+                                            : theme.palette.text.primary,
                                     '&:hover': {
                                         backgroundColor: dayObj.day
-                                            ? (isSelected(dayObj.date)
+                                            ? isSelected(dayObj.date)
                                                 ? theme.palette.primary.dark
-                                                : theme.palette.action.hover)
+                                                : theme.palette.action.hover
                                             : 'transparent',
-                                        transform: dayObj.day ? 'scale(1.05)' : 'none'
-                                    }
+                                        transform: dayObj.day ? 'scale(1.05)' : 'none',
+                                    },
                                 }}
                                 onClick={() => dayObj.day && handleDayClick(dayObj.date)}
                             >
@@ -340,7 +374,11 @@ const TimeCalendar = ({
                                     <>
                                         <Typography
                                             variant="body2"
-                                            fontWeight={isToday(dayObj.date) || isSelected(dayObj.date) ? 'bold' : 'normal'}
+                                            fontWeight={
+                                                isToday(dayObj.date) || isSelected(dayObj.date)
+                                                    ? 'bold'
+                                                    : 'normal'
+                                            }
                                         >
                                             {dayObj.day}
                                         </Typography>
@@ -354,7 +392,7 @@ const TimeCalendar = ({
                                                     width: '100%',
                                                     display: 'flex',
                                                     justifyContent: 'center',
-                                                    gap: 0.5
+                                                    gap: 0.5,
                                                 }}
                                             >
                                                 <Box
@@ -362,9 +400,11 @@ const TimeCalendar = ({
                                                         width: 6,
                                                         height: 6,
                                                         borderRadius: '50%',
-                                                        backgroundColor: hasActiveTimeSlots(dayObj.date)
+                                                        backgroundColor: hasActiveTimeSlots(
+                                                            dayObj.date,
+                                                        )
                                                             ? theme.palette.success.main
-                                                            : theme.palette.grey[400]
+                                                            : theme.palette.grey[400],
                                                     }}
                                                 />
                                                 {countTimeSlots(dayObj.date) > 1 && (
@@ -373,9 +413,11 @@ const TimeCalendar = ({
                                                             width: 6,
                                                             height: 6,
                                                             borderRadius: '50%',
-                                                            backgroundColor: hasActiveTimeSlots(dayObj.date)
+                                                            backgroundColor: hasActiveTimeSlots(
+                                                                dayObj.date,
+                                                            )
                                                                 ? theme.palette.success.main
-                                                                : theme.palette.grey[400]
+                                                                : theme.palette.grey[400],
                                                         }}
                                                     />
                                                 )}
@@ -396,14 +438,10 @@ const TimeCalendar = ({
                     sx={{
                         p: { xs: 1.5, sm: 2 },
                         borderRadius: 2,
-                        backgroundColor: theme.palette.background.default
+                        backgroundColor: theme.palette.background.default,
                     }}
                 >
-                    <Stack
-                        direction="row"
-                        spacing={1}
-                        sx={{ mb: 2, alignItems: "center" }}
-                    >
+                    <Stack direction="row" spacing={1} sx={{ mb: 2, alignItems: 'center' }}>
                         <CalendarMonth color="primary" />
                         <Typography variant="h6" fontWeight="600">
                             {formatDate(selectedDate)}
@@ -440,7 +478,7 @@ const TimeCalendar = ({
                                 borderRadius: 2,
                                 borderStyle: 'dashed',
                                 borderWidth: 1,
-                                borderColor: theme.palette.divider
+                                borderColor: theme.palette.divider,
                             }}
                         >
                             <CalendarMonth
@@ -448,7 +486,7 @@ const TimeCalendar = ({
                                     fontSize: 48,
                                     color: theme.palette.text.secondary,
                                     mb: 2,
-                                    opacity: 0.5
+                                    opacity: 0.5,
                                 }}
                             />
                             <Typography variant="body1" color="text.secondary">

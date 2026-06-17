@@ -1,4 +1,4 @@
-import React, {useState, useMemo} from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     Box,
     Chip,
@@ -21,26 +21,25 @@ import {
     Biotech as SampleIcon,
     Calculate as CalculateIcon,
     FilterList as FilterIcon,
-    Clear as ClearIcon
+    Clear as ClearIcon,
 } from '@mui/icons-material';
 import TableLayout from '@/Layouts/TableLayout';
-import PageHeader from "@/Components/PageHeader.jsx";
-import {Head, router, usePage} from "@inertiajs/react";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.jsx";
-import FormulaTester from "@/Components/FormulaTester.jsx";
-import {DownloadIcon} from "lucide-react";
-
+import PageHeader from '@/Components/PageHeader.jsx';
+import { Head, router, usePage } from '@inertiajs/react';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.jsx';
+import FormulaTester from '@/Components/FormulaTester.jsx';
+import { DownloadIcon } from 'lucide-react';
 
 // Filter Component
-const TestFilter = ({defaultFilter, onFilter}) => {
+const TestFilter = ({ defaultFilter, onFilter }) => {
     const [filters, setFilters] = useState({
         search: defaultFilter?.search || '',
         type: defaultFilter?.type || '',
-        status: defaultFilter?.status || ''
+        status: defaultFilter?.status || '',
     });
 
     const handleFilterChange = (field, value) => {
-        setFilters(prev => ({...prev, [field]: value}));
+        setFilters((prev) => ({ ...prev, [field]: value }));
     };
 
     const applyFilters = () => {
@@ -48,14 +47,14 @@ const TestFilter = ({defaultFilter, onFilter}) => {
     };
 
     const clearFilters = () => {
-        const clearedFilters = {search: '', type: '', status: ''};
+        const clearedFilters = { search: '', type: '', status: '' };
         setFilters(clearedFilters);
         onFilter(clearedFilters)();
     };
 
     return (
-  <Grid container spacing={2} sx={{alignItems: "center"}}>
-            <Grid size={{xs: 12, md: 4}}>
+        <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+            <Grid size={{ xs: 12, md: 4 }}>
                 <TextField
                     fullWidth
                     size="small"
@@ -65,7 +64,7 @@ const TestFilter = ({defaultFilter, onFilter}) => {
                     placeholder="Enter test name or code..."
                 />
             </Grid>
-            <Grid size={{xs: 12, md: 3}}>
+            <Grid size={{ xs: 12, md: 3 }}>
                 <TextField
                     fullWidth
                     size="small"
@@ -73,7 +72,7 @@ const TestFilter = ({defaultFilter, onFilter}) => {
                     label="Test Type"
                     value={filters.type}
                     onChange={(e) => handleFilterChange('type', e.target.value)}
-                    slotProps={{select: {native: true}, inputLabel: {shrink: true}}}
+                    slotProps={{ select: { native: true }, inputLabel: { shrink: true } }}
                 >
                     <option value="">All Types</option>
                     <option value="TEST">Test</option>
@@ -81,7 +80,7 @@ const TestFilter = ({defaultFilter, onFilter}) => {
                     <option value="PANEL">Panel</option>
                 </TextField>
             </Grid>
-            <Grid size={{xs: 12, md: 3}}>
+            <Grid size={{ xs: 12, md: 3 }}>
                 <TextField
                     fullWidth
                     size="small"
@@ -89,19 +88,19 @@ const TestFilter = ({defaultFilter, onFilter}) => {
                     label="Status"
                     value={filters.status}
                     onChange={(e) => handleFilterChange('status', e.target.value)}
-                    slotProps={{select: {native: true}, inputLabel: {shrink: true}}}
+                    slotProps={{ select: { native: true }, inputLabel: { shrink: true } }}
                 >
                     <option value="">All Status</option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                 </TextField>
             </Grid>
-            <Grid size={{xs: 12, md: 2}}>
+            <Grid size={{ xs: 12, md: 2 }}>
                 <Stack direction="row" spacing={1}>
                     <Button
                         variant="contained"
                         onClick={applyFilters}
-                        startIcon={<FilterIcon/>}
+                        startIcon={<FilterIcon />}
                         size="small"
                         fullWidth
                     >
@@ -109,7 +108,7 @@ const TestFilter = ({defaultFilter, onFilter}) => {
                     </Button>
                     <Tooltip title="Clear Filters">
                         <IconButton onClick={clearFilters} size="small">
-                            <ClearIcon/>
+                            <ClearIcon />
                         </IconButton>
                     </Tooltip>
                 </Stack>
@@ -119,33 +118,34 @@ const TestFilter = ({defaultFilter, onFilter}) => {
 };
 
 // Sample Types Display Component
-const SampleTypesDisplay = ({sampleTypes = []}) => {
-    if (!sampleTypes.length) return <Typography variant="body2" color="text.secondary">—</Typography>;
+const SampleTypesDisplay = ({ sampleTypes = [] }) => {
+    if (!sampleTypes.length)
+        return (
+            <Typography variant="body2" color="text.secondary">
+                —
+            </Typography>
+        );
 
     return (
-        <Stack direction="row" spacing={0.5} useFlexGap sx={{flexWrap: 'wrap'}}>
+        <Stack direction="row" spacing={0.5} useFlexGap sx={{ flexWrap: 'wrap' }}>
             {sampleTypes.slice(0, 3).map((type) => (
                 <Chip
                     key={type.id}
                     label={type.name}
                     size="small"
                     variant="outlined"
-                    icon={<SampleIcon fontSize="small"/>}
+                    icon={<SampleIcon fontSize="small" />}
                 />
             ))}
             {sampleTypes.length > 3 && (
-                <Chip
-                    label={`+${sampleTypes.length - 3} more`}
-                    size="small"
-                    variant="outlined"
-                />
+                <Chip label={`+${sampleTypes.length - 3} more`} size="small" variant="outlined" />
             )}
         </Stack>
     );
 };
 
 // Method Display Component with Price Calculator
-const MethodDisplay = ({method, testType}) => {
+const MethodDisplay = ({ method, testType }) => {
     const [calculatorOpen, setCalculatorOpen] = useState(false);
 
     const handleCalculatorOpen = () => {
@@ -158,30 +158,32 @@ const MethodDisplay = ({method, testType}) => {
 
     return (
         <Box>
-  <Stack direction="row" spacing={0.5} sx={{alignItems: "center"}}>
-                {testType !== "PANEL" && <Typography variant="body2" fontWeight="medium">
-                    {method.name}
-                </Typography>}
-                {method.price_type === 'Fix' ? (<Chip
-                    label={`${method.price} OMR`}
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                />) : (
+            <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+                {testType !== 'PANEL' && (
+                    <Typography variant="body2" fontWeight="medium">
+                        {method.name}
+                    </Typography>
+                )}
+                {method.price_type === 'Fix' ? (
+                    <Chip
+                        label={`${method.price} OMR`}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                    />
+                ) : (
                     <Tooltip title="Open Price Calculator">
-                        <IconButton
-                            size="small"
-                            onClick={handleCalculatorOpen}
-                            color="primary"
-                        >
-                            <CalculateIcon fontSize="small"/>
+                        <IconButton size="small" onClick={handleCalculatorOpen} color="primary">
+                            <CalculateIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
                 )}
             </Stack>
-            {method.turnaround_time && method.workflow?.name && <Typography variant="caption" color="text.secondary">
-                {method.turnaround_time} days • {method.workflow?.name}
-            </Typography>}
+            {method.turnaround_time && method.workflow?.name && (
+                <Typography variant="caption" color="text.secondary">
+                    {method.turnaround_time} days • {method.workflow?.name}
+                </Typography>
+            )}
 
             {/* Price Calculator Dialog */}
             {method.price_type !== 'Fix' && (
@@ -191,9 +193,7 @@ const MethodDisplay = ({method, testType}) => {
                     maxWidth="md"
                     fullWidth
                 >
-                    <DialogTitle>
-                        Price Calculator - {method.name}
-                    </DialogTitle>
+                    <DialogTitle>Price Calculator - {method.name}</DialogTitle>
                     <DialogContent>
                         <FormulaTester
                             parameters={method.extra?.parameters || []}
@@ -203,9 +203,7 @@ const MethodDisplay = ({method, testType}) => {
                         />
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleCalculatorClose}>
-                            Close
-                        </Button>
+                        <Button onClick={handleCalculatorClose}>Close</Button>
                     </DialogActions>
                 </Dialog>
             )}
@@ -214,19 +212,19 @@ const MethodDisplay = ({method, testType}) => {
 };
 
 // Methods List Component
-const MethodsList = ({methodTests = [], testType}) => {
+const MethodsList = ({ methodTests = [], testType }) => {
     if (testType === 'PANEL' || !methodTests.length) {
-        return <Typography variant="body2" color="text.secondary">—</Typography>;
+        return (
+            <Typography variant="body2" color="text.secondary">
+                —
+            </Typography>
+        );
     }
 
     return (
         <Stack spacing={1} direction="row">
             {methodTests.slice(0, 2).map((methodTest, index) => (
-                <MethodDisplay
-                    key={methodTest.id}
-                    method={methodTest.method}
-                    testType={testType}
-                />
+                <MethodDisplay key={methodTest.id} method={methodTest.method} testType={testType} />
             ))}
             {methodTests.length > 2 && (
                 <Typography variant="caption" color="text.secondary">
@@ -238,8 +236,8 @@ const MethodsList = ({methodTests = [], testType}) => {
 };
 
 // Test Type Icon Component
-const TestTypeIcon = ({type}) => {
-    const iconProps = {fontSize: 'small'};
+const TestTypeIcon = ({ type }) => {
+    const iconProps = { fontSize: 'small' };
 
     switch (type) {
         case 'TEST':
@@ -255,130 +253,159 @@ const TestTypeIcon = ({type}) => {
 
 // Main Test List Component
 const TestList = () => {
-    const {tests, requestInputs} = usePage().props;
+    const { tests, requestInputs } = usePage().props;
     // Define table columns
-    const columns = useMemo(() => [
-        {
-            field: 'code',
-            headerName: 'Code',
-            flex: 0.1,
-            display: "flex",
-            renderCell: (params) => (
-                <Typography variant="body2" fontWeight="medium">
-                    {params.value}
-                </Typography>
-            )
-        },
-        {
-            field: 'name',
-            headerName: 'Test Name',
-            flex: .3,
-            minWidth: 200,
-            display: "flex",
-            renderCell: (params) => (
-                <Box>
+    const columns = useMemo(
+        () => [
+            {
+                field: 'code',
+                headerName: 'Code',
+                flex: 0.1,
+                display: 'flex',
+                renderCell: (params) => (
                     <Typography variant="body2" fontWeight="medium">
                         {params.value}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                        {params.row.fullName}
-                    </Typography>
-                </Box>
-            )
-        },
-        {
-            field: 'type',
-            headerName: 'Type',
-            width: 70,
-            flex: 0.15,
-            display: "flex",
-            renderCell: (params) => (
-                <Chip
-                    icon={<TestTypeIcon type={params.value}/>}
-                    label={params.value}
-                    size="small"
-                    variant="outlined"
-                    color={params.value === 'TEST' ? 'primary' : params.value === 'SERVICE' ? 'secondary' : 'default'}
-                />
-            )
-        },
-        {
-            field: 'testGroups',
-            headerName: 'Group',
-            flex: 0.15,
-            display: "flex",
-            sortable: false,
-            renderCell: ({row}) => row.test_groups?.map(item => item.name)?.join(", ") || '—'
-        },
-        {
-            field: 'sample_types',
-            headerName: 'Sample Types',
-            flex: 0.4,
-            display: "flex",
-            renderCell: ({row}) => <SampleTypesDisplay sampleTypes={row.sample_types}/>
-        },
-        {
-            field: 'tat',
-            headerName: 'Turnaround Time(Business Day)',
-            flex: 0.2,
-            display: "flex",
-        },
-        {
-            field: 'consent_form_id',
-            headerName: 'Consent Form',
-            flex: 0.2,
-            display: "flex",
-            renderCell: ({row}) => row?.consent_form?.document &&
-                <IconButton href={route("documents.show", row?.consent_form?.document)} target="_blank"><DownloadIcon/></IconButton>
-        },
-        {
-            field: 'request_form_id',
-            headerName: 'Request Form',
-            flex: 0.2,
-            display: "flex",
-            renderCell: ({row}) => row?.request_form?.document &&
-                <IconButton href={route("documents.show", row?.request_form?.document)} target="_blank"><DownloadIcon/></IconButton>
-        },
-        {
-            field: 'instruction_id',
-            headerName: 'Instruction',
-            flex: 0.2,
-            display: "flex",
-            renderCell: ({row}) => row?.instruction?.document &&
-                <IconButton href={route("documents.show", row?.instruction?.document)}
-                            target="_blank"><DownloadIcon/></IconButton>
-        },
-        {
-            field: 'method_tests',
-            headerName: 'Methods & Pricing',
-            flex: 1,
-            display: "flex",
-            minWidth: 400,
-            alignItems: "center",
-            renderCell: (params) => (
-                <Box sx={{py: 1}}>
-                    {params.row.type === 'PANEL' ? (
-                        <MethodDisplay method={params.row} testType="PANEL"/>
-                    ) : (
-                        <MethodsList methodTests={params.value} testType={params.row.type}/>
-                    )}
-                </Box>
-            )
-        }
-    ], []);
+                ),
+            },
+            {
+                field: 'name',
+                headerName: 'Test Name',
+                flex: 0.3,
+                minWidth: 200,
+                display: 'flex',
+                renderCell: (params) => (
+                    <Box>
+                        <Typography variant="body2" fontWeight="medium">
+                            {params.value}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                            {params.row.fullName}
+                        </Typography>
+                    </Box>
+                ),
+            },
+            {
+                field: 'type',
+                headerName: 'Type',
+                width: 70,
+                flex: 0.15,
+                display: 'flex',
+                renderCell: (params) => (
+                    <Chip
+                        icon={<TestTypeIcon type={params.value} />}
+                        label={params.value}
+                        size="small"
+                        variant="outlined"
+                        color={
+                            params.value === 'TEST'
+                                ? 'primary'
+                                : params.value === 'SERVICE'
+                                  ? 'secondary'
+                                  : 'default'
+                        }
+                    />
+                ),
+            },
+            {
+                field: 'testGroups',
+                headerName: 'Group',
+                flex: 0.15,
+                display: 'flex',
+                sortable: false,
+                renderCell: ({ row }) =>
+                    row.test_groups?.map((item) => item.name)?.join(', ') || '—',
+            },
+            {
+                field: 'sample_types',
+                headerName: 'Sample Types',
+                flex: 0.4,
+                display: 'flex',
+                renderCell: ({ row }) => <SampleTypesDisplay sampleTypes={row.sample_types} />,
+            },
+            {
+                field: 'tat',
+                headerName: 'Turnaround Time(Business Day)',
+                flex: 0.2,
+                display: 'flex',
+            },
+            {
+                field: 'consent_form_id',
+                headerName: 'Consent Form',
+                flex: 0.2,
+                display: 'flex',
+                renderCell: ({ row }) =>
+                    row?.consent_form?.document && (
+                        <IconButton
+                            href={route('documents.show', row?.consent_form?.document)}
+                            target="_blank"
+                        >
+                            <DownloadIcon />
+                        </IconButton>
+                    ),
+            },
+            {
+                field: 'request_form_id',
+                headerName: 'Request Form',
+                flex: 0.2,
+                display: 'flex',
+                renderCell: ({ row }) =>
+                    row?.request_form?.document && (
+                        <IconButton
+                            href={route('documents.show', row?.request_form?.document)}
+                            target="_blank"
+                        >
+                            <DownloadIcon />
+                        </IconButton>
+                    ),
+            },
+            {
+                field: 'instruction_id',
+                headerName: 'Instruction',
+                flex: 0.2,
+                display: 'flex',
+                renderCell: ({ row }) =>
+                    row?.instruction?.document && (
+                        <IconButton
+                            href={route('documents.show', row?.instruction?.document)}
+                            target="_blank"
+                        >
+                            <DownloadIcon />
+                        </IconButton>
+                    ),
+            },
+            {
+                field: 'method_tests',
+                headerName: 'Methods & Pricing',
+                flex: 1,
+                display: 'flex',
+                minWidth: 400,
+                alignItems: 'center',
+                renderCell: (params) => (
+                    <Box sx={{ py: 1 }}>
+                        {params.row.type === 'PANEL' ? (
+                            <MethodDisplay method={params.row} testType="PANEL" />
+                        ) : (
+                            <MethodsList methodTests={params.value} testType={params.row.type} />
+                        )}
+                    </Box>
+                ),
+            },
+        ],
+        [],
+    );
 
     const pageReload = (page, filters, sort, pageSize) => {
-        router.visit(route("test-list"), {
-            data: {page, filters, sort, pageSize},
-            only: ["tests", "requestInputs"],
+        router.visit(route('test-list'), {
+            data: { page, filters, sort, pageSize },
+            only: ['tests', 'requestInputs'],
         });
     };
 
-
     return (
         <>
-            <Head title="Test List"/>
-            <PageHeader title="Test List"/>
+            <Head title="Test List" />
+            <PageHeader title="Test List" />
             <TableLayout
                 Filter={TestFilter}
                 columns={columns}
@@ -389,9 +416,9 @@ const TestList = () => {
                     containerSx: {
                         '& .MuiDataGrid-cell': {
                             alignItems: 'flex-start',
-                            py: 1
-                        }
-                    }
+                            py: 1,
+                        },
+                    },
                 }}
             />
         </>
@@ -399,11 +426,13 @@ const TestList = () => {
 };
 const breadCrumbs = [
     {
-        title: "Tests List",
+        title: 'Tests List',
         link: null,
-        icon: null
-    }
-]
+        icon: null,
+    },
+];
 
-TestList.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
+TestList.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
+);
 export default TestList;

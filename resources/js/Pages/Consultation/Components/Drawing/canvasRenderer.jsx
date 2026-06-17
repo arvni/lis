@@ -17,7 +17,13 @@ export const renderCanvas = (ctx, state) => {
     }
 
     // Draw all elements
-    drawElements(ctx, state.elementsOnCanvas, state.selectedElementIds, state.penSize, state.fillColor);
+    drawElements(
+        ctx,
+        state.elementsOnCanvas,
+        state.selectedElementIds,
+        state.penSize,
+        state.fillColor,
+    );
 
     // Draw temporary editing UI elements (current drawing, selection UI)
     drawEditingUI(ctx, state);
@@ -50,7 +56,7 @@ const drawGrid = (ctx, width, height, gridSize) => {
 // Draw all elements on the canvas
 const drawElements = (ctx, elements, selectedElementIds, defaultPenSize, defaultFillColor) => {
     // Draw standard elements first
-    elements.forEach(el => {
+    elements.forEach((el) => {
         if (el.item.shape === ElementTypes.FILL_PLACEHOLDER) {
             drawFillPlaceholder(ctx, el);
         } else if (el.item.shape !== ElementTypes.ERASE_PATH) {
@@ -66,8 +72,10 @@ const drawElements = (ctx, elements, selectedElementIds, defaultPenSize, default
 const drawElement = (ctx, element, selectedElementIds, defaultPenSize, defaultFillColor) => {
     ctx.beginPath();
     const isSelected = selectedElementIds.includes(element.id);
-    ctx.strokeStyle = isSelected ? 'magenta' : (element.color || '#000');
-    ctx.lineWidth = isSelected ? (element.lineWidth || defaultPenSize) + 2 : (element.lineWidth || defaultPenSize);
+    ctx.strokeStyle = isSelected ? 'magenta' : element.color || '#000';
+    ctx.lineWidth = isSelected
+        ? (element.lineWidth || defaultPenSize) + 2
+        : element.lineWidth || defaultPenSize;
     ctx.setLineDash(element.lineStyle === 'dashed' ? [5, 5] : []);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -82,11 +90,24 @@ const drawElement = (ctx, element, selectedElementIds, defaultPenSize, defaultFi
             break;
 
         case ElementTypes.SQUARE:
-            drawSquare(ctx, element.item.x, element.item.y, element.item.width, element.item.height, element.fillColor);
+            drawSquare(
+                ctx,
+                element.item.x,
+                element.item.y,
+                element.item.width,
+                element.item.height,
+                element.fillColor,
+            );
             break;
 
         case ElementTypes.CIRCLE:
-            drawCircle(ctx, element.item.cx, element.item.cy, element.item.radius, element.fillColor);
+            drawCircle(
+                ctx,
+                element.item.cx,
+                element.item.cy,
+                element.item.radius,
+                element.fillColor,
+            );
             break;
 
         case ElementTypes.TEXT:
@@ -150,7 +171,7 @@ const drawText = (ctx, element, isSelected) => {
             element.item.x - 5,
             element.item.y - 2,
             element.item.width + 10,
-            element.item.height + 4
+            element.item.height + 4,
         );
     }
 };
@@ -167,7 +188,7 @@ const drawFillPlaceholder = (ctx, element) => {
 const applyEraserPaths = (ctx, elements, defaultPenSize) => {
     const originalCompositeOp = ctx.globalCompositeOperation;
 
-    elements.forEach(el => {
+    elements.forEach((el) => {
         if (el.item.shape === ElementTypes.ERASE_PATH) {
             ctx.globalCompositeOperation = 'destination-out';
             ctx.beginPath();
@@ -227,13 +248,11 @@ const drawDrawingPreview = (ctx, state) => {
                 state.currentLinePoints[0].y,
                 state.penSize / 2,
                 0,
-                Math.PI * 2
+                Math.PI * 2,
             );
             ctx.fill();
         }
-    }
-
-    else if (state.currentTool === 'straight-line') {
+    } else if (state.currentTool === 'straight-line') {
         ctx.strokeStyle = state.penColor;
 
         if (state.currentLinePoints.length === 2) {
@@ -248,13 +267,11 @@ const drawDrawingPreview = (ctx, state) => {
                 state.currentLinePoints[0].y,
                 state.penSize / 2,
                 0,
-                Math.PI * 2
+                Math.PI * 2,
             );
             ctx.fill();
         }
-    }
-
-    else if (state.currentTool === 'eraser') {
+    } else if (state.currentTool === 'eraser') {
         ctx.fillStyle = 'rgba(128, 128, 128, 0.5)'; // Semi-transparent gray for eraser head
         const lastPoint = state.currentLinePoints[state.currentLinePoints.length - 1];
 
@@ -283,7 +300,7 @@ const drawSelectionUI = (ctx, state) => {
             ctx.beginPath();
             ctx.strokeStyle = 'green';
             ctx.lineWidth = 1;
-            ctx.setLineDash(lineProps.type === 'dashed' ? [3,3] : []);
+            ctx.setLineDash(lineProps.type === 'dashed' ? [3, 3] : []);
             ctx.moveTo(lineProps.points[0].x, lineProps.points[0].y);
             ctx.lineTo(lineProps.points[1].x, lineProps.points[1].y);
             ctx.stroke();
@@ -296,7 +313,7 @@ const drawSelectionUI = (ctx, state) => {
     // Draw temporary selection points
     if (state.currentTool === 'select' && state.tempSelectionPoints.length > 0) {
         ctx.fillStyle = 'green';
-        state.tempSelectionPoints.forEach(p => {
+        state.tempSelectionPoints.forEach((p) => {
             ctx.beginPath();
             ctx.arc(p.x, p.y, 3, 0, 2 * Math.PI);
             ctx.fill();

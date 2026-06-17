@@ -1,6 +1,6 @@
-import {useState, useEffect} from "react";
-import {Autocomplete, TextField, CircularProgress} from "@mui/material";
-import axios from "axios";
+import { useState, useEffect } from 'react';
+import { Autocomplete, TextField, CircularProgress } from '@mui/material';
+import axios from 'axios';
 
 /**
  * Unit selector. When itemId is provided, fetches only units valid for that
@@ -17,7 +17,17 @@ import axios from "axios";
  *   helperText – string
  *   size       – MUI size
  */
-const UnitSelect = ({itemId, allUnits = [], value, onChange, label = "Unit", required = false, error = false, helperText = "", size = "medium"}) => {
+const UnitSelect = ({
+    itemId,
+    allUnits = [],
+    value,
+    onChange,
+    label = 'Unit',
+    required = false,
+    error = false,
+    helperText = '',
+    size = 'medium',
+}) => {
     const [itemUnits, setItemUnits] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -27,8 +37,9 @@ const UnitSelect = ({itemId, allUnits = [], value, onChange, label = "Unit", req
             return;
         }
         setLoading(true);
-        axios.get(route("api.inventory.items.units", itemId))
-            .then(({data}) => setItemUnits(data))
+        axios
+            .get(route('api.inventory.items.units', itemId))
+            .then(({ data }) => setItemUnits(data))
             .catch(() => setItemUnits(null))
             .finally(() => setLoading(false));
     }, [itemId]);
@@ -40,7 +51,7 @@ const UnitSelect = ({itemId, allUnits = [], value, onChange, label = "Unit", req
             value={value || null}
             options={options}
             isOptionEqualToValue={(opt, val) => opt.id === val?.id}
-            getOptionLabel={(opt) => opt ? `${opt.name} (${opt.abbreviation})` : ""}
+            getOptionLabel={(opt) => (opt ? `${opt.name} (${opt.abbreviation})` : '')}
             onChange={(_, newValue) => onChange(newValue)}
             renderInput={(params) => (
                 <TextField
@@ -49,14 +60,17 @@ const UnitSelect = ({itemId, allUnits = [], value, onChange, label = "Unit", req
                     required={required}
                     size={size}
                     error={error}
-                    helperText={helperText || (itemId && itemUnits ? `${options.length} unit(s) available` : "")}
+                    helperText={
+                        helperText ||
+                        (itemId && itemUnits ? `${options.length} unit(s) available` : '')
+                    }
                     slotProps={{
                         ...params.slotProps,
                         input: {
                             ...params.slotProps?.input,
                             endAdornment: (
                                 <>
-                                    {loading && <CircularProgress size={16}/>}
+                                    {loading && <CircularProgress size={16} />}
                                     {params.slotProps?.input?.endAdornment}
                                 </>
                             ),

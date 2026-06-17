@@ -1,22 +1,14 @@
-import React, {useEffect, useState} from 'react';
-import {
-    Box,
-    TextField,
-    Button,
-    Stack,
-    Paper,
-    Typography,
-    Grid as Grid,
-} from '@mui/material';
-import {DatePicker} from '@mui/x-date-pickers/DatePicker';
-import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
-import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import React, { useEffect, useState } from 'react';
+import { Box, TextField, Button, Stack, Paper, Typography, Grid as Grid } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';
-import SelectSearch from "@/Components/SelectSearch.jsx";
+import SelectSearch from '@/Components/SelectSearch.jsx';
 
-const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
+const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
     console.log(defaultValues);
     const [filters, setFilters] = useState({
         search: defaultValues.search || '',
@@ -33,19 +25,19 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
     });
 
     const handleFilterChange = (field, value) => {
-        setFilters(prev => ({
+        setFilters((prev) => ({
             ...prev,
-            [field]: value
+            [field]: value,
         }));
     };
 
     const handleDateRangeChange = (field, type, value) => {
-        setFilters(prev => ({
+        setFilters((prev) => ({
             ...prev,
             [field]: {
                 ...prev[field],
-                [type]: value
-            }
+                [type]: value,
+            },
         }));
     };
 
@@ -63,18 +55,24 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
         // Clean up filters before sending
         const cleanedFilters = {
             ...filters,
-            expire_date: (filters.expire_date.from || filters.expire_date.to) ? {
-                from: formatDateForBackend(filters.expire_date.from),
-                to: formatDateForBackend(filters.expire_date.to)
-            } : null,
-            assigned_at: (filters.assigned_at.from || filters.assigned_at.to) ? {
-                from: formatDateForBackend(filters.assigned_at.from),
-                to: formatDateForBackend(filters.assigned_at.to)
-            } : null,
+            expire_date:
+                filters.expire_date.from || filters.expire_date.to
+                    ? {
+                          from: formatDateForBackend(filters.expire_date.from),
+                          to: formatDateForBackend(filters.expire_date.to),
+                      }
+                    : null,
+            assigned_at:
+                filters.assigned_at.from || filters.assigned_at.to
+                    ? {
+                          from: formatDateForBackend(filters.assigned_at.from),
+                          to: formatDateForBackend(filters.assigned_at.to),
+                      }
+                    : null,
         };
 
         // Remove null values
-        Object.keys(cleanedFilters).forEach(key => {
+        Object.keys(cleanedFilters).forEach((key) => {
             if (cleanedFilters[key] === null || cleanedFilters[key] === '') {
                 delete cleanedFilters[key];
             }
@@ -88,51 +86,60 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
             search: '',
             sampleType: null,
             referrer: null,
-            expire_date: {from: null, to: null},
-            assigned_at: {from: null, to: null},
+            expire_date: { from: null, to: null },
+            assigned_at: { from: null, to: null },
         };
         setFilters(clearedFilters);
         onFilter({})();
     };
 
     const hasActiveFilters = () => {
-        return filters.search ||
+        return (
+            filters.search ||
             filters.sampleType ||
             filters.referrer ||
             filters.expire_date.from ||
             filters.expire_date.to ||
             filters.assigned_at.from ||
-            filters.assigned_at.to;
+            filters.assigned_at.to
+        );
     };
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <Paper elevation={1} sx={{p: 2, mb: 2}}>
+            <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
                 <Box
-                    sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0}}>
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                        <FilterListIcon color="action"/>
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        mb: 0,
+                    }}
+                >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <FilterListIcon color="action" />
                         <Typography variant="h6">Filters</Typography>
                         {hasActiveFilters() && (
-                            <Typography variant="caption" color="primary" sx={{ml: 1}}>
-                                ({Object.keys(filters).filter(key => {
-                                if (key === 'expire_date' || key === 'assigned_at') {
-                                    return filters[key].from || filters[key].to;
-                                }
-                                return filters[key];
-                            }).length} active)
+                            <Typography variant="caption" color="primary" sx={{ ml: 1 }}>
+                                (
+                                {
+                                    Object.keys(filters).filter((key) => {
+                                        if (key === 'expire_date' || key === 'assigned_at') {
+                                            return filters[key].from || filters[key].to;
+                                        }
+                                        return filters[key];
+                                    }).length
+                                }{' '}
+                                active)
                             </Typography>
                         )}
                     </Box>
-                    <Box>
-
-                    </Box>
+                    <Box></Box>
                 </Box>
-
 
                 <Grid container spacing={2}>
                     {/* Search Field */}
-                    <Grid size={{xs: 12, md: 6, lg: 4}}>
+                    <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                         <TextField
                             fullWidth
                             size="small"
@@ -141,94 +148,112 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                             value={filters.search}
                             onChange={(e) => handleFilterChange('search', e.target.value)}
                             slotProps={{
-                                input: {startAdornment: <SearchIcon color="action" sx={{mr: 1}}/>,},
+                                input: {
+                                    startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />,
+                                },
                             }}
                         />
                     </Grid>
 
                     {/* Sample Type Filter */}
-                    <Grid size={{xs: 12, md: 6, lg: 4}}>
+                    <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                         <SelectSearch
                             size="small"
                             value={filters.sampleType}
                             onChange={(e) => handleFilterChange('sampleType', e.target.value)}
                             label="Sample Type"
                             fullWidth
-                            url={route("api.sampleTypes.list")}
+                            url={route('api.sampleTypes.list')}
                             name="sampleType"
                         />
                     </Grid>
 
                     {/* Referrer Filter */}
-                    <Grid size={{xs: 12, md: 6, lg: 4}}>
+                    <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                         <SelectSearch
                             size="small"
                             value={filters.referrer}
                             onChange={(e) => handleFilterChange('referrer', e.target.value)}
                             label="Assigned To"
                             fullWidth
-                            url={route("api.referrers.list")}
+                            url={route('api.referrers.list')}
                             name="referrer"
                         />
                     </Grid>
 
                     {/* Expire Date Range */}
-                    <Grid size={{xs: 12, md: 6,}}>
-                        <Typography variant="caption" color="textSecondary" sx={{mb: 1, display: 'block'}}>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <Typography
+                            variant="caption"
+                            color="textSecondary"
+                            sx={{ mb: 1, display: 'block' }}
+                        >
                             Tube Expire Date Range
                         </Typography>
                         <Stack direction="row" spacing={2}>
                             <DatePicker
                                 label="From"
                                 value={filters.expire_date.from}
-                                onChange={(value) => handleDateRangeChange('expire_date', 'from', value)}
+                                onChange={(value) =>
+                                    handleDateRangeChange('expire_date', 'from', value)
+                                }
                                 slotProps={{
                                     textField: {
                                         size: 'small',
-                                        fullWidth: true
-                                    }
+                                        fullWidth: true,
+                                    },
                                 }}
                             />
                             <DatePicker
                                 label="To"
                                 value={filters.expire_date.to}
-                                onChange={(value) => handleDateRangeChange('expire_date', 'to', value)}
+                                onChange={(value) =>
+                                    handleDateRangeChange('expire_date', 'to', value)
+                                }
                                 slotProps={{
                                     textField: {
                                         size: 'small',
-                                        fullWidth: true
-                                    }
+                                        fullWidth: true,
+                                    },
                                 }}
                             />
                         </Stack>
                     </Grid>
 
                     {/* Assigned Date Range */}
-                    <Grid size={{xs: 12, md: 6}}>
-                        <Typography variant="caption" color="textSecondary" sx={{mb: 1, display: 'block'}}>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                        <Typography
+                            variant="caption"
+                            color="textSecondary"
+                            sx={{ mb: 1, display: 'block' }}
+                        >
                             Assigned Date Range
                         </Typography>
                         <Stack direction="row" spacing={2}>
                             <DatePicker
                                 label="From"
                                 value={filters.assigned_at.from}
-                                onChange={(value) => handleDateRangeChange('assigned_at', 'from', value)}
+                                onChange={(value) =>
+                                    handleDateRangeChange('assigned_at', 'from', value)
+                                }
                                 slotProps={{
                                     textField: {
                                         size: 'small',
-                                        fullWidth: true
-                                    }
+                                        fullWidth: true,
+                                    },
                                 }}
                             />
                             <DatePicker
                                 label="To"
                                 value={filters.assigned_at.to}
-                                onChange={(value) => handleDateRangeChange('assigned_at', 'to', value)}
+                                onChange={(value) =>
+                                    handleDateRangeChange('assigned_at', 'to', value)
+                                }
                                 slotProps={{
                                     textField: {
                                         size: 'small',
-                                        fullWidth: true
-                                    }
+                                        fullWidth: true,
+                                    },
                                 }}
                             />
                         </Stack>
@@ -236,11 +261,11 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
 
                     {/* Action Buttons */}
                     <Grid size={12}>
-  <Stack direction="row" spacing={2} sx={{justifyContent: "flex-end"}}>
+                        <Stack direction="row" spacing={2} sx={{ justifyContent: 'flex-end' }}>
                             <Button
                                 variant="outlined"
                                 color="inherit"
-                                startIcon={<ClearIcon/>}
+                                startIcon={<ClearIcon />}
                                 onClick={handleClearFilters}
                                 disabled={!hasActiveFilters()}
                             >

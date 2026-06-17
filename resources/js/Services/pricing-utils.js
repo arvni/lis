@@ -3,7 +3,6 @@ import { create, all } from 'mathjs';
 // Create a restricted math evaluator to prevent arbitrary code execution
 const math = create(all);
 
-
 /**
  * Safely replace parameters in a formula with their corresponding values
  * @param formula - The original formula string
@@ -41,15 +40,14 @@ function replaceParameters(formula, parameters, values) {
 
     // Additional safety checks
     const dangerousPatterns = [
-        /\b(import|require|eval|function)\b/,  // Prevent importing or calling functions
-        /[{}[\]]/,  // Prevent array or object syntax
-        /;/  // Prevent multiple statements
+        /\b(import|require|eval|function)\b/, // Prevent importing or calling functions
+        /[{}[\]]/, // Prevent array or object syntax
+        /;/, // Prevent multiple statements
     ];
 
-    if (dangerousPatterns.some(pattern => pattern.test(sanitizedExpression))) {
+    if (dangerousPatterns.some((pattern) => pattern.test(sanitizedExpression))) {
         throw new Error('Invalid expression');
     }
-
 
     return sanitizedExpression;
 }
@@ -77,15 +75,9 @@ function safeEvaluateCondition(condition) {
  * @param conditions - Optional pricing conditions
  * @returns Calculated price
  */
-export function calcPrice(
-    formula,
-    parameters,
-    values,
-    conditions
-){
+export function calcPrice(formula, parameters, values, conditions) {
     // Extract parameter names, sorted by length to prevent partial replacements
-    const paramNames = parameters.map(item => item.value)
-        .sort((s1, s2) => s2.length - s1.length);
+    const paramNames = parameters.map((item) => item.value).sort((s1, s2) => s2.length - s1.length);
 
     // If no conditions, directly calculate price
     if (!conditions || conditions.length < 1) {
@@ -96,9 +88,7 @@ export function calcPrice(
     const matchedCondition = findMatchingCondition(conditions, parameters, values);
 
     // Use matched condition's formula or fallback to original
-    return matchedCondition
-        ? safeCalculatePrice(matchedCondition.value, paramNames, values)
-        : 0;
+    return matchedCondition ? safeCalculatePrice(matchedCondition.value, paramNames, values) : 0;
 }
 
 /**
@@ -108,22 +98,13 @@ export function calcPrice(
  * @param values - Parameter values
  * @returns Matched condition or null
  */
-export function findMatchingCondition(
-    conditions,
-    parameters,
-    values
-) {
+export function findMatchingCondition(conditions, parameters, values) {
     // Extract parameter names
-    const paramNames = parameters.map(item => item.value)
-        .sort((s1, s2) => s2.length - s1.length);
+    const paramNames = parameters.map((item) => item.value).sort((s1, s2) => s2.length - s1.length);
 
     // Find first condition that evaluates to true
     for (const condition of conditions) {
-        const replacedCondition = replaceParameters(
-            condition.condition,
-            paramNames,
-            values
-        );
+        const replacedCondition = replaceParameters(condition.condition, paramNames, values);
 
         if (safeEvaluateCondition(replacedCondition)) {
             return condition;
@@ -140,11 +121,7 @@ export function findMatchingCondition(
  * @param values - Parameter values
  * @returns Calculated price
  */
-function safeCalculatePrice(
-    formula,
-    parameters,
-    values
-) {
+function safeCalculatePrice(formula, parameters, values) {
     try {
         // Replace parameters and evaluate using mathjs
         const replacedFormula = replaceParameters(formula, parameters, values);
@@ -159,10 +136,6 @@ function safeCalculatePrice(
 }
 
 // Additional utility for getting condition (for backwards compatibility)
-export function getCondition(
-    conditions,
-    parameters,
-    values
-) {
+export function getCondition(conditions, parameters, values) {
     return findMatchingCondition(conditions, parameters, values);
 }

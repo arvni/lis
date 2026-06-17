@@ -1,6 +1,6 @@
 import React from 'react';
-import { Fab, Tooltip, Zoom, useTheme } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { Fab, Tooltip, Zoom, useTheme } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import PropTypes from 'prop-types';
 
 /**
@@ -15,21 +15,21 @@ import PropTypes from 'prop-types';
  * @param {Object} sx - Additional style props to apply
  */
 const AddButton = ({
-                       onClick,
-                       title,
-                       color = "primary",
-                       position = { bottom: 16, right: 16 },
-                       showTooltip = true,
-                       icon = <AddIcon />,
-                       sx = {},
-                   }) => {
+    onClick,
+    title,
+    color = 'primary',
+    position = { bottom: 16, right: 16 },
+    showTooltip = true,
+    icon = <AddIcon />,
+    sx = {},
+}) => {
     const theme = useTheme();
 
     // Default position styles
     const positionStyles = {
         position: 'fixed',
         zIndex: theme.zIndex.speedDial,
-        ...position
+        ...position,
     };
 
     // Button with conditional tooltip
@@ -49,7 +49,7 @@ const AddButton = ({
                 '&:active': {
                     transform: 'scale(0.95)',
                 },
-                ...sx
+                ...sx,
             }}
             size="large"
         >
@@ -59,16 +59,12 @@ const AddButton = ({
 
     // Return with or without tooltip
     return showTooltip ? (
-        <Tooltip
-            title={title}
-            placement="left"
-            arrow
-            TransitionComponent={Zoom}
-            enterDelay={500}
-        >
+        <Tooltip title={title} placement="left" arrow TransitionComponent={Zoom} enterDelay={500}>
             {button}
         </Tooltip>
-    ) : button;
+    ) : (
+        button
+    );
 };
 
 AddButton.propTypes = {

@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -14,18 +14,18 @@ import {
     CircularProgress,
     Alert,
     Divider,
-} from "@mui/material";
+} from '@mui/material';
 import {
     MergeType as MergeTypeIcon,
     Science as ScienceIcon,
     PlaylistAddCheck as PanelIcon,
     ArrowForwardIos as ArrowIcon,
-} from "@mui/icons-material";
-import {router} from "@inertiajs/react";
-import axios from "axios";
-import AddTestOrPanel from "@/Pages/Acceptance/Components/AddTestOrPanel.jsx";
+} from '@mui/icons-material';
+import { router } from '@inertiajs/react';
+import axios from 'axios';
+import AddTestOrPanel from '@/Pages/Acceptance/Components/AddTestOrPanel.jsx';
 
-const AddPoolingDialog = ({open, onClose, acceptance}) => {
+const AddPoolingDialog = ({ open, onClose, acceptance }) => {
     const [step, setStep] = useState('list');
     const [items, setItems] = useState([]);
     const [loadingList, setLoadingList] = useState(false);
@@ -41,8 +41,9 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
         setPanelData({});
         setError(null);
         setLoadingList(true);
-        axios.get(route('api.acceptances.poolingItems', acceptance.id))
-            .then(res => setItems(res.data.items ?? []))
+        axios
+            .get(route('api.acceptances.poolingItems', acceptance.id))
+            .then((res) => setItems(res.data.items ?? []))
             .catch(() => setError('Failed to load tests. Please try again.'))
             .finally(() => setLoadingList(false));
     }, [open, acceptance?.id]);
@@ -68,59 +69,62 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
         setError(null);
 
         try {
-            const {data: {data: testData}} = await axios.get(route('api.tests.show', testId));
+            const {
+                data: { data: testData },
+            } = await axios.get(route('api.tests.show', testId));
 
             if (item.type === 'test') {
                 // Find the specific method_test that matches the acceptance item
                 const methodTests = testData.method_tests ?? [];
-                const matchedMt = methodTests.find(mt => mt.id === item.initialData.method_test.id)
-                    ?? methodTests[0];
+                const matchedMt =
+                    methodTests.find((mt) => mt.id === item.initialData.method_test.id) ??
+                    methodTests[0];
 
                 const fullInitialData = {
                     method_test: {
                         id: matchedMt?.id ?? null,
-                        test: testData,                       // full test with method_tests array
-                        method: matchedMt?.method ?? null,    // full method with price params
+                        test: testData, // full test with method_tests array
+                        method: matchedMt?.method ?? null, // full method with price params
                     },
-                    price:            item.initialData.price,
-                    discount:         item.initialData.discount,
+                    price: item.initialData.price,
+                    discount: item.initialData.discount,
                     customParameters: {
                         ...(item.initialData.customParameters ?? {}),
                         sampleType: item.initialData.customParameters?.sampleType ?? '',
                     },
                     no_sample: 1,
-                    sampleless: true,   // pooling items are always sampleless
+                    sampleless: true, // pooling items are always sampleless
                 };
 
-                setSelectedItem({...item, initialData: fullInitialData});
+                setSelectedItem({ ...item, initialData: fullInitialData });
                 setStep('test');
             } else {
                 // Panel: mirror what AddPanel.fetchTestDetails does
-                const {method_tests: methodTests, ...panelTestData} = testData;
-                const panelId    = item.panelData.id;
+                const { method_tests: methodTests, ...panelTestData } = testData;
+                const panelId = item.panelData.id;
                 const totalPrice = item.panelData.price ?? 0;
-                const totalDisc  = item.panelData.discount ?? 0;
-                const count      = methodTests?.length || 1;
+                const totalDisc = item.panelData.discount ?? 0;
+                const count = methodTests?.length || 1;
 
-                const formattedItems = (methodTests ?? []).map(mt => ({
+                const formattedItems = (methodTests ?? []).map((mt) => ({
                     id: String(Math.random()),
                     panel_id: panelId,
                     method_test: mt,
                     details: '',
-                    price:    totalPrice / count,
-                    discount: totalDisc  / count,
+                    price: totalPrice / count,
+                    discount: totalDisc / count,
                     no_sample: 1,
-                    customParameters: {samples: [], sampleType: ''},
+                    customParameters: { samples: [], sampleType: '' },
                 }));
 
                 setPanelData({
-                    panel:          {...panelTestData, method_tests: methodTests},
-                    price:          totalPrice,
-                    discount:       totalDisc,
-                    id:             panelId,
+                    panel: { ...panelTestData, method_tests: methodTests },
+                    price: totalPrice,
+                    discount: totalDisc,
+                    id: panelId,
                     acceptanceItems: formattedItems,
-                    sampleless:     true,
-                    reportless:     true,
+                    sampleless: true,
+                    reportless: true,
                 });
                 setSelectedItem(item);
                 setStep('panel');
@@ -135,8 +139,8 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
     const submit = (acceptanceItems) => {
         router.post(
             route('acceptances.addPooling', acceptance.id),
-            {acceptanceItems},
-            {preserveState: false, onSuccess: handleClose}
+            { acceptanceItems },
+            { preserveState: false, onSuccess: handleClose },
         );
     };
 
@@ -144,21 +148,41 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
         // Carry the originally-selected acceptance item so the backend can bump
         // its no_sample — the method may have been changed in the configure step,
         // so matching by method_test_id alone is not reliable.
-        const originalIds = selectedItem?.acceptance_item_id ? [selectedItem.acceptance_item_id] : [];
-        submit({tests: [{...testData, sampleless: true, reportless: true, original_acceptance_item_ids: originalIds}]});
+        const originalIds = selectedItem?.acceptance_item_id
+            ? [selectedItem.acceptance_item_id]
+            : [];
+        submit({
+            tests: [
+                {
+                    ...testData,
+                    sampleless: true,
+                    reportless: true,
+                    original_acceptance_item_ids: originalIds,
+                },
+            ],
+        });
     };
 
     const handlePanelSubmit = (data) => {
         // The panel's original acceptance items (with their real ids) are carried
         // on the selected list item; bump no_sample on every one of them.
         const originalIds = (selectedItem?.panelData?.acceptanceItems ?? [])
-            .map(i => i.id)
+            .map((i) => i.id)
             .filter(Boolean);
-        submit({panels: [{...data, sampleless: true, reportless: true, original_acceptance_item_ids: originalIds}]});
+        submit({
+            panels: [
+                {
+                    ...data,
+                    sampleless: true,
+                    reportless: true,
+                    original_acceptance_item_ids: originalIds,
+                },
+            ],
+        });
     };
 
     const patient = acceptance
-        ? {id: acceptance.patient_id, fullName: acceptance.patient_fullname}
+        ? { id: acceptance.patient_id, fullName: acceptance.patient_fullname }
         : null;
 
     return (
@@ -166,30 +190,32 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
             {/* Step 1 – Item selection list */}
             <Dialog open={open && step === 'list'} onClose={handleClose} maxWidth="xs" fullWidth>
                 <DialogTitle>
-                    <Box sx={{display: "flex", gap: 1, alignItems: "center"}}>
-                        <MergeTypeIcon color="secondary"/>
-                        <Typography variant="h6" fontWeight={600} component="span">Add Pooling</Typography>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <MergeTypeIcon color="secondary" />
+                        <Typography variant="h6" fontWeight={600} component="span">
+                            Add Pooling
+                        </Typography>
                     </Box>
                     <Typography variant="body2" color="text.secondary" mt={0.5}>
                         Select a test or panel to add a pooling item for
                     </Typography>
                 </DialogTitle>
 
-                <DialogContent dividers sx={{p: 0}}>
+                <DialogContent dividers sx={{ p: 0 }}>
                     {loadingList && (
-                        <Box sx={{display: "flex", py: 4, justifyContent: "center"}}>
-                            <CircularProgress size={32}/>
+                        <Box sx={{ display: 'flex', py: 4, justifyContent: 'center' }}>
+                            <CircularProgress size={32} />
                         </Box>
                     )}
 
                     {error && (
-                        <Box sx={{p: 2}}>
+                        <Box sx={{ p: 2 }}>
                             <Alert severity="error">{error}</Alert>
                         </Box>
                     )}
 
                     {!loadingList && !error && items.length === 0 && (
-                        <Box sx={{p: 3}}>
+                        <Box sx={{ p: 3 }}>
                             <Typography color="text.secondary" variant="body2">
                                 No tests or panels found for this acceptance.
                             </Typography>
@@ -200,36 +226,49 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
                         <List disablePadding>
                             {items.map((item, idx) => (
                                 <Box key={`${item.type}-${item.id}`}>
-                                    {idx > 0 && <Divider/>}
+                                    {idx > 0 && <Divider />}
                                     <ListItemButton
                                         onClick={() => handleItemSelect(item)}
                                         disabled={loadingItem !== null}
-                                        sx={{py: 1.5, px: 2}}
+                                        sx={{ py: 1.5, px: 2 }}
                                     >
-                                        <ListItemIcon sx={{minWidth: 36}}>
-                                            {loadingItem === item.id
-                                                ? <CircularProgress size={18}/>
-                                                : item.type === 'panel'
-                                                    ? <PanelIcon color="secondary" fontSize="small"/>
-                                                    : <ScienceIcon color="primary" fontSize="small"/>
-                                            }
+                                        <ListItemIcon sx={{ minWidth: 36 }}>
+                                            {loadingItem === item.id ? (
+                                                <CircularProgress size={18} />
+                                            ) : item.type === 'panel' ? (
+                                                <PanelIcon color="secondary" fontSize="small" />
+                                            ) : (
+                                                <ScienceIcon color="primary" fontSize="small" />
+                                            )}
                                         </ListItemIcon>
                                         <ListItemText
                                             primary={
-                                                <Box sx={{display: "flex", gap: 1, alignItems: "center"}}>
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        gap: 1,
+                                                        alignItems: 'center',
+                                                    }}
+                                                >
                                                     <Typography variant="body2" fontWeight={500}>
                                                         {item.name}
                                                     </Typography>
                                                     <Chip
-                                                        label={item.type === 'panel' ? 'Panel' : 'Test'}
+                                                        label={
+                                                            item.type === 'panel' ? 'Panel' : 'Test'
+                                                        }
                                                         size="small"
-                                                        color={item.type === 'panel' ? 'secondary' : 'primary'}
+                                                        color={
+                                                            item.type === 'panel'
+                                                                ? 'secondary'
+                                                                : 'primary'
+                                                        }
                                                         variant="outlined"
                                                     />
                                                 </Box>
                                             }
                                         />
-                                        <ArrowIcon fontSize="small" color="action"/>
+                                        <ArrowIcon fontSize="small" color="action" />
                                     </ListItemButton>
                                 </Box>
                             ))}
@@ -237,7 +276,7 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
                     )}
                 </DialogContent>
 
-                <Box sx={{p: 2, display: 'flex', justifyContent: 'flex-end'}}>
+                <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end' }}>
                     <Button onClick={handleClose}>Cancel</Button>
                 </Box>
             </Dialog>
@@ -248,7 +287,11 @@ const AddPoolingDialog = ({open, onClose, acceptance}) => {
                 onClose={backToList}
                 onSubmitTest={handleTestSubmit}
                 onSubmitPanel={handlePanelSubmit}
-                initialTestData={step === 'test' && selectedItem?.type === 'test' ? selectedItem.initialData : null}
+                initialTestData={
+                    step === 'test' && selectedItem?.type === 'test'
+                        ? selectedItem.initialData
+                        : null
+                }
                 initialPanelData={step === 'panel' ? panelData : null}
                 patient={patient}
             />

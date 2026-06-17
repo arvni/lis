@@ -1,142 +1,175 @@
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import AcceptanceForm from "@/Pages/Acceptance/Components/AcceptanceForm";
-import Dialog from "@mui/material/Dialog";
-import React, {useCallback, useState} from "react";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import {Dangerous} from "@mui/icons-material";
-import Typography from "@mui/material/Typography";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import {Stack} from "@mui/material";
-import {Head, router, useForm} from "@inertiajs/react";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AcceptanceForm from '@/Pages/Acceptance/Components/AcceptanceForm';
+import Dialog from '@mui/material/Dialog';
+import React, { useCallback, useState } from 'react';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import { Dangerous } from '@mui/icons-material';
+import Typography from '@mui/material/Typography';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import { Stack } from '@mui/material';
+import { Head, router, useForm } from '@inertiajs/react';
 
-const Edit = ({acceptance, maxDiscount=100,errors, canAddPrescription = false}) => {
-    const {data, setData, post, setError, clearErrors, reset} = useForm({...acceptance, _method: "put"});
+const Edit = ({ acceptance, maxDiscount = 100, errors, canAddPrescription = false }) => {
+    const { data, setData, post, setError, clearErrors, reset } = useForm({
+        ...acceptance,
+        _method: 'put',
+    });
 
-    const [open, setOpen] = useState(acceptance.status !== "pending");
-
+    const [open, setOpen] = useState(acceptance.status !== 'pending');
 
     const handleClose = () => setOpen(false);
 
     // Memoized validation functions to prevent unnecessary re-creations
-    const validateTests = useCallback((formData) => {
-        if (!formData.acceptanceItems?.tests?.length && !formData.acceptanceItems?.panels?.length) {
-            setError("acceptanceItems", "Please select at least one test");
-            document.getElementById("add-test")?.focus();
-            return false;
-        }
-        return true;
-    }, [data?.acceptanceItems]);
+    const validateTests = useCallback(
+        (formData) => {
+            if (
+                !formData.acceptanceItems?.tests?.length &&
+                !formData.acceptanceItems?.panels?.length
+            ) {
+                setError('acceptanceItems', 'Please select at least one test');
+                document.getElementById('add-test')?.focus();
+                return false;
+            }
+            return true;
+        },
+        [data?.acceptanceItems],
+    );
 
-    const validateReferrer = useCallback((formData) => {
-        if (formData.referred && formData.referrer === "") {
-            setError("referrer", "Please select referrer");
-            document.getElementById("referrer")?.focus();
-            return false;
-        }
-        return true;
-    }, [data?.referred, data?.referrer, setError]);
+    const validateReferrer = useCallback(
+        (formData) => {
+            if (formData.referred && formData.referrer === '') {
+                setError('referrer', 'Please select referrer');
+                document.getElementById('referrer')?.focus();
+                return false;
+            }
+            return true;
+        },
+        [data?.referred, data?.referrer, setError],
+    );
 
     const validateReporting = useCallback(() => true, []);
 
     // Combined validation function
     // Step-based validation for Edit.jsx
-    const validateForm = useCallback((step = data?.step, formData) => {
-        clearErrors();
+    const validateForm = useCallback(
+        (step = data?.step, formData) => {
+            clearErrors();
 
-        // Define which validation functions to run based on current step
-        switch (step) {
-            case 0: // Patient Information
-                // Usually no validation needed as this is often read-only
-                return true;
+            // Define which validation functions to run based on current step
+            switch (step) {
+                case 0: // Patient Information
+                    // Usually no validation needed as this is often read-only
+                    return true;
 
-            case 1: // Consultation Request
-                // No specific validation needed for consultation checkbox
-                return true;
+                case 1: // Consultation Request
+                    // No specific validation needed for consultation checkbox
+                    return true;
 
-            case 2: // Doctor & Referral
-                return validateReferrer(formData);
+                case 2: // Doctor & Referral
+                    return validateReferrer(formData);
 
-            case 3: // Tests Selection
-                return validateTests(formData);
+                case 3: // Tests Selection
+                    return validateTests(formData);
 
-            case 4: // Sampling & Delivery
-                return validateReporting(formData);
+                case 4: // Sampling & Delivery
+                    return validateReporting(formData);
 
-            case 5: // Review & Submit
-                // Run all validations for final submission
-                return validateTests(formData) && validateReferrer(formData) && validateReporting(formData);
+                case 5: // Review & Submit
+                    // Run all validations for final submission
+                    return (
+                        validateTests(formData) &&
+                        validateReferrer(formData) &&
+                        validateReporting(formData)
+                    );
 
-            default:
-                // Run all validations if step is unknown
-                return validateTests(formData) && validateReferrer(formData) && validateReporting(formData);
-        }
-    }, [clearErrors, validateTests, validateReferrer, validateReporting, data?.step]);
+                default:
+                    // Run all validations if step is unknown
+                    return (
+                        validateTests(formData) &&
+                        validateReferrer(formData) &&
+                        validateReporting(formData)
+                    );
+            }
+        },
+        [clearErrors, validateTests, validateReferrer, validateReporting, data?.step],
+    );
 
     // Update the save function to pass the current step
-    const save = useCallback((formData, step, cb) => {
-        if (!validateForm(step, formData)) {
-            return;
-        }
-
-        router.post(
-            route('acceptances.update', acceptance.id),
-            {...formData, step},
-            {
-                onError: console.error,
-                onSuccess: () => {
-                    setData({...formData, step});
-                    if (cb)
-                    cb();
-                }
+    const save = useCallback(
+        (formData, step, cb) => {
+            if (!validateForm(step, formData)) {
+                return;
             }
-        );
-    }, [setData, validateForm, reset]);
 
-    return (<>
-        <Head title={`Edit Acceptance #${acceptance.id}`}/>
-        <AcceptanceForm initialData={data}
-                        onSubmit={save}
-                        errors={errors}
-                        reset={reset}
-                        setData={setData}
-                        defaultStep={data.step}
-                        canAddPrescription={canAddPrescription}
-                        maxDiscount={maxDiscount}/>
-        <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>
-                <Stack direction="row" spacing={1}>
-                    <Dangerous color="error"/>
-                    <Typography>
-                        Caution
-                    </Typography>
-                </Stack>
-            </DialogTitle>
-            <DialogContent>
-                Warning: Editing Test of Each item will result in the deletion of all histories of the item.
-                Please proceed with caution.
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={handleClose}>Close</Button>
-            </DialogActions>
-        </Dialog>
-    </>);
-}
+            router.post(
+                route('acceptances.update', acceptance.id),
+                { ...formData, step },
+                {
+                    onError: console.error,
+                    onSuccess: () => {
+                        setData({ ...formData, step });
+                        if (cb) cb();
+                    },
+                },
+            );
+        },
+        [setData, validateForm, reset],
+    );
+
+    return (
+        <>
+            <Head title={`Edit Acceptance #${acceptance.id}`} />
+            <AcceptanceForm
+                initialData={data}
+                onSubmit={save}
+                errors={errors}
+                reset={reset}
+                setData={setData}
+                defaultStep={data.step}
+                canAddPrescription={canAddPrescription}
+                maxDiscount={maxDiscount}
+            />
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>
+                    <Stack direction="row" spacing={1}>
+                        <Dangerous color="error" />
+                        <Typography>Caution</Typography>
+                    </Stack>
+                </DialogTitle>
+                <DialogContent>
+                    Warning: Editing Test of Each item will result in the deletion of all histories
+                    of the item. Please proceed with caution.
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Close</Button>
+                </DialogActions>
+            </Dialog>
+        </>
+    );
+};
 
 const breadCrumbs = [
     {
-        title: "Acceptances",
-        link: route("acceptances.index"),
+        title: 'Acceptances',
+        link: route('acceptances.index'),
         icon: null,
     },
-]
+];
 
-Edit.layout = page => <AuthenticatedLayout auth={page.props.auth}
-                                           children={page}
-                                           breadcrumbs={[...breadCrumbs, {
-                                               title: "Edit Acceptance #" + page.props.acceptance.id,
-                                               link: "",
-                                               icon: null
-                                           }]}/>
+Edit.layout = (page) => (
+    <AuthenticatedLayout
+        auth={page.props.auth}
+        children={page}
+        breadcrumbs={[
+            ...breadCrumbs,
+            {
+                title: 'Edit Acceptance #' + page.props.acceptance.id,
+                link: '',
+                icon: null,
+            },
+        ]}
+    />
+);
 export default Edit;

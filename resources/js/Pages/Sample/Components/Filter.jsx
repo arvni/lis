@@ -1,20 +1,20 @@
-import React, {useState} from "react";
-import Grid from "@mui/material/Grid";
-import TextField from "@mui/material/TextField";
-import {FormControl, InputLabel, MenuItem, Select} from "@mui/material";
-import FilterTemplate from "@/Components/FilterWraper.jsx";
+import React, { useState } from 'react';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import FilterTemplate from '@/Components/FilterWraper.jsx';
 
-const Filter = ({defaultFilter, onFilter}) => {
+const Filter = ({ defaultFilter, onFilter }) => {
     const [filter, setFilter] = useState(defaultFilter ?? {});
 
     const handleChange = (e) => {
-        const {name, value} = e.target;
-        setFilter(prev => ({...prev, [name]: value}));
+        const { name, value } = e.target;
+        setFilter((prev) => ({ ...prev, [name]: value }));
     };
 
     return (
         <FilterTemplate onFilter={onFilter(filter)}>
-            <Grid size={{xs: 12, sm: 5}}>
+            <Grid size={{ xs: 12, sm: 5 }}>
                 <TextField
                     fullWidth
                     name="search"
@@ -23,7 +23,7 @@ const Filter = ({defaultFilter, onFilter}) => {
                     onChange={handleChange}
                 />
             </Grid>
-            <Grid size={{xs: 12, sm: 3}}>
+            <Grid size={{ xs: 12, sm: 3 }}>
                 <FormControl fullWidth>
                     <InputLabel>QC Status</InputLabel>
                     <Select

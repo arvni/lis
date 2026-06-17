@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Box,
     Button,
@@ -12,15 +12,15 @@ import {
     Select,
     TextField,
     Tooltip,
-    Typography
-} from "@mui/material";
+    Typography,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 // Define discount types
 const DISCOUNT_TYPES = [
-    {id: 'PERCENTAGE', name: 'Percentage', icon: '%'},
-    {id: 'FIXED', name: 'Fixed Amount', icon: 'OMR'}
+    { id: 'PERCENTAGE', name: 'Percentage', icon: '%' },
+    { id: 'FIXED', name: 'Fixed Amount', icon: 'OMR' },
 ];
 
 /**
@@ -33,24 +33,24 @@ const DISCOUNT_TYPES = [
  * @param {Object} props.errors - Validation errors
  */
 const DiscountManager = ({
-                             customParameters = {},
-                             price = 0,
-                             maxDiscount = 0,
-                             onChange,
-                             errors = {}
-                         }) => {
+    customParameters = {},
+    price = 0,
+    maxDiscount = 0,
+    onChange,
+    errors = {},
+}) => {
     // Initialize or use existing discounts array from customParameters
     const [discounts, setDiscounts] = useState(customParameters.discounts || []);
 
     useEffect(() => {
-        handleDiscountChange()
+        handleDiscountChange();
     }, []);
 
     // Calculate total discount amount
     const calculateTotalDiscount = (discountArray) => {
         return discountArray.reduce((total, discount) => {
             if (discount.type === 'PERCENTAGE') {
-                return total + (price * discount.value / 100);
+                return total + (price * discount.value) / 100;
             } else {
                 return total + Number(discount.value);
             }
@@ -63,7 +63,7 @@ const DiscountManager = ({
             if (discount.type === 'PERCENTAGE') {
                 return total + Number(discount.value);
             } else {
-                return total + (discount.value / price * 100);
+                return total + (discount.value / price) * 100;
             }
         }, 0);
     };
@@ -72,7 +72,7 @@ const DiscountManager = ({
     const handleAddDiscount = () => {
         const newDiscounts = [
             ...discounts,
-            {id: Date.now(), type: 'PERCENTAGE', value: 0, reason: ''}
+            { id: Date.now(), type: 'PERCENTAGE', value: 0, reason: '' },
         ];
         setDiscounts(newDiscounts);
 
@@ -81,15 +81,15 @@ const DiscountManager = ({
         onChange({
             customParameters: {
                 ...customParameters,
-                discounts: newDiscounts
+                discounts: newDiscounts,
             },
-            discount: totalDiscount
+            discount: totalDiscount,
         });
     };
 
     // Remove a discount
     const handleRemoveDiscount = (id) => {
-        const newDiscounts = discounts.filter(discount => discount.id !== id);
+        const newDiscounts = discounts.filter((discount) => discount.id !== id);
         setDiscounts(newDiscounts);
 
         // Update parent component
@@ -97,17 +97,17 @@ const DiscountManager = ({
         onChange({
             customParameters: {
                 ...customParameters,
-                discounts: newDiscounts
+                discounts: newDiscounts,
             },
-            discount: totalDiscount
+            discount: totalDiscount,
         });
     };
 
     // Update a discount field
     const handleDiscountChange = (id, field, value) => {
-        const newDiscounts = discounts.map(discount => {
+        const newDiscounts = discounts.map((discount) => {
             if (discount.id === id) {
-                return {...discount, [field]: value};
+                return { ...discount, [field]: value };
             }
             return discount;
         });
@@ -131,11 +131,11 @@ const DiscountManager = ({
             if (lastDiscount.type === 'PERCENTAGE') {
                 const excess = totalDiscountPercentage - maxDiscount;
                 const newValue = Math.max(0, Number(lastDiscount.value) - excess);
-                adjustedDiscounts[lastIndex] = {...lastDiscount, value: newValue};
+                adjustedDiscounts[lastIndex] = { ...lastDiscount, value: newValue };
             } else {
                 const excess = totalDiscount - maxAmount;
                 const newValue = Math.max(0, Number(lastDiscount.value) - excess);
-                adjustedDiscounts[lastIndex] = {...lastDiscount, value: newValue};
+                adjustedDiscounts[lastIndex] = { ...lastDiscount, value: newValue };
             }
 
             setDiscounts(adjustedDiscounts);
@@ -145,35 +145,47 @@ const DiscountManager = ({
         onChange({
             customParameters: {
                 ...customParameters,
-                discounts: totalDiscount > maxAmount ? adjustedDiscounts : newDiscounts
+                discounts: totalDiscount > maxAmount ? adjustedDiscounts : newDiscounts,
             },
-            discount: finalDiscount
+            discount: finalDiscount,
         });
     };
 
     // Calculate remaining available discount
-    const remainingDiscountPercentage = Math.max(0, maxDiscount - calculateTotalDiscountPercentage(discounts));
-    const remainingDiscountAmount = Math.max(0, (maxDiscount * price * 0.01) - calculateTotalDiscount(discounts));
+    const remainingDiscountPercentage = Math.max(
+        0,
+        maxDiscount - calculateTotalDiscountPercentage(discounts),
+    );
+    const remainingDiscountAmount = Math.max(
+        0,
+        maxDiscount * price * 0.01 - calculateTotalDiscount(discounts),
+    );
 
     return (
         <Box>
-            <Box sx={{mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <Typography variant="subtitle2">
-                    Discounts
-                </Typography>
+            <Box
+                sx={{
+                    mb: 2,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                }}
+            >
+                <Typography variant="subtitle2">Discounts</Typography>
                 <Box>
                     <Tooltip
-                        title={`Remaining available discount: ${remainingDiscountPercentage.toFixed(2)}% (${remainingDiscountAmount.toFixed(2)} OMR)`}>
+                        title={`Remaining available discount: ${remainingDiscountPercentage.toFixed(2)}% (${remainingDiscountAmount.toFixed(2)} OMR)`}
+                    >
                         <Chip
                             label={`Available: ${remainingDiscountPercentage.toFixed(2)}%`}
-                            color={remainingDiscountPercentage > 0 ? "success" : "error"}
+                            color={remainingDiscountPercentage > 0 ? 'success' : 'error'}
                             size="small"
-                            sx={{mr: 1}}
+                            sx={{ mr: 1 }}
                         />
                     </Tooltip>
                     <Button
                         size="small"
-                        startIcon={<AddIcon/>}
+                        startIcon={<AddIcon />}
                         variant="outlined"
                         onClick={handleAddDiscount}
                         disabled={remainingDiscountPercentage <= 0}
@@ -184,7 +196,11 @@ const DiscountManager = ({
             </Box>
 
             {discounts.length === 0 ? (
-                <Typography variant="body2" color="text.secondary" sx={{textAlign: 'center', py: 2}}>
+                <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ textAlign: 'center', py: 2 }}
+                >
                     No discounts applied. Click "Add Discount" to apply one.
                 </Typography>
             ) : (
@@ -197,21 +213,29 @@ const DiscountManager = ({
                             border: '1px solid',
                             borderColor: 'divider',
                             borderRadius: 1,
-                            bgcolor: 'background.paper'
+                            bgcolor: 'background.paper',
                         }}
                     >
                         <Grid container spacing={2}>
-                            <Grid size={{xs: 12, sm: 3}}>
+                            <Grid size={{ xs: 12, sm: 3 }}>
                                 <FormControl
                                     fullWidth
-                                    error={Boolean(errors?.[`customParameters.discounts.${index}.type`])}
+                                    error={Boolean(
+                                        errors?.[`customParameters.discounts.${index}.type`],
+                                    )}
                                 >
                                     <Select
                                         size="small"
                                         value={discount.type}
-                                        onChange={(e) => handleDiscountChange(discount.id, 'type', e.target.value)}
+                                        onChange={(e) =>
+                                            handleDiscountChange(
+                                                discount.id,
+                                                'type',
+                                                e.target.value,
+                                            )
+                                        }
                                     >
-                                        {DISCOUNT_TYPES.map(type => (
+                                        {DISCOUNT_TYPES.map((type) => (
                                             <MenuItem key={type.id} value={type.id}>
                                                 {type.name}
                                             </MenuItem>
@@ -225,7 +249,7 @@ const DiscountManager = ({
                                 </FormControl>
                             </Grid>
 
-                            <Grid size={{xs: 12, sm: 3}}>
+                            <Grid size={{ xs: 12, sm: 3 }}>
                                 <TextField
                                     fullWidth
                                     size="small"
@@ -233,7 +257,10 @@ const DiscountManager = ({
                                     label="Value"
                                     value={discount.value}
                                     onChange={(e) => {
-                                        const newValue = Math.max(0, parseFloat(e.target.value) || 0);
+                                        const newValue = Math.max(
+                                            0,
+                                            parseFloat(e.target.value) || 0,
+                                        );
                                         handleDiscountChange(discount.id, 'value', newValue);
                                     }}
                                     slotProps={{
@@ -243,52 +270,65 @@ const DiscountManager = ({
                                                     {discount.type === 'PERCENTAGE' ? '%' : 'OMR'}
                                                 </InputAdornment>
                                             ),
-                                        }
+                                        },
                                     }}
-                                    error={Boolean(errors?.[`customParameters.discounts.${index}.value`])}
-                                    helperText={errors?.[`customParameters.discounts.${index}.value`] || ''}
+                                    error={Boolean(
+                                        errors?.[`customParameters.discounts.${index}.value`],
+                                    )}
+                                    helperText={
+                                        errors?.[`customParameters.discounts.${index}.value`] || ''
+                                    }
                                 />
                             </Grid>
 
-                            <Grid size={{xs: 12, sm: 3}}>
+                            <Grid size={{ xs: 12, sm: 3 }}>
                                 <TextField
                                     fullWidth
                                     size="small"
                                     label="Reason"
                                     value={discount.reason || ''}
-                                    onChange={(e) => handleDiscountChange(discount.id, 'reason', e.target.value)}
+                                    onChange={(e) =>
+                                        handleDiscountChange(discount.id, 'reason', e.target.value)
+                                    }
                                     placeholder="Why is this discount applied?"
-                                    error={Boolean(errors?.[`customParameters.discounts.${index}.reason`])}
-                                    helperText={errors?.[`customParameters.discounts.${index}.reason`] || ''}
+                                    error={Boolean(
+                                        errors?.[`customParameters.discounts.${index}.reason`],
+                                    )}
+                                    helperText={
+                                        errors?.[`customParameters.discounts.${index}.reason`] || ''
+                                    }
                                 />
                             </Grid>
 
-                            <Grid size={{xs: 12, sm: 1}} sx={{display: 'flex', alignItems: 'center'}}>
+                            <Grid
+                                size={{ xs: 12, sm: 1 }}
+                                sx={{ display: 'flex', alignItems: 'center' }}
+                            >
                                 <Tooltip title="Remove discount">
                                     <IconButton
                                         color="error"
                                         onClick={() => handleRemoveDiscount(discount.id)}
                                         size="small"
                                     >
-                                        <DeleteIcon/>
+                                        <DeleteIcon />
                                     </IconButton>
                                 </Tooltip>
                             </Grid>
                         </Grid>
 
-                        <Box sx={{mt: 1, display: 'flex', justifyContent: 'flex-end'}}>
+                        <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
                             <Typography variant="body2" color="text.secondary">
                                 Amount:
                                 <Typography
                                     component="span"
                                     fontWeight="medium"
                                     color="primary.main"
-                                    sx={{ml: 1}}
+                                    sx={{ ml: 1 }}
                                 >
                                     {discount.type === 'PERCENTAGE'
-                                        ? (price * discount.value / 100).toFixed(2)
-                                        : Number(discount.value).toFixed(2)
-                                    } OMR
+                                        ? ((price * discount.value) / 100).toFixed(2)
+                                        : Number(discount.value).toFixed(2)}{' '}
+                                    OMR
                                 </Typography>
                             </Typography>
                         </Box>
@@ -297,20 +337,25 @@ const DiscountManager = ({
             )}
 
             {discounts.length > 0 && (
-                <Box sx={{
-                    p: 2,
-                    bgcolor: 'primary.50',
-                    borderRadius: 1,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                }}>
-                    <Typography variant="subtitle2">
-                        Total Discount:
-                    </Typography>
+                <Box
+                    sx={{
+                        p: 2,
+                        bgcolor: 'primary.50',
+                        borderRadius: 1,
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Typography variant="subtitle2">Total Discount:</Typography>
                     <Typography variant="h6" fontWeight="bold" color="primary.main">
                         {calculateTotalDiscount(discounts).toFixed(2)} OMR
-                        <Typography component="span" variant="body2" color="text.secondary" sx={{ml: 1}}>
+                        <Typography
+                            component="span"
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ ml: 1 }}
+                        >
                             ({calculateTotalDiscountPercentage(discounts).toFixed(2)}%)
                         </Typography>
                     </Typography>

@@ -16,13 +16,13 @@ import { router } from '@inertiajs/react';
 
 /**
  * TagManager Component
- * 
+ *
  * @param {Array} initialTags - The current tags of the entity
  * @param {string} updateUrl - The URL to sync tags (PUT request)
  * @param {string} entityType - 'acceptance' or 'acceptanceItem' (used for reloading Inertia state)
  */
 const TagManager = ({ initialTags = [], updateUrl, entityType, onSuccess }) => {
-    const [selectedTags, setSelectedTags] = useState(initialTags.map(t => t.name));
+    const [selectedTags, setSelectedTags] = useState(initialTags.map((t) => t.name));
     const [allTags, setAllTags] = useState([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -50,14 +50,16 @@ const TagManager = ({ initialTags = [], updateUrl, entityType, onSuccess }) => {
         try {
             await axios.put(updateUrl, { tags: selectedTags });
             enqueueSnackbar('Tags updated successfully', { variant: 'success' });
-            
+
             if (onSuccess) {
                 onSuccess(selectedTags);
             }
 
             // Optionally reload Inertia state if we are on a show page
             if (entityType) {
-                router.reload({ only: [entityType === 'acceptance' ? 'acceptance' : 'acceptanceItem'] });
+                router.reload({
+                    only: [entityType === 'acceptance' ? 'acceptance' : 'acceptanceItem'],
+                });
             }
         } catch (error) {
             console.error('Error updating tags:', error);
@@ -74,7 +76,7 @@ const TagManager = ({ initialTags = [], updateUrl, entityType, onSuccess }) => {
                 <Autocomplete
                     multiple
                     freeSolo
-                    options={allTags.map(t => t.name)}
+                    options={allTags.map((t) => t.name)}
                     value={selectedTags}
                     onChange={(event, newValue) => {
                         setSelectedTags(newValue);
@@ -82,7 +84,7 @@ const TagManager = ({ initialTags = [], updateUrl, entityType, onSuccess }) => {
                     loading={loading}
                     renderTags={(value, getTagProps) =>
                         value.map((option, index) => {
-                            const tagData = allTags.find(t => t.name === option);
+                            const tagData = allTags.find((t) => t.name === option);
                             const color = tagData?.color;
                             return (
                                 <Chip
@@ -112,13 +114,19 @@ const TagManager = ({ initialTags = [], updateUrl, entityType, onSuccess }) => {
                                     ...InputProps,
                                     startAdornment: (
                                         <>
-                                            <TagIcon color="action" sx={{ ml: 1, mr: 0.5 }} fontSize="small" />
+                                            <TagIcon
+                                                color="action"
+                                                sx={{ ml: 1, mr: 0.5 }}
+                                                fontSize="small"
+                                            />
                                             {InputProps?.startAdornment}
                                         </>
                                     ),
                                     endAdornment: (
                                         <React.Fragment>
-                                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                            {loading ? (
+                                                <CircularProgress color="inherit" size={20} />
+                                            ) : null}
                                             {InputProps?.endAdornment}
                                         </React.Fragment>
                                     ),
@@ -134,7 +142,9 @@ const TagManager = ({ initialTags = [], updateUrl, entityType, onSuccess }) => {
                         size="medium"
                         onClick={handleSave}
                         disabled={saving}
-                        startIcon={saving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+                        startIcon={
+                            saving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />
+                        }
                         sx={{ whiteSpace: 'nowrap', height: '40px' }}
                     >
                         Save

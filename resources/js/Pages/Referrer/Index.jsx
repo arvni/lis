@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useMemo} from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import { Button } from '@mui/material';
 import { GridActionsCellItem } from '@mui/x-data-grid';
@@ -23,22 +23,31 @@ const ReferrersIndex = () => {
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
 
     // Memoized navigation handlers to prevent unnecessary re-renders
-    const showReferrer = useCallback((id) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        router.visit(route('referrers.show', id));
-    }, []);
+    const showReferrer = useCallback(
+        (id) => (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            router.visit(route('referrers.show', id));
+        },
+        [],
+    );
 
-    const editReferrer = useCallback((id) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        router.visit(route('referrers.edit', id));
-    }, []);
+    const editReferrer = useCallback(
+        (id) => (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            router.visit(route('referrers.edit', id));
+        },
+        [],
+    );
 
-    const deleteReferrer = useCallback((params) => () => {
-        setReferrer(params);
-        setOpenDeleteForm(true);
-    }, []);
+    const deleteReferrer = useCallback(
+        (params) => () => {
+            setReferrer(params);
+            setOpenDeleteForm(true);
+        },
+        [],
+    );
 
     const addReferrer = useCallback((e) => {
         e.preventDefault();
@@ -47,12 +56,7 @@ const ReferrersIndex = () => {
     }, []);
 
     // Page reload handler with explicit parameters
-    const pageReload = useCallback((
-        page,
-        filters,
-        sort,
-        pageSize
-    ) => {
+    const pageReload = useCallback((page, filters, sort, pageSize) => {
         router.visit(route('referrers.index'), {
             data: { page, filters, sort, pageSize },
             only: ['referrers', 'status', 'success', 'requestInputs'],
@@ -70,94 +74,97 @@ const ReferrersIndex = () => {
             router.post(
                 route('referrers.destroy', referrer.id),
                 { _method: 'delete' },
-                { onSuccess: handleCloseDeleteForm }
+                { onSuccess: handleCloseDeleteForm },
             );
         }
     }, [referrer, handleCloseDeleteForm]);
 
     // Columns definition with improved type safety
-    const columns = useMemo(()=>[
-        {
-            field: 'name',
-            headerName: 'Title',
-            type: 'string',
-            width: 200,
-        },
-        {
-            field: 'email',
-            headerName: 'Email',
-            type: 'string',
-            width: 200,
-        },
-        {
-            field: 'phoneNo',
-            headerName: 'Phone No',
-            type: 'string',
-            width: 200,
-        },
-        {
-            field: 'acceptances_count',
-            headerName: 'Acceptance No',
-            type: 'number',
-        },
-        {
-            field: 'isActive',
-            headerName: 'Status',
-            type: 'boolean',
-        },
-        {
-            field: 'actions',
-            headerName: 'Action',
-            type: 'actions',
-            width: 100,
-            sortable: false,
-            getActions: (params) => {
-                const actions = [
-                    <GridActionsCellItem
-                        key="view"
-                        icon={<RemoveRedEyeIcon />}
-                        label="Show"
-                        href={route('referrers.show', params.row.id)}
-                        onClick={showReferrer(params.row.id)}
-                    />,
-                    <GridActionsCellItem
-                        key="edit"
-                        icon={<EditIcon />}
-                        label="Edit"
-                        href={route('referrers.edit', params.row.id)}
-                        onClick={editReferrer(params.row.id)}
-                    />
-                ];
-
-                // Conditionally add delete action
-                if (!params.row.acceptances_count) {
-                    actions.push(
+    const columns = useMemo(
+        () => [
+            {
+                field: 'name',
+                headerName: 'Title',
+                type: 'string',
+                width: 200,
+            },
+            {
+                field: 'email',
+                headerName: 'Email',
+                type: 'string',
+                width: 200,
+            },
+            {
+                field: 'phoneNo',
+                headerName: 'Phone No',
+                type: 'string',
+                width: 200,
+            },
+            {
+                field: 'acceptances_count',
+                headerName: 'Acceptance No',
+                type: 'number',
+            },
+            {
+                field: 'isActive',
+                headerName: 'Status',
+                type: 'boolean',
+            },
+            {
+                field: 'actions',
+                headerName: 'Action',
+                type: 'actions',
+                width: 100,
+                sortable: false,
+                getActions: (params) => {
+                    const actions = [
                         <GridActionsCellItem
-                            key="delete"
-                            icon={<DeleteIcon />}
-                            label="Delete"
-                            onClick={deleteReferrer(params.row)}
-                        />
-                    );
-                }
+                            key="view"
+                            icon={<RemoveRedEyeIcon />}
+                            label="Show"
+                            href={route('referrers.show', params.row.id)}
+                            onClick={showReferrer(params.row.id)}
+                        />,
+                        <GridActionsCellItem
+                            key="edit"
+                            icon={<EditIcon />}
+                            label="Edit"
+                            href={route('referrers.edit', params.row.id)}
+                            onClick={editReferrer(params.row.id)}
+                        />,
+                    ];
 
-                return actions;
-            }
-        }
-    ], [showReferrer, editReferrer, deleteReferrer]);
+                    // Conditionally add delete action
+                    if (!params.row.acceptances_count) {
+                        actions.push(
+                            <GridActionsCellItem
+                                key="delete"
+                                icon={<DeleteIcon />}
+                                label="Delete"
+                                onClick={deleteReferrer(params.row)}
+                            />,
+                        );
+                    }
+
+                    return actions;
+                },
+            },
+        ],
+        [showReferrer, editReferrer, deleteReferrer],
+    );
 
     // Breadcrumbs definition
     const breadCrumbs = [
         {
             title: 'Referrers',
             link: null,
-            icon: null
-        }
+            icon: null,
+        },
     ];
 
     return (
         <>
-            <Head title="Referrers"/>
+            <Head title="Referrers" />
             <PageHeader
                 title="Referrers List"
                 actions={
@@ -200,8 +207,8 @@ ReferrersIndex.layout = (page) => (
             {
                 title: 'Referrers',
                 link: null,
-                icon: null
-            }
+                icon: null,
+            },
         ]}
     >
         {page}

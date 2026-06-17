@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Button,
@@ -11,14 +11,7 @@ import {
     IconButton,
     Chip,
 } from '@mui/material';
-import {
-    CalculateOutlined,
-    PlayArrow,
-    Refresh,
-    Close,
-    Check,
-    Error
-} from '@mui/icons-material';
+import { CalculateOutlined, PlayArrow, Refresh, Close, Check, Error } from '@mui/icons-material';
 import * as mathjs from 'mathjs';
 import PropTypes from 'prop-types';
 
@@ -31,7 +24,12 @@ import PropTypes from 'prop-types';
  * @param {Boolean} props.isConditional - Whether this is for conditional pricing
  * @param {Array} props.conditions - Array of condition objects (for conditional pricing)
  */
-const FormulaTester = ({parameters = [], formula = '', isConditional = false, conditions = []}) => {
+const FormulaTester = ({
+    parameters = [],
+    formula = '',
+    isConditional = false,
+    conditions = [],
+}) => {
     const [paramValues, setParamValues] = useState({});
     const [result, setResult] = useState(null);
     const [error, setError] = useState('');
@@ -41,7 +39,7 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
     // Initialize parameter values
     useEffect(() => {
         const initialValues = {};
-        parameters.forEach(param => {
+        parameters.forEach((param) => {
             initialValues[param.value] = '';
         });
         setParamValues(initialValues);
@@ -51,9 +49,9 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
 
     // Handle parameter value change
     const handleParamChange = (paramName, value) => {
-        setParamValues(prev => ({
+        setParamValues((prev) => ({
             ...prev,
-            [paramName]: value
+            [paramName]: value,
         }));
         // Clear results when changing values
         setResult(null);
@@ -65,16 +63,18 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
     const evaluateFormula = () => {
         try {
             // Create a scope with current parameter values
-            const scope = {...paramValues};
+            const scope = { ...paramValues };
 
             // Validate all parameters have values
             const missingParams = Object.entries(scope).filter(([_, value]) => value === '');
             if (missingParams.length > 0) {
-                throw new Error(`Please provide values for all parameters: ${missingParams.map(([key]) => key).join(', ')}`);
+                throw new Error(
+                    `Please provide values for all parameters: ${missingParams.map(([key]) => key).join(', ')}`,
+                );
             }
 
             // Convert string values to numbers
-            Object.keys(scope).forEach(key => {
+            Object.keys(scope).forEach((key) => {
                 scope[key] = parseFloat(scope[key]);
                 if (isNaN(scope[key])) {
                     throw new Error(`Invalid numeric value for parameter ${key}`);
@@ -83,7 +83,7 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
 
             if (isConditional) {
                 // Evaluate all conditions and find the matching one
-                const results = conditions.map(condition => {
+                const results = conditions.map((condition) => {
                     const conditionResult = evaluateCondition(condition.condition, scope);
                     let value = null;
                     let valueError = null;
@@ -99,18 +99,18 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
                         conditionMet: conditionResult,
                         value: value !== null ? value : null,
                         priceFormula: condition.value,
-                        error: valueError
+                        error: valueError,
                     };
                 });
 
                 setConditionResults(results);
 
                 // Find the first condition that is met
-                const matchingCondition = results.find(r => r.conditionMet && r.value !== null);
+                const matchingCondition = results.find((r) => r.conditionMet && r.value !== null);
                 if (matchingCondition) {
                     setResult(matchingCondition.value);
                     setError('');
-                } else if (results.every(r => !r.conditionMet)) {
+                } else if (results.every((r) => !r.conditionMet)) {
                     setError('No conditions were met with the provided parameter values');
                 } else {
                     setError('Error evaluating price for the matching condition');
@@ -130,7 +130,9 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
     // Evaluate a single condition expression
     const evaluateCondition = (conditionStr, scope) => {
         try {
-            return new Function(...Object.keys(scope), `return ${conditionStr}`)(...Object.values(scope));
+            return new Function(...Object.keys(scope), `return ${conditionStr}`)(
+                ...Object.values(scope),
+            );
         } catch (err) {
             return false;
         }
@@ -139,7 +141,7 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
     // Reset all parameter values
     const resetValues = () => {
         const resetValues = {};
-        parameters.forEach(param => {
+        parameters.forEach((param) => {
             resetValues[param.value] = '';
         });
         setParamValues(resetValues);
@@ -154,7 +156,7 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
     };
 
     return (
-        <Paper variant="outlined" sx={{mt: 2, mb: 2}}>
+        <Paper variant="outlined" sx={{ mt: 2, mb: 2 }}>
             <Box
                 sx={{
                     p: 2,
@@ -163,42 +165,45 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
                     alignItems: 'center',
                     cursor: 'pointer',
                     borderBottom: showTester ? '1px solid rgba(0, 0, 0, 0.12)' : 'none',
-                    bgcolor: showTester ? 'rgba(0, 0, 0, 0.03)' : 'transparent'
+                    bgcolor: showTester ? 'rgba(0, 0, 0, 0.03)' : 'transparent',
                 }}
                 onClick={() => setShowTester(!showTester)}
             >
-                <Box sx={{display: 'flex', alignItems: 'center'}}>
-                    <CalculateOutlined sx={{mr: 1}} color="primary"/>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <CalculateOutlined sx={{ mr: 1 }} color="primary" />
                     <Typography variant="subtitle1" fontWeight="medium">
                         Formula Tester
                     </Typography>
                 </Box>
                 <IconButton size="small">
-                    {showTester ? <Close fontSize="small"/> : <PlayArrow fontSize="small"/>}
+                    {showTester ? <Close fontSize="small" /> : <PlayArrow fontSize="small" />}
                 </IconButton>
             </Box>
 
             <Collapse in={showTester}>
-                <Box sx={{p: 2}}>
-                    <Alert severity="info" sx={{mb: 2}}>
-                        Enter values for each parameter to
-                        test {isConditional ? 'conditional pricing' : 'your formula'} and see the calculated result.
+                <Box sx={{ p: 2 }}>
+                    <Alert severity="info" sx={{ mb: 2 }}>
+                        Enter values for each parameter to test{' '}
+                        {isConditional ? 'conditional pricing' : 'your formula'} and see the
+                        calculated result.
                     </Alert>
 
-                    <Grid container spacing={2} sx={{mb: 2}}>
+                    <Grid container spacing={2} sx={{ mb: 2 }}>
                         {parameters.length > 0 ? (
                             parameters.map((param, index) => (
-                                <Grid size={{xs: 12, sm: 6, md: 4}} key={param.id || index}>
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={param.id || index}>
                                     <TextField
                                         label={`${param.value}`}
                                         placeholder="Enter value"
                                         fullWidth
                                         size="small"
                                         value={paramValues[param.value] || ''}
-                                        onChange={(e) => handleParamChange(param.value, e.target.value)}
+                                        onChange={(e) =>
+                                            handleParamChange(param.value, e.target.value)
+                                        }
                                         type="number"
                                         slotProps={{
-                                            htmlInput: {step: 'any'}
+                                            htmlInput: { step: 'any' },
                                         }}
                                     />
                                 </Grid>
@@ -213,10 +218,10 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
                     </Grid>
 
                     {parameters.length > 0 && (
-                        <Box sx={{display: 'flex', gap: 2, mb: 3}}>
+                        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
                             <Button
                                 variant="contained"
-                                startIcon={<CalculateOutlined/>}
+                                startIcon={<CalculateOutlined />}
                                 onClick={evaluateFormula}
                                 disabled={parameters.length === 0}
                             >
@@ -224,7 +229,7 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
                             </Button>
                             <Button
                                 variant="outlined"
-                                startIcon={<Refresh/>}
+                                startIcon={<Refresh />}
                                 onClick={resetValues}
                             >
                                 Reset Values
@@ -233,26 +238,26 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
                     )}
 
                     {error && (
-                        <Alert severity="error" sx={{mb: 2}}>
+                        <Alert severity="error" sx={{ mb: 2 }}>
                             {error}
                         </Alert>
                     )}
 
                     {result !== null && (
-                        <Paper sx={{p: 2, bgcolor: 'success.light', color: 'success.contrastText'}}>
+                        <Paper
+                            sx={{ p: 2, bgcolor: 'success.light', color: 'success.contrastText' }}
+                        >
                             <Typography variant="h6" gutterBottom>
                                 Result: {formatNumber(result)} OMR
                             </Typography>
                             {!isConditional && (
-                                <Typography variant="body2">
-                                    Formula: {formula}
-                                </Typography>
+                                <Typography variant="body2">Formula: {formula}</Typography>
                             )}
                         </Paper>
                     )}
 
                     {isConditional && conditionResults.length > 0 && (
-                        <Box sx={{mt: 3}}>
+                        <Box sx={{ mt: 3 }}>
                             <Typography variant="subtitle2" gutterBottom>
                                 Condition Evaluation Results:
                             </Typography>
@@ -264,17 +269,23 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
                                     sx={{
                                         p: 1.5,
                                         mb: 1,
-                                        bgcolor: result.conditionMet ? 'rgba(76, 175, 80, 0.1)' : 'transparent',
-                                        borderColor: result.conditionMet ? 'success.main' : undefined
+                                        bgcolor: result.conditionMet
+                                            ? 'rgba(76, 175, 80, 0.1)'
+                                            : 'transparent',
+                                        borderColor: result.conditionMet
+                                            ? 'success.main'
+                                            : undefined,
                                     }}
                                 >
-                                    <Box sx={{display: 'flex', alignItems: 'center', mb: 0.5}}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
                                         <Chip
-                                            icon={result.conditionMet ? <Check/> : <Close/>}
-                                            label={result.conditionMet ? "Condition Met" : "Not Met"}
+                                            icon={result.conditionMet ? <Check /> : <Close />}
+                                            label={
+                                                result.conditionMet ? 'Condition Met' : 'Not Met'
+                                            }
                                             size="small"
-                                            color={result.conditionMet ? "success" : "default"}
-                                            sx={{mr: 1}}
+                                            color={result.conditionMet ? 'success' : 'default'}
+                                            sx={{ mr: 1 }}
                                         />
                                         <Typography variant="body2" fontFamily="monospace">
                                             {result.condition}
@@ -282,13 +293,19 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
                                     </Box>
 
                                     {result.conditionMet && (
-                                        <Box sx={{mt: 1}}>
+                                        <Box sx={{ mt: 1 }}>
                                             <Typography variant="body2" color="text.secondary">
-                                                Price Formula: <strong>{result.priceFormula}</strong>
+                                                Price Formula:{' '}
+                                                <strong>{result.priceFormula}</strong>
                                             </Typography>
-                                            <Typography variant="body2" fontWeight="medium"
-                                                        color={result.error ? 'error.main' : 'success.main'}>
-                                                {result.error ? `Error: ${result.error}` : `Result: ${formatNumber(result.value)} OMR`}
+                                            <Typography
+                                                variant="body2"
+                                                fontWeight="medium"
+                                                color={result.error ? 'error.main' : 'success.main'}
+                                            >
+                                                {result.error
+                                                    ? `Error: ${result.error}`
+                                                    : `Result: ${formatNumber(result.value)} OMR`}
                                             </Typography>
                                         </Box>
                                     )}
@@ -303,16 +320,20 @@ const FormulaTester = ({parameters = [], formula = '', isConditional = false, co
 };
 
 FormulaTester.propTypes = {
-    parameters: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        value: PropTypes.string,
-    })),
+    parameters: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+            value: PropTypes.string,
+        }),
+    ),
     formula: PropTypes.string,
     isConditional: PropTypes.bool,
-    conditions: PropTypes.arrayOf(PropTypes.shape({
-        condition: PropTypes.string,
-        value: PropTypes.string,
-    })),
+    conditions: PropTypes.arrayOf(
+        PropTypes.shape({
+            condition: PropTypes.string,
+            value: PropTypes.string,
+        }),
+    ),
 };
 
 export default FormulaTester;

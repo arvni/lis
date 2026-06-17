@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from 'react';
 import {
     Box,
     Paper,
@@ -8,12 +8,9 @@ import {
     AccordionDetails,
     Chip,
     useTheme,
-} from "@mui/material";
-import {
-    ExpandMore as ExpandMoreIcon,
-    Article as ArticleIcon,
-} from "@mui/icons-material";
-import ReportFormContent from "./Form/ReportFormContent.jsx";
+} from '@mui/material';
+import { ExpandMore as ExpandMoreIcon, Article as ArticleIcon } from '@mui/icons-material';
+import ReportFormContent from './Form/ReportFormContent.jsx';
 
 /**
  * Enhanced Report Form Component with Parameter Support
@@ -27,14 +24,14 @@ import ReportFormContent from "./Form/ReportFormContent.jsx";
  * @param {boolean} defaultExpanded - Whether accordion is expanded by default
  */
 const ReportForm = ({
-                        data,
-                        setData,
-                        onSubmit,
-                        patientID,
-                        errors = {},
-                        templates = [],
-                        defaultExpanded = true
-                    }) => {
+    data,
+    setData,
+    onSubmit,
+    patientID,
+    errors = {},
+    templates = [],
+    defaultExpanded = true,
+}) => {
     const theme = useTheme();
     const [expanded, setExpanded] = useState(defaultExpanded);
     const [parameterErrors, setParameterErrors] = useState({});
@@ -47,34 +44,34 @@ const ReportForm = ({
     };
 
     const handleTemplateChange = (e) => {
-        setData(prevData => ({
+        setData((prevData) => ({
             ...prevData,
-            report_template: templates.find(item => item.id === e.target.value),
-            parameterValues: {}
+            report_template: templates.find((item) => item.id === e.target.value),
+            parameterValues: {},
         }));
-    }
+    };
 
     // Handle file change for related documents
-    const handleFileChange = (_, value) => setData(prevData => ({...prevData, files: value}));
+    const handleFileChange = (_, value) => setData((prevData) => ({ ...prevData, files: value }));
 
     // Handle accordion expansion
     const handleAccordionChange = (_, isExpanded) => setExpanded(isExpanded);
 
     // Handle parameter value changes
     const handleParameterChange = (paramId, value) => {
-        setData(prevData => ({
+        setData((prevData) => ({
             ...prevData,
             parameterValues: {
                 ...(prevData.parameterValues || {}),
-                [paramId]: value
-            }
+                [paramId]: value,
+            },
         }));
 
         // Clear error if value is provided
         if (value !== '' && value !== null && value !== undefined) {
-            setParameterErrors(prev => ({
+            setParameterErrors((prev) => ({
                 ...prev,
-                [paramId]: undefined
+                [paramId]: undefined,
             }));
         }
     };
@@ -86,10 +83,10 @@ const ReportForm = ({
         const newErrors = {};
         let isValid = true;
 
-        const activeParameters = data.report_template.parameters.filter(param => param.active);
+        const activeParameters = data.report_template.parameters.filter((param) => param.active);
 
-        activeParameters.forEach(param => {
-            const {title, required, type} = param;
+        activeParameters.forEach((param) => {
+            const { title, required, type } = param;
             const fieldId = `${title.toLowerCase().replace(/\s+/g, '_')}_${param.id}`;
             const value = data.parameterValues?.[fieldId];
 
@@ -117,13 +114,14 @@ const ReportForm = ({
         } else {
             // Scroll to parameter section
             document.getElementById('parameter-section')?.scrollIntoView({
-                behavior: 'smooth'
+                behavior: 'smooth',
             });
         }
     };
 
     // Only show active parameters
-    const activeParameters = data.report_template?.parameters?.filter(param => param.active) || [];
+    const activeParameters =
+        data.report_template?.parameters?.filter((param) => param.active) || [];
     const hasParameters = activeParameters.length > 0;
 
     return (
@@ -134,8 +132,8 @@ const ReportForm = ({
                 overflow: 'hidden',
                 transition: 'box-shadow 0.3s ease',
                 '&:hover': {
-                    boxShadow: theme.shadows[6]
-                }
+                    boxShadow: theme.shadows[6],
+                },
             }}
         >
             <Accordion
@@ -149,11 +147,11 @@ const ReportForm = ({
                         '&:before': {
                             display: 'none',
                         },
-                    }
+                    },
                 }}
             >
                 <AccordionSummary
-                    expandIcon={<ExpandMoreIcon/>}
+                    expandIcon={<ExpandMoreIcon />}
                     aria-controls="report-form-content"
                     id="report-form-header"
                     sx={{
@@ -165,24 +163,36 @@ const ReportForm = ({
                         },
                         '& .MuiAccordionSummary-expandIconWrapper': {
                             color: 'white',
-                        }
+                        },
                     }}
                 >
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                        <ArticleIcon/>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <ArticleIcon />
                         <Typography variant="h6" fontWeight="500">
                             Report Documentation
                         </Typography>
                         <Chip
                             size="small"
-                            label={getActiveStep() === 0 ? "Draft" : getActiveStep() === 1 ? "Approved" : "Published"}
-                            color={getActiveStep() === 0 ? "warning" : getActiveStep() === 1 ? "info" : "success"}
-                            sx={{ml: 2}}
+                            label={
+                                getActiveStep() === 0
+                                    ? 'Draft'
+                                    : getActiveStep() === 1
+                                      ? 'Approved'
+                                      : 'Published'
+                            }
+                            color={
+                                getActiveStep() === 0
+                                    ? 'warning'
+                                    : getActiveStep() === 1
+                                      ? 'info'
+                                      : 'success'
+                            }
+                            sx={{ ml: 2 }}
                         />
                     </Box>
                 </AccordionSummary>
 
-                <AccordionDetails sx={{p: 0}}>
+                <AccordionDetails sx={{ p: 0 }}>
                     <ReportFormContent
                         data={data}
                         setData={setData}

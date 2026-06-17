@@ -30,7 +30,7 @@ export const ElementTypes = {
     CIRCLE: 'circle',
     ERASE_PATH: 'erase-path',
     FILL_PLACEHOLDER: 'fill-placeholder',
-    TEXT: 'text'
+    TEXT: 'text',
 };
 
 // Action types for reducer
@@ -62,5 +62,5 @@ export const ActionTypes = {
     SET_LINE_TYPE_FROM_DIALOG: 'SET_LINE_TYPE_FROM_DIALOG',
     CLOSE_LINE_TYPE_DIALOG: 'CLOSE_LINE_TYPE_DIALOG',
     CLOSE_NOTIFICATION: 'CLOSE_NOTIFICATION',
-    SET_TEXT_SIZE: 'SET_TEXT_SIZE'
+    SET_TEXT_SIZE: 'SET_TEXT_SIZE',
 };

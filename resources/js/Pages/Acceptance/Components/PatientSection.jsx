@@ -1,17 +1,17 @@
-import React from "react";
-import Grid from "@mui/material/Grid";
-import { Box, Divider, Typography, Avatar } from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
+import React from 'react';
+import Grid from '@mui/material/Grid';
+import { Box, Divider, Typography, Avatar } from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
 
 const PatientSection = ({ patient }) => (
     <Box>
-        <Box sx={{display: "flex", mb: 2, alignItems: "center"}}>
+        <Box sx={{ display: 'flex', mb: 2, alignItems: 'center' }}>
             <Avatar
                 sx={{
-                    bgcolor: "primary.main",
+                    bgcolor: 'primary.main',
                     width: 56,
                     height: 56,
-                    mr: 2
+                    mr: 2,
                 }}
             >
                 <PersonIcon fontSize="large" />
@@ -22,28 +22,44 @@ const PatientSection = ({ patient }) => (
         <Divider sx={{ mb: 3 }} />
 
         <Grid container spacing={3}>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} >
-                <Box sx={{ p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
-                    <Typography variant="subtitle2" color="text.secondary">ID/Passport No.</Typography>
-                    <Typography variant="body1" fontWeight="medium">{patient.idNo}</Typography>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                        ID/Passport No.
+                    </Typography>
+                    <Typography variant="body1" fontWeight="medium">
+                        {patient.idNo}
+                    </Typography>
                 </Box>
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} >
-                <Box sx={{ p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
-                    <Typography variant="subtitle2" color="text.secondary">Nationality</Typography>
-                    <Typography variant="body1" fontWeight="medium">{patient.nationality}</Typography>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                        Nationality
+                    </Typography>
+                    <Typography variant="body1" fontWeight="medium">
+                        {patient.nationality}
+                    </Typography>
                 </Box>
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} >
-                <Box sx={{ p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
-                    <Typography variant="subtitle2" color="text.secondary">Date Of Birth</Typography>
-                    <Typography variant="body1" fontWeight="medium">{patient.dateOfBirth}</Typography>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                        Date Of Birth
+                    </Typography>
+                    <Typography variant="body1" fontWeight="medium">
+                        {patient.dateOfBirth}
+                    </Typography>
                 </Box>
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} >
-                <Box sx={{ p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
-                    <Typography variant="subtitle2" color="text.secondary">Gender</Typography>
-                    <Typography variant="body1" fontWeight="medium">{patient.gender.toUpperCase()}</Typography>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                        Gender
+                    </Typography>
+                    <Typography variant="body1" fontWeight="medium">
+                        {patient.gender.toUpperCase()}
+                    </Typography>
                 </Box>
             </Grid>
         </Grid>

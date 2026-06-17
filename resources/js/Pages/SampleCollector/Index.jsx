@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useMemo} from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import { Button } from '@mui/material';
 import { GridActionsCellItem } from '@mui/x-data-grid';
@@ -20,22 +20,31 @@ const SampleCollectorsIndex = () => {
     const [sampleCollector, setSampleCollector] = useState(null);
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
 
-    const showSampleCollector = useCallback((id) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        router.visit(route('sample-collectors.show', id));
-    }, []);
+    const showSampleCollector = useCallback(
+        (id) => (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            router.visit(route('sample-collectors.show', id));
+        },
+        [],
+    );
 
-    const editSampleCollector = useCallback((id) => (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        router.visit(route('sample-collectors.edit', id));
-    }, []);
+    const editSampleCollector = useCallback(
+        (id) => (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            router.visit(route('sample-collectors.edit', id));
+        },
+        [],
+    );
 
-    const deleteSampleCollector = useCallback((params) => () => {
-        setSampleCollector(params);
-        setOpenDeleteForm(true);
-    }, []);
+    const deleteSampleCollector = useCallback(
+        (params) => () => {
+            setSampleCollector(params);
+            setOpenDeleteForm(true);
+        },
+        [],
+    );
 
     const addSampleCollector = useCallback((e) => {
         e.preventDefault();
@@ -60,79 +69,82 @@ const SampleCollectorsIndex = () => {
             router.post(
                 route('sample-collectors.destroy', sampleCollector.id),
                 { _method: 'delete' },
-                { onSuccess: handleCloseDeleteForm }
+                { onSuccess: handleCloseDeleteForm },
             );
         }
     }, [sampleCollector, handleCloseDeleteForm]);
 
-    const columns = useMemo(()=>[
-        {
-            field: 'id',
-            headerName: 'ID',
-            type: 'number',
-            width: 80,
-        },
-        {
-            field: 'name',
-            headerName: 'Name',
-            type: 'string',
-            width: 200,
-        },
-        {
-            field: 'email',
-            headerName: 'Email',
-            type: 'string',
-            width: 250,
-        },
-        {
-            field: 'collect_requests_count',
-            headerName: 'Collect Requests',
-            type: 'number',
-            width: 150,
-        },
-        {
-            field: 'actions',
-            headerName: 'Action',
-            type: 'actions',
-            width: 100,
-            sortable: false,
-            getActions: (params) => {
-                const actions = [
-                    <GridActionsCellItem
-                        key="view"
-                        icon={<RemoveRedEyeIcon />}
-                        label="Show"
-                        href={route('sample-collectors.show', params.row.id)}
-                        onClick={showSampleCollector(params.row.id)}
-                    />,
-                    <GridActionsCellItem
-                        key="edit"
-                        icon={<EditIcon />}
-                        label="Edit"
-                        href={route('sample-collectors.edit', params.row.id)}
-                        onClick={editSampleCollector(params.row.id)}
-                    />
-                ];
-
-                if (!params.row.collect_requests_count) {
-                    actions.push(
+    const columns = useMemo(
+        () => [
+            {
+                field: 'id',
+                headerName: 'ID',
+                type: 'number',
+                width: 80,
+            },
+            {
+                field: 'name',
+                headerName: 'Name',
+                type: 'string',
+                width: 200,
+            },
+            {
+                field: 'email',
+                headerName: 'Email',
+                type: 'string',
+                width: 250,
+            },
+            {
+                field: 'collect_requests_count',
+                headerName: 'Collect Requests',
+                type: 'number',
+                width: 150,
+            },
+            {
+                field: 'actions',
+                headerName: 'Action',
+                type: 'actions',
+                width: 100,
+                sortable: false,
+                getActions: (params) => {
+                    const actions = [
                         <GridActionsCellItem
-                            key="delete"
-                            icon={<DeleteIcon />}
-                            label="Delete"
-                            onClick={deleteSampleCollector(params.row)}
-                        />
-                    );
-                }
+                            key="view"
+                            icon={<RemoveRedEyeIcon />}
+                            label="Show"
+                            href={route('sample-collectors.show', params.row.id)}
+                            onClick={showSampleCollector(params.row.id)}
+                        />,
+                        <GridActionsCellItem
+                            key="edit"
+                            icon={<EditIcon />}
+                            label="Edit"
+                            href={route('sample-collectors.edit', params.row.id)}
+                            onClick={editSampleCollector(params.row.id)}
+                        />,
+                    ];
 
-                return actions;
-            }
-        }
-    ], [showSampleCollector, editSampleCollector, deleteSampleCollector]);
+                    if (!params.row.collect_requests_count) {
+                        actions.push(
+                            <GridActionsCellItem
+                                key="delete"
+                                icon={<DeleteIcon />}
+                                label="Delete"
+                                onClick={deleteSampleCollector(params.row)}
+                            />,
+                        );
+                    }
+
+                    return actions;
+                },
+            },
+        ],
+        [showSampleCollector, editSampleCollector, deleteSampleCollector],
+    );
 
     return (
         <>
-            <Head title="Sample Collectors"/>
+            <Head title="Sample Collectors" />
             <PageHeader
                 title="Sample Collectors List"
                 actions={
@@ -174,8 +186,8 @@ SampleCollectorsIndex.layout = (page) => (
             {
                 title: 'Sample Collectors',
                 link: null,
-                icon: null
-            }
+                icon: null,
+            },
         ]}
     >
         {page}

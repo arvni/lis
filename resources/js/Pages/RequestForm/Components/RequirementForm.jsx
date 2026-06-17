@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
     Alert,
     Box,
@@ -14,8 +14,8 @@ import {
     Tooltip,
     Typography,
     Avatar,
-    ListItemIcon
-} from "@mui/material";
+    ListItemIcon,
+} from '@mui/material';
 import {
     Add as AddIcon,
     Edit as EditIcon,
@@ -24,32 +24,47 @@ import {
     CheckBox,
     List as ListIcon,
     Numbers,
-    Warning
-} from "@mui/icons-material";
-import { DndContext, closestCenter } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import DeleteButton from "@/Components/DeleteButton";
-import AddRequirementForm from "./AddRequirementForm";
-import {makeId} from "@/Services/helper.js";
+    Warning,
+} from '@mui/icons-material';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import {
+    SortableContext,
+    verticalListSortingStrategy,
+    useSortable,
+    arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import DeleteButton from '@/Components/DeleteButton';
+import AddRequirementForm from './AddRequirementForm';
+import { makeId } from '@/Services/helper.js';
 
 const getFieldTypeIcon = (type) => {
     switch (type) {
-        case 'text': return <TextFields fontSize="small" color="primary" />;
-        case 'checkbox': return <CheckBox fontSize="small" color="secondary" />;
-        case 'number': return <Numbers fontSize="small" color="warning" />;
-        case 'select': return <ListIcon fontSize="small" color="success" />;
-        default: return <TextFields fontSize="small" color="primary" />;
+        case 'text':
+            return <TextFields fontSize="small" color="primary" />;
+        case 'checkbox':
+            return <CheckBox fontSize="small" color="secondary" />;
+        case 'number':
+            return <Numbers fontSize="small" color="warning" />;
+        case 'select':
+            return <ListIcon fontSize="small" color="success" />;
+        default:
+            return <TextFields fontSize="small" color="primary" />;
     }
 };
 
 const getTypeLabel = (type) => {
     switch (type) {
-        case 'text': return 'Text Field';
-        case 'checkbox': return 'Checkbox';
-        case 'number': return 'Number Field';
-        case 'select': return 'Dropdown';
-        default: return type.charAt(0).toUpperCase() + type.slice(1);
+        case 'text':
+            return 'Text Field';
+        case 'checkbox':
+            return 'Checkbox';
+        case 'number':
+            return 'Number Field';
+        case 'select':
+            return 'Dropdown';
+        default:
+            return type.charAt(0).toUpperCase() + type.slice(1);
     }
 };
 
@@ -85,8 +100,8 @@ const SortableRequirementItem = ({ field, index, disabled, requirements, onEdit,
                     cursor: disabled ? 'default' : 'grab',
                     color: 'text.secondary',
                     '&:hover': {
-                        color: disabled ? 'text.secondary' : 'primary.main'
-                    }
+                        color: disabled ? 'text.secondary' : 'primary.main',
+                    },
                 }}
             >
                 <DragIndicator />
@@ -97,7 +112,7 @@ const SortableRequirementItem = ({ field, index, disabled, requirements, onEdit,
                 <Avatar
                     sx={{
                         bgcolor: field.required ? 'primary.main' : 'grey.200',
-                        color: field.required ? 'primary.contrastText' : 'text.primary'
+                        color: field.required ? 'primary.contrastText' : 'text.primary',
                     }}
                 >
                     {index + 1}
@@ -109,16 +124,9 @@ const SortableRequirementItem = ({ field, index, disabled, requirements, onEdit,
                 slotProps={{ primary: { component: 'div' }, secondary: { component: 'div' } }}
                 primary={
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="subtitle2">
-                            {field.label}
-                        </Typography>
+                        <Typography variant="subtitle2">{field.label}</Typography>
                         {field.required && (
-                            <Chip
-                                label="Required"
-                                size="small"
-                                color="error"
-                                variant="outlined"
-                            />
+                            <Chip label="Required" size="small" color="error" variant="outlined" />
                         )}
                     </Box>
                 }
@@ -136,7 +144,7 @@ const SortableRequirementItem = ({ field, index, disabled, requirements, onEdit,
                             sx={{
                                 height: 24,
                                 '& .MuiChip-label': { px: 1 },
-                                '& .MuiChip-icon': { fontSize: 16 }
+                                '& .MuiChip-icon': { fontSize: 16 },
                             }}
                         />
 
@@ -148,7 +156,7 @@ const SortableRequirementItem = ({ field, index, disabled, requirements, onEdit,
 
                         {field.type === 'select' && field.options && field.options.length > 0 && (
                             <Typography variant="caption" color="text.secondary">
-                                Options: {field.options.join(", ")}
+                                Options: {field.options.join(', ')}
                             </Typography>
                         )}
                     </Stack>
@@ -158,12 +166,7 @@ const SortableRequirementItem = ({ field, index, disabled, requirements, onEdit,
             {/* Action buttons */}
             <Stack direction="row" spacing={1}>
                 <Tooltip title="Edit Field">
-                    <IconButton
-                        color="primary"
-                        onClick={onEdit}
-                        size="small"
-                        disabled={disabled}
-                    >
+                    <IconButton color="primary" onClick={onEdit} size="small" disabled={disabled}>
                         <EditIcon fontSize="small" />
                     </IconButton>
                 </Tooltip>
@@ -182,12 +185,12 @@ const SortableRequirementItem = ({ field, index, disabled, requirements, onEdit,
 const RequirementForm = ({ errors, requirements = [], onChange, disabled = false }) => {
     const [requirement, setRequirement] = useState({
         id: makeId(6),
-        label: "",
-        type: "text",
+        label: '',
+        type: 'text',
         required: true,
         options: [],
-        value: "",
-        placeholder: ""
+        value: '',
+        placeholder: '',
     });
 
     const [openAddRequirement, setOpenAddRequirement] = useState(false);
@@ -214,19 +217,19 @@ const RequirementForm = ({ errors, requirements = [], onChange, disabled = false
     const handleRequirementChange = (key, value) => {
         setRequirement((prevState) => ({
             ...prevState,
-            [key]: value
+            [key]: value,
         }));
     };
 
     const resetRequirement = () => {
         setRequirement({
             id: makeId(6),
-            label: "",
-            type: "text",
+            label: '',
+            type: 'text',
             required: true,
             options: [],
-            value: "",
-            placeholder: ""
+            value: '',
+            placeholder: '',
         });
     };
 
@@ -237,7 +240,7 @@ const RequirementForm = ({ errors, requirements = [], onChange, disabled = false
 
     const handleEditRequirement = (index) => () => {
         if (requirements && requirements[index]) {
-            setRequirement({...requirements[index]});
+            setRequirement({ ...requirements[index] });
         }
         setOpenAddRequirement(true);
     };
@@ -250,19 +253,19 @@ const RequirementForm = ({ errors, requirements = [], onChange, disabled = false
 
     const handleDragEnd = ({ active, over }) => {
         if (!over || active.id === over.id) return;
-        const oldIndex = requirements.findIndex(r => r.id.toString() === active.id);
-        const newIndex = requirements.findIndex(r => r.id.toString() === over.id);
+        const oldIndex = requirements.findIndex((r) => r.id.toString() === active.id);
+        const newIndex = requirements.findIndex((r) => r.id.toString() === over.id);
         onChange(arrayMove(requirements, oldIndex, newIndex));
     };
 
     return (
         <>
             {/* Add field button and error message */}
-            <Box sx={{ mb: 3,width:"100%"}}>
+            <Box sx={{ mb: 3, width: '100%' }}>
                 <Stack
                     direction="row"
                     spacing={2}
-                    sx={{ mb: 2, alignItems: "center", justifyContent: "space-between" }}
+                    sx={{ mb: 2, alignItems: 'center', justifyContent: 'space-between' }}
                 >
                     <Button
                         variant="contained"
@@ -283,11 +286,7 @@ const RequirementForm = ({ errors, requirements = [], onChange, disabled = false
                 </Stack>
 
                 {errors && errors['formData'] && (
-                    <Alert
-                        severity="error"
-                        icon={<Warning />}
-                        sx={{ mb: 2 }}
-                    >
+                    <Alert severity="error" icon={<Warning />} sx={{ mb: 2 }}>
                         {errors['formData']}
                     </Alert>
                 )}
@@ -303,7 +302,7 @@ const RequirementForm = ({ errors, requirements = [], onChange, disabled = false
                         borderWidth: 1,
                         borderColor: 'divider',
                         bgcolor: 'background.paper',
-                        mb: 3
+                        mb: 3,
                     }}
                 >
                     <TextFields color="disabled" sx={{ fontSize: 48, mb: 2, opacity: 0.5 }} />
@@ -312,8 +311,13 @@ const RequirementForm = ({ errors, requirements = [], onChange, disabled = false
                         No Fields Added Yet
                     </Typography>
 
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 450, mx: 'auto' }}>
-                        Add fields to create your form structure. You can include text fields, checkboxes, number fields, and dropdown selects.
+                    <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 3, maxWidth: 450, mx: 'auto' }}
+                    >
+                        Add fields to create your form structure. You can include text fields,
+                        checkboxes, number fields, and dropdown selects.
                     </Typography>
 
                     <Button
@@ -327,13 +331,16 @@ const RequirementForm = ({ errors, requirements = [], onChange, disabled = false
                 </Paper>
             ) : (
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                    <SortableContext items={requirements.map(f => f.id.toString())} strategy={verticalListSortingStrategy}>
+                    <SortableContext
+                        items={requirements.map((f) => f.id.toString())}
+                        strategy={verticalListSortingStrategy}
+                    >
                         <Paper
                             variant="outlined"
                             sx={{
                                 borderRadius: 1,
                                 overflow: 'hidden',
-                                mb: 3
+                                mb: 3,
                             }}
                         >
                             <List disablePadding>

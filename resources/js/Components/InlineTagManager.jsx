@@ -23,7 +23,7 @@ import { useSnackbar } from 'notistack';
 import { router, usePage } from '@inertiajs/react';
 import TagChip from './TagChip';
 
-const getTagName = (tag) => typeof tag === 'string' ? tag : tag?.name;
+const getTagName = (tag) => (typeof tag === 'string' ? tag : tag?.name);
 const tagStateCache = new Map();
 
 const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
@@ -44,12 +44,9 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
     const hiddenTagCount = Math.max(selectedTags.length - visibleTags.length, 0);
     const initialTagSignature = useMemo(
         () => initialTags.map(getTagName).filter(Boolean).sort().join('|'),
-        [initialTags]
+        [initialTags],
     );
-    const draftTagNames = useMemo(
-        () => draftTags.map(getTagName).filter(Boolean),
-        [draftTags]
-    );
+    const draftTagNames = useMemo(() => draftTags.map(getTagName).filter(Boolean), [draftTags]);
 
     useEffect(() => {
         if (tagStateCache.has(updateUrl)) {
@@ -143,18 +140,12 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
 
     const renderSelectedTags = (value, getTagProps) =>
         value.map((option, index) => {
-            const tagObj = typeof option === 'string'
-                ? allTags.find(t => t.name === option) || { name: option }
-                : option;
+            const tagObj =
+                typeof option === 'string'
+                    ? allTags.find((t) => t.name === option) || { name: option }
+                    : option;
             const { key, ...tagProps } = getTagProps({ index });
-            return (
-                <TagChip
-                    tag={tagObj}
-                    key={key}
-                    {...tagProps}
-                    sx={{ maxWidth: 150 }}
-                />
-            );
+            return <TagChip tag={tagObj} key={key} {...tagProps} sx={{ maxWidth: 150 }} />;
         });
 
     const content = (
@@ -175,12 +166,17 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
                     '& .InlineTagManager-action': {
                         opacity: 1,
                     },
-                }
+                },
             }}
         >
             {selectedTags.length > 0 ? (
                 <>
-                    <Stack direction="row" spacing={0.5} sx={{ minWidth: 0, alignItems: 'center' }} useFlexGap>
+                    <Stack
+                        direction="row"
+                        spacing={0.5}
+                        sx={{ minWidth: 0, alignItems: 'center' }}
+                        useFlexGap
+                    >
                         {visibleTags.map((tag) => (
                             <TagChip
                                 key={tag.id ?? tag.name}
@@ -260,9 +256,7 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
             {canAssign ? (
                 content
             ) : (
-                <Tooltip title="You do not have permission to assign tags">
-                    {content}
-                </Tooltip>
+                <Tooltip title="You do not have permission to assign tags">{content}</Tooltip>
             )}
 
             <Popover
@@ -301,7 +295,10 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
                             <TagIcon fontSize="small" />
                         </Box>
                         <Box sx={{ minWidth: 0 }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                            <Typography
+                                variant="subtitle2"
+                                sx={{ fontWeight: 700, lineHeight: 1.2 }}
+                            >
                                 Manage tags
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
@@ -318,7 +315,9 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
                         disablePortal
                         size="small"
                         options={allTags}
-                        getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
+                        getOptionLabel={(option) =>
+                            typeof option === 'string' ? option : option.name
+                        }
                         value={draftTags}
                         loading={loading}
                         isOptionEqualToValue={(option, value) => {
@@ -357,11 +356,16 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
                                             ),
                                             endAdornment: (
                                                 <React.Fragment>
-                                                    {loading || saving ? <CircularProgress color="inherit" size={16} /> : null}
+                                                    {loading || saving ? (
+                                                        <CircularProgress
+                                                            color="inherit"
+                                                            size={16}
+                                                        />
+                                                    ) : null}
                                                     {slotProps?.input?.endAdornment}
                                                 </React.Fragment>
                                             ),
-                                        }
+                                        },
                                     }}
                                 />
                             );
@@ -370,9 +374,15 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
 
                     <Divider sx={{ my: 1.5 }} />
 
-                    <Stack direction="row" spacing={1} sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Stack
+                        direction="row"
+                        spacing={1}
+                        sx={{ justifyContent: 'space-between', alignItems: 'center' }}
+                    >
                         <Typography variant="caption" color="text.secondary">
-                            {draftTagNames.length ? `${draftTagNames.length} selected` : 'No tags selected'}
+                            {draftTagNames.length
+                                ? `${draftTagNames.length} selected`
+                                : 'No tags selected'}
                         </Typography>
                         <Stack direction="row" spacing={1}>
                             <Button
@@ -388,7 +398,13 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
                             <Button
                                 size="small"
                                 variant="contained"
-                                startIcon={saving ? <CircularProgress size={14} color="inherit" /> : <CheckIcon />}
+                                startIcon={
+                                    saving ? (
+                                        <CircularProgress size={14} color="inherit" />
+                                    ) : (
+                                        <CheckIcon />
+                                    )
+                                }
                                 onClick={handleSave}
                                 disabled={saving}
                                 sx={{ textTransform: 'none' }}

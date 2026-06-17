@@ -1,6 +1,6 @@
-import React, {useCallback, useEffect, useState} from "react";
-import {useForm} from "@inertiajs/react";
-import axios from "axios";
+import React, { useCallback, useEffect, useState } from 'react';
+import { useForm } from '@inertiajs/react';
+import axios from 'axios';
 
 // MUI Components
 import {
@@ -23,24 +23,25 @@ import {
     Divider,
     Box,
     Alert,
-    Snackbar, Tooltip
-} from "@mui/material";
+    Snackbar,
+    Tooltip,
+} from '@mui/material';
 
 // Icons
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import PersonIcon from "@mui/icons-material/Person";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import PersonIcon from '@mui/icons-material/Person';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 // Components
-import SelectSearch from "@/Components/SelectSearch";
-import Autocomplete from "@mui/material/Autocomplete";
-import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import BadgeIcon from "@mui/icons-material/Badge";
+import SelectSearch from '@/Components/SelectSearch';
+import Autocomplete from '@mui/material/Autocomplete';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import BadgeIcon from '@mui/icons-material/Badge';
 
-const AddForm = ({openAdd, onClose}) => {
+const AddForm = ({ openAdd, onClose }) => {
     const [times, setTimes] = useState([]);
     const [waiting, setWaiting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -59,16 +60,16 @@ const AddForm = ({openAdd, onClose}) => {
     const today = new Date();
     const formattedDate = formatDate(today);
 
-    const {data, setData, processing, post, errors, setError, reset} = useForm({
-        consultant: "",
+    const { data, setData, processing, post, errors, setError, reset } = useForm({
+        consultant: '',
         dueDate: formattedDate,
         time: null,
         customer: {
-            phone: "",
-            name: "",
-            email: ""
+            phone: '',
+            name: '',
+            email: '',
         },
-        note:"",
+        note: '',
     });
 
     useEffect(() => {
@@ -83,15 +84,15 @@ const AddForm = ({openAdd, onClose}) => {
     const getTimes = () => {
         axios
             .get(
-                route("list-reservation-times", {
+                route('list-reservation-times', {
                     consultant: data.consultant?.id,
-                    date: data.dueDate
-                })
+                    date: data.dueDate,
+                }),
             )
-            .then(({data}) => setTimes(data.data))
+            .then(({ data }) => setTimes(data.data))
             .then(() => setWaiting(false))
             .catch((error) => {
-                console.error("Error fetching times:", error);
+                console.error('Error fetching times:', error);
                 setWaiting(false);
             });
     };
@@ -99,17 +100,17 @@ const AddForm = ({openAdd, onClose}) => {
     const handleChange = (e) =>
         setData((previousData) => ({
             ...previousData,
-            [e.target.name]: e.target.value
+            [e.target.name]: e.target.value,
         }));
 
     const handleSubmit = () => {
         if (check()) {
-            post(route("book-an-appointment"), {
+            post(route('book-an-appointment'), {
                 onSuccess: () => {
                     setShowSuccess(true);
-                        onClose();
-                        reset();
-                }
+                    onClose();
+                    reset();
+                },
             });
         }
     };
@@ -118,58 +119,63 @@ const AddForm = ({openAdd, onClose}) => {
         let isValid = true;
 
         if (!data.consultant) {
-            setError("consultant", "Please select a consultant");
+            setError('consultant', 'Please select a consultant');
             isValid = false;
         }
 
         if (!data.dueDate) {
-            setError("dueDate", "Please select a date");
+            setError('dueDate', 'Please select a date');
             isValid = false;
         }
 
         if (!data.time) {
-            setError("time", "Please select a time slot");
+            setError('time', 'Please select a time slot');
             isValid = false;
         }
-        if (!data.customer.phone)
-            setError("customer.phone", "Please Enter customer phone number");
-        if (!data.customer.name)
-            setError("customer.phone", "Please Enter customer name");
+        if (!data.customer.phone) setError('customer.phone', 'Please Enter customer phone number');
+        if (!data.customer.name) setError('customer.phone', 'Please Enter customer name');
         return isValid;
     };
 
-
-    const fetchData = useCallback((_, search) => {
-        setLoading(true);
-        setData(prevData => ({...prevData, customer: {...prevData.customer, phone: search}}));
-        fetch(route("api.customers.list", {search}))
-            .then(response => response.json())
-            .then(data => {
-                setOptions((data.data || []).filter(Boolean));
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error("Error fetching customers:", error);
-                setLoading(false);
-                setOptions([]);
-            });
-
-    }, [open])
+    const fetchData = useCallback(
+        (_, search) => {
+            setLoading(true);
+            setData((prevData) => ({
+                ...prevData,
+                customer: { ...prevData.customer, phone: search },
+            }));
+            fetch(route('api.customers.list', { search }))
+                .then((response) => response.json())
+                .then((data) => {
+                    setOptions((data.data || []).filter(Boolean));
+                    setLoading(false);
+                })
+                .catch((error) => {
+                    console.error('Error fetching customers:', error);
+                    setLoading(false);
+                    setOptions([]);
+                });
+        },
+        [open],
+    );
 
     // Handle customer selection
     const handleCustomerSelect = (event, newValue) => {
-        setData(previousData => ({
+        setData((previousData) => ({
             ...previousData,
             customer: newValue || {
-                phone: "",
-                name: "",
-                email: ""
-            }
-        }))
+                phone: '',
+                name: '',
+                email: '',
+            },
+        }));
     };
 
-    const handleCustomerChange=(field,value)=>setData(previousData => ({...previousData,customer: {...previousData.customer,[field]:value}}))
-
+    const handleCustomerChange = (field, value) =>
+        setData((previousData) => ({
+            ...previousData,
+            customer: { ...previousData.customer, [field]: value },
+        }));
 
     return (
         <>
@@ -181,32 +187,33 @@ const AddForm = ({openAdd, onClose}) => {
                 slotProps={{
                     Paper: {
                         elevation: 3,
-                        sx: {borderRadius: 2}
-                    }
+                        sx: { borderRadius: 2 },
+                    },
                 }}
             >
-                <DialogTitle sx={{
-                    bgcolor: "primary.main",
-                    color: "white",
-                    py: 2
-                }}>
+                <DialogTitle
+                    sx={{
+                        bgcolor: 'primary.main',
+                        color: 'white',
+                        py: 2,
+                    }}
+                >
                     <Typography variant="h5" fontWeight="500" component="span">
                         Schedule New Reservation
                     </Typography>
                 </DialogTitle>
-                <Divider/>
+                <Divider />
 
-                <DialogContent sx={{p: 3, mt: 1}}>
+                <DialogContent sx={{ p: 3, mt: 1 }}>
                     <Container>
-
                         <Box>
-                            <Typography variant="subtitle1" fontWeight="medium" sx={{mb: 2}}>
+                            <Typography variant="subtitle1" fontWeight="medium" sx={{ mb: 2 }}>
                                 Referring Customer Information
                             </Typography>
 
                             <Grid container spacing={3}>
-                                <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <Box sx={{display: "flex", alignItems: "flex-start"}}>
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                                         <Autocomplete
                                             id="doctor-autocomplete"
                                             open={open}
@@ -215,7 +222,9 @@ const AddForm = ({openAdd, onClose}) => {
                                             value={data.customer?.id ? data.customer : null}
                                             onChange={handleCustomerSelect}
                                             onInputChange={fetchData}
-                                            isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                                            isOptionEqualToValue={(option, value) =>
+                                                option?.id === value?.id
+                                            }
                                             getOptionLabel={(option) => option?.phone || ''}
                                             options={options}
                                             loading={loading}
@@ -229,19 +238,41 @@ const AddForm = ({openAdd, onClose}) => {
                                                     placeholder="Search or enter phone"
                                                     slotProps={{
                                                         ...params.slotProps,
-                                                        htmlInput: params.slotProps?.htmlInput ?? params.inputProps,
+                                                        htmlInput:
+                                                            params.slotProps?.htmlInput ??
+                                                            params.inputProps,
                                                         input: {
-                                                            ...(params.slotProps?.input ?? params.InputProps),
+                                                            ...(params.slotProps?.input ??
+                                                                params.InputProps),
                                                             startAdornment: (
                                                                 <>
-                                                                    <MedicalServicesIcon color="action" sx={{mr: 1}}/>
-                                                                    {(params.slotProps?.input ?? params.InputProps)?.startAdornment}
+                                                                    <MedicalServicesIcon
+                                                                        color="action"
+                                                                        sx={{ mr: 1 }}
+                                                                    />
+                                                                    {
+                                                                        (
+                                                                            params.slotProps
+                                                                                ?.input ??
+                                                                            params.InputProps
+                                                                        )?.startAdornment
+                                                                    }
                                                                 </>
                                                             ),
                                                             endAdornment: (
                                                                 <>
-                                                                    {loading && <CircularProgress size={16}/>}
-                                                                    {(params.slotProps?.input ?? params.InputProps)?.endAdornment}
+                                                                    {loading && (
+                                                                        <CircularProgress
+                                                                            size={16}
+                                                                        />
+                                                                    )}
+                                                                    {
+                                                                        (
+                                                                            params.slotProps
+                                                                                ?.input ??
+                                                                            params.InputProps
+                                                                        )?.endAdornment
+                                                                    }
                                                                 </>
                                                             ),
                                                         },
@@ -250,68 +281,93 @@ const AddForm = ({openAdd, onClose}) => {
                                             )}
                                         />
                                         <Tooltip title="Search for an existing customer or enter a new phone">
-                                            <HelpOutlineIcon fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
+                                            <HelpOutlineIcon
+                                                fontSize="small"
+                                                color="action"
+                                                sx={{ ml: 1, mt: 2 }}
+                                            />
                                         </Tooltip>
                                     </Box>
                                 </Grid>
 
-                                <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <Box sx={{display: "flex", alignItems: "flex-start"}}>
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                                         <TextField
                                             name="name"
                                             label="Name"
-                                            value={data?.customer?.name || ""}
-                                            onChange={e => handleCustomerChange('name', e.target.value)}
+                                            value={data?.customer?.name || ''}
+                                            onChange={(e) =>
+                                                handleCustomerChange('name', e.target.value)
+                                            }
                                             fullWidth
                                             required
                                             placeholder="e.g. Ali"
                                             slotProps={{
                                                 input: {
                                                     startAdornment: (
-                                                        <LocalHospitalIcon color="action" sx={{mr: 1}}/>
+                                                        <LocalHospitalIcon
+                                                            color="action"
+                                                            sx={{ mr: 1 }}
+                                                        />
                                                     ),
-                                                }
+                                                },
                                             }}
                                         />
                                         <Tooltip title="Customer Full Name">
-                                            <HelpOutlineIcon fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
+                                            <HelpOutlineIcon
+                                                fontSize="small"
+                                                color="action"
+                                                sx={{ ml: 1, mt: 2 }}
+                                            />
                                         </Tooltip>
                                     </Box>
                                 </Grid>
 
-
-                                <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <Box sx={{display: "flex", alignItems: "flex-start"}}>
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                                         <TextField
                                             name="email"
                                             label="Email"
-                                            value={data.customer?.email || ""}
-                                            onChange={e => handleCustomerChange('email', e.target.value)}
+                                            value={data.customer?.email || ''}
+                                            onChange={(e) =>
+                                                handleCustomerChange('email', e.target.value)
+                                            }
                                             fullWidth
                                             placeholder="example@example.com"
                                             slotProps={{
                                                 input: {
                                                     startAdornment: (
-                                                        <BadgeIcon color="action" sx={{mr: 1}}/>
+                                                        <BadgeIcon color="action" sx={{ mr: 1 }} />
                                                     ),
-                                                }
+                                                },
                                             }}
                                         />
                                         <Tooltip title="Customer Email">
-                                            <HelpOutlineIcon fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
+                                            <HelpOutlineIcon
+                                                fontSize="small"
+                                                color="action"
+                                                sx={{ ml: 1, mt: 2 }}
+                                            />
                                         </Tooltip>
                                     </Box>
                                 </Grid>
                             </Grid>
                         </Box>
 
-                        <Grid container spacing={3} sx={{mt:2}}>
+                        <Grid container spacing={3} sx={{ mt: 2 }}>
                             {/* Consultant Selection */}
-                            <Grid size={{xs: 12, md: 6}}>
-                                <Paper elevation={0}
-                                       sx={{p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2}}>
-  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
-                                        <PersonIcon color="primary" sx={{mr: 1}}/>
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        p: 2,
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        borderRadius: 2,
+                                    }}
+                                >
+                                    <Box display="flex" mb={1} sx={{ alignItems: 'center' }}>
+                                        <PersonIcon color="primary" sx={{ mr: 1 }} />
                                         <Typography variant="subtitle1" fontWeight="medium">
                                             Select Consultant
                                         </Typography>
@@ -320,7 +376,7 @@ const AddForm = ({openAdd, onClose}) => {
                                     <SelectSearch
                                         onChange={handleChange}
                                         value={data.consultant}
-                                        url={route("list-consultants")}
+                                        url={route('list-consultants')}
                                         name="consultant"
                                         label="Consultant"
                                         error={Boolean(errors.consultant)}
@@ -331,11 +387,18 @@ const AddForm = ({openAdd, onClose}) => {
                             </Grid>
 
                             {/* Date Selection */}
-                            <Grid size={{xs: 12, md: 6}}>
-                                <Paper elevation={0}
-                                       sx={{p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2}}>
-  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
-                                        <CalendarTodayIcon color="primary" sx={{mr: 1}}/>
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        p: 2,
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        borderRadius: 2,
+                                    }}
+                                >
+                                    <Box display="flex" mb={1} sx={{ alignItems: 'center' }}>
+                                        <CalendarTodayIcon color="primary" sx={{ mr: 1 }} />
                                         <Typography variant="subtitle1" fontWeight="medium">
                                             Select Date
                                         </Typography>
@@ -348,8 +411,11 @@ const AddForm = ({openAdd, onClose}) => {
                                             value={data.dueDate}
                                             onChange={handleChange}
                                             fullWidth
-                                            slotProps={{inputLabel: {shrink: true}, input: {min: formattedDate}}}
-                                            error={errors.hasOwnProperty("dueDate")}
+                                            slotProps={{
+                                                inputLabel: { shrink: true },
+                                                input: { min: formattedDate },
+                                            }}
+                                            error={errors.hasOwnProperty('dueDate')}
                                             helperText={errors?.dueDate}
                                         />
                                     </FormGroup>
@@ -358,20 +424,38 @@ const AddForm = ({openAdd, onClose}) => {
 
                             {/* Time Selection */}
                             {(times.length > 0 || waiting) && (
-                                <Grid size={{xs: 12}}>
-                                    <Paper elevation={0}
-                                           sx={{p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2}}>
-  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
-                                            <AccessTimeIcon color="primary" sx={{mr: 1}}/>
+                                <Grid size={{ xs: 12 }}>
+                                    <Paper
+                                        elevation={0}
+                                        sx={{
+                                            p: 2,
+                                            border: '1px solid',
+                                            borderColor: 'divider',
+                                            borderRadius: 2,
+                                        }}
+                                    >
+                                        <Box display="flex" mb={2} sx={{ alignItems: 'center' }}>
+                                            <AccessTimeIcon color="primary" sx={{ mr: 1 }} />
                                             <Typography variant="subtitle1" fontWeight="medium">
                                                 Available Time Slots
                                             </Typography>
                                         </Box>
 
                                         {waiting ? (
-  <Box display="flex" p={4} sx={{justifyContent: "center", alignItems: "center"}}>
-                                                <CircularProgress size={40}/>
-                                                <Typography variant="body2" color="text.secondary" ml={2}>
+                                            <Box
+                                                display="flex"
+                                                p={4}
+                                                sx={{
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                }}
+                                            >
+                                                <CircularProgress size={40} />
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                    ml={2}
+                                                >
                                                     Loading available times...
                                                 </Typography>
                                             </Box>
@@ -381,7 +465,11 @@ const AddForm = ({openAdd, onClose}) => {
                                                     name="time"
                                                     value={data.time}
                                                     onChange={handleChange}
-                                                    sx={{display: "flex", flexDirection: "row", flexWrap: "wrap"}}
+                                                    sx={{
+                                                        display: 'flex',
+                                                        flexDirection: 'row',
+                                                        flexWrap: 'wrap',
+                                                    }}
                                                 >
                                                     {times.map((item, index) => (
                                                         <FormControlLabel
@@ -393,63 +481,78 @@ const AddForm = ({openAdd, onClose}) => {
                                                                 <Radio
                                                                     color="primary"
                                                                     disabled={item.disabled}
-                                                                    checkedIcon={<CheckCircleIcon/>}
+                                                                    checkedIcon={
+                                                                        <CheckCircleIcon />
+                                                                    }
                                                                 />
                                                             }
                                                             sx={{
-                                                                border: "1px solid",
-                                                                borderColor: data.time === item.value ? "primary.main" : "divider",
-                                                                borderRadius: "8px",
+                                                                border: '1px solid',
+                                                                borderColor:
+                                                                    data.time === item.value
+                                                                        ? 'primary.main'
+                                                                        : 'divider',
+                                                                borderRadius: '8px',
                                                                 m: 0.5,
                                                                 p: 0.5,
                                                                 pr: 1.5,
-                                                                transition: "all 0.2s",
-                                                                bgcolor: data.time === item.value ? "action.selected" : "background.paper",
-                                                                "&:hover": {
-                                                                    bgcolor: "action.hover",
-                                                                    borderColor: "primary.light"
-                                                                }
+                                                                transition: 'all 0.2s',
+                                                                bgcolor:
+                                                                    data.time === item.value
+                                                                        ? 'action.selected'
+                                                                        : 'background.paper',
+                                                                '&:hover': {
+                                                                    bgcolor: 'action.hover',
+                                                                    borderColor: 'primary.light',
+                                                                },
                                                             }}
                                                         />
                                                     ))}
                                                 </RadioGroup>
 
                                                 {errors.time && (
-                                                    <FormHelperText error>{errors.time}</FormHelperText>
+                                                    <FormHelperText error>
+                                                        {errors.time}
+                                                    </FormHelperText>
                                                 )}
                                             </>
                                         ) : (
-                                            <Typography variant="body2" color="text.secondary" align="center"
-                                                        py={2}>
-                                                No available time slots. Please try another date or consultant.
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                align="center"
+                                                py={2}
+                                            >
+                                                No available time slots. Please try another date or
+                                                consultant.
                                             </Typography>
                                         )}
                                     </Paper>
                                 </Grid>
                             )}
-                            <Grid size={{xs: 12}}>
-                                    <TextField
-                                        name="note"
-                                        label="Note"
-                                        value={data?.note || ""}
-                                        onChange={handleChange}
-                                        fullWidth
-                                        multiline
-                                        rows={3}
-                                    />
+                            <Grid size={{ xs: 12 }}>
+                                <TextField
+                                    name="note"
+                                    label="Note"
+                                    value={data?.note || ''}
+                                    onChange={handleChange}
+                                    fullWidth
+                                    multiline
+                                    rows={3}
+                                />
                             </Grid>
                         </Grid>
                     </Container>
                 </DialogContent>
 
-                <Divider/>
+                <Divider />
 
-                <DialogActions sx={{px: 3, py: 2, justifyContent: "space-between"}}>
+                <DialogActions sx={{ px: 3, py: 2, justifyContent: 'space-between' }}>
                     <Button
                         onClick={onClose}
                         variant="outlined"
                         color="inherit"
-                        sx={{borderRadius: 2}}
+                        sx={{ borderRadius: 2 }}
                     >
                         Cancel
                     </Button>
@@ -459,13 +562,15 @@ const AddForm = ({openAdd, onClose}) => {
                         variant="contained"
                         disableElevation
                         disabled={processing}
-                        startIcon={processing ? <CircularProgress size={20} color="inherit"/> : null}
+                        startIcon={
+                            processing ? <CircularProgress size={20} color="inherit" /> : null
+                        }
                         sx={{
                             borderRadius: 2,
-                            px: 3
+                            px: 3,
                         }}
                     >
-                        {processing ? "Scheduling..." : "Schedule Consultation"}
+                        {processing ? 'Scheduling...' : 'Schedule Consultation'}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -473,7 +578,7 @@ const AddForm = ({openAdd, onClose}) => {
             <Snackbar
                 open={showSuccess}
                 autoHideDuration={2000}
-                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
                 <Alert severity="success" variant="filled">
                     Consultation scheduled successfully!

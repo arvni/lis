@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { makeId } from "@/Services/helper";
+import { useState, useCallback } from 'react';
+import { makeId } from '@/Services/helper';
 
 const useAcceptanceFormState = (initialData) => {
     const [data, setData] = useState(initialData);
@@ -22,24 +22,24 @@ const useAcceptanceFormState = (initialData) => {
     const handleFormChange = useCallback((field, value) => {
         if (field.includes('.')) {
             const [parent, child] = field.split('.');
-            setData(prev => ({
+            setData((prev) => ({
                 ...prev,
                 [parent]: { ...(prev?.[parent] || {}), [child]: value },
             }));
         } else if (field === 'referred' && value === false) {
-            setData(prev => ({
+            setData((prev) => ({
                 ...prev,
                 referred: false,
-                referrer: "",
-                howReport: { who: "", way: "print" },
+                referrer: '',
+                howReport: { who: '', way: 'print' },
             }));
         } else {
-            setData(prev => ({ ...prev, [field]: value }));
+            setData((prev) => ({ ...prev, [field]: value }));
         }
     }, []);
 
     const handleDoctorChange = useCallback((field, value) => {
-        setData(prev => ({
+        setData((prev) => ({
             ...prev,
             doctor: { ...(prev?.doctor || {}), [field]: value },
         }));
@@ -51,27 +51,33 @@ const useAcceptanceFormState = (initialData) => {
     }, []);
 
     const closeModal = useCallback(() => {
-        setModalState(prev => ({ ...prev, open: false, testItem: null, panelItem: null }));
+        setModalState((prev) => ({ ...prev, open: false, testItem: null, panelItem: null }));
     }, []);
 
-    const handleEditTest = useCallback((id) => {
-        const test = data?.acceptanceItems?.tests?.find(t => t.id === id);
-        if (!test) return;
-        setModalState({ open: true, mode: 'editTest', testItem: test, panelItem: null });
-    }, [data?.acceptanceItems?.tests]);
+    const handleEditTest = useCallback(
+        (id) => {
+            const test = data?.acceptanceItems?.tests?.find((t) => t.id === id);
+            if (!test) return;
+            setModalState({ open: true, mode: 'editTest', testItem: test, panelItem: null });
+        },
+        [data?.acceptanceItems?.tests],
+    );
 
-    const handleEditPanel = useCallback((id) => {
-        const panel = data?.acceptanceItems?.panels?.find(p => p.id === id);
-        if (!panel) return;
-        setModalState({ open: true, mode: 'editPanel', testItem: null, panelItem: panel });
-    }, [data?.acceptanceItems?.panels]);
+    const handleEditPanel = useCallback(
+        (id) => {
+            const panel = data?.acceptanceItems?.panels?.find((p) => p.id === id);
+            if (!panel) return;
+            setModalState({ open: true, mode: 'editPanel', testItem: null, panelItem: panel });
+        },
+        [data?.acceptanceItems?.panels],
+    );
 
     // ─── Test Submit ─────────────────────────────────────────────────────────────
     const submitTest = useCallback((testItem) => {
-        setData(prev => {
+        setData((prev) => {
             const currentTests = prev?.acceptanceItems?.tests || [];
             const updatedTests = [...currentTests];
-            const idx = updatedTests.findIndex(t => t.id === testItem.id);
+            const idx = updatedTests.findIndex((t) => t.id === testItem.id);
             if (idx !== -1) {
                 updatedTests[idx] = testItem;
             } else {
@@ -86,10 +92,10 @@ const useAcceptanceFormState = (initialData) => {
 
     // ─── Panel Submit ─────────────────────────────────────────────────────────────
     const submitPanel = useCallback((panelItem) => {
-        setData(prev => {
+        setData((prev) => {
             const currentPanels = prev?.acceptanceItems?.panels || [];
             const updatedPanels = [...currentPanels];
-            const idx = updatedPanels.findIndex(p => p.id === panelItem.id);
+            const idx = updatedPanels.findIndex((p) => p.id === panelItem.id);
             if (idx !== -1) {
                 updatedPanels[idx] = panelItem;
             } else {
@@ -103,17 +109,20 @@ const useAcceptanceFormState = (initialData) => {
     }, []);
 
     // ─── Delete Test ──────────────────────────────────────────────────────────────
-    const handleDeleteTest = useCallback((id) => {
-        const item = data?.acceptanceItems?.tests?.find(t => t.id === id);
-        if (item) setDeleteConfirmState({ open: true, item });
-    }, [data?.acceptanceItems?.tests]);
+    const handleDeleteTest = useCallback(
+        (id) => {
+            const item = data?.acceptanceItems?.tests?.find((t) => t.id === id);
+            if (item) setDeleteConfirmState({ open: true, item });
+        },
+        [data?.acceptanceItems?.tests],
+    );
 
     const confirmDeleteTest = useCallback(() => {
         if (!deleteConfirmState.item) return;
-        const updatedTests = (data?.acceptanceItems?.tests || []).map(t =>
-            t.id === deleteConfirmState.item.id ? { ...t, deleted: true } : t
+        const updatedTests = (data?.acceptanceItems?.tests || []).map((t) =>
+            t.id === deleteConfirmState.item.id ? { ...t, deleted: true } : t,
         );
-        setData(prev => ({
+        setData((prev) => ({
             ...prev,
             acceptanceItems: { ...(prev?.acceptanceItems || {}), tests: updatedTests },
         }));
@@ -124,36 +133,45 @@ const useAcceptanceFormState = (initialData) => {
         setDeleteConfirmState({ open: false, item: null });
     }, []);
 
-    const restoreDeleteTest = useCallback((id) => {
-        const updatedTests = (data?.acceptanceItems?.tests || []).map(t =>
-            t.id === id ? { ...t, deleted: false } : t
-        );
-        setData(prev => ({
-            ...prev,
-            acceptanceItems: { ...(prev?.acceptanceItems || {}), tests: updatedTests },
-        }));
-    }, [data?.acceptanceItems?.tests]);
+    const restoreDeleteTest = useCallback(
+        (id) => {
+            const updatedTests = (data?.acceptanceItems?.tests || []).map((t) =>
+                t.id === id ? { ...t, deleted: false } : t,
+            );
+            setData((prev) => ({
+                ...prev,
+                acceptanceItems: { ...(prev?.acceptanceItems || {}), tests: updatedTests },
+            }));
+        },
+        [data?.acceptanceItems?.tests],
+    );
 
     // ─── Delete/Restore Panel ─────────────────────────────────────────────────────
-    const handleDeletePanel = useCallback((id) => {
-        const updatedPanels = (data?.acceptanceItems?.panels || []).map(p =>
-            p.id === id ? { ...p, deleted: true } : p
-        );
-        setData(prev => ({
-            ...prev,
-            acceptanceItems: { ...(prev?.acceptanceItems || {}), panels: updatedPanels },
-        }));
-    }, [data?.acceptanceItems?.panels]);
+    const handleDeletePanel = useCallback(
+        (id) => {
+            const updatedPanels = (data?.acceptanceItems?.panels || []).map((p) =>
+                p.id === id ? { ...p, deleted: true } : p,
+            );
+            setData((prev) => ({
+                ...prev,
+                acceptanceItems: { ...(prev?.acceptanceItems || {}), panels: updatedPanels },
+            }));
+        },
+        [data?.acceptanceItems?.panels],
+    );
 
-    const handleRestorePanel = useCallback((id) => {
-        const updatedPanels = (data?.acceptanceItems?.panels || []).map(p =>
-            p.id === id ? { ...p, deleted: false } : p
-        );
-        setData(prev => ({
-            ...prev,
-            acceptanceItems: { ...(prev?.acceptanceItems || {}), panels: updatedPanels },
-        }));
-    }, [data?.acceptanceItems?.panels]);
+    const handleRestorePanel = useCallback(
+        (id) => {
+            const updatedPanels = (data?.acceptanceItems?.panels || []).map((p) =>
+                p.id === id ? { ...p, deleted: false } : p,
+            );
+            setData((prev) => ({
+                ...prev,
+                acceptanceItems: { ...(prev?.acceptanceItems || {}), panels: updatedPanels },
+            }));
+        },
+        [data?.acceptanceItems?.panels],
+    );
 
     return {
         data,

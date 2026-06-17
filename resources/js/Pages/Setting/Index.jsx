@@ -1,30 +1,30 @@
-import TableLayout from "@/Layouts/TableLayout";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import PageHeader from "@/Components/PageHeader.jsx";
-import Filter from "@/Pages/Setting/Components/Filter";
-import AddForm from "@/Pages/Setting/Components/AddForm";
-import {Head, useForm} from "@inertiajs/react";
-import {router, usePage} from "@inertiajs/react";
-import {useMemo, useState} from "react";
+import TableLayout from '@/Layouts/TableLayout';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PageHeader from '@/Components/PageHeader.jsx';
+import Filter from '@/Pages/Setting/Components/Filter';
+import AddForm from '@/Pages/Setting/Components/AddForm';
+import { Head, useForm } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
+import { useMemo, useState } from 'react';
 
 // Material UI imports
-import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import Avatar from "@mui/material/Avatar";
-import Chip from "@mui/material/Chip";
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import Avatar from '@mui/material/Avatar';
+import Chip from '@mui/material/Chip';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
 
 // Material UI icons
-import EditIcon from "@mui/icons-material/Edit";
-import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
-import SettingsIcon from "@mui/icons-material/Settings";
+import EditIcon from '@mui/icons-material/Edit';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 // Value renderer with improved styling
 const renderValue = (value) => {
     switch (value?.type) {
-        case "image":
+        case 'image':
             return (
                 <Tooltip title="View full image">
                     <Avatar
@@ -37,12 +37,12 @@ const renderValue = (value) => {
                             transition: 'transform 0.2s',
                             '&:hover': {
                                 transform: 'scale(1.1)',
-                            }
+                            },
                         }}
                     />
                 </Tooltip>
             );
-        case "file":
+        case 'file':
             return (
                 <Tooltip title="View file">
                     <IconButton
@@ -51,11 +51,11 @@ const renderValue = (value) => {
                         color="primary"
                         size="small"
                     >
-                        <RemoveRedEyeIcon/>
+                        <RemoveRedEyeIcon />
                     </IconButton>
                 </Tooltip>
             );
-        case "html":
+        case 'html':
             return (
                 <Box
                     sx={{
@@ -67,26 +67,20 @@ const renderValue = (value) => {
                         borderRadius: 1,
                         '&:hover': {
                             borderColor: '#ccc',
-                        }
+                        },
                     }}
                 >
-                    <div dangerouslySetInnerHTML={{__html: value?.value}}/>
+                    <div dangerouslySetInnerHTML={{ __html: value?.value }} />
                 </Box>
             );
-        case "selectSearch":
+        case 'selectSearch':
             return value?.value?.name;
-        case "password":
-            return (
-                <Chip
-                    label="••••••••"
-                    variant="outlined"
-                    size="small"
-                />
-            );
+        case 'password':
+            return <Chip label="••••••••" variant="outlined" size="small" />;
         default:
             return (
                 <Chip
-                    label={value?.value || "—"}
+                    label={value?.value || '—'}
                     variant="outlined"
                     size="small"
                     sx={{
@@ -95,7 +89,7 @@ const renderValue = (value) => {
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
-                        }
+                        },
                     }}
                 />
             );
@@ -103,107 +97,113 @@ const renderValue = (value) => {
 };
 
 const Index = () => {
-    const {post, setData, data, reset, processing} = useForm();
-    const {settings, status, errors, success, requestInputs} = usePage().props;
+    const { post, setData, data, reset, processing } = useForm();
+    const { settings, status, errors, success, requestInputs } = usePage().props;
     const [openAddForm, setOpenAddForm] = useState(false);
 
     // Define table columns with improved styling
-    const columns = useMemo(() => [
-        {
-            field: 'id',
-            headerName: 'ID',
-            type: "number",
-            width: 70,
-            hidden: true
-        },
-        {
-            field: 'title',
-            headerName: 'Title',
-            type: "string",
-            width: 200,
-            renderCell: ({value}) => (
-                <Tooltip title={value} placement="top">
-          <span style={{
-              fontWeight: 500,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-          }}>
-            {value}
-          </span>
-                </Tooltip>
-            )
-        },
-        {
-            field: 'value',
-            headerName: 'Value',
-            type: "string",
-            width: 220,
-            renderCell: ({value}) => renderValue(value)
-        },
-        {
-            field: 'action',
-            headerName: 'Action',
-            type: 'actions',
-            width: 120,
-            sortable: false,
-            renderCell: (params) => (
-                <Button
-                    variant="outlined"
-                    size="small"
-                    color="primary"
-                    startIcon={<EditIcon fontSize="small"/>}
-                    onClick={editSetting(params.row.id)}
-                    sx={{
-                        borderRadius: 2,
-                        textTransform: 'none',
-                        '&:hover': {
-                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                        }
-                    }}
-                >
-                    Edit
-                </Button>
-            )
-        }
-    ], [settings]);
+    const columns = useMemo(
+        () => [
+            {
+                field: 'id',
+                headerName: 'ID',
+                type: 'number',
+                width: 70,
+                hidden: true,
+            },
+            {
+                field: 'title',
+                headerName: 'Title',
+                type: 'string',
+                width: 200,
+                renderCell: ({ value }) => (
+                    <Tooltip title={value} placement="top">
+                        <span
+                            style={{
+                                fontWeight: 500,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            {value}
+                        </span>
+                    </Tooltip>
+                ),
+            },
+            {
+                field: 'value',
+                headerName: 'Value',
+                type: 'string',
+                width: 220,
+                renderCell: ({ value }) => renderValue(value),
+            },
+            {
+                field: 'action',
+                headerName: 'Action',
+                type: 'actions',
+                width: 120,
+                sortable: false,
+                renderCell: (params) => (
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        color="primary"
+                        startIcon={<EditIcon fontSize="small" />}
+                        onClick={editSetting(params.row.id)}
+                        sx={{
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            '&:hover': {
+                                backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                            },
+                        }}
+                    >
+                        Edit
+                    </Button>
+                ),
+            },
+        ],
+        [settings],
+    );
 
     const editSetting = (id) => () => {
         // Fixed the findIndex function
-        const settingIndex = settings.data.findIndex(item => item.id === id);
+        const settingIndex = settings.data.findIndex((item) => item.id === id);
         if (settingIndex !== -1) {
-            setData({...settings.data[settingIndex], _method: 'put'});
+            setData({ ...settings.data[settingIndex], _method: 'put' });
             setOpenAddForm(true);
         }
     };
 
     const pageReload = (page, filters, sort, pageSize) => {
         router.visit(route('settings.index'), {
-            data: {page, filters, sort, pageSize},
-            only: ["settings", "status", "success", "requestInputs"]
+            data: { page, filters, sort, pageSize },
+            only: ['settings', 'status', 'success', 'requestInputs'],
         });
     };
 
-    const handleSubmitForm = () => post(route('settings.update', data.id), {
-        onSuccess: () => {
-            setOpenAddForm(false);
-            reset();
-        },
-    });
+    const handleSubmitForm = () =>
+        post(route('settings.update', data.id), {
+            onSuccess: () => {
+                setOpenAddForm(false);
+                reset();
+            },
+        });
 
-    const handleChangeValue = (value) => setData(previousData => ({
-        ...previousData,
-        value: {...previousData.value, value}
-    }));
-
+    const handleChangeValue = (value) =>
+        setData((previousData) => ({
+            ...previousData,
+            value: { ...previousData.value, value },
+        }));
 
     return (
-        <Box sx={{position: 'relative'}}>
-            <Head title="Settings"/>
+        <Box sx={{ position: 'relative' }}>
+            <Head title="Settings" />
             <PageHeader
                 title="Settings"
                 subtitle="Manage your application settings"
-                icon={<SettingsIcon fontSize="large" sx={{mr: 2}}/>}
+                icon={<SettingsIcon fontSize="large" sx={{ mr: 2 }} />}
             />
 
             <Paper
@@ -211,7 +211,7 @@ const Index = () => {
                 sx={{
                     borderRadius: 2,
                     overflow: 'hidden',
-                    mb: 4
+                    mb: 4,
                 }}
             >
                 <TableLayout
@@ -234,7 +234,7 @@ const Index = () => {
                         },
                         '& .MuiDataGrid-columnHeaders': {
                             backgroundColor: '#f5f5f5',
-                        }
+                        },
                     }}
                 />
             </Paper>
@@ -258,23 +258,19 @@ const Index = () => {
 
 const breadCrumbs = [
     {
-        title: "Dashboard",
+        title: 'Dashboard',
         link: route('dashboard'),
-        icon: null
+        icon: null,
     },
     {
-        title: "Settings",
+        title: 'Settings',
         link: null,
-        icon: <SettingsIcon fontSize="small"/>
-    }
+        icon: <SettingsIcon fontSize="small" />,
+    },
 ];
 
-Index.layout = page => (
-    <AuthenticatedLayout
-        auth={page.props.auth}
-        children={page}
-        breadcrumbs={breadCrumbs}
-    />
+Index.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
 );
 
 export default Index;

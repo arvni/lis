@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { useForm } from "@inertiajs/react";
-import axios from "axios";
+import { useEffect, useState } from 'react';
+import { useForm } from '@inertiajs/react';
+import axios from 'axios';
 
 // MUI Components
 import {
@@ -15,16 +15,16 @@ import {
     Box,
     Alert,
     Snackbar,
-    Chip
-} from "@mui/material";
+    Chip,
+} from '@mui/material';
 
 // Icons
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import PersonIcon from "@mui/icons-material/Person";
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import PersonIcon from '@mui/icons-material/Person';
 
 // Components
-import SelectSearch from "@/Components/SelectSearch";
+import SelectSearch from '@/Components/SelectSearch';
 
 const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
     const [times, setTimes] = useState([]);
@@ -46,7 +46,7 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
         consultant: null,
         dueDate: formattedDate,
         time: null, // Keep this but don't require it
-        patient_id: patientId
+        patient_id: patientId,
     });
 
     useEffect(() => {
@@ -61,15 +61,15 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
     const getTimes = () => {
         axios
             .get(
-                route("list-reservation-times", {
+                route('list-reservation-times', {
                     consultant: data.consultant?.id,
-                    date: data.dueDate
-                })
+                    date: data.dueDate,
+                }),
             )
             .then(({ data }) => setTimes(data.data))
             .then(() => setWaiting(false))
             .catch((error) => {
-                console.error("Error fetching times:", error);
+                console.error('Error fetching times:', error);
                 setWaiting(false);
             });
     };
@@ -77,16 +77,16 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
     const handleChange = (e) =>
         setData((previousData) => ({
             ...previousData,
-            [e.target.name]: e.target.value
+            [e.target.name]: e.target.value,
         }));
 
     const handleSubmit = () => {
         if (check()) {
-            post(route("consultations.store"), {
+            post(route('consultations.store'), {
                 onSuccess: (e) => {
                     setShowSuccess(true);
-                    console.log(e)
-                }
+                    console.log(e);
+                },
             });
         }
     };
@@ -95,12 +95,12 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
         let isValid = true;
 
         if (!data.consultant) {
-            setError("consultant", "Please select a consultant");
+            setError('consultant', 'Please select a consultant');
             isValid = false;
         }
 
         if (!data.dueDate) {
-            setError("dueDate", "Please select a date");
+            setError('dueDate', 'Please select a date');
             isValid = false;
         }
 
@@ -117,7 +117,7 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
     const formContent = (
         <Container sx={{ p: embedded ? 0 : 3 }}>
             {embedded && (
-                <Box sx={{mb: 3}}>
+                <Box sx={{ mb: 3 }}>
                     <Typography variant="body1" color="text.secondary">
                         Please complete the following details to schedule a consultation
                     </Typography>
@@ -127,8 +127,11 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
             <Grid container spacing={3}>
                 {/* Consultant Selection */}
                 <Grid size={{ xs: 12, md: 6 }}>
-                    <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
-                        <Box sx={{display: "flex", mb: 1, alignItems: "center"}}>
+                    <Paper
+                        elevation={0}
+                        sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}
+                    >
+                        <Box sx={{ display: 'flex', mb: 1, alignItems: 'center' }}>
                             <PersonIcon color="primary" sx={{ mr: 1 }} />
                             <Typography variant="subtitle1" fontWeight="medium">
                                 Select Consultant
@@ -138,7 +141,7 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
                         <SelectSearch
                             onChange={handleChange}
                             value={data.consultant}
-                            url={route("list-consultants")}
+                            url={route('list-consultants')}
                             name="consultant"
                             label="Consultant"
                             error={Boolean(errors.consultant)}
@@ -150,8 +153,11 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
 
                 {/* Date Selection */}
                 <Grid size={{ xs: 12, md: 6 }}>
-                    <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
-                        <Box sx={{display: "flex", mb: 1, alignItems: "center"}}>
+                    <Paper
+                        elevation={0}
+                        sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}
+                    >
+                        <Box sx={{ display: 'flex', mb: 1, alignItems: 'center' }}>
                             <CalendarTodayIcon color="primary" sx={{ mr: 1 }} />
                             <Typography variant="subtitle1" fontWeight="medium">
                                 Select Date
@@ -165,8 +171,11 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
                                 value={data.dueDate}
                                 onChange={handleChange}
                                 fullWidth
-                                slotProps={{ InputLabel: { shrink: true }, input: { min: formattedDate } }}
-                                error={errors.hasOwnProperty("dueDate")}
+                                slotProps={{
+                                    InputLabel: { shrink: true },
+                                    input: { min: formattedDate },
+                                }}
+                                error={errors.hasOwnProperty('dueDate')}
                                 helperText={errors?.dueDate}
                             />
                         </FormGroup>
@@ -176,8 +185,16 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
                 {/* Available Times Display (Read-only) */}
                 {(times.length > 0 || waiting) && (
                     <Grid size={{ xs: 12 }}>
-                        <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
-                            <Box sx={{display: "flex", mb: 2, alignItems: "center"}}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 2,
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                borderRadius: 2,
+                            }}
+                        >
+                            <Box sx={{ display: 'flex', mb: 2, alignItems: 'center' }}>
                                 <AccessTimeIcon color="primary" sx={{ mr: 1 }} />
                                 <Typography variant="subtitle1" fontWeight="medium">
                                     Available Time Slots
@@ -185,7 +202,14 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
                             </Box>
 
                             {waiting ? (
-                                <Box sx={{display: "flex", p: 4, justifyContent: "center", alignItems: "center"}}>
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        p: 4,
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}
+                                >
                                     <CircularProgress size={40} />
                                     <Typography variant="body2" color="text.secondary" ml={2}>
                                         Loading available times...
@@ -205,14 +229,19 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
                                                 py: 0.5,
                                                 bgcolor: 'action.selected',
                                                 '&:hover': {
-                                                    bgcolor: 'action.hover'
-                                                }
+                                                    bgcolor: 'action.hover',
+                                                },
                                             }}
                                         />
                                     ))}
                                 </Box>
                             ) : (
-                                <Typography variant="body2" color="text.secondary" align="center" py={2}>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    align="center"
+                                    py={2}
+                                >
                                     No available time slots. Please try another date or consultant.
                                 </Typography>
                             )}
@@ -228,13 +257,15 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
                         variant="contained"
                         disableElevation
                         disabled={processing}
-                        startIcon={processing ? <CircularProgress size={20} color="inherit" /> : null}
+                        startIcon={
+                            processing ? <CircularProgress size={20} color="inherit" /> : null
+                        }
                         sx={{
                             borderRadius: 2,
-                            px: 3
+                            px: 3,
                         }}
                     >
-                        {processing ? "Scheduling..." : "Schedule Consultation"}
+                        {processing ? 'Scheduling...' : 'Schedule Consultation'}
                     </Button>
                 </Box>
             )}

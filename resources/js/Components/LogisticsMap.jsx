@@ -1,19 +1,25 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
-import { APIProvider, Map, AdvancedMarker, useMapsLibrary, useMap } from "@vis.gl/react-google-maps";
-import { Box, Paper, Typography, TextField, InputAdornment } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import PropTypes from "prop-types";
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import {
+    APIProvider,
+    Map,
+    AdvancedMarker,
+    useMapsLibrary,
+    useMap,
+} from '@vis.gl/react-google-maps';
+import { Box, Paper, Typography, TextField, InputAdornment } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import PropTypes from 'prop-types';
 
 const DEFAULT_CENTER = { lat: 23.588, lng: 58.3829 }; // Muscat, Oman
 
 const PlaceSearch = ({ onPlaceSelect }) => {
-    const places = useMapsLibrary("places");
+    const places = useMapsLibrary('places');
     const inputRef = useRef(null);
 
     useEffect(() => {
         if (!places || !inputRef.current) return;
         const autocomplete = new places.Autocomplete(inputRef.current);
-        const listener = autocomplete.addListener("place_changed", () => {
+        const listener = autocomplete.addListener('place_changed', () => {
             const place = autocomplete.getPlace();
             if (place?.geometry?.location) onPlaceSelect(place);
         });
@@ -45,7 +51,7 @@ const MapContent = ({ latitude, longitude, onLocationChange, editable, height, i
     const hasCoords = latitude && longitude;
 
     const [markerPos, setMarkerPos] = useState(
-        hasCoords ? { lat: Number(latitude), lng: Number(longitude) } : null
+        hasCoords ? { lat: Number(latitude), lng: Number(longitude) } : null,
     );
 
     // Sync marker + pan when lat/lng props change (e.g. manual text input)
@@ -63,7 +69,7 @@ const MapContent = ({ latitude, longitude, onLocationChange, editable, height, i
             setMarkerPos({ lat, lng });
             onLocationChange?.({ latitude: lat, longitude: lng });
         },
-        [editable, onLocationChange]
+        [editable, onLocationChange],
     );
 
     const handleMarkerDragEnd = useCallback(
@@ -74,7 +80,7 @@ const MapContent = ({ latitude, longitude, onLocationChange, editable, height, i
             setMarkerPos({ lat, lng });
             onLocationChange?.({ latitude: lat, longitude: lng });
         },
-        [editable, onLocationChange]
+        [editable, onLocationChange],
     );
 
     const handlePlaceSelect = useCallback(
@@ -87,7 +93,7 @@ const MapContent = ({ latitude, longitude, onLocationChange, editable, height, i
             map?.setZoom(15);
             onLocationChange?.({ latitude: lat, longitude: lng });
         },
-        [map, onLocationChange]
+        [map, onLocationChange],
     );
 
     return (
@@ -98,14 +104,18 @@ const MapContent = ({ latitude, longitude, onLocationChange, editable, height, i
                     Search for a place, click on the map, or drag the marker to set the location
                 </Typography>
             )}
-            <Box sx={{ height: `${height}px`, width: "100%", borderRadius: 1, overflow: "hidden" }}>
+            <Box sx={{ height: `${height}px`, width: '100%', borderRadius: 1, overflow: 'hidden' }}>
                 <Map
-                    defaultCenter={hasCoords ? { lat: Number(latitude), lng: Number(longitude) } : DEFAULT_CENTER}
+                    defaultCenter={
+                        hasCoords
+                            ? { lat: Number(latitude), lng: Number(longitude) }
+                            : DEFAULT_CENTER
+                    }
                     defaultZoom={initialZoom}
-                    mapId={import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || "DEMO_MAP_ID"}
+                    mapId={import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID'}
                     onClick={handleMapClick}
                     clickableIcons={false}
-                    style={{ width: "100%", height: "100%" }}
+                    style={{ width: '100%', height: '100%' }}
                 >
                     {markerPos && (
                         <AdvancedMarker
@@ -117,7 +127,11 @@ const MapContent = ({ latitude, longitude, onLocationChange, editable, height, i
                 </Map>
             </Box>
             {markerPos && (
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+                <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 1, display: 'block' }}
+                >
                     Location: {markerPos.lat.toFixed(6)}, {markerPos.lng.toFixed(6)}
                 </Typography>
             )}

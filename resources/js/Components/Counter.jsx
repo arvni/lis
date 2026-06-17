@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import Stack from "@mui/material/Stack";
+import { useEffect, useRef, useState } from 'react';
+import Stack from '@mui/material/Stack';
 import PropTypes from 'prop-types';
 
 const useInterval = (callback, delay) => {
@@ -25,7 +25,7 @@ const getReturnValues = (timer) => {
     return { day, hour, minute, second };
 };
 
-const formatTime = (val) => String(val).padStart(2, "0");
+const formatTime = (val) => String(val).padStart(2, '0');
 
 const Counter = ({ date }) => {
     const [time, setTime] = useState(getReturnValues(0));
@@ -44,8 +44,7 @@ const Counter = ({ date }) => {
     return (
         <Stack direction="row" spacing={1}>
             {time.day > 0 && <span>{formatTime(time.day)}d</span>}
-            <span>{formatTime(time.hour)}</span>:
-            <span>{formatTime(time.minute)}</span>:
+            <span>{formatTime(time.hour)}</span>:<span>{formatTime(time.minute)}</span>:
             <span>{formatTime(time.second)}</span>
         </Stack>
     );

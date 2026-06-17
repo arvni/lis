@@ -1,50 +1,50 @@
-import React, { useState } from "react";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableFooter from "@mui/material/TableFooter";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Typography from "@mui/material/Typography";
-import { Box, Button, Chip } from "@mui/material";
-import { PlaylistAdd as PromoteIcon } from "@mui/icons-material";
-import TestRow from "./TestRow";
-import PanelRow from "./PanelRow";
-import useTotalCalculations from "../hooks/useTotalCalculations";
+import React, { useState } from 'react';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableFooter from '@mui/material/TableFooter';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Typography from '@mui/material/Typography';
+import { Box, Button, Chip } from '@mui/material';
+import { PlaylistAdd as PromoteIcon } from '@mui/icons-material';
+import TestRow from './TestRow';
+import PanelRow from './PanelRow';
+import useTotalCalculations from '../hooks/useTotalCalculations';
 
 const TEST_TYPE = {
-    'TEST': "Test",
-    'SERVICE': "Service",
-    'PANEL': "Panel"
+    TEST: 'Test',
+    SERVICE: 'Service',
+    PANEL: 'Panel',
 };
 
 const TestsTable = ({
-                        tests,
-                        panels,
-                        onEditTest,
-                        onDeleteTest,
-                        onEditPanel,
-                        onDeletePanel,
-                        onRestoreTest,
-                        onRestorePanel,
-                        onEjectPanel,
-                        onPromoteTest,
-                        showButton = false,
-                        showTotal = true
-                    }) => {
+    tests,
+    panels,
+    onEditTest,
+    onDeleteTest,
+    onEditPanel,
+    onDeletePanel,
+    onRestoreTest,
+    onRestorePanel,
+    onEjectPanel,
+    onPromoteTest,
+    showButton = false,
+    showTotal = true,
+}) => {
     const { totalDiscount, totalPrice, hasItems } = useTotalCalculations(tests, panels);
 
     // Selection state — only active when onPromoteTest is provided
     const [selectedIds, setSelectedIds] = useState([]);
 
     const handleSelect = (test, checked) => {
-        setSelectedIds(prev =>
-            checked ? [...prev, test.id] : prev.filter(id => id !== test.id)
+        setSelectedIds((prev) =>
+            checked ? [...prev, test.id] : prev.filter((id) => id !== test.id),
         );
     };
 
-    const selectedTests = (tests || []).filter(t => selectedIds.includes(t.id));
+    const selectedTests = (tests || []).filter((t) => selectedIds.includes(t.id));
 
     const handlePromoteSelected = () => {
         if (onPromoteTest && selectedTests.length > 0) {
@@ -52,7 +52,8 @@ const TestsTable = ({
         }
     };
 
-    const hasActions = onEditPanel || onDeletePanel || onEditTest || onDeleteTest || onEjectPanel || onPromoteTest;
+    const hasActions =
+        onEditPanel || onDeletePanel || onEditTest || onDeleteTest || onEjectPanel || onPromoteTest;
 
     if (!hasItems) return null;
 
@@ -62,8 +63,11 @@ const TestsTable = ({
             {onPromoteTest && selectedTests.length > 0 && (
                 <Box
                     sx={{
-                        display: 'flex', alignItems: 'center', gap: 1,
-                        px: 2, py: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        px: 2,
+                        py: 1,
                         bgcolor: 'secondary.50',
                         borderBottom: '1px solid',
                         borderColor: 'divider',
@@ -114,7 +118,7 @@ const TestsTable = ({
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {panels.map(panel => (
+                        {panels.map((panel) => (
                             <PanelRow
                                 key={panel.id}
                                 showButton={showButton}
@@ -128,7 +132,7 @@ const TestsTable = ({
                             />
                         ))}
 
-                        {tests.map(test => (
+                        {tests.map((test) => (
                             <TestRow
                                 key={test.id}
                                 showButton={showButton}
@@ -147,15 +151,25 @@ const TestsTable = ({
                         <TableFooter>
                             <TableRow>
                                 <TableCell colSpan={onPromoteTest ? 9 : 8} align="right">
-                                    <Typography variant="subtitle1" fontWeight="bold">Total:</Typography>
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        Total:
+                                    </Typography>
                                 </TableCell>
                                 <TableCell align="right">
-                                    <Typography variant="subtitle1" fontWeight="bold" color="success.main">
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight="bold"
+                                        color="success.main"
+                                    >
                                         {totalDiscount}
                                     </Typography>
                                 </TableCell>
                                 <TableCell align="right">
-                                    <Typography variant="subtitle1" fontWeight="bold" color="primary.main">
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight="bold"
+                                        color="primary.main"
+                                    >
                                         {totalPrice}
                                     </Typography>
                                 </TableCell>

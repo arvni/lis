@@ -1,5 +1,5 @@
 import React from 'react';
-import { Chip } from "@mui/material";
+import { Chip } from '@mui/material';
 
 const TagChip = ({ tag, sx = {}, ...props }) => {
     const color = tag.color;
@@ -16,7 +16,7 @@ const TagChip = ({ tag, sx = {}, ...props }) => {
                 borderColor: color || 'divider',
                 border: color ? '1px solid' : 'none',
                 fontWeight: color ? 'bold' : 'normal',
-                ...sx
+                ...sx,
             }}
             {...props}
         />

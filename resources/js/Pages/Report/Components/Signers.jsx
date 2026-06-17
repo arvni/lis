@@ -1,5 +1,5 @@
-import AccordionSummary from "@mui/material/AccordionSummary";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import AccordionSummary from '@mui/material/AccordionSummary';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
     Accordion,
     AccordionDetails,
@@ -20,18 +20,18 @@ import {
     Tooltip,
     Typography,
     Zoom,
-    useTheme
-} from "@mui/material";
+    useTheme,
+} from '@mui/material';
 import {
     Add,
     ArrowDownward,
     ArrowUpward,
     Close,
     EditOutlined,
-    PersonAddAlt1Outlined
-} from "@mui/icons-material";
-import SignerAddForm from "./SignerAddForm";
-import { useState } from "react";
+    PersonAddAlt1Outlined,
+} from '@mui/icons-material';
+import SignerAddForm from './SignerAddForm';
+import { useState } from 'react';
 
 /**
  * Compare function for sorting signers by row number
@@ -76,9 +76,9 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
     // Add a new signer
     const handleAdd = () => {
         if (findIndexByUserId(signer.user.id) === -1) {
-            onChange(prevState => ({
+            onChange((prevState) => ({
                 ...prevState,
-                signers: [...prevState.signers, { ...signer, row: signersList.length + 1 }]
+                signers: [...prevState.signers, { ...signer, row: signersList.length + 1 }],
             }));
         }
         handleClose();
@@ -87,7 +87,7 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
     // Close add form dialog and reset signer state
     const handleClose = () => {
         setSigner({
-            id: Math.floor(Math.random() * 35789542)
+            id: Math.floor(Math.random() * 35789542),
         });
         setOpen(false);
     };
@@ -127,7 +127,7 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
         // Reorder remaining signers
         newSigners = newSigners.map((signer, idx) => ({
             ...signer,
-            row: idx + 1
+            row: idx + 1,
         }));
 
         changeSigners(newSigners);
@@ -151,21 +151,22 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
     const findIndexById = (id) => signersList.findIndex((item) => item.id === id);
 
     // Update signers in parent component
-    const changeSigners = (newSigners) => onChange(prevState => ({ ...prevState, signers: newSigners }));
+    const changeSigners = (newSigners) =>
+        onChange((prevState) => ({ ...prevState, signers: newSigners }));
 
     // Handle changes to the signer being added
     const handleSignerChange = (key, value) => {
-        if (key === "user") {
-            setSigner(prevState => ({
+        if (key === 'user') {
+            setSigner((prevState) => ({
                 ...prevState,
                 [key]: value,
                 user_id: value.id,
                 title: value.title || '',
                 name: value.name || '',
-                signature: value.signature || null
+                signature: value.signature || null,
             }));
         } else {
-            setSigner(prevState => ({
+            setSigner((prevState) => ({
                 ...prevState,
                 [key]: value,
             }));
@@ -202,7 +203,7 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
                         borderBottom: `1px solid ${theme.palette.divider}`,
                     }}
                 >
-  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
+                    <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
                         <Typography variant="h6" component="h2">
                             Signers
                         </Typography>
@@ -218,12 +219,8 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
                 <AccordionDetails sx={{ p: 0 }}>
                     {error && (
                         <Box sx={{ p: 2 }}>
-                            <Alert
-                                severity="error"
-                                variant="filled"
-                                sx={{ mb: 2 }}
-                            >
-                                {errorMessage || "Please add at least one signer"}
+                            <Alert severity="error" variant="filled" sx={{ mb: 2 }}>
+                                {errorMessage || 'Please add at least one signer'}
                             </Alert>
                         </Box>
                     )}
@@ -232,22 +229,14 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
                         <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 0 }}>
                             <Table size="medium">
                                 <TableHead>
-                                    <TableRow sx={{ backgroundColor: theme.palette.background.default }}>
-                                        <TableCell width="10%">
-                                            Order
-                                        </TableCell>
-                                        <TableCell width="20%">
-                                            Name
-                                        </TableCell>
-                                        <TableCell width="25%">
-                                            Title
-                                        </TableCell>
-                                        <TableCell width="20%">
-                                            Signature
-                                        </TableCell>
-                                        <TableCell width="20%">
-                                            Stamp
-                                        </TableCell>
+                                    <TableRow
+                                        sx={{ backgroundColor: theme.palette.background.default }}
+                                    >
+                                        <TableCell width="10%">Order</TableCell>
+                                        <TableCell width="20%">Name</TableCell>
+                                        <TableCell width="25%">Title</TableCell>
+                                        <TableCell width="20%">Signature</TableCell>
+                                        <TableCell width="20%">Stamp</TableCell>
                                         {onChange && (
                                             <TableCell width="5%" align="center">
                                                 Actions
@@ -258,9 +247,17 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
                                 <TableBody>
                                     {signersList.length === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={onChange ? 6 : 5} align="center" sx={{ py: 4 }}>
+                                            <TableCell
+                                                colSpan={onChange ? 6 : 5}
+                                                align="center"
+                                                sx={{ py: 4 }}
+                                            >
                                                 <Box sx={{ p: 3, textAlign: 'center' }}>
-                                                    <Typography variant="body1" color="text.secondary" gutterBottom>
+                                                    <Typography
+                                                        variant="body1"
+                                                        color="text.secondary"
+                                                        gutterBottom
+                                                    >
                                                         No signers added yet
                                                     </Typography>
                                                     {editable && onChange && (
@@ -277,26 +274,40 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        signersList.sort(rowCompare).map(signer => (
+                                        signersList.sort(rowCompare).map((signer) => (
                                             <TableRow
                                                 key={signer.id}
                                                 onMouseEnter={handleMouseEnter(signer.id)}
                                                 onMouseLeave={handleMouseLeave}
                                                 sx={{
-                                                    backgroundColor: hover === signer.id ?
-                                                        theme.palette.action.hover : 'inherit',
+                                                    backgroundColor:
+                                                        hover === signer.id
+                                                            ? theme.palette.action.hover
+                                                            : 'inherit',
                                                     transition: 'background-color 0.2s ease',
                                                 }}
                                             >
                                                 <TableCell>
-  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
+                                                    <Stack
+                                                        direction="row"
+                                                        spacing={1}
+                                                        sx={{ alignItems: 'center' }}
+                                                    >
                                                         {onChange && editable && (
                                                             <Stack direction="column" spacing={0.5}>
-                                                                <Tooltip title="Move Up" placement="left">
+                                                                <Tooltip
+                                                                    title="Move Up"
+                                                                    placement="left"
+                                                                >
                                                                     <span>
                                                                         <IconButton
-                                                                            onClick={handleUp(signer.id)}
-                                                                            disabled={signer.row < 2 || !editable}
+                                                                            onClick={handleUp(
+                                                                                signer.id,
+                                                                            )}
+                                                                            disabled={
+                                                                                signer.row < 2 ||
+                                                                                !editable
+                                                                            }
                                                                             size="small"
                                                                             color="primary"
                                                                         >
@@ -304,13 +315,22 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
                                                                         </IconButton>
                                                                     </span>
                                                                 </Tooltip>
-                                                                <Tooltip title="Move Down" placement="left">
+                                                                <Tooltip
+                                                                    title="Move Down"
+                                                                    placement="left"
+                                                                >
                                                                     <span>
                                                                         <IconButton
-                                                                            onClick={handleDown(signer.id)}
+                                                                            onClick={handleDown(
+                                                                                signer.id,
+                                                                            )}
                                                                             size="small"
                                                                             color="primary"
-                                                                            disabled={signer.row >= signersList.length || !editable}
+                                                                            disabled={
+                                                                                signer.row >=
+                                                                                    signersList.length ||
+                                                                                !editable
+                                                                            }
                                                                         >
                                                                             <ArrowDownward fontSize="small" />
                                                                         </IconButton>
@@ -324,14 +344,14 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
                                                             size="small"
                                                             sx={{
                                                                 fontWeight: 'bold',
-                                                                minWidth: '30px'
+                                                                minWidth: '30px',
                                                             }}
                                                         />
                                                     </Stack>
                                                 </TableCell>
                                                 <TableCell>
                                                     <Typography variant="body2">
-                                                        {signer.name || "Not specified"}
+                                                        {signer.name || 'Not specified'}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell>
@@ -339,7 +359,7 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
                                                         variant="outlined"
                                                         size="small"
                                                         fullWidth
-                                                        value={signer.title || ""}
+                                                        value={signer.title || ''}
                                                         name="title"
                                                         onChange={handleChange(signer.id)}
                                                         disabled={!editable}
@@ -350,10 +370,10 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
                                                                     <EditOutlined
                                                                         fontSize="small"
                                                                         color="action"
-                                                                        sx={{opacity: 0.5}}
+                                                                        sx={{ opacity: 0.5 }}
                                                                     />
-                                                                )
-                                                            }
+                                                                ),
+                                                            },
                                                         }}
                                                     />
                                                 </TableCell>
@@ -364,16 +384,20 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
                                                             src={signer.signature}
                                                             alt={`${signer.name}'s signature`}
                                                             sx={{
-                                                                maxWidth: "100px",
-                                                                maxHeight: "50px",
-                                                                objectFit: "contain",
+                                                                maxWidth: '100px',
+                                                                maxHeight: '50px',
+                                                                objectFit: 'contain',
                                                                 border: `1px solid ${theme.palette.divider}`,
                                                                 borderRadius: 1,
-                                                                p: 1
+                                                                p: 1,
                                                             }}
                                                         />
                                                     ) : (
-                                                        <Typography variant="body2" color="text.secondary" fontStyle="italic">
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                            fontStyle="italic"
+                                                        >
                                                             No signature
                                                         </Typography>
                                                     )}
@@ -385,26 +409,35 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
                                                             src={signer.stamp}
                                                             alt={`${signer.name}'s stamp`}
                                                             sx={{
-                                                                maxWidth: "100px",
-                                                                maxHeight: "50px",
-                                                                objectFit: "contain",
+                                                                maxWidth: '100px',
+                                                                maxHeight: '50px',
+                                                                objectFit: 'contain',
                                                                 border: `1px solid ${theme.palette.divider}`,
                                                                 borderRadius: 1,
-                                                                p: 1
+                                                                p: 1,
                                                             }}
                                                         />
                                                     ) : (
-                                                        <Typography variant="body2" color="text.secondary" fontStyle="italic">
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                            fontStyle="italic"
+                                                        >
                                                             No stamp
                                                         </Typography>
                                                     )}
                                                 </TableCell>
                                                 {onChange && (
                                                     <TableCell align="center">
-                                                        <Tooltip title="Remove Signer" placement="left">
+                                                        <Tooltip
+                                                            title="Remove Signer"
+                                                            placement="left"
+                                                        >
                                                             <span>
                                                                 <IconButton
-                                                                    onClick={handleDelete(signer.id)}
+                                                                    onClick={handleDelete(
+                                                                        signer.id,
+                                                                    )}
                                                                     color="error"
                                                                     disabled={!editable}
                                                                     size="small"
@@ -424,7 +457,11 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
 
                         {onChange && editable && signersList.length > 0 && (
                             <Box sx={{ p: 2, borderTop: `1px solid ${theme.palette.divider}` }}>
-                                <Tooltip title="Add Another Signer" placement="right" slots={{Transition:Zoom}}>
+                                <Tooltip
+                                    title="Add Another Signer"
+                                    placement="right"
+                                    slots={{ Transition: Zoom }}
+                                >
                                     <Button
                                         variant="outlined"
                                         startIcon={<Add />}
@@ -446,7 +483,7 @@ const Signers = ({ signers, onChange, editable = true, error, errorMessage }) =>
                 open={open}
                 onSubmit={handleAdd}
                 data={signer}
-                onClose={handleClose}  // Fixed prop name from onclose to onClose
+                onClose={handleClose} // Fixed prop name from onclose to onClose
             />
         </>
     );

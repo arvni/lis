@@ -12,20 +12,35 @@ import {
 import { Close as CloseIcon, LocalOffer as TagIcon } from '@mui/icons-material';
 import TagManager from './TagManager';
 
-const TagManagerDialog = ({ open, onClose, tags, updateUrl, entityType, title = "Manage Tags" }) => {
+const TagManagerDialog = ({
+    open,
+    onClose,
+    tags,
+    updateUrl,
+    entityType,
+    title = 'Manage Tags',
+}) => {
     return (
-        <Dialog 
-            open={open} 
-            onClose={onClose} 
-            maxWidth="sm" 
+        <Dialog
+            open={open}
+            onClose={onClose}
+            maxWidth="sm"
             fullWidth
             slotProps={{
                 paper: {
-                    sx: { borderRadius: 2 }
-                }
+                    sx: { borderRadius: 2 },
+                },
             }}
         >
-            <DialogTitle sx={{ m: 0, p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <DialogTitle
+                sx={{
+                    m: 0,
+                    p: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                }}
+            >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <TagIcon color="primary" />
                     <Typography variant="h6" fontWeight="bold">
@@ -46,12 +61,12 @@ const TagManagerDialog = ({ open, onClose, tags, updateUrl, entityType, title = 
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     Add or remove tags for this item. New tags will be created automatically.
                 </Typography>
-                <TagManager 
-                    initialTags={tags} 
-                    updateUrl={updateUrl} 
+                <TagManager
+                    initialTags={tags}
+                    updateUrl={updateUrl}
                     entityType={entityType}
                     onSuccess={() => {
-                        // We can optionally close the dialog on success, 
+                        // We can optionally close the dialog on success,
                         // but maybe it's better to let the user see the success snackbar first.
                         // For now, let's keep it open or provide an option.
                     }}

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -9,11 +9,11 @@ import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import {createTheme, ThemeProvider} from '@mui/material/styles';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Button from '@mui/material/Button';
-import {useSnackbar} from "notistack";
-import {Head, router} from "@inertiajs/react";
-import {useForm} from "@inertiajs/react";
+import { useSnackbar } from 'notistack';
+import { Head, router } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
@@ -21,7 +21,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import EmailIcon from '@mui/icons-material/Email';
 import Alert from '@mui/material/Alert';
 import Fade from '@mui/material/Fade';
-import {Container} from "@mui/material";
+import { Container } from '@mui/material';
 
 function Copyright(props) {
     return (
@@ -103,22 +103,21 @@ export default function Welcome(props) {
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [loginError, setLoginError] = useState(null);
 
-    const {data, setData, post, processing, reset, setError, errors, clearErrors} = useForm({
+    const { data, setData, post, processing, reset, setError, errors, clearErrors } = useForm({
         email: '',
         password: '',
         remember: true, // Set to true by default for better UX
     });
 
-    const {enqueueSnackbar} = useSnackbar();
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
-        if (props?.auth?.user)
-            router.visit('/dashboard');
+        if (props?.auth?.user) router.visit('/dashboard');
 
         // Display flash messages if they exist
         if (props.flash && props.flash.error) {
             setLoginError(props.flash.error);
-            enqueueSnackbar(props.flash.error, {variant: "error"});
+            enqueueSnackbar(props.flash.error, { variant: 'error' });
         }
 
         return () => {
@@ -128,14 +127,14 @@ export default function Welcome(props) {
 
     useEffect(() => {
         for (let key in errors) {
-            enqueueSnackbar(errors[key], {variant: "error"});
+            enqueueSnackbar(errors[key], { variant: 'error' });
         }
     }, [errors]);
 
     const onHandleChange = (event) => {
         setData(
             event.target.name,
-            event.target.type === 'checkbox' ? event.target.checked : event.target.value
+            event.target.type === 'checkbox' ? event.target.checked : event.target.value,
         );
 
         // Clear errors when user starts typing again
@@ -162,24 +161,24 @@ export default function Welcome(props) {
 
         // Email or username validation
         if (!data.email || data.email.trim() === '') {
-            setError("email", "Please enter your email or username");
+            setError('email', 'Please enter your email or username');
             isValid = false;
         } else if (data.email.includes('@')) {
             // If input contains @, validate as email
             const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailPattern.test(data.email)) {
-                setError("email", "Please enter a valid email address");
+                setError('email', 'Please enter a valid email address');
                 isValid = false;
             }
         } else if (data.email.length < 3) {
             // If input is a username, ensure minimum length
-            setError("email", "Username must be at least 3 characters");
+            setError('email', 'Username must be at least 3 characters');
             isValid = false;
         }
 
         // Password validation
         if (!data.password || data.password.length < 6) {
-            setError("password", "Password must be at least 6 characters");
+            setError('password', 'Password must be at least 6 characters');
             isValid = false;
         }
 
@@ -197,27 +196,29 @@ export default function Welcome(props) {
 
     return (
         <>
-            <Head title="Login"/>
+            <Head title="Login" />
             <ThemeProvider theme={theme}>
-                <Grid container
-                      component="main" sx={{height: '100vh'}}>
-                    <CssBaseline/>
+                <Grid container component="main" sx={{ height: '100vh' }}>
+                    <CssBaseline />
                     <Grid
                         size={{
                             xs: false,
                             sm: 4,
-                            md: 6
+                            md: 6,
                         }}
                         sx={{
-                            backgroundImage: 'url(https://biongenetic.com/wp-content/uploads/2024/09/1-2.png)',
+                            backgroundImage:
+                                'url(https://biongenetic.com/wp-content/uploads/2024/09/1-2.png)',
                             backgroundRepeat: 'no-repeat',
                             backgroundColor: (t) =>
-                                t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
+                                t.palette.mode === 'light'
+                                    ? t.palette.grey[50]
+                                    : t.palette.grey[900],
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
                         }}
                     />
-                    <Grid size={{xs: 12, sm: 8, md: 6}} component={Paper} elevation={6} square>
+                    <Grid size={{ xs: 12, sm: 8, md: 6 }} component={Paper} elevation={6} square>
                         <Box
                             sx={{
                                 my: 8,
@@ -225,16 +226,23 @@ export default function Welcome(props) {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
-                                padding: {xs: 2, sm: 4},
+                                padding: { xs: 2, sm: 4 },
                             }}
                         >
-                            <Avatar sx={{m: 1, bgcolor: 'secondary.main', width: 56, height: 80}}
-                                    variant="square"
-                                    src="/images/logo.png"/>
+                            <Avatar
+                                sx={{ m: 1, bgcolor: 'secondary.main', width: 56, height: 80 }}
+                                variant="square"
+                                src="/images/logo.png"
+                            />
                             <Typography component="h1" variant="h4" gutterBottom>
                                 Welcome Back
                             </Typography>
-                            <Typography variant="subtitle1" color="text.secondary" align="center" gutterBottom>
+                            <Typography
+                                variant="subtitle1"
+                                color="text.secondary"
+                                align="center"
+                                gutterBottom
+                            >
                                 Sign in to access your LIS account
                             </Typography>
 
@@ -242,7 +250,7 @@ export default function Welcome(props) {
                                 <Fade in={!!loginError}>
                                     <Alert
                                         severity="error"
-                                        sx={{width: '100%', mt: 2, mb: 2}}
+                                        sx={{ width: '100%', mt: 2, mb: 2 }}
                                         onClose={() => setLoginError(null)}
                                     >
                                         {loginError}
@@ -250,7 +258,12 @@ export default function Welcome(props) {
                                 </Fade>
                             )}
                             <Container maxWidth="xs">
-                                <Box component="form" noValidate onSubmit={handleSubmit} sx={{mt: 2, width: '100%'}}>
+                                <Box
+                                    component="form"
+                                    noValidate
+                                    onSubmit={handleSubmit}
+                                    sx={{ mt: 2, width: '100%' }}
+                                >
                                     <TextField
                                         margin="normal"
                                         required
@@ -268,10 +281,10 @@ export default function Welcome(props) {
                                             input: {
                                                 startAdornment: (
                                                     <InputAdornment position="start">
-                                                        <EmailIcon color="action"/>
+                                                        <EmailIcon color="action" />
                                                     </InputAdornment>
                                                 ),
-                                            }
+                                            },
                                         }}
                                         placeholder="Email or username"
                                     />
@@ -298,19 +311,25 @@ export default function Welcome(props) {
                                                             onMouseDown={handleMouseDownPassword}
                                                             edge="end"
                                                         >
-                                                            {showPassword ? <VisibilityOff/> : <Visibility/>}
+                                                            {showPassword ? (
+                                                                <VisibilityOff />
+                                                            ) : (
+                                                                <Visibility />
+                                                            )}
                                                         </IconButton>
                                                     </InputAdornment>
                                                 ),
-                                            }
+                                            },
                                         }}
                                     />
-                                    <Box sx={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        mt: 1
-                                    }}>
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            mt: 1,
+                                        }}
+                                    >
                                         <FormControlLabel
                                             control={
                                                 <Checkbox
@@ -322,7 +341,11 @@ export default function Welcome(props) {
                                             }
                                             label="Remember me"
                                         />
-                                        <Link href={route('password.request')} variant="body2" underline="hover">
+                                        <Link
+                                            href={route('password.request')}
+                                            variant="body2"
+                                            underline="hover"
+                                        >
                                             Forgot password?
                                         </Link>
                                     </Box>
@@ -331,7 +354,7 @@ export default function Welcome(props) {
                                         type="submit"
                                         fullWidth
                                         variant="contained"
-                                        sx={{mt: 3, mb: 2, py: 1.5}}
+                                        sx={{ mt: 3, mb: 2, py: 1.5 }}
                                         size="large"
                                     >
                                         Sign In
@@ -339,7 +362,7 @@ export default function Welcome(props) {
                                 </Box>
                             </Container>
                         </Box>
-                        <Copyright sx={{mt: 4, mb: 4}}/>
+                        <Copyright sx={{ mt: 4, mb: 4 }} />
                     </Grid>
                 </Grid>
             </ThemeProvider>

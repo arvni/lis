@@ -1,10 +1,10 @@
-import React, { useMemo, useState } from "react";
-import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import TableLayout from "@/Layouts/TableLayout";
-import Filter from "./Components/ShowFilter";
-import EnteringForm from "@/Pages/Section/Components/EnteringForm";
-import { ACTION_TYPES, WorkflowActionForm } from "@/Pages/Section/Components/DoneForm";
+import React, { useMemo, useState } from 'react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import TableLayout from '@/Layouts/TableLayout';
+import Filter from './Components/ShowFilter';
+import EnteringForm from '@/Pages/Section/Components/EnteringForm';
+import { ACTION_TYPES, WorkflowActionForm } from '@/Pages/Section/Components/DoneForm';
 import {
     Box,
     Button,
@@ -16,8 +16,8 @@ import {
     Stack,
     Tooltip,
     Typography,
-    useTheme
-} from "@mui/material";
+    useTheme,
+} from '@mui/material';
 import {
     Add as AddIcon,
     RemoveRedEye as RemoveRedEyeIcon,
@@ -32,37 +32,37 @@ import {
     Refresh as RefreshIcon,
     Dashboard as DashboardIcon,
     LocalOffer as TagIcon,
-} from "@mui/icons-material";
-import InlineTagManager from "@/Components/InlineTagManager";
-import { GridActionsCellItem } from "@mui/x-data-grid";
-import Avatar from "@mui/material/Avatar";
+} from '@mui/icons-material';
+import InlineTagManager from '@/Components/InlineTagManager';
+import { GridActionsCellItem } from '@mui/x-data-grid';
+import Avatar from '@mui/material/Avatar';
 
 // Status configurations with icons and colors
 const STATUS_CONFIG = {
     rejected: {
         icon: <ErrorOutlineIcon fontSize="small" />,
-        label: "Rejected",
-        color: "error",
-        chipColor: "error"
+        label: 'Rejected',
+        color: 'error',
+        chipColor: 'error',
     },
     finished: {
         icon: <CheckCircleIcon fontSize="small" />,
-        label: "Finished",
-        color: "success",
-        chipColor: "success"
+        label: 'Finished',
+        color: 'success',
+        chipColor: 'success',
     },
     processing: {
         icon: <AccessTimeIcon fontSize="small" />,
-        label: "Processing",
-        color: "info",
-        chipColor: "info"
+        label: 'Processing',
+        color: 'info',
+        chipColor: 'info',
     },
     waiting: {
         icon: <HourglassEmptyIcon fontSize="small" />,
-        label: "Waiting",
-        color: "warning",
-        chipColor: "warning"
-    }
+        label: 'Waiting',
+        color: 'warning',
+        chipColor: 'warning',
+    },
 };
 
 const formatDateTime = (dateTimeStr) => {
@@ -77,7 +77,7 @@ const formatDateTime = (dateTimeStr) => {
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
-            hour12: false
+            hour12: false,
         }).format(date);
     } catch (e) {
         return dateTimeStr;
@@ -100,15 +100,8 @@ const Show = () => {
     const [openEnteringForm, setOpenEnteringForm] = useState(false);
     const [openDoneForm, setOpenDoneForm] = useState(false);
 
-    const {
-        section,
-        acceptanceItemStates,
-        status,
-        errors,
-        success,
-        requestInputs,
-        stats
-    } = usePage().props;
+    const { section, acceptanceItemStates, status, errors, success, requestInputs, stats } =
+        usePage().props;
 
     const getSelectionIds = (selection) => {
         if (!selection) return [];
@@ -117,7 +110,7 @@ const Show = () => {
             // In MUI X v7+, selection can be an object with a Set or Array in .ids
             if (typeof selection.ids.forEach === 'function') {
                 const ids = [];
-                selection.ids.forEach(id => ids.push(id));
+                selection.ids.forEach((id) => ids.push(id));
                 return ids;
             }
             if (Array.isArray(selection.ids)) return selection.ids;
@@ -131,234 +124,243 @@ const Show = () => {
         if (selection.length <= 1) return true;
 
         const dataRows = acceptanceItemStates?.data || [];
-        const rows = dataRows.filter(row => selection.includes(row.id));
+        const rows = dataRows.filter((row) => selection.includes(row.id));
         if (rows.length === 0) return true;
 
         const firstRow = rows[0];
-        return rows.every(row =>
-            row.acceptance_item?.test?.id === firstRow.acceptance_item?.test?.id &&
-            row.acceptance_item?.method?.test?.id === firstRow.acceptance_item?.method?.test?.id
+        return rows.every(
+            (row) =>
+                row.acceptance_item?.test?.id === firstRow.acceptance_item?.test?.id &&
+                row.acceptance_item?.method?.test?.id ===
+                    firstRow.acceptance_item?.method?.test?.id,
         );
     }, [selectedRows, acceptanceItemStates]);
 
-    const columns = useMemo(() => [
-        {
-            field: 'test',
-            headerName: 'Test',
-            type: "string",
-            sortable: false,
-            flex: 0.8,
-            display: "flex",
-            renderCell: ({ row }) => (
-                <Tooltip title={row?.acceptance_item?.test?.name || "No test name"} arrow>
-                    <Typography noWrap variant="body2">
-                        {(row?.acceptance_item?.test?.name + " >>  " + row?.acceptance_item?.method?.test?.name) || "-"}
-                    </Typography>
-                </Tooltip>
-            )
-        },
-        {
-            field: 'fullName',
-            headerName: 'Patient',
-            sortable: false,
-            display: "flex",
-            type: "string",
-            flex: 1,
-            renderCell: ({ row }) => {
-                return (
-                    <Tooltip title={row?.sample?.patient?.fullName || "No patient name"} arrow>
+    const columns = useMemo(
+        () => [
+            {
+                field: 'test',
+                headerName: 'Test',
+                type: 'string',
+                sortable: false,
+                flex: 0.8,
+                display: 'flex',
+                renderCell: ({ row }) => (
+                    <Tooltip title={row?.acceptance_item?.test?.name || 'No test name'} arrow>
                         <Typography noWrap variant="body2">
-                            {row.sample?.patient?.fullName || "-"}
+                            {row?.acceptance_item?.test?.name +
+                                ' >>  ' +
+                                row?.acceptance_item?.method?.test?.name || '-'}
                         </Typography>
                     </Tooltip>
-                );
-            }
-        },
-        {
-            field: 'dateOfBirth',
-            headerName: 'Age',
-            sortable: false,
-            display: "flex",
-            flex: 0.2,
-            type: "string",
-            renderCell: ({ row }) => {
-                return <Typography variant="body2">{row?.sample?.patient?.age || "-"}</Typography>;
-            }
-        },
-        {
-            field: 'sampled_at',
-            headerName: 'Sampled At',
-            type: "datetime",
-            display: "flex",
-            sortable: false,
-            width: 160,
-            renderCell: ({ row }) => {
-                const date = row?.sample?.created_at
-                    ? formatDateTime(new Date(row.sample.created_at))
-                    : '-';
-                return (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <ScienceIcon fontSize="small" color="action" />
-                        <Typography variant="body2">{date}</Typography>
-                    </Box>
-                );
-            }
-        },
-        {
-            field: 'started_at',
-            headerName: 'Started At',
-            type: "string",
-            display: "flex",
-            width: 160,
-            renderCell: ({ row }) => {
-                const date = row.started_at ? formatDateTime(new Date(row.started_at)) : '-';
-                return (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <AccessTimeIcon fontSize="small" color="action" />
-                        <Typography variant="body2">{date}</Typography>
-                    </Box>
-                );
-            }
-        },
-        {
-            field: 'status',
-            headerName: 'Status',
-            type: "string",
-            display: "flex",
-            flex: .4,
-            renderCell: ({ row }) => {
-                const statusInfo = STATUS_CONFIG[row.status] || STATUS_CONFIG.waiting;
-                return (
-                    <Chip
-                        icon={statusInfo.icon}
-                        label={statusInfo.label}
-                        size="small"
-                        color={statusInfo.chipColor}
-                        sx={{ fontWeight: 'medium' }}
+                ),
+            },
+            {
+                field: 'fullName',
+                headerName: 'Patient',
+                sortable: false,
+                display: 'flex',
+                type: 'string',
+                flex: 1,
+                renderCell: ({ row }) => {
+                    return (
+                        <Tooltip title={row?.sample?.patient?.fullName || 'No patient name'} arrow>
+                            <Typography noWrap variant="body2">
+                                {row.sample?.patient?.fullName || '-'}
+                            </Typography>
+                        </Tooltip>
+                    );
+                },
+            },
+            {
+                field: 'dateOfBirth',
+                headerName: 'Age',
+                sortable: false,
+                display: 'flex',
+                flex: 0.2,
+                type: 'string',
+                renderCell: ({ row }) => {
+                    return (
+                        <Typography variant="body2">{row?.sample?.patient?.age || '-'}</Typography>
+                    );
+                },
+            },
+            {
+                field: 'sampled_at',
+                headerName: 'Sampled At',
+                type: 'datetime',
+                display: 'flex',
+                sortable: false,
+                width: 160,
+                renderCell: ({ row }) => {
+                    const date = row?.sample?.created_at
+                        ? formatDateTime(new Date(row.sample.created_at))
+                        : '-';
+                    return (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <ScienceIcon fontSize="small" color="action" />
+                            <Typography variant="body2">{date}</Typography>
+                        </Box>
+                    );
+                },
+            },
+            {
+                field: 'started_at',
+                headerName: 'Started At',
+                type: 'string',
+                display: 'flex',
+                width: 160,
+                renderCell: ({ row }) => {
+                    const date = row.started_at ? formatDateTime(new Date(row.started_at)) : '-';
+                    return (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <AccessTimeIcon fontSize="small" color="action" />
+                            <Typography variant="body2">{date}</Typography>
+                        </Box>
+                    );
+                },
+            },
+            {
+                field: 'status',
+                headerName: 'Status',
+                type: 'string',
+                display: 'flex',
+                flex: 0.4,
+                renderCell: ({ row }) => {
+                    const statusInfo = STATUS_CONFIG[row.status] || STATUS_CONFIG.waiting;
+                    return (
+                        <Chip
+                            icon={statusInfo.icon}
+                            label={statusInfo.label}
+                            size="small"
+                            color={statusInfo.chipColor}
+                            sx={{ fontWeight: 'medium' }}
+                        />
+                    );
+                },
+            },
+            {
+                field: 'tags',
+                headerName: 'Tags',
+                type: 'string',
+                sortable: false,
+                display: 'flex',
+                flex: 0.8,
+                renderCell: ({ row }) => (
+                    <InlineTagManager
+                        initialTags={row.acceptance_item?.tags || []}
+                        updateUrl={route('acceptanceItems.tags.update', row.acceptance_item?.id)}
+                        entityType="acceptanceItem"
                     />
-                );
-            }
-        },
-        {
-            field: 'tags',
-            headerName: 'Tags',
-            type: "string",
-            sortable: false,
-            display: "flex",
-            flex: 0.8,
-            renderCell: ({ row }) => (
-                <InlineTagManager
-                    initialTags={row.acceptance_item?.tags || []}
-                    updateUrl={route('acceptanceItems.tags.update', row.acceptance_item?.id)}
-                    entityType="acceptanceItem"
-                />
-            )
-        },
-        {
-            field: 'id',
-            headerName: 'Actions',
-            type: "actions",
-            width: 160,
-            getActions: ({ row }) => {
-                let output = [
-                    <GridActionsCellItem
-                        icon={
-                            <Tooltip title="View Details">
-                                <RemoveRedEyeIcon />
-                            </Tooltip>
-                        }
-                        label="Show"
-                        component={Link}
-                        key={"show-" + row.id}
-                        href={route("acceptanceItems.show", {
-                            acceptanceItem: row.acceptance_item_id,
-                            acceptance: row.acceptance_item.acceptance_id
-                        })}
-                        sx={{
-                            color: theme.palette.info.main,
-                            border: `1px solid ${theme.palette.info.main}`,
-                            borderRadius: '50%',
-                            p: 0.5,
-                            '&:hover': {
-                                backgroundColor: theme.palette.info.light,
-                                boxShadow: theme.shadows[2]
-                            }
-                        }}
-                    />
-                ];
-
-                if (row.status === ACCEPTANCE_ITEM_STATES_STATUS.PROCESSING) {
-                    output.push(
+                ),
+            },
+            {
+                field: 'id',
+                headerName: 'Actions',
+                type: 'actions',
+                width: 160,
+                getActions: ({ row }) => {
+                    let output = [
                         <GridActionsCellItem
-                            key={"done-" + row.id}
                             icon={
-                                <Tooltip title="Mark as Done">
-                                    <DoneIcon />
+                                <Tooltip title="View Details">
+                                    <RemoveRedEyeIcon />
                                 </Tooltip>
                             }
-                            label="Done"
-                            onClick={handleOpenForm(row.id, ACTION_TYPES.COMPLETE)}
+                            label="Show"
+                            component={Link}
+                            key={'show-' + row.id}
+                            href={route('acceptanceItems.show', {
+                                acceptanceItem: row.acceptance_item_id,
+                                acceptance: row.acceptance_item.acceptance_id,
+                            })}
                             sx={{
-                                color: theme.palette.success.main,
-                                border: `1px solid ${theme.palette.success.main}`,
+                                color: theme.palette.info.main,
+                                border: `1px solid ${theme.palette.info.main}`,
                                 borderRadius: '50%',
                                 p: 0.5,
                                 '&:hover': {
-                                    backgroundColor: theme.palette.success.light,
-                                    boxShadow: theme.shadows[2]
-                                }
+                                    backgroundColor: theme.palette.info.light,
+                                    boxShadow: theme.shadows[2],
+                                },
                             }}
                         />,
-                        <GridActionsCellItem
-                            key={"reject-" + row.id}
-                            icon={
-                                <Tooltip title="Reject">
-                                    <CloseIcon />
-                                </Tooltip>
-                            }
-                            label="Reject"
-                            onClick={handleOpenRejectForm(row.id)}
-                            sx={{
-                                color: theme.palette.error.main,
-                                border: `1px solid ${theme.palette.error.main}`,
-                                borderRadius: '50%',
-                                p: 0.5,
-                                '&:hover': {
-                                    backgroundColor: theme.palette.error.light,
-                                    boxShadow: theme.shadows[2]
-                                }
-                            }}
-                        />
-                    );
-                } else if (row.status === ACCEPTANCE_ITEM_STATES_STATUS.FINISHED) {
-                    output.push(
-                        <GridActionsCellItem
-                            key={"edit-" + row.id}
-                            icon={
-                                <Tooltip title="Edit">
-                                    <EditIcon />
-                                </Tooltip>
-                            }
-                            label="Edit"
-                            onClick={handleOpenForm(row.id, ACTION_TYPES.UPDATE)}
-                            sx={{
-                                color: theme.palette.warning.main,
-                                border: `1px solid ${theme.palette.warning.main}`,
-                                borderRadius: '50%',
-                                p: 0.5,
-                                '&:hover': {
-                                    backgroundColor: theme.palette.warning.light,
-                                    boxShadow: theme.shadows[2]
-                                }
-                            }}
-                        />
-                    );
-                }
+                    ];
 
-                return output;
-            }
-        }
-    ], [acceptanceItemStates, requestInputs, section, theme]);
+                    if (row.status === ACCEPTANCE_ITEM_STATES_STATUS.PROCESSING) {
+                        output.push(
+                            <GridActionsCellItem
+                                key={'done-' + row.id}
+                                icon={
+                                    <Tooltip title="Mark as Done">
+                                        <DoneIcon />
+                                    </Tooltip>
+                                }
+                                label="Done"
+                                onClick={handleOpenForm(row.id, ACTION_TYPES.COMPLETE)}
+                                sx={{
+                                    color: theme.palette.success.main,
+                                    border: `1px solid ${theme.palette.success.main}`,
+                                    borderRadius: '50%',
+                                    p: 0.5,
+                                    '&:hover': {
+                                        backgroundColor: theme.palette.success.light,
+                                        boxShadow: theme.shadows[2],
+                                    },
+                                }}
+                            />,
+                            <GridActionsCellItem
+                                key={'reject-' + row.id}
+                                icon={
+                                    <Tooltip title="Reject">
+                                        <CloseIcon />
+                                    </Tooltip>
+                                }
+                                label="Reject"
+                                onClick={handleOpenRejectForm(row.id)}
+                                sx={{
+                                    color: theme.palette.error.main,
+                                    border: `1px solid ${theme.palette.error.main}`,
+                                    borderRadius: '50%',
+                                    p: 0.5,
+                                    '&:hover': {
+                                        backgroundColor: theme.palette.error.light,
+                                        boxShadow: theme.shadows[2],
+                                    },
+                                }}
+                            />,
+                        );
+                    } else if (row.status === ACCEPTANCE_ITEM_STATES_STATUS.FINISHED) {
+                        output.push(
+                            <GridActionsCellItem
+                                key={'edit-' + row.id}
+                                icon={
+                                    <Tooltip title="Edit">
+                                        <EditIcon />
+                                    </Tooltip>
+                                }
+                                label="Edit"
+                                onClick={handleOpenForm(row.id, ACTION_TYPES.UPDATE)}
+                                sx={{
+                                    color: theme.palette.warning.main,
+                                    border: `1px solid ${theme.palette.warning.main}`,
+                                    borderRadius: '50%',
+                                    p: 0.5,
+                                    '&:hover': {
+                                        backgroundColor: theme.palette.warning.light,
+                                        boxShadow: theme.shadows[2],
+                                    },
+                                }}
+                            />,
+                        );
+                    }
+
+                    return output;
+                },
+            },
+        ],
+        [acceptanceItemStates, requestInputs, section, theme],
+    );
 
     const onSuccess = () => {
         setOpenEnteringForm(false);
@@ -370,18 +372,18 @@ const Show = () => {
     const pageReload = (page, filters, sort, pageSize) => {
         router.visit(route('sections.show', section.id), {
             data: { page, filters, sort, pageSize },
-            only: ["acceptanceItemStates", "section", "status", "success", "requestInputs"],
+            only: ['acceptanceItemStates', 'section', 'status', 'success', 'requestInputs'],
             preserveState: true,
-            queryStringArrayFormat: "indices",
+            queryStringArrayFormat: 'indices',
         });
     };
 
-    const handleBarcodeChange = e => setData({ barcode: e.target.value });
+    const handleBarcodeChange = (e) => setData({ barcode: e.target.value });
 
-    const handleEntering = () => post(route("sections.enter", section.id), { onSuccess });
+    const handleEntering = () => post(route('sections.enter', section.id), { onSuccess });
 
     const handleOpenEnteringForm = () => {
-        setData({ barcode: "" });
+        setData({ barcode: '' });
         setOpenEnteringForm(true);
     };
 
@@ -392,8 +394,9 @@ const Show = () => {
 
     const handleOpenForm = (id, type) => () => {
         setLoading(true);
-        axios.get(route("acceptanceItemStates.show", id))
-            .then(res => setData({ ...res.data.data, actionType: type, "_method": "put" }))
+        axios
+            .get(route('acceptanceItemStates.show', id))
+            .then((res) => setData({ ...res.data.data, actionType: type, _method: 'put' }))
             .then(() => {
                 setLoading(false);
                 setOpenDoneForm(true);
@@ -405,13 +408,13 @@ const Show = () => {
         setOpenDoneForm(false);
     };
 
-    const handleChange = (name, value) => setData(prevData => ({ ...prevData, [name]: value }));
+    const handleChange = (name, value) => setData((prevData) => ({ ...prevData, [name]: value }));
 
     const handleSubmit = () => {
         if (data.ids && data.ids.length > 0) {
-            post(route("acceptanceItemStates.bulkUpdate"), { onSuccess });
+            post(route('acceptanceItemStates.bulkUpdate'), { onSuccess });
         } else {
-            post(route("acceptanceItemStates.update", data.id), { onSuccess });
+            post(route('acceptanceItemStates.update', data.id), { onSuccess });
         }
     };
 
@@ -420,17 +423,20 @@ const Show = () => {
         if (selection.length === 0) return;
 
         // Find the first selected row to use its parameters as a template
-        const firstSelectedRow = acceptanceItemStates.data.find(row => row.id === selection[0]);
+        const firstSelectedRow = acceptanceItemStates.data.find((row) => row.id === selection[0]);
         if (!firstSelectedRow) return;
 
         setLoading(true);
-        axios.get(route("acceptanceItemStates.show", firstSelectedRow.id))
-            .then(res => setData({
-                ...res.data.data,
-                ids: selection,
-                actionType: type,
-                "_method": "put"
-            }))
+        axios
+            .get(route('acceptanceItemStates.show', firstSelectedRow.id))
+            .then((res) =>
+                setData({
+                    ...res.data.data,
+                    ids: selection,
+                    actionType: type,
+                    _method: 'put',
+                }),
+            )
             .then(() => {
                 setLoading(false);
                 setOpenDoneForm(true);
@@ -441,21 +447,25 @@ const Show = () => {
         const selection = getSelectionIds(selectedRows);
         if (selection.length === 0) return;
 
-        const firstSelectedRow = acceptanceItemStates.data.find(row => row.id === selection[0]);
+        const firstSelectedRow = acceptanceItemStates.data.find((row) => row.id === selection[0]);
         if (!firstSelectedRow) return;
 
         setLoading(true);
-        axios.get(route("acceptanceItemStates.prevSections", firstSelectedRow.id))
-            .then(res => {
+        axios
+            .get(route('acceptanceItemStates.prevSections', firstSelectedRow.id))
+            .then((res) => {
                 setOptions(res.data.sections);
-            }).then(() => axios.get(route("acceptanceItemStates.show", firstSelectedRow.id)))
-            .then(res => setData({
-                ...res.data.data,
-                ids: selection,
-                next: null,
-                actionType: ACTION_TYPES.REJECT,
-                "_method": "put"
-            }))
+            })
+            .then(() => axios.get(route('acceptanceItemStates.show', firstSelectedRow.id)))
+            .then((res) =>
+                setData({
+                    ...res.data.data,
+                    ids: selection,
+                    next: null,
+                    actionType: ACTION_TYPES.REJECT,
+                    _method: 'put',
+                }),
+            )
             .then(() => {
                 setOpenDoneForm(true);
                 setLoading(false);
@@ -464,17 +474,25 @@ const Show = () => {
 
     const handleOpenRejectForm = (id) => async () => {
         setLoading(true);
-        axios.get(route("acceptanceItemStates.prevSections", id))
-            .then(res => {
+        axios
+            .get(route('acceptanceItemStates.prevSections', id))
+            .then((res) => {
                 setOptions(res.data.sections);
-            }).then(() => axios.get(route("acceptanceItemStates.show", id)))
-            .then(res => setData({ ...res.data.data, next: null, actionType: ACTION_TYPES.REJECT, "_method": "put" }))
+            })
+            .then(() => axios.get(route('acceptanceItemStates.show', id)))
+            .then((res) =>
+                setData({
+                    ...res.data.data,
+                    next: null,
+                    actionType: ACTION_TYPES.REJECT,
+                    _method: 'put',
+                }),
+            )
             .then(() => {
                 setOpenDoneForm(true);
                 setLoading(false);
             });
     };
-
 
     return (
         <>
@@ -488,27 +506,34 @@ const Show = () => {
                     mb: 3,
                     borderRadius: 2,
                     background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-                    color: theme.palette.primary.contrastText
+                    color: theme.palette.primary.contrastText,
                 }}
             >
-                <Grid container spacing={2} sx={{ alignItems: "center" }}>
+                <Grid container spacing={2} sx={{ alignItems: 'center' }}>
                     <Grid size={{ xs: 12, md: 6 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            {section.icon ? <Avatar src={section.icon} /> : <DashboardIcon fontSize="large" />}
+                            {section.icon ? (
+                                <Avatar src={section.icon} />
+                            ) : (
+                                <DashboardIcon fontSize="large" />
+                            )}
                             <Box>
-                                <Typography variant="h4"
-                                    fontWeight="bold">
+                                <Typography variant="h4" fontWeight="bold">
                                     {section.name}
                                 </Typography>
-                                <Typography variant="subtitle1">
-                                    {section.sectionGroup}
-                                </Typography>
+                                <Typography variant="subtitle1">{section.sectionGroup}</Typography>
                             </Box>
                         </Box>
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 6 }}
-                        sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' }, gap: 1 }}>
+                    <Grid
+                        size={{ xs: 12, md: 6 }}
+                        sx={{
+                            display: 'flex',
+                            justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                            gap: 1,
+                        }}
+                    >
                         {/* Bulk buttons removed from here and moved to TableLayout headerActions below */}
                         <Button
                             variant="contained"
@@ -521,8 +546,8 @@ const Show = () => {
                                 py: 1,
                                 boxShadow: theme.shadows[4],
                                 '&:hover': {
-                                    boxShadow: theme.shadows[8]
-                                }
+                                    boxShadow: theme.shadows[8],
+                                },
                             }}
                         >
                             Add Sample
@@ -530,17 +555,24 @@ const Show = () => {
 
                         <Tooltip title="Refresh Data">
                             <IconButton
-                                onClick={() => pageReload(1, requestInputs?.filters, requestInputs?.sort, requestInputs?.pageSize)}
+                                onClick={() =>
+                                    pageReload(
+                                        1,
+                                        requestInputs?.filters,
+                                        requestInputs?.sort,
+                                        requestInputs?.pageSize,
+                                    )
+                                }
                                 sx={{
                                     ml: 2,
                                     color: theme.palette.primary.contrastText,
                                     border: `1px solid ${theme.palette.primary.contrastText}`,
                                     '&:hover': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                                    }
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    },
                                 }}
                             >
-                                <RefreshIcon sx={{ color: "white" }} />
+                                <RefreshIcon sx={{ color: 'white' }} />
                             </IconButton>
                         </Tooltip>
                     </Grid>
@@ -558,7 +590,7 @@ const Show = () => {
                             borderLeft: `4px solid ${theme.palette.primary.main}`,
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'space-between'
+                            justifyContent: 'space-between',
                         }}
                     >
                         <Box>
@@ -574,10 +606,10 @@ const Show = () => {
                                 p: 1,
                                 borderRadius: '50%',
                                 backgroundColor: theme.palette.primary.light,
-                                display: 'flex'
+                                display: 'flex',
                             }}
                         >
-                            <DashboardIcon fontSize="large" sx={{ color: "white" }} />
+                            <DashboardIcon fontSize="large" sx={{ color: 'white' }} />
                         </Box>
                     </Paper>
                 </Grid>
@@ -591,7 +623,7 @@ const Show = () => {
                             borderLeft: `4px solid ${theme.palette.success.main}`,
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'space-between'
+                            justifyContent: 'space-between',
                         }}
                     >
                         <Box>
@@ -607,10 +639,10 @@ const Show = () => {
                                 p: 1,
                                 borderRadius: '50%',
                                 backgroundColor: theme.palette.success.light,
-                                display: 'flex'
+                                display: 'flex',
                             }}
                         >
-                            <CheckCircleIcon fontSize="large" sx={{ color: "white" }} />
+                            <CheckCircleIcon fontSize="large" sx={{ color: 'white' }} />
                         </Box>
                     </Paper>
                 </Grid>
@@ -624,7 +656,7 @@ const Show = () => {
                             borderLeft: `4px solid ${theme.palette.info.main}`,
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'space-between'
+                            justifyContent: 'space-between',
                         }}
                     >
                         <Box>
@@ -640,10 +672,10 @@ const Show = () => {
                                 p: 1,
                                 borderRadius: '50%',
                                 backgroundColor: theme.palette.info.light,
-                                display: 'flex'
+                                display: 'flex',
                             }}
                         >
-                            <AccessTimeIcon fontSize="large" sx={{ color: "white" }} />
+                            <AccessTimeIcon fontSize="large" sx={{ color: 'white' }} />
                         </Box>
                     </Paper>
                 </Grid>
@@ -657,7 +689,7 @@ const Show = () => {
                             borderLeft: `4px solid ${theme.palette.warning.main}`,
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'space-between'
+                            justifyContent: 'space-between',
                         }}
                     >
                         <Box>
@@ -673,10 +705,10 @@ const Show = () => {
                                 p: 1,
                                 borderRadius: '50%',
                                 backgroundColor: theme.palette.warning.light,
-                                display: 'flex'
+                                display: 'flex',
                             }}
                         >
-                            <HourglassEmptyIcon fontSize="large" sx={{ color: "white" }} />
+                            <HourglassEmptyIcon fontSize="large" sx={{ color: 'white' }} />
                         </Box>
                     </Paper>
                 </Grid>
@@ -690,7 +722,7 @@ const Show = () => {
                             borderLeft: `4px solid ${theme.palette.error.main}`,
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'space-between'
+                            justifyContent: 'space-between',
                         }}
                     >
                         <Box>
@@ -706,10 +738,10 @@ const Show = () => {
                                 p: 1,
                                 borderRadius: '50%',
                                 backgroundColor: theme.palette.error.light,
-                                display: 'flex'
+                                display: 'flex',
                             }}
                         >
-                            <ErrorOutlineIcon fontSize="large" sx={{ color: "white" }} />
+                            <ErrorOutlineIcon fontSize="large" sx={{ color: 'white' }} />
                         </Box>
                     </Paper>
                 </Grid>
@@ -728,8 +760,12 @@ const Show = () => {
                     Filter={Filter}
                     errors={errors}
                     checkboxSelection
-                    onRowSelectionModelChange={(newSelection) => setSelectedRows(newSelection || [])}
-                    isRowSelectable={(params) => params.row.status === ACCEPTANCE_ITEM_STATES_STATUS.PROCESSING}
+                    onRowSelectionModelChange={(newSelection) =>
+                        setSelectedRows(newSelection || [])
+                    }
+                    isRowSelectable={(params) =>
+                        params.row.status === ACCEPTANCE_ITEM_STATES_STATUS.PROCESSING
+                    }
                     headerActions={
                         <Stack direction="row" spacing={2} alignItems="center">
                             {getSelectionIds(selectedRows).length > 0 ? (
@@ -769,7 +805,11 @@ const Show = () => {
                                     </Button>
                                 </>
                             ) : (
-                                <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                                <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    sx={{ fontStyle: 'italic' }}
+                                >
                                     Select processing items for bulk actions
                                 </Typography>
                             )}
@@ -786,7 +826,6 @@ const Show = () => {
                 barcode={data.barcode}
                 onClose={handleCloseEnteringForm}
             />
-
 
             <WorkflowActionForm
                 actionType={data.actionType}
@@ -807,22 +846,21 @@ const getNestedParents = (sectionGroup) => {
             ...getNestedParents(sectionGroup.parent),
             {
                 title: sectionGroup.name,
-                link: route("sectionGroups.show", sectionGroup.id),
-                icon: null
+                link: route('sectionGroups.show', sectionGroup.id),
+                icon: null,
             },
         ];
     }
     return [
         {
             title: sectionGroup.name,
-            link: route("sectionGroups.show", sectionGroup.id),
-            icon: null
+            link: route('sectionGroups.show', sectionGroup.id),
+            icon: null,
         },
     ];
+};
 
-}
-
-Show.layout = page => (
+Show.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
         children={page}
@@ -831,8 +869,8 @@ Show.layout = page => (
             {
                 title: page.props.section.name,
                 link: null,
-                icon: null
-            }
+                icon: null,
+            },
         ]}
     />
 );

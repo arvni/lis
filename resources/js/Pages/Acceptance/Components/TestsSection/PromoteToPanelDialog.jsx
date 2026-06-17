@@ -1,9 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Dialog, DialogTitle, DialogContent, DialogActions,
-    Box, Typography, Button, CircularProgress, Alert,
-    List, ListItem, ListItemText, ListItemIcon, Divider, Chip, Stack,
-    Autocomplete, TextField,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Box,
+    Typography,
+    Button,
+    CircularProgress,
+    Alert,
+    List,
+    ListItem,
+    ListItemText,
+    ListItemIcon,
+    Divider,
+    Chip,
+    Stack,
+    Autocomplete,
+    TextField,
 } from '@mui/material';
 import {
     PlaylistAddCheck as PanelIcon,
@@ -14,9 +28,9 @@ import {
 import axios from 'axios';
 
 const checkCoverage = (panelMethodTests, selectedMethodIds) => {
-    const panelMethodIdSet = new Set(panelMethodTests.map(mt => mt.method_id));
-    const matched = new Set(selectedMethodIds.filter(id => panelMethodIdSet.has(id)));
-    const missing = new Set(selectedMethodIds.filter(id => !panelMethodIdSet.has(id)));
+    const panelMethodIdSet = new Set(panelMethodTests.map((mt) => mt.method_id));
+    const matched = new Set(selectedMethodIds.filter((id) => panelMethodIdSet.has(id)));
+    const missing = new Set(selectedMethodIds.filter((id) => !panelMethodIdSet.has(id)));
     return { matched, missing };
 };
 
@@ -28,7 +42,7 @@ const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [] }) => {
     const [loadingPanel, setLoadingPanel] = useState(false);
     const [error, setError] = useState(null);
 
-    const selectedMethodIds = tests.map(t => t.method_test?.method_id).filter(Boolean);
+    const selectedMethodIds = tests.map((t) => t.method_test?.method_id).filter(Boolean);
 
     // Fetch and filter panels when dialog opens
     useEffect(() => {
@@ -42,13 +56,14 @@ const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [] }) => {
         if (!selectedMethodIds.length) return;
 
         setLoadingPanels(true);
-        axios.get(route('api.tests.list'), { params: { type: 'PANEL' } })
-            .then(res => {
+        axios
+            .get(route('api.tests.list'), { params: { type: 'PANEL' } })
+            .then((res) => {
                 const allPanels = Array.isArray(res.data.data) ? res.data.data : [];
                 // Keep only panels that contain ALL selected method_ids
-                const filtered = allPanels.filter(panel => {
+                const filtered = allPanels.filter((panel) => {
                     const panelMethodIdSet = new Set(panel.method_ids ?? []);
-                    return selectedMethodIds.every(mid => panelMethodIdSet.has(mid));
+                    return selectedMethodIds.every((mid) => panelMethodIdSet.has(mid));
                 });
                 setPanels(filtered);
             })
@@ -65,8 +80,9 @@ const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [] }) => {
         setLoadingPanel(true);
         setError(null);
 
-        axios.get(route('api.tests.show', selectedPanel.id))
-            .then(res => setPanelDetails(res.data.data ?? res.data))
+        axios
+            .get(route('api.tests.show', selectedPanel.id))
+            .then((res) => setPanelDetails(res.data.data ?? res.data))
             .catch(() => setError('Failed to load panel details.'))
             .finally(() => setLoadingPanel(false));
     }, [selectedPanel]);
@@ -76,11 +92,11 @@ const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [] }) => {
     const allCovered = missing.size === 0 && selectedMethodIds.length > 0;
 
     const handleConfirm = () => {
-        onConfirm(panelMethodTests.map(mt => mt.id));
+        onConfirm(panelMethodTests.map((mt) => mt.id));
     };
 
     const getTestName = (methodId) => {
-        const t = tests.find(t => t.method_test?.method_id === methodId);
+        const t = tests.find((t) => t.method_test?.method_id === methodId);
         return t?.method_test?.test?.name ?? `Method #${methodId}`;
     };
 
@@ -98,7 +114,7 @@ const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [] }) => {
                         Selected tests to promote ({tests.length}):
                     </Typography>
                     <Stack direction="row" flexWrap="wrap" gap={0.5}>
-                        {tests.map(t => (
+                        {tests.map((t) => (
                             <Chip
                                 key={t.id}
                                 icon={<TestIcon />}
@@ -117,8 +133,8 @@ const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [] }) => {
                     {loadingPanels
                         ? 'Loading compatible panels…'
                         : panels.length === 0
-                            ? 'No panels found that contain all selected tests.'
-                            : `${panels.length} compatible panel${panels.length > 1 ? 's' : ''} found. Choose one:`}
+                          ? 'No panels found that contain all selected tests.'
+                          : `${panels.length} compatible panel${panels.length > 1 ? 's' : ''} found. Choose one:`}
                 </Typography>
 
                 {loadingPanels ? (
@@ -130,9 +146,9 @@ const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [] }) => {
                         options={panels}
                         value={selectedPanel}
                         onChange={(_, v) => setSelectedPanel(v)}
-                        getOptionLabel={opt => opt?.name ?? ''}
+                        getOptionLabel={(opt) => opt?.name ?? ''}
                         isOptionEqualToValue={(opt, val) => opt.id === val?.id}
-                        renderInput={params => (
+                        renderInput={(params) => (
                             <TextField {...params} label="Select panel" size="small" />
                         )}
                         noOptionsText="No compatible panels"
@@ -146,25 +162,34 @@ const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [] }) => {
                     </Box>
                 )}
 
-                {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+                {error && (
+                    <Alert severity="error" sx={{ mt: 2 }}>
+                        {error}
+                    </Alert>
+                )}
 
                 {panelDetails && !loadingPanel && (
                     <Box sx={{ mt: 2 }}>
                         {allCovered ? (
                             <Alert severity="success" sx={{ mb: 2 }}>
-                                All {matched.size} selected test{matched.size > 1 ? 's' : ''} found in this panel.
+                                All {matched.size} selected test{matched.size > 1 ? 's' : ''} found
+                                in this panel.
                             </Alert>
                         ) : (
                             <Alert severity="warning" sx={{ mb: 2 }}>
-                                {missing.size} selected test{missing.size > 1 ? 's are' : ' is'} not in this panel:{' '}
-                                {[...missing].map(getTestName).join(', ')}.
+                                {missing.size} selected test{missing.size > 1 ? 's are' : ' is'} not
+                                in this panel: {[...missing].map(getTestName).join(', ')}.
                             </Alert>
                         )}
 
                         <Typography variant="subtitle2" sx={{ mb: 1 }}>
                             Panel tests ({panelMethodTests.length}):
                         </Typography>
-                        <List dense disablePadding sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                        <List
+                            dense
+                            disablePadding
+                            sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
+                        >
                             {panelMethodTests.map((mt, idx) => {
                                 const isSelected = selectedMethodIds.includes(mt.method_id);
                                 return (
@@ -172,21 +197,29 @@ const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [] }) => {
                                         {idx > 0 && <Divider />}
                                         <ListItem>
                                             <ListItemIcon sx={{ minWidth: 32 }}>
-                                                {isSelected
-                                                    ? <MatchIcon fontSize="small" color="success" />
-                                                    : <NoMatchIcon fontSize="small" color="action" />
-                                                }
+                                                {isSelected ? (
+                                                    <MatchIcon fontSize="small" color="success" />
+                                                ) : (
+                                                    <NoMatchIcon fontSize="small" color="action" />
+                                                )}
                                             </ListItemIcon>
                                             <ListItemText
                                                 primary={mt.test_name || mt.method?.name}
                                                 secondary={mt.method?.name}
                                                 primaryTypographyProps={{
                                                     fontWeight: isSelected ? 600 : 400,
-                                                    color: isSelected ? 'success.main' : 'text.primary',
+                                                    color: isSelected
+                                                        ? 'success.main'
+                                                        : 'text.primary',
                                                 }}
                                             />
                                             {isSelected && (
-                                                <Chip label="matched" size="small" color="success" variant="outlined" />
+                                                <Chip
+                                                    label="matched"
+                                                    size="small"
+                                                    color="success"
+                                                    variant="outlined"
+                                                />
                                             )}
                                         </ListItem>
                                     </React.Fragment>
@@ -198,7 +231,9 @@ const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [] }) => {
             </DialogContent>
 
             <DialogActions>
-                <Button onClick={onClose} variant="outlined">Cancel</Button>
+                <Button onClick={onClose} variant="outlined">
+                    Cancel
+                </Button>
                 <Button
                     onClick={handleConfirm}
                     variant="contained"

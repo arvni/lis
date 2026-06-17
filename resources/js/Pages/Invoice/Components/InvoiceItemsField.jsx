@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     Box,
     Button,
@@ -16,7 +16,7 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material';
-import {router} from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import {
     Add as AddIcon,
     AutoAwesome as AutoIcon,
@@ -70,15 +70,12 @@ const blankItem = () => ({
  * - "Reset to auto" clears _destroy and removes the local _dirty flag so the row can be unlocked server-side
  *   (not implemented here; would require a separate endpoint to clear locked_at).
  */
-const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
+const InvoiceItemsField = ({ items = [], onChange, invoiceId }) => {
     const [openDescriptions, setOpenDescriptions] = useState({});
 
     const safeItems = Array.isArray(items) ? items : [];
 
-    const visibleItems = useMemo(
-        () => safeItems.filter((it) => !it._destroy),
-        [safeItems],
-    );
+    const visibleItems = useMemo(() => safeItems.filter((it) => !it._destroy), [safeItems]);
 
     const emit = (next) => onChange('invoice_items', next);
 
@@ -86,7 +83,7 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
         const next = safeItems.map((it) => {
             const matchKey = it.id ?? it._new_id;
             if (matchKey === key) {
-                return {...it, ...patch};
+                return { ...it, ...patch };
             }
             return it;
         });
@@ -97,7 +94,7 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
         const item = safeItems.find((it) => (it.id ?? it._new_id) === key);
         if (!item) return;
 
-        const patch = {[field]: value};
+        const patch = { [field]: value };
         if (field === 'qty' || field === 'unit_price') {
             const qty = Math.max(1, parseInt(field === 'qty' ? value : item.qty, 10) || 1);
             const unit = num(field === 'unit_price' ? value : item.unit_price);
@@ -121,11 +118,11 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
             emit(safeItems.filter((it) => (it.id ?? it._new_id) !== key));
             return;
         }
-        replaceItem(key, {_destroy: true});
+        replaceItem(key, { _destroy: true });
     };
 
     const handleUndoDelete = (key) => {
-        replaceItem(key, {_destroy: false});
+        replaceItem(key, { _destroy: false });
     };
 
     const handleAdd = () => {
@@ -134,18 +131,20 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
 
     const handleRebuild = () => {
         if (!invoiceId) return;
-        if (!window.confirm(
-            'Rebuild invoice items from acceptance items?\n\n' +
-            '• Brings back deleted test/panel lines and resets their price, qty and discount to auto.\n' +
-            '• Manual lines are not affected.\n' +
-            '• This recomputes the invoice total even if it is paid or part of a statement — ' +
-            'the statement total will change too.\n\n' +
-            'Save any unsaved edits first — they are not included.',
-        )) {
+        if (
+            !window.confirm(
+                'Rebuild invoice items from acceptance items?\n\n' +
+                    '• Brings back deleted test/panel lines and resets their price, qty and discount to auto.\n' +
+                    '• Manual lines are not affected.\n' +
+                    '• This recomputes the invoice total even if it is paid or part of a statement — ' +
+                    'the statement total will change too.\n\n' +
+                    'Save any unsaved edits first — they are not included.',
+            )
+        ) {
             return;
         }
         router.post(
-            route('invoices.items.rebuild', {invoice: invoiceId}),
+            route('invoices.items.rebuild', { invoice: invoiceId }),
             {},
             {
                 preserveScroll: true,
@@ -159,23 +158,27 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
 
     const handleResetToAuto = (item) => {
         if (!invoiceId || !item.id) return;
-        if (!window.confirm(
-            `Reset "${item.title}" to auto? The composer will recompute its price/qty/discount from the underlying acceptance items.`,
-        )) {
+        if (
+            !window.confirm(
+                `Reset "${item.title}" to auto? The composer will recompute its price/qty/discount from the underlying acceptance items.`,
+            )
+        ) {
             return;
         }
         router.post(
-            route('invoices.items.unlock', {invoice: invoiceId, item: item.id}),
+            route('invoices.items.unlock', { invoice: invoiceId, item: item.id }),
             {},
-            {preserveScroll: true},
+            { preserveScroll: true },
         );
     };
 
     const canResetToAuto = (item) =>
-        Boolean(invoiceId && item.id && item.locked && (item.kind === 'test' || item.kind === 'panel'));
+        Boolean(
+            invoiceId && item.id && item.locked && (item.kind === 'test' || item.kind === 'panel'),
+        );
 
     const toggleDescription = (key) =>
-        setOpenDescriptions((prev) => ({...prev, [key]: !prev[key]}));
+        setOpenDescriptions((prev) => ({ ...prev, [key]: !prev[key] }));
 
     // Description editor is collapsed by default — even when content exists.
     // Existing content is shown as a small caption under the title row instead.
@@ -194,13 +197,13 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
         if (item.locked) {
             return (
                 <Tooltip title="Locked — composer won't overwrite this row">
-                    <LockIcon fontSize="small" sx={{color: 'warning.main'}}/>
+                    <LockIcon fontSize="small" sx={{ color: 'warning.main' }} />
                 </Tooltip>
             );
         }
         return (
             <Tooltip title="Auto-managed by composer">
-                <AutoIcon fontSize="small" sx={{color: 'text.disabled'}}/>
+                <AutoIcon fontSize="small" sx={{ color: 'text.disabled' }} />
             </Tooltip>
         );
     };
@@ -211,19 +214,21 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
 
         if (isDeleting) {
             return (
-                <TableRow key={key} sx={{backgroundColor: 'error.50', opacity: 0.7}}>
+                <TableRow key={key} sx={{ backgroundColor: 'error.50', opacity: 0.7 }}>
                     <TableCell colSpan={6}>
                         <Stack direction="row" alignItems="center" spacing={1}>
-                            <DeleteIcon fontSize="small" color="error"/>
+                            <DeleteIcon fontSize="small" color="error" />
                             <Typography variant="body2" color="error.main">
                                 <strong>{item.title}</strong> will be removed on save
-                                {item.kind !== 'manual_fee' && item.kind !== 'adjustment' &&
-                                    ' (the test stays on the acceptance; use “Rebuild from acceptance” to bring it back)'}.
+                                {item.kind !== 'manual_fee' &&
+                                    item.kind !== 'adjustment' &&
+                                    ' (the test stays on the acceptance; use “Rebuild from acceptance” to bring it back)'}
+                                .
                             </Typography>
-                            <Box sx={{flex: 1}}/>
+                            <Box sx={{ flex: 1 }} />
                             <Button
                                 size="small"
-                                startIcon={<UndoIcon/>}
+                                startIcon={<UndoIcon />}
                                 onClick={() => handleUndoDelete(key)}
                             >
                                 Undo
@@ -239,8 +244,16 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
 
         return (
             <React.Fragment key={key}>
-                <TableRow hover sx={{'& > td': {verticalAlign: 'middle', borderBottom: descriptionOpen ? 0 : undefined}}}>
-                    <TableCell sx={{minWidth: 260}}>
+                <TableRow
+                    hover
+                    sx={{
+                        '& > td': {
+                            verticalAlign: 'middle',
+                            borderBottom: descriptionOpen ? 0 : undefined,
+                        },
+                    }}
+                >
+                    <TableCell sx={{ minWidth: 260 }}>
                         <Stack direction="row" alignItems="center" spacing={1}>
                             {renderKindChip(item)}
                             {renderLockBadge(item)}
@@ -249,8 +262,12 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
                                 value={item.code || ''}
                                 placeholder="Code"
                                 onChange={(e) => handleField(key, 'code', e.target.value)}
-                                sx={{width: 110, flexShrink: 0}}
-                                slotProps={{htmlInput: {style: {fontFamily: 'monospace', fontSize: '0.8125rem'}}}}
+                                sx={{ width: 110, flexShrink: 0 }}
+                                slotProps={{
+                                    htmlInput: {
+                                        style: { fontFamily: 'monospace', fontSize: '0.8125rem' },
+                                    },
+                                }}
                             />
                             <TextField
                                 size="small"
@@ -275,7 +292,7 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
                                     textOverflow: 'ellipsis',
                                     whiteSpace: 'nowrap',
                                     maxWidth: 380,
-                                    '&:hover': {color: 'primary.main'},
+                                    '&:hover': { color: 'primary.main' },
                                 }}
                             >
                                 {item.description}
@@ -283,54 +300,68 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
                         )}
                     </TableCell>
 
-                    <TableCell align="right" sx={{width: 90}}>
+                    <TableCell align="right" sx={{ width: 90 }}>
                         <TextField
                             size="small"
                             type="number"
                             value={item.qty ?? 1}
                             onChange={(e) => handleField(key, 'qty', e.target.value)}
-                            slotProps={{htmlInput: {min: 1, step: 1, style: {textAlign: 'right'}}}}
+                            slotProps={{
+                                htmlInput: { min: 1, step: 1, style: { textAlign: 'right' } },
+                            }}
                             fullWidth
                         />
                     </TableCell>
 
-                    <TableCell align="right" sx={{width: 130}}>
+                    <TableCell align="right" sx={{ width: 130 }}>
                         <TextField
                             size="small"
                             type="number"
                             value={item.unit_price ?? 0}
                             onChange={(e) => handleField(key, 'unit_price', e.target.value)}
-                            slotProps={{htmlInput: {min: 0, step: 0.001, style: {textAlign: 'right'}}}}
+                            slotProps={{
+                                htmlInput: { min: 0, step: 0.001, style: { textAlign: 'right' } },
+                            }}
                             fullWidth
                         />
                     </TableCell>
 
-                    <TableCell align="right" sx={{width: 130}}>
+                    <TableCell align="right" sx={{ width: 130 }}>
                         <TextField
                             size="small"
                             type="number"
                             value={item.discount ?? 0}
                             onChange={(e) => handleField(key, 'discount', num(e.target.value))}
-                            slotProps={{htmlInput: {min: 0, step: 0.001, style: {textAlign: 'right'}}}}
+                            slotProps={{
+                                htmlInput: { min: 0, step: 0.001, style: { textAlign: 'right' } },
+                            }}
                             fullWidth
                         />
                     </TableCell>
 
-                    <TableCell align="right" sx={{width: 120}}>
+                    <TableCell align="right" sx={{ width: 120 }}>
                         <Typography variant="body2" fontWeight="medium" color="primary.main">
                             {(num(item.price) - num(item.discount)).toFixed(3)}
                         </Typography>
                     </TableCell>
 
-                    <TableCell align="center" sx={{width: 130}}>
+                    <TableCell align="center" sx={{ width: 130 }}>
                         <Stack direction="row" spacing={0.25} justifyContent="center">
-                            <Tooltip title={descriptionOpen ? 'Hide description' : (hasDescription ? 'Edit description' : 'Add description')}>
+                            <Tooltip
+                                title={
+                                    descriptionOpen
+                                        ? 'Hide description'
+                                        : hasDescription
+                                          ? 'Edit description'
+                                          : 'Add description'
+                                }
+                            >
                                 <IconButton
                                     size="small"
                                     color={hasDescription ? 'primary' : 'default'}
                                     onClick={() => toggleDescription(key)}
                                 >
-                                    <NotesIcon fontSize="small"/>
+                                    <NotesIcon fontSize="small" />
                                 </IconButton>
                             </Tooltip>
                             {canResetToAuto(item) && (
@@ -340,13 +371,17 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
                                         color="info"
                                         onClick={() => handleResetToAuto(item)}
                                     >
-                                        <ResetIcon fontSize="small"/>
+                                        <ResetIcon fontSize="small" />
                                     </IconButton>
                                 </Tooltip>
                             )}
                             <Tooltip title="Remove">
-                                <IconButton size="small" color="error" onClick={() => handleDelete(key)}>
-                                    <DeleteIcon fontSize="small"/>
+                                <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={() => handleDelete(key)}
+                                >
+                                    <DeleteIcon fontSize="small" />
                                 </IconButton>
                             </Tooltip>
                         </Stack>
@@ -355,8 +390,8 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
 
                 {descriptionOpen && (
                     <TableRow>
-                        <TableCell sx={{pt: 0, pb: 1.5}} colSpan={6}>
-                            <Box sx={{pl: 6}}>
+                        <TableCell sx={{ pt: 0, pb: 1.5 }} colSpan={6}>
+                            <Box sx={{ pl: 6 }}>
                                 <TextField
                                     size="small"
                                     fullWidth
@@ -365,7 +400,9 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
                                     maxRows={3}
                                     value={item.description || ''}
                                     placeholder="Description (optional)"
-                                    onChange={(e) => handleField(key, 'description', e.target.value)}
+                                    onChange={(e) =>
+                                        handleField(key, 'description', e.target.value)
+                                    }
                                 />
                             </Box>
                         </TableCell>
@@ -377,15 +414,15 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
 
     if (visibleItems.length === 0 && safeItems.length === 0) {
         return (
-            <Paper elevation={0} sx={{p: 4, textAlign: 'center', backgroundColor: 'grey.50'}}>
-                <ReceiptIcon sx={{fontSize: 48, color: 'grey.400', mb: 2}}/>
+            <Paper elevation={0} sx={{ p: 4, textAlign: 'center', backgroundColor: 'grey.50' }}>
+                <ReceiptIcon sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
                 <Typography variant="h6" color="text.secondary">
                     No items on this invoice yet
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     Add a manual line item below, or add an acceptance to this invoice.
                 </Typography>
-                <Button startIcon={<AddIcon/>} variant="contained" onClick={handleAdd}>
+                <Button startIcon={<AddIcon />} variant="contained" onClick={handleAdd}>
                     Add Item
                 </Button>
             </Paper>
@@ -394,20 +431,37 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
 
     return (
         <Box>
-            <Stack sx={{mb: 2,flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
+            <Stack
+                sx={{
+                    mb: 2,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                }}
+            >
                 <Typography variant="subtitle1" fontWeight="medium">
                     Invoice Items
                 </Typography>
                 <Stack direction="row" spacing={1}>
                     {invoiceId && (
                         <Tooltip title="Bring back deleted test/panel lines and reset them to auto from the acceptance items">
-                            <Button startIcon={<RebuildIcon/>} variant="text" size="small" color="info"
-                                    onClick={handleRebuild}>
+                            <Button
+                                startIcon={<RebuildIcon />}
+                                variant="text"
+                                size="small"
+                                color="info"
+                                onClick={handleRebuild}
+                            >
                                 Rebuild from acceptance
                             </Button>
                         </Tooltip>
                     )}
-                    <Button startIcon={<AddIcon/>} variant="outlined" size="small" onClick={handleAdd}>
+                    <Button
+                        startIcon={<AddIcon />}
+                        variant="outlined"
+                        size="small"
+                        onClick={handleAdd}
+                    >
                         Add Item
                     </Button>
                 </Stack>
@@ -416,31 +470,41 @@ const InvoiceItemsField = ({items = [], onChange, invoiceId}) => {
             <TableContainer component={Paper} elevation={1}>
                 <Table size="small">
                     <TableHead>
-                        <TableRow sx={{backgroundColor: 'grey.100'}}>
+                        <TableRow sx={{ backgroundColor: 'grey.100' }}>
                             <TableCell>
-                                <Typography variant="subtitle2" fontWeight="bold">Item</Typography>
+                                <Typography variant="subtitle2" fontWeight="bold">
+                                    Item
+                                </Typography>
                             </TableCell>
                             <TableCell align="right">
-                                <Typography variant="subtitle2" fontWeight="bold">Qty</Typography>
+                                <Typography variant="subtitle2" fontWeight="bold">
+                                    Qty
+                                </Typography>
                             </TableCell>
                             <TableCell align="right">
-                                <Typography variant="subtitle2" fontWeight="bold">Unit Price</Typography>
+                                <Typography variant="subtitle2" fontWeight="bold">
+                                    Unit Price
+                                </Typography>
                             </TableCell>
                             <TableCell align="right">
-                                <Typography variant="subtitle2" fontWeight="bold">Discount</Typography>
+                                <Typography variant="subtitle2" fontWeight="bold">
+                                    Discount
+                                </Typography>
                             </TableCell>
                             <TableCell align="right">
-                                <Typography variant="subtitle2" fontWeight="bold">Net</Typography>
+                                <Typography variant="subtitle2" fontWeight="bold">
+                                    Net
+                                </Typography>
                             </TableCell>
                             <TableCell align="center">
-                                <Typography variant="subtitle2" fontWeight="bold">Actions</Typography>
+                                <Typography variant="subtitle2" fontWeight="bold">
+                                    Actions
+                                </Typography>
                             </TableCell>
                         </TableRow>
                     </TableHead>
 
-                    <TableBody>
-                        {safeItems.map(renderRow)}
-                    </TableBody>
+                    <TableBody>{safeItems.map(renderRow)}</TableBody>
                 </Table>
             </TableContainer>
         </Box>

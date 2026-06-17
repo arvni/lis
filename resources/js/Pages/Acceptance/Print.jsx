@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head,Link } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import OptimizedInvoiceReceipt from './Components/InvoiceReceipt';
 import {
     Box,
@@ -16,14 +16,14 @@ import {
     Tooltip,
     Fade,
     Alert,
-    useTheme
+    useTheme,
 } from '@mui/material';
 import {
     Print as PrintIcon,
     ArrowBack,
     FileDownload as PdfIcon,
     ContentCopy as CopyIcon,
-    Check
+    Check,
 } from '@mui/icons-material';
 // Global print styles using CSS-in-JS - Optimized for A5 paper
 const printStyles = `
@@ -124,21 +124,31 @@ const OptimizedPrint = ({ acceptance }) => {
     };
 
     // Calculate totals for the alert box
-    const subtotal = (acceptance?.acceptanceItems?.tests?.reduce(
-        (sum, item) => sum + parseFloat(item.price || 0), 0
-    ) || 0) + (acceptance?.acceptanceItems?.panels?.reduce(
-        (sum, item) => sum + parseFloat(item.price || 0), 0
-    ) || 0);
+    const subtotal =
+        (acceptance?.acceptanceItems?.tests?.reduce(
+            (sum, item) => sum + parseFloat(item.price || 0),
+            0,
+        ) || 0) +
+        (acceptance?.acceptanceItems?.panels?.reduce(
+            (sum, item) => sum + parseFloat(item.price || 0),
+            0,
+        ) || 0);
 
-    const totalDiscount = (acceptance?.acceptanceItems?.tests?.reduce(
-        (sum, item) => sum + parseFloat(item.discount || 0), 0
-    ) || 0) + (acceptance?.acceptanceItems?.panels?.reduce(
-        (sum, item) => sum + parseFloat(item.discount || 0), 0
-    ) || 0);
+    const totalDiscount =
+        (acceptance?.acceptanceItems?.tests?.reduce(
+            (sum, item) => sum + parseFloat(item.discount || 0),
+            0,
+        ) || 0) +
+        (acceptance?.acceptanceItems?.panels?.reduce(
+            (sum, item) => sum + parseFloat(item.discount || 0),
+            0,
+        ) || 0);
 
-    const totalPayment = acceptance?.invoice?.payments?.reduce(
-        (sum, payment) => sum + parseFloat(payment.price || 0), 0
-    ) || 0;
+    const totalPayment =
+        acceptance?.invoice?.payments?.reduce(
+            (sum, payment) => sum + parseFloat(payment.price || 0),
+            0,
+        ) || 0;
 
     const finalTotal = subtotal - totalPayment - totalDiscount;
 
@@ -155,10 +165,17 @@ const OptimizedPrint = ({ acceptance }) => {
                         p: 2,
                         borderLeft: `4px solid ${theme.palette.primary.main}`,
                         bgcolor: 'background.paper',
-                        mb: 2
+                        mb: 2,
                     }}
                 >
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            mb: 1,
+                        }}
+                    >
                         <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
                             Receipt #{acceptance.id}
                         </Typography>
@@ -177,18 +194,26 @@ const OptimizedPrint = ({ acceptance }) => {
 
                     <Divider sx={{ my: 1 }} />
 
-                    <Alert
-                        severity="info"
-                        variant="outlined"
-                        sx={{ mb: 2 }}
-                    >
+                    <Alert severity="info" variant="outlined" sx={{ mb: 2 }}>
                         <Typography variant="body2">
                             Receipt for patient <strong>{acceptance.patient?.fullName}</strong>
                             <br />
                             Total: <strong>OMR {subtotal.toFixed(2)}</strong>
-                            {totalDiscount > 0 && (<>, Discount: <strong>OMR {totalDiscount.toFixed(2)}</strong></>)}
-                            {totalPayment > 0 && (<>, Paid: <strong>OMR {totalPayment.toFixed(2)}</strong></>)}
-                            {finalTotal > 0 && (<>, Balance: <strong>OMR {finalTotal.toFixed(2)}</strong></>)}
+                            {totalDiscount > 0 && (
+                                <>
+                                    , Discount: <strong>OMR {totalDiscount.toFixed(2)}</strong>
+                                </>
+                            )}
+                            {totalPayment > 0 && (
+                                <>
+                                    , Paid: <strong>OMR {totalPayment.toFixed(2)}</strong>
+                                </>
+                            )}
+                            {finalTotal > 0 && (
+                                <>
+                                    , Balance: <strong>OMR {finalTotal.toFixed(2)}</strong>
+                                </>
+                            )}
                         </Typography>
                     </Alert>
 
@@ -239,21 +264,20 @@ const OptimizedPrint = ({ acceptance }) => {
                                 </Button>
 
                                 <Tooltip
-                                    title={showCopySuccess ? "Copied!" : "Copy receipt #"}
+                                    title={showCopySuccess ? 'Copied!' : 'Copy receipt #'}
                                     slots={{
-                                        Transition:Fade
+                                        Transition: Fade,
                                     }}
-
-                                    slotProps={{Transition:{ timeout: 600 }}}
+                                    slotProps={{ Transition: { timeout: 600 } }}
                                 >
                                     <Button
                                         startIcon={showCopySuccess ? <Check /> : <CopyIcon />}
                                         onClick={handleCopyReceiptNumber}
-                                        color={showCopySuccess ? "success" : "inherit"}
+                                        color={showCopySuccess ? 'success' : 'inherit'}
                                         variant="text"
                                         size="small"
                                     >
-                                        {showCopySuccess ? "Copied" : "Copy #"}
+                                        {showCopySuccess ? 'Copied' : 'Copy #'}
                                     </Button>
                                 </Tooltip>
                             </CardActions>
@@ -263,11 +287,14 @@ const OptimizedPrint = ({ acceptance }) => {
             </Container>
 
             {/* This div ensures proper printing dimensions */}
-            <Box className="print-container" sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                width: '100%'
-            }}>
+            <Box
+                className="print-container"
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    width: '100%',
+                }}
+            >
                 <OptimizedInvoiceReceipt
                     acceptance={acceptance}
                     onPrint={shouldPrint}

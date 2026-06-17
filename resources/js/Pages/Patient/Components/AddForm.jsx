@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { useForm } from "@inertiajs/react";
-import axios from "axios";
+import { useEffect, useState } from 'react';
+import { useForm } from '@inertiajs/react';
+import axios from 'axios';
 
 // MUI Components
 import {
@@ -23,17 +23,17 @@ import {
     Divider,
     Box,
     Alert,
-    Snackbar
-} from "@mui/material";
+    Snackbar,
+} from '@mui/material';
 
 // Icons
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import PersonIcon from "@mui/icons-material/Person";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import PersonIcon from '@mui/icons-material/Person';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 // Components
-import SelectSearch from "@/Components/SelectSearch";
+import SelectSearch from '@/Components/SelectSearch';
 
 const AddForm = ({ open, onClose, patientId }) => {
     const [times, setTimes] = useState([]);
@@ -55,7 +55,7 @@ const AddForm = ({ open, onClose, patientId }) => {
         consultant: null,
         dueDate: formattedDate,
         time: null,
-        patient_id: patientId
+        patient_id: patientId,
     });
 
     useEffect(() => {
@@ -70,15 +70,15 @@ const AddForm = ({ open, onClose, patientId }) => {
     const getTimes = () => {
         axios
             .get(
-                route("list-reservation-times", {
+                route('list-reservation-times', {
                     consultant: data.consultant?.id,
-                    date: data.dueDate
-                })
+                    date: data.dueDate,
+                }),
             )
             .then(({ data }) => setTimes(data.data))
             .then(() => setWaiting(false))
             .catch((error) => {
-                console.error("Error fetching times:", error);
+                console.error('Error fetching times:', error);
                 setWaiting(false);
             });
     };
@@ -86,18 +86,18 @@ const AddForm = ({ open, onClose, patientId }) => {
     const handleChange = (e) =>
         setData((previousData) => ({
             ...previousData,
-            [e.target.name]: e.target.value
+            [e.target.name]: e.target.value,
         }));
 
     const handleSubmit = () => {
         if (check()) {
-            post(route("consultations.store"), {
+            post(route('consultations.store'), {
                 onSuccess: () => {
                     setShowSuccess(true);
                     reset();
                     setTimes([]);
                     onClose();
-                }
+                },
             });
         }
     };
@@ -106,17 +106,17 @@ const AddForm = ({ open, onClose, patientId }) => {
         let isValid = true;
 
         if (!data.consultant) {
-            setError("consultant", "Please select a consultant");
+            setError('consultant', 'Please select a consultant');
             isValid = false;
         }
 
         if (!data.dueDate) {
-            setError("dueDate", "Please select a date");
+            setError('dueDate', 'Please select a date');
             isValid = false;
         }
 
         if (!data.time) {
-            setError("time", "Please select a time slot");
+            setError('time', 'Please select a time slot');
             isValid = false;
         }
 
@@ -133,15 +133,17 @@ const AddForm = ({ open, onClose, patientId }) => {
                 slotProps={{
                     Paper: {
                         elevation: 3,
-                        sx: {borderRadius: 2}
-                    }
+                        sx: { borderRadius: 2 },
+                    },
                 }}
             >
-                <DialogTitle sx={{
-                    bgcolor: "primary.main",
-                    color: "white",
-                    py: 2
-                }}>
+                <DialogTitle
+                    sx={{
+                        bgcolor: 'primary.main',
+                        color: 'white',
+                        py: 2,
+                    }}
+                >
                     <Typography variant="h5" fontWeight="500" component="span">
                         Schedule New Consultation
                     </Typography>
@@ -153,15 +155,24 @@ const AddForm = ({ open, onClose, patientId }) => {
                     <Container>
                         <Box mb={3}>
                             <Typography variant="body1" color="text.secondary">
-                                Please fill in the details below to schedule a consultation for patient ID: {patientId}
+                                Please fill in the details below to schedule a consultation for
+                                patient ID: {patientId}
                             </Typography>
                         </Box>
 
                         <Grid container spacing={3}>
                             {/* Consultant Selection */}
-                            <Grid size={{xs: 12, md: 6}}>
-                                <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
-  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        p: 2,
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        borderRadius: 2,
+                                    }}
+                                >
+                                    <Box display="flex" mb={1} sx={{ alignItems: 'center' }}>
                                         <PersonIcon color="primary" sx={{ mr: 1 }} />
                                         <Typography variant="subtitle1" fontWeight="medium">
                                             Select Consultant
@@ -171,7 +182,7 @@ const AddForm = ({ open, onClose, patientId }) => {
                                     <SelectSearch
                                         onChange={handleChange}
                                         value={data.consultant}
-                                        url={route("list-consultants")}
+                                        url={route('list-consultants')}
                                         name="consultant"
                                         label="Consultant"
                                         error={Boolean(errors.consultant)}
@@ -182,9 +193,17 @@ const AddForm = ({ open, onClose, patientId }) => {
                             </Grid>
 
                             {/* Date Selection */}
-                            <Grid  size={{xs: 12, md: 6}}>
-                                <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
-  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        p: 2,
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        borderRadius: 2,
+                                    }}
+                                >
+                                    <Box display="flex" mb={1} sx={{ alignItems: 'center' }}>
                                         <CalendarTodayIcon color="primary" sx={{ mr: 1 }} />
                                         <Typography variant="subtitle1" fontWeight="medium">
                                             Select Date
@@ -198,8 +217,11 @@ const AddForm = ({ open, onClose, patientId }) => {
                                             value={data.dueDate}
                                             onChange={handleChange}
                                             fullWidth
-                                            slotProps={{ InputLabel:{shrink: true},input:{ min: formattedDate }}}
-                                            error={errors.hasOwnProperty("dueDate")}
+                                            slotProps={{
+                                                InputLabel: { shrink: true },
+                                                input: { min: formattedDate },
+                                            }}
+                                            error={errors.hasOwnProperty('dueDate')}
                                             helperText={errors?.dueDate}
                                         />
                                     </FormGroup>
@@ -208,9 +230,17 @@ const AddForm = ({ open, onClose, patientId }) => {
 
                             {/* Time Selection */}
                             {(times.length > 0 || waiting) && (
-                                <Grid  size={{xs: 12}}>
-                                    <Paper elevation={0} sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
-  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
+                                <Grid size={{ xs: 12 }}>
+                                    <Paper
+                                        elevation={0}
+                                        sx={{
+                                            p: 2,
+                                            border: '1px solid',
+                                            borderColor: 'divider',
+                                            borderRadius: 2,
+                                        }}
+                                    >
+                                        <Box display="flex" mb={2} sx={{ alignItems: 'center' }}>
                                             <AccessTimeIcon color="primary" sx={{ mr: 1 }} />
                                             <Typography variant="subtitle1" fontWeight="medium">
                                                 Available Time Slots
@@ -218,9 +248,20 @@ const AddForm = ({ open, onClose, patientId }) => {
                                         </Box>
 
                                         {waiting ? (
-  <Box display="flex" p={4} sx={{justifyContent: "center", alignItems: "center"}}>
+                                            <Box
+                                                display="flex"
+                                                p={4}
+                                                sx={{
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                }}
+                                            >
                                                 <CircularProgress size={40} />
-                                                <Typography variant="body2" color="text.secondary" ml={2}>
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                    ml={2}
+                                                >
                                                     Loading available times...
                                                 </Typography>
                                             </Box>
@@ -230,7 +271,11 @@ const AddForm = ({ open, onClose, patientId }) => {
                                                     name="time"
                                                     value={data.time}
                                                     onChange={handleChange}
-                                                    sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}
+                                                    sx={{
+                                                        display: 'flex',
+                                                        flexDirection: 'row',
+                                                        flexWrap: 'wrap',
+                                                    }}
                                                 >
                                                     {times.map((item, index) => (
                                                         <FormControlLabel
@@ -241,34 +286,50 @@ const AddForm = ({ open, onClose, patientId }) => {
                                                             control={
                                                                 <Radio
                                                                     color="primary"
-                                                                    checkedIcon={<CheckCircleIcon />}
+                                                                    checkedIcon={
+                                                                        <CheckCircleIcon />
+                                                                    }
                                                                 />
                                                             }
                                                             sx={{
-                                                                border: "1px solid",
-                                                                borderColor: data.time === item.value ? "primary.main" : "divider",
-                                                                borderRadius: "8px",
+                                                                border: '1px solid',
+                                                                borderColor:
+                                                                    data.time === item.value
+                                                                        ? 'primary.main'
+                                                                        : 'divider',
+                                                                borderRadius: '8px',
                                                                 m: 0.5,
                                                                 p: 0.5,
                                                                 pr: 1.5,
-                                                                transition: "all 0.2s",
-                                                                bgcolor: data.time === item.value ? "action.selected" : "background.paper",
-                                                                "&:hover": {
-                                                                    bgcolor: "action.hover",
-                                                                    borderColor: "primary.light"
-                                                                }
+                                                                transition: 'all 0.2s',
+                                                                bgcolor:
+                                                                    data.time === item.value
+                                                                        ? 'action.selected'
+                                                                        : 'background.paper',
+                                                                '&:hover': {
+                                                                    bgcolor: 'action.hover',
+                                                                    borderColor: 'primary.light',
+                                                                },
                                                             }}
                                                         />
                                                     ))}
                                                 </RadioGroup>
 
                                                 {errors.time && (
-                                                    <FormHelperText error>{errors.time}</FormHelperText>
+                                                    <FormHelperText error>
+                                                        {errors.time}
+                                                    </FormHelperText>
                                                 )}
                                             </>
                                         ) : (
-                                            <Typography variant="body2" color="text.secondary" align="center" py={2}>
-                                                No available time slots. Please try another date or consultant.
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                align="center"
+                                                py={2}
+                                            >
+                                                No available time slots. Please try another date or
+                                                consultant.
                                             </Typography>
                                         )}
                                     </Paper>
@@ -280,7 +341,7 @@ const AddForm = ({ open, onClose, patientId }) => {
 
                 <Divider />
 
-                <DialogActions sx={{ px: 3, py: 2, justifyContent: "space-between" }}>
+                <DialogActions sx={{ px: 3, py: 2, justifyContent: 'space-between' }}>
                     <Button
                         onClick={onClose}
                         variant="outlined"
@@ -295,13 +356,15 @@ const AddForm = ({ open, onClose, patientId }) => {
                         variant="contained"
                         disableElevation
                         disabled={processing}
-                        startIcon={processing ? <CircularProgress size={20} color="inherit" /> : null}
+                        startIcon={
+                            processing ? <CircularProgress size={20} color="inherit" /> : null
+                        }
                         sx={{
                             borderRadius: 2,
-                            px: 3
+                            px: 3,
                         }}
                     >
-                        {processing ? "Scheduling..." : "Schedule Consultation"}
+                        {processing ? 'Scheduling...' : 'Schedule Consultation'}
                     </Button>
                 </DialogActions>
             </Dialog>

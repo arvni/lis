@@ -1,6 +1,6 @@
-import {useState, useEffect} from "react";
-import {Autocomplete, TextField, CircularProgress} from "@mui/material";
-import axios from "axios";
+import { useState, useEffect } from 'react';
+import { Autocomplete, TextField, CircularProgress } from '@mui/material';
+import axios from 'axios';
 
 let debounceTimer = null;
 
@@ -16,20 +16,23 @@ let debounceTimer = null;
  *   label    – string
  */
 const BrandInput = ({
-    value = "",
+    value = '',
     onChange,
     itemId = null,
-    size = "small",
+    size = 'small',
     disabled = false,
-    label = "Brand",
+    label = 'Brand',
 }) => {
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
 
     // Load suggestions whenever itemId changes or on first mount
     useEffect(() => {
-        if (!itemId) { setOptions([]); return; }
-        fetchSuggestions("");
+        if (!itemId) {
+            setOptions([]);
+            return;
+        }
+        fetchSuggestions('');
     }, [itemId]);
 
     const fetchSuggestions = (search) => {
@@ -38,8 +41,8 @@ const BrandInput = ({
         debounceTimer = setTimeout(async () => {
             setLoading(true);
             try {
-                const {data} = await axios.get(route("api.inventory.brands.suggestions"), {
-                    params: {item_id: itemId, search},
+                const { data } = await axios.get(route('api.inventory.brands.suggestions'), {
+                    params: { item_id: itemId, search },
                 });
                 setOptions(data);
             } catch {
@@ -53,16 +56,16 @@ const BrandInput = ({
     return (
         <Autocomplete
             freeSolo
-            value={value || ""}
+            value={value || ''}
             options={options}
             disabled={disabled}
             filterOptions={(x) => x}
-            inputValue={value || ""}
+            inputValue={value || ''}
             onInputChange={(_, newVal) => {
-                onChange(newVal ?? "");
+                onChange(newVal ?? '');
                 fetchSuggestions(newVal);
             }}
-            onChange={(_, newVal) => onChange(newVal ?? "")}
+            onChange={(_, newVal) => onChange(newVal ?? '')}
             renderInput={(params) => (
                 <TextField
                     {...params}
@@ -74,7 +77,7 @@ const BrandInput = ({
                             ...params.slotProps?.input,
                             endAdornment: (
                                 <>
-                                    {loading && <CircularProgress size={14}/>}
+                                    {loading && <CircularProgress size={14} />}
                                     {params.slotProps?.input?.endAdornment}
                                 </>
                             ),

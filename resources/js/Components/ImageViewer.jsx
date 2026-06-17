@@ -1,6 +1,16 @@
-import React, {useEffect, useRef, useState} from "react";
-import {Alert, AppBar, Box, CircularProgress, Divider, IconButton, Toolbar, Tooltip, Typography} from "@mui/material";
-import {FilterCenterFocus, RotateLeft, RotateRight, ZoomIn, ZoomOut} from "@mui/icons-material";
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    Alert,
+    AppBar,
+    Box,
+    CircularProgress,
+    Divider,
+    IconButton,
+    Toolbar,
+    Tooltip,
+    Typography,
+} from '@mui/material';
+import { FilterCenterFocus, RotateLeft, RotateRight, ZoomIn, ZoomOut } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 
 const ImageViewer = ({ fileUrl, fullScreen = false }) => {
@@ -9,25 +19,27 @@ const ImageViewer = ({ fileUrl, fullScreen = false }) => {
     const [imageState, setImageState] = useState({
         scale: 1,
         rotation: 0,
-        isLoaded: false
+        isLoaded: false,
     });
     const imgRef = useRef(null);
 
     const handleImageLoad = () => {
         setLoading(false);
-        setImageState(prev => ({ ...prev, isLoaded: true }));
+        setImageState((prev) => ({ ...prev, isLoaded: true }));
     };
 
     const handleImageError = (err) => {
-        console.error("Image Load Error:", err);
+        console.error('Image Load Error:', err);
         setError(`Failed to load image. The file may be corrupted or in an unsupported format.`);
         setLoading(false);
     };
 
-    const zoomIn = () => setImageState(prev => ({ ...prev, scale: Math.min(prev.scale + 0.2, 3) }));
-    const zoomOut = () => setImageState(prev => ({ ...prev, scale: Math.max(prev.scale - 0.2, 0.3) }));
-    const rotateLeft = () => setImageState(prev => ({ ...prev, rotation: prev.rotation - 90 }));
-    const rotateRight = () => setImageState(prev => ({ ...prev, rotation: prev.rotation + 90 }));
+    const zoomIn = () =>
+        setImageState((prev) => ({ ...prev, scale: Math.min(prev.scale + 0.2, 3) }));
+    const zoomOut = () =>
+        setImageState((prev) => ({ ...prev, scale: Math.max(prev.scale - 0.2, 0.3) }));
+    const rotateLeft = () => setImageState((prev) => ({ ...prev, rotation: prev.rotation - 90 }));
+    const rotateRight = () => setImageState((prev) => ({ ...prev, rotation: prev.rotation + 90 }));
     const resetView = () => setImageState({ scale: 1, rotation: 0, isLoaded: true });
 
     useEffect(() => {
@@ -38,13 +50,15 @@ const ImageViewer = ({ fileUrl, fullScreen = false }) => {
     }, [fileUrl]);
 
     return (
-        <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: fullScreen ? 'calc(100vh - 48px)' : 500,
-            width: '100%',
-            overflow: 'hidden'
-        }}>
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: fullScreen ? 'calc(100vh - 48px)' : 500,
+                width: '100%',
+                overflow: 'hidden',
+            }}
+        >
             <AppBar position="static" color="default" elevation={0}>
                 <Toolbar variant="dense">
                     <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
@@ -52,14 +66,22 @@ const ImageViewer = ({ fileUrl, fullScreen = false }) => {
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <Tooltip title="Rotate left">
                                 <span>
-                                    <IconButton size="small" onClick={rotateLeft} disabled={loading || !imageState.isLoaded}>
+                                    <IconButton
+                                        size="small"
+                                        onClick={rotateLeft}
+                                        disabled={loading || !imageState.isLoaded}
+                                    >
                                         <RotateLeft />
                                     </IconButton>
                                 </span>
                             </Tooltip>
                             <Tooltip title="Rotate right">
                                 <span>
-                                    <IconButton size="small" onClick={rotateRight} disabled={loading || !imageState.isLoaded}>
+                                    <IconButton
+                                        size="small"
+                                        onClick={rotateRight}
+                                        disabled={loading || !imageState.isLoaded}
+                                    >
                                         <RotateRight />
                                     </IconButton>
                                 </span>
@@ -67,17 +89,34 @@ const ImageViewer = ({ fileUrl, fullScreen = false }) => {
                             <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
                             <Tooltip title="Zoom out">
                                 <span>
-                                    <IconButton size="small" onClick={zoomOut} disabled={loading || !imageState.isLoaded || imageState.scale <= 0.3}>
+                                    <IconButton
+                                        size="small"
+                                        onClick={zoomOut}
+                                        disabled={
+                                            loading ||
+                                            !imageState.isLoaded ||
+                                            imageState.scale <= 0.3
+                                        }
+                                    >
                                         <ZoomOut />
                                     </IconButton>
                                 </span>
                             </Tooltip>
-                            <Typography variant="body2" sx={{ mx: 1, minWidth: '40px', textAlign: 'center' }}>
+                            <Typography
+                                variant="body2"
+                                sx={{ mx: 1, minWidth: '40px', textAlign: 'center' }}
+                            >
                                 {loading ? '...' : `${Math.round(imageState.scale * 100)}%`}
                             </Typography>
                             <Tooltip title="Zoom in">
                                 <span>
-                                    <IconButton size="small" onClick={zoomIn} disabled={loading || !imageState.isLoaded || imageState.scale >= 3}>
+                                    <IconButton
+                                        size="small"
+                                        onClick={zoomIn}
+                                        disabled={
+                                            loading || !imageState.isLoaded || imageState.scale >= 3
+                                        }
+                                    >
                                         <ZoomIn />
                                     </IconButton>
                                 </span>
@@ -88,7 +127,11 @@ const ImageViewer = ({ fileUrl, fullScreen = false }) => {
                         <Box sx={{ ml: 'auto' }}>
                             <Tooltip title="Reset view">
                                 <span>
-                                    <IconButton size="small" onClick={resetView} disabled={loading || !imageState.isLoaded}>
+                                    <IconButton
+                                        size="small"
+                                        onClick={resetView}
+                                        disabled={loading || !imageState.isLoaded}
+                                    >
                                         <FilterCenterFocus />
                                     </IconButton>
                                 </span>
@@ -110,24 +153,36 @@ const ImageViewer = ({ fileUrl, fullScreen = false }) => {
                 }}
             >
                 {loading && (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: 200 }}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: '100%',
+                            minHeight: 200,
+                        }}
+                    >
                         <CircularProgress />
                     </Box>
                 )}
                 {error && !loading && (
                     <Box sx={{ p: 2 }}>
-                        <Alert severity="error" sx={{ maxWidth: 500, mx: 'auto' }}>{error}</Alert>
+                        <Alert severity="error" sx={{ maxWidth: 500, mx: 'auto' }}>
+                            {error}
+                        </Alert>
                     </Box>
                 )}
                 {!error && (
-                    <Box sx={{
-                        position: 'relative',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: '100%',
-                        width: '100%'
-                    }}>
+                    <Box
+                        sx={{
+                            position: 'relative',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: '100%',
+                            width: '100%',
+                        }}
+                    >
                         <Box
                             component="img"
                             ref={imgRef}
@@ -143,7 +198,9 @@ const ImageViewer = ({ fileUrl, fullScreen = false }) => {
                                 transition: 'transform 0.3s ease',
                                 display: loading ? 'none' : 'block',
                                 // Subtle shadow for better visibility on white backgrounds
-                                boxShadow: imageState.isLoaded ? '0 0 10px rgba(0,0,0,0.1)' : 'none'
+                                boxShadow: imageState.isLoaded
+                                    ? '0 0 10px rgba(0,0,0,0.1)'
+                                    : 'none',
                             }}
                         />
                     </Box>

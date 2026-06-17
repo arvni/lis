@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -19,15 +19,9 @@ import {
     ListItemText,
     ListItemIcon,
     Radio,
-} from "@mui/material";
-import {
-    Assignment,
-    Science,
-    CalendarToday,
-    Add,
-    CheckCircle,
-} from "@mui/icons-material";
-import axios from "axios";
+} from '@mui/material';
+import { Assignment, Science, CalendarToday, Add, CheckCircle } from '@mui/icons-material';
+import axios from 'axios';
 
 const SelectAcceptanceDialog = ({
     open,
@@ -53,14 +47,13 @@ const SelectAcceptanceDialog = ({
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.get(
-                route("api.referrer.patient.acceptances", patientId),
-                { params: { referrer_id: referrerId, ...(poolingOnly ? { pooling_only: true } : {}) } }
-            );
+            const response = await axios.get(route('api.referrer.patient.acceptances', patientId), {
+                params: { referrer_id: referrerId, ...(poolingOnly ? { pooling_only: true } : {}) },
+            });
             setAcceptances(response.data.acceptances || []);
         } catch (err) {
-            setError("Failed to load acceptances. Please try again.");
-            console.error("Error fetching acceptances:", err);
+            setError('Failed to load acceptances. Please try again.');
+            console.error('Error fetching acceptances:', err);
         } finally {
             setLoading(false);
         }
@@ -68,9 +61,7 @@ const SelectAcceptanceDialog = ({
 
     const handleSelect = () => {
         if (selectedAcceptanceId) {
-            const selectedAcceptance = acceptances.find(
-                (a) => a.id === selectedAcceptanceId
-            );
+            const selectedAcceptance = acceptances.find((a) => a.id === selectedAcceptanceId);
             onSelectAcceptance(selectedAcceptance);
             handleClose();
         }
@@ -89,22 +80,22 @@ const SelectAcceptanceDialog = ({
 
     const getStatusColor = (status) => {
         switch (status) {
-            case "sampling":
-                return "warning";
-            case "processing":
-                return "info";
-            case "pooling":
-                return "secondary";
+            case 'sampling':
+                return 'warning';
+            case 'processing':
+                return 'info';
+            case 'pooling':
+                return 'secondary';
             default:
-                return "default";
+                return 'default';
         }
     };
 
     return (
         <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
             <DialogTitle>
-  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
-                    <Avatar sx={{ bgcolor: "primary.main" }}>
+                <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+                    <Avatar sx={{ bgcolor: 'primary.main' }}>
                         <Assignment />
                     </Avatar>
                     <Box>
@@ -112,8 +103,7 @@ const SelectAcceptanceDialog = ({
                             Select Existing Acceptance
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                            Choose an acceptance to add new tests to, or create
-                            a new one
+                            Choose an acceptance to add new tests to, or create a new one
                         </Typography>
                     </Box>
                 </Stack>
@@ -123,7 +113,7 @@ const SelectAcceptanceDialog = ({
                 {loading && (
                     <Box
                         display="flex"
-                        sx={{ justifyContent: "center", alignItems: "center" }}
+                        sx={{ justifyContent: 'center', alignItems: 'center' }}
                         py={4}
                     >
                         <CircularProgress />
@@ -138,51 +128,40 @@ const SelectAcceptanceDialog = ({
 
                 {!loading && !error && acceptances.length === 0 && (
                     <Alert severity="info" sx={{ mb: 2 }}>
-                        No existing acceptances found for this patient and
-                        referrer. You can create a new acceptance.
+                        No existing acceptances found for this patient and referrer. You can create
+                        a new acceptance.
                     </Alert>
                 )}
 
                 {!loading && acceptances.length > 0 && (
-                    <List sx={{ width: "100%" }}>
+                    <List sx={{ width: '100%' }}>
                         {acceptances.map((acceptance) => (
                             <Paper
                                 key={acceptance.id}
-                                elevation={
-                                    selectedAcceptanceId === acceptance.id
-                                        ? 4
-                                        : 1
-                                }
+                                elevation={selectedAcceptanceId === acceptance.id ? 4 : 1}
                                 sx={{
                                     mb: 2,
-                                    border: "2px solid",
+                                    border: '2px solid',
                                     borderColor:
                                         selectedAcceptanceId === acceptance.id
-                                            ? "primary.main"
-                                            : "transparent",
-                                    transition: "all 0.2s ease",
+                                            ? 'primary.main'
+                                            : 'transparent',
+                                    transition: 'all 0.2s ease',
                                 }}
                             >
                                 <ListItemButton
-                                    onClick={() =>
-                                        setSelectedAcceptanceId(acceptance.id)
-                                    }
-                                    selected={
-                                        selectedAcceptanceId === acceptance.id
-                                    }
+                                    onClick={() => setSelectedAcceptanceId(acceptance.id)}
+                                    selected={selectedAcceptanceId === acceptance.id}
                                     sx={{
                                         p: 2,
-                                        "&.Mui-selected": {
-                                            bgcolor: "primary.50",
+                                        '&.Mui-selected': {
+                                            bgcolor: 'primary.50',
                                         },
                                     }}
                                 >
                                     <ListItemIcon>
                                         <Radio
-                                            checked={
-                                                selectedAcceptanceId ===
-                                                acceptance.id
-                                            }
+                                            checked={selectedAcceptanceId === acceptance.id}
                                             color="primary"
                                         />
                                     </ListItemIcon>
@@ -190,22 +169,16 @@ const SelectAcceptanceDialog = ({
                                         primary={
                                             <Stack
                                                 direction="row"
-
- sx={{alignItems: "center"}}
+                                                sx={{ alignItems: 'center' }}
                                                 spacing={2}
                                             >
-                                                <Typography
-                                                    variant="subtitle1"
-                                                    fontWeight={600}
-                                                >
+                                                <Typography variant="subtitle1" fontWeight={600}>
                                                     Acceptance #{acceptance.id}
                                                 </Typography>
                                                 <Chip
                                                     label={acceptance.status}
                                                     size="small"
-                                                    color={getStatusColor(
-                                                        acceptance.status
-                                                    )}
+                                                    color={getStatusColor(acceptance.status)}
                                                 />
                                                 {acceptance.referenceCode && (
                                                     <Chip
@@ -220,8 +193,7 @@ const SelectAcceptanceDialog = ({
                                             <Box sx={{ mt: 1 }}>
                                                 <Stack
                                                     direction="row"
-
- sx={{alignItems: "center"}}
+                                                    sx={{ alignItems: 'center' }}
                                                     spacing={1}
                                                     mb={1}
                                                 >
@@ -233,21 +205,18 @@ const SelectAcceptanceDialog = ({
                                                         variant="body2"
                                                         color="text.secondary"
                                                     >
-                                                        Created:{" "}
-                                                        {acceptance.created_at}
+                                                        Created: {acceptance.created_at}
                                                     </Typography>
                                                 </Stack>
 
-                                                {acceptance.acceptance_items
-                                                    .length > 0 && (
+                                                {acceptance.acceptance_items.length > 0 && (
                                                     <Box>
                                                         <Typography
                                                             variant="body2"
                                                             color="text.secondary"
                                                             sx={{
-                                                                display: "flex",
-                                                                alignItems:
-                                                                    "center",
+                                                                display: 'flex',
+                                                                alignItems: 'center',
                                                                 gap: 1,
                                                                 mb: 1,
                                                             }}
@@ -258,22 +227,18 @@ const SelectAcceptanceDialog = ({
                                                         <Stack
                                                             direction="row"
                                                             spacing={0.5}
-                                                            sx={{ flexWrap: "wrap", gap: 0.5 }}
+                                                            sx={{ flexWrap: 'wrap', gap: 0.5 }}
                                                         >
                                                             {acceptance.acceptance_items.map(
                                                                 (item) => (
                                                                     <Chip
-                                                                        key={
-                                                                            item.id
-                                                                        }
-                                                                        label={
-                                                                            item.test_name
-                                                                        }
+                                                                        key={item.id}
+                                                                        label={item.test_name}
                                                                         size="small"
                                                                         variant="outlined"
                                                                         color="primary"
                                                                     />
-                                                                )
+                                                                ),
                                                             )}
                                                         </Stack>
                                                     </Box>
@@ -295,20 +260,20 @@ const SelectAcceptanceDialog = ({
                     elevation={1}
                     sx={{
                         p: 2,
-                        border: "2px dashed",
-                        borderColor: "grey.300",
-                        bgcolor: "grey.50",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                        "&:hover": {
-                            borderColor: "primary.main",
-                            bgcolor: "primary.50",
+                        border: '2px dashed',
+                        borderColor: 'grey.300',
+                        bgcolor: 'grey.50',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                            borderColor: 'primary.main',
+                            bgcolor: 'primary.50',
                         },
                     }}
                     onClick={handleCreateNew}
                 >
-  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
-                        <Avatar sx={{ bgcolor: "success.main" }}>
+                    <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+                        <Avatar sx={{ bgcolor: 'success.main' }}>
                             <Add />
                         </Avatar>
                         <Box>

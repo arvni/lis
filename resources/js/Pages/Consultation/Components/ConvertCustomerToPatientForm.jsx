@@ -1,4 +1,4 @@
-import Dialog from "@mui/material/Dialog";
+import Dialog from '@mui/material/Dialog';
 import {
     CircularProgress,
     DialogActions,
@@ -15,14 +15,14 @@ import {
     Alert,
     Fade,
     useTheme,
-    useMediaQuery
-} from "@mui/material";
-import PatientIdForm from "@/Pages/Patient/Components/PatientIdForm";
-import PatientForm from "@/Pages/Patient/Components/PatientForm";
-import {useEffect, useState, forwardRef} from "react";
-import Button from "@mui/material/Button";
-import {getPatientByIdNo} from "@/Pages/Patient/Components/Form.jsx";
-import countries from "@/Data/Countries.js";
+    useMediaQuery,
+} from '@mui/material';
+import PatientIdForm from '@/Pages/Patient/Components/PatientIdForm';
+import PatientForm from '@/Pages/Patient/Components/PatientForm';
+import { useEffect, useState, forwardRef } from 'react';
+import Button from '@mui/material/Button';
+import { getPatientByIdNo } from '@/Pages/Patient/Components/Form.jsx';
+import countries from '@/Data/Countries.js';
 import {
     Close as CloseIcon,
     ArrowBack as ArrowBackIcon,
@@ -30,16 +30,16 @@ import {
     PersonAdd as PersonAddIcon,
     Badge as BadgeIcon,
     Person as PersonIcon,
-    CheckCircle as CheckCircleIcon
-} from "@mui/icons-material";
-import {useForm} from "@inertiajs/react";
+    CheckCircle as CheckCircleIcon,
+} from '@mui/icons-material';
+import { useForm } from '@inertiajs/react';
 
 // Slide transition for the dialog
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
+const ConvertCustomerToPatientForm = ({ time, open, onClose }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [step, setStep] = useState(0);
@@ -47,24 +47,24 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
     const [success, setSuccess] = useState(false);
     const [feedback, setFeedback] = useState({
         show: false,
-        message: "",
-        severity: "info"
+        message: '',
+        severity: 'info',
     });
 
-    const {data, setData, post, processing, errors, clearErrors, reset, setError} = useForm({
-        firstName: time?.reservable?.name || "",
-        secondName: "",
-        thirdName: "",
-        lastName: "",
-        phone: time?.reservable?.phone || "",
-        _method: "put"
+    const { data, setData, post, processing, errors, clearErrors, reset, setError } = useForm({
+        firstName: time?.reservable?.name || '',
+        secondName: '',
+        thirdName: '',
+        lastName: '',
+        phone: time?.reservable?.phone || '',
+        _method: 'put',
     });
 
     // Clear feedback message after 5 seconds
     useEffect(() => {
         if (feedback.show) {
             const timer = setTimeout(() => {
-                setFeedback(prev => ({...prev, show: false}));
+                setFeedback((prev) => ({ ...prev, show: false }));
             }, 5000);
             return () => clearTimeout(timer);
         }
@@ -72,8 +72,8 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
 
     // Handle form changes
     const handleChange = (e) => {
-        const {name, value} = e.target;
-        setData(prevData => ({...prevData, [name]: value}));
+        const { name, value } = e.target;
+        setData((prevData) => ({ ...prevData, [name]: value }));
 
         // Clear specific error when user starts typing
         if (errors[name]) {
@@ -85,12 +85,12 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
     const handleSubmit = () => {
         // Validate form before submission
         const requiredFields = ['firstName', 'lastName', 'phone', 'idNo', 'nationality', 'avatar'];
-        if (data?.nationality?.code === "OM") {
+        if (data?.nationality?.code === 'OM') {
             requiredFields.push('secondName', 'thirdName', 'governorate', 'wilayat');
         }
         let hasError = false;
 
-        requiredFields.forEach(field => {
+        requiredFields.forEach((field) => {
             if (!data[field]) {
                 setError(field, 'This field is required');
                 hasError = true;
@@ -100,22 +100,24 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
         if (hasError) {
             setFeedback({
                 show: true,
-                message: "Please fill in all required fields",
-                severity: "error"
+                message: 'Please fill in all required fields',
+                severity: 'error',
             });
             return;
         }
 
         setLoading(true);
         // Submit form data to server
-        post(route("update-customer-to-patient", time.id), {
+        post(route('update-customer-to-patient', time.id), {
             onSuccess: () => {
                 setLoading(false);
                 setSuccess(true);
                 setFeedback({
                     show: true,
-                    message: data.patient_id ? "Patient information updated successfully" : "Patient added successfully",
-                    severity: "success"
+                    message: data.patient_id
+                        ? 'Patient information updated successfully'
+                        : 'Patient added successfully',
+                    severity: 'success',
                 });
                 onClose();
                 reset();
@@ -124,10 +126,10 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                 setLoading(false);
                 setFeedback({
                     show: true,
-                    message: "There was an error processing your request",
-                    severity: "error"
+                    message: 'There was an error processing your request',
+                    severity: 'error',
                 });
-            }
+            },
         });
     };
 
@@ -135,12 +137,12 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
     const next = async () => {
         switch (step) {
             case 0:
-                if (!data.idNo || data.idNo.trim() === "") {
+                if (!data.idNo || data.idNo.trim() === '') {
                     setError('idNo', 'Please enter an ID or passport number');
                     setFeedback({
                         show: true,
-                        message: "Please enter an ID or passport number",
-                        severity: "error"
+                        message: 'Please enter an ID or passport number',
+                        severity: 'error',
                     });
                     return;
                 }
@@ -148,8 +150,8 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                 setLoading(true);
                 setFeedback({
                     show: true,
-                    message: "Searching for patient records...",
-                    severity: "info"
+                    message: 'Searching for patient records...',
+                    severity: 'info',
                 });
 
                 try {
@@ -167,15 +169,15 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
     };
 
     // Callback for patient search
-    const findPatientCallBack = ({data: patientData = {}}) => {
-        const {nationality = null,id=null} = patientData;
+    const findPatientCallBack = ({ data: patientData = {} }) => {
+        const { nationality = null, id = null } = patientData;
 
         // Find matching nationality from countries list
         if (id) {
             const matchedNationality = nationality
                 ? countries.find((item) => item.code === nationality) || null
                 : null;
-            setData(prevData => ({
+            setData((prevData) => ({
                 ...prevData,
                 ...patientData,
                 nationality: matchedNationality,
@@ -188,8 +190,10 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
         // Show appropriate feedback
         setFeedback({
             show: true,
-            message: id ? "Patient found. You can update their information." : "Creating new patient record.",
-            severity: "info"
+            message: id
+                ? 'Patient found. You can update their information.'
+                : 'Creating new patient record.',
+            severity: 'info',
         });
     };
 
@@ -203,20 +207,20 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
     const getStepInfo = () => {
         const steps = [
             {
-                title: "Enter ID/Passport Number",
-                icon: <BadgeIcon color="primary"/>,
-                description: "Search for existing patient or create new one"
+                title: 'Enter ID/Passport Number',
+                icon: <BadgeIcon color="primary" />,
+                description: 'Search for existing patient or create new one',
             },
             {
-                title: "Complete Patient Information",
-                icon: <PersonIcon color="primary"/>,
-                description: "Fill in or update patient details"
-            }
+                title: 'Complete Patient Information',
+                icon: <PersonIcon color="primary" />,
+                description: 'Fill in or update patient details',
+            },
         ];
         return steps[step] || steps[0];
     };
 
-    const {title, icon, description} = getStepInfo();
+    const { title, icon, description } = getStepInfo();
 
     // Handle dialog close with confirmation if needed
     const handleDialogClose = () => {
@@ -226,7 +230,7 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
 
         if (step === 1 && !success) {
             // Could add confirmation dialog here
-            if (window.confirm("Are you sure you want to cancel? Your changes will be lost.")) {
+            if (window.confirm('Are you sure you want to cancel? Your changes will be lost.')) {
                 onClose();
             }
         } else {
@@ -240,13 +244,13 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
             fullWidth
             maxWidth="md"
             fullScreen={isMobile}
-            slots={{transition: Transition}}
+            slots={{ transition: Transition }}
             onClose={handleDialogClose}
             sx={{
                 '& .MuiDialog-paper': {
                     borderRadius: isMobile ? 0 : 2,
-                    overflow: 'hidden'
-                }
+                    overflow: 'hidden',
+                },
             }}
         >
             {/* Custom Dialog Header */}
@@ -261,11 +265,11 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                     px: 3,
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between'
+                    justifyContent: 'space-between',
                 }}
             >
-                <Box sx={{display: 'flex', alignItems: 'center'}}>
-                    <PersonAddIcon sx={{mr: 1.5}}/>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <PersonAddIcon sx={{ mr: 1.5 }} />
                     <Typography variant="h6" component="h2">
                         Convert to Patient
                     </Typography>
@@ -280,7 +284,7 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                         color: 'primary.contrastText',
                     }}
                 >
-                    <CloseIcon/>
+                    <CloseIcon />
                 </IconButton>
             </Paper>
 
@@ -290,16 +294,16 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                     severity={feedback.severity}
                     sx={{
                         borderRadius: 0,
-                        '& .MuiAlert-message': {width: '100%'}
+                        '& .MuiAlert-message': { width: '100%' },
                     }}
                     action={
                         <IconButton
                             aria-label="close"
                             color="inherit"
                             size="small"
-                            onClick={() => setFeedback(prev => ({...prev, show: false}))}
+                            onClick={() => setFeedback((prev) => ({ ...prev, show: false }))}
                         >
-                            <CloseIcon fontSize="inherit"/>
+                            <CloseIcon fontSize="inherit" />
                         </IconButton>
                     }
                 >
@@ -307,7 +311,7 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                 </Alert>
             </Fade>
 
-            <DialogContent sx={{px: 3, py: 3}}>
+            <DialogContent sx={{ px: 3, py: 3 }}>
                 {success ? (
                     <Box
                         sx={{
@@ -315,15 +319,20 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            minHeight: '300px'
+                            minHeight: '300px',
                         }}
                     >
-                        <CheckCircleIcon color="success" sx={{fontSize: 60}}/>
-                        <Typography variant="h6" sx={{mt: 2}}>
-                            {data.patient_id ? "Patient Updated" : "Patient Added"}
+                        <CheckCircleIcon color="success" sx={{ fontSize: 60 }} />
+                        <Typography variant="h6" sx={{ mt: 2 }}>
+                            {data.patient_id ? 'Patient Updated' : 'Patient Added'}
                         </Typography>
-                        <Typography variant="body1" color="text.secondary" sx={{mt: 1, textAlign: 'center'}}>
-                            The patient information has been successfully {data.patient_id ? "updated" : "added"}.
+                        <Typography
+                            variant="body1"
+                            color="text.secondary"
+                            sx={{ mt: 1, textAlign: 'center' }}
+                        >
+                            The patient information has been successfully{' '}
+                            {data.patient_id ? 'updated' : 'added'}.
                         </Typography>
                     </Box>
                 ) : loading ? (
@@ -333,22 +342,24 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            minHeight: '300px'
+                            minHeight: '300px',
                         }}
                     >
-                        <CircularProgress size={60} thickness={4}/>
-                        <Typography variant="body1" sx={{mt: 3}}>
-                            {step === 0 ? "Searching for patient records..." : "Processing your request..."}
+                        <CircularProgress size={60} thickness={4} />
+                        <Typography variant="body1" sx={{ mt: 3 }}>
+                            {step === 0
+                                ? 'Searching for patient records...'
+                                : 'Processing your request...'}
                         </Typography>
                     </Box>
                 ) : (
                     <>
                         {/* Step indicator with title */}
-                        <Box sx={{mb: 3}}>
-                            <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+                        <Box sx={{ mb: 3 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                 {icon}
-                                <Box sx={{ml: 1}}>
-                                    <Typography variant="subtitle1" sx={{fontWeight: 'medium'}}>
+                                <Box sx={{ ml: 1 }}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
                                         {title}
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
@@ -357,11 +368,7 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                                 </Box>
                             </Box>
 
-                            <Stepper
-                                activeStep={step}
-                                alternativeLabel
-                                sx={{mt: 3, mb: 2}}
-                            >
+                            <Stepper activeStep={step} alternativeLabel sx={{ mt: 3, mb: 2 }}>
                                 <Step key={0}>
                                     <StepLabel>ID/Passport</StepLabel>
                                 </Step>
@@ -370,13 +377,13 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                                 </Step>
                             </Stepper>
 
-                            <Divider/>
+                            <Divider />
                         </Box>
 
                         {/* Form content based on current step */}
-                        <Box sx={{minHeight: '300px'}}>
+                        <Box sx={{ minHeight: '300px' }}>
                             {step === 0 && (
-                                <Box sx={{maxWidth: '600px', mx: 'auto', py: 2}}>
+                                <Box sx={{ maxWidth: '600px', mx: 'auto', py: 2 }}>
                                     <PatientIdForm
                                         data={data}
                                         onChange={handleChange}
@@ -391,10 +398,10 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                                     <Typography
                                         variant="body2"
                                         color="text.secondary"
-                                        sx={{mt: 2, textAlign: 'center'}}
+                                        sx={{ mt: 2, textAlign: 'center' }}
                                     >
-                                        Enter the ID number or passport number to search for an existing patient record
-                                        or create a new one.
+                                        Enter the ID number or passport number to search for an
+                                        existing patient record or create a new one.
                                     </Typography>
                                 </Box>
                             )}
@@ -412,9 +419,9 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                 )}
             </DialogContent>
 
-            {!success && <Divider/>}
+            {!success && <Divider />}
 
-            <DialogActions sx={{px: 3, py: 2}}>
+            <DialogActions sx={{ px: 3, py: 2 }}>
                 {!success && (
                     <>
                         <Button
@@ -422,20 +429,20 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                             disabled={loading || processing}
                             variant="outlined"
                             color="inherit"
-                            startIcon={<CloseIcon/>}
+                            startIcon={<CloseIcon />}
                         >
                             Cancel
                         </Button>
 
-                        <Box sx={{flex: '1 1 auto'}}/>
+                        <Box sx={{ flex: '1 1 auto' }} />
 
                         {step > 0 && (
                             <Button
                                 onClick={back}
                                 disabled={loading || processing}
                                 variant="outlined"
-                                startIcon={<ArrowBackIcon/>}
-                                sx={{mr: 1}}
+                                startIcon={<ArrowBackIcon />}
+                                sx={{ mr: 1 }}
                             >
                                 Back
                             </Button>
@@ -445,10 +452,14 @@ const ConvertCustomerToPatientForm = ({time, open, onClose}) => {
                             onClick={next}
                             disabled={loading || processing}
                             variant="contained"
-                            color={step === 1 ? "success" : "primary"}
-                            endIcon={step === 0 ? <ArrowForwardIcon/> : <PersonAddIcon/>}
+                            color={step === 1 ? 'success' : 'primary'}
+                            endIcon={step === 0 ? <ArrowForwardIcon /> : <PersonAddIcon />}
                         >
-                            {step === 0 ? "Next" : (data.patient_id ? "Update Patient" : "Add Patient")}
+                            {step === 0
+                                ? 'Next'
+                                : data.patient_id
+                                  ? 'Update Patient'
+                                  : 'Add Patient'}
                         </Button>
                     </>
                 )}

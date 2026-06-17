@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { SnackbarProvider } from "notistack";
-import AlertComponent from "@/Components/AlertComponent";
-import AddButton from "@/Components/AddButton";
+import React, { useEffect, useState, useMemo } from 'react';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { SnackbarProvider } from 'notistack';
+import AlertComponent from '@/Components/AlertComponent';
+import AddButton from '@/Components/AddButton';
 import {
     Box,
     Paper,
@@ -17,24 +17,31 @@ import {
     alpha,
     Skeleton,
     Fade,
-} from "@mui/material";
+} from '@mui/material';
 import {
     TableRows as TableRowsIcon,
     Refresh as RefreshIcon,
     FilterList as FilterListIcon,
     Download as DownloadIcon,
     FilterListOff as FilterListOffIcon,
-} from "@mui/icons-material";
+} from '@mui/icons-material';
 
 /**
  * Enhanced empty data overlay with better visuals and clearer messaging
  */
 const CustomNoRowsOverlay = () => {
     return (
-        <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center", py: 5 }}>
+        <Stack sx={{ height: '100%', alignItems: 'center', justifyContent: 'center', py: 5 }}>
             <TableRowsIcon sx={{ fontSize: 48, color: 'text.secondary', opacity: 0.4, mb: 2 }} />
-            <Typography variant="h6" color="text.secondary" gutterBottom>No Records Found</Typography>
-            <Typography variant="body2" color="text.disabled" align="center" sx={{ maxWidth: 300, mx: 'auto' }}>
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+                No Records Found
+            </Typography>
+            <Typography
+                variant="body2"
+                color="text.disabled"
+                align="center"
+                sx={{ maxWidth: 300, mx: 'auto' }}
+            >
                 Try adjusting your search or filter criteria to find what you're looking for
             </Typography>
         </Stack>
@@ -46,24 +53,38 @@ const CustomNoRowsOverlay = () => {
  */
 const CustomLoadingOverlay = () => {
     return (
-        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, bgcolor: alpha('#fff', 0.7), zIndex: 2 }}>
+        <Box
+            sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                bgcolor: alpha('#fff', 0.7),
+                zIndex: 2,
+            }}
+        >
             <Box sx={{ position: 'sticky', top: 0, width: '100%' }}>
                 <LinearProgress color="primary" />
             </Box>
-            <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%'
-            }}>
-                <Box sx={{
+            <Box
+                sx={{
                     display: 'flex',
-                    flexDirection: 'column',
                     alignItems: 'center',
-                    p: 3,
-                    borderRadius: 2,
-                    minWidth: 200
-                }}>
+                    justifyContent: 'center',
+                    height: '100%',
+                }}
+            >
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        p: 3,
+                        borderRadius: 2,
+                        minWidth: 200,
+                    }}
+                >
                     <Box sx={{ mb: 2 }}>
                         <Skeleton variant="circular" width={40} height={40} />
                     </Box>
@@ -115,14 +136,14 @@ const TableLayout = ({
     status,
     addNew = false,
     onClickAddNew,
-    addNewTitle = "Add New",
+    addNewTitle = 'Add New',
     errors,
     processing = false,
     defaultValues = {
         filters: {},
         sort: { field: 'id', sort: 'desc' },
         pageSize: 10,
-        page: 1
+        page: 1,
     },
     showToolbar = false,
     onExport,
@@ -135,7 +156,13 @@ const TableLayout = ({
     const [success, setSuccess] = useState(null);
 
     // Merge caller-supplied defaultValues with safe fallbacks
-    defaultValues = { filters: {}, sort: { field: 'id', sort: 'desc' }, pageSize: 10, page: 1, ...defaultValues };
+    defaultValues = {
+        filters: {},
+        sort: { field: 'id', sort: 'desc' },
+        pageSize: 10,
+        page: 1,
+        ...defaultValues,
+    };
 
     const [filterOpen, setFilterOpen] = useState(Object.keys(defaultValues.filters).length > 0);
     const [paginationModel, setPaginationModel] = useState({
@@ -145,7 +172,7 @@ const TableLayout = ({
 
     // Process columns to ensure they're formatted correctly
     const processedColumns = useMemo(() => {
-        return columns.map(column => ({
+        return columns.map((column) => ({
             ...column,
             flex: column.flex !== undefined ? column.flex : 1,
             minWidth: column.minWidth || 100,
@@ -155,7 +182,7 @@ const TableLayout = ({
 
     const sortModel = useMemo(
         () => (defaultValues.sort?.field ? [defaultValues.sort] : []),
-        [defaultValues.sort?.field, defaultValues.sort?.sort]
+        [defaultValues.sort?.field, defaultValues.sort?.sort],
     );
 
     // Effect to handle success message
@@ -184,9 +211,10 @@ const TableLayout = ({
         });
     }, [data.current_page, defaultValues.page, defaultValues.pageSize]);
 
-    const resetSuccess = () => setTimeout(() => {
-        setSuccess(null);
-    }, 3000);
+    const resetSuccess = () =>
+        setTimeout(() => {
+            setSuccess(null);
+        }, 3000);
 
     // Handlers for pagination and filtering
     const handlePaginationChange = (pModel) => {
@@ -199,11 +227,17 @@ const TableLayout = ({
         if (pModel.pageSize !== paginationModel.pageSize) {
             reload(1, defaultValues.filters, defaultValues.sort, pModel.pageSize);
         } else {
-            reload(pModel.page + 1, defaultValues.filters, defaultValues.sort, paginationModel.pageSize);
+            reload(
+                pModel.page + 1,
+                defaultValues.filters,
+                defaultValues.sort,
+                paginationModel.pageSize,
+            );
         }
     };
 
-    const handleFilterChange = (filter) => () => reload(1, filter, defaultValues.sort, defaultValues.pageSize);
+    const handleFilterChange = (filter) => () =>
+        reload(1, filter, defaultValues.sort, defaultValues.pageSize);
 
     const handleSortChange = (sortModel) => {
         if (sortModel && sortModel.length > 0) {
@@ -219,7 +253,7 @@ const TableLayout = ({
                 defaultValues.page,
                 defaultValues.filters,
                 defaultValues.sort,
-                defaultValues.pageSize
+                defaultValues.pageSize,
             );
         }
     };
@@ -238,10 +272,13 @@ const TableLayout = ({
     const formattedTotal = data?.total ? data.total.toLocaleString() : '0';
     const currentPage = data?.current_page || 1;
     const pageSize = defaultValues?.pageSize || 10;
-    const startRecord = ((currentPage - 1) * pageSize) + 1;
+    const startRecord = (currentPage - 1) * pageSize + 1;
     const endRecord = Math.min(startRecord + pageSize - 1, data?.total || 0);
-    const recordRange = data?.total > 0 ? `${startRecord.toLocaleString()}–${endRecord.toLocaleString()}` : '0';
-    const activeFilterCount = Object.values(defaultValues.filters || {}).filter(v => v !== '' && v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0)).length;
+    const recordRange =
+        data?.total > 0 ? `${startRecord.toLocaleString()}–${endRecord.toLocaleString()}` : '0';
+    const activeFilterCount = Object.values(defaultValues.filters || {}).filter(
+        (v) => v !== '' && v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0),
+    ).length;
 
     return (
         <Fade in={true} timeout={300}>
@@ -260,9 +297,19 @@ const TableLayout = ({
                                 bgcolor: alpha(theme.palette.primary.main, 0.03),
                             }}
                         >
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    mb: 2,
+                                }}
+                            >
                                 <Typography variant="subtitle1" fontWeight={500}>
-                                    <FilterListIcon fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
+                                    <FilterListIcon
+                                        fontSize="small"
+                                        sx={{ mr: 1, verticalAlign: 'middle' }}
+                                    />
                                     Filter Records
                                 </Typography>
                                 <IconButton size="small" onClick={toggleFilter}>
@@ -270,7 +317,10 @@ const TableLayout = ({
                                 </IconButton>
                             </Box>
 
-                            <Filter defaultFilter={defaultValues.filters} onFilter={handleFilterChange} />
+                            <Filter
+                                defaultFilter={defaultValues.filters}
+                                onFilter={handleFilterChange}
+                            />
                         </Paper>
                     </Fade>
                 )}
@@ -284,7 +334,7 @@ const TableLayout = ({
                         overflow: 'hidden',
                         mb: 3,
                         transition: 'all 0.2s ease-in-out',
-                        ...customProps.containerSx
+                        ...customProps.containerSx,
                     }}
                 >
                     {/* Table Header */}
@@ -297,16 +347,22 @@ const TableLayout = ({
                             justifyContent: 'space-between',
                             borderBottom: '1px solid',
                             borderColor: 'divider',
-                            bgcolor: theme.palette.mode === 'light' ? 'grey.50' : alpha(theme.palette.background.default, 0.5),
+                            bgcolor:
+                                theme.palette.mode === 'light'
+                                    ? 'grey.50'
+                                    : alpha(theme.palette.background.default, 0.5),
                             flexWrap: { xs: 'wrap', md: 'nowrap' },
                             gap: 1,
                         }}
                     >
                         {/* Left: record count */}
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-                            <TableRowsIcon sx={{ color: 'text.disabled', fontSize: 18, flexShrink: 0 }} />
+                            <TableRowsIcon
+                                sx={{ color: 'text.disabled', fontSize: 18, flexShrink: 0 }}
+                            />
                             <Typography variant="body2" color="text.secondary" noWrap>
-                                Showing <strong>{recordRange}</strong> of <strong>{formattedTotal}</strong> records
+                                Showing <strong>{recordRange}</strong> of{' '}
+                                <strong>{formattedTotal}</strong> records
                             </Typography>
                         </Box>
 
@@ -315,13 +371,29 @@ const TableLayout = ({
                             {Filter && (
                                 <Button
                                     size="small"
-                                    variant={filterOpen ? 'contained' : activeFilterCount > 0 ? 'outlined' : 'text'}
+                                    variant={
+                                        filterOpen
+                                            ? 'contained'
+                                            : activeFilterCount > 0
+                                              ? 'outlined'
+                                              : 'text'
+                                    }
                                     color={activeFilterCount > 0 ? 'primary' : 'inherit'}
                                     onClick={toggleFilter}
-                                    startIcon={filterOpen ? <FilterListOffIcon fontSize="small" /> : <FilterListIcon fontSize="small" />}
+                                    startIcon={
+                                        filterOpen ? (
+                                            <FilterListOffIcon fontSize="small" />
+                                        ) : (
+                                            <FilterListIcon fontSize="small" />
+                                        )
+                                    }
                                     sx={{ textTransform: 'none', fontWeight: 500, minWidth: 90 }}
                                 >
-                                    {filterOpen ? 'Hide' : activeFilterCount > 0 ? `Filters (${activeFilterCount})` : 'Filters'}
+                                    {filterOpen
+                                        ? 'Hide'
+                                        : activeFilterCount > 0
+                                          ? `Filters (${activeFilterCount})`
+                                          : 'Filters'}
                                 </Button>
                             )}
 
@@ -334,7 +406,11 @@ const TableLayout = ({
 
                             {onExport && (
                                 <Tooltip title="Export">
-                                    <IconButton size="small" onClick={handleExport} disabled={loading || !data.total}>
+                                    <IconButton
+                                        size="small"
+                                        onClick={handleExport}
+                                        disabled={loading || !data.total}
+                                    >
                                         <DownloadIcon fontSize="small" />
                                     </IconButton>
                                 </Tooltip>
@@ -384,9 +460,10 @@ const TableLayout = ({
                                 display: 'none',
                             },
                             '.MuiDataGrid-columnHeader': {
-                                backgroundColor: theme.palette.mode === 'light'
-                                    ? theme.palette.grey[50]
-                                    : alpha(theme.palette.background.default, 0.5),
+                                backgroundColor:
+                                    theme.palette.mode === 'light'
+                                        ? theme.palette.grey[50]
+                                        : alpha(theme.palette.background.default, 0.5),
                                 fontWeight: 600,
                                 fontSize: '0.875rem',
                                 lineHeight: '1.5',
@@ -401,35 +478,41 @@ const TableLayout = ({
                                 transition: 'background-color 0.2s ease',
                             },
                             '.MuiDataGrid-row.even-row': {
-                                backgroundColor: theme.palette.mode === 'light'
-                                    ? alpha(theme.palette.background.default, 0.4)
-                                    : alpha(theme.palette.background.paper, 0.2),
+                                backgroundColor:
+                                    theme.palette.mode === 'light'
+                                        ? alpha(theme.palette.background.default, 0.4)
+                                        : alpha(theme.palette.background.paper, 0.2),
                             },
                             '.MuiDataGrid-row.odd-row': {
-                                backgroundColor: theme.palette.mode === 'light'
-                                    ? theme.palette.background.paper
-                                    : theme.palette.background.paper,
+                                backgroundColor:
+                                    theme.palette.mode === 'light'
+                                        ? theme.palette.background.paper
+                                        : theme.palette.background.paper,
                             },
                             '.MuiDataGrid-row:hover': {
-                                backgroundColor: theme.palette.mode === 'light'
-                                    ? alpha(theme.palette.primary.main, 0.04)
-                                    : alpha(theme.palette.primary.main, 0.12),
+                                backgroundColor:
+                                    theme.palette.mode === 'light'
+                                        ? alpha(theme.palette.primary.main, 0.04)
+                                        : alpha(theme.palette.primary.main, 0.12),
                             },
                             '.MuiDataGrid-row.Mui-selected': {
-                                backgroundColor: theme.palette.mode === 'light'
-                                    ? alpha(theme.palette.primary.main, 0.08)
-                                    : alpha(theme.palette.primary.main, 0.16),
+                                backgroundColor:
+                                    theme.palette.mode === 'light'
+                                        ? alpha(theme.palette.primary.main, 0.08)
+                                        : alpha(theme.palette.primary.main, 0.16),
                                 '&:hover': {
-                                    backgroundColor: theme.palette.mode === 'light'
-                                        ? alpha(theme.palette.primary.main, 0.12)
-                                        : alpha(theme.palette.primary.main, 0.24),
+                                    backgroundColor:
+                                        theme.palette.mode === 'light'
+                                            ? alpha(theme.palette.primary.main, 0.12)
+                                            : alpha(theme.palette.primary.main, 0.24),
                                 },
                             },
                             '.MuiDataGrid-footerContainer': {
                                 borderTop: `1px solid ${theme.palette.divider}`,
-                                backgroundColor: theme.palette.mode === 'light'
-                                    ? theme.palette.grey[50]
-                                    : alpha(theme.palette.background.default, 0.5),
+                                backgroundColor:
+                                    theme.palette.mode === 'light'
+                                        ? theme.palette.grey[50]
+                                        : alpha(theme.palette.background.default, 0.5),
                             },
                             '.MuiTablePagination-root': {
                                 color: theme.palette.text.secondary,
@@ -443,7 +526,7 @@ const TableLayout = ({
                                 fontSize: '0.75rem',
                                 letterSpacing: '0.5px',
                             },
-                            ...customProps.sx
+                            ...customProps.sx,
                         }}
                         {...props}
                     />

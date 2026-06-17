@@ -1,28 +1,16 @@
-import React, {useState, useCallback, useMemo, useEffect} from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import {
-    List,
-    ListItem,
-    IconButton,
-    TextField,
-    Box,
-    Typography,
-    Stack
-} from '@mui/material';
-import {
-    Add as AddIcon,
-    Delete as DeleteIcon
-} from '@mui/icons-material';
-import {makeId} from "@/Services/helper";
-
+import { List, ListItem, IconButton, TextField, Box, Typography, Stack } from '@mui/material';
+import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { makeId } from '@/Services/helper';
 
 const ConditionsField = ({
-                             onChange,
-                             name,
-                             defaultValue = [],
-                             errors = {},
-                             label = 'Conditions'
-                         }) => {
+    onChange,
+    name,
+    defaultValue = [],
+    errors = {},
+    label = 'Conditions',
+}) => {
     const [conditions, setConditions] = useState(defaultValue);
 
     useEffect(() => {
@@ -33,41 +21,45 @@ const ConditionsField = ({
         const newCondition = {
             id: makeId(6),
             condition: '',
-            value: ''
+            value: '',
         };
 
         const updatedConditions = [...conditions, newCondition];
 
         setConditions(updatedConditions);
-        onChange({target: {name, value: updatedConditions}});
+        onChange({ target: { name, value: updatedConditions } });
     }, [conditions, name, onChange]);
 
-    const handleDelete = useCallback((id) => {
-        const updatedConditions = conditions.filter(condition => condition.id !== id);
+    const handleDelete = useCallback(
+        (id) => {
+            const updatedConditions = conditions.filter((condition) => condition.id !== id);
 
-        setConditions(updatedConditions);
-        onChange({target: {name, value: updatedConditions}});
-    }, [conditions, name, onChange]);
+            setConditions(updatedConditions);
+            onChange({ target: { name, value: updatedConditions } });
+        },
+        [conditions, name, onChange],
+    );
 
-    const handleChange = useCallback((id) => (e) => {
-        const {name: fieldName, value} = e.target;
+    const handleChange = useCallback(
+        (id) => (e) => {
+            const { name: fieldName, value } = e.target;
 
-        const updatedConditions = conditions.map(condition =>
-            condition.id === id
-                ? {...condition, [fieldName]: value}
-                : condition
-        );
+            const updatedConditions = conditions.map((condition) =>
+                condition.id === id ? { ...condition, [fieldName]: value } : condition,
+            );
 
-        setConditions(updatedConditions);
-        onChange({target: {name, value: updatedConditions}});
-    }, [conditions, name, onChange]);
+            setConditions(updatedConditions);
+            onChange({ target: { name, value: updatedConditions } });
+        },
+        [conditions, name, onChange],
+    );
 
     const getFieldError = useMemo(() => {
         return (id) => errors[id];
     }, [errors]);
 
     return (
-        <Box sx={{width: '100%'}}>
+        <Box sx={{ width: '100%' }}>
             <Typography variant="subtitle1" gutterBottom>
                 {label}
             </Typography>
@@ -80,7 +72,7 @@ const ConditionsField = ({
                             alignItems: 'center',
                             gap: 2,
                             paddingX: 0,
-                            paddingY: 1
+                            paddingY: 1,
                         }}
                         disableGutters
                     >
@@ -89,7 +81,7 @@ const ConditionsField = ({
                             spacing={2}
                             sx={{
                                 flexGrow: 1,
-                                alignItems: 'center'
+                                alignItems: 'center',
                             }}
                         >
                             <TextField
@@ -118,7 +110,7 @@ const ConditionsField = ({
                                 size="small"
                                 edge="end"
                             >
-                                <DeleteIcon/>
+                                <DeleteIcon />
                             </IconButton>
                         </Stack>
                     </ListItem>
@@ -127,16 +119,12 @@ const ConditionsField = ({
                 <ListItem
                     sx={{
                         justifyContent: 'center',
-                        paddingY: 1
+                        paddingY: 1,
                     }}
                     disableGutters
                 >
-                    <IconButton
-                        onClick={handleAdd}
-                        color="primary"
-                        aria-label="Add condition"
-                    >
-                        <AddIcon/>
+                    <IconButton onClick={handleAdd} color="primary" aria-label="Add condition">
+                        <AddIcon />
                     </IconButton>
                 </ListItem>
             </List>
@@ -147,11 +135,13 @@ const ConditionsField = ({
 ConditionsField.propTypes = {
     onChange: PropTypes.func.isRequired,
     name: PropTypes.string.isRequired,
-    defaultValue: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.string,
-        condition: PropTypes.string,
-        value: PropTypes.string,
-    })),
+    defaultValue: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.string,
+            condition: PropTypes.string,
+            value: PropTypes.string,
+        }),
+    ),
     errors: PropTypes.object,
     label: PropTypes.string,
 };
