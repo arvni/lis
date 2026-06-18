@@ -132,7 +132,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Gates on errors only; warnings (no-unused-vars, exhaustive-deps, ...)
-      # are intentionally non-blocking. Use --max-warnings to tighten later.
+      # Ratchet: 0 errors, and warnings capped at the current count so they
+      # can't creep back up. Remaining warnings are all react-hooks/
+      # exhaustive-deps (behavioral). Lower this number as they're addressed.
       - name: Run ESLint
-        run: npm run lint
+        run: npm run lint -- --max-warnings 114
