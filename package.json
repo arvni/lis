@@ -15,7 +15,7 @@
         "@inertiajs/react": "^2.0.0",
         "@vitejs/plugin-react": "^4.3.0",
         "autoprefixer": "^10.4.12",
-        "axios": "1.8.2",
+        "axios": "^1.18.0",
         "concurrently": "^9.0.1",
         "depcheck": "^1.4.7",
         "eslint": "^9.39.4",
@@ -37,7 +37,6 @@
         "@dnd-kit/utilities": "^3.2.2",
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.0",
-        "@inertiajs/progress": "^0.2.7",
         "@mui/icons-material": "^9.0.0",
         "@mui/lab": "^9.0.0-beta.2",
         "@mui/material": "^9.0.0",
@@ -69,7 +68,6 @@
         "swr": "^2.3.3",
         "use-image": "^1.1.1",
         "uuid": "^11.1.0",
-        "uuidv4": "^6.2.13",
         "xlsx": "^0.18.5"
     }
 }

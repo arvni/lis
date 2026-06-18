@@ -37,7 +37,6 @@ import {
     Help as HelpIcon,
 } from '@mui/icons-material';
 import { Link, router, useRemember, Head, usePage } from '@inertiajs/react';
-import { InertiaProgress } from '@inertiajs/progress';
 
 import routesFunction from '@/routes';
 import ChangePassword from '@/Pages/User/Components/ChangePassword';
@@ -49,13 +48,8 @@ import Header from './Components/Header';
 import Notification from './Components/Notification';
 import ConnectionCheck from './Components/ConnectionCheck';
 
-// Initialize Inertia Progress Bar
-InertiaProgress.init({
-    delay: 100,
-    color: '#29d',
-    includeCSS: true,
-    showSpinner: true,
-});
+// Progress bar is configured via createInertiaApp's `progress` option in app.jsx
+// (Inertia 2 built-in), so the legacy @inertiajs/progress init is not needed.
 
 // Create a responsive theme
 const createAppTheme = (mode = 'light') =>
