@@ -221,7 +221,10 @@ const AddForm = ({ open, onClose, patientId }) => {
                                                 InputLabel: { shrink: true },
                                                 input: { min: formattedDate },
                                             }}
-                                            error={errors.hasOwnProperty('dueDate')}
+                                            error={Object.prototype.hasOwnProperty.call(
+                                                errors,
+                                                'dueDate',
+                                            )}
                                             helperText={errors?.dueDate}
                                         />
                                     </FormGroup>

@@ -15,7 +15,7 @@ const PatientMetaForm = ({ data, onChange, errors }) => {
                     name={'profession'}
                     label={'Profession'}
                     onChange={onChange}
-                    error={errors.hasOwnProperty('profession')}
+                    error={Object.prototype.hasOwnProperty.call(errors, 'profession')}
                     helperText={errors?.profession}
                 />
             </Grid>
@@ -26,7 +26,7 @@ const PatientMetaForm = ({ data, onChange, errors }) => {
                     name={'company'}
                     label={'Company'}
                     onChange={onChange}
-                    error={errors.hasOwnProperty('company')}
+                    error={Object.prototype.hasOwnProperty.call(errors, 'company')}
                     helperText={errors?.company}
                 />
             </Grid>
@@ -38,7 +38,7 @@ const PatientMetaForm = ({ data, onChange, errors }) => {
                     label={'Email'}
                     type={'email'}
                     onChange={onChange}
-                    error={errors.hasOwnProperty('email')}
+                    error={Object.prototype.hasOwnProperty.call(errors, 'email')}
                     helperText={errors?.email}
                 />
             </Grid>

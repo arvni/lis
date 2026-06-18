@@ -27,8 +27,6 @@ const Form = ({ defaultValues, open, onClose, id, withRelative = false, mainPati
     const { data, setData, errors, post, reset } = useForm(initialData);
 
     useEffect(() => {
-        if (withRelative && mainPatientId && mainPatientId !== '') {
-        }
         setData((prevData) => ({
             ...prevData,
             patient_id: mainPatientId,

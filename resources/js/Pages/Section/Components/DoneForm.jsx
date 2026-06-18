@@ -145,7 +145,7 @@ const WorkflowActionForm = ({
                                 id: acceptanceItemState?.patient?.id,
                             })}
                             onChange={handleFileParameter}
-                            error={errors.hasOwnProperty(item.name)}
+                            error={Object.prototype.hasOwnProperty.call(errors, item.name)}
                             helperText={errors[item.name] ?? null}
                             required={item.required}
                         />
@@ -213,7 +213,7 @@ const WorkflowActionForm = ({
                         type={item.type}
                         value={item?.value ?? ''}
                         onChange={handleParametersChange}
-                        error={errors.hasOwnProperty(item.name)}
+                        error={Object.prototype.hasOwnProperty.call(errors, item.name)}
                         helperText={errors[item.name] ?? null}
                         required={item.required}
                         variant="outlined"
@@ -391,7 +391,7 @@ const WorkflowActionForm = ({
                     <Box sx={{ mb: 3 }}>
                         <FormControl
                             fullWidth
-                            error={errors.hasOwnProperty('next')}
+                            error={Object.prototype.hasOwnProperty.call(errors, 'next')}
                             sx={{
                                 mb: 3,
                                 '& .MuiOutlinedInput-root': {
@@ -403,7 +403,7 @@ const WorkflowActionForm = ({
                             }}
                         >
                             <InputLabel
-                                error={errors.hasOwnProperty('next')}
+                                error={Object.prototype.hasOwnProperty.call(errors, 'next')}
                                 id="next-section-label"
                                 sx={{
                                     fontWeight: 'medium',
@@ -412,7 +412,7 @@ const WorkflowActionForm = ({
                                 Return to Section *
                             </InputLabel>
                             <Select
-                                error={errors.hasOwnProperty('next')}
+                                error={Object.prototype.hasOwnProperty.call(errors, 'next')}
                                 onChange={handleChange}
                                 name="next"
                                 value={acceptanceItemState.next}
@@ -432,7 +432,7 @@ const WorkflowActionForm = ({
                                     </MenuItem>
                                 ))}
                             </Select>
-                            {errors.hasOwnProperty('next') && (
+                            {Object.prototype.hasOwnProperty.call(errors, 'next') && (
                                 <FormHelperText error>{errors.next}</FormHelperText>
                             )}
                         </FormControl>
@@ -445,10 +445,10 @@ const WorkflowActionForm = ({
                             label="Rejection Details *"
                             rows={4}
                             required
-                            error={errors.hasOwnProperty('details')}
+                            error={Object.prototype.hasOwnProperty.call(errors, 'details')}
                             value={acceptanceItemState.details || ''}
                             helperText={
-                                errors.hasOwnProperty('details')
+                                Object.prototype.hasOwnProperty.call(errors, 'details')
                                     ? errors.details
                                     : 'Please provide detailed reasons for rejecting this section'
                             }

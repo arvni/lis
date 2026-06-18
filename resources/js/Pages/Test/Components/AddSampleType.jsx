@@ -45,7 +45,10 @@ const AddSampleType = ({ open, onClose, sampleType, onChange, setSampleType }) =
                             url={route('api.sampleTypes.list')}
                             label="Sample Type"
                             fullWidth
-                            error={sampleTypeErrors.hasOwnProperty('sample_type')}
+                            error={Object.prototype.hasOwnProperty.call(
+                                sampleTypeErrors,
+                                'sample_type',
+                            )}
                             helperText={sampleTypeErrors.sample_type}
                             name="sample_type"
                             onChange={sampleTypeChange}
@@ -68,12 +71,18 @@ const AddSampleType = ({ open, onClose, sampleType, onChange, setSampleType }) =
                     </Grid>
                     <Grid size={{ xs: 12 }}>
                         <FormControl
-                            error={sampleTypeErrors.hasOwnProperty('description')}
+                            error={Object.prototype.hasOwnProperty.call(
+                                sampleTypeErrors,
+                                'description',
+                            )}
                             fullWidth
                             variant="outlined"
                         >
                             <InputLabel
-                                error={sampleTypeErrors.hasOwnProperty('description')}
+                                error={Object.prototype.hasOwnProperty.call(
+                                    sampleTypeErrors,
+                                    'description',
+                                )}
                                 id="description"
                                 variant="outlined"
                             >
@@ -83,10 +92,18 @@ const AddSampleType = ({ open, onClose, sampleType, onChange, setSampleType }) =
                                 multiline
                                 onChange={sampleTypeChange}
                                 value={sampleType.description}
-                                error={sampleTypeErrors.hasOwnProperty('description')}
+                                error={Object.prototype.hasOwnProperty.call(
+                                    sampleTypeErrors,
+                                    'description',
+                                )}
                                 name="description"
                             />
-                            <FormHelperText error={sampleTypeErrors.hasOwnProperty('description')}>
+                            <FormHelperText
+                                error={Object.prototype.hasOwnProperty.call(
+                                    sampleTypeErrors,
+                                    'description',
+                                )}
+                            >
                                 {sampleTypeErrors.description}
                             </FormHelperText>
                         </FormControl>
