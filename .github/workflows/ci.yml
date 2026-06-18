@@ -115,3 +115,24 @@ jobs:
 
       - name: Run PHPStan
         run: php -d memory_limit=1G vendor/bin/phpstan analyse --no-progress
+
+  lint:
+    name: Lint (ESLint)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Gates on errors only; warnings (no-unused-vars, exhaustive-deps, ...)
+      # are intentionally non-blocking. Use --max-warnings to tighten later.
+      - name: Run ESLint
+        run: npm run lint
