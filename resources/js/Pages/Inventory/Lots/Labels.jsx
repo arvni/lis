@@ -39,7 +39,9 @@ const LotLabel = ({ lot }) => {
                     fontSize: 9,
                     margin: 0,
                 });
-            } catch (_) {}
+            } catch (_) {
+                /* ignore label render errors */
+            }
         }
     }, [barcodeValue]);
 

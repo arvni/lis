@@ -131,7 +131,8 @@ const PatientForm = ({ onChange, data, errors, editable = true, withRelative = f
     const handleAvatarChange = ({ data }) => onChange({ target: { name: 'avatar', value: data } });
 
     // Helper function to check if a field has an error
-    const hasError = (fieldName) => !!errors && errors.hasOwnProperty(fieldName);
+    const hasError = (fieldName) =>
+        !!errors && Object.prototype.hasOwnProperty.call(errors, fieldName);
 
     // Omani nationals must provide second and third names
     const isOmani = data?.nationality?.code === 'OM';

@@ -175,7 +175,7 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
                                     InputLabel: { shrink: true },
                                     input: { min: formattedDate },
                                 }}
-                                error={errors.hasOwnProperty('dueDate')}
+                                error={Object.prototype.hasOwnProperty.call(errors, 'dueDate')}
                                 helperText={errors?.dueDate}
                             />
                         </FormGroup>

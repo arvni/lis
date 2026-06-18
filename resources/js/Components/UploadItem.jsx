@@ -231,7 +231,11 @@ const UploadItem = ({
     }
 
     // Success state (default) - Regular display of uploaded file with actions
-    if (value?.id || value?.hasOwnProperty('id') || status === 'success') {
+    if (
+        value?.id ||
+        (value != null && Object.prototype.hasOwnProperty.call(value, 'id')) ||
+        status === 'success'
+    ) {
         // Handle tag selection
         const handleTagSelect = (event) => {
             const newTag = event.target.value;

@@ -124,7 +124,7 @@ const AddSection = ({ open, onClose, sectionWorkflow, onChange, setSectionWorkfl
                             onChange={sectionGroupChange}
                             label="Section Group"
                             fullWidth
-                            error={sectionErrors.hasOwnProperty('section')}
+                            error={Object.prototype.hasOwnProperty.call(sectionErrors, 'section')}
                             name="sectionGroup"
                             url={route('api.sectionGroups.list')}
                         />
@@ -139,7 +139,10 @@ const AddSection = ({ open, onClose, sectionWorkflow, onChange, setSectionWorkfl
                                 defaultData={{
                                     section_group_id: sectionWorkflow?.section?.sectionGroup?.id,
                                 }}
-                                error={sectionErrors.hasOwnProperty('section')}
+                                error={Object.prototype.hasOwnProperty.call(
+                                    sectionErrors,
+                                    'section',
+                                )}
                                 name="section"
                                 url={route('api.sections.list')}
                             />
@@ -179,16 +182,28 @@ const AddSection = ({ open, onClose, sectionWorkflow, onChange, setSectionWorkfl
                                     label="Parameter Title"
                                     fullWidth
                                     error={
-                                        parameterErrors.hasOwnProperty('name') ||
-                                        sectionErrors.hasOwnProperty('parameters')
+                                        Object.prototype.hasOwnProperty.call(
+                                            parameterErrors,
+                                            'name',
+                                        ) ||
+                                        Object.prototype.hasOwnProperty.call(
+                                            sectionErrors,
+                                            'parameters',
+                                        )
                                     }
                                     name="name"
                                     onChange={changeParameter}
                                     value={parameter.name}
                                     helperText={
-                                        parameterErrors.hasOwnProperty('name')
+                                        Object.prototype.hasOwnProperty.call(
+                                            parameterErrors,
+                                            'name',
+                                        )
                                             ? parameterErrors.name
-                                            : sectionErrors.hasOwnProperty('parameters')
+                                            : Object.prototype.hasOwnProperty.call(
+                                                    sectionErrors,
+                                                    'parameters',
+                                                )
                                               ? sectionErrors.parameters
                                               : ''
                                     }
@@ -206,7 +221,10 @@ const AddSection = ({ open, onClose, sectionWorkflow, onChange, setSectionWorkfl
                                             <OutlinedInput
                                                 value={parameter.type}
                                                 label="Parameter Type"
-                                                error={parameterErrors.hasOwnProperty('type')}
+                                                error={Object.prototype.hasOwnProperty.call(
+                                                    parameterErrors,
+                                                    'type',
+                                                )}
                                             />
                                         }
                                         name="type"
@@ -220,8 +238,16 @@ const AddSection = ({ open, onClose, sectionWorkflow, onChange, setSectionWorkfl
                                         <MenuItem value="options">Options</MenuItem>
                                         <MenuItem value="file">File</MenuItem>
                                     </Select>
-                                    <FormHelperText error={parameterErrors.hasOwnProperty('type')}>
-                                        {parameterErrors.hasOwnProperty('type')
+                                    <FormHelperText
+                                        error={Object.prototype.hasOwnProperty.call(
+                                            parameterErrors,
+                                            'type',
+                                        )}
+                                    >
+                                        {Object.prototype.hasOwnProperty.call(
+                                            parameterErrors,
+                                            'type',
+                                        )
                                             ? parameterErrors.type
                                             : ''}
                                     </FormHelperText>
@@ -234,16 +260,28 @@ const AddSection = ({ open, onClose, sectionWorkflow, onChange, setSectionWorkfl
                                         label={<span>Please Enter Options</span>}
                                         fullWidth
                                         error={
-                                            parameterErrors.hasOwnProperty('options') ||
-                                            sectionErrors.hasOwnProperty('parameters')
+                                            Object.prototype.hasOwnProperty.call(
+                                                parameterErrors,
+                                                'options',
+                                            ) ||
+                                            Object.prototype.hasOwnProperty.call(
+                                                sectionErrors,
+                                                'parameters',
+                                            )
                                         }
                                         name="options"
                                         onChange={changeParameter}
                                         value={parameter.options}
                                         helperText={
-                                            parameterErrors.hasOwnProperty('options')
+                                            Object.prototype.hasOwnProperty.call(
+                                                parameterErrors,
+                                                'options',
+                                            )
                                                 ? parameterErrors.options
-                                                : sectionErrors.hasOwnProperty('parameters')
+                                                : Object.prototype.hasOwnProperty.call(
+                                                        sectionErrors,
+                                                        'parameters',
+                                                    )
                                                   ? sectionErrors.parameters
                                                   : "separate options with ';'"
                                         }

@@ -67,7 +67,7 @@ const DoneForm = ({ open, onClose, acceptanceItemState, onChange, onSubmit, opti
                             id: acceptanceItemState.patient.id,
                         })}
                         onChange={handleFileParameter}
-                        error={errors.hasOwnProperty(item.name)}
+                        error={Object.prototype.hasOwnProperty.call(errors, item.name)}
                         helperText={errors[item.name] ?? null}
                         required={item.required}
                     />
@@ -107,7 +107,7 @@ const DoneForm = ({ open, onClose, acceptanceItemState, onChange, onSubmit, opti
                         type={item.type === 'number' ? item.type : 'text'}
                         value={item?.value ?? ''}
                         onChange={handleParametersChange}
-                        error={errors.hasOwnProperty(item.name)}
+                        error={Object.prototype.hasOwnProperty.call(errors, item.name)}
                         helperText={errors[item.name] ?? null}
                         required={item.required}
                     />
@@ -140,15 +140,18 @@ const DoneForm = ({ open, onClose, acceptanceItemState, onChange, onSubmit, opti
                         </Grid>
                     ))}
                     <Grid size={12}>
-                        <FormControl fullWidth error={errors.hasOwnProperty('next')}>
+                        <FormControl
+                            fullWidth
+                            error={Object.prototype.hasOwnProperty.call(errors, 'next')}
+                        >
                             <InputLabel
-                                error={errors.hasOwnProperty('next')}
+                                error={Object.prototype.hasOwnProperty.call(errors, 'next')}
                                 id={'next-section-label'}
                             >
                                 Return to Section
                             </InputLabel>
                             <Select
-                                error={errors.hasOwnProperty('next')}
+                                error={Object.prototype.hasOwnProperty.call(errors, 'next')}
                                 onChange={handleChange}
                                 name={'next'}
                                 value={acceptanceItemState.nextId}
@@ -162,8 +165,10 @@ const DoneForm = ({ open, onClose, acceptanceItemState, onChange, onSubmit, opti
                                     </MenuItem>
                                 ))}
                             </Select>
-                            {errors.hasOwnProperty('next') ? (
-                                <FormHelperText error={errors.hasOwnProperty('next')}>
+                            {Object.prototype.hasOwnProperty.call(errors, 'next') ? (
+                                <FormHelperText
+                                    error={Object.prototype.hasOwnProperty.call(errors, 'next')}
+                                >
                                     {errors.next}
                                 </FormHelperText>
                             ) : null}
@@ -177,9 +182,13 @@ const DoneForm = ({ open, onClose, acceptanceItemState, onChange, onSubmit, opti
                             onChange={handleChange}
                             label={'Reject Details'}
                             rows={4}
-                            error={errors.hasOwnProperty('details')}
+                            error={Object.prototype.hasOwnProperty.call(errors, 'details')}
                             value={acceptanceItemState.details}
-                            helperText={errors.hasOwnProperty('details') ? errors.details : ''}
+                            helperText={
+                                Object.prototype.hasOwnProperty.call(errors, 'details')
+                                    ? errors.details
+                                    : ''
+                            }
                         />
                     </Grid>
                 </Grid>
