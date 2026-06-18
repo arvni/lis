@@ -327,7 +327,12 @@ class SectionGroupService
     {
         $user = auth()->user();
         $sectionRoutes = "user-$user->id-section-routes";
-        $extractedRoutes = $this->extractRoutes(cache()->get($sectionRoutes));
+        // Populate on a cold cache (same value the HandleInertiaRequests
+        // middleware caches) so this never receives null and works for any
+        // caller, not just web requests that ran the middleware first.
+        $extractedRoutes = $this->extractRoutes(
+            cache()->rememberForever($sectionRoutes, fn() => $this->getTransformedSectionGroups())
+        );
         $sections = [];
         $sectionGroups = [];
         foreach ($extractedRoutes as $route) {

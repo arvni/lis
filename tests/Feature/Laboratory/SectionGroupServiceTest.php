@@ -123,6 +123,19 @@ class SectionGroupServiceTest extends TestCase
         $this->assertSame(['5'], $sections);
     }
 
+    public function test_get_permitted_ids_handles_cold_cache(): void
+    {
+        // Regression: a missing cache entry used to pass null to extractRoutes()
+        // and throw a TypeError; it must now self-populate and return arrays.
+        Gate::before(fn () => true);
+        Cache::forget("user-{$this->user->id}-section-routes");
+
+        [$groups, $sections] = app(SectionGroupService::class)->getPermittedIds();
+
+        $this->assertIsArray($groups);
+        $this->assertIsArray($sections);
+    }
+
     // ── Nested / transformed trees (real DB) ─────────────────────────────────────
 
     public function test_get_all_nested_section_groups_returns_top_level(): void
