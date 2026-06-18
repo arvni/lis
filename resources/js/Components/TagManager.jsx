@@ -88,6 +88,7 @@ const TagManager = ({ initialTags = [], updateUrl, entityType, onSuccess }) => {
                             const color = tagData?.color;
                             return (
                                 <Chip
+                                    key={option ?? index}
                                     label={option}
                                     size="small"
                                     sx={{

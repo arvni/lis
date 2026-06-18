@@ -154,6 +154,7 @@ const Index = () => {
                 getActions: (params) => {
                     let cols = [
                         <GridActionsCellItem
+                            key="Edit"
                             icon={<EditIcon />}
                             label="Edit"
                             onClick={editApprovalFlow(params.row.id)}

@@ -333,13 +333,14 @@ const ReactPaintMUI = ({ defaultImage = null, onChange = () => {} }) => {
                 case 'rectangle':
                     ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
                     break;
-                case 'circle':
+                case 'circle': {
                     const radius = Math.sqrt(
                         Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2),
                     );
                     ctx.arc(start.x, start.y, radius, 0, 2 * Math.PI);
                     break;
-                case 'diamond':
+                }
+                case 'diamond': {
                     const diamondRadius = Math.sqrt(
                         Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2),
                     );
@@ -350,7 +351,8 @@ const ReactPaintMUI = ({ defaultImage = null, onChange = () => {} }) => {
                     ctx.lineTo(start.x - halfDiamond, start.y);
                     ctx.closePath();
                     break;
-                case 'triangle':
+                }
+                case 'triangle': {
                     const triangleRadius = Math.sqrt(
                         Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2),
                     );
@@ -360,6 +362,7 @@ const ReactPaintMUI = ({ defaultImage = null, onChange = () => {} }) => {
                     ctx.lineTo(start.x + triangleRadius / 2, start.y + triangleHeight / 2);
                     ctx.closePath();
                     break;
+                }
                 default:
                     break;
             }

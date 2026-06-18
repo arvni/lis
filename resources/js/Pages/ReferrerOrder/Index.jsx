@@ -113,12 +113,14 @@ const Index = () => {
             sortable: false,
             getActions: (params) => [
                 <GridActionsCellItem
+                    key="View Details"
                     icon={<RemoveRedEye />}
                     label="View Details"
                     onClick={handleViewOrder(params.row.id)}
                     showInMenu={false}
                 />,
                 <GridActionsCellItem
+                    key="View Report"
                     icon={<Assignment />}
                     label="View Report"
                     onClick={handleViewReport(params.row.id)}

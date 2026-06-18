@@ -84,6 +84,7 @@ const Index = ({ auth, canEditAll }) => {
             getActions: (params) => {
                 let cols = [
                     <GridActionsCellItem
+                        key="Show"
                         icon={<RemoveRedEye />}
                         label="Show"
                         onClick={showReport(params.row.id)}

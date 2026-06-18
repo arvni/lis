@@ -44,11 +44,13 @@ const Index = ({ consultants, status, errors, success, requestInputs }) => {
             sortable: false,
             getActions: (params) => [
                 <GridActionsCellItem
+                    key="Edit"
                     icon={<EditIcon />}
                     label="Edit"
                     onClick={edit(params.row.id)}
                 />,
                 <GridActionsCellItem
+                    key="Delete"
                     icon={<DeleteIcon />}
                     label="Delete"
                     onClick={destroy(params.row)}
