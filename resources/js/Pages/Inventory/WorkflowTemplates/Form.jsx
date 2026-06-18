@@ -266,7 +266,7 @@ const WorkflowTemplateForm = () => {
         setLocalSteps(withOrder);
         setData(
             'steps',
-            withOrder.map(({ _user, approver_type, _id, ...rest }) => rest),
+            withOrder.map(({ _user, approver_type: _approver_type, _id, ...rest }) => rest),
         );
     };
 

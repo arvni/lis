@@ -34,7 +34,7 @@ const DoneForm = ({ open, onClose, acceptanceItemState, onChange, onSubmit, opti
         parameters[parameterIndex] = { ...parameters[parameterIndex], value };
         onChange('parameters', parameters);
     };
-    const handleChange = (e, v) => {
+    const handleChange = (e, _v) => {
         onChange(e.target.name, e.target.value);
     };
     const [errors, setErrors] = useState({});

@@ -44,7 +44,7 @@ FileTypeIcon.propTypes = {
     fileType: PropTypes.string,
 };
 
-const GenericFileViewer = ({ fileUrl, fileType, fileName, fileSize, onDownload }) => {
+const GenericFileViewer = ({ _fileUrl, fileType, fileName, fileSize, onDownload }) => {
     return (
         <Box
             sx={{

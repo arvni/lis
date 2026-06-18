@@ -41,7 +41,13 @@ export default [
             'unused-imports/no-unused-imports': 'warn',
             'unused-imports/no-unused-vars': [
                 'warn',
-                { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' },
+                {
+                    vars: 'all',
+                    varsIgnorePattern: '^_',
+                    args: 'after-used',
+                    argsIgnorePattern: '^_',
+                    caughtErrors: 'none',
+                },
             ],
             'react/no-unescaped-entities': 'warn',
             'react/no-children-prop': 'warn',

@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import DeleteForm from '@/Components/DeleteForm';
 
-const SampleTypeCard = ({ id, text, index, findCard, sampleType, onEdit, onDelete, ...props }) => {
+const SampleTypeCard = ({ id, text: _text, index: _index, findCard: _findCard, sampleType, onEdit, onDelete, ...props }) => {
     const [openDelete, setOpenDelete] = useState(false);
     const handleDelete = () => setOpenDelete(true);
     const closeOpenDelete = () => setOpenDelete(false);

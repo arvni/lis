@@ -112,7 +112,7 @@ const Index = ({ auth, canEditAll }) => {
 
     const editReport = (id) => () => get(route('reports.edit', id));
 
-    const showReport = (id) => (e) => get(route('reports.show', id));
+    const showReport = (id) => (_e) => get(route('reports.show', id));
     const pageReload = (page, filters, sort, pageSize) => {
         router.visit(route('reports.index'), {
             data: { page, filters, sort, pageSize },

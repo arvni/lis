@@ -75,7 +75,7 @@ function TabPanel({ children, value, index, ...other }) {
 }
 
 // Patient Card Component
-const PatientCard = ({ patient, index, isMultiple, onSelectPatient, mainPatientID }) => {
+const PatientCard = ({ patient, _index, _isMultiple, onSelectPatient, mainPatientID }) => {
     const formatDate = (dateString) => {
         if (!dateString) return 'Not specified';
         try {
@@ -258,7 +258,7 @@ const PatientCard = ({ patient, index, isMultiple, onSelectPatient, mainPatientI
 };
 
 // Test Order Item Component
-const TestOrderItem = ({ orderItem, index }) => {
+const TestOrderItem = ({ orderItem, _index }) => {
     const [expanded, setExpanded] = useState(true);
 
     const formatDate = (dateString) => {

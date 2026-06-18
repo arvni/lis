@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid';
 import PropTypes from 'prop-types';
 
 const renderElement = (value, level) =>
-    function renderItem(key, index) {
+    function renderItem(key, _index) {
         level += 1;
         if (typeof value[key] != 'object')
             return (

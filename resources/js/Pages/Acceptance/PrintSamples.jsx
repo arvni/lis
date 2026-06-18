@@ -67,7 +67,7 @@ const printStyles = `
 `;
 
 // ─── Styled components ──────────────────────────────────────────
-const PageContainer = styled(Paper)(({ theme }) => ({
+const PageContainer = styled(Paper)(({ _theme }) => ({
     width: A5_WIDTH,
     minHeight: A5_HEIGHT,
     margin: 'auto',

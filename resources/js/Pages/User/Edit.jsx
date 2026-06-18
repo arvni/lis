@@ -4,7 +4,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Snackbar, Alert } from '@mui/material';
 
-const EditUser = ({ user, errors: serverErrors, auth }) => {
+const EditUser = ({ user, errors: serverErrors, _auth }) => {
     // Initialize form with user data and method
     const { data, setData, post, processing, reset } = useForm({
         ...user,

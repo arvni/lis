@@ -22,7 +22,7 @@ const A5_WIDTH = '148mm';
 const A5_HEIGHT = '210mm';
 
 // Styled components optimized for A5 paper
-const InvoiceContainer = styled(Paper)(({ theme }) => ({
+const InvoiceContainer = styled(Paper)(({ _theme }) => ({
     width: A5_WIDTH,
     maxHeight: A5_HEIGHT,
     margin: 'auto',

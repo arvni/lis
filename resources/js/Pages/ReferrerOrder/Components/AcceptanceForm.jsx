@@ -92,7 +92,7 @@ const AcceptanceFormDialog = ({
     initialData = {},
     errors = {},
     onSubmit,
-    setData,
+    _setData,
     maxDiscount = 0,
     requestedTests = [],
     existingAcceptanceId = null,

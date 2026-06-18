@@ -46,7 +46,7 @@ const EMPTY_PARAM = { name: '', type: '', index: null, required: true };
 
 /* ── Small helpers ─────────────────────────────────────────────────── */
 
-const StepLabel = ({ icon: Icon, number, children }) => (
+const StepLabel = ({ icon: _Icon, number, children }) => (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
         <Box
             sx={{

@@ -85,13 +85,13 @@ const formatDate = (date) => {
  */
 const Show = ({
     report,
-    status,
+    _status,
     history,
     signers,
     canApprove,
     canEdit,
     canPrint,
-    canPublish,
+    _canPublish,
     canUnpublish,
     clinicalCommentTemplateUrl,
 }) => {

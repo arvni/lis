@@ -33,7 +33,7 @@ const WeeklySchedule = ({ data = Array(7).fill([]), onChange, onDeleteTimeSlot }
     const [openAdd, setOpenAdd] = useState(false);
 
     const handleAddNewTimeSlot = (index) => () => {
-        setTimeSlot((prevState) => ({ ...defaultTimeSlot, id: Date.now(), day: index }));
+        setTimeSlot((_prevState) => ({ ...defaultTimeSlot, id: Date.now(), day: index }));
         setOpenAdd(true);
     };
 
