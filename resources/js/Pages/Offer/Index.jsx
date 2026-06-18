@@ -3,6 +3,7 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { Box, Button, Chip, Tooltip, Typography } from '@mui/material';
 import { GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import PercentIcon from '@mui/icons-material/Percent';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -237,6 +238,13 @@ const OffersIndex = () => {
                             icon={<EditIcon />}
                             label="Edit"
                             onClick={handleEditOffer(params.row.id)}
+                            showInMenu
+                        />,
+                        <GridActionsCellItem
+                            key={`delete-${params.row.id}`}
+                            icon={<DeleteIcon color="error" />}
+                            label="Delete"
+                            onClick={handleDeleteOffer(params.row.id)}
                             showInMenu
                         />,
                     ];

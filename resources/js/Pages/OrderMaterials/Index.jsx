@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import { GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import TableLayout from '@/Layouts/TableLayout';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import DeleteForm from '@/Components/DeleteForm';
@@ -134,23 +135,30 @@ const OrderMaterialsIndex = () => {
                 width: 100,
                 display: 'flex',
                 getActions: (params) => {
-                    return [
-                        params.row.status === 'PROCESSED' ? (
+                    if (params.row.status === 'PROCESSED') {
+                        return [
                             <GridActionsCellItem
                                 key={`print-${params.row.id}`}
                                 icon={<PrintIcon />}
                                 label="Print"
                                 href={route('orderMaterials.print', params.row.id)}
                                 target="_blank"
-                            />
-                        ) : (
-                            <GridActionsCellItem
-                                key={`edit-${params.row.id}`}
-                                icon={<EditIcon />}
-                                label="Edit"
-                                onClick={handleEditOrderMaterial(params.row.id)}
-                            />
-                        ),
+                            />,
+                        ];
+                    }
+                    return [
+                        <GridActionsCellItem
+                            key={`edit-${params.row.id}`}
+                            icon={<EditIcon />}
+                            label="Edit"
+                            onClick={handleEditOrderMaterial(params.row.id)}
+                        />,
+                        <GridActionsCellItem
+                            key={`delete-${params.row.id}`}
+                            icon={<DeleteIcon color="error" />}
+                            label="Delete"
+                            onClick={handleDeleteOrderMaterial(params.row.id)}
+                        />,
                     ];
                 },
             },
