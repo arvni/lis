@@ -35,6 +35,17 @@ class RequestFormController extends Controller
         return Inertia::render('RequestForm/Index', compact("requestForms", "requestInputs"));
     }
 
+    /**
+     * Display a printable (blank) request form.
+     * @throws AuthorizationException
+     */
+    public function show(RequestForm $requestForm): Response
+    {
+        $this->authorize("view", $requestForm);
+        $requestForm->load("tests", "document");
+        return Inertia::render('RequestForm/Show', compact("requestForm"));
+    }
+
 
     /**
      * Store a newly created resource in storage.

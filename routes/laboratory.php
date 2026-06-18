@@ -47,7 +47,7 @@ Route::group(["prefix" => "laboratory"], function () {
         ->name("reportTemplates.export-parameters");
     Route::get("tests/export", ExportTestsController::class)->name("tests.export");
     Route::resource("tests", TestController::class)->except("show");
-    Route::resource("requestForms", RequestFormController::class)->except("edit", "show");
+    Route::resource("requestForms", RequestFormController::class)->except("edit");
     Route::resource("consentForms", ConsentFormController::class)->except("edit", "show");
     Route::resource("instructions", InstructionController::class)->except("edit", "show");
 });

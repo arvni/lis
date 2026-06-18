@@ -3,6 +3,7 @@ import DeleteForm from '@/Components/DeleteForm';
 import { GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PrintIcon from '@mui/icons-material/Print';
 import { useCallback, useMemo, useState } from 'react';
 import { Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -124,6 +125,12 @@ const Index = () => {
                             icon={<EditIcon />}
                             label="Edit"
                             onClick={editRequestForm(row.id)}
+                        />,
+                        <GridActionsCellItem
+                            key="Print"
+                            icon={<PrintIcon />}
+                            label="Print"
+                            onClick={printRequestForm(row.id)}
                         />,
                     ];
                     if (row?.document?.id || row?.document?.hash)
