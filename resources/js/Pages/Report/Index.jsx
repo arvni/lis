@@ -8,7 +8,7 @@ import { Head, router, useForm, usePage } from '@inertiajs/react';
 import PageHeader from '@/Components/PageHeader.jsx';
 
 const Index = ({ auth, canEditAll }) => {
-    const { post, setData, reset, processing, get } = useForm();
+    const { processing, get } = useForm();
     const columns = [
         {
             field: 'acceptance_item.patient.fullName',

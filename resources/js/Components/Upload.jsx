@@ -515,7 +515,7 @@ const Upload = ({
 
             try {
                 // Call API to update the tag
-                const response = await axios.patch(`${url}/${fileToUpdate.serverData.id}`, {
+                await axios.patch(`${url}/${fileToUpdate.serverData.id}`, {
                     tag: newTag,
                 });
 

@@ -285,11 +285,6 @@ const WorkflowProgress = ({ approvals, canAct, prId, users }) => {
                             const isPending = approval.status === 'PENDING';
                             const isApproved = approval.status === 'APPROVED';
                             const isRejected = approval.status === 'REJECTED';
-                            const stepColor = isApproved
-                                ? 'success'
-                                : isRejected
-                                  ? 'error'
-                                  : 'inherit';
                             const isActive = idx === activeIdx;
 
                             return (
@@ -605,9 +600,6 @@ const Show = () => {
 
     const histories = pr.histories ?? [];
     const currentStatus = pr.status;
-
-    const qtyRemaining = (line) =>
-        Math.max(0, parseFloat(line.qty) - parseFloat(line.qty_received ?? 0));
 
     return (
         <>

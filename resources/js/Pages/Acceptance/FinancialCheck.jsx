@@ -265,10 +265,6 @@ const FinancialCheck = () => {
         });
     }, []);
 
-    const handleChange = (key, value) => {
-        setData((previousData) => ({ ...previousData, [key]: value }));
-    };
-
     const handleCancel = () => {
         setOpenEditForm(false);
         reset();

@@ -56,8 +56,8 @@ const ApproveForm = ({
     processing = false,
 }) => {
     const [activeTab, setActiveTab] = useState(0);
-    const [errors, setErrors] = useState({});
-    const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+    const [, setErrors] = useState({});
+    const [, setHasAttemptedSubmit] = useState(false);
     const [clinicalDocumentMode, setClinicalDocumentMode] = useState('upload'); // 'upload' or 'select'
 
     const isUpdateMode = Boolean(data?.approver);

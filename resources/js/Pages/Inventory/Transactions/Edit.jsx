@@ -86,7 +86,7 @@ const emptyLine = () => ({
 });
 
 const TransactionEdit = () => {
-    const { transaction, transactionTypes, stores, success, status } = usePage().props;
+    const { transaction, stores, success, status } = usePage().props;
 
     const { data, setData, put, processing, errors } = useForm({
         transaction_date: transaction.transaction_date ?? '',

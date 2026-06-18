@@ -52,7 +52,7 @@ const getRelationshipIcon = (_relationship, _gender) => {
     return <PersonIcon fontSize="small" />;
 };
 
-const RelativeForm = ({ relatives = [], patientId, edit = false, canEdit = false }) => {
+const RelativeForm = ({ relatives = [], patientId, edit = false }) => {
     const { data, setData, post, processing, reset, errors, setError } = useForm({
         avatar: '',
         firstName: '',

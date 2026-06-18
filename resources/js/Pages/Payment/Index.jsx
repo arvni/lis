@@ -11,7 +11,6 @@ const PaymentIndex = () => {
     const { payments, status, success, requestInputs, canDelete } = usePage().props;
 
     // State management
-    const [loading, setLoading] = useState(false);
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const { data, setData, post, processing, reset } = useForm();
 

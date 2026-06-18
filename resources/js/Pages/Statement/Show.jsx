@@ -50,7 +50,6 @@ const StatementShow = () => {
         // Columns: 0=# 1=InvoiceNo 2=RegDate 3=Patient 4=Codes 5=Names 6=Gross 7=Discounts 8=Net 9=ReportDate
         // Meta: Customer+StatNo span cols 0-5 | Statement Date above col 8 | Total Samples above col 9
         // Summary: below cols 7-9 (label | value | currency)
-        const COLS = 10;
         const html = `
 <html xmlns:o="urn:schemas-microsoft-com:office:office"
       xmlns:x="urn:schemas-microsoft-com:office:excel"

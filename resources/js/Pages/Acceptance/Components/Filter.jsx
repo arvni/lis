@@ -18,7 +18,6 @@ import {
     FormControlLabel,
     Checkbox,
     ListItemText,
-    useTheme,
 } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';
@@ -66,7 +65,6 @@ const Filter = ({ defaultFilter, onFilter }) => {
     const [reportDateError, setReportDateError] = useState('');
     const [publishedAtError, setPublishedAtError] = useState('');
     const [activeFilters, setActiveFilters] = useState(0);
-    const theme = useTheme();
     const today = new Date().toISOString().split('T')[0];
 
     // Count active filters for better UX

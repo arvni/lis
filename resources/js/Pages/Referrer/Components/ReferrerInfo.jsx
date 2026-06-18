@@ -8,12 +8,7 @@ import Grid from '@mui/material/Grid';
 import Divider from '@mui/material/Divider';
 import LogisticsMap from '@/Components/LogisticsMap';
 
-const ReferrerInfo = ({
-    referrer,
-    defaultExpanded = true,
-    showDocuments = false,
-    viewReferrer = false,
-}) => {
+const ReferrerInfo = ({ referrer, defaultExpanded = true }) => {
     return (
         <Accordion defaultExpanded={defaultExpanded}>
             <AccordionSummary

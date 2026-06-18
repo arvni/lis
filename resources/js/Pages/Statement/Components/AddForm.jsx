@@ -73,7 +73,7 @@ const AddForm = ({ open, defaultValue = {}, onClose, editMode = false, title }) 
     const [success, setSuccess] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [validationErrors, setValidationErrors] = useState({});
-    const [filterStatus, setFilterStatus] = useState('all');
+    const [, setFilterStatus] = useState('all');
 
     // Re-initialise when dialog opens / defaultValue changes
     useEffect(() => {
@@ -247,7 +247,7 @@ const AddForm = ({ open, defaultValue = {}, onClose, editMode = false, title }) 
             : route('statements.store');
 
         transform((d) => {
-            const { month, issue_date, ...rest } = d;
+            const { month: _month, issue_date: _issue_date, ...rest } = d;
             return { ...rest, _method: defaultValue.id ? 'PUT' : 'POST' };
         });
 

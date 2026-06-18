@@ -42,7 +42,7 @@ const ConsultationForm = ({ patientId, embedded = false, _onNext }) => {
     const today = new Date();
     const formattedDate = formatDate(today);
 
-    const { data, setData, reset, processing, post, errors, setError } = useForm({
+    const { data, setData, processing, post, errors, setError } = useForm({
         consultant: null,
         dueDate: formattedDate,
         time: null, // Keep this but don't require it

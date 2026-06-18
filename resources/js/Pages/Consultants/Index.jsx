@@ -21,7 +21,7 @@ const breadCrumbs = [
 ];
 
 const Index = ({ consultants, status, errors, success, requestInputs }) => {
-    const { setData, data, post, processing, reset, setError } = useForm();
+    const { setData, post, processing, reset } = useForm();
     const [open, setOpen] = useState(false);
     const columns = [
         {

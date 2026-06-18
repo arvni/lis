@@ -6,7 +6,7 @@ import { Snackbar, Alert } from '@mui/material';
 
 const Add = ({ errors: initialErrors }) => {
     // Form state initialization with default values
-    const { data, setData, post, processing, reset } = useForm({
+    const { data, setData, post, processing } = useForm({
         name: '',
         username: '',
         mobile: '',

@@ -139,18 +139,6 @@ const StyledTable = styled(Table)(({ theme }) => ({
     },
 }));
 
-const InfoLabel = styled(Typography)({
-    fontWeight: 'bold',
-    display: 'inline',
-    fontSize: '0.72rem',
-    color: '#555',
-});
-
-const InfoValue = styled(Typography)({
-    display: 'inline',
-    fontSize: '0.72rem',
-});
-
 const FooterBox = styled(Box)(({ theme }) => ({
     marginTop: theme.spacing(1.5),
     textAlign: 'center',
@@ -161,13 +149,6 @@ const FooterBox = styled(Box)(({ theme }) => ({
 }));
 
 // ─── Helpers ────────────────────────────────────────────────────
-const InfoItem = ({ label, value }) => (
-    <Box sx={{ display: 'inline-flex', mr: 2, mb: 0.3 }}>
-        <InfoLabel component="span">{label}:&nbsp;</InfoLabel>
-        <InfoValue component="span">{value || 'N/A'}</InfoValue>
-    </Box>
-);
-
 const formatDate = (dateString) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', {

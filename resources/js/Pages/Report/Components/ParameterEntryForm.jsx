@@ -59,7 +59,7 @@ function a11yProps(index) {
     };
 }
 
-const TemplateParameters = ({ data, setData, errors = {} }) => {
+const TemplateParameters = ({ data, setData }) => {
     const [tabValue, setTabValue] = useState(0);
     const [showTabs, setShowTabs] = useState(false);
 

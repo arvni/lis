@@ -700,7 +700,7 @@ const Show = ({ referrerOrder, errors = {} }) => {
         return 'success';
     };
 
-    const { id: patientID, ...patient } = referrerOrder?.orderInformation?.patient || {};
+    const { id: _patientID, ...patient } = referrerOrder?.orderInformation?.patient || {};
     // Use patients array if available, otherwise fall back to single patient object
     const patients =
         referrerOrder?.orderInformation?.patients?.length > 0

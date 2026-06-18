@@ -248,10 +248,6 @@ const InvoiceIndex = () => {
     };
 
     // Form handlers
-    const handleChange = (key, value) => {
-        setData((previousData) => ({ ...previousData, [key]: value }));
-    };
-
     const handleCancel = () => {
         setOpenEditForm(false);
         reset();

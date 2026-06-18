@@ -28,7 +28,7 @@ const AddForm = ({ open, onClose, defaultData: defaultData }) => {
 };
 
 const FormContent = () => {
-    const { data, setData, errors, processing } = useFormState();
+    const { data, setData, errors } = useFormState();
     const handleChange = (e) =>
         setData((prevState) => ({ ...prevState, [e.target.name]: e.target.value }));
     const handleActiveChange = (_, v) => setData((prevValues) => ({ ...prevValues, active: v }));

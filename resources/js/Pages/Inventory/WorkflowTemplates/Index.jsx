@@ -23,18 +23,6 @@ import StarIcon from '@mui/icons-material/Star';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
 
-const StepBadge = ({ step }) => {
-    const label = step.approver_user ? step.approver_user.name : (step.approver_role ?? '—');
-    return (
-        <Chip
-            label={label}
-            size="small"
-            variant="outlined"
-            sx={{ mr: 0.5, mb: 0.5, fontSize: '0.7rem' }}
-        />
-    );
-};
-
 const WorkflowTemplatesIndex = () => {
     const { templates, success, status } = usePage().props;
 

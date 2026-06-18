@@ -252,12 +252,6 @@ const OptimizedInvoiceReceipt = ({ acceptance, onPrint, showLogo }) => {
         });
     };
 
-    const formatPaymentDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toISOString().split('T')[0]; // YYYY-MM-DD format
-    };
-
     return (
         <>
             <Box sx={{ position: 'relative' }}>

@@ -17,7 +17,7 @@ import { AssignmentInd as ConsultantIcon } from '@mui/icons-material';
 
 const Add = ({ errors: initialErrors, _auth }) => {
     // Form state initialization with default values and predefined schedule
-    const { data, setData, post, processing, reset, progress } = useForm({
+    const { data, setData, post, processing, progress } = useForm({
         name: '',
         title: '',
         active: true,

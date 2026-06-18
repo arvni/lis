@@ -493,7 +493,6 @@ const Dashboard = ({
     showSystemHealth = true,
     enableAutoHide = true,
     refreshButtonText = 'Refresh',
-    customMetricConfigs = {},
     className,
     ...props
 }) => {
