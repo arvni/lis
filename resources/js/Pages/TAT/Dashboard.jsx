@@ -101,17 +101,6 @@ const PriorityChip = ({ priority }) => {
     return <Chip label={cfg.label} color={cfg.color} size="small" variant="filled" />;
 };
 
-const StatusChip = ({ status }) => {
-    const map = {
-        waiting: { label: 'Waiting', color: 'default' },
-        processing: { label: 'Processing', color: 'info' },
-        finished: { label: 'Finished', color: 'success' },
-        rejected: { label: 'Rejected', color: 'error' },
-    };
-    const cfg = map[status] ?? { label: status ?? 'Unknown', color: 'default' };
-    return <Chip label={cfg.label} color={cfg.color} size="small" variant="outlined" />;
-};
-
 const TATBar = ({ pct, isBreached }) => {
     const color = isBreached ? 'error' : pct >= 70 ? 'warning' : 'success';
     return (

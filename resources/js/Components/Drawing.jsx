@@ -564,20 +564,11 @@ const PedigreeChart = ({
     });
     const [isLoading, setIsLoading] = useState(false);
     const [showGrid, setShowGrid] = useState(true);
-    const [viewportControls, setViewportControls] = useState({ zoomLevel: 1, fitView: false });
+    const [viewportControls] = useState({ zoomLevel: 1, fitView: false });
 
     // Use React Flow hooks
-    const {
-        project,
-        getNodes,
-        getEdges,
-        deleteElements,
-        fitView,
-        zoomIn,
-        zoomOut,
-        getZoom,
-        setViewport,
-    } = useReactFlow();
+    const { project, getNodes, getEdges, deleteElements, fitView, zoomIn, zoomOut } =
+        useReactFlow();
 
     // Get the currently selected elements
     const selectedNodes = useMemo(() => nodes.filter((n) => n.selected), [nodes]);
@@ -1020,7 +1011,6 @@ const PedigreeChart = ({
 
                 // Simple layout - place root nodes at top level
                 const newNodes = [...nodes];
-                const levelHeight = 150;
                 const nodeWidth = 120;
 
                 // Place root nodes

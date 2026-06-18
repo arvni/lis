@@ -93,7 +93,7 @@ const formatDate = (dateString) => {
     }
 };
 
-const Show = ({ consultant, patient, consultation, status, canEdit }) => {
+const Show = ({ consultant, patient, consultation, _status, canEdit }) => {
     const { data, setData, post, processing, reset } = useForm({
         information: {
             report: '',

@@ -153,7 +153,7 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
     };
 
     // Navigate to a specific cell from search results
-    const goToCell = (rowIndex, colIndex) => {
+    const goToCell = (_rowIndex, _colIndex) => {
         // We could implement scrolling to the specific cell here
         // For now, just close the search to make sure the table is visible
         setShowSearch(false);

@@ -69,7 +69,7 @@ const drawElements = (ctx, elements, selectedElementIds, defaultPenSize, default
 };
 
 // Draw a single element
-const drawElement = (ctx, element, selectedElementIds, defaultPenSize, defaultFillColor) => {
+const drawElement = (ctx, element, selectedElementIds, defaultPenSize, _defaultFillColor) => {
     ctx.beginPath();
     const isSelected = selectedElementIds.includes(element.id);
     ctx.strokeStyle = isSelected ? 'magenta' : element.color || '#000';

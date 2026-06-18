@@ -12,7 +12,7 @@ import { Button, Tooltip } from '@mui/material';
 import { Visibility as VisibilityIcon } from '@mui/icons-material';
 
 const Add = ({ patients, acceptanceItem, templates, history, test, method }) => {
-    const { post, data, setData, reset, processing } = useForm({
+    const { post, data, setData } = useForm({
         reported_document: null,
         report_template: null,
         parameters: {},

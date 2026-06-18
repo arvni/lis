@@ -22,7 +22,7 @@ const A5_WIDTH = '148mm';
 const A5_HEIGHT = '210mm';
 
 // Styled components optimized for A5 paper
-const InvoiceContainer = styled(Paper)(({ theme }) => ({
+const InvoiceContainer = styled(Paper)(({ _theme }) => ({
     width: A5_WIDTH,
     maxHeight: A5_HEIGHT,
     margin: 'auto',
@@ -250,12 +250,6 @@ const OptimizedInvoiceReceipt = ({ acceptance, onPrint, showLogo }) => {
             day: 'numeric',
             year: 'numeric',
         });
-    };
-
-    const formatPaymentDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toISOString().split('T')[0]; // YYYY-MM-DD format
     };
 
     return (

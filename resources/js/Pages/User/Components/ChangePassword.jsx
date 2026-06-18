@@ -14,7 +14,7 @@ import { enqueueSnackbar } from 'notistack';
 import Grid from '@mui/material/Grid';
 
 const ChangePassword = ({ open, onClose, currentNeeded = true, userId }) => {
-    const { data, setData, setError, errors, reset, post } = useForm({
+    const { data, setData, errors, reset, post } = useForm({
         current: '',
         userId: currentNeeded ? null : userId,
         password: '',

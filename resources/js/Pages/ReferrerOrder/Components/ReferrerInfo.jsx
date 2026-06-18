@@ -7,12 +7,7 @@ import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
 import Divider from '@mui/material/Divider';
 
-const ReferrerInfo = ({
-    referrer,
-    defaultExpanded = true,
-    showDocuments = false,
-    viewReferrer = false,
-}) => {
+const ReferrerInfo = ({ referrer, defaultExpanded = true }) => {
     return (
         <Accordion defaultExpanded={defaultExpanded}>
             <AccordionSummary

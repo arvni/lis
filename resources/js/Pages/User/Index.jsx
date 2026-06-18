@@ -22,7 +22,7 @@ const breadCrumbs = [
 ];
 
 const Index = ({ users, status, errors, success, requestInputs }) => {
-    const { setData, data, post, processing, reset, setError } = useForm();
+    const { setData, post, processing, reset } = useForm();
     const [open, setOpen] = useState(false);
     const [openChangePassword, setOpenChangePassword] = useState(false);
     const columns = [

@@ -46,13 +46,13 @@ const getRelationshipColor = (relationship) => {
 };
 
 // Utility function to get the relationship icon
-const getRelationshipIcon = (relationship, gender) => {
+const getRelationshipIcon = (_relationship, _gender) => {
     // This would be better with actual icons for each relationship type
     // For simplicity, we're just returning a person icon for now
     return <PersonIcon fontSize="small" />;
 };
 
-const RelativeForm = ({ relatives = [], patientId, edit = false, canEdit = false }) => {
+const RelativeForm = ({ relatives = [], patientId, edit = false }) => {
     const { data, setData, post, processing, reset, errors, setError } = useForm({
         avatar: '',
         firstName: '',
@@ -91,7 +91,7 @@ const RelativeForm = ({ relatives = [], patientId, edit = false, canEdit = false
         setOpen(true);
     };
 
-    const destroy = (index) => (e) => {
+    const destroy = (index) => (_e) => {
         setData((prevData) => ({
             ...prevData,
             ...relatives[index],

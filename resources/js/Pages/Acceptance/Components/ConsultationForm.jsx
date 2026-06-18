@@ -26,7 +26,7 @@ import PersonIcon from '@mui/icons-material/Person';
 // Components
 import SelectSearch from '@/Components/SelectSearch';
 
-const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
+const ConsultationForm = ({ patientId, embedded = false, _onNext }) => {
     const [times, setTimes] = useState([]);
     const [waiting, setWaiting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -42,7 +42,7 @@ const ConsultationForm = ({ patientId, embedded = false, onNext }) => {
     const today = new Date();
     const formattedDate = formatDate(today);
 
-    const { data, setData, reset, processing, post, errors, setError } = useForm({
+    const { data, setData, processing, post, errors, setError } = useForm({
         consultant: null,
         dueDate: formattedDate,
         time: null, // Keep this but don't require it

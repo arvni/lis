@@ -51,7 +51,7 @@ const PublishForm = ({ open, onCancel, acceptance }) => {
     const [showRecipients, setShowRecipients] = useState(true);
     const [publishSuccess, setPublishSuccess] = useState(false);
 
-    const { data, setData, post, errors, processing, wasSuccessful } = useForm({
+    const { data, setData, post, errors, processing } = useForm({
         _method: 'put',
         silently_publish: false,
     });

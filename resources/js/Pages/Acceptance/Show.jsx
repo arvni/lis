@@ -155,7 +155,7 @@ const PRIORITY_CONFIG = {
 };
 
 const PriorityChanger = ({ acceptance, canUpdatePriority }) => {
-    const [open, setOpen] = React.useState(false);
+    const [, setOpen] = React.useState(false);
     const cfg = PRIORITY_CONFIG[acceptance.priority ?? 'routine'] ?? PRIORITY_CONFIG.routine;
     const Icon = cfg.icon;
 

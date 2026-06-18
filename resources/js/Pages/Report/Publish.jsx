@@ -24,37 +24,9 @@ const BREADCRUMBS = [
 ];
 
 // Helper function to get report status
-const getReportStatus = (report) => {
-    if (report.published_at) {
-        return { status: 'published', color: 'success', label: 'Published' };
-    }
-    if (report.approved_at) {
-        return { status: 'approved', color: 'info', label: 'Ready to Publish' };
-    }
-    return { status: 'pending', color: 'warning', label: 'Pending' };
-};
-
-// Helper function to get delivery methods
-const getDeliveryMethods = (report) => {
-    const methods = [];
-    const howReport = report.acceptance_item?.acceptance?.howReport;
-
-    if (howReport?.whatsapp) {
-        methods.push({ type: 'whatsapp', icon: <WhatsApp />, color: '#25D366' });
-    }
-    if (howReport?.email) {
-        methods.push({ type: 'email', icon: <Email />, color: '#1976d2' });
-    }
-    if (howReport?.sendToReferrer) {
-        methods.push({ type: 'referrer', icon: <Person />, color: '#9c27b0' });
-    }
-
-    return methods;
-};
-
 const PublishingQueue = () => {
     // Destructure page props
-    const { acceptances, status, errors, success, requestInputs, canEdit, stats } = usePage().props;
+    const { acceptances, status, errors, success, requestInputs, canEdit } = usePage().props;
 
     const [openPublishForm, setOpenPublishForm] = useState(false);
     const [selectedAcceptance, setSelectedAcceptance] = useState(null);

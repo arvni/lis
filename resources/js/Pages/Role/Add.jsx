@@ -2,8 +2,8 @@ import AddForm from './Components/Form';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
 
-const Add = ({ permissions, ...props }) => {
-    const { data, setData, post, processing } = useForm({ name: '', permissions: [] });
+const Add = ({ permissions, ..._props }) => {
+    const { data, setData, post } = useForm({ name: '', permissions: [] });
     const handleSubmit = () => post(route('roles.store'));
     const handleCancel = () => router.visit(route('roles.index'));
     return (

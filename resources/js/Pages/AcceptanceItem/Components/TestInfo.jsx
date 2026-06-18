@@ -27,13 +27,7 @@ import {
     TimelineSeparator,
 } from '@mui/lab';
 
-const TestInfo = ({
-    method,
-    test,
-    defaultExpanded = true,
-    showSections = true,
-    showParameters = true,
-}) => {
+const TestInfo = ({ method, test, defaultExpanded = true, showSections = true }) => {
     const theme = useTheme();
 
     return (

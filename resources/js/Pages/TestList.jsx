@@ -223,7 +223,7 @@ const MethodsList = ({ methodTests = [], testType }) => {
 
     return (
         <Stack spacing={1} direction="row">
-            {methodTests.slice(0, 2).map((methodTest, index) => (
+            {methodTests.slice(0, 2).map((methodTest, _index) => (
                 <MethodDisplay key={methodTest.id} method={methodTest.method} testType={testType} />
             ))}
             {methodTests.length > 2 && (

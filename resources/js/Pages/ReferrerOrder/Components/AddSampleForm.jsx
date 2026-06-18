@@ -40,7 +40,7 @@ const Form = ({
 }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [expandedRows, setExpandedRows] = useState({});
-    const { data, setData, errors, reset } = useForm({ barcodes });
+    const { data, setData, reset } = useForm({ barcodes });
 
     // Initialize barcodes with selectedItems for pooling mode
     useEffect(() => {

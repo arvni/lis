@@ -122,7 +122,7 @@ const ConvertCustomerToPatientForm = ({ time, open, onClose }) => {
                 onClose();
                 reset();
             },
-            onError: (errors) => {
+            onError: (_errors) => {
                 setLoading(false);
                 setFeedback({
                     show: true,

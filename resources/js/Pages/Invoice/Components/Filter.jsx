@@ -176,10 +176,6 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
         onFilter({})();
     }, [onFilter]);
 
-    const handleClearDate = useCallback((fieldName) => {
-        setFilters((prevState) => ({ ...prevState, [fieldName]: null }));
-    }, []);
-
     const handleKeyPress = useCallback(
         (e) => {
             if (e.key === 'Enter' && !dateError) {

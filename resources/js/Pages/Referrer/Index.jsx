@@ -154,14 +154,6 @@ const ReferrersIndex = () => {
     );
 
     // Breadcrumbs definition
-    const breadCrumbs = [
-        {
-            title: 'Referrers',
-            link: null,
-            icon: null,
-        },
-    ];
-
     return (
         <>
             <Head title="Referrers" />

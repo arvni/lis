@@ -12,7 +12,7 @@ import { Stack } from '@mui/material';
 import { Head, router, useForm } from '@inertiajs/react';
 
 const Edit = ({ acceptance, maxDiscount = 100, errors, canAddPrescription = false }) => {
-    const { data, setData, post, setError, clearErrors, reset } = useForm({
+    const { data, setData, setError, clearErrors, reset } = useForm({
         ...acceptance,
         _method: 'put',
     });

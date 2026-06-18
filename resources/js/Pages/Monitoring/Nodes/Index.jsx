@@ -65,7 +65,7 @@ const LevelBar = ({ value, max = 100, color = 'primary' }) => {
 };
 
 const NodesIndex = () => {
-    const { nodes, success, status } = usePage().props;
+    const { nodes } = usePage().props;
     const theme = useTheme();
     const [search, setSearch] = useState('');
 

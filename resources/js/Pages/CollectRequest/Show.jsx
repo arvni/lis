@@ -81,7 +81,7 @@ const Show = () => {
     const temperatureData = useMemo(() => {
         if (!collectRequest?.logistic_information?.temperature_logs) return [];
 
-        return collectRequest.logistic_information.temperature_logs.map((log, index) => ({
+        return collectRequest.logistic_information.temperature_logs.map((log, _index) => ({
             time: new Date(log.timestamp).toLocaleTimeString('en-US', {
                 hour: '2-digit',
                 minute: '2-digit',

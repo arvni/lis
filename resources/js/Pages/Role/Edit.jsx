@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
 
 const Edit = ({ permissions, role }) => {
-    const { data, setData, post, processing } = useForm({ ...role, _method: 'put' });
+    const { data, setData, post } = useForm({ ...role, _method: 'put' });
     const handleSubmit = () => post(route('roles.update', role.id));
     const handleCancel = () => router.visit(route('roles.index'));
     return (
