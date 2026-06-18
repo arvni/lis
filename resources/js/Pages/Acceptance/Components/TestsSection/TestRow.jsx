@@ -266,7 +266,9 @@ const TestRow = ({
                         variant="outlined"
                         action={<ActionButtons test={test} onRestore={onRestore} />}
                     >
-                        <Typography variant="body2">Test "{testName}" has been removed</Typography>
+                        <Typography variant="body2">
+                            Test &quot;{testName}&quot; has been removed
+                        </Typography>
                     </Alert>
                 </TableCell>
             </TableRow>

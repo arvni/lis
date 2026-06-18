@@ -324,10 +324,11 @@ EditConsultant.layout = (page) => {
     return (
         <AuthenticatedLayout
             auth={page.props.auth}
-            children={page}
             breadcrumbs={getBreadcrumbs(consultant)}
             title={consultant?.name ? `Edit Consultant: ${consultant.name}` : 'Edit Consultant'}
-        />
+        >
+            {page}
+        </AuthenticatedLayout>
     );
 };
 

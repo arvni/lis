@@ -201,7 +201,7 @@ const DiscountManager = ({
                     color="text.secondary"
                     sx={{ textAlign: 'center', py: 2 }}
                 >
-                    No discounts applied. Click "Add Discount" to apply one.
+                    No discounts applied. Click &quot;Add Discount&quot; to apply one.
                 </Typography>
             ) : (
                 discounts.map((discount, index) => (

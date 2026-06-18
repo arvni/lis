@@ -418,7 +418,9 @@ const breadCrumbs = [
 ];
 
 Waiting.layout = (page) => (
-    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
+    <AuthenticatedLayout auth={page.props.auth} breadcrumbs={breadCrumbs}>
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Waiting;

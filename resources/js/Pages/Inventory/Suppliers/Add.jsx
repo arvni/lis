@@ -222,7 +222,8 @@ const Add = () => {
                     <CardContent>
                         {data.contacts.length === 0 && (
                             <Typography color="text.secondary" variant="body2">
-                                Click "Add Contact" to add a contact person for this supplier.
+                                Click &quot;Add Contact&quot; to add a contact person for this
+                                supplier.
                             </Typography>
                         )}
                         {data.contacts.map((contact, idx) => (

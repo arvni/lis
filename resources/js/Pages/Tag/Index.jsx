@@ -293,12 +293,9 @@ const breadCrumbs = [
 ];
 
 Index.layout = (page) => (
-    <AuthenticatedLayout
-        auth={page.props.auth}
-        children={page}
-        breadcrumbs={breadCrumbs}
-        title="Manage Tags"
-    />
+    <AuthenticatedLayout auth={page.props.auth} breadcrumbs={breadCrumbs} title="Manage Tags">
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Index;

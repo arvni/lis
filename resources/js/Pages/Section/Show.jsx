@@ -862,7 +862,6 @@ const getNestedParents = (sectionGroup) => {
 Show.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
-        children={page}
         breadcrumbs={[
             ...getNestedParents(page.props.section.section_group),
             {
@@ -871,7 +870,9 @@ Show.layout = (page) => (
                 icon: null,
             },
         ]}
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Show;

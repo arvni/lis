@@ -141,7 +141,6 @@ const Add = ({ patient, canAddPrescription, maxDiscount }) => {
 Add.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
-        children={page}
         breadcrumbs={[
             {
                 title: 'Patients',
@@ -159,7 +158,9 @@ Add.layout = (page) => (
                 icon: null,
             },
         ]}
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Add;

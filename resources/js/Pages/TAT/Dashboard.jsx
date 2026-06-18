@@ -811,12 +811,13 @@ const Dashboard = () => {
 Dashboard.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
-        children={page}
         breadcrumbs={[
             { title: 'Reception', link: route('acceptances.index'), icon: null },
             { title: 'TAT Dashboard', link: '', icon: null },
         ]}
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Dashboard;

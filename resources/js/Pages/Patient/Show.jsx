@@ -806,7 +806,6 @@ const breadCrumbs = [
 Show.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
-        children={page}
         breadcrumbs={[
             ...breadCrumbs,
             {
@@ -816,7 +815,9 @@ Show.layout = (page) => (
             },
         ]}
         title={`Patient: ${page.props.patient.fullName}`} // Use page title from props
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Show;

@@ -810,7 +810,7 @@ const Create = ({ success, error, patientFields }) => {
                                     <Alert severity="info" sx={{ mt: 3 }}>
                                         <Typography variant="body2">
                                             <strong>Note:</strong> Default values will only be used
-                                            when the Excel file doesn't contain data for these
+                                            when the Excel file doesn&apos;t contain data for these
                                             fields. If you map an Excel column to a field, the Excel
                                             data will take priority.
                                         </Typography>
@@ -904,8 +904,8 @@ const Create = ({ success, error, patientFields }) => {
                                                 color="text.secondary"
                                                 sx={{ mb: 3 }}
                                             >
-                                                Click "Add Test" button to select tests for your
-                                                patients
+                                                Click &quot;Add Test&quot; button to select tests
+                                                for your patients
                                             </Typography>
                                             <Button
                                                 variant="outlined"
@@ -1135,10 +1135,12 @@ const Create = ({ success, error, patientFields }) => {
                                 <li>Select an Excel file (.xlsx, .xls) or CSV file</li>
                                 <li>File size should not exceed 10MB</li>
                                 <li>
-                                    Check "First row contains headers" if your Excel has column
-                                    headers
+                                    Check &quot;First row contains headers&quot; if your Excel has
+                                    column headers
                                 </li>
-                                <li>Click "Next" to map Excel columns to patient fields</li>
+                                <li>
+                                    Click &quot;Next&quot; to map Excel columns to patient fields
+                                </li>
                             </ul>
                         </Typography>
                     </Box>
@@ -1679,7 +1681,9 @@ const breadCrumbs = [
 ];
 
 Create.layout = (page) => (
-    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
+    <AuthenticatedLayout auth={page.props.auth} breadcrumbs={breadCrumbs}>
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Create;

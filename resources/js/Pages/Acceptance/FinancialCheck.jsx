@@ -365,9 +365,10 @@ const FinancialCheck = () => {
 FinancialCheck.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
-        children={page}
         breadcrumbs={[{ label: 'Financial Check', url: route('acceptances.financialCheck') }]}
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default FinancialCheck;

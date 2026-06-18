@@ -464,7 +464,7 @@ const TabbedReportForm = ({
                                         />
                                     ) : (
                                         <Alert severity="info" sx={{ my: 2 }}>
-                                            This template doesn't have any parameters to fill.
+                                            This template doesn&apos;t have any parameters to fill.
                                         </Alert>
                                     )}
                                 </TabPanel>

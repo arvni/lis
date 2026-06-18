@@ -795,7 +795,6 @@ const Show = ({
 Show.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
-        children={page}
         breadcrumbs={[
             {
                 title: 'Patients',
@@ -818,7 +817,9 @@ Show.layout = (page) => (
                 icon: null,
             },
         ]}
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Show;

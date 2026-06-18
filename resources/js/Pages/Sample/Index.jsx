@@ -291,7 +291,9 @@ const Index = ({ samples, status, requestInputs, canEdit }) => {
 const breadCrumbs = [{ title: 'Samples List', link: null, icon: <ScienceIcon fontSize="small" /> }];
 
 Index.layout = (page) => (
-    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
+    <AuthenticatedLayout auth={page.props.auth} breadcrumbs={breadCrumbs}>
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Index;

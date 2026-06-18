@@ -682,8 +682,9 @@ const Show = ({
                 <DialogTitle>Approve Step{currentStep ? `: ${currentStep.name}` : ''}</DialogTitle>
                 <DialogContent>
                     <Alert severity="info" sx={{ mb: 2 }}>
-                        This approval moves the report to the next step of the "{approvalFlow?.name}
-                        " flow. The published PDF is uploaded at the final sign-off step.
+                        This approval moves the report to the next step of the &quot;
+                        {approvalFlow?.name}
+                        &quot; flow. The published PDF is uploaded at the final sign-off step.
                     </Alert>
                     <TextField
                         fullWidth
@@ -758,7 +759,6 @@ let breadCrumbs = [
 Show.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
-        children={page}
         breadcrumbs={[
             ...breadCrumbs,
             {
@@ -766,7 +766,9 @@ Show.layout = (page) => (
                 icon: null,
             },
         ]}
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Show;

@@ -453,6 +453,7 @@ const MetricCard = React.memo(
         );
     },
 );
+MetricCard.displayName = 'MetricCard';
 
 // Loading skeleton component
 const MetricSkeleton = React.memo(() => (
@@ -474,6 +475,7 @@ const MetricSkeleton = React.memo(() => (
         </CardContent>
     </Card>
 ));
+MetricSkeleton.displayName = 'MetricSkeleton';
 
 // Main Dashboard component that accepts data as props
 const Dashboard = ({

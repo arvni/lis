@@ -170,6 +170,7 @@ const ConsultationCard = memo(({ initialData: { patient, consultant, ...consulta
         </Card>
     );
 });
+ConsultationCard.displayName = 'ConsultationCard';
 
 const AcceptanceForm = ({
     initialData,

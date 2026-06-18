@@ -128,7 +128,6 @@ const breadCrumbs = [
 Edit.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
-        children={page}
         breadcrumbs={[
             ...breadCrumbs,
             {
@@ -137,7 +136,9 @@ Edit.layout = (page) => (
                 icon: null,
             },
         ]}
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Edit;

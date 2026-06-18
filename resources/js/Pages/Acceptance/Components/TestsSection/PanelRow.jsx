@@ -116,8 +116,8 @@ const DeleteConfirmDialog = ({ open, onClose, onConfirm, panelName }) => (
         <DialogTitle>Confirm Panel Removal</DialogTitle>
         <DialogContent>
             <DialogContentText>
-                Are you sure you want to remove the panel "{panelName}"? This action will remove all
-                associated acceptance items.
+                Are you sure you want to remove the panel &quot;{panelName}&quot;? This action will
+                remove all associated acceptance items.
             </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -136,9 +136,9 @@ const EjectConfirmDialog = ({ open, onClose, onConfirm, panelName }) => (
         <DialogTitle>Eject Panel Tests</DialogTitle>
         <DialogContent>
             <DialogContentText>
-                This will split all tests in panel <strong>"{panelName}"</strong> into independent
-                tests, each reverting to its method's default test. Prices will be recalculated.
-                Workflow states and reports are kept.
+                This will split all tests in panel <strong>&quot;{panelName}&quot;</strong> into
+                independent tests, each reverting to its method&apos;s default test. Prices will be
+                recalculated. Workflow states and reports are kept.
             </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -291,7 +291,7 @@ const PanelRow = ({
                         action={<ActionButtons panel={panel} onRestore={onRestore} />}
                     >
                         <Typography variant="body2">
-                            Panel "{panel?.panel?.name}" has been removed
+                            Panel &quot;{panel?.panel?.name}&quot; has been removed
                         </Typography>
                     </Alert>
                 </TableCell>

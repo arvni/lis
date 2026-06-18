@@ -598,7 +598,6 @@ Index.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
         title="Notifications"
-        children={page}
         breadcrumbs={[
             {
                 title: 'Notifications',
@@ -606,7 +605,9 @@ Index.layout = (page) => (
                 icon: null,
             },
         ]}
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Index;
