@@ -3,6 +3,7 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { Button, Tab, Tabs } from '@mui/material';
 import { GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 
 import TableLayout from '@/Layouts/TableLayout';
@@ -156,6 +157,12 @@ const MaterialsIndex = () => {
                             icon={<EditIcon />}
                             label="Edit"
                             onClick={handleEditMaterial(params.row.id)}
+                        />,
+                        <GridActionsCellItem
+                            key={`delete-${params.row.id}`}
+                            icon={<DeleteIcon color="error" />}
+                            label="Delete"
+                            onClick={handleDeleteMaterial(params.row.id)}
                         />,
                     ];
                 },
