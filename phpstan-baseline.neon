@@ -3877,18 +3877,6 @@ parameters:
 			path: app/Domains/Reception/Adapters/WorkflowAdapter.php
 
 		-
-			message: '#^Deprecated in PHP 8\.0\: Required parameter \$status follows optional parameter \$doctor\.$#'
-			identifier: parameter.requiredAfterOptional
-			count: 1
-			path: app/Domains/Reception/DTOs/AcceptanceDTO.php
-
-		-
-			message: '#^Deprecated in PHP 8\.3\: Required parameter \$acceptanceItems follows optional parameter \$doctor\.$#'
-			identifier: parameter.requiredAfterOptional
-			count: 1
-			path: app/Domains/Reception/DTOs/AcceptanceDTO.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\DTOs\\AcceptanceItemDTO\:\:__construct\(\) has parameter \$reportless with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -3923,12 +3911,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Domains/Reception/DTOs/RelativeDTO.php
-
-		-
-			message: '#^Deprecated in PHP 8\.1\: Required parameter \$receivedAt follows optional parameter \$materialId\.$#'
-			identifier: parameter.requiredAfterOptional
-			count: 1
-			path: app/Domains/Reception/DTOs/SampleDTO.php
 
 		-
 			message: '#^Method App\\Domains\\Reception\\Events\\AcceptanceDeletedEvent\:\:__construct\(\) has parameter \$invoiceId with no type specified\.$#'

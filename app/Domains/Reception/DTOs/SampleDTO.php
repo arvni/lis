@@ -13,9 +13,9 @@ class SampleDTO
         public array   $acceptanceItems,
         public ?string $status,
         public array   $barcodeGroup,
+        public string  $receivedAt,
         public ?string $barcode = null,
         public ?int    $materialId = null,
-        public string  $receivedAt,
         public ?int    $collectRequestId = null,
     )
     {
