@@ -1237,12 +1237,6 @@ parameters:
 			path: app/Domains/Document/Resources/DocumentResource.php
 
 		-
-			message: '#^Deprecated in PHP 8\.4\: Parameter \#6 \$relatedId \(int\|string\) is implicitly nullable via default value null\.$#'
-			identifier: parameter.implicitlyNullable
-			count: 1
-			path: app/Domains/Document/Services/DocumentService.php
-
-		-
 			message: '#^Method App\\Domains\\Document\\Services\\DocumentService\:\:getDocument\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -3505,12 +3499,6 @@ parameters:
 			path: app/Domains/Laboratory/Services/TestGroupService.php
 
 		-
-			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$referrer \(int\|array\) is implicitly nullable via default value null\.$#'
-			identifier: parameter.implicitlyNullable
-			count: 1
-			path: app/Domains/Laboratory/Services/TestService.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Services\\TestService\:\:allTests\(\) has parameter \$queryData with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -3755,12 +3743,6 @@ parameters:
 			identifier: deadCode.unreachable
 			count: 4
 			path: app/Domains/Notification/Models/WhatsappMessage.php
-
-		-
-			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$notifiableType \(string\) is implicitly nullable via default value null\.$#'
-			identifier: parameter.implicitlyNullable
-			count: 1
-			path: app/Domains/Notification/Repositories/NotificationRepository.php
 
 		-
 			message: '#^Method App\\Domains\\Notification\\Repositories\\NotificationRepository\:\:getUnreadNotifications\(\) has parameter \$queryData with no type specified\.$#'
@@ -4025,18 +4007,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Events/SampleCollectedEvent.php
-
-		-
-			message: '#^Deprecated in PHP 8\.4\: Parameter \#3 \$previous \(Throwable\) is implicitly nullable via default value null\.$#'
-			identifier: parameter.implicitlyNullable
-			count: 1
-			path: app/Domains/Reception/Exceptions/SampleNotFoundException.php
-
-		-
-			message: '#^Deprecated in PHP 8\.4\: Parameter \#3 \$previous \(Throwable\) is implicitly nullable via default value null\.$#'
-			identifier: parameter.implicitlyNullable
-			count: 1
-			path: app/Domains/Reception/Exceptions/SampleNotWaitingException.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$acceptance\.$#'

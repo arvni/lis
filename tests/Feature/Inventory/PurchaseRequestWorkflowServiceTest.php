@@ -50,7 +50,7 @@ class PurchaseRequestWorkflowServiceTest extends TestCase
         return $template;
     }
 
-    private function makePr(WorkflowTemplate $template, string $status = null): PurchaseRequest
+    private function makePr(WorkflowTemplate $template, ?string $status = null): PurchaseRequest
     {
         return PurchaseRequest::create([
             'requested_by_user_id' => $this->requester->id,
