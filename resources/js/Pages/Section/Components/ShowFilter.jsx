@@ -59,7 +59,7 @@ const ShowFilter = memo(
                     fromDate = new Date(today);
                     fromDate.setDate(fromDate.getDate() - fromDate.getDay());
                     break;
-                case 'lastWeek':
+                case 'lastWeek': {
                     fromDate = new Date(today);
                     fromDate.setDate(fromDate.getDate() - fromDate.getDay() - 7);
                     const toDate = new Date(fromDate);
@@ -70,10 +70,11 @@ const ShowFilter = memo(
                         to_date: toDate.toISOString().split('T')[0],
                     }));
                     return;
+                }
                 case 'thisMonth':
                     fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
                     break;
-                case 'lastMonth':
+                case 'lastMonth': {
                     fromDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
                     const lastDayLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
                     setFilter((prevState) => ({
@@ -82,6 +83,7 @@ const ShowFilter = memo(
                         to_date: lastDayLastMonth.toISOString().split('T')[0],
                     }));
                     return;
+                }
                 default:
                     return;
             }

@@ -128,11 +128,13 @@ const Index = () => {
                 getActions: (params) => {
                     let cols = [
                         <GridActionsCellItem
+                            key="Edit"
                             icon={<EditIcon />}
                             label="Edit"
                             onClick={editReportTemplate(params.row.id)}
                         />,
                         <GridActionsCellItem
+                            key="Print"
                             icon={<Print />}
                             label="Print"
                             onClick={printReportTemplate(params.row.id)}

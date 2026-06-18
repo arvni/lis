@@ -380,14 +380,18 @@ const AddRequirementForm = ({ data, setData, open, onClose, onSubmit, disabled =
                                 handleHomeEndKeys
                                 disabled={disabled}
                                 renderTags={(value, getTagProps) =>
-                                    value.map((option, index) => (
-                                        <Chip
-                                            variant="outlined"
-                                            label={option}
-                                            size="medium"
-                                            {...getTagProps({ index })}
-                                        />
-                                    ))
+                                    value.map((option, index) => {
+                                        const { key, ...tagProps } = getTagProps({ index });
+                                        return (
+                                            <Chip
+                                                key={key}
+                                                variant="outlined"
+                                                label={option}
+                                                size="medium"
+                                                {...tagProps}
+                                            />
+                                        );
+                                    })
                                 }
                                 renderInput={(params) => (
                                     <TextField

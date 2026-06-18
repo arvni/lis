@@ -87,7 +87,12 @@ const DoneForm = ({ open, onClose, acceptanceItemState, onChange, onSubmit, opti
                             {Array.from(
                                 new Set(item.options.split(';').map((op) => op.trim())),
                             ).map((op) => (
-                                <FormControlLabel value={op} control={<Radio />} label={op} />
+                                <FormControlLabel
+                                    key={op}
+                                    value={op}
+                                    control={<Radio />}
+                                    label={op}
+                                />
                             ))}
                         </RadioGroup>
                     </FormControl>

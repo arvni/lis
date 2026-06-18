@@ -1,7 +1,57 @@
 import { Box, Button, Chip, Paper, Typography } from '@mui/material';
-import { CloudDownload } from '@mui/icons-material';
+import {
+    CloudDownload,
+    Description,
+    PictureAsPdf,
+    TableChart,
+    TextFields,
+    Image as ImageIcon,
+} from '@mui/icons-material';
 import React from 'react';
 import PropTypes from 'prop-types';
+
+// Helper function to format file size.
+const formatFileSize = (bytes) => {
+    if (!bytes || typeof bytes !== 'number') return 'Unknown size';
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+// File type icon component.
+const FileTypeIcon = ({ fileType }) => {
+    if (!fileType) return <Description />;
+
+    switch (fileType.toLowerCase()) {
+        case 'pdf':
+            return <PictureAsPdf />;
+        case 'doc':
+        case 'docx':
+            return <Description />;
+        case 'xls':
+        case 'xlsx':
+        case 'csv':
+            return <TableChart />;
+        case 'jpg':
+        case 'jpeg':
+        case 'png':
+        case 'gif':
+        case 'bmp':
+        case 'svg':
+        case 'webp':
+            return <ImageIcon />;
+        case 'txt':
+            return <TextFields />;
+        default:
+            return <Description />;
+    }
+};
+
+FileTypeIcon.propTypes = {
+    fileType: PropTypes.string,
+};
 
 const GenericFileViewer = ({ fileUrl, fileType, fileName, fileSize, onDownload }) => {
     return (

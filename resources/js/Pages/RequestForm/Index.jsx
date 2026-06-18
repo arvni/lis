@@ -120,6 +120,7 @@ const Index = () => {
                 getActions: ({ row }) => {
                     let cols = [
                         <GridActionsCellItem
+                            key="Edit"
                             icon={<EditIcon />}
                             label="Edit"
                             onClick={editRequestForm(row.id)}
