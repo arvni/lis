@@ -1058,45 +1058,42 @@ const PedigreeChart = ({
     const getFilename = (format) =>
         `pedigree-chart-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.${format}`;
 
-    const exportChart = useCallback(
-        (format = 'png') => {
-            if (reactFlowWrapper.current) {
-                setIsLoading(true);
+    const exportChart = useCallback((format = 'png') => {
+        if (reactFlowWrapper.current) {
+            setIsLoading(true);
 
-                const el = reactFlowWrapper.current.querySelector('.react-flow__viewport');
-                if (!el) {
-                    console.error('Viewport not found.');
-                    showNotification('Export failed', 'error');
-                    setIsLoading(false);
-                    return;
-                }
-
-                const opt = {
-                    quality: 1.0,
-                    pixelRatio: 2,
-                    backgroundColor: 'white',
-                };
-
-                const saveFn = format === 'png' ? toPng : toSvg;
-
-                saveFn(el, opt)
-                    .then((url) => {
-                        saveAs(url, getFilename(format));
-                        showNotification(`Exported as ${format.toUpperCase()}`, 'success');
-                        setIsLoading(false);
-                    })
-                    .catch((err) => {
-                        console.error('Export error:', err);
-                        showNotification(`Export failed: ${err.message}`, 'error');
-                        setIsLoading(false);
-                    });
-            } else {
-                console.error('Wrapper ref missing.');
+            const el = reactFlowWrapper.current.querySelector('.react-flow__viewport');
+            if (!el) {
+                console.error('Viewport not found.');
                 showNotification('Export failed', 'error');
+                setIsLoading(false);
+                return;
             }
-        },
-        [reactFlowInstance],
-    );
+
+            const opt = {
+                quality: 1.0,
+                pixelRatio: 2,
+                backgroundColor: 'white',
+            };
+
+            const saveFn = format === 'png' ? toPng : toSvg;
+
+            saveFn(el, opt)
+                .then((url) => {
+                    saveAs(url, getFilename(format));
+                    showNotification(`Exported as ${format.toUpperCase()}`, 'success');
+                    setIsLoading(false);
+                })
+                .catch((err) => {
+                    console.error('Export error:', err);
+                    showNotification(`Export failed: ${err.message}`, 'error');
+                    setIsLoading(false);
+                });
+        } else {
+            console.error('Wrapper ref missing.');
+            showNotification('Export failed', 'error');
+        }
+    }, []);
 
     // --- Save/Load Functionality ---
     const saveData = useCallback(() => {

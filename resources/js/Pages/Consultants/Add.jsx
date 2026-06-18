@@ -120,7 +120,7 @@ const Add = ({ errors: initialErrors, auth }) => {
                 setIsSubmitting(false);
             },
         });
-    }, [data, post, validateForm]);
+    }, [post, validateForm]);
 
     // Handle form cancellation with confirmation dialog
     const handleCancel = useCallback(() => {
