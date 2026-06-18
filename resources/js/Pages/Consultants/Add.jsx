@@ -260,8 +260,9 @@ Add.layout = (page) => (
         auth={page.props.auth}
         breadcrumbs={breadCrumbs}
         title="Add New Consultant"
-        children={page}
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Add;

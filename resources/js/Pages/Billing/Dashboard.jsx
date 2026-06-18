@@ -370,12 +370,13 @@ const Dashboard = () => {
 Dashboard.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
-        children={page}
         breadcrumbs={[
             { title: 'Billing', link: route('invoices.index'), icon: null },
             { title: 'Dashboard', link: '', icon: null },
         ]}
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Dashboard;

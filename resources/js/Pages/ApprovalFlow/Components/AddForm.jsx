@@ -160,7 +160,7 @@ const FormContent = () => {
 
                 <Alert severity="info" sx={{ mb: 3 }}>
                     The last step is the final sign-off: its approver uploads the published PDF and
-                    is recorded as the report's approver.
+                    is recorded as the report&apos;s approver.
                 </Alert>
 
                 {data?.steps?.map((step, index) => (

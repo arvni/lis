@@ -135,7 +135,9 @@ const breadcrumbs = [
 
 // Apply layout with breadcrumbs
 EditUser.layout = (page) => (
-    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadcrumbs} />
+    <AuthenticatedLayout auth={page.props.auth} breadcrumbs={breadcrumbs}>
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default EditUser;

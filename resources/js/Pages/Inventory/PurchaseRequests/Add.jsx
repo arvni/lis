@@ -183,7 +183,7 @@ const Add = () => {
                     <CardContent sx={{ p: lineItems.length ? 0 : undefined, overflowX: 'auto' }}>
                         {lineItems.length === 0 ? (
                             <Alert severity="info" sx={{ m: 2 }}>
-                                Click "Add Item" to begin building your request.
+                                Click &quot;Add Item&quot; to begin building your request.
                             </Alert>
                         ) : (
                             <Table size="small" sx={{ minWidth: 900 }}>

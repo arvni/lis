@@ -126,12 +126,9 @@ const Index = ({ consultants, status, errors, success, requestInputs }) => {
 };
 
 Index.layout = (page) => (
-    <AuthenticatedLayout
-        auth={page.props.auth}
-        children={page}
-        breadcrumbs={breadCrumbs}
-        title="Consultants"
-    />
+    <AuthenticatedLayout auth={page.props.auth} breadcrumbs={breadCrumbs} title="Consultants">
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Index;

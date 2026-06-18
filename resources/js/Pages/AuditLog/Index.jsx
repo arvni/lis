@@ -304,12 +304,13 @@ const Index = () => {
 Index.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
-        children={page}
         breadcrumbs={[
             { title: 'System', link: route('system.failed-jobs'), icon: null },
             { title: 'Audit Log', link: '', icon: null },
         ]}
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Index;

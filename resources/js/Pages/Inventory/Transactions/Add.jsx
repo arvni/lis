@@ -415,8 +415,8 @@ const TransactionAdd = () => {
                     <CardContent>
                         {lineItems.length === 0 ? (
                             <Alert severity="info">
-                                Click "Add Line" to add items. You can scan the barcode on each item
-                                to auto-fill details.
+                                Click &quot;Add Line&quot; to add items. You can scan the barcode on
+                                each item to auto-fill details.
                             </Alert>
                         ) : (
                             <Stack spacing={2}>

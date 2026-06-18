@@ -830,11 +830,7 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
                                                         <IconButton
                                                             aria-label="settings"
                                                             onClick={(e) =>
-                                                                handleMenuOpen(
-                                                                    e,
-                                                                    item,
-                                                                    'section',
-                                                                )
+                                                                handleMenuOpen(e, item, 'section')
                                                             }
                                                         >
                                                             <MoreVertIcon />
@@ -1005,11 +1001,7 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
             </Menu>
 
             {editTarget?.type === 'sectionGroup' && (
-                <SectionGroupAddForm
-                    open
-                    onClose={handleEditClose}
-                    defaultData={editTarget.item}
-                />
+                <SectionGroupAddForm open onClose={handleEditClose} defaultData={editTarget.item} />
             )}
             {editTarget?.type === 'section' && (
                 <SectionAddForm open onClose={handleEditClose} defaultValue={editTarget.item} />
@@ -1041,9 +1033,10 @@ const getNestedParents = (sectionGroup) => {
 Show.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
-        children={page}
         breadcrumbs={getNestedParents(page.props.sectionGroup)}
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Show;

@@ -332,7 +332,7 @@ const PublishForm = ({ open, onCancel, acceptance }) => {
                                         Publish Silently
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
-                                        Recipients won't receive notifications for these{' '}
+                                        Recipients won&apos;t receive notifications for these{' '}
                                         {testsToPublish} report{testsToPublish !== 1 ? 's' : ''}
                                     </Typography>
                                 </Box>

@@ -301,12 +301,13 @@ const SamplesIndex = () => {
 SamplesIndex.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
-        children={page}
         breadcrumbs={[
             { title: 'Quality Control', link: '', icon: null },
             { title: 'Sample QC', link: '', icon: null },
         ]}
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default SamplesIndex;

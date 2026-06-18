@@ -154,7 +154,7 @@ const MethodsList = ({
                                     align="center"
                                     sx={{ py: 3, color: 'text.secondary' }}
                                 >
-                                    No results for "{search}"
+                                    No results for &quot;{search}&quot;
                                 </TableCell>
                             </TableRow>
                         ) : (

@@ -150,7 +150,7 @@ const SortableRequirementItem = ({ field, index, disabled, requirements, onEdit,
 
                         {field.placeholder && (
                             <Typography variant="caption" color="text.secondary">
-                                Placeholder: "{field.placeholder}"
+                                Placeholder: &quot;{field.placeholder}&quot;
                             </Typography>
                         )}
 

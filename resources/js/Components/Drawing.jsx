@@ -2083,7 +2083,7 @@ const PedigreeChart = ({
 
                         <Typography variant="body2" sx={{ mb: 1 }}>
                             <b>Add Children:</b> Select two individuals (using Shift+Click), then
-                            click the "Add Child" button.
+                            click the &quot;Add Child&quot; button.
                         </Typography>
 
                         <Typography variant="body2" sx={{ mb: 1 }}>
@@ -2109,7 +2109,8 @@ const PedigreeChart = ({
                         </Typography>
 
                         <Typography variant="body2">
-                            <b>Fit View:</b> Click the "Fit to View" button to show all elements.
+                            <b>Fit View:</b> Click the &quot;Fit to View&quot; button to show all
+                            elements.
                         </Typography>
                     </Grid>
 

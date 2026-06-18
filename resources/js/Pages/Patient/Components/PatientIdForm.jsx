@@ -17,7 +17,7 @@ const PatientIdForm = ({ onChange, data, errors = {}, onKeyDown }) => {
                 color="text.primary"
                 sx={{ mb: 1, fontWeight: focused ? 'medium' : 'regular' }}
             >
-                Please enter the patient's identification number:
+                Please enter the patient&apos;s identification number:
             </Typography>
 
             <Grid container spacing={2}>

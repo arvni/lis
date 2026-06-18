@@ -57,7 +57,9 @@ const Index = ({ data, date, pendingPRApprovals }) => {
     );
 };
 Index.layout = (page) => (
-    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={[]} />
+    <AuthenticatedLayout auth={page.props.auth} breadcrumbs={[]}>
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Index;

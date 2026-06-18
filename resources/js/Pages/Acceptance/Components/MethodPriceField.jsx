@@ -311,7 +311,8 @@ const PriceField = ({ method, onChange, values = {}, errors = {} }) => {
                                         color="success.dark"
                                         sx={{ display: 'block', mt: 1 }}
                                     >
-                                        Condition "{selectedCondition.condition}" is applied
+                                        Condition &quot;{selectedCondition.condition}&quot; is
+                                        applied
                                     </Typography>
                                 )}
                             </Box>

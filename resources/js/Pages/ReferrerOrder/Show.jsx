@@ -1348,8 +1348,9 @@ Show.layout = (page) => (
                 icon: null,
             },
         ]}
-        children={page}
-    />
+    >
+        {page}
+    </ClientLayout>
 );
 
 export default Show;

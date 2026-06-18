@@ -41,7 +41,7 @@ const CustomNoRowsOverlay = () => {
                 align="center"
                 sx={{ maxWidth: 300, mx: 'auto' }}
             >
-                Try adjusting your search or filter criteria to find what you're looking for
+                Try adjusting your search or filter criteria to find what you&apos;re looking for
             </Typography>
         </Stack>
     );

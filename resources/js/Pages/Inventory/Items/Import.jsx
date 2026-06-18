@@ -439,7 +439,7 @@ const ItemImport = () => {
                                     colSpan={COLS.length + 2}
                                     sx={{ textAlign: 'center', py: 5, color: 'text.disabled' }}
                                 >
-                                    No rows yet — load a file or click "Add Row"
+                                    No rows yet — load a file or click &quot;Add Row&quot;
                                 </TableCell>
                             </TableRow>
                         ) : (

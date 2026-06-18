@@ -211,7 +211,9 @@ const breadcrumbs = [
 
 // Use a more descriptive name for the layout function
 SectionsIndex.layout = (page) => (
-    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadcrumbs} />
+    <AuthenticatedLayout auth={page.props.auth} breadcrumbs={breadcrumbs}>
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default SectionsIndex;

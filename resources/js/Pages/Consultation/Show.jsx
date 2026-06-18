@@ -486,7 +486,6 @@ const breadCrumbs = [
 Show.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
-        children={page}
         breadcrumbs={[
             ...breadCrumbs,
             {
@@ -495,7 +494,9 @@ Show.layout = (page) => (
                 icon: null,
             },
         ]}
-    />
+    >
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Show;
