@@ -64,7 +64,7 @@ const EditUser = ({ user, errors: serverErrors, auth }) => {
                 }, 1500);
             },
         });
-    }, [data, post, user.id]);
+    }, [post, user.id]);
 
     // Handle cancel action
     const handleCancel = useCallback(() => {

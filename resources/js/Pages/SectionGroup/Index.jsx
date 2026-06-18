@@ -47,7 +47,7 @@ const Index = () => {
                 },
                 only: ['sectionGroups', 'status', 'success', 'requestInputs'],
             }),
-        [router],
+        [],
     );
     const handleCloseDeleteForm = useCallback(() => {
         setSectionGroup(null);

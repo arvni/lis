@@ -140,7 +140,7 @@ const EditConsultant = ({ consultant, errors: serverErrors }) => {
                 setIsSubmitting(false);
             },
         });
-    }, [data, formDirty, post, consultant.id, validateForm]);
+    }, [formDirty, post, consultant.id, validateForm]);
 
     // Handle cancel action with confirmation
     const handleCancel = useCallback(() => {
