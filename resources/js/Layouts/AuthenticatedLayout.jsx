@@ -34,7 +34,6 @@ import {
     Brightness4 as DarkModeIcon,
     Brightness7 as LightModeIcon,
     Settings as SettingsIcon,
-    Help as HelpIcon,
 } from '@mui/icons-material';
 import { Link, router, useRemember, Head, usePage } from '@inertiajs/react';
 
@@ -321,14 +320,6 @@ const Authenticated = ({ auth, breadcrumbs, children, title }) => {
             divider: true,
         },
         {
-            label: 'My Profile',
-            icon: <PersonIcon fontSize="small" />,
-            onClick: () => {
-                handleMenuClose();
-                router.visit(route('profile.edit'));
-            },
-        },
-        {
             label: 'Account Settings',
             icon: <SettingsIcon fontSize="small" />,
             onClick: () => {
@@ -348,15 +339,6 @@ const Authenticated = ({ auth, breadcrumbs, children, title }) => {
             onClick: () => {
                 toggleDarkMode();
                 handleMenuClose();
-            },
-            divider: true,
-        },
-        {
-            label: 'Help & Support',
-            icon: <HelpIcon fontSize="small" />,
-            onClick: () => {
-                handleMenuClose();
-                router.visit(route('support'));
             },
             divider: true,
         },
