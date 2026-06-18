@@ -45,10 +45,10 @@ class NotificationServiceTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function test_make_unread_marks_notification_read(): void
+    public function test_make_unread_marks_notification_unread(): void
     {
         $notification = Mockery::mock(Notification::class);
-        $notification->shouldReceive('markAsRead')->once();
+        $notification->shouldReceive('markAsUnread')->once();
         $this->service->makeUnread($notification);
         $this->assertTrue(true);
     }
