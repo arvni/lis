@@ -77,7 +77,7 @@ readonly class TestService
             $test->methods()->sync($ids);
     }
 
-    public function loadTest(Test $test, int|array $referrer = null): Test
+    public function loadTest(Test $test, int|array|null $referrer = null): Test
     {
         $load = [
             "methodTests.method.workflow",

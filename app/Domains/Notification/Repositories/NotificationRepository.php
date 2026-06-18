@@ -93,7 +93,7 @@ class NotificationRepository
             ->delete();
     }
 
-    private function makeQuery(string $notifiableType = null, $notifiableId = null): Builder
+    private function makeQuery(?string $notifiableType = null, $notifiableId = null): Builder
     {
         $query = Notification::query();
         if ($notifiableType && $notifiableId) {
