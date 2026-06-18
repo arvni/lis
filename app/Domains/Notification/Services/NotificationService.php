@@ -38,7 +38,7 @@ readonly class NotificationService
      */
     public function makeUnread(Notification $notification): void
     {
-        $notification->markAsRead();
+        $notification->markAsUnread();
     }
 
     /**
@@ -58,6 +58,44 @@ readonly class NotificationService
                 'type' => 'user',
             ]
         ]);
+    }
+
+    /**
+     * Mark the given notifications (owned by the current user) as read.
+     *
+     * @param array<int, string> $ids
+     */
+    public function markRead(array $ids): void
+    {
+        $this->notificationRepository->markAsReadForUser(auth()->id(), $ids);
+    }
+
+    /**
+     * Mark the given notifications (owned by the current user) as unread.
+     *
+     * @param array<int, string> $ids
+     */
+    public function markUnread(array $ids): void
+    {
+        $this->notificationRepository->markAsUnreadForUser(auth()->id(), $ids);
+    }
+
+    /**
+     * Mark all of the current user's unread notifications as read.
+     */
+    public function markAllRead(): void
+    {
+        $this->notificationRepository->markAllAsReadForUser(auth()->id());
+    }
+
+    /**
+     * Delete the given notifications owned by the current user.
+     *
+     * @param array<int, string> $ids
+     */
+    public function deleteMany(array $ids): void
+    {
+        $this->notificationRepository->deleteForUser(auth()->id(), $ids);
     }
 
 }
