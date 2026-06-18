@@ -40,7 +40,6 @@ import {
     HourglassEmpty as HourglassEmptyIcon,
     DashboardOutlined as DashboardIcon,
     ArrowBack as ArrowBackIcon,
-    Edit as EditIcon,
 } from '@mui/icons-material';
 
 // Grid component with better naming
@@ -979,20 +978,6 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
                 <MenuItem onClick={handleView}>
                     <VisibilityIcon fontSize="small" sx={{ mr: 1 }} />
                     View Details
-                </MenuItem>
-
-                <MenuItem
-                    onClick={() => {
-                        if (menuItemType === 'sectionGroup') {
-                            router.visit(route('sectionGroups.edit', menuItemId));
-                        } else if (menuItemType === 'section') {
-                            router.visit(route('sections.edit', menuItemId));
-                        }
-                        handleMenuClose();
-                    }}
-                >
-                    <EditIcon fontSize="small" sx={{ mr: 1 }} />
-                    Edit
                 </MenuItem>
             </Menu>
         </Container>
