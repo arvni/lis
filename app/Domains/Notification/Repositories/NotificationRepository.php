@@ -33,6 +33,66 @@ class NotificationRepository
         return $query->take($queryData["take"] ?? 10)->get();
     }
 
+    /**
+     * Mark the given notifications as read, scoped to the owner.
+     *
+     * @param array<int, string> $ids
+     */
+    public function markAsReadForUser(int|string|null $notifiableId, array $ids): void
+    {
+        if ($notifiableId === null) {
+            return;
+        }
+        $this->makeQuery('user', $notifiableId)
+            ->whereIn('id', $ids)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+    }
+
+    /**
+     * Mark the given notifications as unread, scoped to the owner.
+     *
+     * @param array<int, string> $ids
+     */
+    public function markAsUnreadForUser(int|string|null $notifiableId, array $ids): void
+    {
+        if ($notifiableId === null) {
+            return;
+        }
+        $this->makeQuery('user', $notifiableId)
+            ->whereIn('id', $ids)
+            ->whereNotNull('read_at')
+            ->update(['read_at' => null]);
+    }
+
+    /**
+     * Mark every unread notification of the owner as read.
+     */
+    public function markAllAsReadForUser(int|string|null $notifiableId): void
+    {
+        if ($notifiableId === null) {
+            return;
+        }
+        $this->makeQuery('user', $notifiableId)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+    }
+
+    /**
+     * Delete the given notifications, scoped to the owner.
+     *
+     * @param array<int, string> $ids
+     */
+    public function deleteForUser(int|string|null $notifiableId, array $ids): void
+    {
+        if ($notifiableId === null) {
+            return;
+        }
+        $this->makeQuery('user', $notifiableId)
+            ->whereIn('id', $ids)
+            ->delete();
+    }
+
     private function makeQuery(string $notifiableType = null, $notifiableId = null): Builder
     {
         $query = Notification::query();
