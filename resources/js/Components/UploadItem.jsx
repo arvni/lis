@@ -6,7 +6,6 @@ import {
     Card,
     Box,
     IconButton,
-    Menu,
     MenuItem,
     Select,
     FormControl,
@@ -22,6 +21,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import LabelIcon from '@mui/icons-material/Label';
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { formatFileSize } from '@/Services/helper';
 
 /**
  * Component to display an uploaded file with actions
@@ -55,15 +55,6 @@ const UploadItem = ({
     // declared unconditionally at the top level of the component).
     const [isEditingTag, setIsEditingTag] = useState(false);
     const [selectedTag, setSelectedTag] = useState(value?.tag || 'TEMP');
-
-    // Format file size to human-readable format
-    const formatFileSize = (bytes) => {
-        if (!bytes) return '';
-
-        if (bytes < 1024) return `${bytes} bytes`;
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    };
 
     // Determine file icon based on file type
     const getFileIcon = () => {

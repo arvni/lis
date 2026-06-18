@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Box, Chip, CircularProgress, Tooltip, Typography } from '@mui/material';
+import { Box, Chip, CircularProgress, Tooltip } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 /**

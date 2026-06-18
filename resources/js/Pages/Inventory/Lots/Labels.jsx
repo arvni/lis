@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { Box, Button, Grid, Paper, Stack, Tooltip, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import PrintIcon from '@mui/icons-material/Print';

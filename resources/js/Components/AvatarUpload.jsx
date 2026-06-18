@@ -5,7 +5,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import styled from '@emotion/styled';
 import Stack from '@mui/material/Stack';
 import { FormHelperText } from '@mui/material';
-import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 
 const FileInput = styled.input`

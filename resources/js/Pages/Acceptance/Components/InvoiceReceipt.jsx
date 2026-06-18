@@ -15,7 +15,6 @@ import {
     Chip,
 } from '@mui/material';
 import { Person, Payments, Science, AccessTime } from '@mui/icons-material';
-import { calculateBusinessDays } from '@/Services/helper.js';
 import ReportDaysInput from '@/Pages/Acceptance/Components/ReportDaysInput.jsx';
 
 // A5 paper dimensions - optimized for printing

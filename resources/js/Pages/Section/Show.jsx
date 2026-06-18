@@ -31,7 +31,6 @@ import {
     HourglassEmpty as HourglassEmptyIcon,
     Refresh as RefreshIcon,
     Dashboard as DashboardIcon,
-    LocalOffer as TagIcon,
 } from '@mui/icons-material';
 import InlineTagManager from '@/Components/InlineTagManager';
 import { GridActionsCellItem } from '@mui/x-data-grid';

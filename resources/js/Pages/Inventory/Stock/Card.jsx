@@ -1,7 +1,6 @@
 import { Head, usePage, router } from '@inertiajs/react';
 import {
     Box,
-    Button,
     Card,
     CardContent,
     CardHeader,
@@ -19,7 +18,6 @@ import {
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import PrintIcon from '@mui/icons-material/Print';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
 import { StockBadge } from '../Components/StockBadge';

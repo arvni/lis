@@ -4,7 +4,7 @@ import Filter from './Components/Filter';
 import TableLayout from '@/Layouts/TableLayout';
 import { useState, useEffect } from 'react';
 import { RemoveRedEye, Assignment, MergeType } from '@mui/icons-material';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { Tooltip, Chip } from '@mui/material';
 
 const Index = () => {

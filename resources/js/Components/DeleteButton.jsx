@@ -1,13 +1,4 @@
-import {
-    Alert,
-    Button,
-    Card,
-    CardActions,
-    CardContent,
-    CircularProgress,
-    IconButton,
-    Popper,
-} from '@mui/material';
+import { Alert, Button, Card, CardActions, CardContent, IconButton, Popper } from '@mui/material';
 import { Delete as DeleteIcon } from '@mui/icons-material';
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';

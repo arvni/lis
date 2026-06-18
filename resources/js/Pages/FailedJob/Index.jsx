@@ -8,13 +8,9 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    IconButton,
-    Paper,
     Stack,
     Tooltip,
     Typography,
-    Alert,
-    Collapse,
     Divider,
     LinearProgress,
     TextField,
@@ -37,7 +33,6 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import ReplayCircleFilledIcon from '@mui/icons-material/ReplayCircleFilled';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlined';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import { formatDate } from '@/Services/helper.js';
 
 // ─── Exception detail dialog ──────────────────────────────────────────────────

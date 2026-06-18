@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import FilterIcon from '@mui/icons-material/FilterAlt';
 import Button from '@mui/material/Button';
 

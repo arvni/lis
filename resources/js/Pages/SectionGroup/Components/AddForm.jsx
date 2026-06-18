@@ -2,7 +2,6 @@ import { Checkbox, FormControlLabel, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import SelectSearch from '@/Components/SelectSearch';
 import { FormProvider, useFormState } from '@/Components/FormTemplate';
-import { useEffect } from 'react';
 
 const AddForm = ({ open, onClose, defaultData: defaultData }) => {
     const url = defaultData?.id
