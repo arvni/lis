@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Grid from '@mui/material/Grid';
 import Editor from '@/Components/Editor';
+import { formatFileSize } from '@/Services/helper';
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
 import {
@@ -160,14 +161,6 @@ const ApproveForm = ({
         const name = document.originalName || document.file_name;
         const maxLength = 50;
         return name.length > maxLength ? `${name.substring(0, maxLength)}...` : name;
-    };
-
-    // Format file size (if available)
-    const formatFileSize = (bytes) => {
-        if (!bytes) return '';
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(1024));
-        return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
     };
 
     const availableClinicalDocuments = getAvailableClinicalDocuments();
