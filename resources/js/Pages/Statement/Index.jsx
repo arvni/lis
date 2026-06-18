@@ -1,6 +1,6 @@
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import Filter from "./Components/Filter";
-import TableLayout from "@/Layouts/TableLayout";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import Filter from './Components/Filter';
+import TableLayout from '@/Layouts/TableLayout';
 import {
     Stack,
     IconButton,
@@ -12,24 +12,25 @@ import {
     Snackbar,
     CircularProgress,
     Backdrop,
-} from "@mui/material";
+} from '@mui/material';
 import {
     Delete as DeleteIcon,
     ImportExport,
     Add as AddIcon,
     Visibility as ViewIcon,
-} from "@mui/icons-material";
-import { useState, useCallback } from "react";
-import DeleteForm from "@/Components/DeleteForm";
-import { Head, router, useForm, usePage } from "@inertiajs/react";
-import PageHeader from "@/Components/PageHeader.jsx";
-import Button from "@mui/material/Button";
-import AddForm from "./Components/AddForm.jsx";
-import { formatDate } from "@/Services/helper.js";
-import EditIcon from "@mui/icons-material/Edit";
+} from '@mui/icons-material';
+import { useState, useCallback } from 'react';
+import DeleteForm from '@/Components/DeleteForm';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import PageHeader from '@/Components/PageHeader.jsx';
+import Button from '@mui/material/Button';
+import AddForm from './Components/AddForm.jsx';
+import { formatDate } from '@/Services/helper.js';
+import EditIcon from '@mui/icons-material/Edit';
 
 const StatementIndex = () => {
-    const { statements, status, success, requestInputs, canDelete, canEdit, canAdd } = usePage().props;
+    const { statements, status, success, requestInputs, canDelete, canEdit, canAdd } =
+        usePage().props;
 
     // Enhanced state management
     const [loading, setLoading] = useState(false);
@@ -40,9 +41,9 @@ const StatementIndex = () => {
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
     const { data, setData, post, processing, reset, errors } = useForm({
-        referrer: "",
-        issue_date: "",
-        invoices: []
+        referrer: '',
+        issue_date: '',
+        invoices: [],
     });
 
     // Enhanced table columns with better formatting and accessibility
@@ -55,7 +56,7 @@ const StatementIndex = () => {
             renderCell: ({ value }) => (
                 <Box>
                     <Typography variant="body2" fontWeight="medium">
-                        {value?.fullName || "No referrer assigned"}
+                        {value?.fullName || 'No referrer assigned'}
                     </Typography>
                     {value?.email && (
                         <Typography variant="caption" color="text.secondary">
@@ -63,7 +64,7 @@ const StatementIndex = () => {
                         </Typography>
                     )}
                 </Box>
-            )
+            ),
         },
         {
             field: 'issue_date',
@@ -72,21 +73,29 @@ const StatementIndex = () => {
             width: 150,
             sortable: true,
             renderCell: ({ value }) => (
-                <Tooltip title={value ? value.toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                }) : 'No date set'}>
+                <Tooltip
+                    title={
+                        value
+                            ? value.toLocaleDateString('en-US', {
+                                  weekday: 'long',
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                              })
+                            : 'No date set'
+                    }
+                >
                     <Typography variant="body2">
-                        {value ? value.toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                        }) : "No date"}
+                        {value
+                            ? value.toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                              })
+                            : 'No date'}
                     </Typography>
                 </Tooltip>
-            )
+            ),
         },
         {
             field: 'no',
@@ -105,7 +114,7 @@ const StatementIndex = () => {
                         {formatDate(value, 'short')}
                     </Typography>
                 </Tooltip>
-            )
+            ),
         },
         {
             field: 'id',
@@ -118,7 +127,7 @@ const StatementIndex = () => {
                     <Stack direction="row" spacing={0.5}>
                         <Tooltip title="View Statement">
                             <IconButton
-                                onClick={() => router.visit(route("statements.view", row.id))}
+                                onClick={() => router.visit(route('statements.view', row.id))}
                                 size="small"
                                 color="info"
                                 aria-label={`View statement for ${row.referrer?.fullName || 'unknown referrer'}`}
@@ -143,7 +152,7 @@ const StatementIndex = () => {
 
                         <Tooltip title="Export Statement">
                             <IconButton
-                                href={route("statements.export", row.id)}
+                                href={route('statements.export', row.id)}
                                 size="small"
                                 color="success"
                                 target="_blank"
@@ -169,32 +178,35 @@ const StatementIndex = () => {
                         )}
                     </Stack>
                 );
-            }
-        }
+            },
+        },
     ];
 
     // Enhanced page reload function with better error handling
-    const pageReload = useCallback((page = 1, filters = [], sort = { field: "issue_date", sort: "desc" }, pageSize = 10) => {
-        setLoading(true);
-        router.visit(route('statements.index'), {
-            data: { page, filters, sort, pageSize },
-            only: ["statements", "status", "success", "requestInputs"],
-            onFinish: () => setLoading(false),
-            onError: () => {
-                setSnackbar({
-                    open: true,
-                    message: 'Failed to reload data. Please try again.',
-                    severity: 'error'
-                });
-                setLoading(false);
-            }
-        });
-    }, []);
+    const pageReload = useCallback(
+        (page = 1, filters = [], sort = { field: 'issue_date', sort: 'desc' }, pageSize = 10) => {
+            setLoading(true);
+            router.visit(route('statements.index'), {
+                data: { page, filters, sort, pageSize },
+                only: ['statements', 'status', 'success', 'requestInputs'],
+                onFinish: () => setLoading(false),
+                onError: () => {
+                    setSnackbar({
+                        open: true,
+                        message: 'Failed to reload data. Please try again.',
+                        severity: 'error',
+                    });
+                    setLoading(false);
+                },
+            });
+        },
+        [],
+    );
 
     // Enhanced action handlers with better UX
     const deleteStatement = (statement) => {
         setSelectedStatement(statement);
-        setData({ ...statement, _method: "delete" });
+        setData({ ...statement, _method: 'delete' });
         setOpenDeleteForm(true);
     };
 
@@ -210,7 +222,7 @@ const StatementIndex = () => {
             setSnackbar({
                 open: true,
                 message: 'Failed to load statement data. Please try again.',
-                severity: 'error'
+                severity: 'error',
             });
         } finally {
             setLoading(false);
@@ -219,7 +231,7 @@ const StatementIndex = () => {
 
     const fetchData = async (id) => {
         try {
-            const response = await axios.get(route("api.statements.show", id));
+            const response = await axios.get(route('api.statements.show', id));
             setData(response.data.data);
             return response.data.data;
         } catch (error) {
@@ -240,9 +252,9 @@ const StatementIndex = () => {
                 setSnackbar({
                     open: true,
                     message: 'Failed to delete statement. Please try again.',
-                    severity: 'error'
+                    severity: 'error',
                 });
-            }
+            },
         });
     };
 
@@ -274,7 +286,7 @@ const StatementIndex = () => {
 
     return (
         <>
-            <Head title="Statements"/>
+            <Head title="Statements" />
             <PageHeader
                 title="Statement Management"
                 subtitle={`${statements?.data?.length || 0} statements found`}
@@ -289,7 +301,7 @@ const StatementIndex = () => {
                         >
                             Add New Statement
                         </Button>
-                    )
+                    ),
                 ].filter(Boolean)}
             />
 
@@ -327,13 +339,15 @@ const StatementIndex = () => {
             />
 
             {/* Enhanced Add/Edit Form */}
-            {openAddForm&&<AddForm
-                defaultValue={data}
-                open={openAddForm}
-                onClose={handleCloseAddForm}
-                editMode={editMode}
-                title={editMode ? 'Edit Statement' : 'Add New Statement'}
-            />}
+            {openAddForm && (
+                <AddForm
+                    defaultValue={data}
+                    open={openAddForm}
+                    onClose={handleCloseAddForm}
+                    editMode={editMode}
+                    title={editMode ? 'Edit Statement' : 'Add New Statement'}
+                />
+            )}
 
             {/* Loading Backdrop */}
             <Backdrop
@@ -368,18 +382,14 @@ const StatementIndex = () => {
 
 const breadCrumbs = [
     {
-        title: "Statements",
+        title: 'Statements',
         link: null,
-        icon: null
-    }
+        icon: null,
+    },
 ];
 
-StatementIndex.layout = page => (
-    <AuthenticatedLayout
-        auth={page.props.auth}
-        children={page}
-        breadcrumbs={breadCrumbs}
-    />
+StatementIndex.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
 );
 
 export default StatementIndex;

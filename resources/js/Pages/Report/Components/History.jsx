@@ -8,19 +8,19 @@ import {
     Paper,
     Stack,
     Typography,
-    useTheme
-} from "@mui/material";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import DocumentsInfo from "@/Components/DocumentsInfo";
+    useTheme,
+} from '@mui/material';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import DocumentsInfo from '@/Components/DocumentsInfo';
 import {
     HistoryOutlined,
     PersonOutlined,
     ThumbDownAlt,
     CalendarToday,
-    Description
-} from "@mui/icons-material";
-import { useState } from "react";
+    Description,
+} from '@mui/icons-material';
+import { useState } from 'react';
 
 /**
  * History Component - Displays the revision history of a report
@@ -39,7 +39,7 @@ const History = ({ history }) => {
 
     // Format date for better readability
     const formatDate = (dateString) => {
-        if (!dateString) return "Unknown date";
+        if (!dateString) return 'Unknown date';
 
         try {
             // Attempt to format the date more nicely if possible
@@ -51,7 +51,7 @@ const History = ({ history }) => {
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit',
-                hour12: false
+                hour12: false,
             });
         } catch (e) {
             // If there's any error parsing, return the original string
@@ -67,7 +67,7 @@ const History = ({ history }) => {
                 mb: 2,
                 borderRadius: 1,
                 overflow: 'hidden',
-                '&:before': { display: 'none' }
+                '&:before': { display: 'none' },
             }}
         >
             <AccordionSummary
@@ -77,7 +77,7 @@ const History = ({ history }) => {
                     borderBottom: `1px solid ${theme.palette.divider}`,
                 }}
             >
-  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
+                <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
                     <HistoryOutlined color="primary" />
                     <Typography variant="h6">Report History</Typography>
                     <Chip
@@ -91,7 +91,11 @@ const History = ({ history }) => {
 
             <AccordionDetails sx={{ p: 2 }}>
                 {history.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', textAlign: 'center', p: 2 }}>
+                    <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ fontStyle: 'italic', textAlign: 'center', p: 2 }}
+                    >
                         No revision history available
                     </Typography>
                 ) : (
@@ -105,7 +109,7 @@ const History = ({ history }) => {
                                 sx={{
                                     borderRadius: 1,
                                     overflow: 'hidden',
-                                    '&:before': { display: 'none' }
+                                    '&:before': { display: 'none' },
                                 }}
                             >
                                 <AccordionSummary
@@ -118,7 +122,11 @@ const History = ({ history }) => {
                                         <Stack
                                             direction={{ xs: 'column', sm: 'row' }}
                                             spacing={1}
-                                            sx={{ justifyContent: "space-between", alignItems: { xs: 'flex-start', sm: 'center' }, width: '100%' }}
+                                            sx={{
+                                                justifyContent: 'space-between',
+                                                alignItems: { xs: 'flex-start', sm: 'center' },
+                                                width: '100%',
+                                            }}
                                         >
                                             <Chip
                                                 label={`Revision ${index + 1}`}
@@ -130,31 +138,70 @@ const History = ({ history }) => {
                                             <Stack
                                                 direction={{ xs: 'column', md: 'row' }}
                                                 spacing={{ xs: 0.5, md: 2 }}
-                                                divider={<Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' } }} />}
+                                                divider={
+                                                    <Divider
+                                                        orientation="vertical"
+                                                        flexItem
+                                                        sx={{
+                                                            display: { xs: 'none', md: 'block' },
+                                                        }}
+                                                    />
+                                                }
                                             >
-  <Stack direction="row" spacing={0.5} sx={{alignItems: "center"}}>
-                                                    <PersonOutlined fontSize="small" color="primary" />
+                                                <Stack
+                                                    direction="row"
+                                                    spacing={0.5}
+                                                    sx={{ alignItems: 'center' }}
+                                                >
+                                                    <PersonOutlined
+                                                        fontSize="small"
+                                                        color="primary"
+                                                    />
                                                     <Typography variant="body2">
-                                                        Reported by <strong>{item?.reporter?.name || 'Unknown'}</strong>
+                                                        Reported by{' '}
+                                                        <strong>
+                                                            {item?.reporter?.name || 'Unknown'}
+                                                        </strong>
                                                     </Typography>
                                                 </Stack>
 
-  <Stack direction="row" spacing={0.5} sx={{alignItems: "center"}}>
-                                                    <CalendarToday fontSize="small" color="action" />
+                                                <Stack
+                                                    direction="row"
+                                                    spacing={0.5}
+                                                    sx={{ alignItems: 'center' }}
+                                                >
+                                                    <CalendarToday
+                                                        fontSize="small"
+                                                        color="action"
+                                                    />
                                                     <Typography variant="body2">
                                                         {formatDate(item?.reportedAt)}
                                                     </Typography>
                                                 </Stack>
 
-  <Stack direction="row" spacing={0.5} sx={{alignItems: "center"}}>
+                                                <Stack
+                                                    direction="row"
+                                                    spacing={0.5}
+                                                    sx={{ alignItems: 'center' }}
+                                                >
                                                     <ThumbDownAlt fontSize="small" color="error" />
                                                     <Typography variant="body2">
-                                                        Rejected by <strong>{item?.approver?.name || 'Unknown'}</strong>
+                                                        Rejected by{' '}
+                                                        <strong>
+                                                            {item?.approver?.name || 'Unknown'}
+                                                        </strong>
                                                     </Typography>
                                                 </Stack>
 
-  <Stack direction="row" spacing={0.5} sx={{alignItems: "center"}}>
-                                                    <CalendarToday fontSize="small" color="action" />
+                                                <Stack
+                                                    direction="row"
+                                                    spacing={0.5}
+                                                    sx={{ alignItems: 'center' }}
+                                                >
+                                                    <CalendarToday
+                                                        fontSize="small"
+                                                        color="action"
+                                                    />
                                                     <Typography variant="body2">
                                                         {formatDate(item?.approvedAt)}
                                                     </Typography>
@@ -192,7 +239,11 @@ const History = ({ history }) => {
                                                 borderRadius: 1,
                                             }}
                                         >
-  <Stack direction="row" spacing={1} sx={{alignItems: "center", mb: 1}}>
+                                            <Stack
+                                                direction="row"
+                                                spacing={1}
+                                                sx={{ alignItems: 'center', mb: 1 }}
+                                            >
                                                 <Description fontSize="small" color="primary" />
                                                 <Typography variant="subtitle1">
                                                     Report Content
@@ -204,15 +255,22 @@ const History = ({ history }) => {
                                             {item?.value ? (
                                                 <Box
                                                     sx={{
-                                                        overflowX: "auto",
-                                                        "& table": { borderCollapse: "collapse" },
-                                                        "& td, & th": { border: "1px solid #ddd", padding: "8px" },
-                                                        "& img": { maxWidth: "100%" }
+                                                        overflowX: 'auto',
+                                                        '& table': { borderCollapse: 'collapse' },
+                                                        '& td, & th': {
+                                                            border: '1px solid #ddd',
+                                                            padding: '8px',
+                                                        },
+                                                        '& img': { maxWidth: '100%' },
                                                     }}
                                                     dangerouslySetInnerHTML={{ __html: item.value }}
                                                 />
                                             ) : (
-                                                <Typography variant="body2" color="text.secondary" fontStyle="italic">
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                    fontStyle="italic"
+                                                >
                                                     No content available for this revision
                                                 </Typography>
                                             )}

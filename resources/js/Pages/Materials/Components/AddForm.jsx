@@ -13,12 +13,12 @@ import {
     TableHead,
     TableRow,
     Chip,
-    InputAdornment
-} from "@mui/material";
-import Grid from "@mui/material/Grid";
-import SelectSearch from "@/Components/SelectSearch";
-import {FormProvider, useFormState} from "@/Components/FormTemplate.jsx";
-import React, {useState, useEffect} from "react";
+    InputAdornment,
+} from '@mui/material';
+import Grid from '@mui/material/Grid';
+import SelectSearch from '@/Components/SelectSearch';
+import { FormProvider, useFormState } from '@/Components/FormTemplate.jsx';
+import React, { useState, useEffect } from 'react';
 import {
     Science,
     Add,
@@ -27,10 +27,10 @@ import {
     CalendarToday,
     Numbers,
     BiotechOutlined,
-    DeleteOutlined
-} from "@mui/icons-material";
+    DeleteOutlined,
+} from '@mui/icons-material';
 
-const AddForm = ({open, onClose, defaultValue}) => {
+const AddForm = ({ open, onClose, defaultValue }) => {
     const url = defaultValue?.id
         ? route('materials.update', defaultValue.id)
         : route('materials.store');
@@ -40,13 +40,13 @@ const AddForm = ({open, onClose, defaultValue}) => {
         number_of_tubes: 1,
         tubes: [
             {
-                tube_barcode: "",
-                tube_series: "",
-                expire_date: "",
-                manufactured_date: ""
-            }
+                tube_barcode: '',
+                tube_series: '',
+                expire_date: '',
+                manufactured_date: '',
+            },
         ],
-        ...defaultValue
+        ...defaultValue,
     };
 
     return (
@@ -56,15 +56,20 @@ const AddForm = ({open, onClose, defaultValue}) => {
             open={open}
             url={url}
             maxWidth="md"
-            generalTitle={defaultValue?.id ? "Edit Material" : " Materials"}>
-            <FormContent/>
+            generalTitle={defaultValue?.id ? 'Edit Material' : ' Materials'}
+        >
+            <FormContent />
         </FormProvider>
     );
 };
 
 const FormContent = () => {
-    const {data, setData, errors} = useFormState();
-    const [tubesList, setTubesList] = useState(data.tubes || [{tube_barcode: "", tube_series: "", expire_date: "", manufactured_date: ""}]);
+    const { data, setData, errors } = useFormState();
+    const [tubesList, setTubesList] = useState(
+        data.tubes || [
+            { tube_barcode: '', tube_series: '', expire_date: '', manufactured_date: '' },
+        ],
+    );
 
     useEffect(() => {
         // Update tubes list when number changes
@@ -75,83 +80,95 @@ const FormContent = () => {
             // Add new empty tubes
             const newTubes = [...tubesList];
             for (let i = currentCount; i < newCount; i++) {
-                newTubes.push({tube_barcode: "", tube_series: "", expire_date: "", manufactured_date: ""});
+                newTubes.push({
+                    tube_barcode: '',
+                    tube_series: '',
+                    expire_date: '',
+                    manufactured_date: '',
+                });
             }
             setTubesList(newTubes);
-            setData(prev => ({...prev, tubes: newTubes}));
+            setData((prev) => ({ ...prev, tubes: newTubes }));
         } else if (newCount < currentCount) {
             // Remove excess tubes
             const newTubes = tubesList.slice(0, newCount);
             setTubesList(newTubes);
-            setData(prev => ({...prev, tubes: newTubes}));
+            setData((prev) => ({ ...prev, tubes: newTubes }));
         }
     }, [data.number_of_tubes]);
 
     const handleChange = (e) => {
-        const {name, value} = e.target;
-        setData(prevState => ({...prevState, [name]: value}));
+        const { name, value } = e.target;
+        setData((prevState) => ({ ...prevState, [name]: value }));
     };
 
     const handleTubeChange = (index, field, value) => {
         const newTubes = [...tubesList];
         newTubes[index] = {
             ...newTubes[index],
-            [field]: value
+            [field]: value,
         };
         setTubesList(newTubes);
-        setData(prev => ({...prev, tubes: newTubes}));
+        setData((prev) => ({ ...prev, tubes: newTubes }));
     };
 
     const handleDeleteTube = (index) => {
         const newTubes = tubesList.filter((_, i) => i !== index);
         setTubesList(newTubes);
-        setData(prev => ({
+        setData((prev) => ({
             ...prev,
             tubes: newTubes,
-            number_of_tubes: newTubes.length
+            number_of_tubes: newTubes.length,
         }));
     };
 
     const incrementTubes = () => {
         const newValue = Math.min(parseInt(data.number_of_tubes || 1) + 1, 100);
-        setData(prev => ({...prev, number_of_tubes: newValue}));
+        setData((prev) => ({ ...prev, number_of_tubes: newValue }));
     };
 
     const decrementTubes = () => {
         const newValue = Math.max(parseInt(data.number_of_tubes || 1) - 1, 1);
-        setData(prev => ({...prev, number_of_tubes: newValue}));
+        setData((prev) => ({ ...prev, number_of_tubes: newValue }));
     };
 
     return (
         <Grid size={12}>
             {/* Sample Type Selection */}
-            <Paper elevation={0} sx={{p: 2, mb: 3, borderRadius: '10px', border: '1px solid #e0e0e0'}}>
-                <Typography variant="h6" gutterBottom sx={{display: 'flex', alignItems: 'center', mb: 2}}>
-                    <Science sx={{mr: 1}}/>
+            <Paper
+                elevation={0}
+                sx={{ p: 2, mb: 3, borderRadius: '10px', border: '1px solid #e0e0e0' }}
+            >
+                <Typography
+                    variant="h6"
+                    gutterBottom
+                    sx={{ display: 'flex', alignItems: 'center', mb: 2 }}
+                >
+                    <Science sx={{ mr: 1 }} />
                     Sample Type & Quantity
                 </Typography>
-                <Divider sx={{mb: 3}}/>
+                <Divider sx={{ mb: 3 }} />
 
                 <Grid container spacing={3}>
-                    <Grid size={{xs: 12, sm: 8}}>
+                    <Grid size={{ xs: 12, sm: 8 }}>
                         <SelectSearch
                             value={data.sample_type}
                             label="Sample Type (Kit Type)"
                             fullWidth
                             required
                             error={!!errors?.sample_type}
-                            helperText={errors?.sample_type || "Select the type of sample kit"}
+                            helperText={errors?.sample_type || 'Select the type of sample kit'}
                             onChange={handleChange}
                             name="sample_type"
-                            defaultData={{orderable:true}}
-                            url={route("api.sampleTypes.list")}
+                            defaultData={{ orderable: true }}
+                            url={route('api.sampleTypes.list')}
                             variant="outlined"
                             placeholder="Search and select sample type..."
                             getOptionLabel={(option) => option?.name || ''}
                         />
                     </Grid>
 
-                    <Grid size={{xs: 12, sm: 4}}>
+                    <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField
                             label="Number of Tubes"
                             name="number_of_tubes"
@@ -160,14 +177,14 @@ const FormContent = () => {
                             type="number"
                             variant="outlined"
                             error={!!errors?.number_of_tubes}
-                            helperText={errors?.number_of_tubes || "How many tubes?"}
+                            helperText={errors?.number_of_tubes || 'How many tubes?'}
                             onChange={handleChange}
                             value={data.number_of_tubes || 1}
                             slotProps={{
                                 input: {
                                     startAdornment: (
                                         <InputAdornment position="start">
-                                            <Numbers fontSize="small"/>
+                                            <Numbers fontSize="small" />
                                         </InputAdornment>
                                     ),
                                     endAdornment: (
@@ -177,19 +194,19 @@ const FormContent = () => {
                                                 onClick={decrementTubes}
                                                 disabled={data.number_of_tubes <= 1}
                                             >
-                                                <Remove fontSize="small"/>
+                                                <Remove fontSize="small" />
                                             </IconButton>
                                             <IconButton
                                                 size="small"
                                                 onClick={incrementTubes}
                                                 disabled={data.number_of_tubes >= 100}
                                             >
-                                                <Add fontSize="small"/>
+                                                <Add fontSize="small" />
                                             </IconButton>
                                         </InputAdornment>
                                     ),
                                 },
-                                htmlInput: { min: 1, max: 100 }
+                                htmlInput: { min: 1, max: 100 },
                             }}
                         />
                     </Grid>
@@ -198,22 +215,29 @@ const FormContent = () => {
 
             {/* Tubes Input Section */}
             {data.sample_type && (
-                <Paper elevation={0} sx={{p: 2, mb: 3, borderRadius: '10px', border: '1px solid #e0e0e0'}}>
-                    <Typography variant="h6" gutterBottom sx={{display: 'flex', alignItems: 'center', mb: 2}}>
-                        <BiotechOutlined sx={{mr: 1}}/>
+                <Paper
+                    elevation={0}
+                    sx={{ p: 2, mb: 3, borderRadius: '10px', border: '1px solid #e0e0e0' }}
+                >
+                    <Typography
+                        variant="h6"
+                        gutterBottom
+                        sx={{ display: 'flex', alignItems: 'center', mb: 2 }}
+                    >
+                        <BiotechOutlined sx={{ mr: 1 }} />
                         Tube Details
                         <Chip
                             label={`${tubesList.length} tube${tubesList.length > 1 ? 's' : ''}`}
                             size="small"
                             color="primary"
-                            sx={{ml: 1}}
+                            sx={{ ml: 1 }}
                         />
                     </Typography>
-                    <Divider sx={{mb: 3}}/>
+                    <Divider sx={{ mb: 3 }} />
 
                     {tubesList.length > 5 ? (
                         // Table view for many tubes
-                        <TableContainer sx={{maxHeight: 400}}>
+                        <TableContainer sx={{ maxHeight: 400 }}>
                             <Table stickyHeader size="small">
                                 <TableHead>
                                     <TableRow>
@@ -235,9 +259,19 @@ const FormContent = () => {
                                                     fullWidth
                                                     placeholder="Enter tube barcode"
                                                     value={tube.tube_barcode}
-                                                    onChange={(e) => handleTubeChange(index, 'tube_barcode', e.target.value)}
-                                                    error={!!errors?.[`tubes.${index}.tube_barcode`]}
-                                                    helperText={errors?.[`tubes.${index}.tube_barcode`]}
+                                                    onChange={(e) =>
+                                                        handleTubeChange(
+                                                            index,
+                                                            'tube_barcode',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    error={
+                                                        !!errors?.[`tubes.${index}.tube_barcode`]
+                                                    }
+                                                    helperText={
+                                                        errors?.[`tubes.${index}.tube_barcode`]
+                                                    }
                                                 />
                                             </TableCell>
                                             <TableCell>
@@ -245,10 +279,18 @@ const FormContent = () => {
                                                     size="small"
                                                     fullWidth
                                                     placeholder="Enter tube series"
-                                                    value={tube.tube_series || ""}
-                                                    onChange={(e) => handleTubeChange(index, 'tube_series', e.target.value)}
+                                                    value={tube.tube_series || ''}
+                                                    onChange={(e) =>
+                                                        handleTubeChange(
+                                                            index,
+                                                            'tube_series',
+                                                            e.target.value,
+                                                        )
+                                                    }
                                                     error={!!errors?.[`tubes.${index}.tube_series`]}
-                                                    helperText={errors?.[`tubes.${index}.tube_series`]}
+                                                    helperText={
+                                                        errors?.[`tubes.${index}.tube_series`]
+                                                    }
                                                 />
                                             </TableCell>
                                             <TableCell>
@@ -256,12 +298,24 @@ const FormContent = () => {
                                                     size="small"
                                                     fullWidth
                                                     type="date"
-                                                    value={tube.manufactured_date || ""}
-                                                    onChange={(e) => handleTubeChange(index, 'manufactured_date', e.target.value)}
-                                                    error={!!errors?.[`tubes.${index}.manufactured_date`]}
-                                                    helperText={errors?.[`tubes.${index}.manufactured_date`]}
+                                                    value={tube.manufactured_date || ''}
+                                                    onChange={(e) =>
+                                                        handleTubeChange(
+                                                            index,
+                                                            'manufactured_date',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    error={
+                                                        !!errors?.[
+                                                            `tubes.${index}.manufactured_date`
+                                                        ]
+                                                    }
+                                                    helperText={
+                                                        errors?.[`tubes.${index}.manufactured_date`]
+                                                    }
                                                     slotProps={{
-                                                        inputLabel: {shrink: true}
+                                                        inputLabel: { shrink: true },
                                                     }}
                                                 />
                                             </TableCell>
@@ -271,11 +325,19 @@ const FormContent = () => {
                                                     fullWidth
                                                     type="date"
                                                     value={tube.expire_date}
-                                                    onChange={(e) => handleTubeChange(index, 'expire_date', e.target.value)}
+                                                    onChange={(e) =>
+                                                        handleTubeChange(
+                                                            index,
+                                                            'expire_date',
+                                                            e.target.value,
+                                                        )
+                                                    }
                                                     error={!!errors?.[`tubes.${index}.expire_date`]}
-                                                    helperText={errors?.[`tubes.${index}.expire_date`]}
+                                                    helperText={
+                                                        errors?.[`tubes.${index}.expire_date`]
+                                                    }
                                                     slotProps={{
-                                                        inputLabel: {shrink: true}
+                                                        inputLabel: { shrink: true },
                                                     }}
                                                 />
                                             </TableCell>
@@ -286,7 +348,7 @@ const FormContent = () => {
                                                     onClick={() => handleDeleteTube(index)}
                                                     disabled={tubesList.length <= 1}
                                                 >
-                                                    <DeleteOutlined fontSize="small"/>
+                                                    <DeleteOutlined fontSize="small" />
                                                 </IconButton>
                                             </TableCell>
                                         </TableRow>
@@ -298,17 +360,24 @@ const FormContent = () => {
                         // Card view for few tubes
                         <Grid container spacing={2}>
                             {tubesList.map((tube, index) => (
-                                <Grid size={{xs: 12}} key={index}>
+                                <Grid size={{ xs: 12 }} key={index}>
                                     <Paper
                                         elevation={0}
                                         sx={{
                                             p: 2,
                                             border: '1px solid #e0e0e0',
                                             borderRadius: '8px',
-                                            backgroundColor: '#f9f9f9'
+                                            backgroundColor: '#f9f9f9',
                                         }}
                                     >
-                                        <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2}}>
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                mb: 2,
+                                            }}
+                                        >
                                             <Typography variant="subtitle2" color="primary">
                                                 Tube #{index + 1}
                                             </Typography>
@@ -318,77 +387,111 @@ const FormContent = () => {
                                                     color="error"
                                                     onClick={() => handleDeleteTube(index)}
                                                 >
-                                                    <DeleteOutlined fontSize="small"/>
+                                                    <DeleteOutlined fontSize="small" />
                                                 </IconButton>
                                             )}
                                         </Box>
                                         <Grid container spacing={2}>
-                                            <Grid size={{xs: 12, sm: 6}}>
+                                            <Grid size={{ xs: 12, sm: 6 }}>
                                                 <TextField
                                                     label="Tube Barcode"
                                                     fullWidth
                                                     variant="outlined"
                                                     size="small"
                                                     value={tube.tube_barcode}
-                                                    onChange={(e) => handleTubeChange(index, 'tube_barcode', e.target.value)}
-                                                    error={!!errors?.[`tubes.${index}.tube_barcode`]}
-                                                    helperText={errors?.[`tubes.${index}.tube_barcode`] || "Scan or enter tube barcode"}
+                                                    onChange={(e) =>
+                                                        handleTubeChange(
+                                                            index,
+                                                            'tube_barcode',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    error={
+                                                        !!errors?.[`tubes.${index}.tube_barcode`]
+                                                    }
+                                                    helperText={
+                                                        errors?.[`tubes.${index}.tube_barcode`] ||
+                                                        'Scan or enter tube barcode'
+                                                    }
                                                     slotProps={{
                                                         input: {
                                                             startAdornment: (
                                                                 <InputAdornment position="start">
-                                                                    <QrCode fontSize="small"/>
+                                                                    <QrCode fontSize="small" />
                                                                 </InputAdornment>
                                                             ),
-                                                        }
+                                                        },
                                                     }}
                                                 />
                                             </Grid>
-                                            <Grid size={{xs: 12, sm: 6}}>
+                                            <Grid size={{ xs: 12, sm: 6 }}>
                                                 <TextField
                                                     label="Tube Series"
                                                     fullWidth
                                                     variant="outlined"
                                                     size="small"
-                                                    value={tube.tube_series || ""}
-                                                    onChange={(e) => handleTubeChange(index, 'tube_series', e.target.value)}
+                                                    value={tube.tube_series || ''}
+                                                    onChange={(e) =>
+                                                        handleTubeChange(
+                                                            index,
+                                                            'tube_series',
+                                                            e.target.value,
+                                                        )
+                                                    }
                                                     error={!!errors?.[`tubes.${index}.tube_series`]}
-                                                    helperText={errors?.[`tubes.${index}.tube_series`] || "Optional tube series"}
+                                                    helperText={
+                                                        errors?.[`tubes.${index}.tube_series`] ||
+                                                        'Optional tube series'
+                                                    }
                                                     slotProps={{
                                                         input: {
                                                             startAdornment: (
                                                                 <InputAdornment position="start">
-                                                                    <Numbers fontSize="small"/>
+                                                                    <Numbers fontSize="small" />
                                                                 </InputAdornment>
                                                             ),
-                                                        }
+                                                        },
                                                     }}
                                                 />
                                             </Grid>
-                                            <Grid size={{xs: 12, sm: 6}}>
+                                            <Grid size={{ xs: 12, sm: 6 }}>
                                                 <TextField
                                                     label="Manufactured Date"
                                                     fullWidth
                                                     type="date"
                                                     variant="outlined"
                                                     size="small"
-                                                    value={tube.manufactured_date || ""}
-                                                    onChange={(e) => handleTubeChange(index, 'manufactured_date', e.target.value)}
-                                                    error={!!errors?.[`tubes.${index}.manufactured_date`]}
-                                                    helperText={errors?.[`tubes.${index}.manufactured_date`] || "Optional manufactured date"}
+                                                    value={tube.manufactured_date || ''}
+                                                    onChange={(e) =>
+                                                        handleTubeChange(
+                                                            index,
+                                                            'manufactured_date',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    error={
+                                                        !!errors?.[
+                                                            `tubes.${index}.manufactured_date`
+                                                        ]
+                                                    }
+                                                    helperText={
+                                                        errors?.[
+                                                            `tubes.${index}.manufactured_date`
+                                                        ] || 'Optional manufactured date'
+                                                    }
                                                     slotProps={{
                                                         input: {
                                                             startAdornment: (
                                                                 <InputAdornment position="start">
-                                                                    <CalendarToday fontSize="small"/>
+                                                                    <CalendarToday fontSize="small" />
                                                                 </InputAdornment>
                                                             ),
                                                         },
-                                                        inputLabel: {shrink: true}
+                                                        inputLabel: { shrink: true },
                                                     }}
                                                 />
                                             </Grid>
-                                            <Grid size={{xs: 12, sm: 6}}>
+                                            <Grid size={{ xs: 12, sm: 6 }}>
                                                 <TextField
                                                     label="Expire Date"
                                                     fullWidth
@@ -396,18 +499,27 @@ const FormContent = () => {
                                                     variant="outlined"
                                                     size="small"
                                                     value={tube.expire_date}
-                                                    onChange={(e) => handleTubeChange(index, 'expire_date', e.target.value)}
+                                                    onChange={(e) =>
+                                                        handleTubeChange(
+                                                            index,
+                                                            'expire_date',
+                                                            e.target.value,
+                                                        )
+                                                    }
                                                     error={!!errors?.[`tubes.${index}.expire_date`]}
-                                                    helperText={errors?.[`tubes.${index}.expire_date`] || "Tube expiration date"}
+                                                    helperText={
+                                                        errors?.[`tubes.${index}.expire_date`] ||
+                                                        'Tube expiration date'
+                                                    }
                                                     slotProps={{
                                                         input: {
                                                             startAdornment: (
                                                                 <InputAdornment position="start">
-                                                                    <CalendarToday fontSize="small"/>
+                                                                    <CalendarToday fontSize="small" />
                                                                 </InputAdornment>
                                                             ),
                                                         },
-                                                        inputLabel: {shrink: true}
+                                                        inputLabel: { shrink: true },
                                                     }}
                                                 />
                                             </Grid>
@@ -419,7 +531,7 @@ const FormContent = () => {
                     )}
 
                     {errors?.tubes && (
-                        <Alert severity="error" sx={{mt: 2}}>
+                        <Alert severity="error" sx={{ mt: 2 }}>
                             {errors.tubes}
                         </Alert>
                     )}
@@ -428,7 +540,7 @@ const FormContent = () => {
 
             {/* Info Alert */}
             {!data.sample_type && (
-                <Alert severity="info" sx={{mt: 2}}>
+                <Alert severity="info" sx={{ mt: 2 }}>
                     Please select a sample type first to enter tube details.
                 </Alert>
             )}

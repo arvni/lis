@@ -6,7 +6,7 @@ import {
     SQUARE_SIZE,
     CIRCLE_RADIUS,
     RESIZE_INCREMENT,
-    GRID_SIZE
+    GRID_SIZE,
 } from './constants';
 
 import {
@@ -15,7 +15,7 @@ import {
     areLinesParallel,
     isElementBetweenParallelLines,
     calculateTextDimensions,
-    snapToGrid
+    snapToGrid,
 } from './utils';
 
 function paintReducer(state, action) {
@@ -28,7 +28,7 @@ function paintReducer(state, action) {
                 isDragging: false,
                 currentLinePoints: [],
                 selectionStep: 0,
-                tempSelectionPoints: []
+                tempSelectionPoints: [],
             };
 
         case ActionTypes.SET_PEN_SIZE:
@@ -51,27 +51,30 @@ function paintReducer(state, action) {
                 return {
                     ...state,
                     isDrawing: true,
-                    currentLinePoints: [action.payload]
+                    currentLinePoints: [action.payload],
                 };
             } else if (state.currentTool === 'straight-line') {
                 return {
                     ...state,
                     isDrawing: true,
-                    currentLinePoints: [action.payload]
+                    currentLinePoints: [action.payload],
                 };
             }
             return state;
         }
 
         case ActionTypes.DRAWING: {
-            if (state.isDrawing && (state.currentTool === 'draw' || state.currentTool === 'eraser')) {
+            if (
+                state.isDrawing &&
+                (state.currentTool === 'draw' || state.currentTool === 'eraser')
+            ) {
                 let point = action.payload;
                 if (state.snapToGrid) {
                     point = snapToGrid(point, GRID_SIZE);
                 }
                 return {
                     ...state,
-                    currentLinePoints: [...state.currentLinePoints, point]
+                    currentLinePoints: [...state.currentLinePoints, point],
                 };
             } else if (state.isDrawing && state.currentTool === 'straight-line') {
                 // For straight line, we only need start and current point
@@ -82,7 +85,7 @@ function paintReducer(state, action) {
                 // Keep the first point and update the second point
                 return {
                     ...state,
-                    currentLinePoints: [state.currentLinePoints[0], point]
+                    currentLinePoints: [state.currentLinePoints[0], point],
                 };
             }
             return state;
@@ -100,15 +103,13 @@ function paintReducer(state, action) {
                     id: Date.now(),
                     item: {
                         shape: ElementTypes.LINE,
-                        points: [...state.currentLinePoints]
+                        points: [...state.currentLinePoints],
                     },
                     lineStyle: 'solid',
                     color: state.penColor,
-                    lineWidth: state.penSize
+                    lineWidth: state.penSize,
                 };
-            }
-
-            else if (state.currentTool === 'eraser') {
+            } else if (state.currentTool === 'eraser') {
                 if (state.currentLinePoints.length <= 1) {
                     return { ...state, isDrawing: false, currentLinePoints: [] };
                 }
@@ -116,13 +117,11 @@ function paintReducer(state, action) {
                     id: Date.now(),
                     item: {
                         shape: ElementTypes.ERASE_PATH,
-                        points: [...state.currentLinePoints]
+                        points: [...state.currentLinePoints],
                     },
-                    lineWidth: state.penSize
+                    lineWidth: state.penSize,
                 };
-            }
-
-            else if (state.currentTool === 'straight-line') {
+            } else if (state.currentTool === 'straight-line') {
                 if (state.currentLinePoints.length !== 2) {
                     return { ...state, isDrawing: false, currentLinePoints: [] };
                 }
@@ -131,11 +130,11 @@ function paintReducer(state, action) {
                     item: {
                         shape: ElementTypes.STRAIGHT_LINE,
                         start: state.currentLinePoints[0],
-                        end: state.currentLinePoints[1]
+                        end: state.currentLinePoints[1],
                     },
                     lineStyle: 'solid',
                     color: state.penColor,
-                    lineWidth: state.penSize
+                    lineWidth: state.penSize,
                 };
             }
 
@@ -145,11 +144,14 @@ function paintReducer(state, action) {
                     isDrawing: false,
                     currentLinePoints: [],
                     elementsOnCanvas: [...state.elementsOnCanvas, newElement],
-                    undoOperations: [...state.undoOperations, {
-                        op: 'ADD',
-                        elementId: newElement.id,
-                        elementData: newElement
-                    }],
+                    undoOperations: [
+                        ...state.undoOperations,
+                        {
+                            op: 'ADD',
+                            elementId: newElement.id,
+                            elementData: newElement,
+                        },
+                    ],
                     redoOperations: [],
                 };
             }
@@ -176,28 +178,26 @@ function paintReducer(state, action) {
                         x,
                         y,
                         width: SQUARE_SIZE,
-                        height: SQUARE_SIZE
+                        height: SQUARE_SIZE,
                     },
                     lineStyle: 'solid',
                     color: state.penColor,
                     fillColor: state.fillColor,
-                    lineWidth: state.penSize
+                    lineWidth: state.penSize,
                 };
-            }
-
-            else if (shapeType === 'circle') {
+            } else if (shapeType === 'circle') {
                 newShape = {
                     id: Date.now(),
                     item: {
                         shape: ElementTypes.CIRCLE,
                         cx: x,
                         cy: y,
-                        radius: CIRCLE_RADIUS
+                        radius: CIRCLE_RADIUS,
                     },
                     lineStyle: 'solid',
                     color: state.penColor,
                     fillColor: state.fillColor,
-                    lineWidth: state.penSize
+                    lineWidth: state.penSize,
                 };
             }
 
@@ -205,11 +205,14 @@ function paintReducer(state, action) {
                 return {
                     ...state,
                     elementsOnCanvas: [...state.elementsOnCanvas, newShape],
-                    undoOperations: [...state.undoOperations, {
-                        op: 'ADD',
-                        elementId: newShape.id,
-                        elementData: newShape
-                    }],
+                    undoOperations: [
+                        ...state.undoOperations,
+                        {
+                            op: 'ADD',
+                            elementId: newShape.id,
+                            elementData: newShape,
+                        },
+                    ],
                     redoOperations: [],
                 };
             }
@@ -223,7 +226,7 @@ function paintReducer(state, action) {
                 ...state,
                 isDragging: true,
                 dragStartPosition: startPosition,
-                elementBeingDragged: elementId
+                elementBeingDragged: elementId,
             };
         }
 
@@ -235,7 +238,9 @@ function paintReducer(state, action) {
             const dy = currentPosition.y - state.dragStartPosition.y;
 
             let updatedElements = [...state.elementsOnCanvas];
-            const elementIndex = updatedElements.findIndex(el => el.id === state.elementBeingDragged);
+            const elementIndex = updatedElements.findIndex(
+                (el) => el.id === state.elementBeingDragged,
+            );
 
             if (elementIndex === -1) return state;
 
@@ -257,11 +262,9 @@ function paintReducer(state, action) {
                 newElement.item = {
                     ...element.item,
                     x: newX,
-                    y: newY
+                    y: newY,
                 };
-            }
-
-            else if (shape === ElementTypes.CIRCLE) {
+            } else if (shape === ElementTypes.CIRCLE) {
                 let newCx = element.item.cx + dx;
                 let newCy = element.item.cy + dy;
 
@@ -273,19 +276,17 @@ function paintReducer(state, action) {
                 newElement.item = {
                     ...element.item,
                     cx: newCx,
-                    cy: newCy
+                    cy: newCy,
                 };
-            }
-
-            else if (shape === ElementTypes.STRAIGHT_LINE) {
+            } else if (shape === ElementTypes.STRAIGHT_LINE) {
                 let newStart = {
                     x: element.item.start.x + dx,
-                    y: element.item.start.y + dy
+                    y: element.item.start.y + dy,
                 };
 
                 let newEnd = {
                     x: element.item.end.x + dx,
-                    y: element.item.end.y + dy
+                    y: element.item.end.y + dy,
                 };
 
                 if (state.snapToGrid) {
@@ -296,11 +297,9 @@ function paintReducer(state, action) {
                 newElement.item = {
                     ...element.item,
                     start: newStart,
-                    end: newEnd
+                    end: newEnd,
                 };
-            }
-
-            else if (shape === ElementTypes.TEXT) {
+            } else if (shape === ElementTypes.TEXT) {
                 let newX = element.item.x + dx;
                 let newY = element.item.y + dy;
 
@@ -312,7 +311,7 @@ function paintReducer(state, action) {
                 newElement.item = {
                     ...element.item,
                     x: newX,
-                    y: newY
+                    y: newY,
                 };
             }
 
@@ -321,7 +320,7 @@ function paintReducer(state, action) {
             return {
                 ...state,
                 elementsOnCanvas: updatedElements,
-                dragStartPosition: currentPosition
+                dragStartPosition: currentPosition,
             };
         }
 
@@ -331,7 +330,7 @@ function paintReducer(state, action) {
                     ...state,
                     isDragging: false,
                     dragStartPosition: null,
-                    elementBeingDragged: null
+                    elementBeingDragged: null,
                 };
             }
 
@@ -342,9 +341,9 @@ function paintReducer(state, action) {
                 elementBeingDragged: null,
                 undoOperations: [
                     ...state.undoOperations,
-                    { op: 'MOVE', elementId: state.elementBeingDragged }
+                    { op: 'MOVE', elementId: state.elementBeingDragged },
                 ],
-                redoOperations: []
+                redoOperations: [],
             };
         }
 
@@ -363,22 +362,25 @@ function paintReducer(state, action) {
                     fontSize: state.textSize,
                     fontFamily: 'Arial',
                     width: dimensions.width,
-                    height: dimensions.height
+                    height: dimensions.height,
                 },
-                color: state.penColor
+                color: state.penColor,
             };
 
             return {
                 ...state,
                 elementsOnCanvas: [...state.elementsOnCanvas, newText],
-                undoOperations: [...state.undoOperations, {
-                    op: 'ADD',
-                    elementId: newText.id,
-                    elementData: newText
-                }],
+                undoOperations: [
+                    ...state.undoOperations,
+                    {
+                        op: 'ADD',
+                        elementId: newText.id,
+                        elementData: newText,
+                    },
+                ],
                 redoOperations: [],
                 textInputDialogOpen: false,
-                currentTextInput: ''
+                currentTextInput: '',
             };
         }
 
@@ -387,7 +389,7 @@ function paintReducer(state, action) {
                 ...state,
                 textInputDialogOpen: true,
                 currentTextInput: '',
-                textPositionOnCanvas: action.payload
+                textPositionOnCanvas: action.payload,
             };
 
         case ActionTypes.CLOSE_TEXT_DIALOG:
@@ -395,7 +397,7 @@ function paintReducer(state, action) {
                 ...state,
                 textInputDialogOpen: false,
                 currentTextInput: '',
-                textPositionOnCanvas: null
+                textPositionOnCanvas: null,
             };
 
         case ActionTypes.UPDATE_TEXT_INPUT:
@@ -413,21 +415,25 @@ function paintReducer(state, action) {
                     y,
                     radius: state.penSize < 5 ? 10 : state.penSize * 2,
                 },
-                color: state.fillColor || state.penColor
+                color: state.fillColor || state.penColor,
             };
 
             return {
                 ...state,
                 elementsOnCanvas: [...state.elementsOnCanvas, fillPlaceholderElement],
-                undoOperations: [...state.undoOperations, {
-                    op: 'ADD',
-                    elementId: fillPlaceholderElement.id,
-                    elementData: fillPlaceholderElement
-                }],
+                undoOperations: [
+                    ...state.undoOperations,
+                    {
+                        op: 'ADD',
+                        elementId: fillPlaceholderElement.id,
+                        elementData: fillPlaceholderElement,
+                    },
+                ],
                 redoOperations: [],
                 notificationOpen: true,
-                notificationMessage: 'Fill tool clicked. A full implementation would flood fill from this point.',
-                notificationSeverity: 'info'
+                notificationMessage:
+                    'Fill tool clicked. A full implementation would flood fill from this point.',
+                notificationSeverity: 'info',
             };
         }
 
@@ -441,13 +447,16 @@ function paintReducer(state, action) {
                 ...state,
                 canvasWidth: newW,
                 canvasHeight: newH,
-                undoOperations: [...state.undoOperations, {
-                    op: 'RESIZE',
-                    oldW,
-                    oldH,
-                    newW,
-                    newH
-                }],
+                undoOperations: [
+                    ...state.undoOperations,
+                    {
+                        op: 'RESIZE',
+                        oldW,
+                        oldH,
+                        newW,
+                        newH,
+                    },
+                ],
                 redoOperations: [],
             };
         }
@@ -455,21 +464,21 @@ function paintReducer(state, action) {
         case ActionTypes.DELETE_SELECTED: {
             if (state.selectedElementIds.length === 0) return state;
 
-            const elementsToDelete = state.elementsOnCanvas.filter(el =>
-                state.selectedElementIds.includes(el.id)
+            const elementsToDelete = state.elementsOnCanvas.filter((el) =>
+                state.selectedElementIds.includes(el.id),
             );
 
             return {
                 ...state,
-                elementsOnCanvas: state.elementsOnCanvas.filter(el =>
-                    !state.selectedElementIds.includes(el.id)
+                elementsOnCanvas: state.elementsOnCanvas.filter(
+                    (el) => !state.selectedElementIds.includes(el.id),
                 ),
                 undoOperations: [
                     ...state.undoOperations,
-                    { op: 'DELETE', elements: elementsToDelete }
+                    { op: 'DELETE', elements: elementsToDelete },
                 ],
                 redoOperations: [],
-                selectedElementIds: []
+                selectedElementIds: [],
             };
         }
 
@@ -483,13 +492,11 @@ function paintReducer(state, action) {
             let newCanvasHeight = state.canvasHeight;
 
             if (lastOp.op === 'ADD') {
-                newElements = newElements.filter(el => el.id !== lastOp.elementId);
-            }
-            else if (lastOp.op === 'RESIZE') {
+                newElements = newElements.filter((el) => el.id !== lastOp.elementId);
+            } else if (lastOp.op === 'RESIZE') {
                 newCanvasWidth = lastOp.oldW;
                 newCanvasHeight = lastOp.oldH;
-            }
-            else if (lastOp.op === 'DELETE') {
+            } else if (lastOp.op === 'DELETE') {
                 newElements = [...newElements, ...lastOp.elements];
             }
 
@@ -516,14 +523,12 @@ function paintReducer(state, action) {
                 if (opToRedo.elementData) {
                     newElements = [...newElements, opToRedo.elementData];
                 }
-            }
-            else if (opToRedo.op === 'RESIZE') {
+            } else if (opToRedo.op === 'RESIZE') {
                 newCanvasWidth = opToRedo.newW;
                 newCanvasHeight = opToRedo.newH;
-            }
-            else if (opToRedo.op === 'DELETE') {
-                newElements = newElements.filter(el =>
-                    !opToRedo.elements.some(deletedEl => deletedEl.id === el.id)
+            } else if (opToRedo.op === 'DELETE') {
+                newElements = newElements.filter(
+                    (el) => !opToRedo.elements.some((deletedEl) => deletedEl.id === el.id),
                 );
             }
 
@@ -547,8 +552,10 @@ function paintReducer(state, action) {
                     const el = state.elementsOnCanvas[i];
 
                     // Skip non-selectable elements
-                    if (el.item.shape === ElementTypes.ERASE_PATH ||
-                        el.item.shape === ElementTypes.FILL_PLACEHOLDER) {
+                    if (
+                        el.item.shape === ElementTypes.ERASE_PATH ||
+                        el.item.shape === ElementTypes.FILL_PLACEHOLDER
+                    ) {
                         continue;
                     }
 
@@ -559,13 +566,13 @@ function paintReducer(state, action) {
                                 ...state,
                                 isDragging: true,
                                 dragStartPosition: { x, y },
-                                elementBeingDragged: el.id
+                                elementBeingDragged: el.id,
                             };
                         } else {
                             // Otherwise select this element
                             return {
                                 ...state,
-                                selectedElementIds: [el.id]
+                                selectedElementIds: [el.id],
                             };
                         }
                     }
@@ -578,7 +585,7 @@ function paintReducer(state, action) {
                     selectionStep: 1,
                     selectionLine1Props: null,
                     selectionLine2Props: null,
-                    selectedElementIds: []
+                    selectedElementIds: [],
                 };
             }
 
@@ -598,15 +605,15 @@ function paintReducer(state, action) {
                         selectionLine1Props: {
                             points: [p1, p2],
                             equation: line1Eq,
-                            type: 'solid'
-                        }
+                            type: 'solid',
+                        },
                     };
                 } else {
                     return {
                         ...state,
                         tempSelectionPoints: [],
-                        selectionStep: 0
-                    }
+                        selectionStep: 0,
+                    };
                 }
             }
 
@@ -615,7 +622,7 @@ function paintReducer(state, action) {
                 return {
                     ...state,
                     tempSelectionPoints: [{ x, y }],
-                    selectionStep: 4
+                    selectionStep: 4,
                 };
             }
 
@@ -625,8 +632,11 @@ function paintReducer(state, action) {
                 const p2 = { x, y };
                 const line2Eq = getLineEquation(p1, p2);
 
-                if (line2Eq && state.selectionLine1Props &&
-                    areLinesParallel(state.selectionLine1Props.equation, line2Eq)) {
+                if (
+                    line2Eq &&
+                    state.selectionLine1Props &&
+                    areLinesParallel(state.selectionLine1Props.equation, line2Eq)
+                ) {
                     return {
                         ...state,
                         tempSelectionPoints: [],
@@ -636,8 +646,8 @@ function paintReducer(state, action) {
                         selectionLine2Props: {
                             points: [p1, p2],
                             equation: line2Eq,
-                            type: 'solid'
-                        }
+                            type: 'solid',
+                        },
                     };
                 } else {
                     return {
@@ -645,7 +655,7 @@ function paintReducer(state, action) {
                         tempSelectionPoints: [],
                         selectionStep: 3,
                         selectionLine2Props: null,
-                        selectedElementIds: []
+                        selectedElementIds: [],
                     };
                 }
             }
@@ -658,42 +668,45 @@ function paintReducer(state, action) {
             let nextState = {
                 ...state,
                 lineTypeDialogOpen: false,
-                currentSelectingLineRef: null
+                currentSelectingLineRef: null,
             };
 
             if (lineRef === 'line1') {
                 nextState.selectionLine1Props = {
                     ...state.selectionLine1Props,
-                    type: lineType
+                    type: lineType,
                 };
                 nextState.selectionStep = 3;
-            }
-            else if (lineRef === 'line2') {
+            } else if (lineRef === 'line2') {
                 nextState.selectionLine2Props = {
                     ...state.selectionLine2Props,
-                    type: lineType
+                    type: lineType,
                 };
                 nextState.selectionStep = 0;
 
                 // Find elements between the two parallel lines
                 const ids = [];
-                if (nextState.selectionLine1Props &&
+                if (
+                    nextState.selectionLine1Props &&
                     nextState.selectionLine2Props &&
                     areLinesParallel(
                         nextState.selectionLine1Props.equation,
-                        nextState.selectionLine2Props.equation
-                    )) {
-                    state.elementsOnCanvas.forEach(el => {
+                        nextState.selectionLine2Props.equation,
+                    )
+                ) {
+                    state.elementsOnCanvas.forEach((el) => {
                         // Ensure element is selectable (not an erase path or fill placeholder)
-                        if (el.item.shape !== ElementTypes.ERASE_PATH &&
+                        if (
+                            el.item.shape !== ElementTypes.ERASE_PATH &&
                             el.item.shape !== ElementTypes.FILL_PLACEHOLDER &&
                             isElementBetweenParallelLines(
                                 el,
                                 nextState.selectionLine1Props.equation,
                                 nextState.selectionLine1Props.type,
                                 nextState.selectionLine2Props.equation,
-                                nextState.selectionLine2Props.type
-                            )) {
+                                nextState.selectionLine2Props.type,
+                            )
+                        ) {
                             ids.push(el.id);
                         }
                     });
@@ -708,7 +721,7 @@ function paintReducer(state, action) {
         case ActionTypes.CLOSE_LINE_TYPE_DIALOG: {
             let resetState = {
                 ...state,
-                lineTypeDialogOpen: false
+                lineTypeDialogOpen: false,
             };
 
             if (state.currentSelectingLineRef === 'line1') {
@@ -727,7 +740,7 @@ function paintReducer(state, action) {
             return {
                 ...state,
                 notificationOpen: false,
-                notificationMessage: ''
+                notificationMessage: '',
             };
 
         case ActionTypes.SET_TEXT_SIZE:

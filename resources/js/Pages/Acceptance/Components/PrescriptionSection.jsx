@@ -1,9 +1,9 @@
-import React from "react";
-import { Box, Stack, Typography, Button, Paper, Chip } from "@mui/material";
-import FileOpenIcon from "@mui/icons-material/FileOpen";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import React from 'react';
+import { Box, Stack, Typography, Button, Paper, Chip } from '@mui/material';
+import FileOpenIcon from '@mui/icons-material/FileOpen';
+import DescriptionIcon from '@mui/icons-material/Description';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 
 const PrescriptionSection = ({ prescription }) => {
     if (!prescription) return null;
@@ -30,13 +30,17 @@ const PrescriptionSection = ({ prescription }) => {
 
     return (
         <Paper elevation={1} sx={{ p: 3, borderRadius: 2, bgcolor: 'background.paper' }}>
-            <Box sx={{display: "flex", mb: 2, alignItems: "center"}}>
-                <DescriptionIcon sx={{ mr: 2, color: "primary.main", fontSize: 28 }} />
+            <Box sx={{ display: 'flex', mb: 2, alignItems: 'center' }}>
+                <DescriptionIcon sx={{ mr: 2, color: 'primary.main', fontSize: 28 }} />
                 <Typography variant="h6">Prescription Document</Typography>
             </Box>
 
             <Box sx={{ pl: 6, mb: 3 }}>
-  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{alignItems: "center"}}>
+                <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
+                    spacing={2}
+                    sx={{ alignItems: 'center' }}
+                >
                     {getFileIcon(prescription.originalName)}
 
                     <Box sx={{ flexGrow: 1 }}>
@@ -56,7 +60,7 @@ const PrescriptionSection = ({ prescription }) => {
                         variant="contained"
                         color="primary"
                         startIcon={<FileOpenIcon />}
-                        href={route("documents.show", prescription.hash)}
+                        href={route('documents.show', prescription.hash)}
                         target="_blank"
                         rel="noopener noreferrer"
                         sx={{ minWidth: 150 }}

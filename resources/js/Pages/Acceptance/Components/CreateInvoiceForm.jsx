@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -22,8 +22,8 @@ import {
     Chip,
     Alert,
     CircularProgress,
-    useTheme
-} from "@mui/material";
+    useTheme,
+} from '@mui/material';
 import {
     Close,
     Save,
@@ -32,9 +32,9 @@ import {
     Business,
     CheckCircle,
     Info,
-    ArrowForward
-} from "@mui/icons-material";
-import { router, usePage } from "@inertiajs/react";
+    ArrowForward,
+} from '@mui/icons-material';
+import { router, usePage } from '@inertiajs/react';
 
 /**
  * Enhanced CreateInvoiceForm component with improved UI/UX
@@ -62,11 +62,11 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
         const newErrors = {};
 
         if (!formData.owner_type) {
-            newErrors.owner_type = "Please select an invoice owner";
+            newErrors.owner_type = 'Please select an invoice owner';
         }
 
         if (!formData.owner_id) {
-            newErrors.owner_id = "Owner ID is required";
+            newErrors.owner_id = 'Owner ID is required';
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -76,7 +76,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
         }
 
         // Submit the form
-        router.post(route("invoices.store"), formData, {
+        router.post(route('invoices.store'), formData, {
             onSuccess: () => {
                 setProcessing(false);
                 const newId = page.props.created_invoice_id;
@@ -89,7 +89,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
             onError: (errors) => {
                 setErrors(errors);
                 setProcessing(false);
-            }
+            },
         });
     };
 
@@ -101,12 +101,12 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
         setFormData((prevState) => ({
             ...prevState,
             owner_type: value,
-            owner_id: ownerId
+            owner_id: ownerId,
         }));
 
         // Clear error if valid selection is made
         if (errors.owner_type && value) {
-            setErrors(prev => {
+            setErrors((prev) => {
                 const newErrors = { ...prev };
                 delete newErrors.owner_type;
                 return newErrors;
@@ -127,7 +127,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                         width: 40,
                         height: 40,
                         border: '2px solid',
-                        borderColor: type === 'patient' ? 'primary.main' : 'secondary.main'
+                        borderColor: type === 'patient' ? 'primary.main' : 'secondary.main',
                     }}
                 />
             );
@@ -138,7 +138,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                 sx={{
                     bgcolor: type === 'patient' ? 'primary.main' : 'secondary.main',
                     width: 40,
-                    height: 40
+                    height: 40,
                 }}
             >
                 {type === 'patient' ? <Person /> : <Business />}
@@ -153,10 +153,12 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
             maxWidth="md"
             fullWidth
             slotProps={{
-                paper:{sx: {
-                    borderRadius: 2,
-                    overflow: 'hidden'
-                }}
+                paper: {
+                    sx: {
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                    },
+                },
             }}
         >
             <DialogTitle
@@ -165,7 +167,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                     backgroundColor: alpha(theme.palette.primary.main, 0.05),
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between'
+                    justifyContent: 'space-between',
                 }}
             >
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -173,7 +175,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                         sx={{
                             mr: 1.5,
                             color: 'primary.main',
-                            fontSize: 28
+                            fontSize: 28,
                         }}
                     />
                     <Box>
@@ -196,7 +198,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                     aria-label="Close dialog"
                     sx={{
                         color: 'text.secondary',
-                        '&:hover': { color: 'primary.main' }
+                        '&:hover': { color: 'primary.main' },
                     }}
                 >
                     <Close />
@@ -207,7 +209,14 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
 
             <DialogContent sx={{ p: 3 }}>
                 {processing ? (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 6 }}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            py: 6,
+                        }}
+                    >
                         <CircularProgress size={60} thickness={4} />
                         <Typography variant="h6" sx={{ mt: 3 }}>
                             Creating invoice...
@@ -221,12 +230,12 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                             variant="outlined"
                             sx={{
                                 mb: 3,
-                                borderRadius: 2
+                                borderRadius: 2,
                             }}
                         >
                             <Typography variant="body2">
-                                The invoice owner will be responsible for payment.
-                                Select the patient or referrer as the owner.
+                                The invoice owner will be responsible for payment. Select the
+                                patient or referrer as the owner.
                             </Typography>
                         </Alert>
 
@@ -237,7 +246,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                             variant="outlined"
                             sx={{
                                 p: 3,
-                                borderRadius: 2
+                                borderRadius: 2,
                             }}
                         >
                             <FormLabel
@@ -246,7 +255,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                     mb: 2,
                                     fontSize: '1rem',
                                     fontWeight: 'medium',
-                                    color: 'text.primary'
+                                    color: 'text.primary',
                                 }}
                             >
                                 Select Invoice Owner
@@ -262,23 +271,31 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                     sx={{
                                         display: 'flex',
                                         flexDirection: { xs: 'column', sm: 'row' },
-                                        gap: 2
+                                        gap: 2,
                                     }}
                                 >
                                     <Paper
-                                        variant={formData.owner_type === 'patient' ? "elevation" : "outlined"}
+                                        variant={
+                                            formData.owner_type === 'patient'
+                                                ? 'elevation'
+                                                : 'outlined'
+                                        }
                                         elevation={formData.owner_type === 'patient' ? 3 : 0}
                                         sx={{
                                             p: 2,
                                             borderRadius: 2,
                                             flex: 1,
-                                            borderColor: formData.owner_type === 'patient' ? 'primary.main' : 'divider',
-                                            backgroundColor: formData.owner_type === 'patient'
-                                                ? alpha(theme.palette.primary.main, 0.05)
-                                                : 'background.paper',
+                                            borderColor:
+                                                formData.owner_type === 'patient'
+                                                    ? 'primary.main'
+                                                    : 'divider',
+                                            backgroundColor:
+                                                formData.owner_type === 'patient'
+                                                    ? alpha(theme.palette.primary.main, 0.05)
+                                                    : 'background.paper',
                                             transition: 'all 0.2s',
                                             position: 'relative',
-                                            overflow: 'hidden'
+                                            overflow: 'hidden',
                                         }}
                                     >
                                         {formData.owner_type === 'patient' && (
@@ -290,24 +307,19 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                                 sx={{
                                                     position: 'absolute',
                                                     top: 8,
-                                                    right: 8
+                                                    right: 8,
                                                 }}
                                             />
                                         )}
 
                                         <FormControlLabel
                                             value="patient"
-                                            control={
-                                                <Radio
-                                                    color="primary"
-                                                    sx={{ mr: 1 }}
-                                                />
-                                            }
+                                            control={<Radio color="primary" sx={{ mr: 1 }} />}
                                             label=""
                                             sx={{
                                                 m: 0,
                                                 width: '100%',
-                                                alignItems: 'flex-start'
+                                                alignItems: 'flex-start',
                                             }}
                                         />
 
@@ -315,7 +327,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                             sx={{
                                                 mt: 1,
                                                 display: 'flex',
-                                                alignItems: 'center'
+                                                alignItems: 'center',
                                             }}
                                         >
                                             {getOwnerAvatar('patient', formData.patient)}
@@ -328,7 +340,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                                     sx={{
                                                         display: 'flex',
                                                         alignItems: 'center',
-                                                        mt: 0.5
+                                                        mt: 0.5,
                                                     }}
                                                 >
                                                     <Typography
@@ -336,14 +348,14 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                                         color="text.secondary"
                                                         sx={{
                                                             display: 'flex',
-                                                            alignItems: 'center'
+                                                            alignItems: 'center',
                                                         }}
                                                     >
                                                         <Person
                                                             fontSize="small"
                                                             sx={{
                                                                 mr: 0.5,
-                                                                color: 'primary.light'
+                                                                color: 'primary.light',
                                                             }}
                                                         />
                                                         Patient
@@ -365,19 +377,27 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
 
                                     {formData.referrer && (
                                         <Paper
-                                            variant={formData.owner_type === 'referrer' ? "elevation" : "outlined"}
+                                            variant={
+                                                formData.owner_type === 'referrer'
+                                                    ? 'elevation'
+                                                    : 'outlined'
+                                            }
                                             elevation={formData.owner_type === 'referrer' ? 3 : 0}
                                             sx={{
                                                 p: 2,
                                                 borderRadius: 2,
                                                 flex: 1,
-                                                borderColor: formData.owner_type === 'referrer' ? 'secondary.main' : 'divider',
-                                                backgroundColor: formData.owner_type === 'referrer'
-                                                    ? alpha(theme.palette.secondary.main, 0.05)
-                                                    : 'background.paper',
+                                                borderColor:
+                                                    formData.owner_type === 'referrer'
+                                                        ? 'secondary.main'
+                                                        : 'divider',
+                                                backgroundColor:
+                                                    formData.owner_type === 'referrer'
+                                                        ? alpha(theme.palette.secondary.main, 0.05)
+                                                        : 'background.paper',
                                                 transition: 'all 0.2s',
                                                 position: 'relative',
-                                                overflow: 'hidden'
+                                                overflow: 'hidden',
                                             }}
                                         >
                                             {formData.owner_type === 'referrer' && (
@@ -389,24 +409,19 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                                     sx={{
                                                         position: 'absolute',
                                                         top: 8,
-                                                        right: 8
+                                                        right: 8,
                                                     }}
                                                 />
                                             )}
 
                                             <FormControlLabel
                                                 value="referrer"
-                                                control={
-                                                    <Radio
-                                                        color="secondary"
-                                                        sx={{ mr: 1 }}
-                                                    />
-                                                }
+                                                control={<Radio color="secondary" sx={{ mr: 1 }} />}
                                                 label=""
                                                 sx={{
                                                     m: 0,
                                                     width: '100%',
-                                                    alignItems: 'flex-start'
+                                                    alignItems: 'flex-start',
                                                 }}
                                             />
 
@@ -414,20 +429,25 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                                 sx={{
                                                     mt: 1,
                                                     display: 'flex',
-                                                    alignItems: 'center'
+                                                    alignItems: 'center',
                                                 }}
                                             >
                                                 {getOwnerAvatar('referrer', formData.referrer)}
 
                                                 <Box sx={{ ml: 2 }}>
-                                                    <Typography variant="subtitle1" fontWeight="medium">
-                                                        {formData.referrer?.fullName || formData.referrer?.name || 'Referrer'}
+                                                    <Typography
+                                                        variant="subtitle1"
+                                                        fontWeight="medium"
+                                                    >
+                                                        {formData.referrer?.fullName ||
+                                                            formData.referrer?.name ||
+                                                            'Referrer'}
                                                     </Typography>
                                                     <Box
                                                         sx={{
                                                             display: 'flex',
                                                             alignItems: 'center',
-                                                            mt: 0.5
+                                                            mt: 0.5,
                                                         }}
                                                     >
                                                         <Typography
@@ -435,14 +455,14 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                                             color="text.secondary"
                                                             sx={{
                                                                 display: 'flex',
-                                                                alignItems: 'center'
+                                                                alignItems: 'center',
                                                             }}
                                                         >
                                                             <Business
                                                                 fontSize="small"
                                                                 sx={{
                                                                     mr: 0.5,
-                                                                    color: 'secondary.light'
+                                                                    color: 'secondary.light',
                                                                 }}
                                                             />
                                                             Referrer
@@ -456,11 +476,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                             </RadioGroup>
 
                             {errors.owner_type && (
-                                <Typography
-                                    variant="caption"
-                                    color="error"
-                                    sx={{ mt: 1 }}
-                                >
+                                <Typography variant="caption" color="error" sx={{ mt: 1 }}>
                                     {errors.owner_type}
                                 </Typography>
                             )}
@@ -474,7 +490,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                     borderRadius: 2,
                                     border: '1px dashed',
                                     borderColor: 'divider',
-                                    backgroundColor: alpha(theme.palette.background.default, 0.5)
+                                    backgroundColor: alpha(theme.palette.background.default, 0.5),
                                 }}
                             >
                                 <Typography variant="subtitle2" gutterBottom>
@@ -498,7 +514,8 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                         <Typography variant="body2" fontWeight="medium">
                                             {formData.owner_type === 'patient'
                                                 ? formData.patient?.fullName
-                                                : formData.referrer?.fullName || formData.referrer?.name}
+                                                : formData.referrer?.fullName ||
+                                                  formData.referrer?.name}
                                         </Typography>
                                     </Box>
 
@@ -510,7 +527,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                             variant="body2"
                                             sx={{
                                                 display: 'flex',
-                                                alignItems: 'center'
+                                                alignItems: 'center',
                                             }}
                                         >
                                             {formData.owner_type === 'patient' ? (
@@ -519,7 +536,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                                         fontSize="small"
                                                         sx={{
                                                             mr: 0.5,
-                                                            color: 'primary.main'
+                                                            color: 'primary.main',
                                                         }}
                                                     />
                                                     Patient Invoice
@@ -530,7 +547,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                                         fontSize="small"
                                                         sx={{
                                                             mr: 0.5,
-                                                            color: 'secondary.main'
+                                                            color: 'secondary.main',
                                                         }}
                                                     />
                                                     Referrer Invoice
@@ -547,7 +564,9 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
 
             <Divider />
 
-            <DialogActions sx={{ p: 2.5, backgroundColor: alpha(theme.palette.background.default, 0.5) }}>
+            <DialogActions
+                sx={{ p: 2.5, backgroundColor: alpha(theme.palette.background.default, 0.5) }}
+            >
                 <Button
                     onClick={onClose}
                     color="inherit"

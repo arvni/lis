@@ -1,19 +1,19 @@
 import '../css/app.css';
 import './bootstrap';
 
-import {createInertiaApp} from '@inertiajs/react';
-import {resolvePageComponent} from 'laravel-vite-plugin/inertia-helpers';
-import {createRoot} from 'react-dom/client';
+import { createInertiaApp } from '@inertiajs/react';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { createRoot } from 'react-dom/client';
 
 // Import additional components
 import ErrorBoundary from './Components/ErrorBoundary';
-import {SnackbarProvider} from "notistack";
+import { SnackbarProvider } from 'notistack';
 
 // App configuration
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Bion Genetic LIS';
 
 // Global error handler
-window.onerror = function(message, source, lineno, colno, error) {
+window.onerror = function (message, source, lineno, colno, error) {
     console.error('Global error:', error);
     // You could implement client-side error logging here
 };
@@ -25,15 +25,12 @@ createInertiaApp({
         try {
             return await resolvePageComponent(
                 `./Pages/${name}.jsx`,
-                import.meta.glob('./Pages/**/*.jsx')
+                import.meta.glob('./Pages/**/*.jsx'),
             );
         } catch (error) {
             console.error(`Failed to load page: ${name}`, error);
             // Fallback to error page
-            return resolvePageComponent(
-                './Pages/Error.jsx',
-                import.meta.glob('./Pages/**/*.jsx')
-            );
+            return resolvePageComponent('./Pages/Error.jsx', import.meta.glob('./Pages/**/*.jsx'));
         }
     },
 
@@ -59,7 +56,10 @@ createInertiaApp({
                 if (value === 'true' || value === true) {
                     if (++ariaHiddenDepth === 1) _setAttribute('inert', '');
                 } else if (ariaHiddenDepth > 0) {
-                    if (--ariaHiddenDepth <= 0) { ariaHiddenDepth = 0; _removeAttribute('inert'); }
+                    if (--ariaHiddenDepth <= 0) {
+                        ariaHiddenDepth = 0;
+                        _removeAttribute('inert');
+                    }
                 }
             } else {
                 _setAttribute(name, value);
@@ -96,9 +96,9 @@ createInertiaApp({
         root.render(
             <ErrorBoundary>
                 <SnackbarProvider maxSnack={3}>
-                <App {...props} />
+                    <App {...props} />
                 </SnackbarProvider>
-            </ErrorBoundary>
+            </ErrorBoundary>,
         );
 
         // Remove loading state once the app is rendered
@@ -116,6 +116,6 @@ createInertiaApp({
         // Delay before showing the progress bar (prevents flicker for fast loads)
         delay: 250,
         // Add a custom class for additional styling
-        className: 'inertia-progress-bar'
+        className: 'inertia-progress-bar',
     },
 });

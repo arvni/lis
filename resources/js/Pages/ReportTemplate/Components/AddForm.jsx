@@ -10,29 +10,30 @@ import {
     Box,
     Tooltip,
     Alert,
-    Stack, Chip
-} from "@mui/material";
-import Grid from "@mui/material/Grid";
-import IconButton from "@mui/material/IconButton";
-import Button from "@mui/material/Button";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
+    Stack,
+    Chip,
+} from '@mui/material';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
+import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
 
-import Upload from "@/Components/Upload";
-import { FormProvider, useFormState } from "@/Components/FormTemplate.jsx";
-import { usePage } from "@inertiajs/react";
+import Upload from '@/Components/Upload';
+import { FormProvider, useFormState } from '@/Components/FormTemplate.jsx';
+import { usePage } from '@inertiajs/react';
 
 const TYPE_DESCRIPTIONS = {
-    text: "Single line text input",
-    number: "Numeric input only",
-    date: "Date picker",
-    image: "Image upload",
-    select: "Dropdown selection",
-    checkbox: "Yes/No checkbox option"
+    text: 'Single line text input',
+    number: 'Numeric input only',
+    date: 'Date picker',
+    image: 'Image upload',
+    select: 'Dropdown selection',
+    checkbox: 'Yes/No checkbox option',
 };
 
 const AddForm = ({ open, onClose, defaultValue }) => {
@@ -40,19 +41,19 @@ const AddForm = ({ open, onClose, defaultValue }) => {
         ? route('reportTemplates.update', defaultValue.id)
         : route('reportTemplates.store');
     const defaultData = {
-        name: "",
+        name: '',
         approval_flow_id: null,
         template: null,
         parameters: [
             {
-                title: "",
+                title: '',
                 required: false,
                 active: true,
-                type: "text",
-                custom_props: ""
-            }
+                type: 'text',
+                custom_props: '',
+            },
         ],
-        ...defaultValue
+        ...defaultValue,
     };
 
     return (
@@ -72,26 +73,27 @@ const AddForm = ({ open, onClose, defaultValue }) => {
 const FormContent = () => {
     const { data, setData } = useFormState();
     const { approvalFlows = [] } = usePage().props;
-    const handleChange = (e) => setData(prevState => ({ ...prevState, [e.target.name]: e.target.value }));
+    const handleChange = (e) =>
+        setData((prevState) => ({ ...prevState, [e.target.name]: e.target.value }));
 
     // Handle parameter changes
     const handleParameterChange = (index, field, value) => {
         const updatedParameters = [...data.parameters];
         updatedParameters[index] = {
             ...updatedParameters[index],
-            [field]: value
+            [field]: value,
         };
-        setData(prevState => ({ ...prevState, parameters: updatedParameters }));
+        setData((prevState) => ({ ...prevState, parameters: updatedParameters }));
     };
 
     // Add a new parameter
     const addParameter = () => {
-        setData(prevState => ({
+        setData((prevState) => ({
             ...prevState,
             parameters: [
                 ...prevState.parameters,
-                { title: "", required: false, active: true, type: "text", custom_props: "" }
-            ]
+                { title: '', required: false, active: true, type: 'text', custom_props: '' },
+            ],
         }));
     };
 
@@ -99,7 +101,7 @@ const FormContent = () => {
     const removeParameter = (index) => {
         const updatedParameters = [...data.parameters];
         updatedParameters.splice(index, 1);
-        setData(prevState => ({ ...prevState, parameters: updatedParameters }));
+        setData((prevState) => ({ ...prevState, parameters: updatedParameters }));
     };
 
     return (
@@ -112,47 +114,57 @@ const FormContent = () => {
                 <Divider sx={{ mb: 2 }} />
 
                 <Grid container spacing={3}>
-                    <Grid size={12} >
+                    <Grid size={12}>
                         <TextField
                             fullWidth
                             label="Template Title"
                             name="name"
                             onChange={handleChange}
-                            value={data?.name || ""}
+                            value={data?.name || ''}
                             placeholder="Enter a descriptive title for this template"
                             required
                             helperText="This title will be displayed to users when selecting templates"
                         />
                     </Grid>
 
-                    <Grid size={12} >
+                    <Grid size={12}>
                         <FormControl fullWidth>
                             <InputLabel id="approval-flow-label">Approval Flow</InputLabel>
                             <Select
                                 labelId="approval-flow-label"
                                 name="approval_flow_id"
-                                value={data?.approval_flow_id ?? ""}
+                                value={data?.approval_flow_id ?? ''}
                                 label="Approval Flow"
-                                onChange={(e) => setData(prevState => ({
-                                    ...prevState,
-                                    approval_flow_id: e.target.value === "" ? null : e.target.value
-                                }))}
+                                onChange={(e) =>
+                                    setData((prevState) => ({
+                                        ...prevState,
+                                        approval_flow_id:
+                                            e.target.value === '' ? null : e.target.value,
+                                    }))
+                                }
                             >
                                 <MenuItem value="">
                                     <em>None — single approval</em>
                                 </MenuItem>
                                 {approvalFlows.map((flow) => (
-                                    <MenuItem value={flow.id} key={flow.id}>{flow.name}</MenuItem>
+                                    <MenuItem value={flow.id} key={flow.id}>
+                                        {flow.name}
+                                    </MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                            Reports created from this template will require each step of the selected flow to be
-                            approved in order. Without a flow, one approval publishes the report.
+                        <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: 'block', mt: 1 }}
+                        >
+                            Reports created from this template will require each step of the
+                            selected flow to be approved in order. Without a flow, one approval
+                            publishes the report.
                         </Typography>
                     </Grid>
 
-                    <Grid size={12} >
+                    <Grid size={12}>
                         <Typography variant="subtitle2" gutterBottom>
                             Template Document
                         </Typography>
@@ -163,9 +175,13 @@ const FormContent = () => {
                             onChange={setData}
                             required
                             accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                            url={route("documents.store")}
+                            url={route('documents.store')}
                         />
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                        <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: 'block', mt: 1 }}
+                        >
                             Accepted formats: .doc, .docx (Word documents)
                         </Typography>
                     </Grid>
@@ -174,7 +190,11 @@ const FormContent = () => {
 
             {/* Parameters Section */}
             <Paper elevation={0} sx={{ p: 3, border: '1px solid #e0e0e0' }}>
-  <Box display="flex" mb={1} sx={{alignItems: "center", justifyContent: "space-between"}}>
+                <Box
+                    display="flex"
+                    mb={1}
+                    sx={{ alignItems: 'center', justifyContent: 'space-between' }}
+                >
                     <Typography variant="h6" color="primary">
                         Template Parameters
                     </Typography>
@@ -187,7 +207,8 @@ const FormContent = () => {
                 <Divider sx={{ mb: 2 }} />
 
                 <Alert severity="info" sx={{ mb: 3 }}>
-                    Define the information fields that users need to complete when using this template
+                    Define the information fields that users need to complete when using this
+                    template
                 </Alert>
 
                 {data?.parameters?.map((param, index) => (
@@ -203,113 +224,155 @@ const FormContent = () => {
                             borderRadius: 1,
                             position: 'relative',
                             '&:hover': {
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                            }
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            },
                         }}
                     >
-  <Grid container spacing={2} sx={{alignItems: "center"}}>
+                        <Grid container spacing={2} sx={{ alignItems: 'center' }}>
                             <Grid size={12} container>
-                                <Grid size={{ xs: 12, sm: 8, md: 9 }} >
+                                <Grid size={{ xs: 12, sm: 8, md: 9 }}>
                                     <Typography variant="subtitle2" gutterBottom>
                                         Parameter #{index + 1}
                                         {param.required && (
-                                            <Typography component="span" color="error" sx={{ ml: 1 }}>
+                                            <Typography
+                                                component="span"
+                                                color="error"
+                                                sx={{ ml: 1 }}
+                                            >
                                                 *Required
                                             </Typography>
                                         )}
                                     </Typography>
                                 </Grid>
-                                <Grid size={{ xs: 12, sm: 4, md: 3 }} sx={{ textAlign: "right" }}>
+                                <Grid size={{ xs: 12, sm: 4, md: 3 }} sx={{ textAlign: 'right' }}>
                                     <Tooltip title="Drag to reorder" placement="top">
                                         <IconButton size="small" sx={{ mr: 1, cursor: 'grab' }}>
                                             <DragIndicatorIcon fontSize="small" />
                                         </IconButton>
                                     </Tooltip>
                                     <Tooltip
-                                        title={data.parameters.length <= 1 ? "At least one parameter is required" : "Remove parameter"}
+                                        title={
+                                            data.parameters.length <= 1
+                                                ? 'At least one parameter is required'
+                                                : 'Remove parameter'
+                                        }
                                         placement="top"
                                     >
-                    <span>
-                      <IconButton
-                          color="error"
-                          onClick={() => removeParameter(index)}
-                          disabled={data.parameters.length <= 1}
-                          size="small"
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </span>
+                                        <span>
+                                            <IconButton
+                                                color="error"
+                                                onClick={() => removeParameter(index)}
+                                                disabled={data.parameters.length <= 1}
+                                                size="small"
+                                            >
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        </span>
                                     </Tooltip>
                                 </Grid>
                             </Grid>
 
-                            <Grid size={{ xs: 12, sm: 6 }} >
+                            <Grid size={{ xs: 12, sm: 6 }}>
                                 <TextField
                                     fullWidth
                                     label="Parameter Title"
-                                    value={param.title || ""}
-                                    onChange={(e) => handleParameterChange(index, 'title', e.target.value)}
+                                    value={param.title || ''}
+                                    onChange={(e) =>
+                                        handleParameterChange(index, 'title', e.target.value)
+                                    }
                                     placeholder="e.g., Patient Name"
                                     required
                                 />
                             </Grid>
 
-                            <Grid size={{ xs: 12, sm: 6 }} >
+                            <Grid size={{ xs: 12, sm: 6 }}>
                                 <FormControl fullWidth>
-                                    <InputLabel id={`param-type-label-${index}`}>Input Type</InputLabel>
+                                    <InputLabel id={`param-type-label-${index}`}>
+                                        Input Type
+                                    </InputLabel>
                                     <Select
                                         labelId={`param-type-label-${index}`}
                                         value={param.type}
                                         label="Input Type"
-                                        onChange={(e) => handleParameterChange(index, 'type', e.target.value)}
+                                        onChange={(e) =>
+                                            handleParameterChange(index, 'type', e.target.value)
+                                        }
                                     >
-                                        {Object.entries(TYPE_DESCRIPTIONS).map(([type, description]) => (
-                                            <MenuItem value={type} key={type}>
-                                                <Box>
-                                                    <Typography variant="body2">{type.charAt(0).toUpperCase() + type.slice(1)}</Typography>
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        {description}
-                                                    </Typography>
-                                                </Box>
-                                            </MenuItem>
-                                        ))}
+                                        {Object.entries(TYPE_DESCRIPTIONS).map(
+                                            ([type, description]) => (
+                                                <MenuItem value={type} key={type}>
+                                                    <Box>
+                                                        <Typography variant="body2">
+                                                            {type.charAt(0).toUpperCase() +
+                                                                type.slice(1)}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="caption"
+                                                            color="text.secondary"
+                                                        >
+                                                            {description}
+                                                        </Typography>
+                                                    </Box>
+                                                </MenuItem>
+                                            ),
+                                        )}
                                     </Select>
                                 </FormControl>
                             </Grid>
 
-                            <Grid size={{ xs: 6, sm: 3 }} >
+                            <Grid size={{ xs: 6, sm: 3 }}>
                                 <FormControlLabel
                                     control={
                                         <Checkbox
                                             checked={param.required}
-                                            onChange={(e) => handleParameterChange(index, 'required', e.target.checked)}
+                                            onChange={(e) =>
+                                                handleParameterChange(
+                                                    index,
+                                                    'required',
+                                                    e.target.checked,
+                                                )
+                                            }
                                         />
                                     }
                                     label="Required"
                                 />
                             </Grid>
 
-                            <Grid size={{ xs: 6, sm: 3 }} >
+                            <Grid size={{ xs: 6, sm: 3 }}>
                                 <FormControlLabel
                                     control={
                                         <Checkbox
                                             checked={param.active}
-                                            onChange={(e) => handleParameterChange(index, 'active', e.target.checked)}
+                                            onChange={(e) =>
+                                                handleParameterChange(
+                                                    index,
+                                                    'active',
+                                                    e.target.checked,
+                                                )
+                                            }
                                         />
                                     }
                                     label="Active"
                                     disabled={param.required}
-                                    title={param.required ? "Required parameters must be active" : ""}
+                                    title={
+                                        param.required ? 'Required parameters must be active' : ''
+                                    }
                                 />
                             </Grid>
 
                             {(param.type === 'select' || param.type === 'checkbox') && (
-                                <Grid size={12} >
+                                <Grid size={12}>
                                     <TextField
                                         fullWidth
                                         label="Options"
-                                        value={param.custom_props || ""}
-                                        onChange={(e) => handleParameterChange(index, 'custom_props', e.target.value)}
+                                        value={param.custom_props || ''}
+                                        onChange={(e) =>
+                                            handleParameterChange(
+                                                index,
+                                                'custom_props',
+                                                e.target.value,
+                                            )
+                                        }
                                         placeholder="Option 1, Option 2, Option 3"
                                         helperText="Separate options with commas (,)"
                                         required
@@ -320,9 +383,21 @@ const FormContent = () => {
                                             <Typography variant="caption" color="text.secondary">
                                                 Preview:
                                             </Typography>
-                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    flexWrap: 'wrap',
+                                                    gap: 0.5,
+                                                    mt: 0.5,
+                                                }}
+                                            >
                                                 {param.custom_props.split(',').map((option, i) => (
-                                                    <Chip key={i} label={option.trim()} size="small" variant="outlined" />
+                                                    <Chip
+                                                        key={i}
+                                                        label={option.trim()}
+                                                        size="small"
+                                                        variant="outlined"
+                                                    />
                                                 ))}
                                             </Box>
                                         </Box>
@@ -333,7 +408,7 @@ const FormContent = () => {
                     </Paper>
                 ))}
 
-                <Box sx={{ textAlign: "center", mt: 3 }}>
+                <Box sx={{ textAlign: 'center', mt: 3 }}>
                     <Button
                         variant="contained"
                         color="primary"

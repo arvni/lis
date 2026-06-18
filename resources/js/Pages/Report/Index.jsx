@@ -1,122 +1,152 @@
-import TableLayout from "@/Layouts/TableLayout";
-import DeleteForm from "@/Components/DeleteForm";
-import {GridActionsCellItem} from "@mui/x-data-grid";
-import EditIcon from "@mui/icons-material/Edit";
-import {useState} from "react";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import Filter from "./Components/Filter";
-import {RemoveRedEye} from "@mui/icons-material";
-import {Head, router, useForm, usePage} from "@inertiajs/react";
-import PageHeader from "@/Components/PageHeader.jsx";
+import TableLayout from '@/Layouts/TableLayout';
+import DeleteForm from '@/Components/DeleteForm';
+import { GridActionsCellItem } from '@mui/x-data-grid';
+import EditIcon from '@mui/icons-material/Edit';
+import { useState } from 'react';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import Filter from './Components/Filter';
+import { RemoveRedEye } from '@mui/icons-material';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import PageHeader from '@/Components/PageHeader.jsx';
 
-const Index = ({auth, canEditAll}) => {
-    const {post, setData, reset, processing, get} = useForm()
+const Index = ({ auth, canEditAll }) => {
+    const { post, setData, reset, processing, get } = useForm();
     const columns = [
         {
             field: 'acceptance_item.patient.fullName',
             headerName: 'Patient',
-            type: "string",
+            type: 'string',
             flex: 1,
             sortable: false,
-            renderCell: ({row}) => row.acceptance_item.patients.map(item => item.fullName).join(", ")
-
+            renderCell: ({ row }) =>
+                row.acceptance_item.patients.map((item) => item.fullName).join(', '),
         },
         {
             field: 'name',
             headerName: 'Test',
-            type: "string",
+            type: 'string',
             flex: 1,
             sortable: false,
-            renderCell: ({row}) => row.acceptance_item.test.name + " >> " + row.acceptance_item.method.name
-
+            renderCell: ({ row }) =>
+                row.acceptance_item.test.name + ' >> ' + row.acceptance_item.method.name,
         },
         {
             field: 'reporter_name',
             headerName: 'Reporter',
-            type: "string",
-            flex: .6,
+            type: 'string',
+            flex: 0.6,
         },
         {
             field: 'reported_at',
             headerName: 'Reported At',
-            type: "datetime",
-            flex: .7,
+            type: 'datetime',
+            flex: 0.7,
             valueGetter: (value) => value && new Date(value),
         },
         {
             field: 'approver_name',
             headerName: 'Approver / Rejecter',
-            type: "string",
-            flex: .6,
+            type: 'string',
+            flex: 0.6,
         },
         {
             field: 'approved_at',
             headerName: 'Approved/Rejected At',
-            type: "datetime",
-            flex: .7,
+            type: 'datetime',
+            flex: 0.7,
             valueGetter: (value) => value && new Date(value),
         },
         {
             field: 'status',
             headerName: 'Status',
-            type: "boolean",
-            flex: .2,
+            type: 'boolean',
+            flex: 0.2,
         },
         {
             field: 'published_at',
             headerName: 'Published At',
-            type: "datetime",
-            flex: .7,
+            type: 'datetime',
+            flex: 0.7,
             valueGetter: (value) => value && new Date(value),
         },
         {
             field: 'publisher_name',
             headerName: 'Publisher',
-            type: "string",
-            flex: .7,
+            type: 'string',
+            flex: 0.7,
         },
         {
             field: 'id',
             headerName: 'Action',
             type: 'actions',
             sortable: false,
-            flex: .1,
+            flex: 0.1,
             getActions: (params) => {
-                let cols = [<GridActionsCellItem icon={<RemoveRedEye/>} label="Show" onClick={showReport(params.row.id)}
-                                                 showInMenu href={route("reports.show", params.row.id)}/>];
-                if (params.row.status && ((params.row.reporter.id === auth.user.id && !params.row.approver) || canEditAll))
-                    cols.push(<GridActionsCellItem icon={<EditIcon/>} label="Edit" onClick={editReport(params.row.id)}
-                                                   showInMenu href={route("reports.edit", params.row.id)}/>)
+                let cols = [
+                    <GridActionsCellItem
+                        icon={<RemoveRedEye />}
+                        label="Show"
+                        onClick={showReport(params.row.id)}
+                        showInMenu
+                        href={route('reports.show', params.row.id)}
+                    />,
+                ];
+                if (
+                    params.row.status &&
+                    ((params.row.reporter.id === auth.user.id && !params.row.approver) ||
+                        canEditAll)
+                )
+                    cols.push(
+                        <GridActionsCellItem
+                            icon={<EditIcon />}
+                            label="Edit"
+                            onClick={editReport(params.row.id)}
+                            showInMenu
+                            href={route('reports.edit', params.row.id)}
+                        />,
+                    );
                 return cols;
-            }
-        }
+            },
+        },
     ];
-    const {reports, status, errors, success, requestInputs, title} = usePage().props;
+    const { reports, status, errors, success, requestInputs, title } = usePage().props;
 
-    const editReport = (id) => () => get(route("reports.edit", id));
+    const editReport = (id) => () => get(route('reports.edit', id));
 
-    const showReport = (id) => (e) => get(route("reports.show", id));
+    const showReport = (id) => (e) => get(route('reports.show', id));
     const pageReload = (page, filters, sort, pageSize) => {
         router.visit(route('reports.index'), {
-            data: {page, filters, sort, pageSize},
-            only: ["reports", "status", "requestInputs", "success"]
+            data: { page, filters, sort, pageSize },
+            only: ['reports', 'status', 'requestInputs', 'success'],
         });
-    }
+    };
     return (
         <>
-            <Head title={title || "Reports"}/>
-            <PageHeader title={title || "Reports List"}/>
-            <TableLayout defaultValues={requestInputs} success={success} status={status} reload={pageReload}
-                         columns={columns} data={reports} processing={processing} Filter={Filter} errors={errors}/>
-        </>);
-}
+            <Head title={title || 'Reports'} />
+            <PageHeader title={title || 'Reports List'} />
+            <TableLayout
+                defaultValues={requestInputs}
+                success={success}
+                status={status}
+                reload={pageReload}
+                columns={columns}
+                data={reports}
+                processing={processing}
+                Filter={Filter}
+                errors={errors}
+            />
+        </>
+    );
+};
 const breadCrumbs = [
     {
-        title: "Reports",
+        title: 'Reports',
         link: null,
-        icon: null
-    }
-]
-Index.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
+        icon: null,
+    },
+];
+Index.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
+);
 
 export default Index;

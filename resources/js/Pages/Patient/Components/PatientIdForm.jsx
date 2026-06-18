@@ -1,8 +1,8 @@
-import TextField from "@mui/material/TextField";
-import Grid from "@mui/material/Grid";
-import { Box, InputAdornment, Typography, FormHelperText } from "@mui/material";
-import { BadgeOutlined as BadgeIcon, SearchOutlined as SearchIcon } from "@mui/icons-material";
-import { useState } from "react";
+import TextField from '@mui/material/TextField';
+import Grid from '@mui/material/Grid';
+import { Box, InputAdornment, Typography, FormHelperText } from '@mui/material';
+import { BadgeOutlined as BadgeIcon, SearchOutlined as SearchIcon } from '@mui/icons-material';
+import { useState } from 'react';
 
 const PatientIdForm = ({ onChange, data, errors = {}, onKeyDown }) => {
     const [focused, setFocused] = useState(false);
@@ -11,7 +11,7 @@ const PatientIdForm = ({ onChange, data, errors = {}, onKeyDown }) => {
     const handleBlur = () => setFocused(false);
 
     return (
-        <Box sx={{ width: "100%" }}>
+        <Box sx={{ width: '100%' }}>
             <Typography
                 variant="body2"
                 color="text.primary"
@@ -24,7 +24,7 @@ const PatientIdForm = ({ onChange, data, errors = {}, onKeyDown }) => {
                 <Grid size={12}>
                     <TextField
                         fullWidth
-                        value={data?.idNo || ""}
+                        value={data?.idNo || ''}
                         name="idNo"
                         label="ID Card No / Passport No"
                         onChange={onChange}
@@ -33,30 +33,30 @@ const PatientIdForm = ({ onChange, data, errors = {}, onKeyDown }) => {
                         onBlur={handleBlur}
                         required
                         error={!!errors?.idNo}
-                        helperText={errors?.idNo || ""}
+                        helperText={errors?.idNo || ''}
                         autoFocus
                         variant="outlined"
                         placeholder="Enter national ID or passport number"
                         slotProps={{
-                            input:{
+                            input: {
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <BadgeIcon color={focused ? "primary" : "action"} />
+                                        <BadgeIcon color={focused ? 'primary' : 'action'} />
                                     </InputAdornment>
                                 ),
                                 endAdornment: data?.idNo ? (
                                     <InputAdornment position="end">
                                         <SearchIcon color="action" />
                                     </InputAdornment>
-                                ) : null
-                            }
+                                ) : null,
+                            },
                         }}
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '&.Mui-focused': {
-                                    boxShadow: '0 0 0 2px rgba(25, 118, 210, 0.2)'
-                                }
-                            }
+                                    boxShadow: '0 0 0 2px rgba(25, 118, 210, 0.2)',
+                                },
+                            },
                         }}
                     />
 
@@ -75,7 +75,7 @@ const PatientIdForm = ({ onChange, data, errors = {}, onKeyDown }) => {
                     display: 'block',
                     mt: 3,
                     textAlign: 'center',
-                    fontStyle: 'italic'
+                    fontStyle: 'italic',
                 }}
             >
                 Press Enter or click Next to search for existing records

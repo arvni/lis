@@ -1,13 +1,7 @@
 // DocumentPage.jsx
 import React, { useEffect, useState } from 'react';
 import { Head } from '@inertiajs/react';
-import {
-    Dialog,
-    DialogContent,
-    useTheme,
-    useMediaQuery,
-    Slide
-} from '@mui/material';
+import { Dialog, DialogContent, useTheme, useMediaQuery, Slide } from '@mui/material';
 import SingleDocumentViewer from '@/Components/SingleDocumentViewer';
 
 // Slide transition for dialog
@@ -41,7 +35,8 @@ const Document = ({ document, onClose }) => {
 
     // Determine dialog sizing based on screen size and document type
     const getDialogProps = () => {
-        const isPDF = document?.ext?.toLowerCase() === 'pdf' ||
+        const isPDF =
+            document?.ext?.toLowerCase() === 'pdf' ||
             document?.originalName?.toLowerCase().endsWith('.pdf');
 
         if (isMobile) {
@@ -53,9 +48,9 @@ const Document = ({ document, onClose }) => {
                         margin: 0,
                         borderRadius: 0,
                         height: '100vh',
-                        width: '100vw'
-                    }
-                }
+                        width: '100vw',
+                    },
+                },
             };
         }
 
@@ -70,8 +65,8 @@ const Document = ({ document, onClose }) => {
                         height: 'calc(100vh - 32px)',
                         width: 'calc(100vw - 32px)',
                         maxHeight: 'calc(100vh - 32px)',
-                    }
-                }
+                    },
+                },
             };
         }
 
@@ -86,8 +81,8 @@ const Document = ({ document, onClose }) => {
                         height: '90vh',
                         maxWidth: '1200px',
                         maxHeight: '900px',
-                    }
-                }
+                    },
+                },
             };
         }
 
@@ -100,8 +95,8 @@ const Document = ({ document, onClose }) => {
                 '& .MuiDialog-paper': {
                     height: '80vh',
                     maxHeight: '800px',
-                }
-            }
+                },
+            },
         };
     };
 
@@ -109,31 +104,31 @@ const Document = ({ document, onClose }) => {
 
     return (
         <>
-        <Head title="Document"/>
-        <Dialog
-            open={open}
-            onClose={handleClose}
-            slots={{transition:Transition}}
-            keepMounted={false}
-            aria-labelledby="document-dialog-title"
-            {...dialogProps}
-        >
-            <DialogContent
-                sx={{
-                    p: 0,
-                    // display: 'flex',
-                    // flexDirection: 'column',
-                    overflow: 'hidden',
-                    height: '100%'
-                }}
+            <Head title="Document" />
+            <Dialog
+                open={open}
+                onClose={handleClose}
+                slots={{ transition: Transition }}
+                keepMounted={false}
+                aria-labelledby="document-dialog-title"
+                {...dialogProps}
             >
-                <SingleDocumentViewer
-                    document={document}
-                    onClose={handleClose}
-                    fullScreen={isMobile}
-                />
-            </DialogContent>
-        </Dialog>
+                <DialogContent
+                    sx={{
+                        p: 0,
+                        // display: 'flex',
+                        // flexDirection: 'column',
+                        overflow: 'hidden',
+                        height: '100%',
+                    }}
+                >
+                    <SingleDocumentViewer
+                        document={document}
+                        onClose={handleClose}
+                        fullScreen={isMobile}
+                    />
+                </DialogContent>
+            </Dialog>
         </>
     );
 };

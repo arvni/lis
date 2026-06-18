@@ -1,30 +1,30 @@
-import React from "react";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import PatientInfo from "@/Pages/Patient/Components/PatientInfo";
-import SectionsInfo from "@/Pages/AcceptanceItem/Components/SectionsInfo";
-import DocumentsInfo from "@/Components/DocumentsInfo";
-import TestInfo from "@/Pages/AcceptanceItem/Components/TestInfo";
-import ReportForm from "@/Pages/Report/Components/ReportForm";
-import History from "@/Pages/Report/Components/History";
-import PageHeader from "@/Components/PageHeader.jsx";
-import {Head, useForm, Link} from "@inertiajs/react";
-import {Button, Tooltip} from "@mui/material";
-import {Visibility as VisibilityIcon} from "@mui/icons-material";
+import React from 'react';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PatientInfo from '@/Pages/Patient/Components/PatientInfo';
+import SectionsInfo from '@/Pages/AcceptanceItem/Components/SectionsInfo';
+import DocumentsInfo from '@/Components/DocumentsInfo';
+import TestInfo from '@/Pages/AcceptanceItem/Components/TestInfo';
+import ReportForm from '@/Pages/Report/Components/ReportForm';
+import History from '@/Pages/Report/Components/History';
+import PageHeader from '@/Components/PageHeader.jsx';
+import { Head, useForm, Link } from '@inertiajs/react';
+import { Button, Tooltip } from '@mui/material';
+import { Visibility as VisibilityIcon } from '@mui/icons-material';
 
-const Add = ({patients, acceptanceItem, templates, history, test, method}) => {
-    const {post, data, setData, reset, processing,} = useForm({
+const Add = ({ patients, acceptanceItem, templates, history, test, method }) => {
+    const { post, data, setData, reset, processing } = useForm({
         reported_document: null,
         report_template: null,
         parameters: {},
         acceptance_item_id: acceptanceItem.id,
         files: [],
-        patient_id: patients[0]?.id
+        patient_id: patients[0]?.id,
     });
-    const handleSubmit = () => post(route("reports.store"));
+    const handleSubmit = () => post(route('reports.store'));
 
     return (
         <>
-            <Head title="Add Report"/>
+            <Head title="Add Report" />
             <PageHeader
                 title="Add Report"
                 actions={[
@@ -33,52 +33,59 @@ const Add = ({patients, acceptanceItem, templates, history, test, method}) => {
                             variant="outlined"
                             size="small"
                             component={Link}
-                            href={route("acceptanceItems.show", {
+                            href={route('acceptanceItems.show', {
                                 acceptance: acceptanceItem.acceptance_id,
-                                acceptanceItem: acceptanceItem.id
+                                acceptanceItem: acceptanceItem.id,
                             })}
                             startIcon={<VisibilityIcon />}
                             sx={{
                                 textTransform: 'none',
-                                fontWeight: 'medium'
+                                fontWeight: 'medium',
                             }}
                         >
                             View Acceptance Item
                         </Button>
-                    </Tooltip>
+                    </Tooltip>,
                 ]}
             />
-            {patients.map(patient => <React.Fragment key={patient.id}>
-                <PatientInfo patient={patient} defaultExpanded={false}/>
-                <DocumentsInfo documents={patient.owned_documents}
-                               defaultExpanded={false}
-                               patientId={patient.id}/>
-            </React.Fragment>)}
-            <TestInfo method={method}
-                      test={test}
-                      showSections={false}/>
-            <SectionsInfo acceptanceItemStates={acceptanceItem.acceptance_item_states}/>
-            {history.length ? <History history={history}/> : null}
-            <ReportForm data={data}
-                        setData={setData}
-                        onSubmit={handleSubmit}
-                        patientID={patients[0]?.id}
-                        templates={templates}/>
-        </>);
-}
+            {patients.map((patient) => (
+                <React.Fragment key={patient.id}>
+                    <PatientInfo patient={patient} defaultExpanded={false} />
+                    <DocumentsInfo
+                        documents={patient.owned_documents}
+                        defaultExpanded={false}
+                        patientId={patient.id}
+                    />
+                </React.Fragment>
+            ))}
+            <TestInfo method={method} test={test} showSections={false} />
+            <SectionsInfo acceptanceItemStates={acceptanceItem.acceptance_item_states} />
+            {history.length ? <History history={history} /> : null}
+            <ReportForm
+                data={data}
+                setData={setData}
+                onSubmit={handleSubmit}
+                patientID={patients[0]?.id}
+                templates={templates}
+            />
+        </>
+    );
+};
 const breadCrumbs = [
     {
-        title: "Reports Waiting For Creating",
-        link: route("reports.waitingList"),
-        icon: null
+        title: 'Reports Waiting For Creating',
+        link: route('reports.waitingList'),
+        icon: null,
     },
 
     {
-        title: "Creating Report",
+        title: 'Creating Report',
         link: null,
-        icon: null
-    }
-]
-Add.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
+        icon: null,
+    },
+];
+Add.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
+);
 
 export default Add;

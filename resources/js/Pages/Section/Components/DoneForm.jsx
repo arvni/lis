@@ -1,4 +1,4 @@
-import React, {useState, useMemo} from "react";
+import React, { useState, useMemo } from 'react';
 import {
     Dialog,
     DialogActions,
@@ -25,8 +25,8 @@ import {
     IconButton,
     Tooltip,
     Grid as Grid,
-    MenuItem
-} from "@mui/material";
+    MenuItem,
+} from '@mui/material';
 import {
     Close as CloseIcon,
     CheckCircle,
@@ -35,15 +35,15 @@ import {
     LocalHospital,
     Science,
     ArrowBack,
-    Warning
-} from "@mui/icons-material";
-import Upload from "@/Components/Upload";
+    Warning,
+} from '@mui/icons-material';
+import Upload from '@/Components/Upload';
 
 // Define the action types
 const ACTION_TYPES = {
     COMPLETE: 'finished',
     REJECT: 'rejected',
-    UPDATE: 'Update'
+    UPDATE: 'Update',
 };
 
 /**
@@ -59,14 +59,14 @@ const ACTION_TYPES = {
  * @param {string} props.actionType - Type of action: 'complete' or 'reject'
  */
 const WorkflowActionForm = ({
-                                open,
-                                onClose,
-                                acceptanceItemState,
-                                onChange,
-                                onSubmit,
-                                options = [],
-                                actionType = ACTION_TYPES.COMPLETE
-                            }) => {
+    open,
+    onClose,
+    acceptanceItemState,
+    onChange,
+    onSubmit,
+    options = [],
+    actionType = ACTION_TYPES.COMPLETE,
+}) => {
     const theme = useTheme();
     const [errors, setErrors] = useState({});
 
@@ -74,31 +74,36 @@ const WorkflowActionForm = ({
     const isReject = actionType === ACTION_TYPES.REJECT;
 
     // Configure theme elements based on action type
-    const actionConfig = useMemo(() => ({
-        title: isReject ? "Reject Section" : "Complete Section",
-        icon: isReject ? <Warning/> : <CheckCircle/>,
-        color: isReject ? "error" : "primary",
-        buttonText: isReject ? "Reject Section" : "Complete Section",
-        buttonIcon: isReject ? <ErrorOutline/> : <CheckCircle/>,
-        headerColor: isReject ? theme.palette.error.main : theme.palette.primary.main,
-        headerTextColor: isReject ? theme.palette.error.contrastText : theme.palette.primary.contrastText
-    }), [isReject, theme]);
+    const actionConfig = useMemo(
+        () => ({
+            title: isReject ? 'Reject Section' : 'Complete Section',
+            icon: isReject ? <Warning /> : <CheckCircle />,
+            color: isReject ? 'error' : 'primary',
+            buttonText: isReject ? 'Reject Section' : 'Complete Section',
+            buttonIcon: isReject ? <ErrorOutline /> : <CheckCircle />,
+            headerColor: isReject ? theme.palette.error.main : theme.palette.primary.main,
+            headerTextColor: isReject
+                ? theme.palette.error.contrastText
+                : theme.palette.primary.contrastText,
+        }),
+        [isReject, theme],
+    );
 
-    const handleParametersChange = e => {
-            let parameters = acceptanceItemState.parameters;
-            let parameterIndex = parameters.findIndex((item) => item.name === e.target.name);
-            parameters[parameterIndex] = {...parameters[parameterIndex], value: e.target.value};
-            onChange("parameters", parameters);
+    const handleParametersChange = (e) => {
+        let parameters = acceptanceItemState.parameters;
+        let parameterIndex = parameters.findIndex((item) => item.name === e.target.name);
+        parameters[parameterIndex] = { ...parameters[parameterIndex], value: e.target.value };
+        onChange('parameters', parameters);
     };
 
     const handleFileParameter = (name, value) => {
-            let parameters = acceptanceItemState.parameters;
-            let parameterIndex = parameters.findIndex((item) => item.name === name);
-            parameters[parameterIndex] = {...parameters[parameterIndex], value};
-            onChange("parameters", parameters);
+        let parameters = acceptanceItemState.parameters;
+        let parameterIndex = parameters.findIndex((item) => item.name === name);
+        parameters[parameterIndex] = { ...parameters[parameterIndex], value };
+        onChange('parameters', parameters);
     };
 
-    const handleChange = e => onChange(e.target.name, e.target.value);
+    const handleChange = (e) => onChange(e.target.name, e.target.value);
 
     const handleSubmit = () => {
         if (check()) onSubmit();
@@ -110,16 +115,16 @@ const WorkflowActionForm = ({
         // Common validation
         acceptanceItemState?.parameters?.forEach((item) => {
             if (!item.value && item.required)
-                tmp = {...tmp, [item.name]: `Please enter ${item.name} value`};
+                tmp = { ...tmp, [item.name]: `Please enter ${item.name} value` };
         });
 
         // Rejection-specific validation
         if (isReject) {
             if (!acceptanceItemState.details)
-                tmp = {...tmp, details: `Please provide rejection details`};
+                tmp = { ...tmp, details: `Please provide rejection details` };
 
             if (acceptanceItemState.next == null)
-                tmp = {...tmp, next: `Please select a section to return to`};
+                tmp = { ...tmp, next: `Please select a section to return to` };
         }
 
         setErrors(tmp);
@@ -128,16 +133,16 @@ const WorkflowActionForm = ({
 
     const renderItem = (item) => {
         switch (item.type) {
-            case "file":
+            case 'file':
                 return (
-                    <Box sx={{mb: 2}}>
+                    <Box sx={{ mb: 2 }}>
                         <Upload
                             value={item?.value}
                             label={item.name}
                             name={item.name}
-                            url={route("documents.store", {
-                                ownerClass: "Patient",
-                                id: acceptanceItemState?.patient?.id
+                            url={route('documents.store', {
+                                ownerClass: 'Patient',
+                                id: acceptanceItemState?.patient?.id,
                             })}
                             onChange={handleFileParameter}
                             error={errors.hasOwnProperty(item.name)}
@@ -146,7 +151,7 @@ const WorkflowActionForm = ({
                         />
                     </Box>
                 );
-            case "options":
+            case 'options':
                 return (
                     <FormControl
                         required={item.required}
@@ -156,18 +161,20 @@ const WorkflowActionForm = ({
                             p: 2,
                             backgroundColor: theme.palette.background.paper,
                             borderRadius: 1,
-                            border: `1px solid ${theme.palette.divider}`
+                            border: `1px solid ${theme.palette.divider}`,
                         }}
                     >
                         <FormLabel
                             sx={{
                                 fontWeight: 'medium',
                                 color: theme.palette.primary.main,
-                                mb: 1
+                                mb: 1,
                             }}
                         >
                             {item.name}
-                            {item.required && <span style={{color: theme.palette.error.main}}> *</span>}
+                            {item.required && (
+                                <span style={{ color: theme.palette.error.main }}> *</span>
+                            )}
                         </FormLabel>
                         <RadioGroup
                             row
@@ -176,21 +183,22 @@ const WorkflowActionForm = ({
                             onChange={handleParametersChange}
                             required={item.required}
                         >
-                            {Array.from(new Set(item.options.split(";").map(op => op.trim())))
-                                .map((op, idx) => (
-                                    <FormControlLabel
-                                        key={idx}
-                                        value={op}
-                                        control={
-                                            <Radio
-                                                color="primary"
-                                                sx={{'& .MuiSvgIcon-root': {fontSize: 20}}}
-                                            />
-                                        }
-                                        label={op}
-                                        sx={{mr: 3}}
-                                    />
-                                ))}
+                            {Array.from(
+                                new Set(item.options.split(';').map((op) => op.trim())),
+                            ).map((op, idx) => (
+                                <FormControlLabel
+                                    key={idx}
+                                    value={op}
+                                    control={
+                                        <Radio
+                                            color="primary"
+                                            sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }}
+                                        />
+                                    }
+                                    label={op}
+                                    sx={{ mr: 3 }}
+                                />
+                            ))}
                         </RadioGroup>
                     </FormControl>
                 );
@@ -199,11 +207,11 @@ const WorkflowActionForm = ({
                     <TextField
                         rows={4}
                         fullWidth
-                        multiline={item.type === "text"}
+                        multiline={item.type === 'text'}
                         name={item.name}
                         label={item.name}
                         type={item.type}
-                        value={item?.value ?? ""}
+                        value={item?.value ?? ''}
                         onChange={handleParametersChange}
                         error={errors.hasOwnProperty(item.name)}
                         helperText={errors[item.name] ?? null}
@@ -215,8 +223,8 @@ const WorkflowActionForm = ({
                                 '&:hover fieldset': {
                                     borderColor: theme.palette.primary.main,
                                 },
-                                borderRadius: 1
-                            }
+                                borderRadius: 1,
+                            },
                         }}
                     />
                 );
@@ -235,9 +243,9 @@ const WorkflowActionForm = ({
                 Paper: {
                     sx: {
                         borderRadius: 2,
-                        overflow: 'hidden'
-                    }
-                }
+                        overflow: 'hidden',
+                    },
+                },
             }}
         >
             <DialogTitle
@@ -247,13 +255,16 @@ const WorkflowActionForm = ({
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    py: 2
+                    py: 2,
                 }}
             >
-                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     {actionConfig.icon}
                     <Typography variant="h6" component="span">
-                        {acceptanceItemState?.ids?.length > 1 ? `Bulk ${actionConfig.title}` : actionConfig.title}: {acceptanceItemState?.section?.name}
+                        {acceptanceItemState?.ids?.length > 1
+                            ? `Bulk ${actionConfig.title}`
+                            : actionConfig.title}
+                        : {acceptanceItemState?.section?.name}
                     </Typography>
                 </Box>
                 <Tooltip title="Close">
@@ -264,49 +275,54 @@ const WorkflowActionForm = ({
                         aria-label="close"
                         sx={{
                             '&:hover': {
-                                bgcolor: 'rgba(255, 255, 255, 0.08)'
-                            }
+                                bgcolor: 'rgba(255, 255, 255, 0.08)',
+                            },
                         }}
                     >
-                        <CloseIcon/>
+                        <CloseIcon />
                     </IconButton>
                 </Tooltip>
             </DialogTitle>
 
-            <DialogContent sx={{p: 3, mt: 2}}>
+            <DialogContent sx={{ p: 3, mt: 2 }}>
                 <Paper
                     elevation={0}
                     sx={{
                         p: 2,
                         mb: 3,
                         bgcolor: theme.palette.background.default,
-                        borderRadius: 1
+                        borderRadius: 1,
                     }}
                 >
-                    <Typography variant="subtitle1" fontWeight="bold" sx={{mb: 2}}>
-                        {acceptanceItemState?.ids?.length > 1 ? `Batch Processing (${acceptanceItemState.ids.length} items)` : 'Case Information'}
+                    <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
+                        {acceptanceItemState?.ids?.length > 1
+                            ? `Batch Processing (${acceptanceItemState.ids.length} items)`
+                            : 'Case Information'}
                     </Typography>
 
                     <Grid container spacing={2}>
-                        <Grid size={{xs: 12, sm: 6}}>
-                            <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
-                                <LocalHospital color="primary" sx={{mr: 1}}/>
-                                <Typography variant="body2" color="text.secondary" sx={{mr: 1}}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                <LocalHospital color="primary" sx={{ mr: 1 }} />
+                                <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
                                     Patients ID/Age/Gender:
                                 </Typography>
-                                {acceptanceItemState?.patients?.map(patient => <Typography
-                                    key={patient.id}
-                                    variant="body1"
-                                    fontWeight="medium">
-                                    {`${patient?.id || '-'} / ${patient?.age || '-'} / ${patient?.gender || '-'}`}
-                                </Typography>)}
+                                {acceptanceItemState?.patients?.map((patient) => (
+                                    <Typography
+                                        key={patient.id}
+                                        variant="body1"
+                                        fontWeight="medium"
+                                    >
+                                        {`${patient?.id || '-'} / ${patient?.age || '-'} / ${patient?.gender || '-'}`}
+                                    </Typography>
+                                ))}
                             </Box>
                         </Grid>
 
-                        <Grid size={{xs: 12, sm: 6}}>
-                            <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
-                                <Science color="primary" sx={{mr: 1}}/>
-                                <Typography variant="body2" color="text.secondary" sx={{mr: 1}}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                <Science color="primary" sx={{ mr: 1 }} />
+                                <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
                                     Sample Type/Date:
                                 </Typography>
                                 <Typography variant="body1" fontWeight="medium">
@@ -315,10 +331,10 @@ const WorkflowActionForm = ({
                             </Box>
                         </Grid>
 
-                        <Grid size={{xs: 12}}>
-                            <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                <MedicalServices color="primary" sx={{mr: 1}}/>
-                                <Typography variant="body2" color="text.secondary" sx={{mr: 1}}>
+                        <Grid size={{ xs: 12 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <MedicalServices color="primary" sx={{ mr: 1 }} />
+                                <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
                                     Test Name:
                                 </Typography>
                                 <Chip
@@ -326,7 +342,7 @@ const WorkflowActionForm = ({
                                     color="primary"
                                     size="small"
                                     variant="outlined"
-                                    sx={{fontWeight: 'medium'}}
+                                    sx={{ fontWeight: 'medium' }}
                                 />
                             </Box>
                         </Grid>
@@ -337,50 +353,45 @@ const WorkflowActionForm = ({
                     <Alert
                         severity="warning"
                         variant="outlined"
-                        sx={{mb: 3, borderRadius: 1}}
-                        icon={<ErrorOutline/>}
+                        sx={{ mb: 3, borderRadius: 1 }}
+                        icon={<ErrorOutline />}
                     >
-                        You are about to reject this section. Please provide all necessary details for the team to
-                        understand the reason for rejection.
+                        You are about to reject this section. Please provide all necessary details
+                        for the team to understand the reason for rejection.
                     </Alert>
                 )}
 
                 {hasErrors && (
-                    <Alert
-                        severity="error"
-                        sx={{mb: 3, borderRadius: 1}}
-                    >
+                    <Alert severity="error" sx={{ mb: 3, borderRadius: 1 }}>
                         Please fill in all required fields before submitting.
                     </Alert>
                 )}
 
-                <Divider sx={{my: 2}}/>
+                <Divider sx={{ my: 2 }} />
 
-                <Box sx={{mb: 2}}>
+                <Box sx={{ mb: 2 }}>
                     <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                        {isReject ? "Parameters" : "Required Parameters"}
+                        {isReject ? 'Parameters' : 'Required Parameters'}
                     </Typography>
                     {!isReject && (
-                        <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                             Please fill in all required fields to complete this section.
                         </Typography>
                     )}
                 </Box>
 
-                <Box sx={{mb: 3}}>
+                <Box sx={{ mb: 3 }}>
                     {acceptanceItemState?.parameters?.map((item, index) => (
-                        <Box key={index}>
-                            {renderItem(item)}
-                        </Box>
+                        <Box key={index}>{renderItem(item)}</Box>
                     ))}
                 </Box>
 
                 {/* Rejection-specific fields */}
                 {isReject && (
-                    <Box sx={{mb: 3}}>
+                    <Box sx={{ mb: 3 }}>
                         <FormControl
                             fullWidth
-                            error={errors.hasOwnProperty("next")}
+                            error={errors.hasOwnProperty('next')}
                             sx={{
                                 mb: 3,
                                 '& .MuiOutlinedInput-root': {
@@ -392,7 +403,7 @@ const WorkflowActionForm = ({
                             }}
                         >
                             <InputLabel
-                                error={errors.hasOwnProperty("next")}
+                                error={errors.hasOwnProperty('next')}
                                 id="next-section-label"
                                 sx={{
                                     fontWeight: 'medium',
@@ -401,28 +412,28 @@ const WorkflowActionForm = ({
                                 Return to Section *
                             </InputLabel>
                             <Select
-                                error={errors.hasOwnProperty("next")}
+                                error={errors.hasOwnProperty('next')}
                                 onChange={handleChange}
                                 name="next"
                                 value={acceptanceItemState.next}
                                 labelId="next-section-label"
                                 label="Return to Section *"
-                                startAdornment={<ArrowBack fontSize="small"
-                                                           sx={{ml: 1, mr: 0.5, color: theme.palette.action.active}}/>}
+                                startAdornment={
+                                    <ArrowBack
+                                        fontSize="small"
+                                        sx={{ ml: 1, mr: 0.5, color: theme.palette.action.active }}
+                                    />
+                                }
                             >
-                                <MenuItem value={""}>Sample Collection</MenuItem>
+                                <MenuItem value={''}>Sample Collection</MenuItem>
                                 {options.map((item, index) => (
-                                    <MenuItem
-                                        key={index}
-                                        value={item.id}>
-                                        {`${(item.order + 1)}- ${item.name}`}
+                                    <MenuItem key={index} value={item.id}>
+                                        {`${item.order + 1}- ${item.name}`}
                                     </MenuItem>
                                 ))}
                             </Select>
-                            {errors.hasOwnProperty("next") && (
-                                <FormHelperText error>
-                                    {errors.next}
-                                </FormHelperText>
+                            {errors.hasOwnProperty('next') && (
+                                <FormHelperText error>{errors.next}</FormHelperText>
                             )}
                         </FormControl>
 
@@ -434,9 +445,13 @@ const WorkflowActionForm = ({
                             label="Rejection Details *"
                             rows={4}
                             required
-                            error={errors.hasOwnProperty("details")}
+                            error={errors.hasOwnProperty('details')}
                             value={acceptanceItemState.details || ''}
-                            helperText={errors.hasOwnProperty("details") ? errors.details : "Please provide detailed reasons for rejecting this section"}
+                            helperText={
+                                errors.hasOwnProperty('details')
+                                    ? errors.details
+                                    : 'Please provide detailed reasons for rejecting this section'
+                            }
                             variant="outlined"
                             sx={{
                                 '& .MuiOutlinedInput-root': {
@@ -451,14 +466,14 @@ const WorkflowActionForm = ({
                 )}
             </DialogContent>
 
-            <DialogActions sx={{px: 3, py: 2, bgcolor: theme.palette.background.default}}>
-  <Stack direction="row" spacing={2} sx={{justifyContent: "flex-end"}}>
+            <DialogActions sx={{ px: 3, py: 2, bgcolor: theme.palette.background.default }}>
+                <Stack direction="row" spacing={2} sx={{ justifyContent: 'flex-end' }}>
                     <Button
                         onClick={onClose}
                         variant="outlined"
                         color="inherit"
-                        startIcon={<CloseIcon/>}
-                        sx={{borderRadius: 1}}
+                        startIcon={<CloseIcon />}
+                        sx={{ borderRadius: 1 }}
                     >
                         Cancel
                     </Button>
@@ -467,7 +482,7 @@ const WorkflowActionForm = ({
                         onClick={handleSubmit}
                         color={actionConfig.color}
                         startIcon={actionConfig.buttonIcon}
-                        sx={{borderRadius: 1}}
+                        sx={{ borderRadius: 1 }}
                     >
                         {actionConfig.buttonText}
                     </Button>
@@ -477,4 +492,4 @@ const WorkflowActionForm = ({
     );
 };
 
-export {WorkflowActionForm, ACTION_TYPES};
+export { WorkflowActionForm, ACTION_TYPES };

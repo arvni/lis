@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import Dialog from "@mui/material/Dialog";
+import React, { useState } from 'react';
+import Dialog from '@mui/material/Dialog';
 import {
     DialogActions,
     DialogContent,
@@ -10,17 +10,17 @@ import {
     Paper,
     Tooltip,
     AppBar,
-    Toolbar
-} from "@mui/material";
-import Button from "@mui/material/Button";
-import Editor from "@/Components/Editor";
+    Toolbar,
+} from '@mui/material';
+import Button from '@mui/material/Button';
+import Editor from '@/Components/Editor';
 import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
 import BrushIcon from '@mui/icons-material/Brush';
 import TextFieldsIcon from '@mui/icons-material/TextFields';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import ImagePaintCanvas from "@/Pages/Consultation/Components/Drawing/PaintApp.jsx";
+import ImagePaintCanvas from '@/Pages/Consultation/Components/Drawing/PaintApp.jsx';
 
 /**
  * Enhanced form component with drawing and rich text editor
@@ -36,23 +36,23 @@ import ImagePaintCanvas from "@/Pages/Consultation/Components/Drawing/PaintApp.j
  * @returns {JSX.Element} Enhanced DoneForm component
  */
 const DoneForm = ({
-                      data = {},
-                      submit,
-                      open,
-                      title = "Create Consultation Report",
-                      loading,
-                      onChange,
-                      onClose
-                  }) => {
+    data = {},
+    submit,
+    open,
+    title = 'Create Consultation Report',
+    loading,
+    onChange,
+    onClose,
+}) => {
     const [activeTab, setActiveTab] = useState(0);
 
     const handleImageChanged = (imageData) => {
         if (typeof onChange === 'function') {
             onChange({
                 target: {
-                    name: "image",
-                    value: imageData || ""
-                }
+                    name: 'image',
+                    value: imageData || '',
+                },
             });
         }
     };
@@ -61,14 +61,14 @@ const DoneForm = ({
         setActiveTab(newValue);
     };
 
-    const handleSubmit =  () => {
+    const handleSubmit = () => {
         setActiveTab(0);
         submit();
     };
     const handleClose = () => {
-      setActiveTab(0);
-      onClose();
-    }
+        setActiveTab(0);
+        onClose();
+    };
 
     return (
         <Dialog
@@ -78,8 +78,8 @@ const DoneForm = ({
             slotProps={{
                 sx: {
                     bgcolor: 'background.default',
-                    backgroundImage: 'none'
-                }
+                    backgroundImage: 'none',
+                },
             }}
         >
             {/* Custom AppBar for better mobile UX */}
@@ -109,19 +109,29 @@ const DoneForm = ({
                     variant="fullWidth"
                     aria-label="Form sections"
                 >
-                    <Tab icon={<BrushIcon />} label="Drawing" id="tab-0" aria-controls="tabpanel-0" />
-                    <Tab icon={<TextFieldsIcon />} label="Report" id="tab-1" aria-controls="tabpanel-1" />
+                    <Tab
+                        icon={<BrushIcon />}
+                        label="Drawing"
+                        id="tab-0"
+                        aria-controls="tabpanel-0"
+                    />
+                    <Tab
+                        icon={<TextFieldsIcon />}
+                        label="Report"
+                        id="tab-1"
+                        aria-controls="tabpanel-1"
+                    />
                 </Tabs>
             </Box>
 
-            <DialogContent sx={{ p: 2, height: "calc(100vh - 200px)" }}>
+            <DialogContent sx={{ p: 2, height: 'calc(100vh - 200px)' }}>
                 <Paper
                     elevation={0}
                     sx={{
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
-                        overflow: 'hidden'
+                        overflow: 'hidden',
                     }}
                 >
                     {/* Drawing Section */}
@@ -134,13 +144,10 @@ const DoneForm = ({
                             height: '100%',
                             display: activeTab === 0 ? 'flex' : 'none',
                             flexDirection: 'column',
-                            overflow: 'auto'
+                            overflow: 'auto',
                         }}
                     >
-                            <ImagePaintCanvas
-                                onChange={handleImageChanged}
-                                defaultImage={data.image}
-                            />
+                        <ImagePaintCanvas onChange={handleImageChanged} defaultImage={data.image} />
                     </Box>
 
                     {/* Report Section */}
@@ -161,7 +168,7 @@ const DoneForm = ({
                         <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
                             <Editor
                                 name="report"
-                                value={data?.report || ""}
+                                value={data?.report || ''}
                                 onChange={onChange}
                                 label=""
                                 height="calc(100vh - 260px)"
@@ -174,11 +181,7 @@ const DoneForm = ({
             <Divider />
 
             <DialogActions sx={{ px: 3, py: 2, justifyContent: 'space-between' }}>
-                <Button
-                    onClick={handleClose}
-                    variant="outlined"
-                    color="secondary"
-                >
+                <Button onClick={handleClose} variant="outlined" color="secondary">
                     Cancel
                 </Button>
                 <Button

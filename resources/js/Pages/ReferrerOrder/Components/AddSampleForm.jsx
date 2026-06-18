@@ -1,7 +1,7 @@
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import {
     Button,
     Select,
@@ -21,15 +21,23 @@ import {
     FormGroup,
     Collapse,
     IconButton,
-} from "@mui/material";
-import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
-import MenuItem from "@mui/material/MenuItem";
-import React, { useState, useMemo, useEffect } from "react";
-import { useForm, router } from "@inertiajs/react";
-import { ExpandMore, ExpandLess, MergeType } from "@mui/icons-material";
+} from '@mui/material';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import MenuItem from '@mui/material/MenuItem';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useForm, router } from '@inertiajs/react';
+import { ExpandMore, ExpandLess, MergeType } from '@mui/icons-material';
 
-const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = false, allAcceptanceItems = [] }) => {
+const Form = ({
+    barcodes,
+    samples,
+    open,
+    onClose,
+    referrerOrder,
+    isPooling = false,
+    allAcceptanceItems = [],
+}) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [expandedRows, setExpandedRows] = useState({});
     const { data, setData, errors, reset } = useForm({ barcodes });
@@ -37,9 +45,9 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
     // Initialize barcodes with selectedItems for pooling mode
     useEffect(() => {
         if (isPooling && barcodes?.length > 0) {
-            const initializedBarcodes = barcodes.map(barcode => ({
+            const initializedBarcodes = barcodes.map((barcode) => ({
                 ...barcode,
-                selectedItems: barcode.items?.map(item => item.id) || [],
+                selectedItems: barcode.items?.map((item) => item.id) || [],
             }));
             setData({ barcodes: initializedBarcodes });
         }
@@ -54,11 +62,13 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
 
     // Validation helper
     const isFormValid = useMemo(() => {
-        return data?.barcodes?.every(barcode => {
-            const baseValid = barcode.sample &&
+        return data?.barcodes?.every((barcode) => {
+            const baseValid =
+                barcode.sample &&
                 barcode.sampleType &&
                 barcode.received_at &&
-                (!barcode.collectionDate || new Date(barcode.collectionDate) <= new Date(barcode.received_at));
+                (!barcode.collectionDate ||
+                    new Date(barcode.collectionDate) <= new Date(barcode.received_at));
 
             // For pooling, also check that at least one item is selected
             if (isPooling) {
@@ -70,9 +80,9 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
 
     // Toggle row expansion for item selection
     const toggleRowExpansion = (index) => {
-        setExpandedRows(prev => ({
+        setExpandedRows((prev) => ({
             ...prev,
-            [index]: !prev[index]
+            [index]: !prev[index],
         }));
     };
 
@@ -82,14 +92,16 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
         const currentSelected = updatedBarcodes[barcodeIndex].selectedItems || [];
 
         if (currentSelected.includes(itemId)) {
-            updatedBarcodes[barcodeIndex].selectedItems = currentSelected.filter(id => id !== itemId);
+            updatedBarcodes[barcodeIndex].selectedItems = currentSelected.filter(
+                (id) => id !== itemId,
+            );
         } else {
             updatedBarcodes[barcodeIndex].selectedItems = [...currentSelected, itemId];
         }
 
         // Also update the items array to match selected items
-        updatedBarcodes[barcodeIndex].items = allAcceptanceItems.filter(
-            item => updatedBarcodes[barcodeIndex].selectedItems.includes(item.id)
+        updatedBarcodes[barcodeIndex].items = allAcceptanceItems.filter((item) =>
+            updatedBarcodes[barcodeIndex].selectedItems.includes(item.id),
         );
 
         setData({ barcodes: updatedBarcodes });
@@ -102,37 +114,44 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
         setIsSubmitting(true);
 
         // Clean up data to only send what's needed
-        const cleanedBarcodes = data.barcodes.map(barcode => ({
+        const cleanedBarcodes = data.barcodes.map((barcode) => ({
             patient: { id: barcode.patient?.id },
             sampleType: barcode.sampleType,
             sampleLocation: barcode.sampleLocation || 'In Lab',
             collection_date: barcode.collection_date,
-            items: (barcode.selectedItems || barcode.items?.map(i => i.id) || []).map(id =>
-                typeof id === 'object' ? { id: id.id } : { id }
+            items: (barcode.selectedItems || barcode.items?.map((i) => i.id) || []).map((id) =>
+                typeof id === 'object' ? { id: id.id } : { id },
             ),
             barcodeGroup: {
                 id: barcode.barcodeGroup?.id,
                 name: barcode.barcodeGroup?.name,
-                abbr: barcode.barcodeGroup?.abbr
+                abbr: barcode.barcodeGroup?.abbr,
             },
             barcode: barcode.barcode,
             material: barcode.sample?.material ? { id: barcode.sample.material.id } : null,
-            received_at: barcode.received_at
+            received_at: barcode.received_at,
         }));
 
         // Use router.post directly with cleaned data
-        router.post(route('referrerOrders.samples', referrerOrder), { barcodes: cleanedBarcodes }, {
-            onSuccess: () => {
-                window.open(route("acceptances.barcodes", referrerOrder.acceptance_id), "_blank");
-                handleClose();
+        router.post(
+            route('referrerOrders.samples', referrerOrder),
+            { barcodes: cleanedBarcodes },
+            {
+                onSuccess: () => {
+                    window.open(
+                        route('acceptances.barcodes', referrerOrder.acceptance_id),
+                        '_blank',
+                    );
+                    handleClose();
+                },
+                onError: () => {
+                    setIsSubmitting(false);
+                },
+                onFinish: () => {
+                    setIsSubmitting(false);
+                },
             },
-            onError: () => {
-                setIsSubmitting(false);
-            },
-            onFinish: () => {
-                setIsSubmitting(false);
-            }
-        });
+        );
     };
 
     const handleClose = () => {
@@ -144,7 +163,7 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
 
     const sampleChange = (index) => (e) => {
         const selectedSampleId = e.target.value;
-        const selectedSample = samples.find(item => item.id === selectedSampleId);
+        const selectedSample = samples.find((item) => item.id === selectedSampleId);
 
         if (selectedSample) {
             const updatedBarcodes = [...data.barcodes];
@@ -154,7 +173,7 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                 collection_date: selectedSample.collectionDate,
                 barcode: selectedSample.sampleId ?? null,
                 // Reset received_at if collection date changed to avoid validation errors
-                received_at: updatedBarcodes[index].received_at || ""
+                received_at: updatedBarcodes[index].received_at || '',
             };
             setData({ barcodes: updatedBarcodes });
         }
@@ -164,7 +183,7 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
         const updatedBarcodes = [...data.barcodes];
         updatedBarcodes[index] = {
             ...updatedBarcodes[index],
-            sampleType: e.target.value
+            sampleType: e.target.value,
         };
         setData({ barcodes: updatedBarcodes });
     };
@@ -173,7 +192,7 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
         const updatedBarcodes = [...data.barcodes];
         updatedBarcodes[index] = {
             ...updatedBarcodes[index],
-            received_at: e.target.value
+            received_at: e.target.value,
         };
         setData({ barcodes: updatedBarcodes });
     };
@@ -181,8 +200,8 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
     // Get unique sample types for a barcode
     const getAvailableSampleTypes = (barcode) => {
         const sampleTypes = new Map();
-        barcode.items.forEach(item => {
-            item.method.test.sample_types?.forEach(sampleType => {
+        barcode.items.forEach((item) => {
+            item.method.test.sample_types?.forEach((sampleType) => {
                 sampleTypes.set(sampleType.id, sampleType);
             });
         });
@@ -192,7 +211,7 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
     // Filter samples based on selected sample type
     const getFilteredSamples = (selectedSampleType) => {
         if (!selectedSampleType) return samples;
-        return samples.filter(sample => sample.sample_type?.server_id === selectedSampleType);
+        return samples.filter((sample) => sample.sample_type?.server_id === selectedSampleType);
     };
 
     if (!data?.barcodes?.length) return null;
@@ -202,23 +221,22 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
             open={open}
             fullWidth
             maxWidth="xl"
-            onClose={(_, reason) => { if (!isSubmitting || reason !== 'escapeKeyDown') handleClose(); }}
+            onClose={(_, reason) => {
+                if (!isSubmitting || reason !== 'escapeKeyDown') handleClose();
+            }}
         >
             <DialogTitle>
-  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                     {isPooling && <MergeType color="info" />}
                     <Typography variant="h6" component="div">
                         Select Samples for Order #{referrerOrder?.id}
                     </Typography>
-                    {isPooling && (
-                        <Chip label="Pooling Mode" size="small" color="info" />
-                    )}
+                    {isPooling && <Chip label="Pooling Mode" size="small" color="info" />}
                 </Stack>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                     {isPooling
-                        ? "Select which acceptance items each sample should be linked to"
-                        : "Please select appropriate samples and sample types for each barcode group"
-                    }
+                        ? 'Select which acceptance items each sample should be linked to'
+                        : 'Please select appropriate samples and sample types for each barcode group'}
                 </Typography>
             </DialogTitle>
 
@@ -226,7 +244,8 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                 <Box component="form" onSubmit={handleSubmit}>
                     {!isFormValid && (
                         <Alert severity="warning" sx={{ mb: 3 }}>
-                            Please complete all required fields and ensure received dates are after collection dates
+                            Please complete all required fields and ensure received dates are after
+                            collection dates
                         </Alert>
                     )}
 
@@ -234,38 +253,72 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                         <Table>
                             <TableHead>
                                 <TableRow sx={{ bgcolor: 'grey.50' }}>
-                                    <TableCell rowSpan={2} align="center" sx={{ fontWeight: 'bold', minWidth: 120 }}>
+                                    <TableCell
+                                        rowSpan={2}
+                                        align="center"
+                                        sx={{ fontWeight: 'bold', minWidth: 120 }}
+                                    >
                                         Barcode Group
                                     </TableCell>
                                     {isPooling && (
-                                        <TableCell rowSpan={2} align="center" sx={{ fontWeight: 'bold', minWidth: 200 }}>
+                                        <TableCell
+                                            rowSpan={2}
+                                            align="center"
+                                            sx={{ fontWeight: 'bold', minWidth: 200 }}
+                                        >
                                             Linked Tests *
                                         </TableCell>
                                     )}
-                                    <TableCell colSpan={2} align="center" sx={{ fontWeight: 'bold', borderBottom: 1 }}>
+                                    <TableCell
+                                        colSpan={2}
+                                        align="center"
+                                        sx={{ fontWeight: 'bold', borderBottom: 1 }}
+                                    >
                                         Test Information
                                     </TableCell>
-                                    <TableCell colSpan={4} align="center" sx={{ fontWeight: 'bold', borderBottom: 1 }}>
+                                    <TableCell
+                                        colSpan={4}
+                                        align="center"
+                                        sx={{ fontWeight: 'bold', borderBottom: 1 }}
+                                    >
                                         Sample Details
                                     </TableCell>
                                 </TableRow>
                                 <TableRow sx={{ bgcolor: 'grey.50' }}>
-                                    <TableCell align="center" sx={{ fontWeight: 'medium', minWidth: 200 }}>
+                                    <TableCell
+                                        align="center"
+                                        sx={{ fontWeight: 'medium', minWidth: 200 }}
+                                    >
                                         Test Name
                                     </TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: 'medium', minWidth: 180 }}>
+                                    <TableCell
+                                        align="center"
+                                        sx={{ fontWeight: 'medium', minWidth: 180 }}
+                                    >
                                         Accepted Sample Types
                                     </TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: 'medium', minWidth: 150 }}>
+                                    <TableCell
+                                        align="center"
+                                        sx={{ fontWeight: 'medium', minWidth: 150 }}
+                                    >
                                         Selected Sample Type *
                                     </TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: 'medium', minWidth: 200 }}>
+                                    <TableCell
+                                        align="center"
+                                        sx={{ fontWeight: 'medium', minWidth: 200 }}
+                                    >
                                         Selected Sample *
                                     </TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: 'medium', minWidth: 200 }}>
+                                    <TableCell
+                                        align="center"
+                                        sx={{ fontWeight: 'medium', minWidth: 200 }}
+                                    >
                                         Sample Information
                                     </TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: 'medium', minWidth: 200 }}>
+                                    <TableCell
+                                        align="center"
+                                        sx={{ fontWeight: 'medium', minWidth: 200 }}
+                                    >
                                         Received Date & Time *
                                     </TableCell>
                                 </TableRow>
@@ -278,10 +331,13 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                                             sx={{
                                                 verticalAlign: 'top',
                                                 bgcolor: 'primary.50',
-                                                fontWeight: 'medium'
+                                                fontWeight: 'medium',
                                             }}
                                         >
-                                            <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                                            <Typography
+                                                variant="body2"
+                                                sx={{ wordBreak: 'break-word' }}
+                                            >
                                                 {barcode.barcodeGroup.name}
                                             </Typography>
                                         </TableCell>
@@ -289,36 +345,77 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                                         {isPooling && (
                                             <TableCell sx={{ verticalAlign: 'top' }}>
                                                 <Box>
-  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
-                                                        <Typography variant="body2" color="text.secondary">
-                                                            {barcode.selectedItems?.length || 0} items selected
+                                                    <Stack
+                                                        direction="row"
+                                                        spacing={1}
+                                                        sx={{ alignItems: 'center' }}
+                                                    >
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                        >
+                                                            {barcode.selectedItems?.length || 0}{' '}
+                                                            items selected
                                                         </Typography>
                                                         <IconButton
                                                             size="small"
-                                                            onClick={() => toggleRowExpansion(index)}
+                                                            onClick={() =>
+                                                                toggleRowExpansion(index)
+                                                            }
                                                         >
-                                                            {expandedRows[index] ? <ExpandLess /> : <ExpandMore />}
+                                                            {expandedRows[index] ? (
+                                                                <ExpandLess />
+                                                            ) : (
+                                                                <ExpandMore />
+                                                            )}
                                                         </IconButton>
                                                     </Stack>
                                                     <Collapse in={expandedRows[index]}>
-                                                        <FormGroup sx={{ mt: 1, maxHeight: 200, overflow: 'auto' }}>
+                                                        <FormGroup
+                                                            sx={{
+                                                                mt: 1,
+                                                                maxHeight: 200,
+                                                                overflow: 'auto',
+                                                            }}
+                                                        >
                                                             {allAcceptanceItems.map((item) => (
                                                                 <FormControlLabel
                                                                     key={item.id}
                                                                     control={
                                                                         <Checkbox
                                                                             size="small"
-                                                                            checked={barcode.selectedItems?.includes(item.id) || false}
-                                                                            onChange={() => handleItemSelectionChange(index, item.id)}
+                                                                            checked={
+                                                                                barcode.selectedItems?.includes(
+                                                                                    item.id,
+                                                                                ) || false
+                                                                            }
+                                                                            onChange={() =>
+                                                                                handleItemSelectionChange(
+                                                                                    index,
+                                                                                    item.id,
+                                                                                )
+                                                                            }
                                                                         />
                                                                     }
                                                                     label={
                                                                         <Box>
                                                                             <Typography variant="body2">
-                                                                                {item.method?.test?.name || item.test?.name || 'Unknown Test'}
+                                                                                {item.method?.test
+                                                                                    ?.name ||
+                                                                                    item.test
+                                                                                        ?.name ||
+                                                                                    'Unknown Test'}
                                                                             </Typography>
-                                                                            <Typography variant="caption" color="text.secondary">
-                                                                                Created: {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}
+                                                                            <Typography
+                                                                                variant="caption"
+                                                                                color="text.secondary"
+                                                                            >
+                                                                                Created:{' '}
+                                                                                {item.created_at
+                                                                                    ? new Date(
+                                                                                          item.created_at,
+                                                                                      ).toLocaleDateString()
+                                                                                    : 'N/A'}
                                                                             </Typography>
                                                                         </Box>
                                                                     }
@@ -326,7 +423,8 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                                                             ))}
                                                         </FormGroup>
                                                     </Collapse>
-                                                    {(!barcode.selectedItems || barcode.selectedItems.length === 0) && (
+                                                    {(!barcode.selectedItems ||
+                                                        barcode.selectedItems.length === 0) && (
                                                         <Typography variant="caption" color="error">
                                                             Please select at least one test
                                                         </Typography>
@@ -339,10 +437,18 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                                             <Stack spacing={1}>
                                                 {barcode.items?.map((item) => (
                                                     <Box key={`test-${item.id || item.method?.id}`}>
-                                                        <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                                                            {item.method?.test?.name || item.test?.name || 'Unknown'}
+                                                        <Typography
+                                                            variant="body2"
+                                                            sx={{ fontWeight: 'medium' }}
+                                                        >
+                                                            {item.method?.test?.name ||
+                                                                item.test?.name ||
+                                                                'Unknown'}
                                                         </Typography>
-                                                        <Typography variant="caption" color="text.secondary">
+                                                        <Typography
+                                                            variant="caption"
+                                                            color="text.secondary"
+                                                        >
                                                             Method: {item.method?.name || 'N/A'}
                                                         </Typography>
                                                     </Box>
@@ -354,15 +460,17 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                                             <Stack spacing={1}>
                                                 {barcode.items.map((item) => (
                                                     <Box key={`sample-types-${item.method.id}`}>
-                                                        {item.method.test.sample_types.map((sampleType) => (
-                                                            <Chip
-                                                                key={sampleType.id}
-                                                                label={`${sampleType.name}${sampleType.pivot.description ? ` (${sampleType.pivot.description})` : ''}`}
-                                                                size="small"
-                                                                variant="outlined"
-                                                                sx={{ mr: 0.5, mb: 0.5 }}
-                                                            />
-                                                        ))}
+                                                        {item.method.test.sample_types.map(
+                                                            (sampleType) => (
+                                                                <Chip
+                                                                    key={sampleType.id}
+                                                                    label={`${sampleType.name}${sampleType.pivot.description ? ` (${sampleType.pivot.description})` : ''}`}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                    sx={{ mr: 0.5, mb: 0.5 }}
+                                                                />
+                                                            ),
+                                                        )}
                                                     </Box>
                                                 ))}
                                             </Stack>
@@ -373,21 +481,23 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                                                 fullWidth
                                                 size="small"
                                                 onChange={sampleTypeChange(index)}
-                                                value={barcode.sampleType || ""}
+                                                value={barcode.sampleType || ''}
                                                 displayEmpty
                                                 error={!barcode.sampleType}
                                             >
                                                 <MenuItem value="">
                                                     <em>Select sample type</em>
                                                 </MenuItem>
-                                                {getAvailableSampleTypes(barcode).map((sampleType) => (
-                                                    <MenuItem
-                                                        key={`sample-type-${sampleType.id}`}
-                                                        value={sampleType.id}
-                                                    >
-                                                        {sampleType.name}
-                                                    </MenuItem>
-                                                ))}
+                                                {getAvailableSampleTypes(barcode).map(
+                                                    (sampleType) => (
+                                                        <MenuItem
+                                                            key={`sample-type-${sampleType.id}`}
+                                                            value={sampleType.id}
+                                                        >
+                                                            {sampleType.name}
+                                                        </MenuItem>
+                                                    ),
+                                                )}
                                             </Select>
                                         </TableCell>
 
@@ -396,7 +506,7 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                                                 fullWidth
                                                 size="small"
                                                 onChange={sampleChange(index)}
-                                                value={barcode?.sample?.id || ""}
+                                                value={barcode?.sample?.id || ''}
                                                 displayEmpty
                                                 disabled={!barcode.sampleType}
                                                 error={!barcode.sample}
@@ -404,38 +514,67 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                                                 <MenuItem value="">
                                                     <em>Select sample</em>
                                                 </MenuItem>
-                                                {getFilteredSamples(barcode.sampleType)?.map((sample) => (
-                                                    <MenuItem
-                                                        key={`sample-${sample.id}`}
-                                                        value={sample.id}
-                                                    >
-                                                        <Box>
-                                                            <Typography variant="body2">
-                                                                {sample.sample_type?.name}
-                                                                {sample.sampleId && ` | ${sample.sampleId}`}
-                                                            </Typography>
-                                                            {sample.collection_date && (
-                                                                <Typography variant="caption" color="text.secondary">
-                                                                    Collected: {new Date(sample.collection_date).toLocaleDateString()}
+                                                {getFilteredSamples(barcode.sampleType)?.map(
+                                                    (sample) => (
+                                                        <MenuItem
+                                                            key={`sample-${sample.id}`}
+                                                            value={sample.id}
+                                                        >
+                                                            <Box>
+                                                                <Typography variant="body2">
+                                                                    {sample.sample_type?.name}
+                                                                    {sample.sampleId &&
+                                                                        ` | ${sample.sampleId}`}
                                                                 </Typography>
-                                                            )}
-                                                        </Box>
-                                                    </MenuItem>
-                                                ))}
+                                                                {sample.collection_date && (
+                                                                    <Typography
+                                                                        variant="caption"
+                                                                        color="text.secondary"
+                                                                    >
+                                                                        Collected:{' '}
+                                                                        {new Date(
+                                                                            sample.collection_date,
+                                                                        ).toLocaleDateString()}
+                                                                    </Typography>
+                                                                )}
+                                                            </Box>
+                                                        </MenuItem>
+                                                    ),
+                                                )}
                                             </Select>
-                                            {barcode.sampleType && !getFilteredSamples(barcode.sampleType)?.length && (
-                                                <Typography variant="caption" color="error" sx={{ display: 'block', mt: 1 }}>
-                                                    No samples available for this type
-                                                </Typography>
-                                            )}
+                                            {barcode.sampleType &&
+                                                !getFilteredSamples(barcode.sampleType)?.length && (
+                                                    <Typography
+                                                        variant="caption"
+                                                        color="error"
+                                                        sx={{ display: 'block', mt: 1 }}
+                                                    >
+                                                        No samples available for this type
+                                                    </Typography>
+                                                )}
                                         </TableCell>
 
                                         <TableCell sx={{ verticalAlign: 'top' }}>
                                             {barcode.sample && (
-                                                <Box sx={{ p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
+                                                <Box
+                                                    sx={{
+                                                        p: 1,
+                                                        bgcolor: 'grey.50',
+                                                        borderRadius: 1,
+                                                    }}
+                                                >
                                                     <Stack spacing={0.5}>
-  <Box display="flex" sx={{alignItems: "center"}}>
-                                                            <Typography variant="caption" sx={{ fontWeight: 'medium', minWidth: 80 }}>
+                                                        <Box
+                                                            display="flex"
+                                                            sx={{ alignItems: 'center' }}
+                                                        >
+                                                            <Typography
+                                                                variant="caption"
+                                                                sx={{
+                                                                    fontWeight: 'medium',
+                                                                    minWidth: 80,
+                                                                }}
+                                                            >
                                                                 Type:
                                                             </Typography>
                                                             <Typography variant="caption">
@@ -443,21 +582,44 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                                                             </Typography>
                                                         </Box>
                                                         {barcode.collectionDate && (
-  <Box display="flex" sx={{alignItems: "center"}}>
-                                                                <Typography variant="caption" sx={{ fontWeight: 'medium', minWidth: 80 }}>
+                                                            <Box
+                                                                display="flex"
+                                                                sx={{ alignItems: 'center' }}
+                                                            >
+                                                                <Typography
+                                                                    variant="caption"
+                                                                    sx={{
+                                                                        fontWeight: 'medium',
+                                                                        minWidth: 80,
+                                                                    }}
+                                                                >
                                                                     Collected:
                                                                 </Typography>
                                                                 <Typography variant="caption">
-                                                                    {new Date(barcode.collectionDate).toLocaleString()}
+                                                                    {new Date(
+                                                                        barcode.collectionDate,
+                                                                    ).toLocaleString()}
                                                                 </Typography>
                                                             </Box>
                                                         )}
                                                         {barcode.sample.sampleId && (
-  <Box display="flex" sx={{alignItems: "center"}}>
-                                                                <Typography variant="caption" sx={{ fontWeight: 'medium', minWidth: 80 }}>
+                                                            <Box
+                                                                display="flex"
+                                                                sx={{ alignItems: 'center' }}
+                                                            >
+                                                                <Typography
+                                                                    variant="caption"
+                                                                    sx={{
+                                                                        fontWeight: 'medium',
+                                                                        minWidth: 80,
+                                                                    }}
+                                                                >
                                                                     Barcode:
                                                                 </Typography>
-                                                                <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
+                                                                <Typography
+                                                                    variant="caption"
+                                                                    sx={{ fontFamily: 'monospace' }}
+                                                                >
                                                                     {barcode.sample.sampleId}
                                                                 </Typography>
                                                             </Box>
@@ -473,29 +635,33 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                                                 size="small"
                                                 type="datetime-local"
                                                 label="Received Date & Time"
-                                                value={barcode.received_at || ""}
+                                                value={barcode.received_at || ''}
                                                 onChange={handleReceivedDateChange(index)}
                                                 slotProps={{
                                                     htmlInput: {
                                                         max: now,
-                                                        min: barcode.collectionDate ?
-                                                            new Date(barcode.collectionDate).toISOString().slice(0, 16) :
-                                                            undefined
+                                                        min: barcode.collectionDate
+                                                            ? new Date(barcode.collectionDate)
+                                                                  .toISOString()
+                                                                  .slice(0, 16)
+                                                            : undefined,
                                                     },
-                                                    inputLabel: { shrink: true }
+                                                    inputLabel: { shrink: true },
                                                 }}
                                                 error={
                                                     !barcode.received_at ||
                                                     (barcode.collectionDate &&
-                                                        new Date(barcode.collectionDate) > new Date(barcode.received_at))
+                                                        new Date(barcode.collectionDate) >
+                                                            new Date(barcode.received_at))
                                                 }
                                                 helperText={
                                                     !barcode.received_at
-                                                        ? "Required field"
+                                                        ? 'Required field'
                                                         : barcode.collectionDate &&
-                                                        new Date(barcode.collectionDate) > new Date(barcode.received_at)
-                                                            ? "Must be after collection date"
-                                                            : ""
+                                                            new Date(barcode.collectionDate) >
+                                                                new Date(barcode.received_at)
+                                                          ? 'Must be after collection date'
+                                                          : ''
                                                 }
                                             />
                                         </TableCell>
@@ -508,11 +674,7 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
             </DialogContent>
 
             <DialogActions sx={{ px: 3, py: 2, bgcolor: 'grey.50' }}>
-                <Button
-                    onClick={handleClose}
-                    disabled={isSubmitting}
-                    sx={{ minWidth: 100 }}
-                >
+                <Button onClick={handleClose} disabled={isSubmitting} sx={{ minWidth: 100 }}>
                     Cancel
                 </Button>
                 <Button
@@ -522,7 +684,7 @@ const Form = ({ barcodes, samples, open, onClose, referrerOrder, isPooling = fal
                     startIcon={isSubmitting ? <CircularProgress size={16} /> : null}
                     sx={{ minWidth: 120 }}
                 >
-                    {isSubmitting ? "Processing..." : "Submit"}
+                    {isSubmitting ? 'Processing...' : 'Submit'}
                 </Button>
             </DialogActions>
         </Dialog>

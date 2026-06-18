@@ -2,28 +2,33 @@ import {
     TextField,
     Paper,
     Box,
-    Stack, Chip, ListItem, ListItemIcon, ListItemText, List
-} from "@mui/material";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import RequirementForm from "../Components/RequirementForm.jsx";
+    Stack,
+    Chip,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    List,
+} from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
+import RequirementForm from '../Components/RequirementForm.jsx';
 
-import Upload from "@/Components/Upload";
-import {FormProvider, useFormState} from "@/Components/FormTemplate.jsx";
-import React from "react";
-import {CheckBox, FormatListNumbered, TextFields} from "@mui/icons-material";
+import Upload from '@/Components/Upload';
+import { FormProvider, useFormState } from '@/Components/FormTemplate.jsx';
+import React from 'react';
+import { CheckBox, FormatListNumbered, TextFields } from '@mui/icons-material';
 
-const AddForm = ({open, onClose, defaultValue}) => {
+const AddForm = ({ open, onClose, defaultValue }) => {
     console.log(defaultValue);
     const url = defaultValue?.id
         ? route('requestForms.update', defaultValue.id)
         : route('requestForms.store');
     const defaultData = {
-        name: "",
+        name: '',
         document: null,
         form_data: [],
-        ...defaultValue
+        ...defaultValue,
     };
 
     return (
@@ -35,19 +40,20 @@ const AddForm = ({open, onClose, defaultValue}) => {
             url={url}
             maxWidth="md"
         >
-            <FormContent/>
+            <FormContent />
         </FormProvider>
     );
 };
 
 const FormContent = () => {
-    const {data, setData, errors, processing} = useFormState();
-    const handleChange = (e) => setData(prevState => ({...prevState, [e.target.name]: e.target.value}));
+    const { data, setData, errors, processing } = useFormState();
+    const handleChange = (e) =>
+        setData((prevState) => ({ ...prevState, [e.target.name]: e.target.value }));
 
     const handleFormDataChanged = (form_data) => {
-        setData(prevState => ({
+        setData((prevState) => ({
             ...prevState,
-            form_data
+            form_data,
         }));
     };
 
@@ -60,24 +66,24 @@ const FormContent = () => {
     const getFieldTypeIcon = (type) => {
         switch (type) {
             case 'text':
-                return <TextFields fontSize="small" color="primary"/>;
+                return <TextFields fontSize="small" color="primary" />;
             case 'checkbox':
-                return <CheckBox fontSize="small" color="secondary"/>;
+                return <CheckBox fontSize="small" color="secondary" />;
             case 'number':
-                return <FormatListNumbered fontSize="small" color="success"/>;
+                return <FormatListNumbered fontSize="small" color="success" />;
             default:
-                return <TextFields fontSize="small" color="primary"/>;
+                return <TextFields fontSize="small" color="primary" />;
         }
     };
 
     return (
         <Grid size={12}>
             {/* Basic Information Section */}
-            <Paper elevation={0} sx={{p: 3, border: '1px solid #e0e0e0'}}>
+            <Paper elevation={0} sx={{ p: 3, border: '1px solid #e0e0e0' }}>
                 <Typography variant="h6" gutterBottom color="primary">
                     Basic Information
                 </Typography>
-                <Divider sx={{mb: 2}}/>
+                <Divider sx={{ mb: 2 }} />
 
                 <Grid container spacing={3}>
                     <Grid size={12}>
@@ -86,7 +92,7 @@ const FormContent = () => {
                             label="Request Form Title"
                             name="name"
                             onChange={handleChange}
-                            value={data?.name || ""}
+                            value={data?.name || ''}
                             placeholder="Enter a descriptive title for this form"
                             required
                             helperText="This title will be displayed to users when selecting form"
@@ -103,9 +109,13 @@ const FormContent = () => {
                             editable
                             onChange={setData}
                             accept=".pdf,.docx,application/pdf"
-                            url={route("documents.store")}
+                            url={route('documents.store')}
                         />
-                        <Typography variant="caption" color="text.secondary" sx={{display: 'block', mt: 1}}>
+                        <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: 'block', mt: 1 }}
+                        >
                             Accepted formats: .pdf
                         </Typography>
                     </Grid>
@@ -119,13 +129,18 @@ const FormContent = () => {
                     p: 3,
                     mb: 2,
                     borderRadius: 2,
-                    width: "100%"
+                    width: '100%',
                 }}
             >
-                <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2}}>
-                    <Typography variant="h6">
-                        Form Fields
-                    </Typography>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        mb: 2,
+                    }}
+                >
+                    <Typography variant="h6">Form Fields</Typography>
 
                     <Chip
                         label={`${data.form_data.length} ${data.form_data.length === 1 ? 'field' : 'fields'}`}
@@ -149,15 +164,15 @@ const FormContent = () => {
 
                 {/* Preview of form fields */}
                 {data.form_data.length > 0 && (
-                    <Box sx={{mt: 3}}>
+                    <Box sx={{ mt: 3 }}>
                         <Typography variant="subtitle2" gutterBottom>
                             Field Preview
                         </Typography>
-                        <Paper variant="outlined" sx={{mt: 1}}>
+                        <Paper variant="outlined" sx={{ mt: 1 }}>
                             <List disablePadding>
                                 {data.form_data.map((field, index) => (
                                     <React.Fragment key={`field-${index}`}>
-                                        {index > 0 && <Divider component="li"/>}
+                                        {index > 0 && <Divider component="li" />}
                                         <ListItem>
                                             <ListItemIcon>
                                                 {getFieldTypeIcon(field.type)}
@@ -171,7 +186,7 @@ const FormContent = () => {
                                                             <Typography
                                                                 component="span"
                                                                 color="error.main"
-                                                                sx={{ml: 0.5}}
+                                                                sx={{ ml: 0.5 }}
                                                             >
                                                                 *
                                                             </Typography>
@@ -179,9 +194,15 @@ const FormContent = () => {
                                                     </Typography>
                                                 }
                                                 secondary={
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        {field.type.charAt(0).toUpperCase() + field.type.slice(1)} field
-                                                        {field.placeholder && ` • Placeholder: "${field.placeholder}"`}
+                                                    <Typography
+                                                        variant="caption"
+                                                        color="text.secondary"
+                                                    >
+                                                        {field.type.charAt(0).toUpperCase() +
+                                                            field.type.slice(1)}{' '}
+                                                        field
+                                                        {field.placeholder &&
+                                                            ` • Placeholder: "${field.placeholder}"`}
                                                     </Typography>
                                                 }
                                             />

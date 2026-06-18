@@ -1,36 +1,36 @@
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import PatientInfo from "@/Pages/Patient/Components/PatientInfo";
-import SectionsInfo from "@/Pages/AcceptanceItem/Components/SectionsInfo";
-import TestInfo from "@/Pages/AcceptanceItem/Components/TestInfo";
-import ReportForm from "@/Pages/Report/Components/ReportForm";
-import {Head, useForm, Link} from "@inertiajs/react";
-import PageHeader from "@/Components/PageHeader.jsx";
-import {useMemo, useCallback} from "react";
-import {Button, Tooltip} from "@mui/material";
-import {Visibility as VisibilityIcon} from "@mui/icons-material";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PatientInfo from '@/Pages/Patient/Components/PatientInfo';
+import SectionsInfo from '@/Pages/AcceptanceItem/Components/SectionsInfo';
+import TestInfo from '@/Pages/AcceptanceItem/Components/TestInfo';
+import ReportForm from '@/Pages/Report/Components/ReportForm';
+import { Head, useForm, Link } from '@inertiajs/react';
+import PageHeader from '@/Components/PageHeader.jsx';
+import { useMemo, useCallback } from 'react';
+import { Button, Tooltip } from '@mui/material';
+import { Visibility as VisibilityIcon } from '@mui/icons-material';
 
 /**
  * Edit Report Page Component
  *
  * Responsible for editing an existing report in the Reception domain
  */
-const Edit = ({patients, acceptanceItem, report, signers, templates}) => {
+const Edit = ({ patients, acceptanceItem, report, signers, templates }) => {
     // Initialize form with report data
-    const {post, data, setData, errors, setError} = useForm({
+    const { post, data, setData, errors, setError } = useForm({
         ...report,
         signers,
-        _method: "put"
+        _method: 'put',
     });
 
     // Validation function
     const validateForm = useCallback(() => {
         // Check if all signers have signatures
         const allSignersHaveSignature = data.signers
-            .map(signer => Boolean(signer.user.signature))
+            .map((signer) => Boolean(signer.user.signature))
             .reduce((allValid, current) => allValid && current, true);
 
         if (!allSignersHaveSignature) {
-            setError("signers", "All the Signers Must have signature");
+            setError('signers', 'All the Signers Must have signature');
             return false;
         }
 
@@ -40,7 +40,7 @@ const Edit = ({patients, acceptanceItem, report, signers, templates}) => {
     // Form submission handler
     const handleSubmit = useCallback(() => {
         if (validateForm()) {
-            post(route("reports.update", report.id));
+            post(route('reports.update', report.id));
         }
     }, [validateForm, post, report.id]);
 
@@ -49,7 +49,7 @@ const Edit = ({patients, acceptanceItem, report, signers, templates}) => {
 
     return (
         <>
-            <Head title="Edit Report"/>
+            <Head title="Edit Report" />
             <PageHeader
                 title="Edit Report"
                 actions={[
@@ -58,25 +58,25 @@ const Edit = ({patients, acceptanceItem, report, signers, templates}) => {
                             variant="outlined"
                             size="small"
                             component={Link}
-                            href={route("acceptanceItems.show", {
+                            href={route('acceptanceItems.show', {
                                 acceptance: acceptanceItem.acceptance_id,
-                                acceptanceItem: acceptanceItem.id
+                                acceptanceItem: acceptanceItem.id,
                             })}
                             startIcon={<VisibilityIcon />}
                             sx={{
                                 textTransform: 'none',
-                                fontWeight: 'medium'
+                                fontWeight: 'medium',
                             }}
                         >
                             View Acceptance Item
                         </Button>
-                    </Tooltip>
+                    </Tooltip>,
                 ]}
             />
 
             {/* Patient Information Section */}
             <section className="patient-info-section">
-                {patients.map(patient => (
+                {patients.map((patient) => (
                     <PatientInfo
                         key={patient.id}
                         patient={patient}
@@ -97,9 +97,7 @@ const Edit = ({patients, acceptanceItem, report, signers, templates}) => {
 
             {/* Sections Information */}
             <section className="sections-info">
-                <SectionsInfo
-                    acceptanceItemStates={acceptanceItem.acceptance_item_states}
-                />
+                <SectionsInfo acceptanceItemStates={acceptanceItem.acceptance_item_states} />
             </section>
 
             {/* Report Form */}
@@ -120,14 +118,14 @@ const Edit = ({patients, acceptanceItem, report, signers, templates}) => {
 // Define breadcrumbs for navigation
 const breadCrumbs = [
     {
-        title: "Reports",
-        link: route("reports.index"),
-        icon: null
+        title: 'Reports',
+        link: route('reports.index'),
+        icon: null,
     },
 ];
 
 // Setup layout with breadcrumbs
-Edit.layout = page => (
+Edit.layout = (page) => (
     <AuthenticatedLayout
         auth={page.props.auth}
         children={page}
@@ -136,8 +134,8 @@ Edit.layout = page => (
             {
                 title: `Edit Report ${page.props.report.id}`,
                 link: null,
-                icon: null
-            }
+                icon: null,
+            },
         ]}
     />
 );

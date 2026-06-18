@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
     Box,
     TextField,
@@ -15,17 +15,17 @@ import {
     Select,
     MenuItem,
 } from '@mui/material';
-import {DatePicker} from '@mui/x-date-pickers/DatePicker';
-import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
-import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PersonIcon from '@mui/icons-material/Person';
-import SelectSearch from "@/Components/SelectSearch.jsx";
+import SelectSearch from '@/Components/SelectSearch.jsx';
 
-const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
+const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
     const [filters, setFilters] = useState({
         search: defaultValues.search || '',
         invoice_no: defaultValues.invoice_no || '',
@@ -35,11 +35,9 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
         from_date: defaultValues.from_date || null,
         to_date: defaultValues.to_date || null,
     });
-    const [dateError, setDateError] = useState("");
+    const [dateError, setDateError] = useState('');
     const [activeFilters, setActiveFilters] = useState(0);
-    const today = new Date(Date.now() + 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0];
+    const today = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
     // Count active filters for better UX
     useEffect(() => {
@@ -51,11 +49,11 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
             from_date: filters.from_date,
             to_date: filters.to_date,
         };
-        const count = Object.values(filterValues).filter(value => {
+        const count = Object.values(filterValues).filter((value) => {
             if (Array.isArray(value)) {
                 return value.length > 0;
             }
-            return value !== "" && value !== null && value !== undefined;
+            return value !== '' && value !== null && value !== undefined;
         }).length;
         setActiveFilters(count);
     }, [filters]);
@@ -67,22 +65,22 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
             const toDate = new Date(filters.to_date);
 
             if (fromDate > toDate) {
-                setDateError("Start date cannot be after end date");
+                setDateError('Start date cannot be after end date');
             } else if (fromDate > new Date(today)) {
-                setDateError("Start date cannot be in the future");
+                setDateError('Start date cannot be in the future');
             } else {
-                setDateError("");
+                setDateError('');
             }
         } else {
-            setDateError("");
+            setDateError('');
         }
     }, [filters.from_date, filters.to_date, today]);
 
     const handleFilterChange = (field, value) => {
-        setFilters(prev => {
+        setFilters((prev) => {
             const newFilters = {
                 ...prev,
-                [field]: value
+                [field]: value,
             };
 
             // Reset owner_id and owner_object when owner_type changes
@@ -101,10 +99,10 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
 
     const handleOwnerChange = useCallback((e) => {
         const ownerObject = e.target.value;
-        setFilters(prev => ({
+        setFilters((prev) => ({
             ...prev,
             owner_object: ownerObject,
-            owner_id: ownerObject?.id || null
+            owner_id: ownerObject?.id || null,
         }));
     }, []);
 
@@ -113,7 +111,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
     }, []);
 
     const handleClearSearch = useCallback(() => {
-        setFilters(prevState => ({...prevState, search: ""}));
+        setFilters((prevState) => ({ ...prevState, search: '' }));
     }, []);
 
     const handleInvoiceNoChange = useCallback((e) => {
@@ -121,7 +119,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
     }, []);
 
     const handleClearInvoiceNo = useCallback(() => {
-        setFilters(prevState => ({...prevState, invoice_no: ""}));
+        setFilters((prevState) => ({ ...prevState, invoice_no: '' }));
     }, []);
 
     const formatDateForBackend = (date) => {
@@ -150,8 +148,12 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
         };
 
         // Remove null, undefined, and empty string values, but keep owner_object out of the API call
-        Object.keys(cleanedFilters).forEach(key => {
-            if (cleanedFilters[key] === null || cleanedFilters[key] === '' || cleanedFilters[key] === undefined) {
+        Object.keys(cleanedFilters).forEach((key) => {
+            if (
+                cleanedFilters[key] === null ||
+                cleanedFilters[key] === '' ||
+                cleanedFilters[key] === undefined
+            ) {
                 delete cleanedFilters[key];
             }
         });
@@ -170,19 +172,22 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
             to_date: null,
         };
         setFilters(clearedFilters);
-        setDateError("");
+        setDateError('');
         onFilter({})();
     }, [onFilter]);
 
     const handleClearDate = useCallback((fieldName) => {
-        setFilters(prevState => ({...prevState, [fieldName]: null}));
+        setFilters((prevState) => ({ ...prevState, [fieldName]: null }));
     }, []);
 
-    const handleKeyPress = useCallback((e) => {
-        if (e.key === 'Enter' && !dateError) {
-            handleApplyFilters();
-        }
-    }, [handleApplyFilters, dateError]);
+    const handleKeyPress = useCallback(
+        (e) => {
+            if (e.key === 'Enter' && !dateError) {
+                handleApplyFilters();
+            }
+        },
+        [handleApplyFilters, dateError],
+    );
 
     const handleQuickDatePreset = useCallback((preset) => {
         const today = new Date();
@@ -230,19 +235,19 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                 return;
         }
 
-        setFilters(prev => ({
+        setFilters((prev) => ({
             ...prev,
             from_date: fromDate,
-            to_date: toDate
+            to_date: toDate,
         }));
     }, []);
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <Paper elevation={0} sx={{p: 3, mb: 2, bgcolor: 'background.paper'}}>
+            <Paper elevation={0} sx={{ p: 3, mb: 2, bgcolor: 'background.paper' }}>
                 <Stack spacing={3}>
                     {/* Header with filter icon and active count */}
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         {activeFilters > 0 && (
                             <Chip
                                 label={`${activeFilters} active`}
@@ -255,7 +260,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
 
                     <Grid container spacing={2}>
                         {/* Patient Search Field */}
-                        <Grid size={{xs: 12, md: 6}}>
+                        <Grid size={{ xs: 12, md: 6 }}>
                             <TextField
                                 fullWidth
                                 name="search"
@@ -268,7 +273,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                     input: {
                                         startAdornment: (
                                             <InputAdornment position="start">
-                                                <SearchIcon color="action"/>
+                                                <SearchIcon color="action" />
                                             </InputAdornment>
                                         ),
                                         endAdornment: filters.search && (
@@ -278,17 +283,17 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                                     onClick={handleClearSearch}
                                                     edge="end"
                                                 >
-                                                    <ClearIcon fontSize="small"/>
+                                                    <ClearIcon fontSize="small" />
                                                 </IconButton>
                                             </InputAdornment>
-                                        )
-                                    }
+                                        ),
+                                    },
                                 }}
                             />
                         </Grid>
 
                         {/* Invoice No Filter */}
-                        <Grid size={{xs: 12, md: 6}}>
+                        <Grid size={{ xs: 12, md: 6 }}>
                             <TextField
                                 fullWidth
                                 name="invoice_no"
@@ -301,7 +306,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                     input: {
                                         startAdornment: (
                                             <InputAdornment position="start">
-                                                <SearchIcon color="action"/>
+                                                <SearchIcon color="action" />
                                             </InputAdornment>
                                         ),
                                         endAdornment: filters.invoice_no && (
@@ -311,17 +316,17 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                                     onClick={handleClearInvoiceNo}
                                                     edge="end"
                                                 >
-                                                    <ClearIcon fontSize="small"/>
+                                                    <ClearIcon fontSize="small" />
                                                 </IconButton>
                                             </InputAdornment>
-                                        )
-                                    }
+                                        ),
+                                    },
                                 }}
                             />
                         </Grid>
 
                         {/* Owner Type Selector */}
-                        <Grid size={{xs: 12, md: 6}}>
+                        <Grid size={{ xs: 12, md: 6 }}>
                             <FormControl fullWidth>
                                 <InputLabel id="owner-type-label">Owner Type</InputLabel>
                                 <Select
@@ -332,7 +337,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                     onChange={handleOwnerTypeChange}
                                     startAdornment={
                                         <InputAdornment position="start">
-                                            <PersonIcon color="action"/>
+                                            <PersonIcon color="action" />
                                         </InputAdornment>
                                     }
                                 >
@@ -346,20 +351,20 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                         </Grid>
 
                         {/* Owner (Referrer/Patient) Filter */}
-                        <Grid size={{xs: 12, md: 6}}>
+                        <Grid size={{ xs: 12, md: 6 }}>
                             {filters.owner_type ? (
                                 <SelectSearch
                                     key={filters.owner_type}
                                     fullWidth
                                     label={
                                         filters.owner_type === 'referrer'
-                                            ? "Select Referrer"
-                                            : "Select Patient"
+                                            ? 'Select Referrer'
+                                            : 'Select Patient'
                                     }
                                     url={
                                         filters.owner_type === 'referrer'
-                                            ? route("api.referrers.list")
-                                            : route("api.patients.list")
+                                            ? route('api.referrers.list')
+                                            : route('api.patients.list')
                                     }
                                     value={filters.owner_object}
                                     name="owner_id"
@@ -377,17 +382,21 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                         </Grid>
 
                         {/* Date Range Section */}
-                        <Grid size={{xs: 12}}>
+                        <Grid size={{ xs: 12 }}>
                             <Box>
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 2}}>
-                                    <CalendarTodayIcon color="action" fontSize="small"/>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                                    <CalendarTodayIcon color="action" fontSize="small" />
                                     <Typography variant="subtitle2" color="text.secondary">
                                         Date Range
                                     </Typography>
                                 </Box>
 
                                 {/* Quick Date Presets */}
-                                <Stack direction="row" spacing={1} sx={{mb: 2, flexWrap: 'wrap', gap: 1}}>
+                                <Stack
+                                    direction="row"
+                                    spacing={1}
+                                    sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}
+                                >
                                     <Chip
                                         label="Today"
                                         onClick={() => handleQuickDatePreset('today')}
@@ -448,32 +457,36 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
 
                                 {/* Date Pickers */}
                                 <Grid container spacing={2}>
-                                    <Grid size={{xs: 12, sm: 6}}>
+                                    <Grid size={{ xs: 12, sm: 6 }}>
                                         <DatePicker
                                             label="From Date"
                                             value={filters.from_date}
-                                            onChange={(value) => handleFilterChange('from_date', value)}
+                                            onChange={(value) =>
+                                                handleFilterChange('from_date', value)
+                                            }
                                             clearable
                                             slotProps={{
                                                 textField: {
                                                     fullWidth: true,
                                                     error: !!dateError,
-                                                }
+                                                },
                                             }}
                                         />
                                     </Grid>
-                                    <Grid size={{xs: 12, sm: 6}}>
+                                    <Grid size={{ xs: 12, sm: 6 }}>
                                         <DatePicker
                                             label="To Date"
                                             value={filters.to_date}
-                                            onChange={(value) => handleFilterChange('to_date', value)}
+                                            onChange={(value) =>
+                                                handleFilterChange('to_date', value)
+                                            }
                                             clearable
                                             slotProps={{
                                                 textField: {
                                                     fullWidth: true,
                                                     error: !!dateError,
                                                     helperText: dateError,
-                                                }
+                                                },
                                             }}
                                         />
                                     </Grid>
@@ -482,11 +495,11 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                         </Grid>
 
                         {/* Action Buttons */}
-                        <Grid size={{xs: 12}}>
-  <Stack direction="row" spacing={2} sx={{justifyContent: "flex-end"}}>
+                        <Grid size={{ xs: 12 }}>
+                            <Stack direction="row" spacing={2} sx={{ justifyContent: 'flex-end' }}>
                                 <Button
                                     variant="outlined"
-                                    startIcon={<ClearIcon/>}
+                                    startIcon={<ClearIcon />}
                                     onClick={handleClearFilters}
                                     disabled={activeFilters === 0}
                                 >
@@ -494,7 +507,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                 </Button>
                                 <Button
                                     variant="contained"
-                                    startIcon={<FilterListIcon/>}
+                                    startIcon={<FilterListIcon />}
                                     onClick={handleApplyFilters}
                                     disabled={!!dateError}
                                 >
@@ -507,6 +520,6 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
             </Paper>
         </LocalizationProvider>
     );
-}
+};
 
 export default Filter;

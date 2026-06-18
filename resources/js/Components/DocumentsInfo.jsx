@@ -1,11 +1,11 @@
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import React, {useState, useEffect} from "react";
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import AccordionDetails from "@mui/material/AccordionDetails";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import {
     AccordionActions,
     Box,
@@ -19,8 +19,8 @@ import {
     useTheme,
     Tabs,
     Tab,
-} from "@mui/material";
-import Button from "@mui/material/Button";
+} from '@mui/material';
+import Button from '@mui/material/Button';
 import {
     Save as SaveIcon,
     Cancel as CancelIcon,
@@ -33,11 +33,12 @@ import {
     Description as DescriptionIcon,
     Archive as ArchiveIcon,
     CloudUpload as CloudUploadIcon,
-    Download as DownloadIcon, RemoveRedEye,
-} from "@mui/icons-material";
-import {useForm} from "@inertiajs/react";
-import Upload from "./Upload";
-import Document from "@/Pages/Document.jsx";
+    Download as DownloadIcon,
+    RemoveRedEye,
+} from '@mui/icons-material';
+import { useForm } from '@inertiajs/react';
+import Upload from './Upload';
+import Document from '@/Pages/Document.jsx';
 
 /**
  * Enhanced DocumentsInfo component with tag-based filtering tabs
@@ -55,49 +56,49 @@ import Document from "@/Pages/Document.jsx";
 
 // Define tags for DocumentsInfo
 const allTags = [
-    {label: "Sections Documents", value: "ACCEPTANCE_ITEM_STATES"},
-    {label: "Prescription", value: "PRESCRIPTION"},
-    {label: "Report", value: "REPORTED"},
-    {label: "Published Report", value: "PUBLISHED"},
-    {label: "Clinical Comment", value: "CLINICAL_COMMENT"},
-    {label: "Approved", value: "APPROVED"},
-    {label: "Document", value: "DOCUMENT"},
-    {label: "Signature", value: "SIGNATURE"},
-    {label: "Additional Report Files", value: "ADDITIONAL"},
-    {label: "Medical History", value: "MEDICAL_HISTORY"},
-    {label: "ID Card", value: "ID_CARD"},
-    {label: "Consent Form", value: "CONSENT_FORM"},
-    {label: "Acceptance Form", value: "ACCEPTANCE_FORM"},
-    {label: "Request Form", value: "REQUEST_FORM"}
+    { label: 'Sections Documents', value: 'ACCEPTANCE_ITEM_STATES' },
+    { label: 'Prescription', value: 'PRESCRIPTION' },
+    { label: 'Report', value: 'REPORTED' },
+    { label: 'Published Report', value: 'PUBLISHED' },
+    { label: 'Clinical Comment', value: 'CLINICAL_COMMENT' },
+    { label: 'Approved', value: 'APPROVED' },
+    { label: 'Document', value: 'DOCUMENT' },
+    { label: 'Signature', value: 'SIGNATURE' },
+    { label: 'Additional Report Files', value: 'ADDITIONAL' },
+    { label: 'Medical History', value: 'MEDICAL_HISTORY' },
+    { label: 'ID Card', value: 'ID_CARD' },
+    { label: 'Consent Form', value: 'CONSENT_FORM' },
+    { label: 'Acceptance Form', value: 'ACCEPTANCE_FORM' },
+    { label: 'Request Form', value: 'REQUEST_FORM' },
 ];
 const DocumentsInfo = ({
-                           documents = [],
-                           appendData = {},
-                           defaultExpanded = true,
-                           titleVariant = "h6",
-                           editable = true,
-                           url = "",
-                           allowedTags = allTags.map((tag) => tag.value),
-                       }) => {
+    documents = [],
+    appendData = {},
+    defaultExpanded = true,
+    titleVariant = 'h6',
+    editable = true,
+    url = '',
+    allowedTags = allTags.map((tag) => tag.value),
+}) => {
     const theme = useTheme();
     const tags = allowedTags.reduce((acc, tag) => {
-        const allowedTag = allTags.find(item => item.value === tag);
+        const allowedTag = allTags.find((item) => item.value === tag);
         if (allowedTag) acc.push(allowedTag);
         return acc;
     }, []);
 
     // Initialize form with documents data
-    const {data, setData, post, processing, reset} = useForm({
+    const { data, setData, post, processing, reset } = useForm({
         documents,
         ...appendData,
-        _method: "put"
+        _method: 'put',
     });
 
     // State for edit mode
     const [edit, setEdit] = useState(false);
 
     // State for active tab
-    const [activeTab, setActiveTab] = useState("all");
+    const [activeTab, setActiveTab] = useState('all');
 
     // Extract unique tags from documents
     const [uniqueTags, setUniqueTags] = useState([]);
@@ -107,8 +108,8 @@ const DocumentsInfo = ({
 
     // Extract unique tags and set filtered documents whenever documents change
     useEffect(() => {
-        const tags = ["all"];
-        documents.forEach(doc => {
+        const tags = ['all'];
+        documents.forEach((doc) => {
             if (doc.tag && !tags.includes(doc.tag)) {
                 tags.push(doc.tag);
             }
@@ -116,19 +117,19 @@ const DocumentsInfo = ({
         setUniqueTags(tags);
 
         // Initial filtering
-        if (activeTab === "all") {
+        if (activeTab === 'all') {
             setFilteredDocuments(documents);
         } else {
-            setFilteredDocuments(documents.filter(doc => doc.tag === activeTab));
+            setFilteredDocuments(documents.filter((doc) => doc.tag === activeTab));
         }
     }, [documents]);
 
     // Filter documents when tab changes
     useEffect(() => {
-        if (activeTab === "all") {
+        if (activeTab === 'all') {
             setFilteredDocuments(documents);
         } else {
-            setFilteredDocuments(documents.filter(doc => doc.tag === activeTab));
+            setFilteredDocuments(documents.filter((doc) => doc.tag === activeTab));
         }
     }, [activeTab, documents]);
 
@@ -142,7 +143,7 @@ const DocumentsInfo = ({
         post(url, {
             onSuccess: () => {
                 setEdit(false);
-            }
+            },
         });
     };
 
@@ -156,34 +157,39 @@ const DocumentsInfo = ({
     const handleEdit = () => setEdit(true);
 
     // Handle file changes
-    const handleChange = (_, value) => setData(previousData => ({...previousData, documents: value}));
+    const handleChange = (_, value) =>
+        setData((previousData) => ({ ...previousData, documents: value }));
 
     // Get appropriate icon based on file type
     const getFileIcon = (mimeType) => {
-        if (!mimeType) return <InsertDriveFileIcon/>;
+        if (!mimeType) return <InsertDriveFileIcon />;
 
         if (['pdf', 'application/pdf', 'application/x-pdf'].includes(mimeType)) {
-            return <PictureAsPdfIcon sx={{color: '#f44336'}}/>;
-        } else if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp', 'ico', 'tif', 'tiff'].includes(mimeType)) {
-            return <PhotoIcon sx={{color: '#4caf50'}}/>;
-        } else if (["doc", "docx"].includes(mimeType)) {
-            return <DescriptionIcon sx={{color: '#2196f3'}}/>;
+            return <PictureAsPdfIcon sx={{ color: '#f44336' }} />;
+        } else if (
+            ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp', 'ico', 'tif', 'tiff'].includes(
+                mimeType,
+            )
+        ) {
+            return <PhotoIcon sx={{ color: '#4caf50' }} />;
+        } else if (['doc', 'docx'].includes(mimeType)) {
+            return <DescriptionIcon sx={{ color: '#2196f3' }} />;
         } else if (['zip', 'rar', 'archive', '7z', 'tar', 'gz', 'bz2'].includes(mimeType)) {
-            return <ArchiveIcon sx={{color: '#ff9800'}}/>;
+            return <ArchiveIcon sx={{ color: '#ff9800' }} />;
         }
 
-        return <InsertDriveFileIcon sx={{color: '#9e9e9e'}}/>;
+        return <InsertDriveFileIcon sx={{ color: '#9e9e9e' }} />;
     };
 
     // Document management view based on edit state
 
-    const [selectedDoc, setSelectedDoc] = useState()
-    const handleClick = (doc) => () => setSelectedDoc({...doc, hash: doc.hash || doc.id});
+    const [selectedDoc, setSelectedDoc] = useState();
+    const handleClick = (doc) => () => setSelectedDoc({ ...doc, hash: doc.hash || doc.id });
     const handleClose = () => setSelectedDoc(null);
     const DocumentsManager = () => {
         if (edit) {
             return (
-                <Box sx={{p: 2}}>
+                <Box sx={{ p: 2 }}>
                     <Paper
                         elevation={0}
                         variant="outlined"
@@ -192,15 +198,17 @@ const DocumentsInfo = ({
                             borderRadius: 2,
                             backgroundColor: alpha(theme.palette.background.default, 0.5),
                             borderStyle: 'dashed',
-                            mb: 2
+                            mb: 2,
                         }}
                     >
-                        <Box sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            mb: 2
-                        }}>
-                            <CloudUploadIcon color="primary" sx={{mr: 1}}/>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                mb: 2,
+                            }}
+                        >
+                            <CloudUploadIcon color="primary" sx={{ mr: 1 }} />
                             <Typography variant="subtitle1" fontWeight="medium">
                                 Manage Documents
                             </Typography>
@@ -208,17 +216,17 @@ const DocumentsInfo = ({
 
                         <Upload
                             value={data.documents}
-                            url={route("documents.store")}
+                            url={route('documents.store')}
                             onChange={handleChange}
                             multiple
                             editable={true}
-                            sx={{borderRadius: 2}}
+                            sx={{ borderRadius: 2 }}
                             tags={tags}
                         />
                         <Typography
                             variant="caption"
                             color="text.secondary"
-                            sx={{display: 'block', mt: 2}}
+                            sx={{ display: 'block', mt: 2 }}
                         >
                             Drag and drop files here or click to browse.
                         </Typography>
@@ -226,11 +234,12 @@ const DocumentsInfo = ({
                 </Box>
             );
         }
-        return (<Box sx={{p: 1}}>
+        return (
+            <Box sx={{ p: 1 }}>
                 {documents && documents.length > 0 ? (
                     <>
                         {/* Tabs for filtering documents by tag */}
-                        <Box sx={{borderBottom: 1, borderColor: 'divider', mb: 2}}>
+                        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
                             <Tabs
                                 value={activeTab}
                                 onChange={handleTabChange}
@@ -238,14 +247,18 @@ const DocumentsInfo = ({
                                 scrollButtons="auto"
                                 aria-label="document tag tabs"
                             >
-                                {uniqueTags.map(tag => (
+                                {uniqueTags.map((tag) => (
                                     <Tab
                                         key={tag}
-                                        label={tag === "all" ? "All Documents" : tags.find(t => t.value === tag)?.label}
+                                        label={
+                                            tag === 'all'
+                                                ? 'All Documents'
+                                                : tags.find((t) => t.value === tag)?.label
+                                        }
                                         value={tag}
                                         sx={{
                                             textTransform: 'capitalize',
-                                            minHeight: '48px'
+                                            minHeight: '48px',
                                         }}
                                     />
                                 ))}
@@ -253,7 +266,7 @@ const DocumentsInfo = ({
                         </Box>
 
                         {/* Show count of filtered documents */}
-                        <Box sx={{ml: 2, mb: 2}}>
+                        <Box sx={{ ml: 2, mb: 2 }}>
                             <Typography variant="subtitle2" color="text.secondary">
                                 Showing {filteredDocuments.length} of {documents.length} documents
                             </Typography>
@@ -263,7 +276,7 @@ const DocumentsInfo = ({
                         <Grid container spacing={2}>
                             {filteredDocuments.length > 0 ? (
                                 filteredDocuments.map((doc, index) => (
-                                    <Grid size={{xs: 12, sm: 6, md: 4}} key={doc.id || index}>
+                                    <Grid size={{ xs: 12, sm: 6, md: 4 }} key={doc.id || index}>
                                         <Paper
                                             elevation={1}
                                             sx={{
@@ -275,47 +288,68 @@ const DocumentsInfo = ({
                                                 transition: 'all 0.2s',
                                                 '&:hover': {
                                                     boxShadow: 3,
-                                                    transform: 'translateY(-2px)'
-                                                }
+                                                    transform: 'translateY(-2px)',
+                                                },
                                             }}
                                         >
-                                            <Box sx={{
-                                                display: 'flex',
-                                                alignItems: 'flex-start',
-                                                mb: 1
-                                            }}>
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'flex-start',
+                                                    mb: 1,
+                                                }}
+                                            >
                                                 <Box
                                                     sx={{
                                                         p: 1.5,
                                                         borderRadius: 1,
-                                                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                                                        mr: 2
+                                                        backgroundColor: alpha(
+                                                            theme.palette.primary.main,
+                                                            0.1,
+                                                        ),
+                                                        mr: 2,
                                                     }}
                                                 >
                                                     {getFileIcon(doc.ext)}
                                                 </Box>
-                                                <Box sx={{flexGrow: 1, overflow: 'hidden'}}>
+                                                <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
                                                     <Typography
                                                         variant="subtitle2"
                                                         noWrap
                                                         title={doc.originalName || doc.name}
-                                                        sx={{maxWidth: '100%'}}
+                                                        sx={{ maxWidth: '100%' }}
                                                     >
                                                         {doc.originalName || doc.name}
                                                     </Typography>
-                                                    {doc.tag && (<>
+                                                    {doc.tag && (
+                                                        <>
                                                             <Chip
-                                                                label={tags.find(item => item.value === doc.tag)?.label}
+                                                                label={
+                                                                    tags.find(
+                                                                        (item) =>
+                                                                            item.value === doc.tag,
+                                                                    )?.label
+                                                                }
                                                                 size="small"
                                                                 color="primary"
                                                                 variant="outlined"
-                                                                sx={{mt: 0.5, mb: 0.5, textTransform: 'capitalize'}}
+                                                                sx={{
+                                                                    mt: 0.5,
+                                                                    mb: 0.5,
+                                                                    textTransform: 'capitalize',
+                                                                }}
                                                             />
-                                                            <br/>
+                                                            <br />
                                                         </>
                                                     )}
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        Uploaded: {new Date(doc.created_at).toLocaleDateString()}
+                                                    <Typography
+                                                        variant="caption"
+                                                        color="text.secondary"
+                                                    >
+                                                        Uploaded:{' '}
+                                                        {new Date(
+                                                            doc.created_at,
+                                                        ).toLocaleDateString()}
                                                     </Typography>
                                                 </Box>
                                             </Box>
@@ -325,25 +359,34 @@ const DocumentsInfo = ({
                                                     pt: 1,
                                                     display: 'flex',
                                                     justifyContent: 'flex-end',
-                                                    gap: 1
+                                                    gap: 1,
                                                 }}
                                             >
                                                 <Tooltip title="Download">
                                                     <IconButton
                                                         size="small"
                                                         component="a"
-                                                        href={route("documents.download", doc.id || doc.hash)}
+                                                        href={route(
+                                                            'documents.download',
+                                                            doc.id || doc.hash,
+                                                        )}
                                                         download
                                                         target="_blank"
                                                         sx={{
                                                             color: theme.palette.success.main,
-                                                            backgroundColor: alpha(theme.palette.success.main, 0.1),
+                                                            backgroundColor: alpha(
+                                                                theme.palette.success.main,
+                                                                0.1,
+                                                            ),
                                                             '&:hover': {
-                                                                backgroundColor: alpha(theme.palette.success.main, 0.2)
-                                                            }
+                                                                backgroundColor: alpha(
+                                                                    theme.palette.success.main,
+                                                                    0.2,
+                                                                ),
+                                                            },
                                                         }}
                                                     >
-                                                        <DownloadIcon fontSize="small"/>
+                                                        <DownloadIcon fontSize="small" />
                                                     </IconButton>
                                                 </Tooltip>
                                                 <Tooltip title="View">
@@ -352,13 +395,19 @@ const DocumentsInfo = ({
                                                         onClick={handleClick(doc)}
                                                         sx={{
                                                             color: theme.palette.info.main,
-                                                            backgroundColor: alpha(theme.palette.info.main, 0.1),
+                                                            backgroundColor: alpha(
+                                                                theme.palette.info.main,
+                                                                0.1,
+                                                            ),
                                                             '&:hover': {
-                                                                backgroundColor: alpha(theme.palette.info.main, 0.2)
-                                                            }
+                                                                backgroundColor: alpha(
+                                                                    theme.palette.info.main,
+                                                                    0.2,
+                                                                ),
+                                                            },
                                                         }}
                                                     >
-                                                        <RemoveRedEye fontSize="small"/>
+                                                        <RemoveRedEye fontSize="small" />
                                                     </IconButton>
                                                 </Tooltip>
                                             </Box>
@@ -366,19 +415,26 @@ const DocumentsInfo = ({
                                     </Grid>
                                 ))
                             ) : (
-                                <Grid size={{xs: 12}}>
+                                <Grid size={{ xs: 12 }}>
                                     <Box
                                         sx={{
                                             p: 3,
                                             textAlign: 'center',
-                                            backgroundColor: alpha(theme.palette.background.default, 0.5),
+                                            backgroundColor: alpha(
+                                                theme.palette.background.default,
+                                                0.5,
+                                            ),
                                             borderRadius: 2,
                                             border: '1px dashed',
                                             borderColor: 'divider',
-                                            m: 2
+                                            m: 2,
                                         }}
                                     >
-                                        <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                                        <Typography
+                                            variant="subtitle1"
+                                            color="text.secondary"
+                                            gutterBottom
+                                        >
                                             No documents found with the selected tag
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary">
@@ -397,7 +453,7 @@ const DocumentsInfo = ({
                             backgroundColor: alpha(theme.palette.background.default, 0.5),
                             borderRadius: 2,
                             border: '1px dashed',
-                            borderColor: 'divider'
+                            borderColor: 'divider',
                         }}
                     >
                         <DocumentScannerIcon
@@ -405,7 +461,7 @@ const DocumentsInfo = ({
                                 fontSize: 48,
                                 color: 'text.secondary',
                                 mb: 2,
-                                opacity: 0.6
+                                opacity: 0.6,
                             }}
                         />
                         <Typography variant="subtitle1" color="text.secondary" gutterBottom>
@@ -422,33 +478,34 @@ const DocumentsInfo = ({
         );
     };
 
-    return (<>
+    return (
+        <>
             <Accordion
                 defaultExpanded={defaultExpanded}
                 sx={{
                     mt: 2,
                     borderRadius: 1,
-                    '&:before': {display: 'none'},
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                    '&:before': { display: 'none' },
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                 }}
             >
                 <AccordionSummary
-                    expandIcon={<ExpandMoreIcon/>}
+                    expandIcon={<ExpandMoreIcon />}
                     aria-controls="patient-documents"
                     id="patient-documents"
                     sx={{
                         backgroundColor: 'background.paper',
-                        borderRadius: '8px 8px 0 0'
+                        borderRadius: '8px 8px 0 0',
                     }}
                 >
-                    <Box sx={{display: 'flex', alignItems: 'center', width: '100%'}}>
-                        <DocumentScannerIcon sx={{mr: 1, color: 'primary.main'}}/>
+                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                        <DocumentScannerIcon sx={{ mr: 1, color: 'primary.main' }} />
                         <Typography
                             variant={titleVariant}
                             sx={{
                                 fontWeight: 500,
                                 color: 'text.primary',
-                                flexGrow: 1
+                                flexGrow: 1,
                             }}
                         >
                             Documents
@@ -457,30 +514,30 @@ const DocumentsInfo = ({
                         <Chip
                             label={`${documents?.length || 0} files`}
                             size="small"
-                            color={documents?.length > 0 ? "primary" : "default"}
-                            sx={{mr: 2}}
+                            color={documents?.length > 0 ? 'primary' : 'default'}
+                            sx={{ mr: 2 }}
                         />
                     </Box>
                 </AccordionSummary>
 
-                <Divider/>
+                <Divider />
 
-                <AccordionDetails sx={{p: 0, backgroundColor: 'background.default'}}>
-                    <DocumentsManager/>
+                <AccordionDetails sx={{ p: 0, backgroundColor: 'background.default' }}>
+                    <DocumentsManager />
                 </AccordionDetails>
 
                 {editable && (
                     <>
-                        <Divider/>
-                        <AccordionActions sx={{p: 2, backgroundColor: 'background.paper'}}>
+                        <Divider />
+                        <AccordionActions sx={{ p: 2, backgroundColor: 'background.paper' }}>
                             {edit ? (
                                 <Stack direction="row" spacing={2}>
                                     <Button
                                         onClick={handleCancel}
-                                        startIcon={<CancelIcon/>}
+                                        startIcon={<CancelIcon />}
                                         variant="outlined"
                                         color="inherit"
-                                        sx={{borderRadius: 2}}
+                                        sx={{ borderRadius: 2 }}
                                     >
                                         Cancel
                                     </Button>
@@ -489,8 +546,8 @@ const DocumentsInfo = ({
                                         variant="contained"
                                         loading={processing}
                                         loadingPosition="start"
-                                        startIcon={<SaveIcon/>}
-                                        sx={{borderRadius: 2}}
+                                        startIcon={<SaveIcon />}
+                                        sx={{ borderRadius: 2 }}
                                     >
                                         Save Changes
                                     </Button>
@@ -498,20 +555,19 @@ const DocumentsInfo = ({
                             ) : (
                                 <Button
                                     onClick={handleEdit}
-                                    startIcon={documents?.length > 0 ? <EditIcon/> : <AddIcon/>}
+                                    startIcon={documents?.length > 0 ? <EditIcon /> : <AddIcon />}
                                     variant="outlined"
                                     color="secondary"
-                                    sx={{borderRadius: 2}}
+                                    sx={{ borderRadius: 2 }}
                                 >
-                                    {documents?.length > 0 ? "Manage Documents" : "Add Documents"}
+                                    {documents?.length > 0 ? 'Manage Documents' : 'Add Documents'}
                                 </Button>
                             )}
                         </AccordionActions>
                     </>
                 )}
             </Accordion>
-            <Document document={selectedDoc}
-                      onClose={handleClose}/>
+            <Document document={selectedDoc} onClose={handleClose} />
         </>
     );
 };

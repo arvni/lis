@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from 'react';
 import {
     Box,
     Button,
@@ -13,21 +13,21 @@ import {
     TextField,
     Tooltip,
     Typography,
-} from "@mui/material";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import ClearIcon from "@mui/icons-material/Clear";
-import SelectSearch from "@/Components/SelectSearch.jsx";
+} from '@mui/material';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import ClearIcon from '@mui/icons-material/Clear';
+import SelectSearch from '@/Components/SelectSearch.jsx';
 
 const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
     const [filter, setFilter] = useState(defaultFilter || {});
-    const [dateError, setDateError] = useState("");
-    const today = new Date().toISOString().split("T")[0];
+    const [dateError, setDateError] = useState('');
+    const today = new Date().toISOString().split('T')[0];
 
     useEffect(() => {
         if (filter?.from_date && filter?.to_date && filter.from_date > filter.to_date) {
-            setDateError("Start date cannot be after end date");
+            setDateError('Start date cannot be after end date');
         } else {
-            setDateError("");
+            setDateError('');
         }
     }, [filter?.from_date, filter?.to_date]);
 
@@ -39,7 +39,7 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
     };
 
     const handleClearDate = (fieldName) => {
-        setFilter((prevState) => ({ ...prevState, [fieldName]: "" }));
+        setFilter((prevState) => ({ ...prevState, [fieldName]: '' }));
     };
 
     const handleQuickDatePreset = (preset) => {
@@ -48,24 +48,24 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
         let toDate = new Date(currentDate);
 
         switch (preset) {
-            case "today":
+            case 'today':
                 break;
-            case "yesterday":
+            case 'yesterday':
                 fromDate.setDate(fromDate.getDate() - 1);
                 toDate = new Date(fromDate);
                 break;
-            case "thisWeek":
+            case 'thisWeek':
                 fromDate.setDate(fromDate.getDate() - fromDate.getDay());
                 break;
-            case "lastWeek":
+            case 'lastWeek':
                 fromDate.setDate(fromDate.getDate() - fromDate.getDay() - 7);
                 toDate = new Date(fromDate);
                 toDate.setDate(toDate.getDate() + 6);
                 break;
-            case "thisMonth":
+            case 'thisMonth':
                 fromDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
                 break;
-            case "lastMonth":
+            case 'lastMonth':
                 fromDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
                 toDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
                 break;
@@ -75,18 +75,18 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
 
         setFilter((prevState) => ({
             ...prevState,
-            from_date: fromDate.toISOString().split("T")[0],
-            to_date: toDate.toISOString().split("T")[0],
+            from_date: fromDate.toISOString().split('T')[0],
+            to_date: toDate.toISOString().split('T')[0],
         }));
     };
 
     const clearAllFilters = () => {
         setFilter({
-            search: "",
-            status: "",
+            search: '',
+            status: '',
             tags: [],
-            from_date: "",
-            to_date: "",
+            from_date: '',
+            to_date: '',
         });
     };
 
@@ -110,7 +110,7 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
                     <TextField
                         fullWidth
                         name="search"
-                        value={filter?.search || ""}
+                        value={filter?.search || ''}
                         onChange={handleChange}
                         label="Search"
                         placeholder="Acceptance, patient, test, method, barcode"
@@ -119,7 +119,11 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
                                 endAdornment: filter?.search ? (
                                     <InputAdornment position="end">
                                         <IconButton
-                                            onClick={() => handleChange({ target: { name: "search", value: "" } })}
+                                            onClick={() =>
+                                                handleChange({
+                                                    target: { name: 'search', value: '' },
+                                                })
+                                            }
                                             edge="end"
                                             size="small"
                                         >
@@ -140,7 +144,7 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
                         label="Tags"
                         fullWidth
                         name="tags"
-                        url={route("api.tags.list")}
+                        url={route('api.tags.list')}
                     />
                 </Grid>
 
@@ -150,7 +154,7 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
                         <Select
                             fullWidth
                             name="status"
-                            value={filter?.status || ""}
+                            value={filter?.status || ''}
                             onChange={handleChange}
                             labelId="section-group-acceptance-status-label"
                             label="Status"
@@ -176,22 +180,34 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
                 )}
 
                 <Grid size={{ xs: 12 }}>
-                    <Typography variant="subtitle2" sx={{ mb: 1, display: "flex", alignItems: "center" }}>
+                    <Typography
+                        variant="subtitle2"
+                        sx={{ mb: 1, display: 'flex', alignItems: 'center' }}
+                    >
                         <CalendarTodayIcon fontSize="small" sx={{ mr: 1 }} />
                         Date Range Presets
                     </Typography>
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
-                        {["today", "yesterday", "thisWeek", "lastWeek", "thisMonth", "lastMonth"].map((preset) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                        {[
+                            'today',
+                            'yesterday',
+                            'thisWeek',
+                            'lastWeek',
+                            'thisMonth',
+                            'lastMonth',
+                        ].map((preset) => (
                             <Chip
                                 key={preset}
-                                label={{
-                                    today: "Today",
-                                    yesterday: "Yesterday",
-                                    thisWeek: "This Week",
-                                    lastWeek: "Last Week",
-                                    thisMonth: "This Month",
-                                    lastMonth: "Last Month",
-                                }[preset]}
+                                label={
+                                    {
+                                        today: 'Today',
+                                        yesterday: 'Yesterday',
+                                        thisWeek: 'This Week',
+                                        lastWeek: 'Last Week',
+                                        thisMonth: 'This Month',
+                                        lastMonth: 'Last Month',
+                                    }[preset]
+                                }
                                 onClick={() => handleQuickDatePreset(preset)}
                                 size="small"
                                 clickable
@@ -204,7 +220,7 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
                     <TextField
                         fullWidth
                         name="from_date"
-                        value={filter?.from_date || ""}
+                        value={filter?.from_date || ''}
                         onChange={handleChange}
                         label="From Date"
                         type="date"
@@ -217,7 +233,7 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
                                     <InputAdornment position="end">
                                         <Tooltip title="Clear date">
                                             <IconButton
-                                                onClick={() => handleClearDate("from_date")}
+                                                onClick={() => handleClearDate('from_date')}
                                                 edge="end"
                                                 size="small"
                                             >
@@ -235,7 +251,7 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
                     <TextField
                         fullWidth
                         name="to_date"
-                        value={filter?.to_date || ""}
+                        value={filter?.to_date || ''}
                         onChange={handleChange}
                         label="To Date"
                         type="date"
@@ -249,7 +265,7 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
                                     <InputAdornment position="end">
                                         <Tooltip title="Clear date">
                                             <IconButton
-                                                onClick={() => handleClearDate("to_date")}
+                                                onClick={() => handleClearDate('to_date')}
                                                 edge="end"
                                                 size="small"
                                             >
@@ -264,13 +280,17 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
                 </Grid>
 
                 <Grid size={{ xs: 12 }}>
-                    <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
                         {hasActiveFilters && (
                             <Button variant="outlined" color="secondary" onClick={clearAllFilters}>
                                 Clear
                             </Button>
                         )}
-                        <Button variant="contained" onClick={applyFilter} disabled={Boolean(dateError)}>
+                        <Button
+                            variant="contained"
+                            onClick={applyFilter}
+                            disabled={Boolean(dateError)}
+                        >
                             Apply Filters
                         </Button>
                     </Box>

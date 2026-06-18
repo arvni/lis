@@ -10,7 +10,7 @@ import {
     CircularProgress,
     Box,
     Typography,
-    Alert
+    Alert,
 } from '@mui/material';
 import { WarningAmber, ErrorOutlined as ErrorOutline } from '@mui/icons-material';
 
@@ -30,16 +30,16 @@ import { WarningAmber, ErrorOutlined as ErrorOutline } from '@mui/icons-material
  * @returns {JSX.Element} The DeleteConfirmationDialog component
  */
 const DeleteConfirmationDialog = ({
-                                      open,
-                                      onClose,
-                                      onConfirm,
-                                      title = "Confirm Deletion",
-                                      itemName = "",
-                                      itemType = "item",
-                                      description = "",
-                                      isLoading = false,
-                                      severity = "warning"
-                                  }) => {
+    open,
+    onClose,
+    onConfirm,
+    title = 'Confirm Deletion',
+    itemName = '',
+    itemType = 'item',
+    description = '',
+    isLoading = false,
+    severity = 'warning',
+}) => {
     const isError = severity === 'error';
 
     return (
@@ -52,28 +52,26 @@ const DeleteConfirmationDialog = ({
                 paper: {
                     sx: {
                         borderRadius: 2,
-                        overflow: 'hidden'
-                    }
-                }
+                        overflow: 'hidden',
+                    },
+                },
             }}
         >
-            <DialogTitle sx={{
-                pb: 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                color: isError ? 'error.main' : 'warning.main'
-            }}>
+            <DialogTitle
+                sx={{
+                    pb: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    color: isError ? 'error.main' : 'warning.main',
+                }}
+            >
                 {isError ? <ErrorOutline color="error" /> : <WarningAmber color="warning" />}
                 {title}
             </DialogTitle>
 
             <DialogContent sx={{ pt: 1 }}>
-                <Alert
-                    severity={severity}
-                    variant="outlined"
-                    sx={{ mb: 2 }}
-                >
+                <Alert severity={severity} variant="outlined" sx={{ mb: 2 }}>
                     <Typography variant="body2" fontWeight="500">
                         You are about to delete: <strong>{itemName}</strong>
                     </Typography>
@@ -84,19 +82,16 @@ const DeleteConfirmationDialog = ({
                 </DialogContentText>
 
                 {description && (
-                    <DialogContentText sx={{ mt: 2, color: isError ? 'error.dark' : 'text.secondary' }}>
+                    <DialogContentText
+                        sx={{ mt: 2, color: isError ? 'error.dark' : 'text.secondary' }}
+                    >
                         {description}
                     </DialogContentText>
                 )}
             </DialogContent>
 
             <DialogActions sx={{ px: 3, py: 2 }}>
-                <Button
-                    onClick={onClose}
-                    disabled={isLoading}
-                    variant="outlined"
-                    color="inherit"
-                >
+                <Button onClick={onClose} disabled={isLoading} variant="outlined" color="inherit">
                     Cancel
                 </Button>
                 <Box sx={{ position: 'relative' }}>
@@ -104,7 +99,7 @@ const DeleteConfirmationDialog = ({
                         onClick={onConfirm}
                         disabled={isLoading}
                         variant="contained"
-                        color={isError ? "error" : "warning"}
+                        color={isError ? 'error' : 'warning'}
                         startIcon={isLoading ? null : isError ? <ErrorOutline /> : <WarningAmber />}
                     >
                         {isLoading ? 'Deleting...' : 'Delete'}
@@ -136,7 +131,7 @@ DeleteConfirmationDialog.propTypes = {
     itemType: PropTypes.string,
     description: PropTypes.string,
     isLoading: PropTypes.bool,
-    severity: PropTypes.oneOf(['warning', 'error'])
+    severity: PropTypes.oneOf(['warning', 'error']),
 };
 
 export default DeleteConfirmationDialog;

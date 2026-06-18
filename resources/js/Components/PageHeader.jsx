@@ -1,42 +1,43 @@
-import React from "react";
-import {Card, Paper, Stack, Box} from "@mui/material";
-import Typography from "@mui/material/Typography";
-import {Head} from "@inertiajs/react";
+import React from 'react';
+import { Card, Paper, Stack, Box } from '@mui/material';
+import Typography from '@mui/material/Typography';
+import { Head } from '@inertiajs/react';
 import PropTypes from 'prop-types';
 
-const PageHeader = ({title, actions, subtitle, icon}) => {
+const PageHeader = ({ title, actions, subtitle, icon }) => {
     return (
         <Card
             elevation={2}
             sx={{
                 mb: 3,
                 borderRadius: 2,
-                overflow: "hidden"
+                overflow: 'hidden',
             }}
         >
-            <Head title={typeof title === "string" ? title : "Dashboard"}/>
+            <Head title={typeof title === 'string' ? title : 'Dashboard'} />
             <Paper
                 sx={{
                     pr: 2,
-                    backgroundImage: "linear-gradient(to right, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0) 20%)",
-                    borderBottom: "1px solid",
-                    borderColor: "divider"
+                    backgroundImage:
+                        'linear-gradient(to right, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0) 20%)',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
                 }}
             >
                 <Stack
                     direction="row"
                     spacing={2}
-                    sx={{justifyContent: "space-between", alignItems: "center"}}
+                    sx={{ justifyContent: 'space-between', alignItems: 'center' }}
                 >
-                    <Box sx={{p: 2, pl: 3}}>
-                        {typeof title === "string" ? (
+                    <Box sx={{ p: 2, pl: 3 }}>
+                        {typeof title === 'string' ? (
                             <>
                                 <Typography
                                     variant="h4"
                                     fontWeight={600}
                                     sx={{
-                                        display: "flex",
-                                        alignItems: "center"
+                                        display: 'flex',
+                                        alignItems: 'center',
                                     }}
                                 >
                                     {icon && (
@@ -44,8 +45,8 @@ const PageHeader = ({title, actions, subtitle, icon}) => {
                                             component="span"
                                             sx={{
                                                 mr: 1.5,
-                                                display: "flex",
-                                                color: "primary.main"
+                                                display: 'flex',
+                                                color: 'primary.main',
                                             }}
                                         >
                                             {icon}
@@ -58,7 +59,7 @@ const PageHeader = ({title, actions, subtitle, icon}) => {
                                         component="div"
                                         variant="body2"
                                         color="text.secondary"
-                                        sx={{mt: 0.5}}
+                                        sx={{ mt: 0.5 }}
                                     >
                                         {subtitle}
                                     </Typography>
@@ -73,7 +74,7 @@ const PageHeader = ({title, actions, subtitle, icon}) => {
                         <Stack
                             direction="row"
                             spacing={2}
-                            sx={{py: 1, flexWrap: "wrap", alignItems: "center"}}
+                            sx={{ py: 1, flexWrap: 'wrap', alignItems: 'center' }}
                         >
                             {actions}
                         </Stack>

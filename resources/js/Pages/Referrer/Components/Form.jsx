@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback } from 'react';
 import {
     Button,
     Container,
@@ -8,53 +8,73 @@ import {
     TextField,
     Typography,
     Chip,
-    IconButton
-} from "@mui/material";
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import AddIcon from "@mui/icons-material/Add";
-import LogisticsMap from "@/Components/LogisticsMap";
+    IconButton,
+} from '@mui/material';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import AddIcon from '@mui/icons-material/Add';
+import LogisticsMap from '@/Components/LogisticsMap';
 
 // Email validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function ReferrerForm({ data, setData, submit, cancel, errors, setError, clearErrors }) {
-    const [emailInput, setEmailInput] = useState("");
+export default function ReferrerForm({
+    data,
+    setData,
+    submit,
+    cancel,
+    errors,
+    setError,
+    clearErrors,
+}) {
+    const [emailInput, setEmailInput] = useState('');
 
     // Memoized handlers
     const handleChange = useCallback((e) => {
         const { name, type, checked, value } = e.target;
-        onChange(name, type === "checkbox" ? checked : value);
+        onChange(name, type === 'checkbox' ? checked : value);
     }, []);
 
-    const handleBillingInfoChange = useCallback((e) => {
-        const { name, value } = e.target;
-        onChange("billingInfo", {
-            ...data.billingInfo,
-            [name]: value
-        });
-    }, [data.billingInfo]);
+    const handleBillingInfoChange = useCallback(
+        (e) => {
+            const { name, value } = e.target;
+            onChange('billingInfo', {
+                ...data.billingInfo,
+                [name]: value,
+            });
+        },
+        [data.billingInfo],
+    );
 
-    const handleLogisticInfoChange = useCallback((e) => {
-        const { name, value } = e.target;
-        onChange("logisticInfo", {
-            ...data.logisticInfo,
-            [name]: value
-        });
-    }, [data.logisticInfo]);
+    const handleLogisticInfoChange = useCallback(
+        (e) => {
+            const { name, value } = e.target;
+            onChange('logisticInfo', {
+                ...data.logisticInfo,
+                [name]: value,
+            });
+        },
+        [data.logisticInfo],
+    );
 
-    const handleLocationChange = useCallback(({ latitude, longitude }) => {
-        onChange("logisticInfo", {
-            ...data.logisticInfo,
-            latitude,
-            longitude
-        });
-    }, [data.logisticInfo]);
+    const handleLocationChange = useCallback(
+        ({ latitude, longitude }) => {
+            onChange('logisticInfo', {
+                ...data.logisticInfo,
+                latitude,
+                longitude,
+            });
+        },
+        [data.logisticInfo],
+    );
 
-    const onChange = useCallback((key, value) => {
-        setData(prevState => ({ ...prevState, [key]: value }));
-    }, [setData]);
+    const onChange = useCallback(
+        (key, value) => {
+            setData((prevState) => ({ ...prevState, [key]: value }));
+        },
+        [setData],
+    );
 
     // Report receivers handlers
     const validateEmail = (email) => EMAIL_REGEX.test(email);
@@ -67,33 +87,42 @@ export default function ReferrerForm({ data, setData, submit, cancel, errors, se
         }
 
         if (!validateEmail(trimmedEmail)) {
-            setError("reportReceivers", "Please enter a valid email address");
+            setError('reportReceivers', 'Please enter a valid email address');
             return;
         }
 
         const currentEmails = data.reportReceivers || [];
 
         if (currentEmails.includes(trimmedEmail)) {
-            setError("reportReceivers", "This email is already added");
+            setError('reportReceivers', 'This email is already added');
             return;
         }
 
-        onChange("reportReceivers", [...currentEmails, trimmedEmail]);
-        setEmailInput("");
-        clearErrors("reportReceivers");
+        onChange('reportReceivers', [...currentEmails, trimmedEmail]);
+        setEmailInput('');
+        clearErrors('reportReceivers');
     }, [emailInput, data.reportReceivers, onChange, setError, clearErrors]);
 
-    const handleRemoveEmail = useCallback((emailToRemove) => {
-        const currentEmails = data.reportReceivers || [];
-        onChange("reportReceivers", currentEmails.filter(email => email !== emailToRemove));
-    }, [data.reportReceivers, onChange]);
+    const handleRemoveEmail = useCallback(
+        (emailToRemove) => {
+            const currentEmails = data.reportReceivers || [];
+            onChange(
+                'reportReceivers',
+                currentEmails.filter((email) => email !== emailToRemove),
+            );
+        },
+        [data.reportReceivers, onChange],
+    );
 
-    const handleEmailKeyPress = useCallback((e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            handleAddEmail();
-        }
-    }, [handleAddEmail]);
+    const handleEmailKeyPress = useCallback(
+        (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleAddEmail();
+            }
+        },
+        [handleAddEmail],
+    );
 
     // Form validation
     const validateForm = useCallback(() => {
@@ -101,9 +130,9 @@ export default function ReferrerForm({ data, setData, submit, cancel, errors, se
         let isValid = true;
 
         const validations = [
-            { field: "phoneNo", value: data?.phoneNo, message: "Please Enter Phone No." },
-            { field: "fullName", value: data?.fullName, message: "Please Enter Name" },
-            { field: "email", value: data?.email, message: "Please Enter Email" }
+            { field: 'phoneNo', value: data?.phoneNo, message: 'Please Enter Phone No.' },
+            { field: 'fullName', value: data?.fullName, message: 'Please Enter Name' },
+            { field: 'email', value: data?.email, message: 'Please Enter Email' },
         ];
 
         validations.forEach(({ field, value, message }) => {
@@ -116,28 +145,29 @@ export default function ReferrerForm({ data, setData, submit, cancel, errors, se
         return isValid;
     }, [data, clearErrors, setError]);
 
-    const handleSubmit = useCallback((e) => {
-        e.preventDefault();
-        e.stopPropagation();
+    const handleSubmit = useCallback(
+        (e) => {
+            e.preventDefault();
+            e.stopPropagation();
 
-        if (validateForm()) {
-            submit();
-        }
-    }, [validateForm, submit]);
+            if (validateForm()) {
+                submit();
+            }
+        },
+        [validateForm, submit],
+    );
 
     return (
-        <Container sx={{ p: "1em" }}>
-            <Typography variant="h4">
-                {data.id ? "Edit" : "Add New"} Referrer
-            </Typography>
-            <Divider sx={{ my: "1em" }} />
+        <Container sx={{ p: '1em' }}>
+            <Typography variant="h4">{data.id ? 'Edit' : 'Add New'} Referrer</Typography>
+            <Divider sx={{ my: '1em' }} />
 
             <Box component="form" onSubmit={handleSubmit}>
                 <Grid container spacing={2} rowSpacing={5}>
                     {/* Basic Information */}
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <TextField
-                            value={data.fullName || ""}
+                            value={data.fullName || ''}
                             fullWidth
                             required
                             name="fullName"
@@ -150,7 +180,7 @@ export default function ReferrerForm({ data, setData, submit, cancel, errors, se
 
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <TextField
-                            value={data.email || ""}
+                            value={data.email || ''}
                             fullWidth
                             required
                             type="email"
@@ -164,7 +194,7 @@ export default function ReferrerForm({ data, setData, submit, cancel, errors, se
 
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <TextField
-                            value={data.phoneNo || ""}
+                            value={data.phoneNo || ''}
                             fullWidth
                             required
                             type="tel"
@@ -238,75 +268,75 @@ export default function ReferrerForm({ data, setData, submit, cancel, errors, se
 
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <TextField
-                            value={data.billingInfo?.name || ""}
+                            value={data.billingInfo?.name || ''}
                             fullWidth
                             name="name"
                             label="Name"
                             onChange={handleBillingInfoChange}
-                            error={!!errors?.["billingInfo.name"]}
-                            helperText={errors?.["billingInfo.name"]}
+                            error={!!errors?.['billingInfo.name']}
+                            helperText={errors?.['billingInfo.name']}
                         />
                     </Grid>
 
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <TextField
-                            value={data.billingInfo?.email || ""}
+                            value={data.billingInfo?.email || ''}
                             fullWidth
                             type="email"
                             name="email"
                             label="Email"
                             onChange={handleBillingInfoChange}
-                            error={!!errors?.["billingInfo.email"]}
-                            helperText={errors?.["billingInfo.email"]}
+                            error={!!errors?.['billingInfo.email']}
+                            helperText={errors?.['billingInfo.email']}
                         />
                     </Grid>
 
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <TextField
-                            value={data.billingInfo?.phone || ""}
+                            value={data.billingInfo?.phone || ''}
                             fullWidth
                             type="tel"
                             name="phone"
                             label="Phone"
                             onChange={handleBillingInfoChange}
-                            error={!!errors?.["billingInfo.phone"]}
-                            helperText={errors?.["billingInfo.phone"]}
+                            error={!!errors?.['billingInfo.phone']}
+                            helperText={errors?.['billingInfo.phone']}
                         />
                     </Grid>
 
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <TextField
-                            value={data.billingInfo?.vatIn || ""}
+                            value={data.billingInfo?.vatIn || ''}
                             fullWidth
                             name="vatIn"
                             label="VatIn"
                             onChange={handleBillingInfoChange}
-                            error={!!errors?.["billingInfo.vatIn"]}
-                            helperText={errors?.["billingInfo.vatIn"]}
+                            error={!!errors?.['billingInfo.vatIn']}
+                            helperText={errors?.['billingInfo.vatIn']}
                         />
                     </Grid>
 
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <TextField
-                            value={data.billingInfo?.city || ""}
+                            value={data.billingInfo?.city || ''}
                             fullWidth
                             name="city"
                             label="City"
                             onChange={handleBillingInfoChange}
-                            error={!!errors?.["billingInfo.city"]}
-                            helperText={errors?.["billingInfo.city"]}
+                            error={!!errors?.['billingInfo.city']}
+                            helperText={errors?.['billingInfo.city']}
                         />
                     </Grid>
 
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <TextField
-                            value={data.billingInfo?.country || ""}
+                            value={data.billingInfo?.country || ''}
                             fullWidth
                             name="country"
                             label="Country"
                             onChange={handleBillingInfoChange}
-                            error={!!errors?.["billingInfo.country"]}
-                            helperText={errors?.["billingInfo.country"]}
+                            error={!!errors?.['billingInfo.country']}
+                            helperText={errors?.['billingInfo.country']}
                         />
                     </Grid>
 
@@ -314,13 +344,13 @@ export default function ReferrerForm({ data, setData, submit, cancel, errors, se
                         <TextField
                             multiline
                             rows={3}
-                            value={data.billingInfo?.address || ""}
+                            value={data.billingInfo?.address || ''}
                             fullWidth
                             name="address"
                             label="Address"
                             onChange={handleBillingInfoChange}
-                            error={!!errors?.["billingInfo.address"]}
-                            helperText={errors?.["billingInfo.address"]}
+                            error={!!errors?.['billingInfo.address']}
+                            helperText={errors?.['billingInfo.address']}
                         />
                     </Grid>
                     {/* Logistic Information Section */}
@@ -332,41 +362,41 @@ export default function ReferrerForm({ data, setData, submit, cancel, errors, se
                         <TextField
                             multiline
                             rows={3}
-                            value={data.logisticInfo?.address || ""}
+                            value={data.logisticInfo?.address || ''}
                             fullWidth
                             name="address"
                             label="Logistics Address"
                             onChange={handleLogisticInfoChange}
-                            error={!!errors?.["logisticInfo.address"]}
-                            helperText={errors?.["logisticInfo.address"]}
+                            error={!!errors?.['logisticInfo.address']}
+                            helperText={errors?.['logisticInfo.address']}
                         />
                     </Grid>
 
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
-                            value={data.logisticInfo?.latitude || ""}
+                            value={data.logisticInfo?.latitude || ''}
                             fullWidth
                             type="number"
                             name="latitude"
                             label="Latitude"
                             onChange={handleLogisticInfoChange}
-                            error={!!errors?.["logisticInfo.latitude"]}
-                            helperText={errors?.["logisticInfo.latitude"]}
-                            slotProps={{ htmlInput: { step: "any", min: -90, max: 90 } }}
+                            error={!!errors?.['logisticInfo.latitude']}
+                            helperText={errors?.['logisticInfo.latitude']}
+                            slotProps={{ htmlInput: { step: 'any', min: -90, max: 90 } }}
                         />
                     </Grid>
 
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
-                            value={data.logisticInfo?.longitude || ""}
+                            value={data.logisticInfo?.longitude || ''}
                             fullWidth
                             type="number"
                             name="longitude"
                             label="Longitude"
                             onChange={handleLogisticInfoChange}
-                            error={!!errors?.["logisticInfo.longitude"]}
-                            helperText={errors?.["logisticInfo.longitude"]}
-                            slotProps={{ htmlInput: { step: "any", min: -180, max: 180 } }}
+                            error={!!errors?.['logisticInfo.longitude']}
+                            helperText={errors?.['logisticInfo.longitude']}
+                            slotProps={{ htmlInput: { step: 'any', min: -180, max: 180 } }}
                         />
                     </Grid>
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
     TableCell,
     TableRow,
@@ -16,8 +16,8 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    DialogContentText
-} from "@mui/material";
+    DialogContentText,
+} from '@mui/material';
 import {
     Edit as EditIcon,
     Delete as DeleteIcon,
@@ -27,8 +27,8 @@ import {
     Restore as RestoreIcon,
     Visibility as VisibilityIcon,
     CallSplit as EjectIcon,
-} from "@mui/icons-material";
-import { Link } from "@inertiajs/react";
+} from '@mui/icons-material';
+import { Link } from '@inertiajs/react';
 
 const PatientChips = ({ patients, maxVisible = 3 }) => {
     const [showAll, setShowAll] = useState(false);
@@ -88,9 +88,8 @@ const DetailsCell = ({ details, maxLength = 100 }) => {
     }
 
     const shouldTruncate = details.length > maxLength;
-    const displayText = expanded || !shouldTruncate
-        ? details
-        : `${details.substring(0, maxLength)}...`;
+    const displayText =
+        expanded || !shouldTruncate ? details : `${details.substring(0, maxLength)}...`;
 
     return (
         <Box>
@@ -117,8 +116,8 @@ const DeleteConfirmDialog = ({ open, onClose, onConfirm, panelName }) => (
         <DialogTitle>Confirm Panel Removal</DialogTitle>
         <DialogContent>
             <DialogContentText>
-                Are you sure you want to remove the panel "{panelName}"?
-                This action will remove all associated acceptance items.
+                Are you sure you want to remove the panel "{panelName}"? This action will remove all
+                associated acceptance items.
             </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -137,14 +136,18 @@ const EjectConfirmDialog = ({ open, onClose, onConfirm, panelName }) => (
         <DialogTitle>Eject Panel Tests</DialogTitle>
         <DialogContent>
             <DialogContentText>
-                This will split all tests in panel <strong>"{panelName}"</strong> into independent tests,
-                each reverting to its method's default test. Prices will be recalculated.
+                This will split all tests in panel <strong>"{panelName}"</strong> into independent
+                tests, each reverting to its method's default test. Prices will be recalculated.
                 Workflow states and reports are kept.
             </DialogContentText>
         </DialogContent>
         <DialogActions>
-            <Button onClick={onClose} variant="outlined">Cancel</Button>
-            <Button onClick={onConfirm} variant="contained" color="warning">Eject</Button>
+            <Button onClick={onClose} variant="outlined">
+                Cancel
+            </Button>
+            <Button onClick={onConfirm} variant="contained" color="warning">
+                Eject
+            </Button>
         </DialogActions>
     </Dialog>
 );
@@ -172,8 +175,8 @@ const ActionButtons = ({ panel, onEdit, onDelete, onRestore, onEject }) => {
                     sx={{
                         '&:hover': {
                             backgroundColor: 'success.main',
-                            color: 'white'
-                        }
+                            color: 'white',
+                        },
                     }}
                 >
                     <RestoreIcon />
@@ -184,7 +187,7 @@ const ActionButtons = ({ panel, onEdit, onDelete, onRestore, onEject }) => {
 
     return (
         <>
-            <Stack direction="row" spacing={1} sx={{ justifyContent: "center" }}>
+            <Stack direction="row" spacing={1} sx={{ justifyContent: 'center' }}>
                 {onEject && (
                     <Tooltip title="Eject panel — convert all tests to individual">
                         <IconButton
@@ -232,7 +235,10 @@ const ActionButtons = ({ panel, onEdit, onDelete, onRestore, onEject }) => {
             <EjectConfirmDialog
                 open={ejectDialogOpen}
                 onClose={() => setEjectDialogOpen(false)}
-                onConfirm={() => { onEject(); setEjectDialogOpen(false); }}
+                onConfirm={() => {
+                    onEject();
+                    setEjectDialogOpen(false);
+                }}
                 panelName={panel?.panel?.name}
             />
         </>
@@ -247,16 +253,12 @@ const PriceDisplay = ({ price, discount }) => {
             <Typography
                 variant="body2"
                 fontWeight="medium"
-                color={hasDiscount ? "success.main" : "text.primary"}
+                color={hasDiscount ? 'success.main' : 'text.primary'}
             >
                 {price}
             </Typography>
             {hasDiscount && (
-                <Typography
-                    variant="caption"
-                    color="success.main"
-                    sx={{ display: 'block' }}
-                >
+                <Typography variant="caption" color="success.main" sx={{ display: 'block' }}>
                     -{discount} discount
                 </Typography>
             )}
@@ -265,15 +267,15 @@ const PriceDisplay = ({ price, discount }) => {
 };
 
 const PanelRow = ({
-                      panel,
-                      testTypes,
-                      onEdit,
-                      onDelete,
-                      onRestore,
-                      onEject,
-                      hasSelectionColumn = false,
-                      showButton = false
-                  }) => {
+    panel,
+    testTypes,
+    onEdit,
+    onDelete,
+    onRestore,
+    onEject,
+    hasSelectionColumn = false,
+    showButton = false,
+}) => {
     const [collapsed, setCollapsed] = useState(false);
     const acceptanceItems = panel?.acceptanceItems || [];
     const hasMultipleItems = acceptanceItems.length > 1;
@@ -286,12 +288,7 @@ const PanelRow = ({
                     <Alert
                         severity="warning"
                         variant="outlined"
-                        action={
-                            <ActionButtons
-                                panel={panel}
-                                onRestore={onRestore}
-                            />
-                        }
+                        action={<ActionButtons panel={panel} onRestore={onRestore} />}
                     >
                         <Typography variant="body2">
                             Panel "{panel?.panel?.name}" has been removed
@@ -317,9 +314,11 @@ const PanelRow = ({
                         sx={{
                             backgroundColor: isFirstItem ? 'rgba(25, 118, 210, 0.04)' : 'inherit',
                             '&:hover': {
-                                backgroundColor: isFirstItem ? 'rgba(25, 118, 210, 0.08)' : 'rgba(0, 0, 0, 0.04)'
+                                backgroundColor: isFirstItem
+                                    ? 'rgba(25, 118, 210, 0.08)'
+                                    : 'rgba(0, 0, 0, 0.04)',
                             },
-                            '&:last-child td, &:last-child th': { border: 0 }
+                            '&:last-child td, &:last-child th': { border: 0 },
                         }}
                     >
                         {isFirstItem && (
@@ -335,38 +334,74 @@ const PanelRow = ({
                                     sx={{
                                         borderLeft: '4px solid',
                                         borderLeftColor: 'primary.main',
-                                        backgroundColor: 'rgba(25, 118, 210, 0.02)'
+                                        backgroundColor: 'rgba(25, 118, 210, 0.02)',
                                     }}
                                 >
-                                    <Box sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
-                                        <Box sx={{display: "flex", alignItems: "center"}}>
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                        }}
+                                    >
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                             <PlaylistAddCheckIcon color="primary" sx={{ mr: 1 }} />
                                             <Box>
                                                 <Typography fontWeight="600" color="primary.main">
                                                     {panel?.panel?.name}
                                                 </Typography>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: 0.5,
+                                                        flexWrap: 'wrap',
+                                                    }}
+                                                >
                                                     {hasMultipleItems && (
-                                                        <Typography variant="caption" color="text.secondary">
+                                                        <Typography
+                                                            variant="caption"
+                                                            color="text.secondary"
+                                                        >
                                                             {acceptanceItems.length} tests
                                                         </Typography>
                                                     )}
                                                     {panel?.sampleless && (
-                                                        <Chip label="Sampleless" size="small" color="warning" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
+                                                        <Chip
+                                                            label="Sampleless"
+                                                            size="small"
+                                                            color="warning"
+                                                            variant="outlined"
+                                                            sx={{ fontSize: '0.65rem', height: 20 }}
+                                                        />
                                                     )}
                                                     {(panel?.reportless || panel?.sampleless) && (
-                                                        <Chip label="Reportless" size="small" color="info" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
+                                                        <Chip
+                                                            label="Reportless"
+                                                            size="small"
+                                                            color="info"
+                                                            variant="outlined"
+                                                            sx={{ fontSize: '0.65rem', height: 20 }}
+                                                        />
                                                     )}
                                                 </Box>
                                             </Box>
                                         </Box>
                                         {hasMultipleItems && (
-                                            <Tooltip title={collapsed ? "Expand tests" : "Collapse tests"}>
+                                            <Tooltip
+                                                title={
+                                                    collapsed ? 'Expand tests' : 'Collapse tests'
+                                                }
+                                            >
                                                 <IconButton
                                                     size="small"
                                                     onClick={() => setCollapsed(!collapsed)}
                                                 >
-                                                    {collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+                                                    {collapsed ? (
+                                                        <ExpandMoreIcon />
+                                                    ) : (
+                                                        <ExpandLessIcon />
+                                                    )}
                                                 </IconButton>
                                             </Tooltip>
                                         )}
@@ -401,12 +436,12 @@ const PanelRow = ({
                         )}
 
                         <TableCell>
-  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
+                            <Box display="flex" gap={1} sx={{ alignItems: 'center' }}>
                                 {showButton ? (
                                     <Link
-                                        href={route("acceptanceItems.show", {
+                                        href={route('acceptanceItems.show', {
                                             acceptanceItem: item.id,
-                                            acceptance: item.acceptance_id
+                                            acceptance: item.acceptance_id,
                                         })}
                                         style={{ textDecoration: 'none' }}
                                     >
@@ -430,7 +465,10 @@ const PanelRow = ({
                         <TableCell>
                             {!item?.patients?.length ? (
                                 item?.samples?.map((sample, sampleIndex) => (
-                                    <Box key={sampleIndex} sx={{ mb: sampleIndex < item.samples.length - 1 ? 1 : 0 }}>
+                                    <Box
+                                        key={sampleIndex}
+                                        sx={{ mb: sampleIndex < item.samples.length - 1 ? 1 : 0 }}
+                                    >
                                         <PatientChips patients={sample.patients} />
                                         {sampleIndex < item.samples.length - 1 && (
                                             <Divider sx={{ my: 1 }} />
@@ -452,7 +490,11 @@ const PanelRow = ({
                                     <Typography
                                         variant="body2"
                                         fontWeight="medium"
-                                        color={Number(panel.discount) > 0 ? "success.main" : "text.primary"}
+                                        color={
+                                            Number(panel.discount) > 0
+                                                ? 'success.main'
+                                                : 'text.primary'
+                                        }
                                         sx={{ textAlign: 'right' }}
                                     >
                                         {panel.discount}

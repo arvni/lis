@@ -1,20 +1,28 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     Alert,
     AppBar,
     Box,
     Button,
-    Chip, CircularProgress,
+    Chip,
+    CircularProgress,
     Fade,
-    IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    IconButton,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
     Toolbar,
     Tooltip,
     Typography,
     useMediaQuery,
-    useTheme
-} from "@mui/material";
-import * as XLSX from "xlsx";
-import {Search} from "@mui/icons-material";
+    useTheme,
+} from '@mui/material';
+import * as XLSX from 'xlsx';
+import { Search } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 
 const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
@@ -63,7 +71,7 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
                     cellFormulas: true,
                     cellDates: true,
                     cellNF: true,
-                    sheetStubs: true
+                    sheetStubs: true,
                 });
 
                 if (isMounted) {
@@ -76,13 +84,15 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
                         setActiveSheetName(firstSheetName);
                         setSheetData(firstSheetData);
                     } else {
-                        setError("Excel file contains no sheets.");
+                        setError('Excel file contains no sheets.');
                     }
                 }
             } catch (err) {
-                console.error("Excel Load Error:", err);
+                console.error('Excel Load Error:', err);
                 if (isMounted) {
-                    setError(`Failed to load or parse Excel file: ${err.message || 'Unknown error'}`);
+                    setError(
+                        `Failed to load or parse Excel file: ${err.message || 'Unknown error'}`,
+                    );
                 }
             } finally {
                 if (isMounted) {
@@ -93,7 +103,9 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
 
         readExcel();
 
-        return () => { isMounted = false; };
+        return () => {
+            isMounted = false;
+        };
     }, [fileUrl, parseSheet]);
 
     const handleSheetChange = (sheetName) => {
@@ -110,7 +122,7 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
                 setActiveSheetName(sheetName);
                 setSheetData(data);
             } catch (err) {
-                console.error("Sheet Change Error:", err);
+                console.error('Sheet Change Error:', err);
                 setError(`Failed to parse sheet '${sheetName}': ${err.message || 'Unknown error'}`);
             } finally {
                 setLoading(false);
@@ -151,29 +163,46 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
     const maxCols = sheetData.reduce((max, row) => Math.max(max, row.length), 0);
 
     return (
-        <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: fullScreen ? 'calc(100vh - 48px)' : 500,
-            width: '100%',
-            overflow: 'hidden'
-        }}>
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: fullScreen ? 'calc(100vh - 48px)' : 500,
+                width: '100%',
+                overflow: 'hidden',
+            }}
+        >
             <AppBar position="static" color="default" elevation={0}>
                 <Toolbar variant="dense">
-                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', overflow: 'auto' }}>
-                        <Box sx={{ display: 'flex', gap: 1, flexShrink: 0, overflow: 'auto', py: 0.5 }}>
-                            {sheets.map(sheet => (
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            width: '100%',
+                            overflow: 'auto',
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                gap: 1,
+                                flexShrink: 0,
+                                overflow: 'auto',
+                                py: 0.5,
+                            }}
+                        >
+                            {sheets.map((sheet) => (
                                 <Chip
                                     key={sheet}
                                     label={sheet}
                                     size="small"
-                                    color={activeSheetName === sheet ? "primary" : "default"}
+                                    color={activeSheetName === sheet ? 'primary' : 'default'}
                                     onClick={() => handleSheetChange(sheet)}
                                     disabled={loading}
                                     sx={{
                                         textTransform: 'none',
                                         whiteSpace: 'nowrap',
-                                        cursor: 'pointer'
+                                        cursor: 'pointer',
                                     }}
                                 />
                             ))}
@@ -181,11 +210,11 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
 
                         {!isMobile && (
                             <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center' }}>
-                                <Tooltip title={showSearch ? "Hide search" : "Search in sheet"}>
+                                <Tooltip title={showSearch ? 'Hide search' : 'Search in sheet'}>
                                     <IconButton
                                         size="small"
                                         onClick={() => setShowSearch(!showSearch)}
-                                        color={showSearch ? "primary" : "default"}
+                                        color={showSearch ? 'primary' : 'default'}
                                     >
                                         <Search />
                                     </IconButton>
@@ -212,7 +241,7 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
                                     padding: '8px 12px',
                                     border: '1px solid #ddd',
                                     borderRadius: '4px',
-                                    fontSize: '14px'
+                                    fontSize: '14px',
                                 }}
                             />
                             <Button
@@ -231,7 +260,14 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
                                 <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
                                     Found {searchResults.length} matches
                                 </Typography>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 0.5 }}>
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 0.5,
+                                        mt: 0.5,
+                                    }}
+                                >
                                     {searchResults.map((result, index) => (
                                         <Button
                                             key={index}
@@ -242,10 +278,13 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
                                                 textTransform: 'none',
                                                 py: 0.5,
                                                 textAlign: 'left',
-                                                lineHeight: 1.2
+                                                lineHeight: 1.2,
                                             }}
                                         >
-                                            <Typography variant="caption" sx={{ fontWeight: 'bold', mr: 1 }}>
+                                            <Typography
+                                                variant="caption"
+                                                sx={{ fontWeight: 'bold', mr: 1 }}
+                                            >
                                                 {`R${result.row + 1}:C${result.col + 1}`}
                                             </Typography>
                                             <Typography
@@ -253,7 +292,7 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
                                                 sx={{
                                                     overflow: 'hidden',
                                                     textOverflow: 'ellipsis',
-                                                    whiteSpace: 'nowrap'
+                                                    whiteSpace: 'nowrap',
                                                 }}
                                             >
                                                 {String(result.value)}
@@ -272,24 +311,34 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
                     flex: 1,
                     overflow: 'auto',
                     bgcolor: 'white',
-                    position: 'relative'
+                    position: 'relative',
                 }}
             >
                 {loading && (
-                    <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: '100%',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        zIndex: 1,
-                        backgroundColor: 'rgba(255, 255, 255, 0.8)'
-                    }}>
-                        <Paper sx={{ p: 3, borderRadius: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: '100%',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            zIndex: 1,
+                            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        }}
+                    >
+                        <Paper
+                            sx={{
+                                p: 3,
+                                borderRadius: 2,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                            }}
+                        >
                             <CircularProgress size={40} sx={{ mb: 2 }} />
                             <Typography variant="body2">Loading spreadsheet...</Typography>
                         </Paper>
@@ -313,13 +362,15 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
                                                 backgroundColor: '#f5f5f5',
                                                 position: 'sticky',
                                                 top: 0,
-                                                zIndex: 1
+                                                zIndex: 1,
                                             }}
                                         >
                                             {cell !== null && cell !== undefined ? cell : ''}
                                         </TableCell>
                                     ))}
-                                    {Array.from({ length: Math.max(0, maxCols - sheetData[0].length) }).map((_, i) => (
+                                    {Array.from({
+                                        length: Math.max(0, maxCols - sheetData[0].length),
+                                    }).map((_, i) => (
                                         <TableCell
                                             key={`empty-th-${i}`}
                                             sx={{
@@ -327,7 +378,7 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
                                                 backgroundColor: '#f5f5f5',
                                                 position: 'sticky',
                                                 top: 0,
-                                                zIndex: 1
+                                                zIndex: 1,
                                             }}
                                         />
                                     ))}
@@ -339,7 +390,7 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
                                         key={rowIndex}
                                         sx={{
                                             '&:nth-of-type(even)': { backgroundColor: '#fafafa' },
-                                            '&:hover': { backgroundColor: '#f0f7ff' }
+                                            '&:hover': { backgroundColor: '#f0f7ff' },
                                         }}
                                     >
                                         {row.map((cell, cellIndex) => (
@@ -347,7 +398,9 @@ const ExcelViewer = ({ fileUrl, fullScreen = false }) => {
                                                 {cell !== null && cell !== undefined ? cell : ''}
                                             </TableCell>
                                         ))}
-                                        {Array.from({ length: Math.max(0, maxCols - row.length) }).map((_, i) => (
+                                        {Array.from({
+                                            length: Math.max(0, maxCols - row.length),
+                                        }).map((_, i) => (
                                             <TableCell key={`empty-td-${rowIndex}-${i}`} />
                                         ))}
                                     </TableRow>

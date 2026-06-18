@@ -1,61 +1,55 @@
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import Filter from "./Components/Filter";
-import TableLayout from "@/Layouts/TableLayout";
-import {
-    Stack,
-    IconButton,
-    Box,
-    Paper,
-    Typography,
-    Tooltip,
-    Chip
-} from "@mui/material";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import Filter from './Components/Filter';
+import TableLayout from '@/Layouts/TableLayout';
+import { Stack, IconButton, Box, Paper, Typography, Tooltip, Chip } from '@mui/material';
 import {
     RemoveRedEye,
     ReceiptLong,
     Edit as EditIcon,
     Delete as DeleteIcon,
-} from "@mui/icons-material";
-import {useState, useCallback} from "react";
-import InvoiceEditForm from "@/Pages/Invoice/Components/InvoiceEditForm";
-import Excel from "@/../images/excel.svg";
-import DeleteForm from "@/Components/DeleteForm";
-import {Head, Link, router, useForm, usePage} from "@inertiajs/react";
-import axios from "axios";
-
+} from '@mui/icons-material';
+import { useState, useCallback } from 'react';
+import InvoiceEditForm from '@/Pages/Invoice/Components/InvoiceEditForm';
+import Excel from '@/../images/excel.svg';
+import DeleteForm from '@/Components/DeleteForm';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import axios from 'axios';
 
 export const INVOICE_STATUS = {
     WAITING_FOR_PAYMENT: {
-        value: "Waiting",
-        color: "warning"
+        value: 'Waiting',
+        color: 'warning',
     },
-    PAID: {value: "Paid", color: "success"},
-    CREDIT_PAID: {value: "Credit Paid", color: "warning"},
-    PARTIALLY_PAID: {value: "Partially Paid", color: "info"},
-    CANCELED: {value: "Canceled", color: "error"}
-}
+    PAID: { value: 'Paid', color: 'success' },
+    CREDIT_PAID: { value: 'Credit Paid', color: 'warning' },
+    PARTIALLY_PAID: { value: 'Partially Paid', color: 'info' },
+    CANCELED: { value: 'Canceled', color: 'error' },
+};
 
 const InvoiceIndex = () => {
-    const {invoices, status, success, requestInputs, canDelete} = usePage().props;
+    const { invoices, status, success, requestInputs, canDelete } = usePage().props;
 
     // State management
     const [loading, setLoading] = useState(false);
     const [openEditForm, setOpenEditForm] = useState(false);
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
-    const {data, setData, post, processing, reset} = useForm();
+    const { data, setData, post, processing, reset } = useForm();
 
     // Format currency values consistently
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('en-US', {
             minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            maximumFractionDigits: 2,
         }).format(amount);
     };
 
     // Status indicator with appropriate colors
-    const StatusChip = ({status}) => {
-        let stat = INVOICE_STATUS?.[Object.keys(INVOICE_STATUS).find(item => INVOICE_STATUS?.[item].value == status)];
-        return <Chip label={status} color={stat?.color || 'default'} size="small"/>;
+    const StatusChip = ({ status }) => {
+        let stat =
+            INVOICE_STATUS?.[
+                Object.keys(INVOICE_STATUS).find((item) => INVOICE_STATUS?.[item].value == status)
+            ];
+        return <Chip label={status} color={stat?.color || 'default'} size="small" />;
     };
 
     // Table columns with improved readability
@@ -64,82 +58,91 @@ const InvoiceIndex = () => {
             field: 'invoiceNo',
             headerName: 'Invoice #',
             width: 110,
-            display: "flex"
+            display: 'flex',
         },
         {
             field: 'owner',
             headerName: 'Owner',
             width: 200,
             sortable: false,
-            display: "flex",
-            renderCell: ({value}) => value?.fullName || "—"
+            display: 'flex',
+            renderCell: ({ value }) => value?.fullName || '—',
         },
         {
             field: 'name',
             headerName: 'Patient',
-            type: "string",
+            type: 'string',
             width: 200,
             sortable: false,
-            display: "flex",
-            renderCell: ({row}) => row?.patient?.fullName || "—"
+            display: 'flex',
+            renderCell: ({ row }) => row?.patient?.fullName || '—',
         },
         {
             field: 'invoice_items_sum_price',
             headerName: 'Amount',
-            type: "number",
+            type: 'number',
             width: 100,
-            display: "flex",
-            renderCell: ({value}) => formatCurrency(value)
+            display: 'flex',
+            renderCell: ({ value }) => formatCurrency(value),
         },
         {
             field: 'invoice_items_sum_discount',
             headerName: 'Discount',
-            type: "number",
+            type: 'number',
             width: 100,
-            display: "flex",
-            renderCell: ({value}) => formatCurrency(Math.ceil(value))
+            display: 'flex',
+            renderCell: ({ value }) => formatCurrency(Math.ceil(value)),
         },
         {
             field: 'payments_sum_price',
             headerName: 'Paid',
-            type: "number",
+            type: 'number',
             width: 100,
-            renderCell: ({value}) => formatCurrency(Math.floor(value))
+            renderCell: ({ value }) => formatCurrency(Math.floor(value)),
         },
         {
             field: 'status',
             headerName: 'Status',
-            type: "string",
+            type: 'string',
             width: 120,
-            display: "flex",
-            renderCell: ({value}) => <StatusChip status={value}/>
+            display: 'flex',
+            renderCell: ({ value }) => <StatusChip status={value} />,
         },
         {
             field: 'statement',
             headerName: 'Statement',
             width: 130,
             sortable: false,
-            display: "flex",
-            renderCell: ({value}) => value
-                ? <a target="_blank"
-                        href={route("statements.export", value.id)}
-                        style={{textDecoration: 'none'}}>
-                    <Chip label={`#${value.no}`} size="small" color="primary" clickable/>
-                </a>
-                : "—"
+            display: 'flex',
+            renderCell: ({ value }) =>
+                value ? (
+                    <a
+                        target="_blank"
+                        href={route('statements.export', value.id)}
+                        style={{ textDecoration: 'none' }}
+                        rel="noreferrer"
+                    >
+                        <Chip label={`#${value.no}`} size="small" color="primary" clickable />
+                    </a>
+                ) : (
+                    '—'
+                ),
         },
         {
             field: 'created_at',
             headerName: 'Created Date',
-            type: "date",
-            display: "flex",
+            type: 'date',
+            display: 'flex',
             valueGetter: (value) => value && new Date(value),
             width: 120,
-            renderCell: ({value}) => value ? value.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            }) : "—"
+            renderCell: ({ value }) =>
+                value
+                    ? value.toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                      })
+                    : '—',
         },
         {
             field: 'id',
@@ -147,40 +150,42 @@ const InvoiceIndex = () => {
             headerName: 'Actions',
             width: 250,
             flex: 0,
-            display: "flex",
-            renderCell: ({row}) => {
+            display: 'flex',
+            renderCell: ({ row }) => {
                 return (
                     <Stack direction="row" spacing={1}>
                         <Tooltip title="View Invoice">
                             <IconButton
-                                href={route("invoices.show", row.id)}
+                                href={route('invoices.show', row.id)}
                                 target="_blank"
                                 size="small"
                                 color="info"
                             >
-                                <RemoveRedEye/>
+                                <RemoveRedEye />
                             </IconButton>
                         </Tooltip>
 
-                        {canDelete && (<Tooltip title="Edit Invoice">
-                            <IconButton
-                                onClick={() => handleEdit(row.id)}
-                                size="small"
-                                color="primary"
-                            >
-                                <EditIcon/>
-                            </IconButton>
-                        </Tooltip>)}
+                        {canDelete && (
+                            <Tooltip title="Edit Invoice">
+                                <IconButton
+                                    onClick={() => handleEdit(row.id)}
+                                    size="small"
+                                    color="primary"
+                                >
+                                    <EditIcon />
+                                </IconButton>
+                            </Tooltip>
+                        )}
 
                         {Boolean(row?.acceptance?.id) && (
                             <Tooltip title="View Acceptance">
                                 <IconButton
                                     component={Link}
-                                    href={route("acceptances.show", row.acceptance.id)}
+                                    href={route('acceptances.show', row.acceptance.id)}
                                     size="small"
                                     color="secondary"
                                 >
-                                    <ReceiptLong/>
+                                    <ReceiptLong />
                                 </IconButton>
                             </Tooltip>
                         )}
@@ -192,22 +197,22 @@ const InvoiceIndex = () => {
                                     size="small"
                                     color="error"
                                 >
-                                    <DeleteIcon/>
+                                    <DeleteIcon />
                                 </IconButton>
                             </Tooltip>
                         )}
                     </Stack>
                 );
-            }
-        }
+            },
+        },
     ];
 
     // Page reload function
     const pageReload = useCallback((page, filters, sort, pageSize) => {
         router.visit(route('invoices.index'), {
-            data: {page, filters, sort, pageSize},
-            only: ["invoices", "status", "success", "requestInputs"],
-            preserveState: true
+            data: { page, filters, sort, pageSize },
+            only: ['invoices', 'status', 'success', 'requestInputs'],
+            preserveState: true,
         });
     }, []);
 
@@ -216,20 +221,19 @@ const InvoiceIndex = () => {
         document.activeElement?.blur();
         try {
             setLoading(true);
-            const response = await axios.get(route("api.invoices.show", id));
-            setData({...response.data.data, _method: "put"});
+            const response = await axios.get(route('api.invoices.show', id));
+            setData({ ...response.data.data, _method: 'put' });
             setOpenEditForm(true);
         } catch (error) {
-            console.error("Error fetching invoice:", error);
+            console.error('Error fetching invoice:', error);
         } finally {
             setLoading(false);
         }
     };
 
-
     const deleteInvoice = (invoice) => {
         document.activeElement?.blur();
-        setData({...invoice, _method: "delete"});
+        setData({ ...invoice, _method: 'delete' });
         setOpenDeleteForm(true);
     };
 
@@ -239,13 +243,13 @@ const InvoiceIndex = () => {
             onSuccess: () => {
                 reset();
                 setOpenDeleteForm(false);
-            }
+            },
         });
     };
 
     // Form handlers
     const handleChange = (key, value) => {
-        setData(previousData => ({...previousData, [key]: value}));
+        setData((previousData) => ({ ...previousData, [key]: value }));
     };
 
     const handleCancel = () => {
@@ -260,27 +264,33 @@ const InvoiceIndex = () => {
 
     return (
         <>
-            <Head title="Invoice Management"/>
-            <Box sx={{mb: 3}}>
-                <Paper sx={{padding: 2}}>
-  <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "center"}}>
-                        <Typography variant="h5" component="h1" sx={{fontWeight: 'bold'}}>
+            <Head title="Invoice Management" />
+            <Box sx={{ mb: 3 }}>
+                <Paper sx={{ padding: 2 }}>
+                    <Stack
+                        direction="row"
+                        sx={{ justifyContent: 'space-between', alignItems: 'center' }}
+                    >
+                        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
                             Invoice Management
                         </Typography>
 
                         <Tooltip title="Export to Excel">
                             <IconButton
-                                href={route("invoices.export", requestInputs)}
+                                href={route('invoices.export', requestInputs)}
                                 color="success"
                                 sx={{
                                     border: '1px solid #e0e0e0',
                                     borderRadius: 1,
-                                    p: 1
+                                    p: 1,
                                 }}
                             >
-  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
-                                    <img src={Excel} alt="Excel" width="24px"/>
-                                    <Typography variant="button" sx={{display: {xs: 'none', sm: 'block'}}}>
+                                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                                    <img src={Excel} alt="Excel" width="24px" />
+                                    <Typography
+                                        variant="button"
+                                        sx={{ display: { xs: 'none', sm: 'block' } }}
+                                    >
                                         Export
                                     </Typography>
                                 </Stack>
@@ -300,11 +310,7 @@ const InvoiceIndex = () => {
                 success={success}
                 status={status}
             >
-                <InvoiceEditForm
-                    invoice={data}
-                    onClose={handleCancel}
-                    open={openEditForm}
-                />
+                <InvoiceEditForm invoice={data} onClose={handleCancel} open={openEditForm} />
 
                 <DeleteForm
                     title={`Invoice No. ${data?.invoiceNo}`}
@@ -319,18 +325,14 @@ const InvoiceIndex = () => {
 
 const breadCrumbs = [
     {
-        title: "Invoices",
+        title: 'Invoices',
         link: null,
-        icon: null
-    }
+        icon: null,
+    },
 ];
 
-InvoiceIndex.layout = page => (
-    <AuthenticatedLayout
-        auth={page.props.auth}
-        children={page}
-        breadcrumbs={breadCrumbs}
-    />
+InvoiceIndex.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
 );
 
 export default InvoiceIndex;

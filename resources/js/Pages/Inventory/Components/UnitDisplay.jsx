@@ -2,9 +2,13 @@
  * Renders stock quantity broken into largest units.
  * breakdown: [{unit: {name}, qty: number}, ...]
  */
-const UnitDisplay = ({breakdown, totalBase, baseUnit}) => {
+const UnitDisplay = ({ breakdown, totalBase, baseUnit }) => {
     if (!breakdown || breakdown.length === 0) {
-        return <span>{Number(totalBase || 0).toFixed(2)} {baseUnit}</span>;
+        return (
+            <span>
+                {Number(totalBase || 0).toFixed(2)} {baseUnit}
+            </span>
+        );
     }
 
     return (

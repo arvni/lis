@@ -1,19 +1,19 @@
-import React, {useCallback} from "react";
-import Grid from "@mui/material/Grid";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import TextField from "@mui/material/TextField";
-import Autocomplete from "@mui/material/Autocomplete";
-import SelectSearch from "@/Components/SelectSearch";
-import {Box, Typography, Tooltip, CircularProgress} from "@mui/material";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
-import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import PhoneIcon from "@mui/icons-material/Phone";
-import BadgeIcon from "@mui/icons-material/Badge";
+import React, { useCallback } from 'react';
+import Grid from '@mui/material/Grid';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
+import SelectSearch from '@/Components/SelectSearch';
+import { Box, Typography, Tooltip, CircularProgress } from '@mui/material';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import PhoneIcon from '@mui/icons-material/Phone';
+import BadgeIcon from '@mui/icons-material/Badge';
 
-const ReferredToggle = ({value, onChange}) => (
-    <Box sx={{display: "flex", alignItems: "center"}}>
+const ReferredToggle = ({ value, onChange }) => (
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <FormControlLabel
             label="Referred from another facility"
             control={
@@ -27,34 +27,36 @@ const ReferredToggle = ({value, onChange}) => (
             labelPlacement="start"
         />
         <Tooltip title="Select if this test was referred from another healthcare facility">
-            <HelpOutlineIcon fontSize="small" color="action" sx={{ml: 1}}/>
+            <HelpOutlineIcon fontSize="small" color="action" sx={{ ml: 1 }} />
         </Tooltip>
     </Box>
 );
 
-const ReferrerOptions = ({referrer, referenceCode, onChange, errors}) => (
-    <Box sx={{bgcolor: "secondary.50", p: 2, borderRadius: 2, mb: 4}}>
-        <Typography variant="subtitle1" fontWeight="medium" sx={{mb: 2}}>
+const ReferrerOptions = ({ referrer, referenceCode, onChange, errors }) => (
+    <Box sx={{ bgcolor: 'secondary.50', p: 2, borderRadius: 2, mb: 4 }}>
+        <Typography variant="subtitle1" fontWeight="medium" sx={{ mb: 2 }}>
             Referral Information
         </Typography>
 
         <Grid container spacing={3}>
-            <Grid size={{xs: 12, md: 6}}>
+            <Grid size={{ xs: 12, md: 6 }}>
                 <SelectSearch
                     name="referrer"
                     value={referrer}
                     label="Referring Facility/Doctor"
                     fullWidth
-                    url={route("api.referrers.list")}
+                    url={route('api.referrers.list')}
                     id="referrer"
                     error={Boolean(errors?.referrer)}
-                    onChange={e => onChange('referrer', e.target.value)}
-                    helperText={errors?.referrer || "Select the facility or doctor that referred this test"}
+                    onChange={(e) => onChange('referrer', e.target.value)}
+                    helperText={
+                        errors?.referrer || 'Select the facility or doctor that referred this test'
+                    }
                     variant="outlined"
                 />
             </Grid>
 
-            <Grid size={{xs: 12, md: 6}}>
+            <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                     value={referenceCode}
                     fullWidth
@@ -63,8 +65,10 @@ const ReferrerOptions = ({referrer, referenceCode, onChange, errors}) => (
                     error={Boolean(errors?.referenceCode)}
                     label="Reference Number"
                     placeholder="Enter the reference number from the referring facility"
-                    onChange={e => onChange('referenceCode', e.target.value)}
-                    helperText={errors?.referenceCode || "Optional: Enter reference number if available"}
+                    onChange={(e) => onChange('referenceCode', e.target.value)}
+                    helperText={
+                        errors?.referenceCode || 'Optional: Enter reference number if available'
+                    }
                     variant="outlined"
                 />
             </Grid>
@@ -72,28 +76,29 @@ const ReferrerOptions = ({referrer, referenceCode, onChange, errors}) => (
     </Box>
 );
 
-const DoctorSection = ({doctor, onDoctorChange}) => {
+const DoctorSection = ({ doctor, onDoctorChange }) => {
     const [open, setOpen] = React.useState(false);
     const [options, setOptions] = React.useState([]);
     const [loading, setLoading] = React.useState(false);
 
-
-    const fetchData = useCallback((_, search) => {
-        setLoading(true);
-        onDoctorChange("name", search);
-        fetch(route("api.doctors.list", {search}))
-            .then(response => response.json())
-            .then(data => {
-                setOptions(data.data);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error("Error fetching doctors:", error);
-                setLoading(false);
-                setOptions([]);
-            });
-
-    }, [open])
+    const fetchData = useCallback(
+        (_, search) => {
+            setLoading(true);
+            onDoctorChange('name', search);
+            fetch(route('api.doctors.list', { search }))
+                .then((response) => response.json())
+                .then((data) => {
+                    setOptions(data.data);
+                    setLoading(false);
+                })
+                .catch((error) => {
+                    console.error('Error fetching doctors:', error);
+                    setLoading(false);
+                    setOptions([]);
+                });
+        },
+        [open],
+    );
 
     // Handle doctor selection
     const handleDoctorSelect = (event, newValue) => {
@@ -115,28 +120,30 @@ const DoctorSection = ({doctor, onDoctorChange}) => {
 
     return (
         <Box>
-            <Typography variant="subtitle1" fontWeight="medium" sx={{mb: 2}}>
+            <Typography variant="subtitle1" fontWeight="medium" sx={{ mb: 2 }}>
                 Referring Doctor Information
             </Typography>
 
             <Grid container spacing={3}>
-                <Grid size={{xs: 12, sm: 6, md: 3}}>
-                    <Box sx={{display: "flex", alignItems: "flex-start"}}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                         <Autocomplete
                             id="doctor-autocomplete"
                             open={open}
                             onOpen={() => setOpen(true)}
                             onClose={() => setOpen(false)}
-                            value={doctor?.id ? doctor : (doctor?.name || null)}
+                            value={doctor?.id ? doctor : doctor?.name || null}
                             onChange={handleDoctorSelect}
                             onInputChange={fetchData}
                             isOptionEqualToValue={(option, value) => option.id === value?.id}
-                            getOptionLabel={(option) => (typeof option === 'string' ? option : option?.name) || ''}
+                            getOptionLabel={(option) =>
+                                (typeof option === 'string' ? option : option?.name) || ''
+                            }
                             options={options}
                             loading={loading}
                             fullWidth
                             freeSolo
-                            renderInput={({slotProps: paramSlotProps, ...params}) => (
+                            renderInput={({ slotProps: paramSlotProps, ...params }) => (
                                 <TextField
                                     {...params}
                                     name="name"
@@ -146,84 +153,105 @@ const DoctorSection = ({doctor, onDoctorChange}) => {
                                         ...paramSlotProps,
                                         input: {
                                             ...(paramSlotProps?.input ?? {}),
-                                            startAdornment: <MedicalServicesIcon color="action" sx={{mr: 1}}/>,
-                                            endAdornment: loading ? <CircularProgress size={20}/> : paramSlotProps?.input?.endAdornment,
+                                            startAdornment: (
+                                                <MedicalServicesIcon
+                                                    color="action"
+                                                    sx={{ mr: 1 }}
+                                                />
+                                            ),
+                                            endAdornment: loading ? (
+                                                <CircularProgress size={20} />
+                                            ) : (
+                                                paramSlotProps?.input?.endAdornment
+                                            ),
                                         },
                                     }}
                                 />
                             )}
                         />
                         <Tooltip title="Search for an existing doctor or enter a new name">
-                            <HelpOutlineIcon fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
+                            <HelpOutlineIcon
+                                fontSize="small"
+                                color="action"
+                                sx={{ ml: 1, mt: 2 }}
+                            />
                         </Tooltip>
                     </Box>
                 </Grid>
 
-                <Grid size={{xs: 12, sm: 6, md: 3}}>
-                    <Box sx={{display: "flex", alignItems: "flex-start"}}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                         <TextField
                             name="expertise"
                             label="Speciality"
-                            value={doctor?.expertise || ""}
-                            onChange={e => onDoctorChange('expertise', e.target.value)}
+                            value={doctor?.expertise || ''}
+                            onChange={(e) => onDoctorChange('expertise', e.target.value)}
                             fullWidth
                             placeholder="e.g. Cardiology"
                             slotProps={{
                                 input: {
                                     startAdornment: (
-                                        <LocalHospitalIcon color="action" sx={{mr: 1}}/>
+                                        <LocalHospitalIcon color="action" sx={{ mr: 1 }} />
                                     ),
-                                }
+                                },
                             }}
                         />
                         <Tooltip title="Doctor's area of specialization">
-                            <HelpOutlineIcon fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
+                            <HelpOutlineIcon
+                                fontSize="small"
+                                color="action"
+                                sx={{ ml: 1, mt: 2 }}
+                            />
                         </Tooltip>
                     </Box>
                 </Grid>
 
-                <Grid size={{xs: 12, sm: 6, md: 3}}>
-                    <Box sx={{display: "flex", alignItems: "flex-start"}}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                         <TextField
                             name="phone"
                             label="Phone Number"
-                            value={doctor?.phone || ""}
-                            onChange={e => onDoctorChange('phone', e.target.value)}
+                            value={doctor?.phone || ''}
+                            onChange={(e) => onDoctorChange('phone', e.target.value)}
                             fullWidth
                             placeholder="+1 (555) 123-4567"
                             slotProps={{
                                 input: {
-                                    startAdornment: (
-                                        <PhoneIcon color="action" sx={{mr: 1}}/>
-                                    ),
-                                }
+                                    startAdornment: <PhoneIcon color="action" sx={{ mr: 1 }} />,
+                                },
                             }}
                         />
                         <Tooltip title="Contact number of the doctor">
-                            <HelpOutlineIcon fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
+                            <HelpOutlineIcon
+                                fontSize="small"
+                                color="action"
+                                sx={{ ml: 1, mt: 2 }}
+                            />
                         </Tooltip>
                     </Box>
                 </Grid>
 
-                <Grid size={{xs: 12, sm: 6, md: 3}}>
-                    <Box sx={{display: "flex", alignItems: "flex-start"}}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                         <TextField
                             name="license_no"
                             label="License Number"
-                            value={doctor?.license_no || ""}
-                            onChange={e => onDoctorChange('license_no', e.target.value)}
+                            value={doctor?.license_no || ''}
+                            onChange={(e) => onDoctorChange('license_no', e.target.value)}
                             fullWidth
                             placeholder="e.g. MD12345"
                             slotProps={{
                                 input: {
-                                    startAdornment: (
-                                        <BadgeIcon color="action" sx={{mr: 1}}/>
-                                    ),
-                                }
+                                    startAdornment: <BadgeIcon color="action" sx={{ mr: 1 }} />,
+                                },
                             }}
                         />
                         <Tooltip title="Doctor's medical license or registration number">
-                            <HelpOutlineIcon fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
+                            <HelpOutlineIcon
+                                fontSize="small"
+                                color="action"
+                                sx={{ ml: 1, mt: 2 }}
+                            />
                         </Tooltip>
                     </Box>
                 </Grid>
@@ -232,29 +260,23 @@ const DoctorSection = ({doctor, onDoctorChange}) => {
     );
 };
 
-const DoctorReferralSection = ({data, doctor, errors, onChange, onDoctorChange}) => {
+const DoctorReferralSection = ({ data, doctor, errors, onChange, onDoctorChange }) => {
     return (
         <Box>
-            <Box sx={{mb: 3}}>
-                <ReferredToggle
-                    value={data.referred}
-                    onChange={onChange}
-                />
+            <Box sx={{ mb: 3 }}>
+                <ReferredToggle value={data.referred} onChange={onChange} />
             </Box>
 
             {data.referred && (
                 <ReferrerOptions
                     referrer={data.referrer}
-                    referenceCode={data?.referenceCode || ""}
+                    referenceCode={data?.referenceCode || ''}
                     onChange={onChange}
                     errors={errors}
                 />
             )}
 
-            <DoctorSection
-                doctor={doctor}
-                onDoctorChange={onDoctorChange}
-            />
+            <DoctorSection doctor={doctor} onDoctorChange={onDoctorChange} />
         </Box>
     );
 };

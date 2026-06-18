@@ -1,15 +1,15 @@
 import AddForm from './Components/Form';
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {Head, router, useForm, usePage} from "@inertiajs/react";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 
 const Add = () => {
     const { sampleCollectors, referrers } = usePage().props;
 
-    const {data, setData, post, errors, setError, clearErrors} = useForm({
+    const { data, setData, post, errors, setError, clearErrors } = useForm({
         sample_collector_id: null,
         referrer_id: null,
         preferred_date: null,
-        note: "",
+        note: '',
     });
 
     const handleSubmit = () => post(route('collect-requests.store'));
@@ -22,36 +22,36 @@ const Add = () => {
 
     return (
         <>
-        <Head title="New Collect Request"/>
-        <AddForm
-            data={data}
-            setData={setData}
-            submit={handleSubmit}
-            cancel={handleCancel}
-            errors={errors}
-            setError={setError}
-            clearErrors={clearErrors}
-            sampleCollectors={sampleCollectors || []}
-            referrers={referrers || []}
-        />
+            <Head title="New Collect Request" />
+            <AddForm
+                data={data}
+                setData={setData}
+                submit={handleSubmit}
+                cancel={handleCancel}
+                errors={errors}
+                setError={setError}
+                clearErrors={clearErrors}
+                sampleCollectors={sampleCollectors || []}
+                referrers={referrers || []}
+            />
         </>
     );
-}
+};
 
 const breadCrumbs = [
     {
-        title: "Collect Requests",
-        link: route("collect-requests.index"),
+        title: 'Collect Requests',
+        link: route('collect-requests.index'),
         icon: null,
     },
     {
-        title: "Add New Collect Request",
-        link: "",
-        icon: null
-    }
-]
+        title: 'Add New Collect Request',
+        link: '',
+        icon: null,
+    },
+];
 
-Add.layout = page => <AuthenticatedLayout auth={page.props.auth}
-                                          children={page}
-                                          breadcrumbs={breadCrumbs}/>
+Add.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
+);
 export default Add;

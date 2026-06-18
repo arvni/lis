@@ -10,14 +10,9 @@ import {
     Tooltip,
     useTheme,
     useMediaQuery,
-    Alert
+    Alert,
 } from '@mui/material';
-import {
-    ZoomIn,
-    ZoomOut,
-    Print,
-    Refresh
-} from '@mui/icons-material';
+import { ZoomIn, ZoomOut, Print, Refresh } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 
 const SimplifiedPDFViewer = ({ fileUrl, fullScreen = false }) => {
@@ -81,7 +76,7 @@ const SimplifiedPDFViewer = ({ fileUrl, fullScreen = false }) => {
 
     // Handle zoom actions with container size consideration
     const zoomIn = useCallback(() => {
-        setScale(prevScale => {
+        setScale((prevScale) => {
             const newScale = Math.min(prevScale + 0.2, 3);
             updateIframeScale(newScale);
             return newScale;
@@ -89,7 +84,7 @@ const SimplifiedPDFViewer = ({ fileUrl, fullScreen = false }) => {
     }, []);
 
     const zoomOut = useCallback(() => {
-        setScale(prevScale => {
+        setScale((prevScale) => {
             const newScale = Math.max(prevScale - 0.2, 0.6);
             updateIframeScale(newScale);
             return newScale;
@@ -97,18 +92,21 @@ const SimplifiedPDFViewer = ({ fileUrl, fullScreen = false }) => {
     }, []);
 
     // Update iframe scale with proper positioning
-    const updateIframeScale = useCallback((newScale) => {
-        if (iframeRef.current) {
-            iframeRef.current.style.transform = `scale(${newScale})`;
-            iframeRef.current.style.transformOrigin = 'top center';
+    const updateIframeScale = useCallback(
+        (newScale) => {
+            if (iframeRef.current) {
+                iframeRef.current.style.transform = `scale(${newScale})`;
+                iframeRef.current.style.transformOrigin = 'top center';
 
-            // Adjust container height based on scale to prevent scrolling issues
-            const scaledHeight = containerSize.height * newScale;
-            if (containerRef.current) {
-                containerRef.current.style.minHeight = `${scaledHeight}px`;
+                // Adjust container height based on scale to prevent scrolling issues
+                const scaledHeight = containerSize.height * newScale;
+                if (containerRef.current) {
+                    containerRef.current.style.minHeight = `${scaledHeight}px`;
+                }
             }
-        }
-    }, [containerSize.height]);
+        },
+        [containerSize.height],
+    );
 
     // Force refresh of PDF
     const refreshPDF = useCallback(() => {
@@ -144,16 +142,25 @@ const SimplifiedPDFViewer = ({ fileUrl, fullScreen = false }) => {
     }, [containerSize, scale, updateIframeScale]);
 
     return (
-        <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: fullScreen ? 'calc(100vh - 48px)' : '100%',
-            width: '100%',
-            overflow: 'hidden',
-        }}>
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: fullScreen ? 'calc(100vh - 48px)' : '100%',
+                width: '100%',
+                overflow: 'hidden',
+            }}
+        >
             <AppBar position="static" color="default" elevation={0}>
                 <Toolbar variant="dense">
-                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', flexWrap: 'wrap' }}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            width: '100%',
+                            flexWrap: 'wrap',
+                        }}
+                    >
                         {/* Zoom Controls */}
                         <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
                             <Tooltip title="Zoom out">
@@ -168,7 +175,10 @@ const SimplifiedPDFViewer = ({ fileUrl, fullScreen = false }) => {
                                     </IconButton>
                                 </span>
                             </Tooltip>
-                            <Typography variant="body2" sx={{ mx: 1, minWidth: '40px', textAlign: 'center' }}>
+                            <Typography
+                                variant="body2"
+                                sx={{ mx: 1, minWidth: '40px', textAlign: 'center' }}
+                            >
                                 {loading ? '...' : `${Math.round(scale * 100)}%`}
                             </Typography>
                             <Tooltip title="Zoom in">
@@ -217,8 +227,12 @@ const SimplifiedPDFViewer = ({ fileUrl, fullScreen = false }) => {
 
                         {/* Container size info (for debugging) */}
                         {containerSize.width > 0 && (
-                            <Typography variant="caption" sx={{ ml: 'auto', color: 'text.secondary' }}>
-                                {Math.round(containerSize.width)} × {Math.round(containerSize.height)}
+                            <Typography
+                                variant="caption"
+                                sx={{ ml: 'auto', color: 'text.secondary' }}
+                            >
+                                {Math.round(containerSize.width)} ×{' '}
+                                {Math.round(containerSize.height)}
                             </Typography>
                         )}
                     </Box>
@@ -234,23 +248,33 @@ const SimplifiedPDFViewer = ({ fileUrl, fullScreen = false }) => {
                     justifyContent: 'center',
                     bgcolor: '#f5f5f5',
                     p: 2,
-                    position: 'relative'
+                    position: 'relative',
                 }}
             >
                 {loading && (
-                    <Box sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        zIndex: 10,
-                        bgcolor: 'rgba(245, 245, 245, 0.8)'
-                    }}>
-                        <Paper sx={{ p: 3, borderRadius: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            zIndex: 10,
+                            bgcolor: 'rgba(245, 245, 245, 0.8)',
+                        }}
+                    >
+                        <Paper
+                            sx={{
+                                p: 3,
+                                borderRadius: 2,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                            }}
+                        >
                             <CircularProgress size={40} sx={{ mb: 2 }} />
                             <Typography variant="body2">Loading PDF...</Typography>
                         </Paper>
@@ -272,7 +296,7 @@ const SimplifiedPDFViewer = ({ fileUrl, fullScreen = false }) => {
                         justifyContent: 'center',
                         alignItems: 'flex-start',
                         overflow: 'auto',
-                        position: 'relative'
+                        position: 'relative',
                     }}
                 >
                     <iframe
@@ -286,7 +310,7 @@ const SimplifiedPDFViewer = ({ fileUrl, fullScreen = false }) => {
                             transform: `scale(${scale})`,
                             transformOrigin: 'top center',
                             display: loading ? 'none' : 'block',
-                            transition: 'transform 0.2s ease-in-out'
+                            transition: 'transform 0.2s ease-in-out',
                         }}
                         onLoad={handleIframeLoad}
                         onError={handleIframeError}

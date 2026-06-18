@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, { useRef, useState } from 'react';
 import {
     Alert,
     Box,
@@ -17,7 +17,7 @@ import {
     TableHead,
     TableRow,
     Tooltip,
-    Typography
+    Typography,
 } from '@mui/material';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import CloseIcon from '@mui/icons-material/Close';
@@ -52,7 +52,7 @@ const ExcelParameterImporter = ({ onImport, currentValues = {} }) => {
 
     const resetFileInput = () => {
         if (fileInputRef.current) {
-            fileInputRef.current.value = "";
+            fileInputRef.current.value = '';
         }
     };
 
@@ -73,7 +73,7 @@ const ExcelParameterImporter = ({ onImport, currentValues = {} }) => {
                 type: 'array',
                 cellDates: true,
                 cellNF: true,
-                cellStyles: true
+                cellStyles: true,
             });
 
             // Get the first sheet
@@ -87,7 +87,9 @@ const ExcelParameterImporter = ({ onImport, currentValues = {} }) => {
 
             // Check if the sheet has at least 3 rows
             if (range.e.r < 2) {
-                throw new Error('The Excel file must have at least 3 rows (header, parameter IDs, values)');
+                throw new Error(
+                    'The Excel file must have at least 3 rows (header, parameter IDs, values)',
+                );
             }
 
             // Extract parameter IDs from row 2 and values from row 3
@@ -153,12 +155,7 @@ const ExcelParameterImporter = ({ onImport, currentValues = {} }) => {
                 </IconButton>
             </Tooltip>
 
-            <Dialog
-                open={open}
-                onClose={handleClose}
-                maxWidth="md"
-                fullWidth
-            >
+            <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
                 <DialogTitle>
                     Import Parameters from Excel
                     <IconButton
@@ -171,11 +168,11 @@ const ExcelParameterImporter = ({ onImport, currentValues = {} }) => {
 
                 <DialogContent>
                     <Box sx={{ mb: 3 }}>
-                        <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                             Upload an Excel file containing parameter values. The file should have:
                         </Typography>
                         <ul>
-                            <li>Row 2: Parameter identifiers in format {"${parameter_name}"}</li>
+                            <li>Row 2: Parameter identifiers in format {'${parameter_name}'}</li>
                             <li>Row 3: Parameter values</li>
                         </ul>
 
@@ -218,7 +215,8 @@ const ExcelParameterImporter = ({ onImport, currentValues = {} }) => {
                         {importedValues && (
                             <Box sx={{ mt: 3 }}>
                                 <Alert severity="success" sx={{ mb: 2 }}>
-                                    Successfully extracted {Object.keys(importedValues).length} parameter values
+                                    Successfully extracted {Object.keys(importedValues).length}{' '}
+                                    parameter values
                                 </Alert>
 
                                 <Typography variant="subtitle2" gutterBottom>
@@ -237,21 +235,30 @@ const ExcelParameterImporter = ({ onImport, currentValues = {} }) => {
                                         <TableBody>
                                             {Object.keys(importedValues).map((paramId) => {
                                                 // Extract parameter name for display
-                                                const displayName = paramId.replace('param-', '').replace(/-/g, ' ');
+                                                const displayName = paramId
+                                                    .replace('param-', '')
+                                                    .replace(/-/g, ' ');
 
                                                 // Format values for display
                                                 const formatValue = (value) => {
-                                                    if (value === undefined || value === null) return '';
-                                                    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-                                                    if (value instanceof Date) return value.toLocaleDateString();
+                                                    if (value === undefined || value === null)
+                                                        return '';
+                                                    if (typeof value === 'boolean')
+                                                        return value ? 'Yes' : 'No';
+                                                    if (value instanceof Date)
+                                                        return value.toLocaleDateString();
                                                     return String(value);
                                                 };
 
                                                 return (
                                                     <TableRow key={paramId}>
                                                         <TableCell>{displayName}</TableCell>
-                                                        <TableCell>{formatValue(currentValues[paramId])}</TableCell>
-                                                        <TableCell>{formatValue(importedValues[paramId])}</TableCell>
+                                                        <TableCell>
+                                                            {formatValue(currentValues[paramId])}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {formatValue(importedValues[paramId])}
+                                                        </TableCell>
                                                     </TableRow>
                                                 );
                                             })}

@@ -1,10 +1,10 @@
-import TableLayout from "@/Layouts/TableLayout";
-import DeleteForm from "@/Components/DeleteForm";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import Filter from "./Components/Filter";
-import PageHeader from "@/Components/PageHeader.jsx";
-import { Head, router, useForm, usePage } from "@inertiajs/react";
-import { useState, useMemo } from "react";
+import TableLayout from '@/Layouts/TableLayout';
+import DeleteForm from '@/Components/DeleteForm';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import Filter from './Components/Filter';
+import PageHeader from '@/Components/PageHeader.jsx';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { useState, useMemo } from 'react';
 
 // Material UI components
 import {
@@ -16,8 +16,8 @@ import {
     Typography,
     Avatar,
     Alert,
-    Button
-} from "@mui/material";
+    Button,
+} from '@mui/material';
 
 // Material UI icons
 import {
@@ -28,19 +28,19 @@ import {
     LocalHospitalOutlined,
     HourglassEmptyOutlined,
     RefreshOutlined,
-} from "@mui/icons-material";
+} from '@mui/icons-material';
 
 const statusColors = {
-    waiting: "warning",
-    booked: "info",
-    started: "primary",
-    done: "success",
-    default: "default"
+    waiting: 'warning',
+    booked: 'info',
+    started: 'primary',
+    done: 'success',
+    default: 'default',
 };
 
 // Format date for better readability
 const formatDate = (dateString) => {
-    if (!dateString) return "—";
+    if (!dateString) return '—';
 
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
@@ -57,16 +57,20 @@ const formatDate = (dateString) => {
     } else if (isTomorrow) {
         return `Tomorrow, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     } else {
-        return date.toLocaleDateString([], {
-            month: 'short',
-            day: 'numeric',
-            year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
-        }) + ', ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return (
+            date.toLocaleDateString([], {
+                month: 'short',
+                day: 'numeric',
+                year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined,
+            }) +
+            ', ' +
+            date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        );
     }
 };
 
 const formatWaitingTime = (minutes) => {
-    if (minutes === null || minutes === undefined) return "—";
+    if (minutes === null || minutes === undefined) return '—';
     const m = Math.round(Math.abs(minutes));
     if (m < 60) return `${m}m`;
     if (m < 24 * 60) {
@@ -84,176 +88,186 @@ const Waiting = () => {
     const { consultations, status, errors, success, requestInputs } = usePage().props;
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
 
-    const columns = useMemo(() => [
-        {
-            field: 'patient_fullname',
-            headerName: 'Patient',
-            type: "string",
-            display: "flex",
-            flex: 0.6,
-            renderCell: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Avatar
-                        sx={{
-                            width: 30,
-                            height: 30,
-                            bgcolor: 'primary.light',
-                            fontSize: '0.8rem',
-                            flexShrink: 0,
-                        }}
-                    >
-                        {params.value ? params.value.charAt(0).toUpperCase() : 'P'}
-                    </Avatar>
-                    <Tooltip title="View consultation" placement="top">
-                        <Typography
-                            variant="body2"
-                            onClick={(e) => { e.stopPropagation(); show(params.row.id)(); }}
+    const columns = useMemo(
+        () => [
+            {
+                field: 'patient_fullname',
+                headerName: 'Patient',
+                type: 'string',
+                display: 'flex',
+                flex: 0.6,
+                renderCell: (params) => (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Avatar
                             sx={{
-                                fontWeight: 500,
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                color: 'primary.main',
-                                cursor: 'pointer',
-                                '&:hover': { textDecoration: 'underline' },
+                                width: 30,
+                                height: 30,
+                                bgcolor: 'primary.light',
+                                fontSize: '0.8rem',
+                                flexShrink: 0,
                             }}
                         >
-                            {params.value || "Unknown"}
-                        </Typography>
-                    </Tooltip>
-                </Box>
-            ),
-        },
-        {
-            field: 'patient_phone',
-            headerName: 'Phone',
-            type: "string",
-            display: "flex",
-            flex: 0.4,
-            renderCell: (params) => (
-                <Typography variant="body2" color={params.value ? "text.primary" : "text.disabled"}>
-                    {params.value || "—"}
-                </Typography>
-            ),
-        },
-        {
-            field: 'consultant_name',
-            headerName: 'Consultant',
-            type: "string",
-            display: "flex",
-            flex: 0.5,
-            renderCell: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <LocalHospitalOutlined fontSize="small" color="primary" />
-                    <Tooltip title={params.value || "Unassigned"} placement="top">
-                        <Typography
-                            variant="body2"
-                            sx={{
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                            }}
-                        >
-                            {params.value || "—"}
-                        </Typography>
-                    </Tooltip>
-                </Box>
-            ),
-        },
-        {
-            field: 'status',
-            headerName: 'Status',
-            type: "string",
-            display: "flex",
-            flex: 0.25,
-            renderCell: (params) => {
-                const status = params.value?.toLowerCase() || 'default';
-                const color = statusColors[status] || statusColors.default;
-                return (
-                    <Chip
-                        label={params.value || "—"}
-                        color={color}
-                        size="small"
-                        variant={status === 'waiting' ? 'filled' : 'outlined'}
-                        sx={{ textTransform: 'capitalize' }}
-                    />
-                );
-            },
-        },
-        {
-            field: 'waiting_time',
-            headerName: 'Waiting Time',
-            type: "string",
-            display: "flex",
-            flex: 0.3,
-            renderCell: (params) => {
-                const minutes = typeof params.value === 'number' ? params.value : null;
-                const isLong = minutes !== null && minutes > 30;
-                return (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <AccessTimeOutlined
-                            fontSize="small"
-                            color={isLong ? "error" : "action"}
-                        />
-                        <Typography
-                            variant="body2"
-                            color={isLong ? "error.main" : "text.primary"}
-                            fontWeight={isLong ? 600 : 400}
-                        >
-                            {formatWaitingTime(params.value)}
-                        </Typography>
-                    </Box>
-                );
-            },
-        },
-        {
-            field: 'dueDate',
-            headerName: 'Due Date',
-            type: "datetime",
-            display: "flex",
-            flex: 0.4,
-            renderCell: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CalendarToday fontSize="small" color="action" />
-                    <Tooltip title={params.value ? String(params.value) : "Not scheduled"}>
-                        <Typography variant="body2">
-                            {formatDate(params.value)}
-                        </Typography>
-                    </Tooltip>
-                </Box>
-            ),
-        },
-        {
-            field: 'id',
-            headerName: 'Actions',
-            type: 'actions',
-            display: "flex",
-            flex: 0.2,
-            sortable: false,
-            renderCell: (params) => (
-                <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    {params.row.status?.toLowerCase() === 'waiting' && (
-                        <Tooltip title="Delete">
-                            <IconButton
-                                onClick={(e) => { e.stopPropagation(); deleteConsultation(params.row)(); }}
-                                size="small"
-                                color="error"
+                            {params.value ? params.value.charAt(0).toUpperCase() : 'P'}
+                        </Avatar>
+                        <Tooltip title="View consultation" placement="top">
+                            <Typography
+                                variant="body2"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    show(params.row.id)();
+                                }}
+                                sx={{
+                                    fontWeight: 500,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    color: 'primary.main',
+                                    cursor: 'pointer',
+                                    '&:hover': { textDecoration: 'underline' },
+                                }}
                             >
-                                <DeleteOutlined fontSize="small" />
-                            </IconButton>
+                                {params.value || 'Unknown'}
+                            </Typography>
                         </Tooltip>
-                    )}
-                </Box>
-            ),
-        },
-    ], []);
+                    </Box>
+                ),
+            },
+            {
+                field: 'patient_phone',
+                headerName: 'Phone',
+                type: 'string',
+                display: 'flex',
+                flex: 0.4,
+                renderCell: (params) => (
+                    <Typography
+                        variant="body2"
+                        color={params.value ? 'text.primary' : 'text.disabled'}
+                    >
+                        {params.value || '—'}
+                    </Typography>
+                ),
+            },
+            {
+                field: 'consultant_name',
+                headerName: 'Consultant',
+                type: 'string',
+                display: 'flex',
+                flex: 0.5,
+                renderCell: (params) => (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <LocalHospitalOutlined fontSize="small" color="primary" />
+                        <Tooltip title={params.value || 'Unassigned'} placement="top">
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                {params.value || '—'}
+                            </Typography>
+                        </Tooltip>
+                    </Box>
+                ),
+            },
+            {
+                field: 'status',
+                headerName: 'Status',
+                type: 'string',
+                display: 'flex',
+                flex: 0.25,
+                renderCell: (params) => {
+                    const status = params.value?.toLowerCase() || 'default';
+                    const color = statusColors[status] || statusColors.default;
+                    return (
+                        <Chip
+                            label={params.value || '—'}
+                            color={color}
+                            size="small"
+                            variant={status === 'waiting' ? 'filled' : 'outlined'}
+                            sx={{ textTransform: 'capitalize' }}
+                        />
+                    );
+                },
+            },
+            {
+                field: 'waiting_time',
+                headerName: 'Waiting Time',
+                type: 'string',
+                display: 'flex',
+                flex: 0.3,
+                renderCell: (params) => {
+                    const minutes = typeof params.value === 'number' ? params.value : null;
+                    const isLong = minutes !== null && minutes > 30;
+                    return (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <AccessTimeOutlined
+                                fontSize="small"
+                                color={isLong ? 'error' : 'action'}
+                            />
+                            <Typography
+                                variant="body2"
+                                color={isLong ? 'error.main' : 'text.primary'}
+                                fontWeight={isLong ? 600 : 400}
+                            >
+                                {formatWaitingTime(params.value)}
+                            </Typography>
+                        </Box>
+                    );
+                },
+            },
+            {
+                field: 'dueDate',
+                headerName: 'Due Date',
+                type: 'datetime',
+                display: 'flex',
+                flex: 0.4,
+                renderCell: (params) => (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CalendarToday fontSize="small" color="action" />
+                        <Tooltip title={params.value ? String(params.value) : 'Not scheduled'}>
+                            <Typography variant="body2">{formatDate(params.value)}</Typography>
+                        </Tooltip>
+                    </Box>
+                ),
+            },
+            {
+                field: 'id',
+                headerName: 'Actions',
+                type: 'actions',
+                display: 'flex',
+                flex: 0.2,
+                sortable: false,
+                renderCell: (params) => (
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        {params.row.status?.toLowerCase() === 'waiting' && (
+                            <Tooltip title="Delete">
+                                <IconButton
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        deleteConsultation(params.row)();
+                                    }}
+                                    size="small"
+                                    color="error"
+                                >
+                                    <DeleteOutlined fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+                    </Box>
+                ),
+            },
+        ],
+        [],
+    );
 
     const deleteConsultation = (params) => () => {
-        setData({...params, _method: "delete"});
+        setData({ ...params, _method: 'delete' });
         setOpenDeleteForm(true);
     };
 
-    const show = (id) => () => router.visit(route("consultations.show", id));
+    const show = (id) => () => router.visit(route('consultations.show', id));
 
     const pageReload = (page, filters, sort, pageSize) => {
         router.visit(route('consultations.waiting-list'), {
@@ -261,10 +275,10 @@ const Waiting = () => {
                 page,
                 filters,
                 sort,
-                pageSize
+                pageSize,
             },
-            only: ["consultations", "status", "success", "requestInputs"],
-            preserveState: true
+            only: ['consultations', 'status', 'success', 'requestInputs'],
+            preserveState: true,
         });
     };
 
@@ -275,7 +289,7 @@ const Waiting = () => {
 
     const handleDestroy = async () => {
         post(route('consultations.destroy', data.id), {
-            onSuccess: handleCloseDeleteForm
+            onSuccess: handleCloseDeleteForm,
         });
     };
 
@@ -283,7 +297,7 @@ const Waiting = () => {
     const hasUrgentConsultations = () => {
         if (!consultations?.data) return false;
 
-        return consultations.data.some(consultation => {
+        return consultations.data.some((consultation) => {
             const waitingTime = consultation.waiting_time;
             if (!waitingTime) return false;
 
@@ -300,13 +314,13 @@ const Waiting = () => {
     };
 
     // Count of waiting consultations
-    const waitingCount = consultations?.data ?
-        consultations.data.filter(c => c.status?.toLowerCase() === 'waiting').length :
-        0;
+    const waitingCount = consultations?.data
+        ? consultations.data.filter((c) => c.status?.toLowerCase() === 'waiting').length
+        : 0;
 
     return (
         <Box sx={{ position: 'relative' }}>
-            <Head title="Waiting Consultations"/>
+            <Head title="Waiting Consultations" />
             <PageHeader
                 title="Waiting Consultations"
                 subtitle={`Patients waiting for consultation: ${waitingCount}`}
@@ -320,25 +334,28 @@ const Waiting = () => {
                         mb: 3,
                         borderRadius: 2,
                         display: 'flex',
-                        alignItems: 'center'
+                        alignItems: 'center',
                     }}
                     action={
                         <Button
                             color="inherit"
                             size="small"
                             startIcon={<RefreshOutlined />}
-                            onClick={() => pageReload(
-                                requestInputs?.page || 1,
-                                requestInputs?.filters,
-                                requestInputs?.sort,
-                                requestInputs?.pageSize
-                            )}
+                            onClick={() =>
+                                pageReload(
+                                    requestInputs?.page || 1,
+                                    requestInputs?.filters,
+                                    requestInputs?.sort,
+                                    requestInputs?.pageSize,
+                                )
+                            }
                         >
                             Refresh
                         </Button>
                     }
                 >
-                    Some patients have been waiting for a long time. Please prioritize their consultations.
+                    Some patients have been waiting for a long time. Please prioritize their
+                    consultations.
                 </Alert>
             )}
 
@@ -347,7 +364,7 @@ const Waiting = () => {
                 sx={{
                     borderRadius: 2,
                     overflow: 'hidden',
-                    mb: 4
+                    mb: 4,
                 }}
             >
                 <Box
@@ -357,7 +374,7 @@ const Waiting = () => {
                         borderBottom: '1px solid #e0e0e0',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: 'center',
                     }}
                 >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -370,12 +387,14 @@ const Waiting = () => {
                     <Tooltip title="Refresh List">
                         <IconButton
                             size="small"
-                            onClick={() => pageReload(
-                                requestInputs?.page || 1,
-                                requestInputs?.filters,
-                                requestInputs?.sort,
-                                requestInputs?.pageSize
-                            )}
+                            onClick={() =>
+                                pageReload(
+                                    requestInputs?.page || 1,
+                                    requestInputs?.filters,
+                                    requestInputs?.sort,
+                                    requestInputs?.pageSize,
+                                )
+                            }
                         >
                             <RefreshOutlined />
                         </IconButton>
@@ -405,12 +424,14 @@ const Waiting = () => {
                         },
                         '& .MuiDataGrid-cell': {
                             padding: '8px 16px',
-                        }
+                        },
                     }}
                     onRowClick={(params) => show(params.id)()}
                     emptyContent={
                         <Box sx={{ p: 4, textAlign: 'center' }}>
-                            <HourglassEmptyOutlined sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                            <HourglassEmptyOutlined
+                                sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }}
+                            />
                             <Typography variant="h6" color="text.secondary" gutterBottom>
                                 No Waiting Consultations
                             </Typography>
@@ -434,23 +455,19 @@ const Waiting = () => {
 
 const breadCrumbs = [
     {
-        title: "Consultations",
+        title: 'Consultations',
         link: route('consultations.index'),
-        icon: <MedicalServicesOutlined fontSize="small" />
+        icon: <MedicalServicesOutlined fontSize="small" />,
     },
     {
-        title: "Waiting List",
+        title: 'Waiting List',
         link: null,
-        icon: <HourglassEmptyOutlined fontSize="small" />
-    }
+        icon: <HourglassEmptyOutlined fontSize="small" />,
+    },
 ];
 
-Waiting.layout = page => (
-    <AuthenticatedLayout
-        auth={page.props.auth}
-        children={page}
-        breadcrumbs={breadCrumbs}
-    />
+Waiting.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
 );
 
 export default Waiting;

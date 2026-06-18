@@ -1,18 +1,19 @@
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {GridActionsCellItem} from "@mui/x-data-grid";
-import Filter from "./Components/Filter";
-import TableLayout from "@/Layouts/TableLayout";
-import DeleteIcon from "@mui/icons-material/Delete";
-import DeleteForm from "@/Components/DeleteForm";
-import React, {useCallback, useMemo, useState} from "react";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { GridActionsCellItem } from '@mui/x-data-grid';
+import Filter from './Components/Filter';
+import TableLayout from '@/Layouts/TableLayout';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteForm from '@/Components/DeleteForm';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
     ExpandMore,
     KeyboardArrowRight,
     Male as MaleIcon,
-    Female as FemaleIcon, QuestionMark as QuestionMarkIcon
-} from "@mui/icons-material";
-import {Head, router, useForm, usePage} from "@inertiajs/react";
-import PageHeader from "@/Components/PageHeader.jsx";
+    Female as FemaleIcon,
+    QuestionMark as QuestionMarkIcon,
+} from '@mui/icons-material';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import PageHeader from '@/Components/PageHeader.jsx';
 import {
     Box,
     Button,
@@ -31,19 +32,22 @@ import {
     ListItem,
     ListItemAvatar,
     ListItemText,
-    Divider
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import MergeIcon from "@mui/icons-material/Merge";
-import countries from "@/Data/Countries.js";
-import Grid from "@mui/material/Grid";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import {formatDate} from "@/Services/helper";
+    Divider,
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import MergeIcon from '@mui/icons-material/Merge';
+import countries from '@/Data/Countries.js';
+import Grid from '@mui/material/Grid';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import { formatDate } from '@/Services/helper';
 
-const renderDebt = ({row}) => {
-    let amount = row.payments_sum_price * 1 - row.acceptance_items_sum_price * 1 + row.acceptance_items_sum_discount * 1;
+const renderDebt = ({ row }) => {
+    let amount =
+        row.payments_sum_price * 1 -
+        row.acceptance_items_sum_price * 1 +
+        row.acceptance_items_sum_discount * 1;
     return amount < 0 ? (
         <Chip
             label={`${Intl.NumberFormat().format(Math.abs(amount).toFixed(2))}`}
@@ -55,22 +59,20 @@ const renderDebt = ({row}) => {
     );
 };
 
-const StatsCard = ({title, children, elevation = 8}) => (
-    <Grid size={{xs: 12, sm: 6, md: 4}} p={1}>
-        <Card elevation={elevation} sx={{borderRadius: 2, height: '100%'}}>
+const StatsCard = ({ title, children, elevation = 8 }) => (
+    <Grid size={{ xs: 12, sm: 6, md: 4 }} p={1}>
+        <Card elevation={elevation} sx={{ borderRadius: 2, height: '100%' }}>
             <CardHeader
                 title={title}
-                slotProps={{titleTypography: {variant: 'h6'}}}
-                sx={{backgroundColor: 'primary.light', color: 'primary.contrastText', py: 1}}
+                slotProps={{ titleTypography: { variant: 'h6' } }}
+                sx={{ backgroundColor: 'primary.light', color: 'primary.contrastText', py: 1 }}
             />
-            <CardContent>
-                {children}
-            </CardContent>
+            <CardContent>{children}</CardContent>
         </Card>
     </Grid>
 );
 
-const NationalityList = ({stats}) => {
+const NationalityList = ({ stats }) => {
     const [open, setOpen] = useState(false);
     const nationEntries = Object.entries(stats.patientsPerNation);
     const initialItems = nationEntries.slice(0, 5); // Show top 5 initially
@@ -88,16 +90,18 @@ const NationalityList = ({stats}) => {
                                     loading="lazy"
                                     width="32"
                                     src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
-                                    alt={countries.find(c => c.code === code)?.label || code}
-                                    sx={{border: '1px solid #eee', borderRadius: 1}}
+                                    alt={countries.find((c) => c.code === code)?.label || code}
+                                    sx={{ border: '1px solid #eee', borderRadius: 1 }}
                                 />
                             </ListItemAvatar>
                             <ListItemText
-                                primary={countries.find(c => c.code === code)?.label || code}
+                                primary={countries.find((c) => c.code === code)?.label || code}
                                 secondary={`${count} patients`}
                             />
                         </ListItem>
-                        {idx < initialItems.length - 1 && <Divider variant="inset" component="li"/>}
+                        {idx < initialItems.length - 1 && (
+                            <Divider variant="inset" component="li" />
+                        )}
                     </React.Fragment>
                 ))}
             </List>
@@ -107,9 +111,9 @@ const NationalityList = ({stats}) => {
                     fullWidth
                     variant="outlined"
                     size="small"
-                    endIcon={<KeyboardArrowRight/>}
+                    endIcon={<KeyboardArrowRight />}
                     onClick={() => setOpen(true)}
-                    sx={{mt: 1}}
+                    sx={{ mt: 1 }}
                 >
                     Show {remainingCount} more
                 </Button>
@@ -121,9 +125,9 @@ const NationalityList = ({stats}) => {
                     <IconButton
                         aria-label="close"
                         onClick={() => setOpen(false)}
-                        sx={{position: 'absolute', right: 8, top: 8}}
+                        sx={{ position: 'absolute', right: 8, top: 8 }}
                     >
-                        <DeleteIcon/>
+                        <DeleteIcon />
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers>
@@ -137,16 +141,23 @@ const NationalityList = ({stats}) => {
                                             loading="lazy"
                                             width="32"
                                             src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
-                                            alt={countries.find(c => c.code === code)?.label || code}
-                                            sx={{border: '1px solid #eee', borderRadius: 1}}
+                                            alt={
+                                                countries.find((c) => c.code === code)?.label ||
+                                                code
+                                            }
+                                            sx={{ border: '1px solid #eee', borderRadius: 1 }}
                                         />
                                     </ListItemAvatar>
                                     <ListItemText
-                                        primary={countries.find(c => c.code === code)?.label || code}
+                                        primary={
+                                            countries.find((c) => c.code === code)?.label || code
+                                        }
                                         secondary={`${count} patients`}
                                     />
                                 </ListItem>
-                                {idx < nationEntries.length - 1 && <Divider variant="inset" component="li"/>}
+                                {idx < nationEntries.length - 1 && (
+                                    <Divider variant="inset" component="li" />
+                                )}
                             </React.Fragment>
                         ))}
                     </List>
@@ -160,43 +171,43 @@ const getGenderInfo = (gender) => {
     switch (gender) {
         case 'male':
             return {
-                icon: <MaleIcon sx={{color: 'white'}}/>,
+                icon: <MaleIcon sx={{ color: 'white' }} />,
                 label: 'Male',
-                color: 'primary'
+                color: 'primary',
             };
         case 'female':
             return {
-                icon: <FemaleIcon sx={{color: 'white'}}/>,
+                icon: <FemaleIcon sx={{ color: 'white' }} />,
                 label: 'Female',
-                color: 'secondary'
+                color: 'secondary',
             };
         case 'ambiguous':
             return {
-                icon: <QuestionMarkIcon/>,
+                icon: <QuestionMarkIcon />,
                 label: 'Ambiguous',
-                color: 'default'
+                color: 'default',
             };
         case 'none':
             return {
-                icon: <QuestionMarkIcon/>,
+                icon: <QuestionMarkIcon />,
                 label: 'None',
-                color: 'default'
+                color: 'default',
             };
         default:
             return {
-                icon: <QuestionMarkIcon/>,
+                icon: <QuestionMarkIcon />,
                 label: 'Unspecified',
-                color: 'default'
+                color: 'default',
             };
     }
 };
 
-const GenderStats = ({stats}) => {
+const GenderStats = ({ stats }) => {
     const genderColors = {
-        'male': 'primary.light',
-        'female': 'secondary.light',
-        'ambiguous': 'info.light',
-        'none': 'grey.300'
+        male: 'primary.light',
+        female: 'secondary.light',
+        ambiguous: 'info.light',
+        none: 'grey.300',
     };
 
     return (
@@ -208,14 +219,16 @@ const GenderStats = ({stats}) => {
                         p: 1,
                         display: 'flex',
                         justifyContent: 'space-between',
-                        backgroundColor: genderColors[gender] || 'grey.200'
+                        backgroundColor: genderColors[gender] || 'grey.200',
                     }}
                 >
-                    <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
+                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                         {getGenderInfo(gender).icon}
                         <Typography variant="body2"> {getGenderInfo(gender).label}</Typography>
                     </Stack>
-                    <Typography variant="body2" fontWeight="bold">{count}</Typography>
+                    <Typography variant="body2" fontWeight="bold">
+                        {count}
+                    </Typography>
                 </Paper>
             ))}
         </Stack>
@@ -223,162 +236,191 @@ const GenderStats = ({stats}) => {
 };
 
 const Index = () => {
-    const {post, setData, data, reset, processing} = useForm();
-    const {patients, status, success, requestInputs, stats,canDelete,canMerge} = usePage().props;
+    const { post, setData, data, reset, processing } = useForm();
+    const { patients, status, success, requestInputs, stats, canDelete, canMerge } =
+        usePage().props;
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const [statsExpanded, setStatsExpanded] = useState(false);
 
-    const showPatient = useCallback((id) => (e) => {
-        e.preventDefault();
-        router.visit(route('patients.show', id))
-    }, []);
-    const deletePatient = useCallback((params) => () => {
-        setData({_method: "delete", ...params});
-        setOpenDeleteForm(true);
-    }, []);
-
-    const pageReload = useCallback((page, filters, sort, pageSize) => router.visit(route('patients.index'), {
-        data: {
-            page, filters, sort, pageSize
+    const showPatient = useCallback(
+        (id) => (e) => {
+            e.preventDefault();
+            router.visit(route('patients.show', id));
         },
-        only: ["patients", "status", "success", "requestInputs"]
-    }), []);
+        [],
+    );
+    const deletePatient = useCallback(
+        (params) => () => {
+            setData({ _method: 'delete', ...params });
+            setOpenDeleteForm(true);
+        },
+        [],
+    );
+
+    const pageReload = useCallback(
+        (page, filters, sort, pageSize) =>
+            router.visit(route('patients.index'), {
+                data: {
+                    page,
+                    filters,
+                    sort,
+                    pageSize,
+                },
+                only: ['patients', 'status', 'success', 'requestInputs'],
+            }),
+        [],
+    );
 
     const handleCloseDeleteForm = useCallback(() => {
         reset();
         setOpenDeleteForm(false);
     }, []);
 
-    const handleDestroy = useCallback(() => post(route('patients.destroy', data.id), {
-        onSuccess: handleCloseDeleteForm
-    }), [data.id]);
+    const handleDestroy = useCallback(
+        () =>
+            post(route('patients.destroy', data.id), {
+                onSuccess: handleCloseDeleteForm,
+            }),
+        [data.id],
+    );
 
     const addPatient = useCallback(() => router.visit(route('patients.create')), []);
 
     const mergePatients = useCallback(() => router.visit(route('patients.merge.create')), []);
 
     const toggleStats = useCallback(() => {
-        setStatsExpanded(prev => !prev);
+        setStatsExpanded((prev) => !prev);
     }, []);
 
-    const columns = useMemo(() => [
-        {
-            field: 'id',
-            headerName: 'ID',
-            type: "number",
-            flex: 0.05,
-            display: "flex",
-            hidden: true
-        },
-        {
-            field: 'fullName',
-            headerName: 'Name',
-            type: "string",
-            flex: 1,
-            display: "flex",
-            renderCell: ({value, row}) => <a href={route("patients.show", row.id)}
-                                             onClick={showPatient(row.id)}>{value}</a>
-        },
-        {
-            field: 'idNo',
-            headerName: 'ID No./Passport No.',
-            type: "string",
-            flex: 0.4,
-            display: "flex"
-        },
-        {
-            field: 'phone',
-            headerName: 'Phone',
-            type: "string",
-            flex: 0.4,
-            display: "flex"
-        },
-        {
-            field: 'nationality',
-            headerName: 'Nationality',
-            type: "string",
-            flex: .4,
-            display: "flex",
-            valueGetter: (value) => countries.find((item) => item.code === value)?.label,
-            renderCell: ({row, value}) => (
-                <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
-                    <Box
-                        component="img"
-                        loading="lazy"
-                        width="24"
-                        height="16"
-                        src={`https://flagcdn.com/w40/${row.nationality.toLowerCase()}.png`}
-                        alt={value}
-                        sx={{border: '1px solid #eee'}}
-                    />
-                    <span>{value}</span>
-                </Stack>
-            )
-        },
-        {
-            field: 'governorate',
-            headerName: 'Governorate',
-            type: "string",
-            flex: .4,
-            display: "flex",
-            renderCell: ({value}) => value || "-"
-        },
-        {
-            field: 'dateOfBirth',
-            headerName: 'Date Of Birth (Age)',
-            flex: .4,
-            display: "flex",
-            renderCell: ({row}) => (
-                <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
-                    <span>{row.dateOfBirth}</span>
-                    <Chip label={row.age} size="small" variant="outlined"/>
-                </Stack>
-            )
-        },
-        {
-            field: 'debt',
-            headerName: 'Debt',
-            sortable: false,
-            flex: .3,
-            display: "flex",
-            renderCell: renderDebt
-        },
-        {
-            field: 'created_at',
-            headerName: 'Register Date',
-            flex: .6,
-            display: "flex",
-            type: "datetime",
-            valueGetter: (value) => value ? new Date(value) : null,
-            renderCell: ({value}) => value ? formatDate(value) : "-"
-        },
-        {
-            field: 'action',
-            headerName: 'Action',
-            type: 'actions',
-            flex: 0.1,
-            display: "flex",
-            sortable: false,
-            getActions: (params) => {
-                let cols = [];
-                if (params.row.acceptances_count < 1 && params.row.consultations_count < 1 && params.row.relatives_count < 1 && canDelete) {
-                    cols.push(
-                        <GridActionsCellItem
-                            icon={<DeleteIcon/>}
-                            label="Delete"
-                            onClick={deletePatient(params.row)}
+    const columns = useMemo(
+        () => [
+            {
+                field: 'id',
+                headerName: 'ID',
+                type: 'number',
+                flex: 0.05,
+                display: 'flex',
+                hidden: true,
+            },
+            {
+                field: 'fullName',
+                headerName: 'Name',
+                type: 'string',
+                flex: 1,
+                display: 'flex',
+                renderCell: ({ value, row }) => (
+                    <a href={route('patients.show', row.id)} onClick={showPatient(row.id)}>
+                        {value}
+                    </a>
+                ),
+            },
+            {
+                field: 'idNo',
+                headerName: 'ID No./Passport No.',
+                type: 'string',
+                flex: 0.4,
+                display: 'flex',
+            },
+            {
+                field: 'phone',
+                headerName: 'Phone',
+                type: 'string',
+                flex: 0.4,
+                display: 'flex',
+            },
+            {
+                field: 'nationality',
+                headerName: 'Nationality',
+                type: 'string',
+                flex: 0.4,
+                display: 'flex',
+                valueGetter: (value) => countries.find((item) => item.code === value)?.label,
+                renderCell: ({ row, value }) => (
+                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                        <Box
+                            component="img"
+                            loading="lazy"
+                            width="24"
+                            height="16"
+                            src={`https://flagcdn.com/w40/${row.nationality.toLowerCase()}.png`}
+                            alt={value}
+                            sx={{ border: '1px solid #eee' }}
                         />
-                    );
-                }
+                        <span>{value}</span>
+                    </Stack>
+                ),
+            },
+            {
+                field: 'governorate',
+                headerName: 'Governorate',
+                type: 'string',
+                flex: 0.4,
+                display: 'flex',
+                renderCell: ({ value }) => value || '-',
+            },
+            {
+                field: 'dateOfBirth',
+                headerName: 'Date Of Birth (Age)',
+                flex: 0.4,
+                display: 'flex',
+                renderCell: ({ row }) => (
+                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                        <span>{row.dateOfBirth}</span>
+                        <Chip label={row.age} size="small" variant="outlined" />
+                    </Stack>
+                ),
+            },
+            {
+                field: 'debt',
+                headerName: 'Debt',
+                sortable: false,
+                flex: 0.3,
+                display: 'flex',
+                renderCell: renderDebt,
+            },
+            {
+                field: 'created_at',
+                headerName: 'Register Date',
+                flex: 0.6,
+                display: 'flex',
+                type: 'datetime',
+                valueGetter: (value) => (value ? new Date(value) : null),
+                renderCell: ({ value }) => (value ? formatDate(value) : '-'),
+            },
+            {
+                field: 'action',
+                headerName: 'Action',
+                type: 'actions',
+                flex: 0.1,
+                display: 'flex',
+                sortable: false,
+                getActions: (params) => {
+                    let cols = [];
+                    if (
+                        params.row.acceptances_count < 1 &&
+                        params.row.consultations_count < 1 &&
+                        params.row.relatives_count < 1 &&
+                        canDelete
+                    ) {
+                        cols.push(
+                            <GridActionsCellItem
+                                icon={<DeleteIcon />}
+                                label="Delete"
+                                onClick={deletePatient(params.row)}
+                            />,
+                        );
+                    }
 
-                return cols;
-            }
-        }
-    ], [showPatient, deletePatient]);
+                    return cols;
+                },
+            },
+        ],
+        [showPatient, deletePatient],
+    );
 
     return (
         <>
-            <Head title="Patients"/>
+            <Head title="Patients" />
             <PageHeader
                 title="Patients"
                 description="Manage patient records and view statistics"
@@ -389,7 +431,7 @@ const Index = () => {
                             key="merge-button"
                             variant="outlined"
                             color="primary"
-                            startIcon={<MergeIcon/>}
+                            startIcon={<MergeIcon />}
                         >
                             Merge Patients
                         </Button>
@@ -399,10 +441,10 @@ const Index = () => {
                         key="add-button"
                         variant="contained"
                         color="success"
-                        startIcon={<AddIcon/>}
+                        startIcon={<AddIcon />}
                     >
                         Add Patient
-                    </Button>
+                    </Button>,
                 ]}
             />
 
@@ -414,16 +456,19 @@ const Index = () => {
                     sx={{
                         mb: 3,
                         borderRadius: 2,
-                        overflow: 'hidden'
+                        overflow: 'hidden',
                     }}
                 >
-                    <AccordionSummary expandIcon={<ExpandMore/>}>
+                    <AccordionSummary expandIcon={<ExpandMore />}>
                         <Typography variant="h6">Statistics Dashboard</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                         <Grid container spacing={0}>
                             <StatsCard title="Total Patients">
-                                <Box display="flex" sx={{justifyContent: "center", alignItems: "center", p: 2}}>
+                                <Box
+                                    display="flex"
+                                    sx={{ justifyContent: 'center', alignItems: 'center', p: 2 }}
+                                >
                                     <Typography variant="h3" color="primary.main">
                                         {stats.patients}
                                     </Typography>
@@ -431,11 +476,11 @@ const Index = () => {
                             </StatsCard>
 
                             <StatsCard title="Patients by Nationality">
-                                <NationalityList stats={stats}/>
+                                <NationalityList stats={stats} />
                             </StatsCard>
 
                             <StatsCard title="Patients by Gender">
-                                <GenderStats stats={stats}/>
+                                <GenderStats stats={stats} />
                             </StatsCard>
                         </Grid>
                     </AccordionDetails>
@@ -466,12 +511,14 @@ const Index = () => {
 
 const breadCrumbs = [
     {
-        title: "Patients",
+        title: 'Patients',
         link: null,
-        icon: null
-    }
+        icon: null,
+    },
 ];
 
-Index.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>;
+Index.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
+);
 
 export default Index;

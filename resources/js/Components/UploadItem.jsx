@@ -1,15 +1,26 @@
-import { LinearProgress, Stack, Typography, Tooltip, Card, Box, IconButton,
-    Menu, MenuItem, Select, FormControl } from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import CloseIcon from "@mui/icons-material/Close";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import ImageIcon from "@mui/icons-material/Image";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import CancelIcon from "@mui/icons-material/Cancel";
-import EditIcon from "@mui/icons-material/Edit";
-import LabelIcon from "@mui/icons-material/Label";
-import React, { useState } from "react";
+import {
+    LinearProgress,
+    Stack,
+    Typography,
+    Tooltip,
+    Card,
+    Box,
+    IconButton,
+    Menu,
+    MenuItem,
+    Select,
+    FormControl,
+} from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import CloseIcon from '@mui/icons-material/Close';
+import DescriptionIcon from '@mui/icons-material/Description';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import ImageIcon from '@mui/icons-material/Image';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import CancelIcon from '@mui/icons-material/Cancel';
+import EditIcon from '@mui/icons-material/Edit';
+import LabelIcon from '@mui/icons-material/Label';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 /**
@@ -29,20 +40,20 @@ import PropTypes from 'prop-types';
  * @returns {JSX.Element}
  */
 const UploadItem = ({
-                        value,
-                        status = 'success',
-                        progress = 0,
-                        error,
-                        onDelete,
-                        onCancel,
-                        onTagChange,
-                        availableTags = [],
-                        editable = true,
-                        showFileSize = false
-                    }) => {
+    value,
+    status = 'success',
+    progress = 0,
+    error,
+    onDelete,
+    onCancel,
+    onTagChange,
+    availableTags = [],
+    editable = true,
+    showFileSize = false,
+}) => {
     // Format file size to human-readable format
     const formatFileSize = (bytes) => {
-        if (!bytes) return "";
+        if (!bytes) return '';
 
         if (bytes < 1024) return `${bytes} bytes`;
         if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -74,16 +85,18 @@ const UploadItem = ({
                 sx={{
                     p: 2,
                     mb: 2,
-                    width: "100%",
-                    borderColor: "divider",
+                    width: '100%',
+                    borderColor: 'divider',
                     borderRadius: 1,
-                    borderStyle: "dashed"
+                    borderStyle: 'dashed',
                 }}
             >
-  <Stack direction="row" spacing={2} width="100%" sx={{alignItems: "center"}}>
+                <Stack direction="row" spacing={2} width="100%" sx={{ alignItems: 'center' }}>
                     <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
-                            {value?.originalName ? `Waiting to upload ${value.originalName}...` : "Waiting to upload..."}
+                            {value?.originalName
+                                ? `Waiting to upload ${value.originalName}...`
+                                : 'Waiting to upload...'}
                         </Typography>
                     </Box>
                     {onCancel && (
@@ -111,15 +124,17 @@ const UploadItem = ({
                 sx={{
                     p: 2,
                     mb: 2,
-                    width: "100%",
-                    borderColor: "divider",
-                    borderRadius: 1
+                    width: '100%',
+                    borderColor: 'divider',
+                    borderRadius: 1,
                 }}
             >
-  <Stack direction="row" spacing={2} width="100%" sx={{alignItems: "center"}}>
+                <Stack direction="row" spacing={2} width="100%" sx={{ alignItems: 'center' }}>
                     <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
-                            {value?.originalName ? `Uploading ${value.originalName}...` : "Uploading..."}
+                            {value?.originalName
+                                ? `Uploading ${value.originalName}...`
+                                : 'Uploading...'}
                         </Typography>
                         <LinearProgress
                             variant="determinate"
@@ -127,11 +142,15 @@ const UploadItem = ({
                             sx={{
                                 height: 8,
                                 borderRadius: 4,
-                                backgroundColor: "#e0e0e0"
+                                backgroundColor: '#e0e0e0',
                             }}
                         />
                     </Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ minWidth: 45, textAlign: "right" }}>
+                    <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ minWidth: 45, textAlign: 'right' }}
+                    >
                         {Math.floor(progress)}%
                     </Typography>
                     {onCancel && (
@@ -159,19 +178,19 @@ const UploadItem = ({
                 sx={{
                     p: 2,
                     mb: 2,
-                    width: "100%",
-                    borderColor: "error.main",
+                    width: '100%',
+                    borderColor: 'error.main',
                     borderRadius: 1,
-                    bgcolor: "error.light",
+                    bgcolor: 'error.light',
                 }}
             >
-  <Stack direction="row" spacing={2} width="100%" sx={{alignItems: "center"}}>
+                <Stack direction="row" spacing={2} width="100%" sx={{ alignItems: 'center' }}>
                     <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body2" gutterBottom fontWeight="medium">
-                            {value?.originalName || "File"} - Upload failed
+                            {value?.originalName || 'File'} - Upload failed
                         </Typography>
                         <Typography variant="caption" color="error.dark">
-                            {error || "An error occurred during upload"}
+                            {error || 'An error occurred during upload'}
                         </Typography>
                     </Box>
                     <Tooltip title="Remove">
@@ -197,16 +216,16 @@ const UploadItem = ({
                 sx={{
                     p: 2,
                     mb: 2,
-                    width: "100%",
-                    borderColor: "divider",
+                    width: '100%',
+                    borderColor: 'divider',
                     borderRadius: 1,
                     opacity: 0.6,
                 }}
             >
-  <Stack direction="row" spacing={2} width="100%" sx={{alignItems: "center"}}>
+                <Stack direction="row" spacing={2} width="100%" sx={{ alignItems: 'center' }}>
                     <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
-                            Deleting {value?.originalName || "file"}...
+                            Deleting {value?.originalName || 'file'}...
                         </Typography>
                         <LinearProgress />
                     </Box>
@@ -216,10 +235,10 @@ const UploadItem = ({
     }
 
     // Success state (default) - Regular display of uploaded file with actions
-    if (value?.id || value?.hasOwnProperty("id") || status === 'success') {
+    if (value?.id || value?.hasOwnProperty('id') || status === 'success') {
         // State for tag editing
         const [isEditingTag, setIsEditingTag] = useState(false);
-        const [selectedTag, setSelectedTag] = useState(value?.tag || "TEMP");
+        const [selectedTag, setSelectedTag] = useState(value?.tag || 'TEMP');
 
         // Handle tag selection
         const handleTagSelect = (event) => {
@@ -238,39 +257,43 @@ const UploadItem = ({
                 sx={{
                     p: 2,
                     mb: 2,
-                    width: "100%",
-                    borderColor: status === 'updating' ? "primary.light" : "divider",
+                    width: '100%',
+                    borderColor: status === 'updating' ? 'primary.light' : 'divider',
                     borderRadius: 1,
-                    transition: "all 0.2s",
-                    "&:hover": {
+                    transition: 'all 0.2s',
+                    '&:hover': {
                         boxShadow: 1,
-                        borderColor: "primary.main"
-                    }
+                        borderColor: 'primary.main',
+                    },
                 }}
             >
                 <Stack
                     direction="row"
                     spacing={2}
                     width="100%"
-                    sx={{ alignItems: "center", justifyContent: "space-between" }}
+                    sx={{ alignItems: 'center', justifyContent: 'space-between' }}
                 >
-  <Stack direction="row" spacing={2} sx={{alignItems: "center", overflow: "hidden"}}>
+                    <Stack
+                        direction="row"
+                        spacing={2}
+                        sx={{ alignItems: 'center', overflow: 'hidden' }}
+                    >
                         {getFileIcon()}
-                        <Box sx={{ overflow: "hidden" }}>
-                            <Tooltip title={value?.originalName || "File"} placement="top">
+                        <Box sx={{ overflow: 'hidden' }}>
+                            <Tooltip title={value?.originalName || 'File'} placement="top">
                                 <Typography
                                     noWrap
                                     variant="body1"
                                     sx={{
                                         maxWidth: { xs: 120, sm: 200, md: 300 },
-                                        fontWeight: 500
+                                        fontWeight: 500,
                                     }}
                                 >
-                                    {value?.originalName || "File"}
+                                    {value?.originalName || 'File'}
                                 </Typography>
                             </Tooltip>
 
-  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
+                            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                                 {showFileSize && value?.size && (
                                     <Typography variant="caption" color="text.secondary">
                                         {formatFileSize(value.size)}
@@ -297,10 +320,14 @@ const UploadItem = ({
                                         </Select>
                                     </FormControl>
                                 ) : (
-  <Stack direction="row" spacing={0.5} sx={{alignItems: "center"}}>
+                                    <Stack
+                                        direction="row"
+                                        spacing={0.5}
+                                        sx={{ alignItems: 'center' }}
+                                    >
                                         <LabelIcon sx={{ fontSize: 16, color: 'primary.main' }} />
                                         <Typography variant="caption" color="primary">
-                                            {value?.tag || "TEMP"}
+                                            {value?.tag || 'TEMP'}
                                         </Typography>
                                         {editable && onTagChange && availableTags.length > 0 && (
                                             <Tooltip title="Edit tag">
@@ -319,7 +346,11 @@ const UploadItem = ({
 
                             {/* Show updating status if needed */}
                             {status === 'updating' && (
-                                <Typography variant="caption" color="primary" sx={{ display: 'block', mt: 0.5 }}>
+                                <Typography
+                                    variant="caption"
+                                    color="primary"
+                                    sx={{ display: 'block', mt: 0.5 }}
+                                >
                                     Updating tag...
                                 </Typography>
                             )}
@@ -332,7 +363,7 @@ const UploadItem = ({
                                 <IconButton
                                     size="small"
                                     color="primary"
-                                    href={value?.id ? route("documents.show", value?.id) : null}
+                                    href={value?.id ? route('documents.show', value?.id) : null}
                                     target="_blank"
                                     aria-label="View file"
                                 >
@@ -370,10 +401,12 @@ UploadItem.propTypes = {
     onDelete: PropTypes.func,
     onCancel: PropTypes.func,
     onTagChange: PropTypes.func,
-    availableTags: PropTypes.arrayOf(PropTypes.shape({
-        value: PropTypes.string,
-        label: PropTypes.string,
-    })),
+    availableTags: PropTypes.arrayOf(
+        PropTypes.shape({
+            value: PropTypes.string,
+            label: PropTypes.string,
+        }),
+    ),
     editable: PropTypes.bool,
     showFileSize: PropTypes.bool,
 };

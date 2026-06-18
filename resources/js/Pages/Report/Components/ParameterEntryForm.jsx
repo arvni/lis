@@ -18,7 +18,7 @@ import {
     Tooltip,
     Chip,
     Tabs,
-    Tab
+    Tab,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
@@ -28,12 +28,12 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
 
 // Define input types with descriptions
 const TYPE_DESCRIPTIONS = {
-    text: "Single line text input",
-    number: "Numeric input only",
-    date: "Date picker",
-    image: "Image upload",
-    select: "Dropdown selection",
-    checkbox: "Yes/No checkbox option"
+    text: 'Single line text input',
+    number: 'Numeric input only',
+    date: 'Date picker',
+    image: 'Image upload',
+    select: 'Dropdown selection',
+    checkbox: 'Yes/No checkbox option',
 };
 
 // TabPanel component for parameters tabs
@@ -48,11 +48,7 @@ function TabPanel(props) {
             aria-labelledby={`parameter-tab-${index}`}
             {...other}
         >
-            {value === index && (
-                <Box sx={{ p: 3 }}>
-                    {children}
-                </Box>
-            )}
+            {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
         </div>
     );
 }
@@ -87,8 +83,8 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                 type: 'text',
                 required: false,
                 active: true,
-                custom_props: ''
-            }
+                custom_props: '',
+            },
         ];
 
         setData({ ...data, parameters: newParameters });
@@ -138,9 +134,9 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                         type: 'text',
                         required: false,
                         active: true,
-                        custom_props: ''
-                    }
-                ]
+                        custom_props: '',
+                    },
+                ],
             });
         }
     }, []);
@@ -158,13 +154,13 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                 borderRadius: 1,
                 position: 'relative',
                 '&:hover': {
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                }
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                },
             }}
         >
-  <Grid container spacing={2} sx={{alignItems: "center"}}>
+            <Grid container spacing={2} sx={{ alignItems: 'center' }}>
                 <Grid size={12} container>
-                    <Grid size={{ xs: 12, sm: 8, md: 9 }} >
+                    <Grid size={{ xs: 12, sm: 8, md: 9 }}>
                         <Typography variant="subtitle2" gutterBottom>
                             Parameter #{index + 1}
                             {param.required && (
@@ -174,7 +170,7 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                             )}
                         </Typography>
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 4, md: 3 }} sx={{ textAlign: "right" }}>
+                    <Grid size={{ xs: 12, sm: 4, md: 3 }} sx={{ textAlign: 'right' }}>
                         {showTabs && (
                             <Tooltip title="Drag to reorder" placement="top">
                                 <IconButton size="small" sx={{ mr: 1, cursor: 'grab' }}>
@@ -183,37 +179,41 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                             </Tooltip>
                         )}
                         <Tooltip
-                            title={data.parameters.length <= 1 ? "At least one parameter is required" : "Remove parameter"}
+                            title={
+                                data.parameters.length <= 1
+                                    ? 'At least one parameter is required'
+                                    : 'Remove parameter'
+                            }
                             placement="top"
                         >
-              <span>
-                <IconButton
-                    color="error"
-                    onClick={() => removeParameter(index)}
-                    disabled={data.parameters.length <= 1}
-                    size="small"
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </span>
+                            <span>
+                                <IconButton
+                                    color="error"
+                                    onClick={() => removeParameter(index)}
+                                    disabled={data.parameters.length <= 1}
+                                    size="small"
+                                >
+                                    <DeleteIcon fontSize="small" />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                     </Grid>
                 </Grid>
 
-                <Grid size={{ xs: 12, sm: 6 }} >
+                <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                         fullWidth
                         label="Parameter Title"
-                        value={param.title || ""}
+                        value={param.title || ''}
                         onChange={(e) => handleParameterChange(index, 'title', e.target.value)}
                         placeholder="e.g., Patient Name"
                         required
                         error={!param.title}
-                        helperText={!param.title ? "Title is required" : ""}
+                        helperText={!param.title ? 'Title is required' : ''}
                     />
                 </Grid>
 
-                <Grid size={{ xs: 12, sm: 6 }} >
+                <Grid size={{ xs: 12, sm: 6 }}>
                     <FormControl fullWidth>
                         <InputLabel id={`param-type-label-${index}`}>Input Type</InputLabel>
                         <Select
@@ -225,7 +225,9 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                             {Object.entries(TYPE_DESCRIPTIONS).map(([type, description]) => (
                                 <MenuItem value={type} key={type}>
                                     <Box>
-                                        <Typography variant="body2">{type.charAt(0).toUpperCase() + type.slice(1)}</Typography>
+                                        <Typography variant="body2">
+                                            {type.charAt(0).toUpperCase() + type.slice(1)}
+                                        </Typography>
                                         <Typography variant="caption" color="text.secondary">
                                             {description}
                                         </Typography>
@@ -236,39 +238,45 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                     </FormControl>
                 </Grid>
 
-                <Grid size={{ xs: 6, sm: 3 }} >
+                <Grid size={{ xs: 6, sm: 3 }}>
                     <FormControlLabel
                         control={
                             <Checkbox
                                 checked={param.required}
-                                onChange={(e) => handleParameterChange(index, 'required', e.target.checked)}
+                                onChange={(e) =>
+                                    handleParameterChange(index, 'required', e.target.checked)
+                                }
                             />
                         }
                         label="Required"
                     />
                 </Grid>
 
-                <Grid size={{ xs: 6, sm: 3 }} >
+                <Grid size={{ xs: 6, sm: 3 }}>
                     <FormControlLabel
                         control={
                             <Checkbox
                                 checked={param.active}
-                                onChange={(e) => handleParameterChange(index, 'active', e.target.checked)}
+                                onChange={(e) =>
+                                    handleParameterChange(index, 'active', e.target.checked)
+                                }
                                 disabled={param.required}
                             />
                         }
                         label="Active"
-                        title={param.required ? "Required parameters must be active" : ""}
+                        title={param.required ? 'Required parameters must be active' : ''}
                     />
                 </Grid>
 
                 {(param.type === 'select' || param.type === 'checkbox') && (
-                    <Grid size={12} >
+                    <Grid size={12}>
                         <TextField
                             fullWidth
                             label="Options"
-                            value={param.custom_props || ""}
-                            onChange={(e) => handleParameterChange(index, 'custom_props', e.target.value)}
+                            value={param.custom_props || ''}
+                            onChange={(e) =>
+                                handleParameterChange(index, 'custom_props', e.target.value)
+                            }
                             placeholder="Option 1, Option 2, Option 3"
                             helperText="Separate options with commas (,)"
                             required
@@ -282,7 +290,12 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                                 </Typography>
                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
                                     {param.custom_props.split(',').map((option, i) => (
-                                        <Chip key={i} label={option.trim()} size="small" variant="outlined" />
+                                        <Chip
+                                            key={i}
+                                            label={option.trim()}
+                                            size="small"
+                                            variant="outlined"
+                                        />
                                     ))}
                                 </Box>
                             </Box>
@@ -295,7 +308,11 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
 
     return (
         <Paper elevation={0} sx={{ p: 3, border: '1px solid #e0e0e0' }}>
-  <Box display="flex" mb={1} sx={{alignItems: "center", justifyContent: "space-between"}}>
+            <Box
+                display="flex"
+                mb={1}
+                sx={{ alignItems: 'center', justifyContent: 'space-between' }}
+            >
                 <Typography variant="h6" color="primary">
                     Template Parameters
                 </Typography>
@@ -326,7 +343,11 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                                     key={index}
                                     label={param.title || `Parameter ${index + 1}`}
                                     {...a11yProps(index)}
-                                    icon={param.required ? <span style={{ color: 'red' }}>*</span> : null}
+                                    icon={
+                                        param.required ? (
+                                            <span style={{ color: 'red' }}>*</span>
+                                        ) : null
+                                    }
                                     iconPosition="end"
                                 />
                             ))}
@@ -344,7 +365,7 @@ const TemplateParameters = ({ data, setData, errors = {} }) => {
                 data?.parameters?.map((param, index) => renderParameterForm(param, index))
             )}
 
-            <Box sx={{textAlign: "center", mt: 3}}>
+            <Box sx={{ textAlign: 'center', mt: 3 }}>
                 <Button
                     variant="contained"
                     color="primary"

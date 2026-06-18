@@ -1,5 +1,5 @@
-import React, { useCallback } from "react";
-import PropTypes from "prop-types";
+import React, { useCallback } from 'react';
+import PropTypes from 'prop-types';
 import {
     Container,
     Grid as Grid,
@@ -10,33 +10,48 @@ import {
     Paper,
     Box,
     FormControlLabel,
-    CircularProgress
-} from "@mui/material";
-import AvatarUpload from "@/Components/AvatarUpload";
-import SelectSearch from "@/Components/SelectSearch.jsx";
-import PageHeader from "@/Components/PageHeader.jsx";
+    CircularProgress,
+} from '@mui/material';
+import AvatarUpload from '@/Components/AvatarUpload';
+import SelectSearch from '@/Components/SelectSearch.jsx';
+import PageHeader from '@/Components/PageHeader.jsx';
 
-const UserForm = ({ values = {is_active: true, roles: []}, setValues, cancel, loading = false, submit, errors = {}, edit = false }) => {
-    const handleChange = useCallback((e) => {
-        const { name, value, checked, type } = e.target;
-        setValues((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
-    }, [setValues]);
+const UserForm = ({
+    values = { is_active: true, roles: [] },
+    setValues,
+    cancel,
+    loading = false,
+    submit,
+    errors = {},
+    edit = false,
+}) => {
+    const handleChange = useCallback(
+        (e) => {
+            const { name, value, checked, type } = e.target;
+            setValues((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+        },
+        [setValues],
+    );
 
-    const handleFileChange = useCallback((name) => ({ data }) => {
-        setValues((prev) => ({ ...prev, [name]: data }));
-    }, [setValues]);
+    const handleFileChange = useCallback(
+        (name) =>
+            ({ data }) => {
+                setValues((prev) => ({ ...prev, [name]: data }));
+            },
+        [setValues],
+    );
 
-    const renderTextField = (name, label, type = "text", required = false) => (
+    const renderTextField = (name, label, type = 'text', required = false) => (
         <TextField
             fullWidth
             type={type}
             name={name}
             label={label}
             required={required}
-            value={values[name] || ""}
+            value={values[name] || ''}
             onChange={handleChange}
             error={Boolean(errors?.[name])}
-            helperText={errors?.[name] ?? ""}
+            helperText={errors?.[name] ?? ''}
             variant="outlined"
             margin="normal"
             size="medium"
@@ -45,7 +60,7 @@ const UserForm = ({ values = {is_active: true, roles: []}, setValues, cancel, lo
 
     return (
         <Container maxWidth="lg">
-            <PageHeader title={edit ? "Edit User" : "Add User"} />
+            <PageHeader title={edit ? 'Edit User' : 'Add User'} />
 
             <Paper elevation={2} sx={{ p: 3, mt: 2 }}>
                 <Typography variant="h6" gutterBottom color="primary">
@@ -53,22 +68,22 @@ const UserForm = ({ values = {is_active: true, roles: []}, setValues, cancel, lo
                 </Typography>
 
                 <Grid container spacing={3}>
-                    <Grid size={{xs:12, sm:6, md:4}}>
-                        {renderTextField("name", "Full Name", "text", true)}
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                        {renderTextField('name', 'Full Name', 'text', true)}
                     </Grid>
-                    <Grid size={{xs:12, sm:6, md:4}}>
-                        {renderTextField("username", "Username", "text", true)}
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                        {renderTextField('username', 'Username', 'text', true)}
                     </Grid>
-                    <Grid size={{xs:12, sm:6, md:4}}>
-                        {renderTextField("email", "Email Address", "email", true)}
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                        {renderTextField('email', 'Email Address', 'email', true)}
                     </Grid>
-                    <Grid size={{xs:12, sm:6, md:4}}>
-                        {renderTextField("mobile", "Phone Number", "text", true)}
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                        {renderTextField('mobile', 'Phone Number', 'text', true)}
                     </Grid>
-                    <Grid size={{xs:12, sm:6, md:4}}>
-                        {renderTextField("title", "Title Under Signature")}
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                        {renderTextField('title', 'Title Under Signature')}
                     </Grid>
-                    <Grid size={{xs:12, sm:6, md:4}}>
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                         <Box sx={{ pt: 2 }}>
                             <FormControlLabel
                                 control={
@@ -95,17 +110,17 @@ const UserForm = ({ values = {is_active: true, roles: []}, setValues, cancel, lo
                 </Typography>
 
                 <Grid container spacing={3}>
-                    <Grid  size={{xs:12,}}>
+                    <Grid size={{ xs: 12 }}>
                         <SelectSearch
-                            error={Boolean(errors?.["roles"])}
-                            helperText={errors?.roles || "Select one or more roles for this user"}
+                            error={Boolean(errors?.['roles'])}
+                            helperText={errors?.roles || 'Select one or more roles for this user'}
                             label="User Roles"
                             name="roles"
                             multiple
-                            sx={{ width: "100%" }}
+                            sx={{ width: '100%' }}
                             fullWidth
                             value={values.roles || []}
-                            url={route("api.roles.list")}
+                            url={route('api.roles.list')}
                             onChange={handleChange}
                             required
                             variant="outlined"
@@ -120,28 +135,28 @@ const UserForm = ({ values = {is_active: true, roles: []}, setValues, cancel, lo
                 </Typography>
 
                 <Grid container spacing={3}>
-                    <Grid  size={{xs:12, sm:6}}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                         <AvatarUpload
                             value={values.signature}
                             name="signature"
                             tag="SIGNATURE"
                             label="User Signature"
-                            onChange={handleFileChange("signature")}
+                            onChange={handleFileChange('signature')}
                             error={Boolean(errors?.signature)}
                             helperText={errors?.signature ?? "Upload user's signature image"}
-                            uploadUrl={route("documents.store")}
+                            uploadUrl={route('documents.store')}
                         />
                     </Grid>
-                    <Grid  size={{xs:12, sm:6}}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                         <AvatarUpload
                             value={values.stamp}
                             name="stamp"
                             tag="STAMP"
                             label="User Stamp"
-                            onChange={handleFileChange("stamp")}
+                            onChange={handleFileChange('stamp')}
                             error={Boolean(errors?.stamp)}
                             helperText={errors?.stamp ?? "Upload user's official stamp image"}
-                            uploadUrl={route("documents.store")}
+                            uploadUrl={route('documents.store')}
                         />
                     </Grid>
                 </Grid>
@@ -154,26 +169,26 @@ const UserForm = ({ values = {is_active: true, roles: []}, setValues, cancel, lo
                     </Typography>
 
                     <Grid container spacing={3}>
-                        <Grid  size={{xs:12, sm:6}}>
-                            {renderTextField("password", "Password", "password", true)}
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                            {renderTextField('password', 'Password', 'password', true)}
                             <Typography variant="caption" color="text.secondary">
                                 Password must be at least 8 characters long
                             </Typography>
                         </Grid>
-                        <Grid  size={{xs:12, sm:6}}>
-                            {renderTextField("password_confirmation", "Confirm Password", "password", true)}
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                            {renderTextField(
+                                'password_confirmation',
+                                'Confirm Password',
+                                'password',
+                                true,
+                            )}
                         </Grid>
                     </Grid>
                 </Paper>
             )}
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4, mb: 2 }}>
-                <Button
-                    onClick={cancel}
-                    disabled={loading}
-                    variant="outlined"
-                    sx={{ mr: 2 }}
-                >
+                <Button onClick={cancel} disabled={loading} variant="outlined" sx={{ mr: 2 }}>
                     Cancel
                 </Button>
                 <Button
@@ -196,8 +211,7 @@ UserForm.propTypes = {
     loading: PropTypes.bool,
     submit: PropTypes.func.isRequired,
     errors: PropTypes.object,
-    edit: PropTypes.bool
+    edit: PropTypes.bool,
 };
-
 
 export default UserForm;

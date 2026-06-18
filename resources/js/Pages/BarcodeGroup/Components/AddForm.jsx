@@ -1,13 +1,12 @@
-import { TextField } from "@mui/material";
-import Grid from "@mui/material/Grid";
+import { TextField } from '@mui/material';
+import Grid from '@mui/material/Grid';
 
-import { FormProvider, useFormState } from "@/Components/FormTemplate.jsx";
+import { FormProvider, useFormState } from '@/Components/FormTemplate.jsx';
 
 const AddForm = ({ open, onClose, defaultValue = {} }) => {
-
     const url = defaultValue?.id
-        ? route("barcodeGroups.update", defaultValue.id)
-        : route("barcodeGroups.store");
+        ? route('barcodeGroups.update', defaultValue.id)
+        : route('barcodeGroups.store');
 
     return (
         <FormProvider
@@ -15,7 +14,7 @@ const AddForm = ({ open, onClose, defaultValue = {} }) => {
             generalTitle="Barcode Group"
             url={url}
             onClose={onClose}
-            defaultValue={{ name: "", abbr: "", ...defaultValue }}
+            defaultValue={{ name: '', abbr: '', ...defaultValue }}
         >
             <FormContent />
         </FormProvider>
@@ -31,12 +30,12 @@ const FormContent = () => {
 
     return (
         <>
-            <Grid size={{ xs: 12, sm: 6 }} >
+            <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                     label="Title"
                     name="name"
                     onChange={handleChange}
-                    value={data?.name || ""}
+                    value={data?.name || ''}
                     error={!!errors?.name}
                     helperText={errors?.name}
                     fullWidth
@@ -45,12 +44,12 @@ const FormContent = () => {
                     disabled={processing}
                 />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6 }} >
+            <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                     label="Abbreviation"
                     name="abbr"
                     onChange={handleChange}
-                    value={data?.abbr || ""}
+                    value={data?.abbr || ''}
                     error={!!errors?.abbr}
                     helperText={errors?.abbr}
                     fullWidth

@@ -1,40 +1,49 @@
-import {useState, useCallback, useMemo} from "react";
-import {Head, router, usePage} from "@inertiajs/react";
-import {Button} from "@mui/material";
-import {GridActionsCellItem} from "@mui/x-data-grid";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
+import { useState, useCallback, useMemo } from 'react';
+import { Head, router, usePage } from '@inertiajs/react';
+import { Button } from '@mui/material';
+import { GridActionsCellItem } from '@mui/x-data-grid';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 
-import TableLayout from "@/Layouts/TableLayout";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import DeleteForm from "@/Components/DeleteForm";
-import PageHeader from "@/Components/PageHeader";
-import Filter from "@/Pages/BarcodeGroup/Components/Filter";
-import AddForm from "@/Pages/BarcodeGroup/Components/AddForm";
+import TableLayout from '@/Layouts/TableLayout';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import DeleteForm from '@/Components/DeleteForm';
+import PageHeader from '@/Components/PageHeader';
+import Filter from '@/Pages/BarcodeGroup/Components/Filter';
+import AddForm from '@/Pages/BarcodeGroup/Components/AddForm';
 
 const BarcodeGroupsIndex = () => {
-    const {barcodeGroups, status, errors, success, requestInputs} = usePage().props;
+    const { barcodeGroups, status, errors, success, requestInputs } = usePage().props;
 
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const [openAddForm, setOpenAddForm] = useState(false);
     const [selectedBarcodeGroup, setSelectedBarcodeGroup] = useState(null);
 
     // Memoize the findBarcodeGroup function to avoid recreating it on every render
-    const findBarcodeGroup = useCallback((id) => {
-        return barcodeGroups.data.find((group) => group.id === id) ?? {id};
-    }, [barcodeGroups.data]);
+    const findBarcodeGroup = useCallback(
+        (id) => {
+            return barcodeGroups.data.find((group) => group.id === id) ?? { id };
+        },
+        [barcodeGroups.data],
+    );
 
     // Create handlers with useCallback to prevent unnecessary re-renders
-    const handleEditBarcodeGroup = useCallback((id) => () => {
-        setSelectedBarcodeGroup({...findBarcodeGroup(id), _method: 'put'});
-        setOpenAddForm(true);
-    }, [findBarcodeGroup]);
+    const handleEditBarcodeGroup = useCallback(
+        (id) => () => {
+            setSelectedBarcodeGroup({ ...findBarcodeGroup(id), _method: 'put' });
+            setOpenAddForm(true);
+        },
+        [findBarcodeGroup],
+    );
 
-    const handleDeleteBarcodeGroup = useCallback((id) => () => {
-        setSelectedBarcodeGroup(findBarcodeGroup(id));
-        setOpenDeleteForm(true);
-    }, [findBarcodeGroup]);
+    const handleDeleteBarcodeGroup = useCallback(
+        (id) => () => {
+            setSelectedBarcodeGroup(findBarcodeGroup(id));
+            setOpenDeleteForm(true);
+        },
+        [findBarcodeGroup],
+    );
 
     const handleCloseForm = useCallback(() => {
         setSelectedBarcodeGroup(null);
@@ -47,8 +56,8 @@ const BarcodeGroupsIndex = () => {
 
         router.post(
             route('barcodeGroups.destroy', selectedBarcodeGroup.id),
-            {_method: "delete"},
-            {onSuccess: handleCloseForm}
+            { _method: 'delete' },
+            { onSuccess: handleCloseForm },
         );
     }, [selectedBarcodeGroup, handleCloseForm]);
 
@@ -59,69 +68,72 @@ const BarcodeGroupsIndex = () => {
 
     const handlePageReload = useCallback((page, filters, sort, pageSize) => {
         router.visit(route('barcodeGroups.index'), {
-            data: {page, filters, sort, pageSize},
-            only: ["barcodeGroups", "status", "success", "requestInputs"]
+            data: { page, filters, sort, pageSize },
+            only: ['barcodeGroups', 'status', 'success', 'requestInputs'],
         });
     }, []);
 
     // Memoize columns definition to prevent recreating on every render
-    const columns = useMemo(() => [
-        {
-            field: 'name',
-            headerName: 'Title',
-            type: "string",
-            width: 200,
-            flex: 1
-        },
-        {
-            field: 'abbr',
-            headerName: 'Abbreviation',
-            type: "string",
-            width: 150
-        },
-        {
-            field: 'id',
-            headerName: 'Action',
-            type: 'actions',
-            sortable: false,
-            width: 100,
-            getActions: (params) => {
-                const actions = [
-                    <GridActionsCellItem
-                        key={`edit-${params.row.id}`}
-                        icon={<EditIcon/>}
-                        label="Edit"
-                        onClick={handleEditBarcodeGroup(params.row.id)}
-                        showInMenu
-                    />
-                ];
-
-                if (params.row.methods_count < 1) {
-                    actions.push(
+    const columns = useMemo(
+        () => [
+            {
+                field: 'name',
+                headerName: 'Title',
+                type: 'string',
+                width: 200,
+                flex: 1,
+            },
+            {
+                field: 'abbr',
+                headerName: 'Abbreviation',
+                type: 'string',
+                width: 150,
+            },
+            {
+                field: 'id',
+                headerName: 'Action',
+                type: 'actions',
+                sortable: false,
+                width: 100,
+                getActions: (params) => {
+                    const actions = [
                         <GridActionsCellItem
-                            key={`delete-${params.row.id}`}
-                            icon={<DeleteIcon/>}
-                            label="Delete"
+                            key={`edit-${params.row.id}`}
+                            icon={<EditIcon />}
+                            label="Edit"
+                            onClick={handleEditBarcodeGroup(params.row.id)}
                             showInMenu
-                            onClick={handleDeleteBarcodeGroup(params.row.id)}
-                        />
-                    );
-                }
+                        />,
+                    ];
 
-                return actions;
-            }
-        }
-    ], [handleEditBarcodeGroup, handleDeleteBarcodeGroup]);
+                    if (params.row.methods_count < 1) {
+                        actions.push(
+                            <GridActionsCellItem
+                                key={`delete-${params.row.id}`}
+                                icon={<DeleteIcon />}
+                                label="Delete"
+                                showInMenu
+                                onClick={handleDeleteBarcodeGroup(params.row.id)}
+                            />,
+                        );
+                    }
+
+                    return actions;
+                },
+            },
+        ],
+        [handleEditBarcodeGroup, handleDeleteBarcodeGroup],
+    );
 
     return (
         <>
-            <Head title="Barcode Groups"/>
+            <Head title="Barcode Groups" />
             <PageHeader
                 title="Barcode Groups List"
                 actions={
                     <Button
                         onClick={handleAddNew}
-                        startIcon={<AddIcon/>}
+                        startIcon={<AddIcon />}
                         variant="contained"
                         color="success"
                     >
@@ -140,17 +152,21 @@ const BarcodeGroupsIndex = () => {
                 Filter={Filter}
                 errors={errors}
             />
-            {openDeleteForm && <DeleteForm
-                title={`${selectedBarcodeGroup.name || ''} Barcode Group`}
-                agreeCB={handleDestroy}
-                disAgreeCB={handleCloseForm}
-                openDelete={openDeleteForm}
-            />}
-            {openAddForm && <AddForm
-                open={openAddForm}
-                defaultValue={selectedBarcodeGroup}
-                onClose={handleCloseForm}
-            />}
+            {openDeleteForm && (
+                <DeleteForm
+                    title={`${selectedBarcodeGroup.name || ''} Barcode Group`}
+                    agreeCB={handleDestroy}
+                    disAgreeCB={handleCloseForm}
+                    openDelete={openDeleteForm}
+                />
+            )}
+            {openAddForm && (
+                <AddForm
+                    open={openAddForm}
+                    defaultValue={selectedBarcodeGroup}
+                    onClose={handleCloseForm}
+                />
+            )}
         </>
     );
 };
@@ -158,19 +174,15 @@ const BarcodeGroupsIndex = () => {
 // Define breadcrumbs outside the component
 const breadcrumbs = [
     {
-        title: "Barcode Groups",
+        title: 'Barcode Groups',
         link: null,
-        icon: null
-    }
+        icon: null,
+    },
 ];
 
 // Use a more descriptive name for the layout function
-BarcodeGroupsIndex.layout = page => (
-    <AuthenticatedLayout
-        auth={page.props.auth}
-        children={page}
-        breadcrumbs={breadcrumbs}
-    />
+BarcodeGroupsIndex.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadcrumbs} />
 );
 
 export default BarcodeGroupsIndex;

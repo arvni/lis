@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import {
-    Box, Typography, Button, CircularProgress, Paper, Fade
-} from '@mui/material';
+import { Box, Typography, Button, CircularProgress, Paper, Fade } from '@mui/material';
 import { WifiOff, Refresh, CheckCircle } from '@mui/icons-material';
 
 // Module-level flag: only check once per page load regardless of re-renders
@@ -15,7 +13,8 @@ const ConnectionCheck = ({ children }) => {
     const check = useCallback(() => {
         setStatus('checking');
         setErrorMsg('');
-        axios.get('/ping', { timeout: 10000 })
+        axios
+            .get('/ping', { timeout: 10000 })
             .then(() => {
                 checkState.done = true;
                 setStatus('connected');
@@ -84,7 +83,8 @@ const ConnectionCheck = ({ children }) => {
                                 Cannot connect to server
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {errorMsg || 'Unable to reach the server. Please check your network connection.'}
+                                {errorMsg ||
+                                    'Unable to reach the server. Please check your network connection.'}
                             </Typography>
                             <Button
                                 variant="contained"

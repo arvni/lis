@@ -1,4 +1,4 @@
-import React, {useState, useMemo} from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     Box,
     Card,
@@ -29,7 +29,7 @@ import {
     Snackbar,
     useTheme,
     alpha,
-    styled
+    styled,
 } from '@mui/material';
 import {
     TrendingUp,
@@ -52,19 +52,19 @@ import {
     ExpandLess,
     Error as ErrorIcon,
     CurrencyExchange,
-    RequestQuote
+    RequestQuote,
 } from '@mui/icons-material';
-import {Link} from "@inertiajs/react";
+import { Link } from '@inertiajs/react';
 
 // PropTypes for better documentation (optional)
 import PropTypes from 'prop-types';
-import TextField from "@mui/material/TextField";
-import Excel from "../../../../images/excel.svg";
+import TextField from '@mui/material/TextField';
+import Excel from '../../../../images/excel.svg';
 
 // Styled components for enhanced UI
 const StyledCard = styled(Card, {
     shouldForwardProp: (prop) => prop !== 'isAlert' && prop !== 'priority',
-})(({theme, priority, isAlert}) => ({
+})(({ theme, priority, isAlert }) => ({
     height: '100%',
     transition: 'all 0.3s ease-in-out',
     borderRadius: theme.spacing(2),
@@ -74,21 +74,21 @@ const StyledCard = styled(Card, {
         isAlert
             ? theme.palette.warning.main
             : priority === 'high'
-                ? theme.palette.primary.main
-                : theme.palette.grey[300]
+              ? theme.palette.primary.main
+              : theme.palette.grey[300]
     }`,
     '&:hover': {
         transform: 'translateY(-4px)',
-        boxShadow: theme.shadows[8]
+        boxShadow: theme.shadows[8],
     },
     ...(priority === 'high' && {
-        boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`
-    })
+        boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
+    }),
 }));
 
 const MetricValue = styled(Typography, {
     shouldForwardProp: (prop) => prop !== 'isAlert',
-})(({theme, isAlert}) => ({
+})(({ theme, isAlert }) => ({
     fontWeight: 'bold',
     fontSize: '2rem',
     background: isAlert
@@ -97,10 +97,10 @@ const MetricValue = styled(Typography, {
     backgroundClip: 'text',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
-    transition: 'all 0.3s ease'
+    transition: 'all 0.3s ease',
 }));
 
-const IconContainer = styled(Box)(({theme, color = 'primary'}) => ({
+const IconContainer = styled(Box)(({ theme, color = 'primary' }) => ({
     width: 56,
     height: 56,
     borderRadius: '50%',
@@ -112,8 +112,8 @@ const IconContainer = styled(Box)(({theme, color = 'primary'}) => ({
     transition: 'all 0.3s ease',
     '&:hover': {
         transform: 'scale(1.1)',
-        backgroundColor: alpha(theme.palette[color].main, 0.2)
-    }
+        backgroundColor: alpha(theme.palette[color].main, 0.2),
+    },
 }));
 
 // Metric configuration
@@ -126,8 +126,8 @@ const getMetricConfig = (label) => {
             priority: 'high',
             category: 'operations',
             unit: 'patients',
-            route: "acceptances.index",
-            filter: true
+            route: 'acceptances.index',
+            filter: true,
         },
         'Total Tests': {
             icon: Description,
@@ -136,9 +136,9 @@ const getMetricConfig = (label) => {
             priority: 'medium',
             category: 'operations',
             unit: 'tests',
-            route: "acceptanceItems.index",
-            filters: {"test.type": ["TEST", "PANEL"]},
-            filter: true
+            route: 'acceptanceItems.index',
+            filters: { 'test.type': ['TEST', 'PANEL'] },
+            filter: true,
         },
         'Total Consultation': {
             icon: CheckCircle,
@@ -147,8 +147,8 @@ const getMetricConfig = (label) => {
             priority: 'high',
             category: 'medical',
             unit: 'consultations',
-            route: "consultations.index",
-            filter: true
+            route: 'consultations.index',
+            filter: true,
         },
         'Total Payments': {
             icon: AttachMoney,
@@ -158,7 +158,7 @@ const getMetricConfig = (label) => {
             category: 'financial',
             unit: 'currency',
             route: 'payments.index',
-            filter: true
+            filter: true,
         },
         'Total Cash Payments': {
             icon: MonetizationOn,
@@ -168,8 +168,8 @@ const getMetricConfig = (label) => {
             category: 'financial',
             unit: 'currency',
             route: 'payments.index',
-            filters: {type: "cash"},
-            filter: true
+            filters: { type: 'cash' },
+            filter: true,
         },
         'Total Card Payments': {
             icon: CreditCard,
@@ -179,8 +179,8 @@ const getMetricConfig = (label) => {
             category: 'financial',
             unit: 'currency',
             route: 'payments.index',
-            filters: {type: "card"},
-            filter: true
+            filters: { type: 'card' },
+            filter: true,
         },
         'Total Transfer Payments': {
             icon: CurrencyExchange,
@@ -190,8 +190,8 @@ const getMetricConfig = (label) => {
             category: 'financial',
             unit: 'currency',
             route: 'payments.index',
-            filters: {type: "transfer"},
-            filter: true
+            filters: { type: 'transfer' },
+            filter: true,
         },
         'Total Credit Payments': {
             icon: RequestQuote,
@@ -201,8 +201,8 @@ const getMetricConfig = (label) => {
             category: 'financial',
             unit: 'currency',
             route: 'payments.index',
-            filters: {type: "credit"},
-            filter: true
+            filters: { type: 'credit' },
+            filter: true,
         },
         'Waiting For Sampling': {
             icon: AccessTime,
@@ -236,216 +236,241 @@ const getMetricConfig = (label) => {
             isAlert: true,
             route: 'reports.approvingList',
             filter: false,
+        },
+    };
+    return (
+        configs[label] || {
+            icon: TrendingUp,
+            color: 'primary',
+            description: 'Metric description not available',
+            priority: 'medium',
+            category: 'general',
+            unit: 'units',
         }
-    };
-    return configs[label] || {
-        icon: TrendingUp,
-        color: 'primary',
-        description: 'Metric description not available',
-        priority: 'medium',
-        category: 'general',
-        unit: 'units'
-    };
+    );
 };
 
 // Enhanced metric card component
 
-const MetricCard = React.memo(({
-                                   label,
-                                   valueData,
-                                   category,
-                                   delay = 0,
-                                   onToggleVisibility,
-                                   isVisible = true,
-                                   date
-                               }) => {
-    const [showDetails, setShowDetails] = useState(false);
-    const config = getMetricConfig(label);
-    const Icon = config.icon;
-    const url = route(config.route, config.filter ? {filters: {...config.filters, date}} : null);
+const MetricCard = React.memo(
+    ({ label, valueData, category, delay = 0, onToggleVisibility, isVisible = true, date }) => {
+        const [showDetails, setShowDetails] = useState(false);
+        const config = getMetricConfig(label);
+        const Icon = config.icon;
+        const url = route(
+            config.route,
+            config.filter ? { filters: { ...config.filters, date } } : null,
+        );
 
-    const value = valueData?.value || valueData;
-    const trend = valueData?.trend || 0;
-    const previousValue = valueData?.previousValue;
+        const value = valueData?.value || valueData;
+        const trend = valueData?.trend || 0;
+        const previousValue = valueData?.previousValue;
 
-    const numericValue = typeof value === 'string' ?
-        parseFloat(value.replace(/[^\d.]/g, '')) || 0 : value;
+        const numericValue =
+            typeof value === 'string' ? parseFloat(value.replace(/[^\d.]/g, '')) || 0 : value;
 
-    const formatValue = (val) => {
-        if (typeof val === 'string' && val.includes('OMR')) {
-            return val;
-        }
-        return typeof val === 'number' && val >= 1000 ?
-            `${(val / 1000).toFixed(1)}k` : val;
-    };
+        const formatValue = (val) => {
+            if (typeof val === 'string' && val.includes('OMR')) {
+                return val;
+            }
+            return typeof val === 'number' && val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val;
+        };
 
-    const getTrendColor = (trend) => {
-        if (trend > 0) return config.isAlert ? 'error' : 'success';
-        if (trend < 0) return config.isAlert ? 'success' : 'error';
-        return 'text.secondary';
-    };
+        const getTrendColor = (trend) => {
+            if (trend > 0) return config.isAlert ? 'error' : 'success';
+            if (trend < 0) return config.isAlert ? 'success' : 'error';
+            return 'text.secondary';
+        };
 
-    const getTrendIcon = (trend) => {
-        if (trend > 0) return '↗';
-        if (trend < 0) return '↘';
-        return '→';
-    };
+        const getTrendIcon = (trend) => {
+            if (trend > 0) return '↗';
+            if (trend < 0) return '↘';
+            return '→';
+        };
 
-    return (
-        <Fade in={isVisible} timeout={500} style={{transitionDelay: `${delay}ms`}}>
-            <StyledCard
-                priority={config.priority}
-                isAlert={config.isAlert && numericValue > 0}
-            >
-                {config.priority === 'high' && (
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            top: -8,
-                            right: -8,
-                            width: 16,
-                            height: 16,
-                            bgcolor: 'primary.main',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            zIndex: 1
-                        }}
-                    >
-                        <Box sx={{width: 8, height: 8, bgcolor: 'white', borderRadius: '50%'}}/>
-                    </Box>
-                )}
+        return (
+            <Fade in={isVisible} timeout={500} style={{ transitionDelay: `${delay}ms` }}>
+                <StyledCard priority={config.priority} isAlert={config.isAlert && numericValue > 0}>
+                    {config.priority === 'high' && (
+                        <Box
+                            sx={{
+                                position: 'absolute',
+                                top: -8,
+                                right: -8,
+                                width: 16,
+                                height: 16,
+                                bgcolor: 'primary.main',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                zIndex: 1,
+                            }}
+                        >
+                            <Box
+                                sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: '50%' }}
+                            />
+                        </Box>
+                    )}
 
-                {config.isAlert && numericValue > 0 && (
-                    <Badge
-                        badgeContent={<NotificationsActive sx={{fontSize: 12}}/>}
-                        color="error"
-                        sx={{position: 'absolute', top: 16, right: 16}}
-                    />
-                )}
+                    {config.isAlert && numericValue > 0 && (
+                        <Badge
+                            badgeContent={<NotificationsActive sx={{ fontSize: 12 }} />}
+                            color="error"
+                            sx={{ position: 'absolute', top: 16, right: 16 }}
+                        />
+                    )}
 
-                <CardContent sx={{p: 3}}>
-                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
-                        <Box sx={{flex: 1}}>
-                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 1}}>
-                                <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                    sx={{fontWeight: 500}}
-                                >
-                                    {label}
-                                </Typography>
-                                <Tooltip title={config.description} arrow>
-                                    <IconButton size="small" sx={{p: 0}}>
-                                        <Info sx={{fontSize: 14}}/>
-                                    </IconButton>
-                                </Tooltip>
-                            </Box>
-
-                            <MetricValue
-                                variant="h3"
-                                component="div"
-                                isAlert={config.isAlert && numericValue > 0}
-                                sx={{mb: 1}}
-                            >
-                                {formatValue(value)}
-                            </MetricValue>
-
-                            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                                <Stack direction="row" spacing={1} sx={{alignItems: 'center'}}>
-                                    <Chip
-                                        label={category}
-                                        size="small"
-                                        color={config.color}
-                                        variant="outlined"
-                                        sx={{fontSize: '0.75rem'}}
-                                    />
-
-                                    {trend !== 0 && (
-                                        <Typography
-                                            variant="caption"
-                                            sx={{
-                                                color: getTrendColor(trend),
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                fontWeight: 'bold'
-                                            }}
-                                        >
-                                            {getTrendIcon(trend)} {Math.abs(trend)}%
-                                        </Typography>
-                                    )}
-                                </Stack>
-
-                                {config.isAlert && numericValue > 0 && (
-                                    <Chip
-                                        label="Attention"
-                                        size="small"
-                                        color="warning"
-                                        variant="filled"
-                                        sx={{animation: 'pulse 2s infinite'}}
-                                    />
-                                )}
-                            </Box>
-
-                            <Collapse in={showDetails}>
-                                <Box sx={{mt: 2, pt: 2, borderTop: 1, borderColor: 'divider'}}>
-                                    <Typography variant="caption" color="text.secondary">
-                                        Category: {config.category} • Unit: {config.unit}
+                    <CardContent sx={{ p: 3 }}>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'flex-start',
+                            }}
+                        >
+                            <Box sx={{ flex: 1 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                    <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                        sx={{ fontWeight: 500 }}
+                                    >
+                                        {label}
                                     </Typography>
-                                    {previousValue && (
-                                        <Typography variant="caption" display="block" color="text.secondary">
-                                            Previous: {formatValue(previousValue)}
-                                        </Typography>
+                                    <Tooltip title={config.description} arrow>
+                                        <IconButton size="small" sx={{ p: 0 }}>
+                                            <Info sx={{ fontSize: 14 }} />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Box>
+
+                                <MetricValue
+                                    variant="h3"
+                                    component="div"
+                                    isAlert={config.isAlert && numericValue > 0}
+                                    sx={{ mb: 1 }}
+                                >
+                                    {formatValue(value)}
+                                </MetricValue>
+
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                    }}
+                                >
+                                    <Stack
+                                        direction="row"
+                                        spacing={1}
+                                        sx={{ alignItems: 'center' }}
+                                    >
+                                        <Chip
+                                            label={category}
+                                            size="small"
+                                            color={config.color}
+                                            variant="outlined"
+                                            sx={{ fontSize: '0.75rem' }}
+                                        />
+
+                                        {trend !== 0 && (
+                                            <Typography
+                                                variant="caption"
+                                                sx={{
+                                                    color: getTrendColor(trend),
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    fontWeight: 'bold',
+                                                }}
+                                            >
+                                                {getTrendIcon(trend)} {Math.abs(trend)}%
+                                            </Typography>
+                                        )}
+                                    </Stack>
+
+                                    {config.isAlert && numericValue > 0 && (
+                                        <Chip
+                                            label="Attention"
+                                            size="small"
+                                            color="warning"
+                                            variant="filled"
+                                            sx={{ animation: 'pulse 2s infinite' }}
+                                        />
                                     )}
                                 </Box>
-                            </Collapse>
 
-                            <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 1}}>
-                                <IconButton
-                                    size="small"
-                                    onClick={() => setShowDetails(!showDetails)}
-                                    sx={{opacity: 0.7}}
+                                <Collapse in={showDetails}>
+                                    <Box
+                                        sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}
+                                    >
+                                        <Typography variant="caption" color="text.secondary">
+                                            Category: {config.category} • Unit: {config.unit}
+                                        </Typography>
+                                        {previousValue && (
+                                            <Typography
+                                                variant="caption"
+                                                display="block"
+                                                color="text.secondary"
+                                            >
+                                                Previous: {formatValue(previousValue)}
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                </Collapse>
+
+                                <Box
+                                    sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}
                                 >
-                                    {showDetails ? <ExpandLess/> : <ExpandMore/>}
-                                </IconButton>
-
-                                {onToggleVisibility && (
                                     <IconButton
                                         size="small"
-                                        onClick={() => onToggleVisibility(label)}
-                                        sx={{opacity: 0.7}}
+                                        onClick={() => setShowDetails(!showDetails)}
+                                        sx={{ opacity: 0.7 }}
                                     >
-                                        <VisibilityOff/>
+                                        {showDetails ? <ExpandLess /> : <ExpandMore />}
                                     </IconButton>
-                                )}
-                            </Box>
-                        </Box>
 
-                        <IconContainer color={config.color}>
-                            <Link href={url}><Icon sx={{fontSize: 28}}/></Link>
-                        </IconContainer>
-                    </Box>
-                </CardContent>
-            </StyledCard>
-        </Fade>
-    );
-});
+                                    {onToggleVisibility && (
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => onToggleVisibility(label)}
+                                            sx={{ opacity: 0.7 }}
+                                        >
+                                            <VisibilityOff />
+                                        </IconButton>
+                                    )}
+                                </Box>
+                            </Box>
+
+                            <IconContainer color={config.color}>
+                                <Link href={url}>
+                                    <Icon sx={{ fontSize: 28 }} />
+                                </Link>
+                            </IconContainer>
+                        </Box>
+                    </CardContent>
+                </StyledCard>
+            </Fade>
+        );
+    },
+);
 
 // Loading skeleton component
 const MetricSkeleton = React.memo(() => (
-    <Card sx={{height: '100%', borderRadius: 2}}>
-        <CardContent sx={{p: 3}}>
-            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
-                <Box sx={{flex: 1, mr: 2}}>
-                    <Skeleton variant="text" width="70%" height={24}/>
-                    <Skeleton variant="text" width="50%" height={48} sx={{my: 1}}/>
-                    <Box sx={{display: 'flex', gap: 1}}>
-                        <Skeleton variant="rounded" width={80} height={24}/>
-                        <Skeleton variant="rounded" width={60} height={24}/>
+    <Card sx={{ height: '100%', borderRadius: 2 }}>
+        <CardContent sx={{ p: 3 }}>
+            <Box
+                sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
+            >
+                <Box sx={{ flex: 1, mr: 2 }}>
+                    <Skeleton variant="text" width="70%" height={24} />
+                    <Skeleton variant="text" width="50%" height={48} sx={{ my: 1 }} />
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Skeleton variant="rounded" width={80} height={24} />
+                        <Skeleton variant="rounded" width={60} height={24} />
                     </Box>
                 </Box>
-                <Skeleton variant="circular" width={56} height={56}/>
+                <Skeleton variant="circular" width={56} height={56} />
             </Box>
         </CardContent>
     </Card>
@@ -453,30 +478,29 @@ const MetricSkeleton = React.memo(() => (
 
 // Main Dashboard component that accepts data as props
 const Dashboard = ({
-                       data = null,
-                       date = null,
-                       loading = false,
-                       error = null,
-                       lastUpdated = null,
-                       systemHealth = 'good',
-                       onRefresh = null,
-                       title = 'Dashboard',
-                       subtitle = '',
-                       showHeader = true,
-                       showFilters = true,
-                       showSystemHealth = true,
-                       enableAutoHide = true,
-                       refreshButtonText = 'Refresh',
-                       customMetricConfigs = {},
-                       className,
-                       ...props
-                   }) => {
+    data = null,
+    date = null,
+    loading = false,
+    error = null,
+    lastUpdated = null,
+    systemHealth = 'good',
+    onRefresh = null,
+    title = 'Dashboard',
+    subtitle = '',
+    showHeader = true,
+    showFilters = true,
+    showSystemHealth = true,
+    enableAutoHide = true,
+    refreshButtonText = 'Refresh',
+    customMetricConfigs = {},
+    className,
+    ...props
+}) => {
     const [filter, setFilter] = useState('all');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [hiddenMetrics, setHiddenMetrics] = useState(new Set());
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
-
 
     // Handle refresh action
     const handleRefresh = async () => {
@@ -505,8 +529,10 @@ const Dashboard = ({
             Object.entries(metrics).forEach(([label, valueData]) => {
                 const config = getMetricConfig(label);
                 const value = valueData?.value || valueData;
-                const numericValue = typeof value === 'string' ?
-                    parseFloat(value.replace(/[^\d.]/g, '')) || 0 : value;
+                const numericValue =
+                    typeof value === 'string'
+                        ? parseFloat(value.replace(/[^\d.]/g, '')) || 0
+                        : value;
 
                 // Apply priority filter
                 if (filter === 'high' && config.priority !== 'high') return;
@@ -531,7 +557,7 @@ const Dashboard = ({
 
     const toggleMetricVisibility = (label) => {
         if (enableAutoHide) {
-            setHiddenMetrics(prev => {
+            setHiddenMetrics((prev) => {
                 const newSet = new Set(prev);
                 if (newSet.has(label)) {
                     newSet.delete(label);
@@ -546,12 +572,14 @@ const Dashboard = ({
     const totalAlerts = useMemo(() => {
         if (!data) return 0;
         let count = 0;
-        Object.values(data).forEach(category => {
+        Object.values(data).forEach((category) => {
             Object.entries(category).forEach(([label, valueData]) => {
                 const config = getMetricConfig(label);
                 const value = valueData?.value || valueData;
-                const numericValue = typeof value === 'string' ?
-                    parseFloat(value.replace(/[^\d.]/g, '')) || 0 : value;
+                const numericValue =
+                    typeof value === 'string'
+                        ? parseFloat(value.replace(/[^\d.]/g, '')) || 0
+                        : value;
                 if (config.isAlert && numericValue > 0) count++;
             });
         });
@@ -561,19 +589,19 @@ const Dashboard = ({
     // Error state
     if (error && !data) {
         return (
-            <Container maxWidth="lg" sx={{mt: 4, mb: 4}} className={className} {...props}>
-                <Paper elevation={2} sx={{p: 4, textAlign: 'center', borderRadius: 3}}>
-                    <ErrorIcon sx={{fontSize: 64, color: 'error.main', mb: 2}}/>
+            <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }} className={className} {...props}>
+                <Paper elevation={2} sx={{ p: 4, textAlign: 'center', borderRadius: 3 }}>
+                    <ErrorIcon sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
                     <Typography variant="h4" color="error" gutterBottom>
                         Unable to load dashboard
                     </Typography>
-                    <Typography variant="body1" color="text.secondary" sx={{mb: 3}}>
+                    <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
                         {error}
                     </Typography>
                     {onRefresh && (
                         <Button
                             variant="contained"
-                            startIcon={isRefreshing ? <CircularProgress size={20}/> : <Refresh/>}
+                            startIcon={isRefreshing ? <CircularProgress size={20} /> : <Refresh />}
                             onClick={handleRefresh}
                             disabled={isRefreshing}
                             size="large"
@@ -587,37 +615,43 @@ const Dashboard = ({
     }
 
     const handleDateChange = (e) => {
-        if (onRefresh)
-            onRefresh(e.target.value)
-    }
+        if (onRefresh) onRefresh(e.target.value);
+    };
     const today = () => {
         let t = new Date();
-        return t.getFullYear() + "-" + (t.getMonth() + 1) + "-" + t.getDate();
+        return t.getFullYear() + '-' + (t.getMonth() + 1) + '-' + t.getDate();
     };
 
     return (
-        <Box sx={{flexGrow: 1}} className={className} {...props}>
+        <Box sx={{ flexGrow: 1 }} className={className} {...props}>
             {/* Header */}
             {showHeader && (
-                <AppBar position="static" elevation={0}
-                        sx={{bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider'}}>
+                <AppBar
+                    position="static"
+                    elevation={0}
+                    sx={{ bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider' }}
+                >
                     <Toolbar>
-                        <DashboardIcon sx={{color: 'primary.main', mr: 2}}/>
-                        <Typography variant="h6" sx={{flexGrow: 1, color: 'text.primary'}}>
+                        <DashboardIcon sx={{ color: 'primary.main', mr: 2 }} />
+                        <Typography variant="h6" sx={{ flexGrow: 1, color: 'text.primary' }}>
                             {title}
                         </Typography>
 
                         {showSystemHealth && totalAlerts > 0 && (
-                            <Badge badgeContent={totalAlerts} color="error" sx={{mr: 2}}>
-                                <NotificationsActive color="action"/>
+                            <Badge badgeContent={totalAlerts} color="error" sx={{ mr: 2 }}>
+                                <NotificationsActive color="action" />
                             </Badge>
                         )}
 
                         {showSystemHealth && (
-                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Chip
-                                    icon={<Timeline/>}
-                                    label={systemHealth === 'good' ? 'All Systems Operational' : 'System Issues Detected'}
+                                    icon={<Timeline />}
+                                    label={
+                                        systemHealth === 'good'
+                                            ? 'All Systems Operational'
+                                            : 'System Issues Detected'
+                                    }
                                     color={systemHealth === 'good' ? 'success' : 'warning'}
                                     variant="outlined"
                                     size="small"
@@ -628,14 +662,27 @@ const Dashboard = ({
                 </AppBar>
             )}
 
-            <Container maxWidth="lg" sx={{mt: 4, mb: 4}}>
+            <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
                 {/* Dashboard Title */}
                 <Box mb={4}>
-                    <Typography variant="h3" component="h1" gutterBottom sx={{fontWeight: 'bold'}}>
+                    <Typography
+                        variant="h3"
+                        component="h1"
+                        gutterBottom
+                        sx={{ fontWeight: 'bold' }}
+                    >
                         Dashboard Overview
                     </Typography>
 
-                    <Stack direction="row" sx={{justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2}}>
+                    <Stack
+                        direction="row"
+                        sx={{
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                            gap: 2,
+                        }}
+                    >
                         <Box>
                             <Typography variant="h6" color="text.secondary">
                                 {subtitle}
@@ -648,33 +695,42 @@ const Dashboard = ({
                         </Box>
 
                         {showFilters && (
-                            <Stack direction="row" spacing={2} sx={{alignItems: 'center'}}>
+                            <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
                                 <Tooltip title="Export to Excel">
                                     <IconButton
-                                        href={route("api.dailyCashReport.export", {date})}
+                                        href={route('api.dailyCashReport.export', { date })}
                                         color="success"
                                         target="_blank"
                                         sx={{
                                             border: '1px solid #e0e0e0',
                                             borderRadius: 1,
-                                            p: 1
+                                            p: 1,
                                         }}
                                     >
-                                        <Stack direction="row" spacing={1} sx={{alignItems: 'center'}}>
-                                            <img src={Excel} alt="Excel" width="24px"/>
-                                            <Typography variant="button" sx={{display: {xs: 'none', sm: 'block'}}}>
+                                        <Stack
+                                            direction="row"
+                                            spacing={1}
+                                            sx={{ alignItems: 'center' }}
+                                        >
+                                            <img src={Excel} alt="Excel" width="24px" />
+                                            <Typography
+                                                variant="button"
+                                                sx={{ display: { xs: 'none', sm: 'block' } }}
+                                            >
                                                 Export
                                             </Typography>
                                         </Stack>
                                     </IconButton>
                                 </Tooltip>
-                                <TextField onChange={handleDateChange}
-                                           value={date}
-                                           size="small"
-                                           type="date"
-                                           sx={{minWidth: 120}}
-                                           slotProps={{htmlInput: {max: today()}}}/>
-                                <FormControl size="small" sx={{minWidth: 120}}>
+                                <TextField
+                                    onChange={handleDateChange}
+                                    value={date}
+                                    size="small"
+                                    type="date"
+                                    sx={{ minWidth: 120 }}
+                                    slotProps={{ htmlInput: { max: today() } }}
+                                />
+                                <FormControl size="small" sx={{ minWidth: 120 }}>
                                     <InputLabel>Priority</InputLabel>
                                     <Select
                                         value={filter}
@@ -687,7 +743,7 @@ const Dashboard = ({
                                     </Select>
                                 </FormControl>
 
-                                <FormControl size="small" sx={{minWidth: 120}}>
+                                <FormControl size="small" sx={{ minWidth: 120 }}>
                                     <InputLabel>Category</InputLabel>
                                     <Select
                                         value={categoryFilter}
@@ -705,7 +761,13 @@ const Dashboard = ({
                                 {onRefresh && (
                                     <Button
                                         variant="outlined"
-                                        startIcon={isRefreshing ? <CircularProgress size={16}/> : <Refresh/>}
+                                        startIcon={
+                                            isRefreshing ? (
+                                                <CircularProgress size={16} />
+                                            ) : (
+                                                <Refresh />
+                                            )
+                                        }
                                         onClick={handleRefresh}
                                         disabled={isRefreshing}
                                     >
@@ -719,7 +781,7 @@ const Dashboard = ({
 
                 {/* Error banner for refresh errors */}
                 {error && data && (
-                    <Alert severity="warning" sx={{mb: 3, borderRadius: 2}}>
+                    <Alert severity="warning" sx={{ mb: 3, borderRadius: 2 }}>
                         <AlertTitle>Failed to refresh data</AlertTitle>
                         {error} — Showing last known data.
                     </Alert>
@@ -728,73 +790,114 @@ const Dashboard = ({
                 {/* Content */}
                 {loading ? (
                     <Grid container spacing={3}>
-                        {Array.from({length: 6}).map((_, index) => (
-                            <Grid size={{xs: 12, sm: 6, md: 4}} key={index}>
-                                <MetricSkeleton/>
+                        {Array.from({ length: 6 }).map((_, index) => (
+                            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
+                                <MetricSkeleton />
                             </Grid>
                         ))}
                     </Grid>
                 ) : (
                     <Stack spacing={4}>
-                        {Object.entries(filteredData || {}).map(([category, metrics], categoryIndex) => {
-                            const visibleMetrics = Object.entries(metrics);
-                            const totalMetrics = data ? Object.keys(data[category] || {}).length : 0;
+                        {Object.entries(filteredData || {}).map(
+                            ([category, metrics], categoryIndex) => {
+                                const visibleMetrics = Object.entries(metrics);
+                                const totalMetrics = data
+                                    ? Object.keys(data[category] || {}).length
+                                    : 0;
 
-                            return (
-                                <Paper key={category} elevation={1} sx={{p: 3, borderRadius: 3}}>
-                                    <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3}}>
-                                        <Typography variant="h4" component="h2" sx={{fontWeight: 'bold'}}>
-                                            {category} Metrics
-                                        </Typography>
-                                        <Chip
-                                            label={`${visibleMetrics.length} of ${totalMetrics} shown`}
-                                            variant="outlined"
-                                            size="small"
-                                        />
-                                    </Box>
-
-                                    <Grid container spacing={3}>
-                                        {visibleMetrics.map(([label, valueData], index) => (
-                                            <Grid size={{xs: 12, sm: 6, md: 4}} key={label}>
-                                                <MetricCard
-                                                    label={label}
-                                                    valueData={valueData}
-                                                    date={date}
-                                                    category={category}
-                                                    delay={categoryIndex * 100 + index * 50}
-                                                    onToggleVisibility={enableAutoHide ? toggleMetricVisibility : undefined}
-                                                />
-                                            </Grid>
-                                        ))}
-                                    </Grid>
-
-                                    {/* Hidden metrics section */}
-                                    {enableAutoHide && data && Object.keys(data[category] || {}).some(label => hiddenMetrics.has(label)) && (
-                                        <Box sx={{mt: 3, pt: 3}}>
-                                            <Divider sx={{mb: 2}}/>
-                                            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                                Hidden Metrics
+                                return (
+                                    <Paper
+                                        key={category}
+                                        elevation={1}
+                                        sx={{ p: 3, borderRadius: 3 }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                mb: 3,
+                                            }}
+                                        >
+                                            <Typography
+                                                variant="h4"
+                                                component="h2"
+                                                sx={{ fontWeight: 'bold' }}
+                                            >
+                                                {category} Metrics
                                             </Typography>
-                                            <Stack direction="row" spacing={1} sx={{flexWrap: 'wrap'}}>
-                                                {Object.keys(data[category] || {})
-                                                    .filter(label => hiddenMetrics.has(label))
-                                                    .map(label => (
-                                                        <Chip
-                                                            key={label}
-                                                            label={label}
-                                                            icon={<Visibility/>}
-                                                            onClick={() => toggleMetricVisibility(label)}
-                                                            variant="outlined"
-                                                            size="small"
-                                                            sx={{m: 0.5}}
-                                                        />
-                                                    ))}
-                                            </Stack>
+                                            <Chip
+                                                label={`${visibleMetrics.length} of ${totalMetrics} shown`}
+                                                variant="outlined"
+                                                size="small"
+                                            />
                                         </Box>
-                                    )}
-                                </Paper>
-                            );
-                        })}
+
+                                        <Grid container spacing={3}>
+                                            {visibleMetrics.map(([label, valueData], index) => (
+                                                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={label}>
+                                                    <MetricCard
+                                                        label={label}
+                                                        valueData={valueData}
+                                                        date={date}
+                                                        category={category}
+                                                        delay={categoryIndex * 100 + index * 50}
+                                                        onToggleVisibility={
+                                                            enableAutoHide
+                                                                ? toggleMetricVisibility
+                                                                : undefined
+                                                        }
+                                                    />
+                                                </Grid>
+                                            ))}
+                                        </Grid>
+
+                                        {/* Hidden metrics section */}
+                                        {enableAutoHide &&
+                                            data &&
+                                            Object.keys(data[category] || {}).some((label) =>
+                                                hiddenMetrics.has(label),
+                                            ) && (
+                                                <Box sx={{ mt: 3, pt: 3 }}>
+                                                    <Divider sx={{ mb: 2 }} />
+                                                    <Typography
+                                                        variant="subtitle2"
+                                                        color="text.secondary"
+                                                        gutterBottom
+                                                    >
+                                                        Hidden Metrics
+                                                    </Typography>
+                                                    <Stack
+                                                        direction="row"
+                                                        spacing={1}
+                                                        sx={{ flexWrap: 'wrap' }}
+                                                    >
+                                                        {Object.keys(data[category] || {})
+                                                            .filter((label) =>
+                                                                hiddenMetrics.has(label),
+                                                            )
+                                                            .map((label) => (
+                                                                <Chip
+                                                                    key={label}
+                                                                    label={label}
+                                                                    icon={<Visibility />}
+                                                                    onClick={() =>
+                                                                        toggleMetricVisibility(
+                                                                            label,
+                                                                        )
+                                                                    }
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    sx={{ m: 0.5 }}
+                                                                />
+                                                            ))}
+                                                    </Stack>
+                                                </Box>
+                                            )}
+                                    </Paper>
+                                );
+                            },
+                        )}
                     </Stack>
                 )}
 
@@ -803,9 +906,13 @@ const Dashboard = ({
                     open={showSuccess}
                     autoHideDuration={3000}
                     onClose={() => setShowSuccess(false)}
-                    anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 >
-                    <Alert onClose={() => setShowSuccess(false)} severity="success" sx={{width: '100%'}}>
+                    <Alert
+                        onClose={() => setShowSuccess(false)}
+                        severity="success"
+                        sx={{ width: '100%' }}
+                    >
                         Dashboard data refreshed successfully!
                     </Alert>
                 </Snackbar>
@@ -830,6 +937,6 @@ Dashboard.propTypes = {
     enableAutoHide: PropTypes.bool,
     refreshButtonText: PropTypes.string,
     customMetricConfigs: PropTypes.object,
-    className: PropTypes.string
+    className: PropTypes.string,
 };
 export default Dashboard;

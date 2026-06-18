@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {Head} from '@inertiajs/react';
+import React, { useEffect, useState } from 'react';
+import { Head } from '@inertiajs/react';
 import {
     Box,
     Typography,
@@ -10,21 +10,22 @@ import {
     Tooltip,
     IconButton,
     Grid as Grid,
-    Chip, Stack
+    Chip,
+    Stack,
 } from '@mui/material';
-import {styled} from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import JsBarcode from 'jsbarcode';
 import {
     Print as PrintIcon,
     LocalHospital as LocalHospitalIcon,
     Close as CloseIcon,
-    ArrowBack as ArrowBackIcon
+    ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 
 // Styled components with enhanced styling
-const BarcodeContainer = styled(Container)(({theme}) => ({
+const BarcodeContainer = styled(Container)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -32,11 +33,11 @@ const BarcodeContainer = styled(Container)(({theme}) => ({
     padding: theme.spacing(2),
     margin: '0 auto',
     '@media print': {
-        padding: 0
-    }
+        padding: 0,
+    },
 }));
 
-const BarcodeItem = styled(Paper)(({theme}) => ({
+const BarcodeItem = styled(Paper)(({ theme }) => ({
     paddingTop: '0mm',
     textAlign: 'center',
     margin: theme.spacing(1),
@@ -58,7 +59,7 @@ const BarcodeItem = styled(Paper)(({theme}) => ({
         border: 'none',
         width: '100%',
         height: '100%',
-    }
+    },
 }));
 
 const BarcodeText = styled(Typography)(() => ({
@@ -78,10 +79,10 @@ const BarcodeText = styled(Typography)(() => ({
     whiteSpace: 'nowrap',
     '@media print': {
         fontSize: '2.5mm',
-    }
+    },
 }));
 
-const RejectedOverlay = styled(Typography)(({theme}) => ({
+const RejectedOverlay = styled(Typography)(({ theme }) => ({
     position: 'absolute',
     transform: 'rotate(-30deg)',
     fontSize: '2rem',
@@ -93,10 +94,10 @@ const RejectedOverlay = styled(Typography)(({theme}) => ({
     pointerEvents: 'none',
     '@media print': {
         fontSize: '1.8rem',
-    }
+    },
 }));
 
-const PrintButton = styled(IconButton)(({theme}) => ({
+const PrintButton = styled(IconButton)(({ theme }) => ({
     position: 'fixed',
     bottom: theme.spacing(3),
     right: theme.spacing(3),
@@ -107,11 +108,11 @@ const PrintButton = styled(IconButton)(({theme}) => ({
         backgroundColor: theme.palette.primary.dark,
     },
     '@media print': {
-        display: 'none'
-    }
+        display: 'none',
+    },
 }));
 
-const BackButton = styled(IconButton)(({theme}) => ({
+const BackButton = styled(IconButton)(({ theme }) => ({
     position: 'fixed',
     bottom: theme.spacing(3),
     left: theme.spacing(3),
@@ -122,11 +123,11 @@ const BackButton = styled(IconButton)(({theme}) => ({
         backgroundColor: theme.palette.grey[300],
     },
     '@media print': {
-        display: 'none'
-    }
+        display: 'none',
+    },
 }));
 
-const HeaderBar = styled(Box)(({theme}) => ({
+const HeaderBar = styled(Box)(({ theme }) => ({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -134,26 +135,26 @@ const HeaderBar = styled(Box)(({theme}) => ({
     marginBottom: theme.spacing(2),
     borderBottom: `1px solid ${theme.palette.divider}`,
     '@media print': {
-        display: 'none'
-    }
+        display: 'none',
+    },
 }));
 
-const BarcodeComponent = ({barcodes}) => {
+const BarcodeComponent = ({ barcodes }) => {
     const [showSnackbar, setShowSnackbar] = useState(false);
     const [printOnlyBarcode, setPrintOnlyBarcode] = useState(false);
-    const handleChange = (e) => setPrintOnlyBarcode(e.target.checked)
+    const handleChange = (e) => setPrintOnlyBarcode(e.target.checked);
 
     useEffect(() => {
         // Initialize barcodes after component mounts
         if (!printOnlyBarcode) {
-            barcodes.forEach(barcode => {
+            barcodes.forEach((barcode) => {
                 JsBarcode(`#barcode-${barcode.barcode}`, barcode.barcode, {
                     format: 'CODE128',
                     width: 1,
                     height: 35,
                     displayValue: false,
                     background: '#ffffff',
-                    lineColor: '#000000'
+                    lineColor: '#000000',
                 });
             });
         }
@@ -188,71 +189,107 @@ const BarcodeComponent = ({barcodes}) => {
         <>
             <HeaderBar>
                 <Typography variant="h6">
-                    <LocalHospitalIcon sx={{mr: 1, verticalAlign: 'middle'}}/>
+                    <LocalHospitalIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                     Barcode Labels ({barcodes.length})
                 </Typography>
                 <Box>
-                    <FormControlLabel sx={{mt: 1}}
-                                      label="Print The Barcode"
-                                      control={<Checkbox checked={printOnlyBarcode}
-                                                         name="printBarcode"
-                                                         onChange={handleChange}/>}/>
+                    <FormControlLabel
+                        sx={{ mt: 1 }}
+                        label="Print The Barcode"
+                        control={
+                            <Checkbox
+                                checked={printOnlyBarcode}
+                                name="printBarcode"
+                                onChange={handleChange}
+                            />
+                        }
+                    />
                 </Box>
                 <Chip
-                    icon={<PrintIcon fontSize="small"/>}
+                    icon={<PrintIcon fontSize="small" />}
                     label="Ready for Printing"
                     color="primary"
                     variant="outlined"
                     size="small"
-                    sx={{display: 'flex'}}
+                    sx={{ display: 'flex' }}
                 />
             </HeaderBar>
             <BarcodeContainer>
-  <Grid container spacing={0} sx={{justifyContent: "center", gap:0}} >
+                <Grid container spacing={0} sx={{ justifyContent: 'center', gap: 0 }}>
                     {barcodes.map((barcode) => (
-                        <Grid key={barcode.barcode}
-                              size={12}
-                              sx={{display: "flex", justifyContent: "center",gap:0}}
-                              className={(!barcode?.acceptance_items?.length || barcode.is_rejected) ? "no-print page-break" : "page-break"}>
+                        <Grid
+                            key={barcode.barcode}
+                            size={12}
+                            sx={{ display: 'flex', justifyContent: 'center', gap: 0 }}
+                            className={
+                                !barcode?.acceptance_items?.length || barcode.is_rejected
+                                    ? 'no-print page-break'
+                                    : 'page-break'
+                            }
+                        >
                             <BarcodeItem>
                                 {(!barcode?.acceptance_items?.length || barcode.is_rejected) && (
                                     <RejectedOverlay>Rejected</RejectedOverlay>
                                 )}
-                                {printOnlyBarcode ? <BarcodeText>{barcode.barcode}</BarcodeText> : <>
-                                    <Box sx={{
-                                        width: '100%',
-                                        pt: '0mm',
-                                        display: "flex",
-                                        "& svg ": {width: "100% !important"}
-                                    }}>
-                                        <svg id={`barcode-${barcode.barcode}`} style={{width: "100% !important"}}></svg>
-                                    </Box>
-                                    <Stack spacing={.5} sx={{mt: "-3mm", zIndex: 1}}>
-                                        <BarcodeText>{barcode.barcode}</BarcodeText>
-                                        <BarcodeText>
-                                            <Box component="span"
-                                                 sx={{display: 'inline-flex', alignItems: 'center'}}>
-                                                {formatDate(barcode.created_at)}
-                                            </Box>
-                                            {barcode.patient && <>
-                                                |
-                                                <Box component="span"
-                                                     sx={{
-                                                         display: 'inline-flex',
-                                                         alignItems: 'center',
-                                                     }}>
-                                                    {barcode.patient.gender.substring(0, 1)}/{barcode.patient.age}
+                                {printOnlyBarcode ? (
+                                    <BarcodeText>{barcode.barcode}</BarcodeText>
+                                ) : (
+                                    <>
+                                        <Box
+                                            sx={{
+                                                width: '100%',
+                                                pt: '0mm',
+                                                display: 'flex',
+                                                '& svg ': { width: '100% !important' },
+                                            }}
+                                        >
+                                            <svg
+                                                id={`barcode-${barcode.barcode}`}
+                                                style={{ width: '100% !important' }}
+                                            ></svg>
+                                        </Box>
+                                        <Stack spacing={0.5} sx={{ mt: '-3mm', zIndex: 1 }}>
+                                            <BarcodeText>{barcode.barcode}</BarcodeText>
+                                            <BarcodeText>
+                                                <Box
+                                                    component="span"
+                                                    sx={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                    }}
+                                                >
+                                                    {formatDate(barcode.created_at)}
                                                 </Box>
-                                            </>}
-                                        </BarcodeText>
-                                        {barcode?.acceptance_items?.length ? (
-                                            <BarcodeText
-                                                title={barcode.acceptance_items.map(item => item.method.test.name).join(', ')}>
-                                                {barcode.acceptance_items.map(item => item.method.test.name).join(', ')}
+                                                {barcode.patient && (
+                                                    <>
+                                                        |
+                                                        <Box
+                                                            component="span"
+                                                            sx={{
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                            }}
+                                                        >
+                                                            {barcode.patient.gender.substring(0, 1)}
+                                                            /{barcode.patient.age}
+                                                        </Box>
+                                                    </>
+                                                )}
                                             </BarcodeText>
-                                        ) : null}
-                                    </Stack>
-                                </>}
+                                            {barcode?.acceptance_items?.length ? (
+                                                <BarcodeText
+                                                    title={barcode.acceptance_items
+                                                        .map((item) => item.method.test.name)
+                                                        .join(', ')}
+                                                >
+                                                    {barcode.acceptance_items
+                                                        .map((item) => item.method.test.name)
+                                                        .join(', ')}
+                                                </BarcodeText>
+                                            ) : null}
+                                        </Stack>
+                                    </>
+                                )}
                             </BarcodeItem>
                         </Grid>
                     ))}
@@ -261,13 +298,13 @@ const BarcodeComponent = ({barcodes}) => {
 
             <Tooltip title="Print Barcodes">
                 <PrintButton size="large" onClick={handlePrint}>
-                    <PrintIcon/>
+                    <PrintIcon />
                 </PrintButton>
             </Tooltip>
 
             <Tooltip title="Go Back">
                 <BackButton size="large" onClick={handleBack}>
-                    <ArrowBackIcon/>
+                    <ArrowBackIcon />
                 </BackButton>
             </Tooltip>
 
@@ -275,15 +312,15 @@ const BarcodeComponent = ({barcodes}) => {
                 open={showSnackbar}
                 autoHideDuration={6000}
                 onClose={handleSnackbarClose}
-                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
                 <Alert
                     onClose={handleSnackbarClose}
                     severity="success"
-                    sx={{width: '100%'}}
+                    sx={{ width: '100%' }}
                     action={
                         <IconButton size="small" color="inherit" onClick={handleSnackbarClose}>
-                            <CloseIcon fontSize="small"/>
+                            <CloseIcon fontSize="small" />
                         </IconButton>
                     }
                 >
@@ -337,12 +374,12 @@ const GlobalStyles = () => {
     return null;
 };
 
-const BarcodePageComponent = ({barcodes}) => {
+const BarcodePageComponent = ({ barcodes }) => {
     return (
         <>
-            <Head title="Acceptance Barcodes"/>
-            <GlobalStyles/>
-            <BarcodeComponent barcodes={barcodes}/>
+            <Head title="Acceptance Barcodes" />
+            <GlobalStyles />
+            <BarcodeComponent barcodes={barcodes} />
         </>
     );
 };

@@ -1,10 +1,10 @@
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import React, {useState} from "react";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import React, { useState } from 'react';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import {
     AccordionActions,
     Box,
@@ -13,9 +13,9 @@ import {
     Grid as Grid,
     Paper,
     Tooltip,
-    Dialog
-} from "@mui/material";
-import Button from "@mui/material/Button";
+    Dialog,
+} from '@mui/material';
+import Button from '@mui/material/Button';
 import {
     Save as SaveIcon,
     Cancel as CancelIcon,
@@ -27,13 +27,16 @@ import {
     Phone as PhoneIcon,
     Cake as CakeIcon,
     Badge as BadgeIcon,
-    OpenInNew as OpenInNewIcon, AccessibilityNew, LocationCity, Home, Map as MapIcon
-} from "@mui/icons-material";
-import {useForm,Link} from "@inertiajs/react";
-import countries from "@/Data/Countries.js";
-import PatientForm from "@/Pages/Patient/Components/PatientForm";
-import DocumentsInfo from "@/Components/DocumentsInfo";
-
+    OpenInNew as OpenInNewIcon,
+    AccessibilityNew,
+    LocationCity,
+    Home,
+    Map as MapIcon,
+} from '@mui/icons-material';
+import { useForm, Link } from '@inertiajs/react';
+import countries from '@/Data/Countries.js';
+import PatientForm from '@/Pages/Patient/Components/PatientForm';
+import DocumentsInfo from '@/Components/DocumentsInfo';
 
 /**
  * Enhanced PatientInfo component
@@ -47,36 +50,37 @@ import DocumentsInfo from "@/Components/DocumentsInfo";
  * @returns {JSX.Element}
  */
 const PatientInfo = ({
-                         patient,
-                         editable = false,
-                         defaultExpanded = true,
-                         showDocuments = false,
-                         viewPatient = false,
-                         tags = []
-                     }) => {
+    patient,
+    editable = false,
+    defaultExpanded = true,
+    showDocuments = false,
+    viewPatient = false,
+    tags = [],
+}) => {
     // Initialize form with patient data
-    const {data, setData, post, processing, reset} = useForm({
+    const { data, setData, post, processing, reset } = useForm({
         ...patient,
-        nationality: typeof patient.nationality !== "string"
-            ? patient.nationality
-            : countries.find(c => c.code === patient.nationality),
-        _method: "put"
+        nationality:
+            typeof patient.nationality !== 'string'
+                ? patient.nationality
+                : countries.find((c) => c.code === patient.nationality),
+        _method: 'put',
     });
 
     // State for edit mode
     const [edit, setEdit] = useState(false);
 
     // Handle form field changes
-    const handlePatient = e => {
-        setData(prevData => ({
+    const handlePatient = (e) => {
+        setData((prevData) => ({
             ...prevData,
-            [e.target.name]: e.target.value
+            [e.target.name]: e.target.value,
         }));
     };
 
     // Submit form handler
     const handleSubmit = () => {
-        post(route("patients.update", patient.id), {onSuccess: () => setEdit(false)});
+        post(route('patients.update', patient.id), { onSuccess: () => setEdit(false) });
     };
 
     // Cancel edit handler
@@ -95,33 +99,33 @@ const PatientInfo = ({
         switch (data.gender) {
             case 'male':
                 return {
-                    icon: <MaleIcon sx={{color: 'primary.main'}}/>,
+                    icon: <MaleIcon sx={{ color: 'primary.main' }} />,
                     label: 'Male',
-                    color: 'primary'
+                    color: 'primary',
                 };
             case 'female':
                 return {
-                    icon: <FemaleIcon sx={{color: 'secondary.main'}}/>,
+                    icon: <FemaleIcon sx={{ color: 'secondary.main' }} />,
                     label: 'Female',
-                    color: 'secondary'
+                    color: 'secondary',
                 };
             case 'ambiguous':
                 return {
-                    icon: <QuestionMarkIcon/>,
+                    icon: <QuestionMarkIcon />,
                     label: 'Ambiguous',
-                    color: 'default'
+                    color: 'default',
                 };
             case 'none':
                 return {
-                    icon: <QuestionMarkIcon/>,
+                    icon: <QuestionMarkIcon />,
                     label: 'None',
-                    color: 'default'
+                    color: 'default',
                 };
             default:
                 return {
-                    icon: <QuestionMarkIcon/>,
+                    icon: <QuestionMarkIcon />,
                     label: 'Unspecified',
-                    color: 'default'
+                    color: 'default',
                 };
         }
     };
@@ -129,17 +133,20 @@ const PatientInfo = ({
     const genderInfo = getGenderInfo();
 
     const [openImage, setOpenImage] = useState(false);
-    const handleClickImage = () => setOpenImage(true)
+    const handleClickImage = () => setOpenImage(true);
     const closeImgViewer = () => {
-        setOpenImage(false)
-    }
+        setOpenImage(false);
+    };
 
     const PatientAvatar = () => (
         <>
             <Box
                 onClick={handleClickImage}
                 component="img"
-                src={data.avatar || `/images/${['male', 'female'].includes(data.gender) ? data.gender : 'unknown'}.png`}
+                src={
+                    data.avatar ||
+                    `/images/${['male', 'female'].includes(data.gender) ? data.gender : 'unknown'}.png`
+                }
                 alt={data.fullName}
                 sx={{
                     width: 100,
@@ -149,36 +156,47 @@ const PatientInfo = ({
                     border: '2px solid',
                     borderColor: `${genderInfo.color}.main`,
                     boxShadow: 2,
-                    cursor: 'pointer'
+                    cursor: 'pointer',
                 }}
             />
             <Dialog open={openImage} onClose={closeImgViewer} maxWidth="lg">
-                <img src={data.avatar || `/images/${['male', 'female'].includes(data.gender) ? data.gender : 'unknown'}.png`} alt={data.fullName || ""}/>
+                <img
+                    src={
+                        data.avatar ||
+                        `/images/${['male', 'female'].includes(data.gender) ? data.gender : 'unknown'}.png`
+                    }
+                    alt={data.fullName || ''}
+                />
             </Dialog>
         </>
     );
 
     // Patient summary section
     const PatientSummary = () => (
-        <Box sx={{mb: 3}}>
+        <Box sx={{ mb: 3 }}>
             <Paper
                 elevation={0}
                 sx={{
                     p: 2,
                     borderRadius: 2,
                     border: '1px solid',
-                    borderColor: 'divider'
+                    borderColor: 'divider',
                 }}
             >
-  <Grid container spacing={2} sx={{alignItems: "center"}}>
-                    <Grid size={{xs: 12, sm: 3, md: 2}} sx={{display: 'flex', justifyContent: 'center'}}>
-                        <PatientAvatar/>
+                <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+                    <Grid
+                        size={{ xs: 12, sm: 3, md: 2 }}
+                        sx={{ display: 'flex', justifyContent: 'center' }}
+                    >
+                        <PatientAvatar />
                     </Grid>
-                    <Grid size={{xs: 12, sm: 9, md: 10}}>
-  <Grid container spacing={1} sx={{alignItems: "center"}}>
-                            <Grid size={{xs: 12}}>
-                                <Box sx={{display: 'flex', alignItems: 'center', flexWrap: 'wrap'}}>
-                                    <Typography variant="h5" sx={{mr: 1, fontWeight: 'bold'}}>
+                    <Grid size={{ xs: 12, sm: 9, md: 10 }}>
+                        <Grid container spacing={1} sx={{ alignItems: 'center' }}>
+                            <Grid size={{ xs: 12 }}>
+                                <Box
+                                    sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}
+                                >
+                                    <Typography variant="h5" sx={{ mr: 1, fontWeight: 'bold' }}>
                                         {data.fullName}
                                     </Typography>
                                     <Chip
@@ -186,7 +204,7 @@ const PatientInfo = ({
                                         label={genderInfo.label}
                                         size="small"
                                         color={genderInfo.color}
-                                        sx={{mr: 1}}
+                                        sx={{ mr: 1 }}
                                     />
                                     {data.nationality && (
                                         <Tooltip title={`Nationality: ${data.nationality.label}`}>
@@ -197,80 +215,105 @@ const PatientInfo = ({
                                                 height="16"
                                                 src={`https://flagcdn.com/w40/${data.nationality.code.toLowerCase()}.png`}
                                                 alt={data.nationality.label}
-                                                sx={{ml: 1, border: '1px solid #eee'}}
+                                                sx={{ ml: 1, border: '1px solid #eee' }}
                                             />
                                         </Tooltip>
                                     )}
                                 </Box>
                             </Grid>
-                            <Grid size={{xs: 12, sm: 6, md: 3}}>
-                                <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                    <BadgeIcon fontSize="medium" sx={{color: 'text.secondary', mr: 1}}/>
+                            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <BadgeIcon
+                                        fontSize="medium"
+                                        sx={{ color: 'text.secondary', mr: 1 }}
+                                    />
                                     <Typography variant="body1" color="text.secondary">
                                         ID: {data.idNo || 'N/A'}
                                     </Typography>
                                 </Box>
                             </Grid>
-                            <Grid size={{xs: 12, sm: 6, md: 3}}>
-                                <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                    <AccessibilityNew fontSize="medium" sx={{color: 'text.secondary', mr: 1}}/>
+                            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <AccessibilityNew
+                                        fontSize="medium"
+                                        sx={{ color: 'text.secondary', mr: 1 }}
+                                    />
                                     <Typography variant="body1" color="text.secondary">
                                         Tribe: {data.tribe || 'N/A'}
                                     </Typography>
                                 </Box>
                             </Grid>
-                            <Grid size={{xs: 12, sm: 6, md: 3}}>
-                                <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                    <CakeIcon fontSize="medium" sx={{color: 'text.secondary', mr: 1}}/>
+                            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <CakeIcon
+                                        fontSize="medium"
+                                        sx={{ color: 'text.secondary', mr: 1 }}
+                                    />
                                     <Typography variant="body1" color="text.secondary">
                                         DOB: {data.dateOfBirth || 'N/A'} ({data.age})
                                     </Typography>
                                 </Box>
                             </Grid>
-                            <Grid size={{xs: 12, sm: 6, md: 3}}>
-                                <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                    <PhoneIcon fontSize="medium" sx={{color: 'text.secondary', mr: 1}}/>
+                            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <PhoneIcon
+                                        fontSize="medium"
+                                        sx={{ color: 'text.secondary', mr: 1 }}
+                                    />
                                     <Typography variant="body1" color="text.secondary">
                                         Phone: {data.phone || 'N/A'}
                                     </Typography>
                                 </Box>
                             </Grid>
-                            {data.nationality.code === "OM" && <>
-                                <Grid size={{xs: 12, sm: 6, md: 3}}>
-                                    <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                        <MapIcon fontSize="medium" sx={{color: 'text.secondary', mr: 1}}/>
-                                        <Typography variant="body1" color="text.secondary">
-                                            Governorate: {data.governorate || 'N/A'}
-                                        </Typography>
-                                    </Box>
-                                </Grid>
-                                <Grid size={{xs: 12, sm: 6, md: 3}}>
-                                    <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                        <LocationCity fontSize="medium" sx={{color: 'text.secondary', mr: 1}}/>
-                                        <Typography variant="body1" color="text.secondary">
-                                            Wilayat: {data.wilayat || 'N/A'}
-                                        </Typography>
-                                    </Box>
-                                </Grid>
+                            {data.nationality.code === 'OM' && (
+                                <>
+                                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <MapIcon
+                                                fontSize="medium"
+                                                sx={{ color: 'text.secondary', mr: 1 }}
+                                            />
+                                            <Typography variant="body1" color="text.secondary">
+                                                Governorate: {data.governorate || 'N/A'}
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+                                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <LocationCity
+                                                fontSize="medium"
+                                                sx={{ color: 'text.secondary', mr: 1 }}
+                                            />
+                                            <Typography variant="body1" color="text.secondary">
+                                                Wilayat: {data.wilayat || 'N/A'}
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
 
-                                <Grid size={{xs: 12, sm: 6, md: 3}}>
-                                    <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                        <Home fontSize="medium" sx={{color: 'text.secondary', mr: 1}}/>
-                                        <Typography variant="body1" color="text.secondary">
-                                            Village: {data.village || 'N/A'}
-                                        </Typography>
-                                    </Box>
-                                </Grid>
-                            </>}
+                                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <Home
+                                                fontSize="medium"
+                                                sx={{ color: 'text.secondary', mr: 1 }}
+                                            />
+                                            <Typography variant="body1" color="text.secondary">
+                                                Village: {data.village || 'N/A'}
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+                                </>
+                            )}
                             {viewPatient && (
-                                <Grid size={{xs: 12, sm: 6, md: 3}}>
+                                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                                     <Button
                                         variant="outlined"
                                         size="small"
-                                        startIcon={<OpenInNewIcon/>}
-                                        href={patient.id ? route("patients.show", patient.id) : null}
+                                        startIcon={<OpenInNewIcon />}
+                                        href={
+                                            patient.id ? route('patients.show', patient.id) : null
+                                        }
                                         component={Link}
-                                        sx={{borderRadius: 2}}
+                                        sx={{ borderRadius: 2 }}
                                     >
                                         View Full Profile
                                     </Button>
@@ -288,26 +331,26 @@ const PatientInfo = ({
             defaultExpanded={defaultExpanded}
             sx={{
                 borderRadius: 1,
-                '&:before': {display: 'none'},
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                '&:before': { display: 'none' },
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
             }}
         >
             <AccordionSummary
-                expandIcon={<ExpandMoreIcon/>}
+                expandIcon={<ExpandMoreIcon />}
                 aria-controls="patient-information"
                 id="patient-information"
                 sx={{
                     backgroundColor: 'background.paper',
-                    borderRadius: '8px 8px 0 0'
+                    borderRadius: '8px 8px 0 0',
                 }}
             >
-                <Box sx={{display: 'flex', alignItems: 'center'}}>
-                    <PersonIcon sx={{mr: 1, color: 'primary.main'}}/>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <PersonIcon sx={{ mr: 1, color: 'primary.main' }} />
                     <Typography
                         variant="h5"
                         sx={{
                             fontWeight: 500,
-                            color: 'text.primary'
+                            color: 'text.primary',
                         }}
                     >
                         Patient Information
@@ -315,17 +358,17 @@ const PatientInfo = ({
                 </Box>
             </AccordionSummary>
 
-            <Divider/>
+            <Divider />
 
-            <AccordionDetails sx={{backgroundColor: 'background.default', p: 3}}>
-                {!edit ? <PatientSummary/> : <PatientForm
-                    data={data}
-                    onChange={handlePatient}
-                    editable={edit}
-                />}
+            <AccordionDetails sx={{ backgroundColor: 'background.default', p: 3 }}>
+                {!edit ? (
+                    <PatientSummary />
+                ) : (
+                    <PatientForm data={data} onChange={handlePatient} editable={edit} />
+                )}
 
                 {showDocuments && (
-                    <Box sx={{mt: 3}}>
+                    <Box sx={{ mt: 3 }}>
                         <DocumentsInfo
                             defaultExpanded={false}
                             documents={patient.owned_documents}
@@ -340,16 +383,16 @@ const PatientInfo = ({
 
             {editable && (
                 <>
-                    <Divider/>
-                    <AccordionActions sx={{p: 2, backgroundColor: 'background.paper'}}>
+                    <Divider />
+                    <AccordionActions sx={{ p: 2, backgroundColor: 'background.paper' }}>
                         {edit ? (
                             <Stack direction="row" spacing={2}>
                                 <Button
                                     onClick={handleCancel}
-                                    startIcon={<CancelIcon/>}
+                                    startIcon={<CancelIcon />}
                                     variant="outlined"
                                     color="inherit"
-                                    sx={{borderRadius: 2}}
+                                    sx={{ borderRadius: 2 }}
                                 >
                                     Cancel
                                 </Button>
@@ -358,8 +401,8 @@ const PatientInfo = ({
                                     variant="contained"
                                     loading={processing}
                                     loadingPosition="start"
-                                    startIcon={<SaveIcon/>}
-                                    sx={{borderRadius: 2}}
+                                    startIcon={<SaveIcon />}
+                                    sx={{ borderRadius: 2 }}
                                 >
                                     Save Changes
                                 </Button>
@@ -367,10 +410,10 @@ const PatientInfo = ({
                         ) : (
                             <Button
                                 onClick={handleEdit}
-                                startIcon={<EditIcon/>}
+                                startIcon={<EditIcon />}
                                 variant="outlined"
                                 color="secondary"
-                                sx={{borderRadius: 2}}
+                                sx={{ borderRadius: 2 }}
                             >
                                 Edit Patient Info
                             </Button>

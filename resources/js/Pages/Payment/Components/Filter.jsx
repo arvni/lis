@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
     Box,
     TextField,
@@ -15,9 +15,9 @@ import {
     Select,
     MenuItem,
 } from '@mui/material';
-import {DatePicker} from '@mui/x-date-pickers/DatePicker';
-import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
-import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';
@@ -25,7 +25,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PaymentIcon from '@mui/icons-material/Payment';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
-const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
+const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
     // Helper to parse date string to Date object in local timezone
     const parseDateFromServer = (dateString) => {
         if (!dateString) return null;
@@ -42,8 +42,8 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
         amountFrom: defaultValues.amountFrom || '',
         amountTo: defaultValues.amountTo || '',
     });
-    const [dateError, setDateError] = useState("");
-    const [amountError, setAmountError] = useState("");
+    const [dateError, setDateError] = useState('');
+    const [amountError, setAmountError] = useState('');
     const [activeFilters, setActiveFilters] = useState(0);
     const today = new Date();
 
@@ -57,11 +57,11 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
             amountFrom: filters.amountFrom,
             amountTo: filters.amountTo,
         };
-        const count = Object.values(filterValues).filter(value => {
+        const count = Object.values(filterValues).filter((value) => {
             if (Array.isArray(value)) {
                 return value.length > 0;
             }
-            return value !== "" && value !== null && value !== undefined;
+            return value !== '' && value !== null && value !== undefined;
         }).length;
         setActiveFilters(count);
     }, [filters]);
@@ -75,14 +75,14 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
             todayDate.setHours(23, 59, 59, 999); // End of today
 
             if (fromDate > toDate) {
-                setDateError("Start date cannot be after end date");
+                setDateError('Start date cannot be after end date');
             } else if (fromDate > todayDate) {
-                setDateError("Start date cannot be in the future");
+                setDateError('Start date cannot be in the future');
             } else {
-                setDateError("");
+                setDateError('');
             }
         } else {
-            setDateError("");
+            setDateError('');
         }
     }, [filters.dateFrom, filters.dateTo, today]);
 
@@ -93,25 +93,25 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
             const toAmount = parseFloat(filters.amountTo);
 
             if (fromAmount < 0 || toAmount < 0) {
-                setAmountError("Amount cannot be negative");
+                setAmountError('Amount cannot be negative');
             } else if (fromAmount > toAmount) {
-                setAmountError("From amount cannot be greater than To amount");
+                setAmountError('From amount cannot be greater than To amount');
             } else {
-                setAmountError("");
+                setAmountError('');
             }
         } else if (filters.amountFrom && parseFloat(filters.amountFrom) < 0) {
-            setAmountError("Amount cannot be negative");
+            setAmountError('Amount cannot be negative');
         } else if (filters.amountTo && parseFloat(filters.amountTo) < 0) {
-            setAmountError("Amount cannot be negative");
+            setAmountError('Amount cannot be negative');
         } else {
-            setAmountError("");
+            setAmountError('');
         }
     }, [filters.amountFrom, filters.amountTo]);
 
     const handleFilterChange = (field, value) => {
-        setFilters(prev => ({
+        setFilters((prev) => ({
             ...prev,
-            [field]: value
+            [field]: value,
         }));
     };
 
@@ -123,16 +123,19 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
         handleFilterChange('paymentMethod', e.target.value);
     }, []);
 
-    const handleAmountChange = useCallback((field) => (e) => {
-        const value = e.target.value;
-        // Allow only numbers and decimal point
-        if (value === '' || /^\d*\.?\d*$/.test(value)) {
-            handleFilterChange(field, value);
-        }
-    }, []);
+    const handleAmountChange = useCallback(
+        (field) => (e) => {
+            const value = e.target.value;
+            // Allow only numbers and decimal point
+            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                handleFilterChange(field, value);
+            }
+        },
+        [],
+    );
 
     const handleClearSearch = useCallback(() => {
-        setFilters(prevState => ({...prevState, search: ""}));
+        setFilters((prevState) => ({ ...prevState, search: '' }));
     }, []);
 
     const formatDateForServer = (date) => {
@@ -160,8 +163,12 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
         };
 
         // Remove null, undefined, and empty string values
-        Object.keys(cleanedFilters).forEach(key => {
-            if (cleanedFilters[key] === null || cleanedFilters[key] === '' || cleanedFilters[key] === undefined) {
+        Object.keys(cleanedFilters).forEach((key) => {
+            if (
+                cleanedFilters[key] === null ||
+                cleanedFilters[key] === '' ||
+                cleanedFilters[key] === undefined
+            ) {
                 delete cleanedFilters[key];
             }
         });
@@ -179,20 +186,23 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
             amountTo: '',
         };
         setFilters(clearedFilters);
-        setDateError("");
-        setAmountError("");
+        setDateError('');
+        setAmountError('');
         onFilter({})();
     }, [onFilter]);
 
     const handleClearDate = useCallback((fieldName) => {
-        setFilters(prevState => ({...prevState, [fieldName]: null}));
+        setFilters((prevState) => ({ ...prevState, [fieldName]: null }));
     }, []);
 
-    const handleKeyPress = useCallback((e) => {
-        if (e.key === 'Enter' && !dateError && !amountError) {
-            handleApplyFilters();
-        }
-    }, [handleApplyFilters, dateError, amountError]);
+    const handleKeyPress = useCallback(
+        (e) => {
+            if (e.key === 'Enter' && !dateError && !amountError) {
+                handleApplyFilters();
+            }
+        },
+        [handleApplyFilters, dateError, amountError],
+    );
 
     const handleQuickDatePreset = useCallback((preset) => {
         const today = new Date();
@@ -240,19 +250,19 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                 return;
         }
 
-        setFilters(prev => ({
+        setFilters((prev) => ({
             ...prev,
             dateFrom: fromDate,
-            dateTo: toDate
+            dateTo: toDate,
         }));
     }, []);
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <Paper elevation={0} sx={{p: 3, mb: 2, bgcolor: 'background.paper'}}>
+            <Paper elevation={0} sx={{ p: 3, mb: 2, bgcolor: 'background.paper' }}>
                 <Stack spacing={3}>
                     {/* Header with filter icon and active count */}
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         {activeFilters > 0 && (
                             <Chip
                                 label={`${activeFilters} active`}
@@ -265,7 +275,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
 
                     <Grid container spacing={2}>
                         {/* Search Field for Payer Name/ID */}
-                        <Grid size={{xs: 12}}>
+                        <Grid size={{ xs: 12 }}>
                             <TextField
                                 fullWidth
                                 name="search"
@@ -278,7 +288,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                     input: {
                                         startAdornment: (
                                             <InputAdornment position="start">
-                                                <SearchIcon color="action"/>
+                                                <SearchIcon color="action" />
                                             </InputAdornment>
                                         ),
                                         endAdornment: filters.search && (
@@ -288,17 +298,17 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                                     onClick={handleClearSearch}
                                                     edge="end"
                                                 >
-                                                    <ClearIcon fontSize="small"/>
+                                                    <ClearIcon fontSize="small" />
                                                 </IconButton>
                                             </InputAdornment>
-                                        )
-                                    }
+                                        ),
+                                    },
                                 }}
                             />
                         </Grid>
 
                         {/* Payment Method Selector */}
-                        <Grid size={{xs: 12, md: 6}}>
+                        <Grid size={{ xs: 12, md: 6 }}>
                             <FormControl fullWidth>
                                 <InputLabel id="payment-method-label">Payment Method</InputLabel>
                                 <Select
@@ -309,7 +319,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                     onChange={handlePaymentMethodChange}
                                     startAdornment={
                                         <InputAdornment position="start">
-                                            <PaymentIcon color="action"/>
+                                            <PaymentIcon color="action" />
                                         </InputAdornment>
                                     }
                                 >
@@ -325,10 +335,10 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                         </Grid>
 
                         {/* Amount Range Section */}
-                        <Grid size={{xs: 12, md: 6}}>
+                        <Grid size={{ xs: 12, md: 6 }}>
                             <Box>
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 1}}>
-                                    <AttachMoneyIcon color="action" fontSize="small"/>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                    <AttachMoneyIcon color="action" fontSize="small" />
                                     <Typography variant="subtitle2" color="text.secondary">
                                         Amount Range
                                     </Typography>
@@ -343,9 +353,11 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                         onKeyDown={handleKeyPress}
                                         error={!!amountError && filters.amountFrom}
                                         type="text"
-                                        slotProps={{ htmlInput: {
-                                            inputMode: 'decimal',
-                                        } }}
+                                        slotProps={{
+                                            htmlInput: {
+                                                inputMode: 'decimal',
+                                            },
+                                        }}
                                     />
                                     <TextField
                                         fullWidth
@@ -357,26 +369,32 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                         error={!!amountError}
                                         helperText={amountError}
                                         type="text"
-                                        slotProps={{ htmlInput: {
-                                            inputMode: 'decimal',
-                                        } }}
+                                        slotProps={{
+                                            htmlInput: {
+                                                inputMode: 'decimal',
+                                            },
+                                        }}
                                     />
                                 </Stack>
                             </Box>
                         </Grid>
 
                         {/* Date Range Section */}
-                        <Grid size={{xs: 12}}>
+                        <Grid size={{ xs: 12 }}>
                             <Box>
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 2}}>
-                                    <CalendarTodayIcon color="action" fontSize="small"/>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                                    <CalendarTodayIcon color="action" fontSize="small" />
                                     <Typography variant="subtitle2" color="text.secondary">
                                         Date Range
                                     </Typography>
                                 </Box>
 
                                 {/* Quick Date Presets */}
-                                <Stack direction="row" spacing={1} sx={{mb: 2, flexWrap: 'wrap', gap: 1}}>
+                                <Stack
+                                    direction="row"
+                                    spacing={1}
+                                    sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}
+                                >
                                     <Chip
                                         label="Today"
                                         onClick={() => handleQuickDatePreset('today')}
@@ -437,32 +455,36 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
 
                                 {/* Date Pickers */}
                                 <Grid container spacing={2}>
-                                    <Grid size={{xs: 12, sm: 6}}>
+                                    <Grid size={{ xs: 12, sm: 6 }}>
                                         <DatePicker
                                             label="From Date"
                                             value={filters.dateFrom}
-                                            onChange={(value) => handleFilterChange('dateFrom', value)}
+                                            onChange={(value) =>
+                                                handleFilterChange('dateFrom', value)
+                                            }
                                             clearable
                                             slotProps={{
                                                 textField: {
                                                     fullWidth: true,
                                                     error: !!dateError,
-                                                }
+                                                },
                                             }}
                                         />
                                     </Grid>
-                                    <Grid size={{xs: 12, sm: 6}}>
+                                    <Grid size={{ xs: 12, sm: 6 }}>
                                         <DatePicker
                                             label="To Date"
                                             value={filters.dateTo}
-                                            onChange={(value) => handleFilterChange('dateTo', value)}
+                                            onChange={(value) =>
+                                                handleFilterChange('dateTo', value)
+                                            }
                                             clearable
                                             slotProps={{
                                                 textField: {
                                                     fullWidth: true,
                                                     error: !!dateError,
                                                     helperText: dateError,
-                                                }
+                                                },
                                             }}
                                         />
                                     </Grid>
@@ -471,11 +493,11 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                         </Grid>
 
                         {/* Action Buttons */}
-                        <Grid size={{xs: 12}}>
-  <Stack direction="row" spacing={2} sx={{justifyContent: "flex-end"}}>
+                        <Grid size={{ xs: 12 }}>
+                            <Stack direction="row" spacing={2} sx={{ justifyContent: 'flex-end' }}>
                                 <Button
                                     variant="outlined"
-                                    startIcon={<ClearIcon/>}
+                                    startIcon={<ClearIcon />}
                                     onClick={handleClearFilters}
                                     disabled={activeFilters === 0}
                                 >
@@ -483,7 +505,7 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
                                 </Button>
                                 <Button
                                     variant="contained"
-                                    startIcon={<FilterListIcon/>}
+                                    startIcon={<FilterListIcon />}
                                     onClick={handleApplyFilters}
                                     disabled={!!dateError || !!amountError}
                                 >
@@ -496,6 +518,6 @@ const Filter = ({onFilter, defaultFilter: defaultValues = {}}) => {
             </Paper>
         </LocalizationProvider>
     );
-}
+};
 
 export default Filter;

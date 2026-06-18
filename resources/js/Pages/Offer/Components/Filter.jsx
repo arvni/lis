@@ -37,7 +37,7 @@ const Filter = ({ defaultValues, onFilter }) => {
         date_start: '',
         date_end: '',
         tests: [],
-        referrers: []
+        referrers: [],
     });
 
     // Count active filters
@@ -50,33 +50,33 @@ const Filter = ({ defaultValues, onFilter }) => {
 
     useEffect(() => {
         if (defaultValues) {
-            setFilters(prevState => ({
+            setFilters((prevState) => ({
                 ...prevState,
-                ...defaultValues
+                ...defaultValues,
             }));
         }
     }, [defaultValues]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFilters(prevState => ({
+        setFilters((prevState) => ({
             ...prevState,
-            [name]: value
+            [name]: value,
         }));
     };
 
     const handleSelectChange = (e) => {
         const { name, value } = e.target;
-        setFilters(prevState => ({
+        setFilters((prevState) => ({
             ...prevState,
-            [name]: value
+            [name]: value,
         }));
     };
 
     const handleSearchChange = (name) => (value) => {
-        setFilters(prevState => ({
+        setFilters((prevState) => ({
             ...prevState,
-            [name]: value
+            [name]: value,
         }));
     };
 
@@ -95,14 +95,14 @@ const Filter = ({ defaultValues, onFilter }) => {
             date_start: '',
             date_end: '',
             tests: [],
-            referrers: []
+            referrers: [],
         };
         setFilters(resetFilters);
         onFilter(resetFilters)();
     };
 
     const toggleExpanded = () => {
-        setExpanded(prev => !prev);
+        setExpanded((prev) => !prev);
     };
 
     return (
@@ -112,10 +112,17 @@ const Filter = ({ defaultValues, onFilter }) => {
                 p: 2,
                 mb: 3,
                 border: '1px solid #e0e0e0',
-                borderRadius: '10px'
+                borderRadius: '10px',
             }}
         >
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    mb: 2,
+                }}
+            >
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <FilterListIcon sx={{ mr: 1 }} />
                     <Typography variant="h6">Filters</Typography>
@@ -129,13 +136,13 @@ const Filter = ({ defaultValues, onFilter }) => {
                     )}
                 </Box>
                 <Box>
-                    <Tooltip title={expanded ? "Collapse filters" : "Expand filters"}>
+                    <Tooltip title={expanded ? 'Collapse filters' : 'Expand filters'}>
                         <Button
                             size="small"
                             onClick={toggleExpanded}
                             startIcon={expanded ? <ClearIcon /> : <FilterListIcon />}
                         >
-                            {expanded ? "Collapse" : "Expand"}
+                            {expanded ? 'Collapse' : 'Expand'}
                         </Button>
                     </Tooltip>
                 </Box>
@@ -143,8 +150,8 @@ const Filter = ({ defaultValues, onFilter }) => {
 
             {/* Basic search - always visible */}
             <form onSubmit={handleSubmit}>
-  <Grid container spacing={2} sx={{alignItems: "center"}}>
-                    <Grid size={{ xs: 12, md: expanded ? 12 : 4 }} >
+                <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+                    <Grid size={{ xs: 12, md: expanded ? 12 : 4 }}>
                         <TextField
                             name="name"
                             label="Search by title"
@@ -155,25 +162,27 @@ const Filter = ({ defaultValues, onFilter }) => {
                             placeholder="Search offers..."
                             slotProps={{
                                 input: {
-                                    startAdornment: <SearchIcon sx={{color: 'action.active', mr: 1}}/>,
+                                    startAdornment: (
+                                        <SearchIcon sx={{ color: 'action.active', mr: 1 }} />
+                                    ),
                                     endAdornment: filters.name ? (
                                         <IconButton
                                             size="small"
                                             onClick={() => {
-                                                setFilters(prev => ({...prev, name: ''}));
+                                                setFilters((prev) => ({ ...prev, name: '' }));
                                             }}
                                         >
-                                            <ClearIcon fontSize="small"/>
+                                            <ClearIcon fontSize="small" />
                                         </IconButton>
-                                    ) : null
-                                }
+                                    ) : null,
+                                },
                             }}
                         />
                     </Grid>
 
                     {!expanded && (
                         <>
-                            <Grid size={{ xs: 12, md: 4 }} >
+                            <Grid size={{ xs: 12, md: 4 }}>
                                 <FormControl fullWidth variant="outlined">
                                     <InputLabel id="active-label">Status</InputLabel>
                                     <Select
@@ -186,13 +195,21 @@ const Filter = ({ defaultValues, onFilter }) => {
                                         <MenuItem value="">All Status</MenuItem>
                                         <MenuItem value="true">
                                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                <CheckCircleIcon fontSize="small" color="success" sx={{ mr: 1 }} />
+                                                <CheckCircleIcon
+                                                    fontSize="small"
+                                                    color="success"
+                                                    sx={{ mr: 1 }}
+                                                />
                                                 Active
                                             </Box>
                                         </MenuItem>
                                         <MenuItem value="false">
                                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                <CancelIcon fontSize="small" color="disabled" sx={{ mr: 1 }} />
+                                                <CancelIcon
+                                                    fontSize="small"
+                                                    color="disabled"
+                                                    sx={{ mr: 1 }}
+                                                />
                                                 Inactive
                                             </Box>
                                         </MenuItem>
@@ -200,7 +217,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                                 </FormControl>
                             </Grid>
 
-                            <Grid size={{ xs: 12, md: 4 }} >
+                            <Grid size={{ xs: 12, md: 4 }}>
                                 <FormControl fullWidth variant="outlined">
                                     <InputLabel id="type-label">Offer Type</InputLabel>
                                     <Select
@@ -231,12 +248,14 @@ const Filter = ({ defaultValues, onFilter }) => {
 
                     {expanded && (
                         <>
-                            <Grid size={12} >
+                            <Grid size={12}>
                                 <Divider sx={{ my: 2 }} />
-                                <Typography variant="subtitle2" gutterBottom>Advanced Filters</Typography>
+                                <Typography variant="subtitle2" gutterBottom>
+                                    Advanced Filters
+                                </Typography>
                             </Grid>
 
-                            <Grid size={{ xs: 12, md: 3 }} >
+                            <Grid size={{ xs: 12, md: 3 }}>
                                 <FormControl fullWidth variant="outlined">
                                     <InputLabel id="active-label">Status</InputLabel>
                                     <Select
@@ -249,13 +268,21 @@ const Filter = ({ defaultValues, onFilter }) => {
                                         <MenuItem value="">All Status</MenuItem>
                                         <MenuItem value="true">
                                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                <CheckCircleIcon fontSize="small" color="success" sx={{ mr: 1 }} />
+                                                <CheckCircleIcon
+                                                    fontSize="small"
+                                                    color="success"
+                                                    sx={{ mr: 1 }}
+                                                />
                                                 Active
                                             </Box>
                                         </MenuItem>
                                         <MenuItem value="false">
                                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                <CancelIcon fontSize="small" color="disabled" sx={{ mr: 1 }} />
+                                                <CancelIcon
+                                                    fontSize="small"
+                                                    color="disabled"
+                                                    sx={{ mr: 1 }}
+                                                />
                                                 Inactive
                                             </Box>
                                         </MenuItem>
@@ -263,7 +290,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                                 </FormControl>
                             </Grid>
 
-                            <Grid size={{ xs: 12, md: 3 }} >
+                            <Grid size={{ xs: 12, md: 3 }}>
                                 <FormControl fullWidth variant="outlined">
                                     <InputLabel id="type-label">Offer Type</InputLabel>
                                     <Select
@@ -290,7 +317,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                                 </FormControl>
                             </Grid>
 
-                            <Grid size={{ xs: 12, md: 3 }} >
+                            <Grid size={{ xs: 12, md: 3 }}>
                                 <TextField
                                     name="amount_min"
                                     label="Min Amount"
@@ -303,7 +330,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                                 />
                             </Grid>
 
-                            <Grid size={{ xs: 12, md: 3 }} >
+                            <Grid size={{ xs: 12, md: 3 }}>
                                 <TextField
                                     name="amount_max"
                                     label="Max Amount"
@@ -312,11 +339,11 @@ const Filter = ({ defaultValues, onFilter }) => {
                                     type="number"
                                     value={filters.amount_max}
                                     onChange={handleChange}
-                                    slotProps={{ htmlInput:{ min: 0 }}}
+                                    slotProps={{ htmlInput: { min: 0 } }}
                                 />
                             </Grid>
 
-                            <Grid size={{ xs: 12, md: 6 }} >
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <TextField
                                     label="Start Date From"
                                     name="date_start"
@@ -326,12 +353,12 @@ const Filter = ({ defaultValues, onFilter }) => {
                                     value={filters.date_start}
                                     onChange={handleChange}
                                     slotProps={{
-                                        inputLabel:{shrink: true,}
+                                        inputLabel: { shrink: true },
                                     }}
                                 />
                             </Grid>
 
-                            <Grid size={{ xs: 12, md: 6 }} >
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <TextField
                                     label="End Date To"
                                     name="date_end"
@@ -341,12 +368,12 @@ const Filter = ({ defaultValues, onFilter }) => {
                                     value={filters.date_end}
                                     onChange={handleChange}
                                     slotProps={{
-                                        inputLabel:{shrink: true,}
+                                        inputLabel: { shrink: true },
                                     }}
                                 />
                             </Grid>
 
-                            <Grid size={{ xs: 12, md: 6 }} >
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <SelectSearch
                                     filterSelectedOptions
                                     value={filters.tests}
@@ -355,13 +382,13 @@ const Filter = ({ defaultValues, onFilter }) => {
                                     multiple
                                     onChange={handleSearchChange('tests')}
                                     name="tests"
-                                    url={route("api.tests.list")}
+                                    url={route('api.tests.list')}
                                     variant="outlined"
                                     placeholder="Search for tests..."
                                 />
                             </Grid>
 
-                            <Grid size={{ xs: 12, md: 6 }} >
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <SelectSearch
                                     filterSelectedOptions
                                     value={filters.referrers}
@@ -370,7 +397,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                                     multiple
                                     onChange={handleSearchChange('referrers')}
                                     name="referrers"
-                                    url={route("api.referrers.list")}
+                                    url={route('api.referrers.list')}
                                     variant="outlined"
                                     placeholder="Search for referrers..."
                                 />
@@ -378,7 +405,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                         </>
                     )}
 
-                    <Grid size={12} >
+                    <Grid size={12}>
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, gap: 1 }}>
                             <Button
                                 variant="outlined"

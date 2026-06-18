@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import {router} from "@inertiajs/react";
+import React, { useState, useEffect } from 'react';
+import { router } from '@inertiajs/react';
 import {
     Dialog,
     DialogTitle,
@@ -15,7 +15,7 @@ import {
     IconButton,
     Tooltip,
     Alert,
-    Snackbar
+    Snackbar,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import EventNoteIcon from '@mui/icons-material/EventNote';
@@ -29,10 +29,9 @@ const isEndTimeAfterStartTime = (startTime, endTime) => {
 
     if (endHour > startHour) return true;
     return endHour === startHour && endMinute > startMinute;
-
 };
 
-const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
+const AddTimeSlotForm = ({ open, onClose, consultantId, defaultDate }) => {
     // Get today's date in YYYY-MM-DD format for default value
     const today = new Date().toISOString().split('T')[0];
 
@@ -43,7 +42,7 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
         startTime: '',
         endTime: '',
         active: true,
-        consultant_id: consultantId
+        consultant_id: consultantId,
     });
 
     // UI state
@@ -55,36 +54,36 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
 
     // Update form data when consultantId changes
     useEffect(() => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             date: new Date() > new Date(defaultDate) ? today : defaultDate,
-            consultant_id: consultantId
+            consultant_id: consultantId,
         }));
     }, [consultantId, defaultDate]);
 
     // Field change handler
     const handleChange = (e) => {
-        const {name, value, type, checked} = e.target;
+        const { name, value, type, checked } = e.target;
         const fieldValue = type === 'checkbox' ? checked : value;
 
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            [name]: fieldValue
+            [name]: fieldValue,
         }));
 
         // Mark field as touched
-        setTouched(prev => ({
+        setTouched((prev) => ({
             ...prev,
-            [name]: true
+            [name]: true,
         }));
     };
 
     // Field blur handler for validation
     const handleBlur = (e) => {
-        const {name} = e.target;
-        setTouched(prev => ({
+        const { name } = e.target;
+        setTouched((prev) => ({
             ...prev,
-            [name]: true
+            [name]: true,
         }));
 
         validateField(name);
@@ -92,7 +91,7 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
 
     // Validate a single field
     const validateField = (fieldName) => {
-        const newErrors = {...errors};
+        const newErrors = { ...errors };
 
         switch (fieldName) {
             case 'title':
@@ -126,7 +125,10 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
             case 'endTime':
                 if (!formData.endTime) {
                     newErrors.endTime = 'Please select an end time';
-                } else if (formData.startTime && !isEndTimeAfterStartTime(formData.startTime, formData.endTime)) {
+                } else if (
+                    formData.startTime &&
+                    !isEndTimeAfterStartTime(formData.startTime, formData.endTime)
+                ) {
                     newErrors.endTime = 'End time must be after start time';
                 } else {
                     delete newErrors.endTime;
@@ -145,14 +147,14 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
     const validateForm = () => {
         // Mark all fields as touched
         const allTouched = {};
-        Object.keys(formData).forEach(key => {
+        Object.keys(formData).forEach((key) => {
             allTouched[key] = true;
         });
         setTouched(allTouched);
 
         // Validate each field
         let isValid = true;
-        ['title', 'date', 'startTime', 'endTime'].forEach(field => {
+        ['title', 'date', 'startTime', 'endTime'].forEach((field) => {
             if (!validateField(field)) {
                 isValid = false;
             }
@@ -169,7 +171,7 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
             startTime: '',
             endTime: '',
             active: true,
-            consultant_id: consultantId
+            consultant_id: consultantId,
         });
         setErrors({});
         setTouched({});
@@ -203,27 +205,33 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
                     setErrors(serverErrors);
 
                     // Show generic error message
-                    setErrorMessage('There were errors in your submission. Please check the form and try again.');
+                    setErrorMessage(
+                        'There were errors in your submission. Please check the form and try again.',
+                    );
                     setShowError(true);
                 } else {
                     // Show generic error message
                     setErrorMessage('An unexpected error occurred. Please try again later.');
                     setShowError(true);
                 }
-            }
+            },
         });
     };
 
     // Calculate duration for display
     const calculateDuration = () => {
-        if (!formData.startTime || !formData.endTime || !isEndTimeAfterStartTime(formData.startTime, formData.endTime)) {
+        if (
+            !formData.startTime ||
+            !formData.endTime ||
+            !isEndTimeAfterStartTime(formData.startTime, formData.endTime)
+        ) {
             return null;
         }
 
         const [startHour, startMinute] = formData.startTime.split(':').map(Number);
         const [endHour, endMinute] = formData.endTime.split(':').map(Number);
 
-        let durationMinutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+        let durationMinutes = endHour * 60 + endMinute - (startHour * 60 + startMinute);
         const hours = Math.floor(durationMinutes / 60);
         const minutes = durationMinutes % 60;
 
@@ -240,31 +248,37 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
                 slotProps={{
                     paper: {
                         elevation: 3,
-                        sx: {borderRadius: 2}
-                    }
+                        sx: { borderRadius: 2 },
+                    },
                 }}
             >
-                <DialogTitle sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    bgcolor: 'primary.main',
-                    color: 'white',
-                    borderRadius: '8px 8px 0 0'
-                }}>
-                    <Typography variant="h6" sx={{display: 'flex', alignItems: 'center', gap: 1}} component="span">
-                        <EventNoteIcon/> Add New Time Slot
+                <DialogTitle
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        bgcolor: 'primary.main',
+                        color: 'white',
+                        borderRadius: '8px 8px 0 0',
+                    }}
+                >
+                    <Typography
+                        variant="h6"
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                        component="span"
+                    >
+                        <EventNoteIcon /> Add New Time Slot
                     </Typography>
                     <Tooltip title="Close">
                         <IconButton edge="end" color="inherit" onClick={onClose} disabled={loading}>
-                            <CloseIcon/>
+                            <CloseIcon />
                         </IconButton>
                     </Tooltip>
                 </DialogTitle>
 
                 <form onSubmit={handleSubmit}>
                     <DialogContent dividers>
-                        <Paper elevation={0} sx={{p: 2, mb: 2}}>
+                        <Paper elevation={0} sx={{ p: 2, mb: 2 }}>
                             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                                 Please fill in the details for the new time slot
                             </Typography>
@@ -283,7 +297,11 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
                                         error={touched.title && Boolean(errors.title)}
                                         helperText={touched.title && errors.title}
                                         slotProps={{
-                                            input: {startAdornment: <TitleIcon color="action" sx={{mr: 1}}/>}
+                                            input: {
+                                                startAdornment: (
+                                                    <TitleIcon color="action" sx={{ mr: 1 }} />
+                                                ),
+                                            },
                                         }}
                                     />
                                 </Grid>
@@ -296,7 +314,7 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
                                     </Divider>
                                 </Grid>
 
-                                <Grid size={{xs: 12, sm: 4}}>
+                                <Grid size={{ xs: 12, sm: 4 }}>
                                     <TextField
                                         id="date"
                                         name="date"
@@ -307,17 +325,17 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
                                         onBlur={handleBlur}
                                         fullWidth
                                         slotProps={{
-                                            inputLabel: {shrink: true},
+                                            inputLabel: { shrink: true },
                                             htmlInput: {
-                                                min: today
-                                            }
+                                                min: today,
+                                            },
                                         }}
                                         error={touched.date && Boolean(errors.date)}
                                         helperText={touched.date && errors.date}
                                     />
                                 </Grid>
 
-                                <Grid size={{xs: 12, sm: 4}}>
+                                <Grid size={{ xs: 12, sm: 4 }}>
                                     <TextField
                                         id="startTime"
                                         name="startTime"
@@ -329,18 +347,20 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
                                         fullWidth
                                         slotProps={{
                                             inputLabel: {
-                                                shrink: true
+                                                shrink: true,
                                             },
                                             input: {
-                                                startAdornment: <AccessTimeIcon color="action" sx={{mr: 1}}/>
-                                            }
+                                                startAdornment: (
+                                                    <AccessTimeIcon color="action" sx={{ mr: 1 }} />
+                                                ),
+                                            },
                                         }}
                                         error={touched.startTime && Boolean(errors.startTime)}
                                         helperText={touched.startTime && errors.startTime}
                                     />
                                 </Grid>
 
-                                <Grid size={{xs: 12, sm: 4}}>
+                                <Grid size={{ xs: 12, sm: 4 }}>
                                     <TextField
                                         id="endTime"
                                         name="endTime"
@@ -352,11 +372,13 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
                                         fullWidth
                                         slotProps={{
                                             inputLabel: {
-                                                shrink: true
+                                                shrink: true,
                                             },
                                             input: {
-                                                startAdornment: <AccessTimeIcon color="action" sx={{mr: 1}}/>
-                                            }
+                                                startAdornment: (
+                                                    <AccessTimeIcon color="action" sx={{ mr: 1 }} />
+                                                ),
+                                            },
                                         }}
                                         error={touched.endTime && Boolean(errors.endTime)}
                                         helperText={touched.endTime && errors.endTime}
@@ -366,20 +388,17 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
                         </Paper>
 
                         {/* Show duration calculation */}
-                        {formData.startTime && formData.endTime &&
+                        {formData.startTime &&
+                            formData.endTime &&
                             isEndTimeAfterStartTime(formData.startTime, formData.endTime) && (
-                                <Alert severity="info" sx={{mb: 2}}>
+                                <Alert severity="info" sx={{ mb: 2 }}>
                                     {calculateDuration()}
                                 </Alert>
                             )}
                     </DialogContent>
 
-                    <DialogActions sx={{px: 3, py: 2, justifyContent: 'space-between'}}>
-                        <Button
-                            onClick={onClose}
-                            disabled={loading}
-                            startIcon={<CloseIcon/>}
-                        >
+                    <DialogActions sx={{ px: 3, py: 2, justifyContent: 'space-between' }}>
+                        <Button onClick={onClose} disabled={loading} startIcon={<CloseIcon />}>
                             Cancel
                         </Button>
                         <Button
@@ -387,9 +406,13 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
                             variant="contained"
                             color="primary"
                             disabled={loading}
-                            sx={{px: 4}}
+                            sx={{ px: 4 }}
                         >
-                            {loading ? <CircularProgress size={24} color="inherit"/> : 'Save Time Slot'}
+                            {loading ? (
+                                <CircularProgress size={24} color="inherit" />
+                            ) : (
+                                'Save Time Slot'
+                            )}
                         </Button>
                     </DialogActions>
                 </form>
@@ -399,13 +422,9 @@ const AddTimeSlotForm = ({open, onClose, consultantId, defaultDate}) => {
                 open={showError}
                 autoHideDuration={6000}
                 onClose={() => setShowError(false)}
-                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-                <Alert
-                    onClose={() => setShowError(false)}
-                    severity="error"
-                    sx={{width: '100%'}}
-                >
+                <Alert onClose={() => setShowError(false)} severity="error" sx={{ width: '100%' }}>
                     {errorMessage}
                 </Alert>
             </Snackbar>

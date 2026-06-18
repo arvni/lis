@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {Head} from '@inertiajs/react';
+import React, { useEffect, useState } from 'react';
+import { Head } from '@inertiajs/react';
 import {
     Box,
     Typography,
@@ -10,21 +10,23 @@ import {
     Tooltip,
     IconButton,
     Grid as Grid,
-    Chip, Stack, Divider
+    Chip,
+    Stack,
+    Divider,
 } from '@mui/material';
-import {styled} from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import JsBarcode from 'jsbarcode';
 import {
     Print as PrintIcon,
     LocalHospital as LocalHospitalIcon,
     Close as CloseIcon,
-    ArrowBack as ArrowBackIcon
+    ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 
 // Styled components with enhanced styling
-const BarcodeContainer = styled(Container)(({theme}) => ({
+const BarcodeContainer = styled(Container)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -32,11 +34,11 @@ const BarcodeContainer = styled(Container)(({theme}) => ({
     padding: theme.spacing(2),
     margin: '0 auto',
     '@media print': {
-        padding: 0
-    }
+        padding: 0,
+    },
 }));
 
-const BarcodeItem = styled(Paper)(({theme, printOnlyBarcode}) => ({
+const BarcodeItem = styled(Paper)(({ theme, printOnlyBarcode }) => ({
     paddingTop: '0mm',
     textAlign: 'center',
     margin: theme.spacing(1),
@@ -53,15 +55,15 @@ const BarcodeItem = styled(Paper)(({theme, printOnlyBarcode}) => ({
     position: 'relative',
     overflow: 'hidden',
     '@media print': {
-        margin: printOnlyBarcode?'auto':0,
+        margin: printOnlyBarcode ? 'auto' : 0,
         boxShadow: 'none',
         border: 'none',
-        width:"100%",
-        height:"100%"
-    }
+        width: '100%',
+        height: '100%',
+    },
 }));
 
-const BarcodeText = styled(Typography)(({printOnlyBarcode = false}) => ({
+const BarcodeText = styled(Typography)(({ printOnlyBarcode = false }) => ({
     margin: '0.5px',
     lineHeight: printOnlyBarcode ? '3.5mm' : '2.5mm',
     fontWeight: 'bold',
@@ -78,10 +80,10 @@ const BarcodeText = styled(Typography)(({printOnlyBarcode = false}) => ({
     whiteSpace: 'nowrap',
     '@media print': {
         fontSize: printOnlyBarcode ? '3.5mm' : '2.5mm',
-    }
+    },
 }));
 
-const PrintButton = styled(IconButton)(({theme}) => ({
+const PrintButton = styled(IconButton)(({ theme }) => ({
     position: 'fixed',
     bottom: theme.spacing(3),
     right: theme.spacing(3),
@@ -92,11 +94,11 @@ const PrintButton = styled(IconButton)(({theme}) => ({
         backgroundColor: theme.palette.primary.dark,
     },
     '@media print': {
-        display: 'none'
-    }
+        display: 'none',
+    },
 }));
 
-const BackButton = styled(IconButton)(({theme}) => ({
+const BackButton = styled(IconButton)(({ theme }) => ({
     position: 'fixed',
     bottom: theme.spacing(3),
     left: theme.spacing(3),
@@ -107,11 +109,11 @@ const BackButton = styled(IconButton)(({theme}) => ({
         backgroundColor: theme.palette.grey[300],
     },
     '@media print': {
-        display: 'none'
-    }
+        display: 'none',
+    },
 }));
 
-const HeaderBar = styled(Box)(({theme}) => ({
+const HeaderBar = styled(Box)(({ theme }) => ({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -119,26 +121,26 @@ const HeaderBar = styled(Box)(({theme}) => ({
     marginBottom: theme.spacing(2),
     borderBottom: `1px solid ${theme.palette.divider}`,
     '@media print': {
-        display: 'none'
-    }
+        display: 'none',
+    },
 }));
 
-const BarcodeComponent = ({materials}) => {
+const BarcodeComponent = ({ materials }) => {
     const [showSnackbar, setShowSnackbar] = useState(false);
     const [printOnlyBarcode, setPrintOnlyBarcode] = useState(false);
-    const handleChange = (e) => setPrintOnlyBarcode(e.target.checked)
+    const handleChange = (e) => setPrintOnlyBarcode(e.target.checked);
 
     useEffect(() => {
         // Initialize barcodes after component mounts
         if (!printOnlyBarcode) {
-            materials.forEach(material => {
+            materials.forEach((material) => {
                 JsBarcode(`#barcode-${material.barcode}`, material.barcode, {
                     format: 'CODE128',
                     width: 1,
                     height: 35,
                     displayValue: false,
                     background: '#ffffff',
-                    lineColor: '#000000'
+                    lineColor: '#000000',
                 });
             });
         }
@@ -173,63 +175,100 @@ const BarcodeComponent = ({materials}) => {
         <>
             <HeaderBar>
                 <Typography variant="h6">
-                    <LocalHospitalIcon sx={{mr: 1, verticalAlign: 'middle'}}/>
-                    Barcode Labels Packing Series ({materials.length ? materials[0].packing_series : ""})
+                    <LocalHospitalIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                    Barcode Labels Packing Series (
+                    {materials.length ? materials[0].packing_series : ''})
                 </Typography>
                 <Box>
-                    <FormControlLabel sx={{mt: 1}}
-                                      label="Print Series & Dates"
-                                      control={<Checkbox checked={printOnlyBarcode}
-                                                         name="printBarcode"
-                                                         onChange={handleChange}/>}/>
+                    <FormControlLabel
+                        sx={{ mt: 1 }}
+                        label="Print Series & Dates"
+                        control={
+                            <Checkbox
+                                checked={printOnlyBarcode}
+                                name="printBarcode"
+                                onChange={handleChange}
+                            />
+                        }
+                    />
                 </Box>
                 <Chip
-                    icon={<PrintIcon fontSize="small"/>}
+                    icon={<PrintIcon fontSize="small" />}
                     label="Ready for Printing"
                     color="primary"
                     variant="outlined"
                     size="small"
-                    sx={{display: 'flex'}}
+                    sx={{ display: 'flex' }}
                 />
             </HeaderBar>
             <BarcodeContainer>
-  <Grid container spacing={0} sx={{justifyContent: "center", gap:0}} >
+                <Grid container spacing={0} sx={{ justifyContent: 'center', gap: 0 }}>
                     {materials.map((material) => (
-                        <Grid key={material.id}
-                              size={12}
-                              sx={{display: printOnlyBarcode ? "block" : "flex", justifyContent: "center",gap:"0"}}
-                              className="page-break">
+                        <Grid
+                            key={material.id}
+                            size={12}
+                            sx={{
+                                display: printOnlyBarcode ? 'block' : 'flex',
+                                justifyContent: 'center',
+                                gap: '0',
+                            }}
+                            className="page-break"
+                        >
                             <BarcodeItem printOnlyBarcode={printOnlyBarcode}>
-                                {printOnlyBarcode ? <Stack direction="column"
-                                                           sx={{height:"100%", justifyContent: "space-around"}}>
-                                    <BarcodeText printOnlyBarcode>{material.tube_series}</BarcodeText>
-                                    <Divider/>
-                                    <BarcodeText printOnlyBarcode>{formatDate(material.manufactured_date)}</BarcodeText>
-                                    <Divider/>
-                                    <BarcodeText printOnlyBarcode>{formatDate(material.expire_date)}</BarcodeText>
-                                </Stack> : <>
-                                    <Box sx={{
-                                        width: '100%',
-                                        pt: '0mm',
-                                        display: "flex",
-                                        "& svg ": {width: "100% !important"}
-                                    }}>
-                                        <svg id={`barcode-${material.barcode}`}
-                                             style={{width: "100% !important"}}></svg>
-                                    </Box>
-                                    <Stack spacing={.5} sx={{mt: "-3mm", zIndex: 1}}>
-                                        <BarcodeText>{material.barcode}</BarcodeText>
-                                        <BarcodeText>
-                                            <Box component="span"
-                                                 sx={{display: 'inline-flex', alignItems: 'center', mr: 0.5}}>
-                                                {formatDate(material.expire_date || material.created_at)}
-                                            </Box>
+                                {printOnlyBarcode ? (
+                                    <Stack
+                                        direction="column"
+                                        sx={{ height: '100%', justifyContent: 'space-around' }}
+                                    >
+                                        <BarcodeText printOnlyBarcode>
+                                            {material.tube_series}
                                         </BarcodeText>
-                                        <BarcodeText title={material.sample_type_name}>
-                                            {material.sample_type_name}
+                                        <Divider />
+                                        <BarcodeText printOnlyBarcode>
+                                            {formatDate(material.manufactured_date)}
+                                        </BarcodeText>
+                                        <Divider />
+                                        <BarcodeText printOnlyBarcode>
+                                            {formatDate(material.expire_date)}
                                         </BarcodeText>
                                     </Stack>
-                                </>}
+                                ) : (
+                                    <>
+                                        <Box
+                                            sx={{
+                                                width: '100%',
+                                                pt: '0mm',
+                                                display: 'flex',
+                                                '& svg ': { width: '100% !important' },
+                                            }}
+                                        >
+                                            <svg
+                                                id={`barcode-${material.barcode}`}
+                                                style={{ width: '100% !important' }}
+                                            ></svg>
+                                        </Box>
+                                        <Stack spacing={0.5} sx={{ mt: '-3mm', zIndex: 1 }}>
+                                            <BarcodeText>{material.barcode}</BarcodeText>
+                                            <BarcodeText>
+                                                <Box
+                                                    component="span"
+                                                    sx={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        mr: 0.5,
+                                                    }}
+                                                >
+                                                    {formatDate(
+                                                        material.expire_date || material.created_at,
+                                                    )}
+                                                </Box>
+                                            </BarcodeText>
+                                            <BarcodeText title={material.sample_type_name}>
+                                                {material.sample_type_name}
+                                            </BarcodeText>
+                                        </Stack>
+                                    </>
+                                )}
                             </BarcodeItem>
                         </Grid>
                     ))}
@@ -238,13 +277,13 @@ const BarcodeComponent = ({materials}) => {
 
             <Tooltip title="Print Barcodes">
                 <PrintButton size="large" onClick={handlePrint}>
-                    <PrintIcon/>
+                    <PrintIcon />
                 </PrintButton>
             </Tooltip>
 
             <Tooltip title="Go Back">
                 <BackButton size="large" onClick={handleBack}>
-                    <ArrowBackIcon/>
+                    <ArrowBackIcon />
                 </BackButton>
             </Tooltip>
 
@@ -252,15 +291,15 @@ const BarcodeComponent = ({materials}) => {
                 open={showSnackbar}
                 autoHideDuration={6000}
                 onClose={handleSnackbarClose}
-                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
                 <Alert
                     onClose={handleSnackbarClose}
                     severity="success"
-                    sx={{width: '100%'}}
+                    sx={{ width: '100%' }}
                     action={
                         <IconButton size="small" color="inherit" onClick={handleSnackbarClose}>
-                            <CloseIcon fontSize="small"/>
+                            <CloseIcon fontSize="small" />
                         </IconButton>
                     }
                 >
@@ -314,12 +353,12 @@ const GlobalStyles = () => {
     return null;
 };
 
-const BarcodePageComponent = ({materials}) => {
+const BarcodePageComponent = ({ materials }) => {
     return (
         <>
-            <Head title="Material Barcodes"/>
-            <GlobalStyles/>
-            <BarcodeComponent materials={materials}/>
+            <Head title="Material Barcodes" />
+            <GlobalStyles />
+            <BarcodeComponent materials={materials} />
         </>
     );
 };

@@ -1,4 +1,4 @@
-import React, {useState, useMemo} from "react";
+import React, { useState, useMemo } from 'react';
 import {
     Box,
     Chip,
@@ -18,8 +18,8 @@ import {
     Tabs,
     Tab,
     Grid as Grid,
-} from "@mui/material";
-import List from "@mui/material/List";
+} from '@mui/material';
+import List from '@mui/material/List';
 import {
     Timeline,
     TimelineConnector,
@@ -27,8 +27,8 @@ import {
     TimelineDot,
     TimelineItem,
     TimelineOppositeContent,
-    TimelineSeparator
-} from "@mui/lab";
+    TimelineSeparator,
+} from '@mui/lab';
 import {
     Done as DoneIcon,
     Close as CloseIcon,
@@ -41,42 +41,42 @@ import {
     Timeline as TimelineIcon,
     Science as ScienceIcon,
     Assignment as AssignmentIcon,
-    Person as PersonIcon
-} from "@mui/icons-material";
-import {WorkflowActionForm, ACTION_TYPES} from "@/Pages/Section/Components/DoneForm";
-import {Link, useForm} from "@inertiajs/react";
-import Document from "@/Pages/Document.jsx";
+    Person as PersonIcon,
+} from '@mui/icons-material';
+import { WorkflowActionForm, ACTION_TYPES } from '@/Pages/Section/Components/DoneForm';
+import { Link, useForm } from '@inertiajs/react';
+import Document from '@/Pages/Document.jsx';
 
 // Enhanced status configuration
 const workflowStatus = {
     waiting: {
-        icon: <HourglassEmpty fontSize="small"/>,
-        color: "warning",
-        label: "Waiting",
-        description: "This section is waiting to be processed"
+        icon: <HourglassEmpty fontSize="small" />,
+        color: 'warning',
+        label: 'Waiting',
+        description: 'This section is waiting to be processed',
     },
     processing: {
-        icon: <AccessTimeIcon fontSize="small"/>,
-        color: "info",
-        label: "Processing",
-        description: "This section is currently being processed"
+        icon: <AccessTimeIcon fontSize="small" />,
+        color: 'info',
+        label: 'Processing',
+        description: 'This section is currently being processed',
     },
     finished: {
-        icon: <CheckCircle fontSize="small"/>,
-        color: "success",
-        label: "Finished",
-        description: "This section has been completed successfully"
+        icon: <CheckCircle fontSize="small" />,
+        color: 'success',
+        label: 'Finished',
+        description: 'This section has been completed successfully',
     },
     rejected: {
-        icon: <ErrorOutline fontSize="small"/>,
-        color: "error",
-        label: "Rejected",
-        description: "This section was rejected and needs attention"
-    }
+        icon: <ErrorOutline fontSize="small" />,
+        color: 'error',
+        label: 'Rejected',
+        description: 'This section was rejected and needs attention',
+    },
 };
 
 // Custom Tab Panel Component
-function TabPanel({children, value, index, ...other}) {
+function TabPanel({ children, value, index, ...other }) {
     return (
         <div
             role="tabpanel"
@@ -85,17 +85,13 @@ function TabPanel({children, value, index, ...other}) {
             aria-labelledby={`sample-tab-${index}`}
             {...other}
         >
-            {value === index && (
-                <Box sx={{pt: 3}}>
-                    {children}
-                </Box>
-            )}
+            {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
         </div>
     );
 }
 
 // Patient Information Component
-const PatientInfoCard = ({patient, sample}) => {
+const PatientInfoCard = ({ patient, sample }) => {
     const theme = useTheme();
 
     if (!patient && !sample) return null;
@@ -108,16 +104,16 @@ const PatientInfoCard = ({patient, sample}) => {
                 borderRadius: 2,
                 border: `1px solid ${theme.palette.info.light}`,
                 backgroundColor: theme.palette.info.main,
-                color: theme.palette.info.contrastText
+                color: theme.palette.info.contrastText,
             }}
         >
             <Box sx={{ p: 2 }}>
-  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
+                <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
                     <Avatar
                         sx={{
                             bgcolor: theme.palette.info.dark,
                             width: 48,
-                            height: 48
+                            height: 48,
                         }}
                     >
                         <PersonIcon />
@@ -142,7 +138,7 @@ const PatientInfoCard = ({patient, sample}) => {
 };
 
 // Enhanced status dot component
-const StatusDot = ({status}) => {
+const StatusDot = ({ status }) => {
     const theme = useTheme();
     const statusConfig = workflowStatus[status];
 
@@ -155,9 +151,9 @@ const StatusDot = ({status}) => {
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     '&:hover': {
                         transform: 'scale(1.15)',
-                        boxShadow: theme.shadows[6]
+                        boxShadow: theme.shadows[6],
                     },
-                    cursor: 'pointer'
+                    cursor: 'pointer',
                 }}
             >
                 {statusConfig.icon}
@@ -167,14 +163,14 @@ const StatusDot = ({status}) => {
 };
 
 // User avatar component
-const UserAvatar = ({name, size = 32}) => {
+const UserAvatar = ({ name, size = 32 }) => {
     const theme = useTheme();
 
     if (!name) return null;
 
     const initials = name
         .split(' ')
-        .map(part => part[0])
+        .map((part) => part[0])
         .join('')
         .toUpperCase()
         .substring(0, 2);
@@ -187,7 +183,7 @@ const UserAvatar = ({name, size = 32}) => {
                     height: size,
                     bgcolor: theme.palette.primary.main,
                     fontSize: size / 2,
-                    fontWeight: 'bold'
+                    fontWeight: 'bold',
                 }}
             >
                 {initials}
@@ -208,7 +204,7 @@ const formatDateTime = (dateTimeStr) => {
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
-            hour12: false
+            hour12: false,
         }).format(date);
     } catch (e) {
         return dateTimeStr;
@@ -216,7 +212,7 @@ const formatDateTime = (dateTimeStr) => {
 };
 
 // Timeline Component for individual sample
-const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}) => {
+const SampleTimeline = ({ acceptanceItemStates, onOpenDoneForm, onOpenRejectForm }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [selectedDoc, setSelectedDoc] = useState(null);
@@ -235,41 +231,37 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                     <Button
                         variant="outlined"
                         size="small"
-                        startIcon={<InfoIcon/>}
+                        startIcon={<InfoIcon />}
                         onClick={handleOpenFile(parameter.value)}
-                        href={route("documents.download", (parameter.value.id || parameter.value.hash))}
+                        href={route(
+                            'documents.download',
+                            parameter.value.id || parameter.value.hash,
+                        )}
                         target="_blank"
-                        sx={{mt: 0.5, borderRadius: 1}}
+                        sx={{ mt: 0.5, borderRadius: 1 }}
                         title={parameter.value.originalName}
                     >
                         View File
                     </Button>
-                    <Document
-                        document={selectedDoc}
-                        onClose={handleCloseFile}
-                    />
+                    <Document document={selectedDoc} onClose={handleCloseFile} />
                 </>
             );
         }
 
-        return (
-            <Typography variant="body2">
-                {parameter.value || '-'}
-            </Typography>
-        );
+        return <Typography variant="body2">{parameter.value || '-'}</Typography>;
     };
 
     return (
-        <Timeline position={isMobile ? "right" : "alternate"} sx={{px: {xs: 0, sm: 2}}}>
+        <Timeline position={isMobile ? 'right' : 'alternate'} sx={{ px: { xs: 0, sm: 2 } }}>
             {acceptanceItemStates?.map((acceptanceItemState, index) => (
                 <TimelineItem key={index}>
                     {!isMobile && (
                         <TimelineOppositeContent
                             sx={{
                                 m: 'auto 0',
-                                px: {xs: 1, sm: 2},
+                                px: { xs: 1, sm: 2 },
                                 py: 1,
-                                maxWidth: {xs: '100%', sm: '30%'}
+                                maxWidth: { xs: '100%', sm: '30%' },
                             }}
                         >
                             <Paper
@@ -277,19 +269,25 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                 sx={{
                                     p: 2,
                                     backgroundColor: theme.palette.background.paper,
-                                    borderRight: index % 2 === 0 ? `4px solid ${theme.palette.primary.main}` : 'none',
-                                    borderLeft: index % 2 !== 0 ? `4px solid ${theme.palette.primary.main}` : 'none',
+                                    borderRight:
+                                        index % 2 === 0
+                                            ? `4px solid ${theme.palette.primary.main}`
+                                            : 'none',
+                                    borderLeft:
+                                        index % 2 !== 0
+                                            ? `4px solid ${theme.palette.primary.main}`
+                                            : 'none',
                                     borderRadius: 2,
                                     transition: 'all 0.3s',
                                     '&:hover': {
                                         boxShadow: theme.shadows[4],
-                                        transform: 'translateY(-3px)'
-                                    }
+                                        transform: 'translateY(-3px)',
+                                    },
                                 }}
                             >
                                 <Typography
                                     variant="h6"
-                                    href={route("sections.show", acceptanceItemState.section.id)}
+                                    href={route('sections.show', acceptanceItemState.section.id)}
                                     component={Link}
                                     fontWeight="bold"
                                     gutterBottom
@@ -303,13 +301,13 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                     label={workflowStatus[acceptanceItemState.status].label}
                                     size="small"
                                     color={workflowStatus[acceptanceItemState.status].color}
-                                    sx={{fontWeight: 'medium', mt: 0.5}}
+                                    sx={{ fontWeight: 'medium', mt: 0.5 }}
                                 />
                             </Paper>
                         </TimelineOppositeContent>
                     )}
 
-                    <TimelineSeparator sx={{justifyContent: "center"}}>
+                    <TimelineSeparator sx={{ justifyContent: 'center' }}>
                         {index > 0 && (
                             <TimelineConnector
                                 sx={{
@@ -317,14 +315,14 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                         acceptanceItemState.status === 'finished'
                                             ? theme.palette.success.light
                                             : acceptanceItemState.status === 'rejected'
-                                                ? theme.palette.error.light
-                                                : theme.palette.divider,
-                                    minHeight: 40
+                                              ? theme.palette.error.light
+                                              : theme.palette.divider,
+                                    minHeight: 40,
                                 }}
                             />
                         )}
 
-                        <StatusDot status={acceptanceItemState.status}/>
+                        <StatusDot status={acceptanceItemState.status} />
 
                         {index < acceptanceItemStates.length - 1 && (
                             <TimelineConnector
@@ -333,13 +331,13 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                         acceptanceItemState.status === 'finished'
                                             ? theme.palette.success.light
                                             : theme.palette.divider,
-                                    minHeight: 40
+                                    minHeight: 40,
                                 }}
                             />
                         )}
                     </TimelineSeparator>
 
-                    <TimelineContent sx={{py: 2, px: {xs: 1, sm: 2}}}>
+                    <TimelineContent sx={{ py: 2, px: { xs: 1, sm: 2 } }}>
                         <Card
                             elevation={2}
                             sx={{
@@ -348,16 +346,24 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                 transition: 'all 0.3s',
                                 '&:hover': {
                                     boxShadow: theme.shadows[4],
-                                }
+                                },
                             }}
                         >
                             {isMobile && (
-                                <Box sx={{
-                                    p: 2,
-                                    backgroundColor: theme.palette.background.default,
-                                    borderBottom: `1px solid ${theme.palette.divider}`
-                                }}>
-  <Stack direction="row" sx={{justifyContent: "space-between", alignItems: "center"}}>
+                                <Box
+                                    sx={{
+                                        p: 2,
+                                        backgroundColor: theme.palette.background.default,
+                                        borderBottom: `1px solid ${theme.palette.divider}`,
+                                    }}
+                                >
+                                    <Stack
+                                        direction="row"
+                                        sx={{
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                        }}
+                                    >
                                         <Typography variant="subtitle1" fontWeight="bold">
                                             {acceptanceItemState.section.name}
                                         </Typography>
@@ -366,31 +372,39 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                             label={workflowStatus[acceptanceItemState.status].label}
                                             size="small"
                                             color={workflowStatus[acceptanceItemState.status].color}
-                                            sx={{fontWeight: 'medium'}}
+                                            sx={{ fontWeight: 'medium' }}
                                         />
                                     </Stack>
                                 </Box>
                             )}
 
-                            <Box sx={{p: 2}}>
+                            <Box sx={{ p: 2 }}>
                                 {acceptanceItemState.started_at && (
                                     <Stack
                                         direction="row"
                                         spacing={1}
-                                        sx={{ mb: 2, alignItems: "center" }}
+                                        sx={{ mb: 2, alignItems: 'center' }}
                                     >
                                         <Badge
                                             overlap="circular"
-                                            anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
-                                            badgeContent={<CalendarToday fontSize="small" color="action"/>}
+                                            anchorOrigin={{
+                                                vertical: 'bottom',
+                                                horizontal: 'right',
+                                            }}
+                                            badgeContent={
+                                                <CalendarToday fontSize="small" color="action" />
+                                            }
                                         >
-                                            <UserAvatar name={acceptanceItemState.started_by?.name}/>
+                                            <UserAvatar
+                                                name={acceptanceItemState.started_by?.name}
+                                            />
                                         </Badge>
                                         <Box>
                                             <Typography variant="body2" color="text.secondary">
                                                 Started by{' '}
                                                 <Typography component="span" fontWeight="bold">
-                                                    {acceptanceItemState.started_by?.name || 'Unknown'}
+                                                    {acceptanceItemState.started_by?.name ||
+                                                        'Unknown'}
                                                 </Typography>
                                             </Typography>
                                             <Typography variant="body2" color="text.secondary">
@@ -400,69 +414,92 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                     </Stack>
                                 )}
 
-                                {["finished", "rejected"].includes(acceptanceItemState.status) && (
+                                {['finished', 'rejected'].includes(acceptanceItemState.status) && (
                                     <>
-                                        {acceptanceItemState.parameters && acceptanceItemState.parameters.length > 0 && (
-                                            <>
-                                                <Typography
-                                                    variant="subtitle2"
-                                                    fontWeight="bold"
-                                                    sx={{
-                                                        mb: 1,
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: 0.5
-                                                    }}
-                                                >
-                                                    <InfoIcon fontSize="small" color="primary"/>
-                                                    Parameters
-                                                </Typography>
+                                        {acceptanceItemState.parameters &&
+                                            acceptanceItemState.parameters.length > 0 && (
+                                                <>
+                                                    <Typography
+                                                        variant="subtitle2"
+                                                        fontWeight="bold"
+                                                        sx={{
+                                                            mb: 1,
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 0.5,
+                                                        }}
+                                                    >
+                                                        <InfoIcon
+                                                            fontSize="small"
+                                                            color="primary"
+                                                        />
+                                                        Parameters
+                                                    </Typography>
 
-                                                <Paper
-                                                    variant="outlined"
-                                                    sx={{
-                                                        borderRadius: 1,
-                                                        mb: 2,
-                                                        overflow: 'hidden'
-                                                    }}
-                                                >
-                                                    <List dense disablePadding>
-                                                        {(typeof acceptanceItemState.parameters !== "string"
+                                                    <Paper
+                                                        variant="outlined"
+                                                        sx={{
+                                                            borderRadius: 1,
+                                                            mb: 2,
+                                                            overflow: 'hidden',
+                                                        }}
+                                                    >
+                                                        <List dense disablePadding>
+                                                            {(typeof acceptanceItemState.parameters !==
+                                                            'string'
                                                                 ? acceptanceItemState.parameters
-                                                                : JSON.parse(acceptanceItemState.parameters)
-                                                        ).map((parameter, paramIndex) => (
-                                                            <React.Fragment key={paramIndex}>
-                                                                {paramIndex > 0 && <Divider/>}
-                                                                <ListItem
-                                                                    sx={{
-                                                                        py: 1,
-                                                                        px: 2,
-                                                                        backgroundColor: paramIndex % 2 === 0
-                                                                            ? 'transparent'
-                                                                            : theme.palette.action.hover
-                                                                    }}
-                                                                >
-                                                                    <Stack
-                                                                        direction={{xs: 'column', sm: 'row'}}
-                                                                        spacing={1}
-                                                                        sx={{justifyContent: "space-between", alignItems: {xs: 'flex-start', sm: 'center'}, width: "100%"}}
+                                                                : JSON.parse(
+                                                                      acceptanceItemState.parameters,
+                                                                  )
+                                                            ).map((parameter, paramIndex) => (
+                                                                <React.Fragment key={paramIndex}>
+                                                                    {paramIndex > 0 && <Divider />}
+                                                                    <ListItem
+                                                                        sx={{
+                                                                            py: 1,
+                                                                            px: 2,
+                                                                            backgroundColor:
+                                                                                paramIndex % 2 === 0
+                                                                                    ? 'transparent'
+                                                                                    : theme.palette
+                                                                                          .action
+                                                                                          .hover,
+                                                                        }}
                                                                     >
-                                                                        <Typography
-                                                                            variant="subtitle2"
-                                                                            color="text.primary"
-                                                                            fontWeight="medium"
+                                                                        <Stack
+                                                                            direction={{
+                                                                                xs: 'column',
+                                                                                sm: 'row',
+                                                                            }}
+                                                                            spacing={1}
+                                                                            sx={{
+                                                                                justifyContent:
+                                                                                    'space-between',
+                                                                                alignItems: {
+                                                                                    xs: 'flex-start',
+                                                                                    sm: 'center',
+                                                                                },
+                                                                                width: '100%',
+                                                                            }}
                                                                         >
-                                                                            {parameter.name}:
-                                                                        </Typography>
-                                                                        {renderParameterValue(parameter)}
-                                                                    </Stack>
-                                                                </ListItem>
-                                                            </React.Fragment>
-                                                        ))}
-                                                    </List>
-                                                </Paper>
-                                            </>
-                                        )}
+                                                                            <Typography
+                                                                                variant="subtitle2"
+                                                                                color="text.primary"
+                                                                                fontWeight="medium"
+                                                                            >
+                                                                                {parameter.name}:
+                                                                            </Typography>
+                                                                            {renderParameterValue(
+                                                                                parameter,
+                                                                            )}
+                                                                        </Stack>
+                                                                    </ListItem>
+                                                                </React.Fragment>
+                                                            ))}
+                                                        </List>
+                                                    </Paper>
+                                                </>
+                                            )}
 
                                         {acceptanceItemState.details && (
                                             <>
@@ -473,10 +510,10 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                                         mb: 1,
                                                         display: 'flex',
                                                         alignItems: 'center',
-                                                        gap: 0.5
+                                                        gap: 0.5,
                                                     }}
                                                 >
-                                                    <ErrorOutline fontSize="small" color="error"/>
+                                                    <ErrorOutline fontSize="small" color="error" />
                                                     Rejection Details
                                                 </Typography>
 
@@ -488,7 +525,7 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                                         color: theme.palette.error.dark,
                                                         borderLeft: `4px solid ${theme.palette.error.main}`,
                                                         borderRadius: 1,
-                                                        mb: 2
+                                                        mb: 2,
                                                     }}
                                                 >
                                                     <Typography variant="body2">
@@ -503,32 +540,61 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                                 direction="row"
                                                 spacing={1}
                                                 sx={{
-                                                    alignItems: "center",
+                                                    alignItems: 'center',
                                                     mt: 2,
                                                     pt: 2,
-                                                    borderTop: `1px dashed ${theme.palette.divider}`
+                                                    borderTop: `1px dashed ${theme.palette.divider}`,
                                                 }}
                                             >
                                                 <Badge
                                                     overlap="circular"
-                                                    anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
+                                                    anchorOrigin={{
+                                                        vertical: 'bottom',
+                                                        horizontal: 'right',
+                                                    }}
                                                     badgeContent={
-                                                        acceptanceItemState.status === 'finished'
-                                                            ? <CheckCircle fontSize="small" color="success"/>
-                                                            : <CloseIcon fontSize="small" color="error"/>
+                                                        acceptanceItemState.status ===
+                                                        'finished' ? (
+                                                            <CheckCircle
+                                                                fontSize="small"
+                                                                color="success"
+                                                            />
+                                                        ) : (
+                                                            <CloseIcon
+                                                                fontSize="small"
+                                                                color="error"
+                                                            />
+                                                        )
                                                     }
                                                 >
-                                                    <UserAvatar name={acceptanceItemState.finished_by?.name}/>
+                                                    <UserAvatar
+                                                        name={acceptanceItemState.finished_by?.name}
+                                                    />
                                                 </Badge>
                                                 <Box>
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        {acceptanceItemState.status === 'finished' ? 'Completed' : 'Rejected'} by{' '}
-                                                        <Typography component="span" fontWeight="bold">
-                                                            {acceptanceItemState.finished_by?.name || 'Unknown'}
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                    >
+                                                        {acceptanceItemState.status === 'finished'
+                                                            ? 'Completed'
+                                                            : 'Rejected'}{' '}
+                                                        by{' '}
+                                                        <Typography
+                                                            component="span"
+                                                            fontWeight="bold"
+                                                        >
+                                                            {acceptanceItemState.finished_by
+                                                                ?.name || 'Unknown'}
                                                         </Typography>
                                                     </Typography>
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        {formatDateTime(acceptanceItemState.finished_at)}
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                    >
+                                                        {formatDateTime(
+                                                            acceptanceItemState.finished_at,
+                                                        )}
                                                     </Typography>
                                                 </Box>
                                             </Stack>
@@ -536,15 +602,15 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                     </>
                                 )}
 
-                                {acceptanceItemState.status === "processing" && (
+                                {acceptanceItemState.status === 'processing' && (
                                     <Stack
                                         direction="row"
                                         spacing={2}
-                                        sx={{ mt: 2, justifyContent: "center" }}
+                                        sx={{ mt: 2, justifyContent: 'center' }}
                                     >
                                         <Button
                                             variant="outlined"
-                                            startIcon={<DoneIcon/>}
+                                            startIcon={<DoneIcon />}
                                             onClick={onOpenDoneForm(acceptanceItemState.id)}
                                             color="success"
                                             sx={{
@@ -554,8 +620,8 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                                 '&:hover': {
                                                     backgroundColor: theme.palette.success.light,
                                                     borderColor: theme.palette.success.dark,
-                                                    boxShadow: theme.shadows[2]
-                                                }
+                                                    boxShadow: theme.shadows[2],
+                                                },
                                             }}
                                         >
                                             Complete
@@ -563,7 +629,7 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
 
                                         <Button
                                             variant="outlined"
-                                            startIcon={<CloseIcon/>}
+                                            startIcon={<CloseIcon />}
                                             onClick={onOpenRejectForm(acceptanceItemState.id)}
                                             color="error"
                                             sx={{
@@ -573,8 +639,8 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
                                                 '&:hover': {
                                                     backgroundColor: theme.palette.error.light,
                                                     borderColor: theme.palette.error.dark,
-                                                    boxShadow: theme.shadows[2]
-                                                }
+                                                    boxShadow: theme.shadows[2],
+                                                },
                                             }}
                                         >
                                             Reject
@@ -590,13 +656,13 @@ const SampleTimeline = ({acceptanceItemStates, onOpenDoneForm, onOpenRejectForm}
     );
 };
 
-const SectionsInfo = ({acceptanceItemStates = true}) => {
+const SectionsInfo = ({ acceptanceItemStates = true }) => {
     const theme = useTheme();
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [openForm, setOpenForm] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
-    const {post, setData, data, reset, processing} = useForm({});
+    const { post, setData, data, reset, processing } = useForm({});
 
     // Group acceptance item states by sample_id
     const groupedSamples = useMemo(() => {
@@ -615,7 +681,7 @@ const SectionsInfo = ({acceptanceItemStates = true}) => {
             sampleId,
             sample: items[0]?.sample, // Get sample info from first item
             patient: items[0]?.sample?.patient, // Get patient info from sample
-            acceptanceItemStates: items
+            acceptanceItemStates: items,
         }));
     }, [acceptanceItemStates]);
 
@@ -626,9 +692,10 @@ const SectionsInfo = ({acceptanceItemStates = true}) => {
 
     const handleOpenDoneForm = (id) => () => {
         setLoading(true);
-        axios.get(route("acceptanceItemStates.show", id))
-            .then(res => {
-                setData({...res.data.data, actionType: ACTION_TYPES.COMPLETE, "_method": "put"});
+        axios
+            .get(route('acceptanceItemStates.show', id))
+            .then((res) => {
+                setData({ ...res.data.data, actionType: ACTION_TYPES.COMPLETE, _method: 'put' });
             })
             .then(() => {
                 setLoading(false);
@@ -643,12 +710,19 @@ const SectionsInfo = ({acceptanceItemStates = true}) => {
 
     const handleOpenRejectForm = (id) => async () => {
         setLoading(true);
-        axios.get(route("acceptanceItemStates.prevSections", id))
-            .then(res => {
+        axios
+            .get(route('acceptanceItemStates.prevSections', id))
+            .then((res) => {
                 setOptions(res.data.sections);
-            }).then(() => axios.get(route("acceptanceItemStates.show", id)))
-            .then(res => {
-                setData({...res.data.data, next:"", "_method": "put", actionType: ACTION_TYPES.REJECT});
+            })
+            .then(() => axios.get(route('acceptanceItemStates.show', id)))
+            .then((res) => {
+                setData({
+                    ...res.data.data,
+                    next: '',
+                    _method: 'put',
+                    actionType: ACTION_TYPES.REJECT,
+                });
             })
             .then(() => {
                 setOpenForm(true);
@@ -656,9 +730,10 @@ const SectionsInfo = ({acceptanceItemStates = true}) => {
             });
     };
 
-    const handleFormChange = (name, value) => setData(prevData => ({...prevData, [name]: value}));
+    const handleFormChange = (name, value) =>
+        setData((prevData) => ({ ...prevData, [name]: value }));
 
-    const handleSubmit = () => post(route("acceptanceItemStates.update", data.id), {onSuccess});
+    const handleSubmit = () => post(route('acceptanceItemStates.update', data.id), { onSuccess });
 
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
@@ -667,16 +742,16 @@ const SectionsInfo = ({acceptanceItemStates = true}) => {
     // Calculate overall statistics
     const overallStats = useMemo(() => {
         const totalSections = acceptanceItemStates?.length || 0;
-        const completedSections = acceptanceItemStates?.filter(
-            state => ['finished', 'rejected'].includes(state.status)
-        ).length || 0;
+        const completedSections =
+            acceptanceItemStates?.filter((state) => ['finished', 'rejected'].includes(state.status))
+                .length || 0;
         const overallProgress = totalSections > 0 ? (completedSections / totalSections) * 100 : 0;
 
         return {
             totalSamples: groupedSamples.length,
             totalSections,
             completedSections,
-            overallProgress
+            overallProgress,
         };
     }, [acceptanceItemStates, groupedSamples]);
 
@@ -702,22 +777,24 @@ const SectionsInfo = ({acceptanceItemStates = true}) => {
                         color: theme.palette.primary.contrastText,
                     }}
                 >
-  <Grid container spacing={2} sx={{alignItems: "center"}}>
-                        <Grid size={{ xs:12, md:6}}>
-  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
-                                <TimelineIcon fontSize="large"/>
+                    <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+                                <TimelineIcon fontSize="large" />
                                 <Box>
                                     <Typography variant="h5" fontWeight="bold">
                                         Workflow Dashboard
                                     </Typography>
                                     <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                        {overallStats.overallProgress.toFixed(0)}% Complete • {overallStats.totalSamples} Samples • {overallStats.totalSections} Sections
+                                        {overallStats.overallProgress.toFixed(0)}% Complete •{' '}
+                                        {overallStats.totalSamples} Samples •{' '}
+                                        {overallStats.totalSections} Sections
                                     </Typography>
                                 </Box>
                             </Stack>
                         </Grid>
 
-                        <Grid size={{ xs:12, md:6}}>
+                        <Grid size={{ xs: 12, md: 6 }}>
                             <Box sx={{ textAlign: { xs: 'left', md: 'right' } }}>
                                 <Typography variant="h6" fontWeight="bold">
                                     {overallStats.completedSections} / {overallStats.totalSections}
@@ -739,8 +816,8 @@ const SectionsInfo = ({acceptanceItemStates = true}) => {
                             backgroundColor: 'rgba(255,255,255,0.2)',
                             '& .MuiLinearProgress-bar': {
                                 borderRadius: 4,
-                                transition: 'transform 1s ease-in-out'
-                            }
+                                transition: 'transform 1s ease-in-out',
+                            },
                         }}
                     />
                 </Box>
@@ -755,18 +832,29 @@ const SectionsInfo = ({acceptanceItemStates = true}) => {
                         sx={{
                             '& .MuiTab-root': {
                                 minHeight: 64,
-                                fontWeight: 'bold'
-                            }
+                                fontWeight: 'bold',
+                            },
                         }}
                     >
                         {groupedSamples.map((sample, index) => (
                             <Tab
                                 key={sample.sampleId}
                                 label={
-  <Stack direction="column" spacing={0.5} sx={{alignItems: "center"}}>
-  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
+                                    <Stack
+                                        direction="column"
+                                        spacing={0.5}
+                                        sx={{ alignItems: 'center' }}
+                                    >
+                                        <Stack
+                                            direction="row"
+                                            spacing={1}
+                                            sx={{ alignItems: 'center' }}
+                                        >
                                             <ScienceIcon fontSize="small" />
-                                            <span>{sample.sample?.barcode || `Sample ${sample.sampleId}`}</span>
+                                            <span>
+                                                {sample.sample?.barcode ||
+                                                    `Sample ${sample.sampleId}`}
+                                            </span>
                                             <Chip
                                                 size="small"
                                                 label={sample.acceptanceItemStates.length}
@@ -775,7 +863,10 @@ const SectionsInfo = ({acceptanceItemStates = true}) => {
                                             />
                                         </Stack>
                                         {sample.patient?.fullName && (
-                                            <Typography variant="caption" sx={{ opacity: 0.7, fontSize: '0.7rem' }}>
+                                            <Typography
+                                                variant="caption"
+                                                sx={{ opacity: 0.7, fontSize: '0.7rem' }}
+                                            >
                                                 {sample.patient.fullName}
                                             </Typography>
                                         )}
@@ -785,7 +876,7 @@ const SectionsInfo = ({acceptanceItemStates = true}) => {
                                 aria-controls={`sample-tabpanel-${index}`}
                                 sx={{
                                     textTransform: 'none',
-                                    minWidth: 120
+                                    minWidth: 120,
                                 }}
                             />
                         ))}

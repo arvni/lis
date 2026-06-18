@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
     Autocomplete,
     Box,
@@ -22,8 +22,8 @@ import {
     Tooltip,
     Typography,
     alpha,
-    Slide
-} from "@mui/material";
+    Slide,
+} from '@mui/material';
 import {
     Save,
     Cancel,
@@ -35,7 +35,7 @@ import {
     Help,
     Title,
     Close,
-} from "@mui/icons-material";
+} from '@mui/icons-material';
 
 /**
  * Slide transition for dialog
@@ -57,14 +57,7 @@ const SlideTransition = React.forwardRef(function Transition(props, ref) {
  * @param {boolean} props.disabled Whether form is disabled
  * @returns {JSX.Element} Rendered component
  */
-const AddRequirementForm = ({
-                                data,
-                                setData,
-                                open,
-                                onClose,
-                                onSubmit,
-                                disabled = false
-                            }) => {
+const AddRequirementForm = ({ data, setData, open, onClose, onSubmit, disabled = false }) => {
     // State for validation errors
     const [errors, setErrors] = useState({});
 
@@ -166,7 +159,7 @@ const AddRequirementForm = ({
 
         // Clear error when field changes
         if (errors[name]) {
-            setErrors(prev => {
+            setErrors((prev) => {
                 const newErrors = { ...prev };
                 delete newErrors[name];
                 return newErrors;
@@ -191,7 +184,7 @@ const AddRequirementForm = ({
     const handleOptionChange = (_, value) => {
         // Clear error when options change
         if (errors.options) {
-            setErrors(prev => {
+            setErrors((prev) => {
                 const newErrors = { ...prev };
                 delete newErrors.options;
                 return newErrors;
@@ -242,20 +235,22 @@ const AddRequirementForm = ({
             fullWidth
             maxWidth="md"
             slotProps={{
-                paper:{
+                paper: {
                     elevation: 5,
-                    sx: {borderRadius: 2}
-                }
+                    sx: { borderRadius: 2 },
+                },
             }}
-            slots={{transition: SlideTransition}}
+            slots={{ transition: SlideTransition }}
         >
             {/* Dialog title */}
-            <DialogTitle sx={{
-                pb: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-            }}>
+            <DialogTitle
+                sx={{
+                    pb: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                }}
+            >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     {data?.type && getFieldTypeIcon(data?.type)}
                     <Typography variant="h6" component="span">
@@ -280,7 +275,7 @@ const AddRequirementForm = ({
             <DialogContent sx={{ py: 3 }}>
                 <Grid container spacing={3}>
                     {/* Field Label */}
-                    <Grid size={{xs:12, md:6}}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                             fullWidth
                             name="label"
@@ -290,16 +285,18 @@ const AddRequirementForm = ({
                             placeholder="Enter field label"
                             required
                             error={!!errors?.label}
-                            helperText={errors?.label || "The label that will be displayed for this field"}
-                            multiline={data?.type === "description"}
-                            rows={data?.type === "description" ? 3 : 1}
+                            helperText={
+                                errors?.label || 'The label that will be displayed for this field'
+                            }
+                            multiline={data?.type === 'description'}
+                            rows={data?.type === 'description' ? 3 : 1}
                             disabled={disabled}
                             autoFocus
                         />
                     </Grid>
 
                     {/* Field Type */}
-                    <Grid size={{xs:12, md:6}}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                             fullWidth
                             select
@@ -317,8 +314,8 @@ const AddRequirementForm = ({
                                         <InputAdornment position="start">
                                             {getFieldTypeIcon(data?.type)}
                                         </InputAdornment>
-                                    ) : undefined
-                                }
+                                    ) : undefined,
+                                },
                             }}
                         >
                             <MenuItem value="text">Text Field</MenuItem>
@@ -331,7 +328,7 @@ const AddRequirementForm = ({
                     </Grid>
 
                     {/* Required switch */}
-                    <Grid size={{xs:12, md:6}}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                         <FormControl component="fieldset">
                             <FormControlLabel
                                 control={
@@ -355,7 +352,7 @@ const AddRequirementForm = ({
 
                     {/* Placeholder field */}
                     {(data?.type === 'text' || data?.type === 'number') && (
-                        <Grid size={{xs:12, md:6}}>
+                        <Grid size={{ xs: 12, md: 6 }}>
                             <TextField
                                 fullWidth
                                 name="placeholder"
@@ -371,7 +368,7 @@ const AddRequirementForm = ({
 
                     {/* Options for select type */}
                     {data?.type === 'select' && (
-                        <Grid size={{xs:12}}>
+                        <Grid size={{ xs: 12 }}>
                             <Autocomplete
                                 multiple
                                 value={data.options || []}
@@ -399,7 +396,10 @@ const AddRequirementForm = ({
                                         placeholder="Type and press Enter to add options"
                                         fullWidth
                                         error={!!errors.options}
-                                        helperText={errors.options || "Add the options that will appear in the dropdown list"}
+                                        helperText={
+                                            errors.options ||
+                                            'Add the options that will appear in the dropdown list'
+                                        }
                                     />
                                 )}
                             />
@@ -419,7 +419,7 @@ const AddRequirementForm = ({
 
                     {/* Field preview */}
                     {data?.label && data?.type && (
-                        <Grid size={{xs:12}}>
+                        <Grid size={{ xs: 12 }}>
                             <Typography variant="subtitle2" gutterBottom>
                                 Field Preview
                             </Typography>
@@ -430,11 +430,15 @@ const AddRequirementForm = ({
                                     border: '1px solid',
                                     borderColor: 'divider',
                                     borderRadius: 1,
-                                    bgcolor: alpha('#f5f5f5', 0.5)
+                                    bgcolor: alpha('#f5f5f5', 0.5),
                                 }}
                             >
                                 {data?.type === 'description' ? (
-                                    <Typography variant="subtitle1" fontWeight={500} color="primary">
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight={500}
+                                        color="primary"
+                                    >
                                         {data?.label || 'Section Title'}
                                     </Typography>
                                 ) : (
@@ -477,9 +481,11 @@ const AddRequirementForm = ({
                                                 size="small"
                                                 disabled
                                                 fullWidth
-                                                slotProps={{ inputLabel: {
-                                                    shrink: true,
-                                                } }}
+                                                slotProps={{
+                                                    inputLabel: {
+                                                        shrink: true,
+                                                    },
+                                                }}
                                             />
                                         )}
 
@@ -518,11 +524,7 @@ const AddRequirementForm = ({
 
             {/* Dialog actions */}
             <DialogActions sx={{ px: 3, py: 2 }}>
-                <Button
-                    onClick={handleClose}
-                    startIcon={<Cancel />}
-                    disabled={disabled}
-                >
+                <Button onClick={handleClose} startIcon={<Cancel />} disabled={disabled}>
                     Cancel
                 </Button>
 

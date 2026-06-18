@@ -1,8 +1,8 @@
-import React, {useState, useEffect} from "react";
-import Grid from "@mui/material/Grid";
-import Editor from "@/Components/Editor";
-import Button from "@mui/material/Button";
-import DialogTitle from "@mui/material/DialogTitle";
+import React, { useState, useEffect } from 'react';
+import Grid from '@mui/material/Grid';
+import Editor from '@/Components/Editor';
+import Button from '@mui/material/Button';
+import DialogTitle from '@mui/material/DialogTitle';
 import {
     Dialog,
     DialogActions,
@@ -27,8 +27,8 @@ import {
     RadioGroup,
     FormControlLabel,
     Radio,
-} from "@mui/material";
-import Upload from "@/Components/Upload";
+} from '@mui/material';
+import Upload from '@/Components/Upload';
 import {
     ThumbUpAlt,
     InfoOutlined,
@@ -39,29 +39,29 @@ import {
     Description,
     PictureAsPdf,
     Visibility,
-    InsertDriveFile
-} from "@mui/icons-material";
+    InsertDriveFile,
+} from '@mui/icons-material';
 
 /**
  * ApproveForm Component - A dialog for approving reports or updating clinical reports
  */
 const ApproveForm = ({
-                         data,
-                         onSubmit,
-                         open,
-                         setData,
-                         onCancel,
-                         documents = [],
-                         clinicalCommentTemplateUrl,
-                         processing = false
-                     }) => {
+    data,
+    onSubmit,
+    open,
+    setData,
+    onCancel,
+    documents = [],
+    clinicalCommentTemplateUrl,
+    processing = false,
+}) => {
     const [activeTab, setActiveTab] = useState(0);
     const [errors, setErrors] = useState({});
     const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
     const [clinicalDocumentMode, setClinicalDocumentMode] = useState('upload'); // 'upload' or 'select'
 
     const isUpdateMode = Boolean(data?.approver);
-    const dialogTitle = isUpdateMode ? "Update Clinical Report" : "Approve Report";
+    const dialogTitle = isUpdateMode ? 'Update Clinical Report' : 'Approve Report';
 
     // Reset state when dialog opens/closes
     useEffect(() => {
@@ -86,44 +86,44 @@ const ApproveForm = ({
 
     // Handle form field changes
     const handleEditorChange = (value) => {
-        setData(prevState => ({
+        setData((prevState) => ({
             ...prevState,
-            clinical_comment: value
+            clinical_comment: value,
         }));
     };
 
     // Handle published report selection
     const handlePublishedReportChange = (event) => {
         const selectedDocumentId = event.target.value;
-        const selectedDocument = documents.find(doc =>
-            (doc.hash ?? doc.id) === selectedDocumentId
+        const selectedDocument = documents.find(
+            (doc) => (doc.hash ?? doc.id) === selectedDocumentId,
         );
 
-        setData(prevState => ({
+        setData((prevState) => ({
             ...prevState,
             published_report: selectedDocumentId,
             published_report_document: selectedDocument,
             // Clear clinical document if it's the same as published report
             ...(prevState.clinical_comment_document_id === selectedDocumentId && {
                 clinical_comment_document_id: '',
-                clinical_comment_document: null
-            })
+                clinical_comment_document: null,
+            }),
         }));
     };
 
     // Handle clinical document selection from existing documents
     const handleClinicalDocumentChange = (event) => {
         const selectedDocumentId = event.target.value;
-        const selectedDocument = documents.find(doc =>
-            (doc.hash ?? doc.id) === selectedDocumentId
+        const selectedDocument = documents.find(
+            (doc) => (doc.hash ?? doc.id) === selectedDocumentId,
         );
 
-        setData(prevState => ({
+        setData((prevState) => ({
             ...prevState,
             clinical_comment_document_id: selectedDocumentId,
             clinical_comment_document: selectedDocument,
             // Clear uploaded document and editor content when selecting existing
-            clinical_comment: ''
+            clinical_comment: '',
         }));
     };
 
@@ -133,23 +133,21 @@ const ApproveForm = ({
         setClinicalDocumentMode(mode);
 
         // Clear relevant fields when switching modes
-        setData(prevState => ({
+        setData((prevState) => ({
             ...prevState,
             ...(mode === 'upload' && {
                 clinical_comment_document_id: '',
             }),
             ...(mode === 'select' && {
                 clinical_comment_document: null,
-                clinical_comment: ''
-            })
+                clinical_comment: '',
+            }),
         }));
     };
 
     // Get available documents for clinical report (excluding published report)
     const getAvailableClinicalDocuments = () => {
-        return documents.filter(doc =>
-            (doc.hash ?? doc.id) !== data.published_report
-        );
+        return documents.filter((doc) => (doc.hash ?? doc.id) !== data.published_report);
     };
 
     // Get the view URL for a document
@@ -169,7 +167,7 @@ const ApproveForm = ({
         if (!bytes) return '';
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(1024));
-        return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
     };
 
     const availableClinicalDocuments = getAvailableClinicalDocuments();
@@ -180,15 +178,15 @@ const ApproveForm = ({
             onClose={!processing ? onCancel : undefined}
             fullWidth
             maxWidth="md"
-            slots={{Transition: Fade}}
+            slots={{ Transition: Fade }}
             transitionDuration={300}
             slotProps={{
                 Paper: {
                     sx: {
                         borderRadius: 2,
-                        overflow: 'hidden'
-                    }
-                }
+                        overflow: 'hidden',
+                    },
+                },
             }}
         >
             <DialogTitle
@@ -197,20 +195,22 @@ const ApproveForm = ({
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     p: 2.5,
-                    bgcolor: 'background.default'
+                    bgcolor: 'background.default',
                 }}
             >
-  <Stack direction="row" spacing={1.5} sx={{alignItems: "center"}}>
-                    {isUpdateMode ? <EditNote color="primary"/> : <ThumbUpAlt color="primary"/>}
-                    <Typography variant="h6" component="span">{dialogTitle}</Typography>
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+                    {isUpdateMode ? <EditNote color="primary" /> : <ThumbUpAlt color="primary" />}
+                    <Typography variant="h6" component="span">
+                        {dialogTitle}
+                    </Typography>
                 </Stack>
 
-  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                     {clinicalCommentTemplateUrl && (
                         <Tooltip title="Download Template">
                             <Button
                                 size="small"
-                                startIcon={<FileDownloadOutlined/>}
+                                startIcon={<FileDownloadOutlined />}
                                 href={clinicalCommentTemplateUrl}
                                 target="_blank"
                                 variant="outlined"
@@ -230,28 +230,23 @@ const ApproveForm = ({
                             aria-label="close"
                             size="small"
                         >
-                            <Close/>
+                            <Close />
                         </IconButton>
                     </Tooltip>
                 </Stack>
             </DialogTitle>
 
-            <Divider/>
+            <Divider />
 
-            <DialogContent sx={{p: 3}}>
-                <Alert
-                    severity="info"
-                    variant="outlined"
-                    icon={<InfoOutlined/>}
-                    sx={{mb: 3}}
-                >
+            <DialogContent sx={{ p: 3 }}>
+                <Alert severity="info" variant="outlined" icon={<InfoOutlined />} sx={{ mb: 3 }}>
                     {isUpdateMode
-                        ? "Update the clinical report by selecting an existing document, uploading a new PDF, or using the built-in editor."
-                        : "Approve this report by selecting an existing document, uploading a clinical report document, or creating one with the editor."}
+                        ? 'Update the clinical report by selecting an existing document, uploading a new PDF, or using the built-in editor.'
+                        : 'Approve this report by selecting an existing document, uploading a clinical report document, or creating one with the editor.'}
                 </Alert>
 
                 {/* Published Report Selection */}
-                <Grid container spacing={3} sx={{mb: 3}}>
+                <Grid container spacing={3} sx={{ mb: 3 }}>
                     <Grid size={12}>
                         <Typography
                             variant="subtitle1"
@@ -259,10 +254,10 @@ const ApproveForm = ({
                             sx={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: 1
+                                gap: 1,
                             }}
                         >
-                            <PictureAsPdf fontSize="small"/>
+                            <PictureAsPdf fontSize="small" />
                             Published Report
                         </Typography>
 
@@ -278,8 +273,8 @@ const ApproveForm = ({
                                 label="Select Published Report"
                                 disabled={processing || documents.length === 0}
                                 renderValue={(selected) => {
-                                    const selectedDoc = documents.find(doc =>
-                                        (doc.hash ?? doc.id) === selected
+                                    const selectedDoc = documents.find(
+                                        (doc) => (doc.hash ?? doc.id) === selected,
                                     );
                                     return selectedDoc ? (
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -294,7 +289,9 @@ const ApproveForm = ({
                                                 variant="outlined"
                                             />
                                         </Box>
-                                    ) : '';
+                                    ) : (
+                                        ''
+                                    );
                                 }}
                             >
                                 {documents.length === 0 ? (
@@ -309,23 +306,44 @@ const ApproveForm = ({
                                             key={document.hash ?? document.id}
                                             value={document.hash ?? document.id}
                                         >
-                                            <Box sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'space-between',
-                                                width: '100%',
-                                                gap: 2
-                                            }}>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between',
+                                                    width: '100%',
+                                                    gap: 2,
+                                                }}
+                                            >
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: 1,
+                                                        flex: 1,
+                                                    }}
+                                                >
                                                     <PictureAsPdf fontSize="small" color="error" />
                                                     <Box sx={{ flex: 1 }}>
                                                         <Box>
                                                             <Typography variant="body2">
                                                                 {formatDocumentName(document)}
                                                             </Typography>
-                                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 0.25 }}>
-                                                                <Typography variant="caption" color="text.secondary">
-                                                                    {new Date(document.created_at).toLocaleDateString()}
+                                                            <Box
+                                                                sx={{
+                                                                    display: 'flex',
+                                                                    gap: 1,
+                                                                    alignItems: 'center',
+                                                                    mt: 0.25,
+                                                                }}
+                                                            >
+                                                                <Typography
+                                                                    variant="caption"
+                                                                    color="text.secondary"
+                                                                >
+                                                                    {new Date(
+                                                                        document.created_at,
+                                                                    ).toLocaleDateString()}
                                                                 </Typography>
                                                                 {document.tag && (
                                                                     <Chip
@@ -345,7 +363,10 @@ const ApproveForm = ({
                                                         size="small"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            window.open(getDocumentViewUrl(document), '_blank');
+                                                            window.open(
+                                                                getDocumentViewUrl(document),
+                                                                '_blank',
+                                                            );
                                                         }}
                                                         sx={{ ml: 1 }}
                                                     >
@@ -361,7 +382,7 @@ const ApproveForm = ({
                     </Grid>
                 </Grid>
 
-                <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs
                         value={activeTab}
                         onChange={handleTabChange}
@@ -369,13 +390,13 @@ const ApproveForm = ({
                         variant="fullWidth"
                     >
                         <Tab
-                            icon={<InsertDriveFile fontSize="small"/>}
+                            icon={<InsertDriveFile fontSize="small" />}
                             label="Select/Upload Document"
                             id="tab-0"
                             aria-controls="tabpanel-0"
                         />
                         <Tab
-                            icon={<EditNote fontSize="small"/>}
+                            icon={<EditNote fontSize="small" />}
                             label="Create Clinical Report"
                             id="tab-1"
                             aria-controls="tabpanel-1"
@@ -389,10 +410,10 @@ const ApproveForm = ({
                     hidden={activeTab !== 0}
                     id="tabpanel-0"
                     aria-labelledby="tab-0"
-                    sx={{mt: 2}}
+                    sx={{ mt: 2 }}
                 >
                     {activeTab === 0 && (
-  <Grid container spacing={3} sx={{justifyContent: "center"}}>
+                        <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
                             <Grid size={12}>
                                 <Typography
                                     variant="subtitle1"
@@ -400,10 +421,10 @@ const ApproveForm = ({
                                     sx={{
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: 1
+                                        gap: 1,
                                     }}
                                 >
-                                    <Description fontSize="small"/>
+                                    <Description fontSize="small" />
                                     Clinical Report Document
                                 </Typography>
 
@@ -447,12 +468,21 @@ const ApproveForm = ({
                                             label="Select Clinical Document"
                                             disabled={processing}
                                             renderValue={(selected) => {
-                                                const selectedDoc = availableClinicalDocuments.find(doc =>
-                                                    (doc.hash ?? doc.id) === selected
+                                                const selectedDoc = availableClinicalDocuments.find(
+                                                    (doc) => (doc.hash ?? doc.id) === selected,
                                                 );
                                                 return selectedDoc ? (
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <PictureAsPdf fontSize="small" color="error" />
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 1,
+                                                        }}
+                                                    >
+                                                        <PictureAsPdf
+                                                            fontSize="small"
+                                                            color="error"
+                                                        />
                                                         <Typography variant="body2">
                                                             {formatDocumentName(selectedDoc)}
                                                         </Typography>
@@ -463,13 +493,16 @@ const ApproveForm = ({
                                                             variant="outlined"
                                                         />
                                                     </Box>
-                                                ) : '';
+                                                ) : (
+                                                    ''
+                                                );
                                             }}
                                         >
                                             {availableClinicalDocuments.length === 0 ? (
                                                 <MenuItem disabled>
                                                     <Typography color="text.secondary">
-                                                        No available documents (excluding published report)
+                                                        No available documents (excluding published
+                                                        report)
                                                     </Typography>
                                                 </MenuItem>
                                             ) : (
@@ -478,27 +511,56 @@ const ApproveForm = ({
                                                         key={document.hash ?? document.id}
                                                         value={document.hash ?? document.id}
                                                     >
-                                                        <Box sx={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'space-between',
-                                                            width: '100%',
-                                                            gap: 2
-                                                        }}>
-                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
-                                                                <PictureAsPdf fontSize="small" color="error" />
+                                                        <Box
+                                                            sx={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'space-between',
+                                                                width: '100%',
+                                                                gap: 2,
+                                                            }}
+                                                        >
+                                                            <Box
+                                                                sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: 1,
+                                                                    flex: 1,
+                                                                }}
+                                                            >
+                                                                <PictureAsPdf
+                                                                    fontSize="small"
+                                                                    color="error"
+                                                                />
                                                                 <Box sx={{ flex: 1 }}>
                                                                     <Box>
                                                                         <Typography variant="body2">
-                                                                            {formatDocumentName(document)}
+                                                                            {formatDocumentName(
+                                                                                document,
+                                                                            )}
                                                                         </Typography>
-                                                                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 0.25 }}>
-                                                                            <Typography variant="caption" color="text.secondary">
-                                                                                {new Date(document.created_at).toLocaleDateString()}
+                                                                        <Box
+                                                                            sx={{
+                                                                                display: 'flex',
+                                                                                gap: 1,
+                                                                                alignItems:
+                                                                                    'center',
+                                                                                mt: 0.25,
+                                                                            }}
+                                                                        >
+                                                                            <Typography
+                                                                                variant="caption"
+                                                                                color="text.secondary"
+                                                                            >
+                                                                                {new Date(
+                                                                                    document.created_at,
+                                                                                ).toLocaleDateString()}
                                                                             </Typography>
                                                                             {document.tag && (
                                                                                 <Chip
-                                                                                    label={document.tag}
+                                                                                    label={
+                                                                                        document.tag
+                                                                                    }
                                                                                     size="small"
                                                                                     color="secondary"
                                                                                     variant="outlined"
@@ -514,7 +576,12 @@ const ApproveForm = ({
                                                                     size="small"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
-                                                                        window.open(getDocumentViewUrl(document), '_blank');
+                                                                        window.open(
+                                                                            getDocumentViewUrl(
+                                                                                document,
+                                                                            ),
+                                                                            '_blank',
+                                                                        );
                                                                     }}
                                                                     sx={{ ml: 1 }}
                                                                 >
@@ -537,10 +604,10 @@ const ApproveForm = ({
                                         name="clinical_comment_document"
                                         editable={!processing}
                                         onChange={setData}
-                                        accept={".pdf"}
-                                        url={route("documents.store")}
+                                        accept={'.pdf'}
+                                        url={route('documents.store')}
                                         placeholder="Select or drag and drop a PDF file"
-                                        icon={<CloudUploadOutlined/>}
+                                        icon={<CloudUploadOutlined />}
                                     />
                                 )}
                             </Grid>
@@ -554,10 +621,10 @@ const ApproveForm = ({
                     hidden={activeTab !== 1}
                     id="tabpanel-1"
                     aria-labelledby="tab-1"
-                    sx={{mt: 2}}
+                    sx={{ mt: 2 }}
                 >
                     {activeTab === 1 && (
-  <Grid container spacing={3} sx={{justifyContent: "center"}}>
+                        <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
                             <Grid size={12}>
                                 <Typography
                                     variant="subtitle1"
@@ -565,10 +632,10 @@ const ApproveForm = ({
                                     sx={{
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: 1
+                                        gap: 1,
                                     }}
                                 >
-                                    <EditNote fontSize="small"/>
+                                    <EditNote fontSize="small" />
                                     Create Clinical Report
                                 </Typography>
 
@@ -577,7 +644,7 @@ const ApproveForm = ({
                                     sx={{
                                         p: 1,
                                         minHeight: '300px',
-                                        borderRadius: 1
+                                        borderRadius: 1,
                                     }}
                                 >
                                     <Editor
@@ -593,14 +660,10 @@ const ApproveForm = ({
                 </Box>
             </DialogContent>
 
-            <Divider/>
+            <Divider />
 
-            <DialogActions sx={{p: 2.5, justifyContent: 'space-between'}}>
-                <Button
-                    onClick={onCancel}
-                    color="inherit"
-                    disabled={processing}
-                >
+            <DialogActions sx={{ p: 2.5, justifyContent: 'space-between' }}>
+                <Button onClick={onCancel} color="inherit" disabled={processing}>
                     Cancel
                 </Button>
 
@@ -609,12 +672,23 @@ const ApproveForm = ({
                     variant="contained"
                     color="primary"
                     disabled={processing}
-                    startIcon={processing ? <CircularProgress size={20} color="inherit"/> : (isUpdateMode ?
-                        <EditNote/> : <ThumbUpAlt/>)}
+                    startIcon={
+                        processing ? (
+                            <CircularProgress size={20} color="inherit" />
+                        ) : isUpdateMode ? (
+                            <EditNote />
+                        ) : (
+                            <ThumbUpAlt />
+                        )
+                    }
                 >
                     {processing
-                        ? (isUpdateMode ? 'Updating...' : 'Approving...')
-                        : (isUpdateMode ? 'Update' : 'Approve')}
+                        ? isUpdateMode
+                            ? 'Updating...'
+                            : 'Approving...'
+                        : isUpdateMode
+                          ? 'Update'
+                          : 'Approve'}
                 </Button>
             </DialogActions>
         </Dialog>

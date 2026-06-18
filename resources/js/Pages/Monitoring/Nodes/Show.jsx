@@ -1,71 +1,100 @@
-import {useMemo, useState} from "react";
-import {Head, router, useForm, usePage} from "@inertiajs/react";
-import dayjs from "dayjs";
-import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
-import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
-import {DateTimePicker} from "@mui/x-date-pickers/DateTimePicker";
+import { useMemo, useState } from 'react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import dayjs from 'dayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import {
-    Alert, Box, Button, ButtonGroup, Card, CardContent, CardHeader, Chip,
-    Divider, FormControl, Grid, InputLabel, ListItemIcon, Menu, MenuItem,
-    Select, TextField, Typography,
-} from "@mui/material";
-import {useTheme} from "@mui/material/styles";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import DownloadIcon from "@mui/icons-material/Download";
-import SyncIcon from "@mui/icons-material/Sync";
-import TodayIcon from "@mui/icons-material/Today";
-import DateRangeIcon from "@mui/icons-material/DateRange";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import TuneIcon from "@mui/icons-material/Tune";
-import SignalCellularAltIcon from "@mui/icons-material/SignalCellularAlt";
-import BatteryChargingFullIcon from "@mui/icons-material/BatteryChargingFull";
-import WifiIcon from "@mui/icons-material/Wifi";
-import WifiOffIcon from "@mui/icons-material/WifiOff";
-import ThermostatIcon from "@mui/icons-material/Thermostat";
-import WaterDropIcon from "@mui/icons-material/WaterDrop";
+    Alert,
+    Box,
+    Button,
+    ButtonGroup,
+    Card,
+    CardContent,
+    CardHeader,
+    Chip,
+    Divider,
+    FormControl,
+    Grid,
+    InputLabel,
+    ListItemIcon,
+    Menu,
+    MenuItem,
+    Select,
+    TextField,
+    Typography,
+} from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import DownloadIcon from '@mui/icons-material/Download';
+import SyncIcon from '@mui/icons-material/Sync';
+import TodayIcon from '@mui/icons-material/Today';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import TuneIcon from '@mui/icons-material/Tune';
+import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
+import BatteryChargingFullIcon from '@mui/icons-material/BatteryChargingFull';
+import WifiIcon from '@mui/icons-material/Wifi';
+import WifiOffIcon from '@mui/icons-material/WifiOff';
+import ThermostatIcon from '@mui/icons-material/Thermostat';
+import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import {
-    ComposedChart, Line, XAxis, YAxis, CartesianGrid,
-    Tooltip as ChartTooltip, Legend, ResponsiveContainer,
-} from "recharts";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import PageHeader from "@/Components/PageHeader";
+    ComposedChart,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip as ChartTooltip,
+    Legend,
+    ResponsiveContainer,
+} from 'recharts';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PageHeader from '@/Components/PageHeader';
 
 const PERIODS = [
-    {key: "today", label: "Today",      icon: <TodayIcon fontSize="small"/>},
-    {key: "week",  label: "This Week",  icon: <DateRangeIcon fontSize="small"/>},
-    {key: "month", label: "This Month", icon: <CalendarMonthIcon fontSize="small"/>},
-    {key: "year",  label: "This Year",  icon: <CalendarTodayIcon fontSize="small"/>},
-    {key: "custom",label: "Custom",     icon: <TuneIcon fontSize="small"/>},
+    { key: 'today', label: 'Today', icon: <TodayIcon fontSize="small" /> },
+    { key: 'week', label: 'This Week', icon: <DateRangeIcon fontSize="small" /> },
+    { key: 'month', label: 'This Month', icon: <CalendarMonthIcon fontSize="small" /> },
+    { key: 'year', label: 'This Year', icon: <CalendarTodayIcon fontSize="small" /> },
+    { key: 'custom', label: 'Custom', icon: <TuneIcon fontSize="small" /> },
 ];
 
-const Field = ({label, children}) => (
-    <Box sx={{py: 0.75}}>
-        <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
-        <Typography variant="body2" fontWeight={500} component="div">{children ?? "—"}</Typography>
+const Field = ({ label, children }) => (
+    <Box sx={{ py: 0.75 }}>
+        <Typography variant="caption" color="text.secondary" display="block">
+            {label}
+        </Typography>
+        <Typography variant="body2" fontWeight={500} component="div">
+            {children ?? '—'}
+        </Typography>
     </Box>
 );
 
-const formatTime = (ts, tz) => ts
-    ? new Date(ts * 1000).toLocaleString([], {timeZone: tz})
-    : "—";
+const formatTime = (ts, tz) =>
+    ts ? new Date(ts * 1000).toLocaleString([], { timeZone: tz }) : '—';
 
 const tickFormatter = (ts, period, tz) => {
     const d = new Date(ts * 1000);
-    if (period === "year" || period === "month")
-        return d.toLocaleDateString([], {timeZone: tz, month: "short", day: "numeric"});
-    if (period === "week")
-        return d.toLocaleString([], {timeZone: tz, weekday: "short", hour: "2-digit", minute: "2-digit"});
-    return d.toLocaleTimeString([], {timeZone: tz, hour: "2-digit", minute: "2-digit"});
+    if (period === 'year' || period === 'month')
+        return d.toLocaleDateString([], { timeZone: tz, month: 'short', day: 'numeric' });
+    if (period === 'week')
+        return d.toLocaleString([], {
+            timeZone: tz,
+            weekday: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    return d.toLocaleTimeString([], { timeZone: tz, hour: '2-digit', minute: '2-digit' });
 };
 
-const SensorChart = ({samples, hasHumidity, period, tz}) => {
+const SensorChart = ({ samples, hasHumidity, period, tz }) => {
     const theme = useTheme();
 
     if (samples.length === 0) {
         return (
-            <Box sx={{py: 4, textAlign: "center"}}>
+            <Box sx={{ py: 4, textAlign: 'center' }}>
                 <Typography color="text.secondary">No data for this period.</Typography>
             </Box>
         );
@@ -73,20 +102,23 @@ const SensorChart = ({samples, hasHumidity, period, tz}) => {
 
     return (
         <ResponsiveContainer width="100%" height={280}>
-            <ComposedChart data={samples} margin={{top: 8, right: hasHumidity ? 40 : 16, left: 0, bottom: 4}}>
-                <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider}/>
+            <ComposedChart
+                data={samples}
+                margin={{ top: 8, right: hasHumidity ? 40 : 16, left: 0, bottom: 4 }}
+            >
+                <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
                 <XAxis
                     dataKey="time"
                     tickFormatter={(ts) => tickFormatter(ts, period, tz)}
-                    tick={{fontSize: 11, fill: theme.palette.text.secondary}}
+                    tick={{ fontSize: 11, fill: theme.palette.text.secondary }}
                     tickLine={false}
-                    axisLine={{stroke: theme.palette.divider}}
+                    axisLine={{ stroke: theme.palette.divider }}
                     minTickGap={40}
                 />
                 <YAxis
                     yAxisId="temp"
                     tickFormatter={(v) => `${v}°`}
-                    tick={{fontSize: 11, fill: theme.palette.text.secondary}}
+                    tick={{ fontSize: 11, fill: theme.palette.text.secondary }}
                     tickLine={false}
                     axisLine={false}
                     width={42}
@@ -97,7 +129,7 @@ const SensorChart = ({samples, hasHumidity, period, tz}) => {
                         orientation="right"
                         domain={[0, 100]}
                         tickFormatter={(v) => `${v}%`}
-                        tick={{fontSize: 11, fill: theme.palette.text.secondary}}
+                        tick={{ fontSize: 11, fill: theme.palette.text.secondary }}
                         tickLine={false}
                         axisLine={false}
                         width={38}
@@ -112,14 +144,14 @@ const SensorChart = ({samples, hasHumidity, period, tz}) => {
                     }}
                     labelFormatter={(ts) => formatTime(ts, tz)}
                     formatter={(value, key) =>
-                        key === "temperature"
-                            ? [`${value} °C`, "Temperature"]
-                            : [`${value} %`, "Humidity"]
+                        key === 'temperature'
+                            ? [`${value} °C`, 'Temperature']
+                            : [`${value} %`, 'Humidity']
                     }
                 />
                 <Legend
-                    formatter={(key) => key === "temperature" ? "Temperature" : "Humidity"}
-                    wrapperStyle={{fontSize: 12}}
+                    formatter={(key) => (key === 'temperature' ? 'Temperature' : 'Humidity')}
+                    wrapperStyle={{ fontSize: 12 }}
                 />
                 <Line
                     yAxisId="temp"
@@ -146,45 +178,45 @@ const SensorChart = ({samples, hasHumidity, period, tz}) => {
     );
 };
 
-const PeriodBar = ({nodeId, activePeriod, beginTime, endTime}) => {
-    const [showCustom, setShowCustom] = useState(activePeriod === "custom");
-    const [begin, setBegin]           = useState(beginTime ? dayjs.unix(beginTime) : null);
-    const [end,   setEnd]             = useState(endTime   ? dayjs.unix(endTime)   : null);
+const PeriodBar = ({ nodeId, activePeriod, beginTime, endTime }) => {
+    const [showCustom, setShowCustom] = useState(activePeriod === 'custom');
+    const [begin, setBegin] = useState(beginTime ? dayjs.unix(beginTime) : null);
+    const [end, setEnd] = useState(endTime ? dayjs.unix(endTime) : null);
 
     const navigate = (period) => {
-        if (period === "custom") {
+        if (period === 'custom') {
             setShowCustom(true);
             return;
         }
         setShowCustom(false);
         const now = dayjs();
         const ranges = {
-            today: [now.startOf("day"),   now.endOf("day")],
-            week:  [now.startOf("week"),  now.endOf("week")],
-            month: [now.startOf("month"), now.endOf("month")],
-            year:  [now.startOf("year"),  now.endOf("year")],
+            today: [now.startOf('day'), now.endOf('day')],
+            week: [now.startOf('week'), now.endOf('week')],
+            month: [now.startOf('month'), now.endOf('month')],
+            year: [now.startOf('year'), now.endOf('year')],
         };
         const [begin, end] = ranges[period] ?? ranges.today;
-        router.visit(route("monitoring.nodes.show", nodeId), {
-            data: {period, beginTime: begin.unix(), endTime: end.unix()},
+        router.visit(route('monitoring.nodes.show', nodeId), {
+            data: { period, beginTime: begin.unix(), endTime: end.unix() },
         });
     };
 
     const applyCustom = () => {
-        const params = {period: "custom"};
+        const params = { period: 'custom' };
         if (begin) params.beginTime = begin.unix();
-        if (end)   params.endTime   = end.unix();
-        router.visit(route("monitoring.nodes.show", nodeId), {data: params});
+        if (end) params.endTime = end.unix();
+        router.visit(route('monitoring.nodes.show', nodeId), { data: params });
     };
 
     return (
-        <Box sx={{mb: 2}}>
-            <ButtonGroup size="small" variant="outlined" sx={{mb: showCustom ? 1.5 : 0}}>
-                {PERIODS.map(({key, label, icon}) => (
+        <Box sx={{ mb: 2 }}>
+            <ButtonGroup size="small" variant="outlined" sx={{ mb: showCustom ? 1.5 : 0 }}>
+                {PERIODS.map(({ key, label, icon }) => (
                     <Button
                         key={key}
                         startIcon={icon}
-                        variant={activePeriod === key ? "contained" : "outlined"}
+                        variant={activePeriod === key ? 'contained' : 'outlined'}
                         onClick={() => navigate(key)}
                     >
                         {label}
@@ -194,25 +226,34 @@ const PeriodBar = ({nodeId, activePeriod, beginTime, endTime}) => {
 
             {showCustom && (
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <Box sx={{
-                        display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap",
-                        p: 1.5, bgcolor: "action.hover", borderRadius: 1,
-                    }}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            gap: 1.5,
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                            p: 1.5,
+                            bgcolor: 'action.hover',
+                            borderRadius: 1,
+                        }}
+                    >
                         <DateTimePicker
                             label="From"
                             value={begin}
                             onChange={setBegin}
                             maxDateTime={end ?? undefined}
-                            slotProps={{textField: {size: "small", sx: {minWidth: 200}}}}
+                            slotProps={{ textField: { size: 'small', sx: { minWidth: 200 } } }}
                         />
                         <DateTimePicker
                             label="To"
                             value={end}
                             onChange={setEnd}
                             minDateTime={begin ?? undefined}
-                            slotProps={{textField: {size: "small", sx: {minWidth: 200}}}}
+                            slotProps={{ textField: { size: 'small', sx: { minWidth: 200 } } }}
                         />
-                        <Button variant="contained" size="small" onClick={applyCustom}>Apply</Button>
+                        <Button variant="contained" size="small" onClick={applyCustom}>
+                            Apply
+                        </Button>
                     </Box>
                 </LocalizationProvider>
             )}
@@ -220,27 +261,31 @@ const PeriodBar = ({nodeId, activePeriod, beginTime, endTime}) => {
     );
 };
 
-const FetchButton = ({nodeId}) => {
+const FetchButton = ({ nodeId }) => {
     const [anchor, setAnchor] = useState(null);
 
     const fetch = (period) => {
         setAnchor(null);
-        router.post(route("monitoring.nodes.fetch", nodeId), {period});
+        router.post(route('monitoring.nodes.fetch', nodeId), { period });
     };
 
     return (
         <>
             <ButtonGroup variant="contained" size="small">
-                <Button startIcon={<SyncIcon/>} onClick={() => fetch("today")}>
+                <Button startIcon={<SyncIcon />} onClick={() => fetch('today')}>
                     Fetch Now
                 </Button>
-                <Button size="small" sx={{px: 0.5, minWidth: 28}} onClick={(e) => setAnchor(e.currentTarget)}>
-                    <ArrowDropDownIcon fontSize="small"/>
+                <Button
+                    size="small"
+                    sx={{ px: 0.5, minWidth: 28 }}
+                    onClick={(e) => setAnchor(e.currentTarget)}
+                >
+                    <ArrowDropDownIcon fontSize="small" />
                 </Button>
             </ButtonGroup>
 
             <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)}>
-                {PERIODS.filter(p => p.key !== "custom").map(({key, label, icon}) => (
+                {PERIODS.filter((p) => p.key !== 'custom').map(({ key, label, icon }) => (
                     <MenuItem key={key} onClick={() => fetch(key)} dense>
                         <ListItemIcon>{icon}</ListItemIcon>
                         {label}
@@ -251,38 +296,48 @@ const FetchButton = ({nodeId}) => {
     );
 };
 
-const SectionForm = ({nodeId, sections, sectionId, notes}) => {
-    const {data, setData, put, processing, errors} = useForm({
-        section_id: sectionId ?? "",
-        notes:      notes    ?? "",
+const SectionForm = ({ nodeId, sections, sectionId, notes }) => {
+    const { data, setData, put, processing, errors } = useForm({
+        section_id: sectionId ?? '',
+        notes: notes ?? '',
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(route("monitoring.nodes.updateSection", nodeId));
+        put(route('monitoring.nodes.updateSection', nodeId));
     };
 
     return (
         <Box component="form" onSubmit={handleSubmit}>
-            <FormControl fullWidth size="small" sx={{mb: 2}}>
+            <FormControl fullWidth size="small" sx={{ mb: 2 }}>
                 <InputLabel>Section</InputLabel>
                 <Select
                     label="Section"
                     value={data.section_id}
-                    onChange={(e) => setData("section_id", e.target.value)}
+                    onChange={(e) => setData('section_id', e.target.value)}
                     error={!!errors.section_id}
                 >
-                    <MenuItem value=""><em>None</em></MenuItem>
+                    <MenuItem value="">
+                        <em>None</em>
+                    </MenuItem>
                     {sections.map((s) => (
-                        <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>
+                        <MenuItem key={s.id} value={s.id}>
+                            {s.name}
+                        </MenuItem>
                     ))}
                 </Select>
             </FormControl>
             <TextField
-                fullWidth size="small" label="Notes" multiline rows={2}
-                value={data.notes} onChange={(e) => setData("notes", e.target.value)}
-                error={!!errors.notes} helperText={errors.notes}
-                sx={{mb: 2}}
+                fullWidth
+                size="small"
+                label="Notes"
+                multiline
+                rows={2}
+                value={data.notes}
+                onChange={(e) => setData('notes', e.target.value)}
+                error={!!errors.notes}
+                helperText={errors.notes}
+                sx={{ mb: 2 }}
             />
             <Button type="submit" size="small" variant="contained" disabled={processing}>
                 Save
@@ -292,28 +347,42 @@ const SectionForm = ({nodeId, sections, sectionId, notes}) => {
 };
 
 const Show = () => {
-    const {node, samples = [], sections = [], period = "today", beginTime, endTime, success, status, appTimezone = "UTC"} = usePage().props;
+    const {
+        node,
+        samples = [],
+        sections = [],
+        period = 'today',
+        beginTime,
+        endTime,
+        success,
+        status,
+        appTimezone = 'UTC',
+    } = usePage().props;
 
-    const hasHumidity = node.info?.humidity !== undefined
-        || samples.some((s) => s.humidity != null);
+    const hasHumidity =
+        node.info?.humidity !== undefined || samples.some((s) => s.humidity != null);
 
     const exportUrl = () => {
-        const params = new URLSearchParams({period});
-        if (beginTime) params.set("beginTime", beginTime);
-        if (endTime)   params.set("endTime",   endTime);
-        return route("monitoring.nodes.samples.export", node.nodeId) + "?" + params.toString();
+        const params = new URLSearchParams({ period });
+        if (beginTime) params.set('beginTime', beginTime);
+        if (endTime) params.set('endTime', endTime);
+        return route('monitoring.nodes.samples.export', node.nodeId) + '?' + params.toString();
     };
 
     return (
         <>
-            <Head title={`Node: ${node.name || node.nodeId}`}/>
+            <Head title={`Node: ${node.name || node.nodeId}`} />
             <PageHeader
                 title={node.name || node.nodeId}
                 actions={
-                    <Box sx={{display: "flex", gap: 1, alignItems: "center"}}>
-                        <FetchButton nodeId={node.nodeId}/>
-                        <Button startIcon={<ArrowBackIcon/>} variant="outlined" size="small"
-                            onClick={() => router.visit(route("monitoring.nodes.index"))}>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <FetchButton nodeId={node.nodeId} />
+                        <Button
+                            startIcon={<ArrowBackIcon />}
+                            variant="outlined"
+                            size="small"
+                            onClick={() => router.visit(route('monitoring.nodes.index'))}
+                        >
                             All Nodes
                         </Button>
                     </Box>
@@ -321,21 +390,29 @@ const Show = () => {
             />
 
             {status && (
-                <Alert severity={success ? "success" : "error"} sx={{mb: 2}}>{status}</Alert>
+                <Alert severity={success ? 'success' : 'error'} sx={{ mb: 2 }}>
+                    {status}
+                </Alert>
             )}
 
             <Grid container spacing={3}>
                 {/* Left: node info + section assignment */}
-                <Grid size={{ xs: 12, md: 4 }} >
-                    <Card elevation={0} variant="outlined" sx={{mb: 2}}>
+                <Grid size={{ xs: 12, md: 4 }}>
+                    <Card elevation={0} variant="outlined" sx={{ mb: 2 }}>
                         <CardHeader
                             title="Node Info"
                             action={
-                                <Box sx={{pt: 1, pr: 1}}>
+                                <Box sx={{ pt: 1, pr: 1 }}>
                                     <Chip
-                                        icon={node.onlined ? <WifiIcon fontSize="small"/> : <WifiOffIcon fontSize="small"/>}
-                                        label={node.onlined ? "Online" : "Offline"}
-                                        color={node.onlined ? "success" : "default"}
+                                        icon={
+                                            node.onlined ? (
+                                                <WifiIcon fontSize="small" />
+                                            ) : (
+                                                <WifiOffIcon fontSize="small" />
+                                            )
+                                        }
+                                        label={node.onlined ? 'Online' : 'Offline'}
+                                        color={node.onlined ? 'success' : 'default'}
                                         size="small"
                                     />
                                 </Box>
@@ -343,38 +420,68 @@ const Show = () => {
                         />
                         <CardContent>
                             <Grid container spacing={0}>
-                                <Grid size={6} ><Field label="Node ID">{node.nodeId}</Field></Grid>
-                                <Grid size={6} ><Field label="Model">{node.model}</Field></Grid>
+                                <Grid size={6}>
+                                    <Field label="Node ID">{node.nodeId}</Field>
+                                </Grid>
+                                <Grid size={6}>
+                                    <Field label="Model">{node.model}</Field>
+                                </Grid>
                             </Grid>
-                            <Divider sx={{my: 1}}/>
-                            <Box sx={{display: "flex", gap: 3}}>
+                            <Divider sx={{ my: 1 }} />
+                            <Box sx={{ display: 'flex', gap: 3 }}>
                                 <Box>
-                                    <Typography variant="caption" color="text.secondary" display="block">Signal</Typography>
-                                    <Box sx={{display: "flex", alignItems: "center", gap: 0.5}}>
-                                        <SignalCellularAltIcon fontSize="small" color="info"/>
-                                        <Typography variant="body2" fontWeight={500}>{node.signalLevel ?? "—"}</Typography>
+                                    <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                        display="block"
+                                    >
+                                        Signal
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <SignalCellularAltIcon fontSize="small" color="info" />
+                                        <Typography variant="body2" fontWeight={500}>
+                                            {node.signalLevel ?? '—'}
+                                        </Typography>
                                     </Box>
                                 </Box>
                                 <Box>
-                                    <Typography variant="caption" color="text.secondary" display="block">Battery</Typography>
-                                    <Box sx={{display: "flex", alignItems: "center", gap: 0.5}}>
-                                        <BatteryChargingFullIcon fontSize="small"
-                                            color={(node.batteryLevel ?? 100) < 20 ? "error" : "success"}/>
-                                        <Typography variant="body2" fontWeight={500}>{node.batteryLevel ?? "—"}</Typography>
+                                    <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                        display="block"
+                                    >
+                                        Battery
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <BatteryChargingFullIcon
+                                            fontSize="small"
+                                            color={
+                                                (node.batteryLevel ?? 100) < 20
+                                                    ? 'error'
+                                                    : 'success'
+                                            }
+                                        />
+                                        <Typography variant="body2" fontWeight={500}>
+                                            {node.batteryLevel ?? '—'}
+                                        </Typography>
                                     </Box>
                                 </Box>
                             </Box>
                             {node.section_name && (
                                 <>
-                                    <Divider sx={{my: 1}}/>
+                                    <Divider sx={{ my: 1 }} />
                                     <Field label="Section">
-                                        <Chip label={node.section_name} size="small" variant="outlined"/>
+                                        <Chip
+                                            label={node.section_name}
+                                            size="small"
+                                            variant="outlined"
+                                        />
                                     </Field>
                                 </>
                             )}
                             {node.notes && (
                                 <>
-                                    <Divider sx={{my: 1}}/>
+                                    <Divider sx={{ my: 1 }} />
                                     <Field label="Notes">{node.notes}</Field>
                                 </>
                             )}
@@ -382,7 +489,10 @@ const Show = () => {
                     </Card>
 
                     <Card elevation={0} variant="outlined">
-                        <CardHeader title="Section Assignment" subheader="Link this node to a lab section"/>
+                        <CardHeader
+                            title="Section Assignment"
+                            subheader="Link this node to a lab section"
+                        />
                         <CardContent>
                             <SectionForm
                                 nodeId={node.nodeId}
@@ -395,7 +505,7 @@ const Show = () => {
                 </Grid>
 
                 {/* Right: period filter + chart + download */}
-                <Grid size={{ xs: 12, md: 8 }} >
+                <Grid size={{ xs: 12, md: 8 }}>
                     <PeriodBar
                         nodeId={node.nodeId}
                         activePeriod={period}
@@ -406,22 +516,36 @@ const Show = () => {
                         <CardHeader
                             title="Readings"
                             subheader={
-                                <Box sx={{display: "flex", gap: 1, mt: 0.5}}>
-                                    <Chip icon={<ThermostatIcon fontSize="small"/>}
-                                        label="Temperature" size="small" color="error" variant="outlined"/>
+                                <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
+                                    <Chip
+                                        icon={<ThermostatIcon fontSize="small" />}
+                                        label="Temperature"
+                                        size="small"
+                                        color="error"
+                                        variant="outlined"
+                                    />
                                     {hasHumidity && (
-                                        <Chip icon={<WaterDropIcon fontSize="small"/>}
-                                            label="Humidity" size="small" color="primary" variant="outlined"/>
+                                        <Chip
+                                            icon={<WaterDropIcon fontSize="small" />}
+                                            label="Humidity"
+                                            size="small"
+                                            color="primary"
+                                            variant="outlined"
+                                        />
                                     )}
-                                    <Chip label={`${samples.length} readings`} size="small" variant="outlined"/>
+                                    <Chip
+                                        label={`${samples.length} readings`}
+                                        size="small"
+                                        variant="outlined"
+                                    />
                                 </Box>
                             }
                             action={
-                                <Box sx={{pt: 1, pr: 1}}>
+                                <Box sx={{ pt: 1, pr: 1 }}>
                                     <Button
                                         component="a"
                                         href={exportUrl()}
-                                        startIcon={<DownloadIcon/>}
+                                        startIcon={<DownloadIcon />}
                                         variant="outlined"
                                         size="small"
                                     >
@@ -431,7 +555,12 @@ const Show = () => {
                             }
                         />
                         <CardContent>
-                            <SensorChart samples={samples} hasHumidity={hasHumidity} period={period} tz={appTimezone}/>
+                            <SensorChart
+                                samples={samples}
+                                hasHumidity={hasHumidity}
+                                period={period}
+                                tz={appTimezone}
+                            />
                         </CardContent>
                     </Card>
                 </Grid>
@@ -441,13 +570,15 @@ const Show = () => {
 };
 
 const breadcrumbs = (node) => [
-    {title: "Monitoring", link: null},
-    {title: "Sensor Nodes", link: route("monitoring.nodes.index")},
-    {title: node?.name || node?.nodeId || "Node", link: null},
+    { title: 'Monitoring', link: null },
+    { title: 'Sensor Nodes', link: route('monitoring.nodes.index') },
+    { title: node?.name || node?.nodeId || 'Node', link: null },
 ];
 
 Show.layout = (page) => (
-    <AuthenticatedLayout auth={page.props.auth} breadcrumbs={breadcrumbs(page.props.node)}>{page}</AuthenticatedLayout>
+    <AuthenticatedLayout auth={page.props.auth} breadcrumbs={breadcrumbs(page.props.node)}>
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Show;

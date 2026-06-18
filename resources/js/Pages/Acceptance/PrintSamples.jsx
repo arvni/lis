@@ -1,5 +1,5 @@
-import React, {useEffect, useMemo} from 'react';
-import {Head, Link} from '@inertiajs/react';
+import React, { useEffect, useMemo } from 'react';
+import { Head, Link } from '@inertiajs/react';
 import {
     Box,
     Typography,
@@ -15,11 +15,7 @@ import {
     Chip,
     styled,
 } from '@mui/material';
-import {
-    Print as PrintIcon,
-    ArrowBack,
-    Biotech,
-} from '@mui/icons-material';
+import { Print as PrintIcon, ArrowBack, Biotech } from '@mui/icons-material';
 
 // ─── Preview dimensions ─────────────────────────────────────────
 const A5_WIDTH = '148mm';
@@ -71,7 +67,7 @@ const printStyles = `
 `;
 
 // ─── Styled components ──────────────────────────────────────────
-const PageContainer = styled(Paper)(({theme}) => ({
+const PageContainer = styled(Paper)(({ theme }) => ({
     width: A5_WIDTH,
     minHeight: A5_HEIGHT,
     margin: 'auto',
@@ -87,17 +83,17 @@ const PageContainer = styled(Paper)(({theme}) => ({
         width: '100%',
         maxWidth: 'none',
         minHeight: 'auto',
-    }
+    },
 }));
 
-const HeaderBar = styled(Box)(({theme}) => ({
+const HeaderBar = styled(Box)(({ theme }) => ({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: theme.spacing(1.5),
 }));
 
-const SectionHeading = styled(Box)(({theme}) => ({
+const SectionHeading = styled(Box)(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     backgroundColor: theme.palette.primary.main,
@@ -108,7 +104,7 @@ const SectionHeading = styled(Box)(({theme}) => ({
     fontSize: '0.75rem',
 }));
 
-const StyledTable = styled(Table)(({theme}) => ({
+const StyledTable = styled(Table)(({ theme }) => ({
     width: '100%',
     tableLayout: 'fixed',
     '& .MuiTableCell-root': {
@@ -155,7 +151,7 @@ const InfoValue = styled(Typography)({
     fontSize: '0.72rem',
 });
 
-const FooterBox = styled(Box)(({theme}) => ({
+const FooterBox = styled(Box)(({ theme }) => ({
     marginTop: theme.spacing(1.5),
     textAlign: 'center',
     borderTop: `1px solid ${theme.palette.divider}`,
@@ -165,8 +161,8 @@ const FooterBox = styled(Box)(({theme}) => ({
 }));
 
 // ─── Helpers ────────────────────────────────────────────────────
-const InfoItem = ({label, value}) => (
-    <Box sx={{display: 'inline-flex', mr: 2, mb: 0.3}}>
+const InfoItem = ({ label, value }) => (
+    <Box sx={{ display: 'inline-flex', mr: 2, mb: 0.3 }}>
         <InfoLabel component="span">{label}:&nbsp;</InfoLabel>
         <InfoValue component="span">{value || 'N/A'}</InfoValue>
     </Box>
@@ -175,7 +171,9 @@ const InfoItem = ({label, value}) => (
 const formatDate = (dateString) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', {
-        month: 'short', day: 'numeric', year: 'numeric'
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
     });
 };
 
@@ -185,7 +183,7 @@ const buildSampleRows = (samples, acceptance) => {
     return samples.map((sample, index) => {
         // Collect all test names for this sample from its active acceptanceItems
         const testNames = (sample.acceptance_items || [])
-            .map(item => item?.method?.test?.name || item?.test?.name || 'Unknown')
+            .map((item) => item?.method?.test?.name || item?.test?.name || 'Unknown')
             .filter(Boolean)
             .join(', ');
 
@@ -204,7 +202,7 @@ const buildSampleRows = (samples, acceptance) => {
 };
 
 // ─── Main Component ─────────────────────────────────────────────
-const PrintSamples = ({acceptance, samples}) => {
+const PrintSamples = ({ acceptance, samples }) => {
     const rows = useMemo(() => buildSampleRows(samples, acceptance), [samples, acceptance]);
 
     const handlePrint = () => window.print();
@@ -222,19 +220,22 @@ const PrintSamples = ({acceptance, samples}) => {
             </Head>
 
             {/* ── Toolbar (hidden on print) ────────────────────── */}
-            <Box className="hidden-print" sx={{
-                maxWidth: 600,
-                mx: 'auto',
-                mb: 2,
-                p: 2,
-                display: 'flex',
-                gap: 1,
-                alignItems: 'center',
-                justifyContent: 'space-between',
-            }}>
+            <Box
+                className="hidden-print"
+                sx={{
+                    maxWidth: 600,
+                    mx: 'auto',
+                    mb: 2,
+                    p: 2,
+                    display: 'flex',
+                    gap: 1,
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                }}
+            >
                 <Button
                     variant="outlined"
-                    startIcon={<ArrowBack/>}
+                    startIcon={<ArrowBack />}
                     component={Link}
                     href={route('acceptances.show', acceptance?.id)}
                     size="small"
@@ -242,13 +243,13 @@ const PrintSamples = ({acceptance, samples}) => {
                     Back
                 </Button>
 
-                <Typography variant="subtitle1" sx={{fontWeight: 'bold'}}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                     Samples — Acceptance #{acceptance?.id}
                 </Typography>
 
                 <Button
                     variant="contained"
-                    startIcon={<PrintIcon/>}
+                    startIcon={<PrintIcon />}
                     onClick={handlePrint}
                     size="small"
                 >
@@ -257,48 +258,70 @@ const PrintSamples = ({acceptance, samples}) => {
             </Box>
 
             {/* ── Printable A5 page ────────────────────────────── */}
-            <Box className="print-container" sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                width: '100%',
-            }}>
+            <Box
+                className="print-container"
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    width: '100%',
+                }}
+            >
                 <PageContainer elevation={3}>
                     {/* Header */}
                     <HeaderBar>
-                        <Box sx={{display: 'flex', alignItems: 'center'}}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box
                                 component="img"
                                 src="https://biongenetic.com/wp-content/uploads/2021/11/mmclogo-1.png"
-                                sx={{height: '20px', mr: 1}}
+                                sx={{ height: '20px', mr: 1 }}
                                 alt="Logo"
                             />
                             <Box>
-                                <Typography variant="body1"
-                                            sx={{fontWeight: 'bold', color: 'primary.main', fontSize: '0.85rem'}}>
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        fontWeight: 'bold',
+                                        color: 'primary.main',
+                                        fontSize: '0.85rem',
+                                    }}
+                                >
                                     Muscat Medical Center
                                 </Typography>
-                                <Typography variant="caption" color="text.secondary" sx={{fontSize: '0.6rem'}}>
+                                <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    sx={{ fontSize: '0.6rem' }}
+                                >
                                     Healthcare Excellence
                                 </Typography>
                             </Box>
                         </Box>
-                        <Box sx={{textAlign: 'right'}}>
-                            <Typography variant="subtitle2"
-                                        sx={{color: 'secondary.main', fontSize: '0.75rem'}}>
+                        <Box sx={{ textAlign: 'right' }}>
+                            <Typography
+                                variant="subtitle2"
+                                sx={{ color: 'secondary.main', fontSize: '0.75rem' }}
+                            >
                                 Acceptance #{acceptance?.id}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{fontSize: '0.6rem'}}>
+                            <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ fontSize: '0.6rem' }}
+                            >
                                 {formatDate(acceptance?.created_at)}
                             </Typography>
                         </Box>
                     </HeaderBar>
 
-                    <Divider sx={{mb: 1}}/>
+                    <Divider sx={{ mb: 1 }} />
 
                     {/* Samples Table */}
                     <SectionHeading>
-                        <Biotech sx={{mr: 0.5, fontSize: '0.75rem'}}/>
-                        <Typography variant="subtitle2" sx={{fontWeight: 'bold', fontSize: '0.75rem'}}>
+                        <Biotech sx={{ mr: 0.5, fontSize: '0.75rem' }} />
+                        <Typography
+                            variant="subtitle2"
+                            sx={{ fontWeight: 'bold', fontSize: '0.75rem' }}
+                        >
                             Samples &amp; Tests
                         </Typography>
                     </SectionHeading>
@@ -307,57 +330,80 @@ const PrintSamples = ({acceptance, samples}) => {
                         <StyledTable size="small" padding="none">
                             <TableHead>
                                 <TableRow>
-                                    <TableCell align="center" sx={{width: '7%'}}>#</TableCell>
-                                    <TableCell sx={{width: '18%'}}>Barcode</TableCell>
-                                    <TableCell sx={{width: '18%'}}>Sample Type</TableCell>
-                                    <TableCell sx={{width: '29%'}}>Test</TableCell>
-                                    <TableCell sx={{width: '18%'}}>Patient</TableCell>
-                                    <TableCell align="center" sx={{width: '5%'}}>Gender</TableCell>
-                                    <TableCell align="center" sx={{width: '5%'}}>Age</TableCell>
+                                    <TableCell align="center" sx={{ width: '7%' }}>
+                                        #
+                                    </TableCell>
+                                    <TableCell sx={{ width: '18%' }}>Barcode</TableCell>
+                                    <TableCell sx={{ width: '18%' }}>Sample Type</TableCell>
+                                    <TableCell sx={{ width: '29%' }}>Test</TableCell>
+                                    <TableCell sx={{ width: '18%' }}>Patient</TableCell>
+                                    <TableCell align="center" sx={{ width: '5%' }}>
+                                        Gender
+                                    </TableCell>
+                                    <TableCell align="center" sx={{ width: '5%' }}>
+                                        Age
+                                    </TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {rows.length > 0 ? rows.map((row, idx) => (
-                                    <TableRow key={idx} sx={{
-                                        '&:nth-of-type(even)': {backgroundColor: 'grey.50'},
-                                    }}>
-                                        <TableCell align="center">{row.sampleIndex}</TableCell>
-                                        <TableCell sx={{ fontWeight: 'bold' }}>
-                                            {row.barcode}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                label={row.sampleType}
-                                                size="small"
-                                                variant="outlined"
-                                                color="info"
+                                {rows.length > 0 ? (
+                                    rows.map((row, idx) => (
+                                        <TableRow
+                                            key={idx}
+                                            sx={{
+                                                '&:nth-of-type(even)': {
+                                                    backgroundColor: 'grey.50',
+                                                },
+                                            }}
+                                        >
+                                            <TableCell align="center">{row.sampleIndex}</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold' }}>
+                                                {row.barcode}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Chip
+                                                    label={row.sampleType}
+                                                    size="small"
+                                                    variant="outlined"
+                                                    color="info"
+                                                    sx={{
+                                                        height: 18,
+                                                        fontSize: '0.62rem',
+                                                        '& .MuiChip-label': { px: '5px' },
+                                                    }}
+                                                />
+                                            </TableCell>
+                                            <TableCell
                                                 sx={{
-                                                    height: 18,
-                                                    fontSize: '0.62rem',
-                                                    '& .MuiChip-label': {px: '5px'},
+                                                    overflowWrap: 'anywhere',
+                                                    whiteSpace: 'normal',
                                                 }}
-                                            />
-                                        </TableCell>
-                                        <TableCell sx={{
-                                            overflowWrap: 'anywhere',
-                                            whiteSpace: 'normal',
-                                        }}>
-                                            {row.testName}
-                                        </TableCell>
-                                        <TableCell sx={{
-                                            overflowWrap: 'anywhere',
-                                            whiteSpace: 'normal',
-                                        }}>
-                                            {row.patientName}
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            {row.gender ? row.gender.charAt(0).toUpperCase() : '-'}
-                                        </TableCell>
-                                        <TableCell align="center">{row.age}</TableCell>
-                                    </TableRow>
-                                )) : (
+                                            >
+                                                {row.testName}
+                                            </TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    overflowWrap: 'anywhere',
+                                                    whiteSpace: 'normal',
+                                                }}
+                                            >
+                                                {row.patientName}
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                {row.gender
+                                                    ? row.gender.charAt(0).toUpperCase()
+                                                    : '-'}
+                                            </TableCell>
+                                            <TableCell align="center">{row.age}</TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
                                     <TableRow>
-                                        <TableCell colSpan={7} align="center" sx={{py: 2, color: 'text.secondary'}}>
+                                        <TableCell
+                                            colSpan={7}
+                                            align="center"
+                                            sx={{ py: 2, color: 'text.secondary' }}
+                                        >
                                             No samples found
                                         </TableCell>
                                     </TableRow>
@@ -367,49 +413,69 @@ const PrintSamples = ({acceptance, samples}) => {
                     </TableContainer>
 
                     {/* Summary */}
-                    <Box sx={{
-                        mt: 1,
-                        p: 0.75,
-                        bgcolor: 'grey.50',
-                        borderRadius: 1,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                    }}>
-                        <Typography variant="caption" sx={{fontWeight: 'bold', fontSize: '0.7rem'}}>
+                    <Box
+                        sx={{
+                            mt: 1,
+                            p: 0.75,
+                            bgcolor: 'grey.50',
+                            borderRadius: 1,
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Typography
+                            variant="caption"
+                            sx={{ fontWeight: 'bold', fontSize: '0.7rem' }}
+                        >
                             Total Tests: {rows.length}
                         </Typography>
-                        <Typography variant="caption" sx={{fontSize: '0.65rem', color: 'text.secondary'}}>
+                        <Typography
+                            variant="caption"
+                            sx={{ fontSize: '0.65rem', color: 'text.secondary' }}
+                        >
                             Phlebotomist: {acceptance?.sampler?.name || '_______________'}
                         </Typography>
                     </Box>
 
                     {/* Signature line */}
-                    <Box sx={{
-                        mt: 2,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        px: 2,
-                    }}>
-                        <Box sx={{textAlign: 'center'}}>
-                            <Box sx={{
-                                width: 120,
-                                borderBottom: '1px solid #999',
-                                mb: 0.5,
-                                height: 20,
-                            }}/>
-                            <Typography variant="caption" sx={{fontSize: '0.6rem', color: 'text.secondary'}}>
+                    <Box
+                        sx={{
+                            mt: 2,
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            px: 2,
+                        }}
+                    >
+                        <Box sx={{ textAlign: 'center' }}>
+                            <Box
+                                sx={{
+                                    width: 120,
+                                    borderBottom: '1px solid #999',
+                                    mb: 0.5,
+                                    height: 20,
+                                }}
+                            />
+                            <Typography
+                                variant="caption"
+                                sx={{ fontSize: '0.6rem', color: 'text.secondary' }}
+                            >
                                 Phlebotomist Signature
                             </Typography>
                         </Box>
-                        <Box sx={{textAlign: 'center'}}>
-                            <Box sx={{
-                                width: 120,
-                                borderBottom: '1px solid #999',
-                                mb: 0.5,
-                                height: 20,
-                            }}/>
-                            <Typography variant="caption" sx={{fontSize: '0.6rem', color: 'text.secondary'}}>
+                        <Box sx={{ textAlign: 'center' }}>
+                            <Box
+                                sx={{
+                                    width: 120,
+                                    borderBottom: '1px solid #999',
+                                    mb: 0.5,
+                                    height: 20,
+                                }}
+                            />
+                            <Typography
+                                variant="caption"
+                                sx={{ fontSize: '0.6rem', color: 'text.secondary' }}
+                            >
                                 Date &amp; Time
                             </Typography>
                         </Box>
@@ -417,7 +483,7 @@ const PrintSamples = ({acceptance, samples}) => {
 
                     {/* Footer */}
                     <FooterBox>
-                        <Typography variant="caption" sx={{fontSize: '0.6rem'}}>
+                        <Typography variant="caption" sx={{ fontSize: '0.6rem' }}>
                             Thank you for choosing Bion Genetic Laboratory.
                         </Typography>
                     </FooterBox>

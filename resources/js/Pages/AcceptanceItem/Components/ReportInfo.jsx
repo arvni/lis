@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
     Accordion,
     AccordionActions,
@@ -14,8 +14,8 @@ import {
     Stack,
     Tooltip,
     Typography,
-    useTheme
-} from "@mui/material";
+    useTheme,
+} from '@mui/material';
 import {
     ExpandMore as ExpandMoreIcon,
     Description as DescriptionIcon,
@@ -23,8 +23,8 @@ import {
     CheckCircle as ApproveIcon,
     CalendarToday as DateIcon,
     Visibility as VisibilityIcon,
-    ArticleOutlined as ReportIcon
-} from "@mui/icons-material";
+    ArticleOutlined as ReportIcon,
+} from '@mui/icons-material';
 
 // Format date string to be more readable
 const formatDateTime = (dateTimeStr) => {
@@ -37,7 +37,7 @@ const formatDateTime = (dateTimeStr) => {
             month: 'short',
             day: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
         }).format(date);
     } catch (e) {
         return dateTimeStr;
@@ -53,7 +53,7 @@ const UserAvatar = ({ name, size = 40, icon }) => {
     // Generate initials from name
     const initials = name
         .split(' ')
-        .map(part => part[0])
+        .map((part) => part[0])
         .join('')
         .toUpperCase()
         .substring(0, 2);
@@ -64,9 +64,12 @@ const UserAvatar = ({ name, size = 40, icon }) => {
                 sx={{
                     width: size,
                     height: size,
-                    bgcolor: icon === 'approver' ? theme.palette.success.main : theme.palette.primary.main,
+                    bgcolor:
+                        icon === 'approver'
+                            ? theme.palette.success.main
+                            : theme.palette.primary.main,
                     fontSize: size / 2,
-                    fontWeight: 'bold'
+                    fontWeight: 'bold',
                 }}
             >
                 {initials}
@@ -90,7 +93,7 @@ const ReportInfo = ({ report, defaultExpanded = true }) => {
                 transition: 'all 0.3s ease',
                 '&:hover': {
                     boxShadow: theme.shadows[4],
-                }
+                },
             }}
         >
             <Accordion
@@ -101,7 +104,7 @@ const ReportInfo = ({ report, defaultExpanded = true }) => {
                         '&:before': {
                             display: 'none',
                         },
-                    }
+                    },
                 }}
             >
                 <AccordionSummary
@@ -115,8 +118,8 @@ const ReportInfo = ({ report, defaultExpanded = true }) => {
                             backgroundColor: theme.palette.primary.dark,
                         },
                         '& .MuiAccordionSummary-expandIconWrapper': {
-                            color: theme.palette.primary.contrastText
-                        }
+                            color: theme.palette.primary.contrastText,
+                        },
                     }}
                 >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -153,7 +156,7 @@ const ReportInfo = ({ report, defaultExpanded = true }) => {
                             p: 2,
                             mb: 2,
                             backgroundColor: theme.palette.background.default,
-                            borderRadius: 2
+                            borderRadius: 2,
                         }}
                     >
                         {report.reporter && (
@@ -162,20 +165,28 @@ const ReportInfo = ({ report, defaultExpanded = true }) => {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: 2,
-                                    mb: report.approver ? 3 : 0
+                                    mb: report.approver ? 3 : 0,
                                 }}
                             >
                                 <UserAvatar name={report.reporter.name} icon="reporter" />
 
                                 <Box>
-  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
+                                    <Stack
+                                        direction="row"
+                                        spacing={1}
+                                        sx={{ alignItems: 'center' }}
+                                    >
                                         <PersonIcon fontSize="small" color="primary" />
                                         <Typography variant="subtitle1" fontWeight="medium">
                                             {report.reporter.name}
                                         </Typography>
                                     </Stack>
 
-  <Stack direction="row" spacing={1} sx={{alignItems: "center", mt: 0.5}}>
+                                    <Stack
+                                        direction="row"
+                                        spacing={1}
+                                        sx={{ alignItems: 'center', mt: 0.5 }}
+                                    >
                                         <DateIcon fontSize="small" color="action" />
                                         <Typography variant="body2" color="text.secondary">
                                             Created at {formatDateTime(report.reportedAt)}
@@ -193,14 +204,22 @@ const ReportInfo = ({ report, defaultExpanded = true }) => {
                                     <UserAvatar name={report.approver.name} icon="approver" />
 
                                     <Box>
-  <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
+                                        <Stack
+                                            direction="row"
+                                            spacing={1}
+                                            sx={{ alignItems: 'center' }}
+                                        >
                                             <ApproveIcon fontSize="small" color="success" />
                                             <Typography variant="subtitle1" fontWeight="medium">
                                                 {report.approver.name}
                                             </Typography>
                                         </Stack>
 
-  <Stack direction="row" spacing={1} sx={{alignItems: "center", mt: 0.5}}>
+                                        <Stack
+                                            direction="row"
+                                            spacing={1}
+                                            sx={{ alignItems: 'center', mt: 0.5 }}
+                                        >
                                             <DateIcon fontSize="small" color="action" />
                                             <Typography variant="body2" color="text.secondary">
                                                 Approved at {formatDateTime(report.approvedAt)}
@@ -220,14 +239,14 @@ const ReportInfo = ({ report, defaultExpanded = true }) => {
                         variant="contained"
                         color="primary"
                         startIcon={<VisibilityIcon />}
-                        href={route("reports.show", report.id)}
+                        href={route('reports.show', report.id)}
                         target="_blank"
                         sx={{
                             borderRadius: 6,
                             px: 3,
                             '&:hover': {
-                                boxShadow: theme.shadows[4]
-                            }
+                                boxShadow: theme.shadows[4],
+                            },
                         }}
                     >
                         View Full Report

@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, { useMemo } from 'react';
 import {
     TextField,
     Typography,
@@ -8,65 +8,53 @@ import {
     Divider,
     Chip,
     InputAdornment,
-    Alert
+    Alert,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
 import CalculateIcon from '@mui/icons-material/Calculate';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
-import {
-    calcPrice,
-    getCondition
-} from '@/Services/pricing-utils';
+import { calcPrice, getCondition } from '@/Services/pricing-utils';
 
-const PriceField = ({
-                              method,
-                              onChange,
-                              values = {},
-                              errors = {}
-                          }) => {
+const PriceField = ({ method, onChange, values = {}, errors = {} }) => {
     // Memoized price calculation to optimize performance
-    const {calculatedPrice, formula, selectedCondition, isValid} = useMemo(() => {
+    const { calculatedPrice, formula, selectedCondition, isValid } = useMemo(() => {
         const price = calcPrice(
             method.extra.formula || '',
             method.extra.parameters || [],
             values?.price || {},
-            method.extra.conditions
+            method.extra.conditions,
         );
 
         // Check if all required parameters have values
-        const allParametersFilled = method.extra.parameters?.every(param =>
-            param.required ? Boolean(values?.price?.[param.value]) : true
+        const allParametersFilled = method.extra.parameters?.every((param) =>
+            param.required ? Boolean(values?.price?.[param.value]) : true,
         );
 
         // Get the selected condition for conditional pricing
-        const condition = method.price_type === "Conditional"
-            ? getCondition(
-                method.extra.conditions,
-                method.extra.parameters,
-                values?.price
-            )
-            : null;
+        const condition =
+            method.price_type === 'Conditional'
+                ? getCondition(method.extra.conditions, method.extra.parameters, values?.price)
+                : null;
 
-        const displayFormula = method.price_type === "Formulate"
-            ? method.extra.formula
-            : condition?.value || 'N/A';
+        const displayFormula =
+            method.price_type === 'Formulate' ? method.extra.formula : condition?.value || 'N/A';
 
         return {
             calculatedPrice: price,
             formula: displayFormula,
             selectedCondition: condition,
-            isValid: allParametersFilled && price > 0
+            isValid: allParametersFilled && price > 0,
         };
     }, [method, values?.price]);
 
     // Enhanced change handler with improved validation
     const handleChange = (e) => {
-        const {name, value} = e.target;
+        const { name, value } = e.target;
 
         // Validate input based on parameter constraints
-        const parameter = method.extra.parameters?.find(p => p.value === name);
+        const parameter = method.extra.parameters?.find((p) => p.value === name);
         const numericValue = Number(value);
 
         if (parameter) {
@@ -84,22 +72,22 @@ const PriceField = ({
 
         const updatedPrice = {
             ...(values?.price || {}),
-            [name]: value
+            [name]: value,
         };
 
         const newPrice = calcPrice(
             method.extra.formula || '',
             method.extra.parameters || [],
             updatedPrice,
-            method.extra.conditions
+            method.extra.conditions,
         );
 
         onChange({
             customParameters: {
                 ...(values || {}),
-                price: updatedPrice
+                price: updatedPrice,
             },
-            price: newPrice
+            price: newPrice,
         });
     };
 
@@ -110,27 +98,20 @@ const PriceField = ({
 
     return (
         <Grid container spacing={3}>
-            <Grid size={{xs: 12}}>
-                <Alert
-                    severity="info"
-                    icon={<CalculateIcon/>}
-                    sx={{mb: 2}}
-                >
-                    {method.price_type === "Formulate"
-                        ? "The price for this test is calculated based on the formula and parameters below."
-                        : "The price for this test depends on which condition is met based on the parameters below."}
+            <Grid size={{ xs: 12 }}>
+                <Alert severity="info" icon={<CalculateIcon />} sx={{ mb: 2 }}>
+                    {method.price_type === 'Formulate'
+                        ? 'The price for this test is calculated based on the formula and parameters below.'
+                        : 'The price for this test depends on which condition is met based on the parameters below.'}
                 </Alert>
             </Grid>
 
-            {method.extra.parameters.map(parameter => {
+            {method.extra.parameters.map((parameter) => {
                 const paramError = errors?.[`customParameters.price.${parameter.value}`];
 
                 return (
-                    <Grid
- size={{xs: 12, sm: 6, md: 4}}
- key={parameter.value}
- >
-                        <Box sx={{display: "flex", alignItems: "flex-start"}}>
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }} key={parameter.value}>
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                             <TextField
                                 type="number"
                                 label={parameter.label || parameter.value}
@@ -143,7 +124,7 @@ const PriceField = ({
                                     htmlInput: {
                                         min: parameter.min,
                                         max: parameter.max,
-                                        step: parameter.step || 1
+                                        step: parameter.step || 1,
                                     },
                                     input: {
                                         startAdornment: parameter.prefix ? (
@@ -156,7 +137,7 @@ const PriceField = ({
                                                 {parameter.suffix}
                                             </InputAdornment>
                                         ) : null,
-                                    }
+                                    },
                                 }}
                                 error={Boolean(paramError)}
                                 helperText={
@@ -165,11 +146,15 @@ const PriceField = ({
                                         ? `Range: ${parameter.min} - ${parameter.max}`
                                         : parameter.description || '')
                                 }
-                                sx={{"& input": {textAlign: 'right'}}}
+                                sx={{ '& input': { textAlign: 'right' } }}
                             />
                             {parameter.description && (
                                 <Tooltip title={parameter.description}>
-                                    <HelpOutlineIcon fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
+                                    <HelpOutlineIcon
+                                        fontSize="small"
+                                        color="action"
+                                        sx={{ ml: 1, mt: 2 }}
+                                    />
                                 </Tooltip>
                             )}
                         </Box>
@@ -177,7 +162,7 @@ const PriceField = ({
                 );
             })}
 
-            <Grid size={{xs: 12}}>
+            <Grid size={{ xs: 12 }}>
                 <Paper
                     elevation={0}
                     sx={{
@@ -186,43 +171,46 @@ const PriceField = ({
                         backgroundColor: isValid ? 'success.50' : 'grey.50',
                         borderRadius: 2,
                         border: '1px solid',
-                        borderColor: isValid ? 'success.light' : 'grey.300'
+                        borderColor: isValid ? 'success.light' : 'grey.300',
                     }}
                 >
-  <Grid container spacing={2} sx={{alignItems: "center"}}>
-                        <Grid size={{xs: 12, md: 6}}>
-                            <Box sx={{display: "flex", alignItems: "center"}}>
-                                <FunctionsIcon sx={{mr: 1, color: 'text.secondary'}}/>
+                    <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <FunctionsIcon sx={{ mr: 1, color: 'text.secondary' }} />
                                 <Typography variant="subtitle2" color="text.secondary">
-                                    {method.price_type === "Formulate" ? "Formula:" : "Conditions:"}
+                                    {method.price_type === 'Formulate' ? 'Formula:' : 'Conditions:'}
                                 </Typography>
                             </Box>
 
-                            {method.price_type === "Conditional" && (
-                                <Box sx={{mt: 2, mb: 2}}>
+                            {method.price_type === 'Conditional' && (
+                                <Box sx={{ mt: 2, mb: 2 }}>
                                     {method.extra.conditions?.map((condition, index) => (
                                         <Box
                                             key={index}
                                             sx={{
                                                 p: 1.5,
                                                 mb: 1,
-                                                backgroundColor: selectedCondition?.index === index
-                                                    ? 'success.light'
-                                                    : 'background.paper',
-                                                color: selectedCondition?.index === index
-                                                    ? 'white'
-                                                    : 'text.primary',
+                                                backgroundColor:
+                                                    selectedCondition?.index === index
+                                                        ? 'success.light'
+                                                        : 'background.paper',
+                                                color:
+                                                    selectedCondition?.index === index
+                                                        ? 'white'
+                                                        : 'text.primary',
                                                 borderRadius: 1,
                                                 border: '1px solid',
-                                                borderColor: selectedCondition?.index === index
-                                                    ? 'success.main'
-                                                    : 'divider',
+                                                borderColor:
+                                                    selectedCondition?.index === index
+                                                        ? 'success.main'
+                                                        : 'divider',
                                                 display: 'flex',
-                                                alignItems: 'center'
+                                                alignItems: 'center',
                                             }}
                                         >
                                             {selectedCondition?.index === index && (
-                                                <CheckCircleOutlineIcon sx={{mr: 1}}/>
+                                                <CheckCircleOutlineIcon sx={{ mr: 1 }} />
                                             )}
                                             <Typography variant="body2" fontFamily="monospace">
                                                 {condition.condition}: {condition.value} OMR
@@ -232,7 +220,7 @@ const PriceField = ({
                                 </Box>
                             )}
 
-                            {method.price_type === "Formulate" && (
+                            {method.price_type === 'Formulate' && (
                                 <Box
                                     sx={{
                                         p: 1.5,
@@ -244,21 +232,21 @@ const PriceField = ({
                                         fontFamily: 'monospace',
                                         fontSize: '0.875rem',
                                         overflow: 'auto',
-                                        maxWidth: '100%'
+                                        maxWidth: '100%',
                                     }}
                                 >
                                     {formula || 'Enter all parameters to see the formula'}
                                 </Box>
                             )}
 
-                            {method.price_type === "Conditional" && selectedCondition && (
-                                <Box sx={{mt: 2}}>
+                            {method.price_type === 'Conditional' && selectedCondition && (
+                                <Box sx={{ mt: 2 }}>
                                     <Chip
-                                        icon={<CheckCircleOutlineIcon/>}
+                                        icon={<CheckCircleOutlineIcon />}
                                         label="Applied Condition"
                                         color="success"
                                         size="small"
-                                        sx={{mb: 1}}
+                                        sx={{ mb: 1 }}
                                     />
                                     <Box
                                         sx={{
@@ -268,7 +256,7 @@ const PriceField = ({
                                             border: '1px solid',
                                             borderColor: 'success.light',
                                             fontFamily: 'monospace',
-                                            fontSize: '0.875rem'
+                                            fontSize: '0.875rem',
                                         }}
                                     >
                                         {selectedCondition.condition}
@@ -277,15 +265,18 @@ const PriceField = ({
                             )}
                         </Grid>
 
-                        <Grid size={{xs: 12, md: 6}}>
-                            <Divider orientation="vertical" sx={{display: {xs: 'none', md: 'block'}}}/>
-                            <Divider sx={{display: {xs: 'block', md: 'none'}, my: 2}}/>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <Divider
+                                orientation="vertical"
+                                sx={{ display: { xs: 'none', md: 'block' } }}
+                            />
+                            <Divider sx={{ display: { xs: 'block', md: 'none' }, my: 2 }} />
 
-                            <Box sx={{textAlign: "center"}}>
+                            <Box sx={{ textAlign: 'center' }}>
                                 <Typography variant="body2" color="text.secondary" gutterBottom>
-                                    {method.price_type === "Conditional"
-                                        ? "Selected Price:"
-                                        : "Calculated Price:"}
+                                    {method.price_type === 'Conditional'
+                                        ? 'Selected Price:'
+                                        : 'Calculated Price:'}
                                 </Typography>
                                 <Box
                                     sx={{
@@ -296,7 +287,7 @@ const PriceField = ({
                                         backgroundColor: isValid ? 'success.main' : 'grey.300',
                                         color: isValid ? 'white' : 'text.secondary',
                                         borderRadius: 2,
-                                        minWidth: 120
+                                        minWidth: 120,
                                     }}
                                 >
                                     <Typography variant="h5" fontWeight="bold">
@@ -305,13 +296,21 @@ const PriceField = ({
                                 </Box>
 
                                 {!isValid && (
-                                    <Typography variant="caption" color="text.secondary" sx={{display: 'block', mt: 1}}>
+                                    <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                        sx={{ display: 'block', mt: 1 }}
+                                    >
                                         Fill in all required parameters to determine price
                                     </Typography>
                                 )}
 
-                                {method.price_type === "Conditional" && selectedCondition && (
-                                    <Typography variant="caption" color="success.dark" sx={{display: 'block', mt: 1}}>
+                                {method.price_type === 'Conditional' && selectedCondition && (
+                                    <Typography
+                                        variant="caption"
+                                        color="success.dark"
+                                        sx={{ display: 'block', mt: 1 }}
+                                    >
                                         Condition "{selectedCondition.condition}" is applied
                                     </Typography>
                                 )}

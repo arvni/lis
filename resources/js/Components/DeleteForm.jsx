@@ -1,12 +1,12 @@
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import ReportProblemIcon from "@mui/icons-material/ReportProblem";
-import { Box, Typography, Stack } from "@mui/material";
-import React from "react";
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import { Box, Typography, Stack } from '@mui/material';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 /**
@@ -21,14 +21,7 @@ import PropTypes from 'prop-types';
  * @param {boolean} props.loading - Whether deletion is in progress
  * @returns {JSX.Element}
  */
-const DeleteForm = ({
-                        title,
-                        message,
-                        agreeCB,
-                        disAgreeCB,
-                        openDelete,
-                        loading = false
-                    }) => {
+const DeleteForm = ({ title, message, agreeCB, disAgreeCB, openDelete, loading = false }) => {
     const defaultMessage = `Are you sure you want to delete ${title}?`;
     const displayMessage = message || defaultMessage;
 
@@ -43,19 +36,19 @@ const DeleteForm = ({
                     elevation: 3,
                     sx: {
                         borderRadius: 2,
-                        minWidth: { xs: '85%', sm: 400 }
-                    }
-                }
+                        minWidth: { xs: '85%', sm: 400 },
+                    },
+                },
             }}
         >
             <DialogTitle
                 id="delete-dialog-title"
                 sx={{
                     pt: 3,
-                    pb: 1
+                    pb: 1,
                 }}
             >
-                <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
+                <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
                     <Box
                         sx={{
                             display: 'flex',
@@ -64,7 +57,7 @@ const DeleteForm = ({
                             bgcolor: 'error.light',
                             borderRadius: '50%',
                             p: 1,
-                            color: 'error.main'
+                            color: 'error.main',
                         }}
                     >
                         <ReportProblemIcon color="error" />
@@ -84,12 +77,7 @@ const DeleteForm = ({
                     {displayMessage}
                 </DialogContentText>
 
-                <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    display="block"
-                    sx={{ mt: 2 }}
-                >
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 2 }}>
                     This action cannot be undone.
                 </Typography>
             </DialogContent>
@@ -101,7 +89,7 @@ const DeleteForm = ({
                     sx={{
                         px: 3,
                         textTransform: 'none',
-                        fontWeight: 500
+                        fontWeight: 500,
                     }}
                 >
                     Cancel
@@ -115,10 +103,10 @@ const DeleteForm = ({
                     sx={{
                         px: 3,
                         textTransform: 'none',
-                        fontWeight: 500
+                        fontWeight: 500,
                     }}
                 >
-                    {loading ? "Deleting..." : "Delete"}
+                    {loading ? 'Deleting...' : 'Delete'}
                 </Button>
             </DialogActions>
         </Dialog>

@@ -1,6 +1,6 @@
-import {useState, useEffect} from "react";
-import {Autocomplete, TextField, CircularProgress, Typography} from "@mui/material";
-import axios from "axios";
+import { useState, useEffect } from 'react';
+import { Autocomplete, TextField, CircularProgress, Typography } from '@mui/material';
+import axios from 'axios';
 
 /**
  * Loads store locations filtered by item and transaction type.
@@ -14,7 +14,15 @@ import axios from "axios";
  *   label           – field label
  *   size            – MUI size
  */
-const LocationSelect = ({storeId, itemId, transactionType, value, onChange, label = "Location (optional)", size = "medium"}) => {
+const LocationSelect = ({
+    storeId,
+    itemId,
+    transactionType,
+    value,
+    onChange,
+    label = 'Location (optional)',
+    size = 'medium',
+}) => {
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -29,11 +37,12 @@ const LocationSelect = ({storeId, itemId, transactionType, value, onChange, labe
         if (itemId) params.item_id = itemId;
         if (transactionType) params.type = transactionType;
 
-        axios.get(route("api.inventory.stores.locations", storeId), {params})
-            .then(({data}) => {
+        axios
+            .get(route('api.inventory.stores.locations', storeId), { params })
+            .then(({ data }) => {
                 setOptions(data);
                 // If current value is no longer in filtered list, clear it
-                if (value && !data.find(l => l.id === value.id)) {
+                if (value && !data.find((l) => l.id === value.id)) {
                     onChange(null);
                 }
             })
@@ -46,18 +55,24 @@ const LocationSelect = ({storeId, itemId, transactionType, value, onChange, labe
             value={value || null}
             options={options}
             isOptionEqualToValue={(opt, val) => opt.id === val?.id}
-            getOptionLabel={(opt) => opt?.label ?? ""}
+            getOptionLabel={(opt) => opt?.label ?? ''}
             onChange={(_, newValue) => onChange(newValue)}
             noOptionsText={
-                !storeId ? "Select a store first" :
-                "No locations — add locations to this store first"
+                !storeId
+                    ? 'Select a store first'
+                    : 'No locations — add locations to this store first'
             }
             renderOption={(props, opt) => (
                 <Typography component="li" {...props} key={opt.id} variant="body2">
                     {opt.label}
                     {(opt.zone || opt.shelf || opt.bin) && (
-                        <Typography component="span" variant="caption" color="text.secondary" sx={{ml: 1}}>
-                            {[opt.zone, opt.row, opt.shelf, opt.bin].filter(Boolean).join(" · ")}
+                        <Typography
+                            component="span"
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ ml: 1 }}
+                        >
+                            {[opt.zone, opt.row, opt.shelf, opt.bin].filter(Boolean).join(' · ')}
                         </Typography>
                     )}
                 </Typography>
@@ -73,7 +88,7 @@ const LocationSelect = ({storeId, itemId, transactionType, value, onChange, labe
                             ...params.slotProps?.input,
                             endAdornment: (
                                 <>
-                                    {loading && <CircularProgress size={16}/>}
+                                    {loading && <CircularProgress size={16} />}
                                     {params.slotProps?.input?.endAdornment}
                                 </>
                             ),

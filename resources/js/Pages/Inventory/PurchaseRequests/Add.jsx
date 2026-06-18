@@ -1,21 +1,35 @@
-import {useState} from "react";
-import {Head, router, usePage, useForm} from "@inertiajs/react";
+import { useState } from 'react';
+import { Head, router, usePage, useForm } from '@inertiajs/react';
 import {
-    Box, Button, Card, CardContent, CardHeader, Grid, TextField, MenuItem,
-    IconButton, Table, TableHead, TableBody, TableRow, TableCell,
-    Typography, CircularProgress, Alert,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import PageHeader from "@/Components/PageHeader";
-import ItemSelect from "@/Pages/Inventory/Components/ItemSelect";
-import UnitSelect from "@/Pages/Inventory/Components/UnitSelect";
-import SupplierSelect from "@/Pages/Inventory/Components/SupplierSelect";
-import BrandInput from "@/Pages/Inventory/Components/BrandInput";
-import PriceHint from "@/Pages/Inventory/Components/PriceHint";
+    Box,
+    Button,
+    Card,
+    CardContent,
+    CardHeader,
+    Grid,
+    TextField,
+    MenuItem,
+    IconButton,
+    Table,
+    TableHead,
+    TableBody,
+    TableRow,
+    TableCell,
+    Typography,
+    CircularProgress,
+    Alert,
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PageHeader from '@/Components/PageHeader';
+import ItemSelect from '@/Pages/Inventory/Components/ItemSelect';
+import UnitSelect from '@/Pages/Inventory/Components/UnitSelect';
+import SupplierSelect from '@/Pages/Inventory/Components/SupplierSelect';
+import BrandInput from '@/Pages/Inventory/Components/BrandInput';
+import PriceHint from '@/Pages/Inventory/Components/PriceHint';
 
-const URGENCY_OPTIONS = ["LOW", "NORMAL", "HIGH", "URGENT"];
+const URGENCY_OPTIONS = ['LOW', 'NORMAL', 'HIGH', 'URGENT'];
 
 const emptyLine = () => ({
     _item: null,
@@ -23,15 +37,15 @@ const emptyLine = () => ({
     _preferred_supplier: null,
     item_id: null,
     unit_id: null,
-    qty: "",
-    estimated_unit_price: "",
-    preferred_supplier_id: "",
-    cat_no: "",
-    brand: "",
-    notes: "",
+    qty: '',
+    estimated_unit_price: '',
+    preferred_supplier_id: '',
+    cat_no: '',
+    brand: '',
+    notes: '',
 });
 
-const toPayload = ({_item, _unit, _preferred_supplier, ...rest}) => rest;
+const toPayload = ({ _item, _unit, _preferred_supplier, ...rest }) => rest;
 
 const lineFromSource = (line) => ({
     _item: line.item ?? null,
@@ -39,30 +53,30 @@ const lineFromSource = (line) => ({
     _preferred_supplier: line.preferred_supplier ?? null,
     item_id: line.item_id,
     unit_id: line.unit_id,
-    qty: line.qty ?? "",
-    estimated_unit_price: line.estimated_unit_price ?? "",
-    preferred_supplier_id: line.preferred_supplier_id ?? "",
-    cat_no: line.cat_no ?? "",
-    brand: line.brand ?? "",
-    notes: line.notes ?? "",
+    qty: line.qty ?? '',
+    estimated_unit_price: line.estimated_unit_price ?? '',
+    preferred_supplier_id: line.preferred_supplier_id ?? '',
+    cat_no: line.cat_no ?? '',
+    brand: line.brand ?? '',
+    notes: line.notes ?? '',
 });
 
 const payloadFromSource = (line) => toPayload(lineFromSource(line));
 
 const Add = () => {
-    const {defaults} = usePage().props;
+    const { defaults } = usePage().props;
 
-    const {data, setData, post, processing, errors} = useForm({
-        urgency: defaults?.urgency ?? "NORMAL",
-        notes:   defaults?.notes ?? "",
-        lines:   defaults?.lines?.map(payloadFromSource) ?? [],
+    const { data, setData, post, processing, errors } = useForm({
+        urgency: defaults?.urgency ?? 'NORMAL',
+        notes: defaults?.notes ?? '',
+        lines: defaults?.lines?.map(payloadFromSource) ?? [],
     });
 
     const [lineItems, setLineItems] = useState(() => defaults?.lines?.map(lineFromSource) ?? []);
 
     const syncLines = (updated) => {
         setLineItems(updated);
-        setData("lines", updated.map(toPayload));
+        setData('lines', updated.map(toPayload));
     };
 
     const addLine = () => syncLines([...lineItems, emptyLine()]);
@@ -70,53 +84,84 @@ const Add = () => {
     const removeLine = (idx) => syncLines(lineItems.filter((_, i) => i !== idx));
 
     const setLineItem = (idx, item) => {
-        syncLines(lineItems.map((l, i) => i === idx
-            ? {...l, _item: item, item_id: item?.id ?? null, _unit: null, unit_id: null}
-            : l
-        ));
+        syncLines(
+            lineItems.map((l, i) =>
+                i === idx
+                    ? { ...l, _item: item, item_id: item?.id ?? null, _unit: null, unit_id: null }
+                    : l,
+            ),
+        );
     };
 
     const setLineUnit = (idx, unit) => {
-        syncLines(lineItems.map((l, i) => i === idx
-            ? {...l, _unit: unit, unit_id: unit?.id ?? null}
-            : l
-        ));
+        syncLines(
+            lineItems.map((l, i) =>
+                i === idx ? { ...l, _unit: unit, unit_id: unit?.id ?? null } : l,
+            ),
+        );
     };
 
     const updateLine = (idx, field, value) => {
-        syncLines(lineItems.map((l, i) => i === idx ? {...l, [field]: value} : l));
+        syncLines(lineItems.map((l, i) => (i === idx ? { ...l, [field]: value } : l)));
     };
 
     const setLineSupplier = (idx, supplier) => {
-        syncLines(lineItems.map((l, i) => i === idx
-            ? {...l, _preferred_supplier: supplier, preferred_supplier_id: supplier?.id ?? ""}
-            : l
-        ));
+        syncLines(
+            lineItems.map((l, i) =>
+                i === idx
+                    ? {
+                          ...l,
+                          _preferred_supplier: supplier,
+                          preferred_supplier_id: supplier?.id ?? '',
+                      }
+                    : l,
+            ),
+        );
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route("inventory.purchase-requests.store"));
+        post(route('inventory.purchase-requests.store'));
     };
 
     return (
         <>
-            <Head title="New Purchase Request"/>
-            <PageHeader title="New Purchase Request"/>
-            <Box component="form" onSubmit={handleSubmit} sx={{display: "flex", flexDirection: "column", gap: 3}}>
+            <Head title="New Purchase Request" />
+            <PageHeader title="New Purchase Request" />
+            <Box
+                component="form"
+                onSubmit={handleSubmit}
+                sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
+            >
                 <Card>
-                    <CardHeader title="Request Details"/>
+                    <CardHeader title="Request Details" />
                     <CardContent>
                         <Grid container spacing={3}>
-                            <Grid size={{ xs: 12, md: 4 }} >
-                                <TextField select fullWidth required label="Urgency"
-                                    value={data.urgency} onChange={(e) => setData("urgency", e.target.value)}>
-                                    {URGENCY_OPTIONS.map((u) => <MenuItem key={u} value={u}>{u}</MenuItem>)}
+                            <Grid size={{ xs: 12, md: 4 }}>
+                                <TextField
+                                    select
+                                    fullWidth
+                                    required
+                                    label="Urgency"
+                                    value={data.urgency}
+                                    onChange={(e) => setData('urgency', e.target.value)}
+                                >
+                                    {URGENCY_OPTIONS.map((u) => (
+                                        <MenuItem key={u} value={u}>
+                                            {u}
+                                        </MenuItem>
+                                    ))}
                                 </TextField>
                             </Grid>
-                            <Grid size={12} >
-                                <TextField fullWidth multiline rows={2} label="Notes"
-                                    value={data.notes} onChange={(e) => setData("notes", e.target.value)}/>
+                            <Grid size={12}>
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    rows={2}
+                                    label="Notes"
+                                    value={data.notes}
+                                    onChange={(e) => setData('notes', e.target.value)}
+                                />
                             </Grid>
                         </Grid>
                     </CardContent>
@@ -126,27 +171,36 @@ const Add = () => {
                     <CardHeader
                         title="Requested Items"
                         action={
-                            <Button startIcon={<AddIcon/>} onClick={addLine} size="small" variant="outlined">
+                            <Button
+                                startIcon={<AddIcon />}
+                                onClick={addLine}
+                                size="small"
+                                variant="outlined"
+                            >
                                 Add Item
                             </Button>
                         }
                     />
-                    <CardContent sx={{p: lineItems.length ? 0 : undefined, overflowX: "auto"}}>
+                    <CardContent sx={{ p: lineItems.length ? 0 : undefined, overflowX: 'auto' }}>
                         {lineItems.length === 0 ? (
-                            <Alert severity="info" sx={{m: 2}}>Click "Add Item" to begin building your request.</Alert>
+                            <Alert severity="info" sx={{ m: 2 }}>
+                                Click "Add Item" to begin building your request.
+                            </Alert>
                         ) : (
-                            <Table size="small" sx={{minWidth: 900}}>
+                            <Table size="small" sx={{ minWidth: 900 }}>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell sx={{minWidth: 260}}>Item</TableCell>
-                                        <TableCell sx={{minWidth: 180}}>Unit</TableCell>
-                                        <TableCell sx={{width: 100}}>Qty</TableCell>
-                                        <TableCell sx={{width: 120}}>Est. Unit Price</TableCell>
-                                        <TableCell sx={{minWidth: 130}}>Cat No</TableCell>
-                                        <TableCell sx={{minWidth: 140}}>Brand</TableCell>
-                                        <TableCell sx={{minWidth: 160}}>Preferred Supplier</TableCell>
-                                        <TableCell sx={{minWidth: 140}}>Notes</TableCell>
-                                        <TableCell sx={{width: 48}}/>
+                                        <TableCell sx={{ minWidth: 260 }}>Item</TableCell>
+                                        <TableCell sx={{ minWidth: 180 }}>Unit</TableCell>
+                                        <TableCell sx={{ width: 100 }}>Qty</TableCell>
+                                        <TableCell sx={{ width: 120 }}>Est. Unit Price</TableCell>
+                                        <TableCell sx={{ minWidth: 130 }}>Cat No</TableCell>
+                                        <TableCell sx={{ minWidth: 140 }}>Brand</TableCell>
+                                        <TableCell sx={{ minWidth: 160 }}>
+                                            Preferred Supplier
+                                        </TableCell>
+                                        <TableCell sx={{ minWidth: 140 }}>Notes</TableCell>
+                                        <TableCell sx={{ width: 48 }} />
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -178,29 +232,61 @@ const Add = () => {
                                                 />
                                             </TableCell>
                                             <TableCell>
-                                                <TextField size="small" type="number" placeholder="Qty"
+                                                <TextField
+                                                    size="small"
+                                                    type="number"
+                                                    placeholder="Qty"
                                                     value={line.qty}
-                                                    onChange={(e) => updateLine(idx, "qty", e.target.value)}
-                                                    slotProps={{ htmlInput: {min: 0, step: "any"} }} fullWidth
-                                                    error={!!errors[`lines.${idx}.qty`]}/>
+                                                    onChange={(e) =>
+                                                        updateLine(idx, 'qty', e.target.value)
+                                                    }
+                                                    slotProps={{
+                                                        htmlInput: { min: 0, step: 'any' },
+                                                    }}
+                                                    fullWidth
+                                                    error={!!errors[`lines.${idx}.qty`]}
+                                                />
                                             </TableCell>
                                             <TableCell>
-                                                <TextField size="small" type="number" placeholder="0.00"
+                                                <TextField
+                                                    size="small"
+                                                    type="number"
+                                                    placeholder="0.00"
                                                     value={line.estimated_unit_price}
-                                                    onChange={(e) => updateLine(idx, "estimated_unit_price", e.target.value)}
-                                                    slotProps={{ htmlInput: {min: 0, step: "any"} }} fullWidth
-                                                    error={!!errors[`lines.${idx}.estimated_unit_price`]}/>
+                                                    onChange={(e) =>
+                                                        updateLine(
+                                                            idx,
+                                                            'estimated_unit_price',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    slotProps={{
+                                                        htmlInput: { min: 0, step: 'any' },
+                                                    }}
+                                                    fullWidth
+                                                    error={
+                                                        !!errors[
+                                                            `lines.${idx}.estimated_unit_price`
+                                                        ]
+                                                    }
+                                                />
                                             </TableCell>
                                             <TableCell>
-                                                <TextField size="small" fullWidth placeholder="Cat No"
+                                                <TextField
+                                                    size="small"
+                                                    fullWidth
+                                                    placeholder="Cat No"
                                                     value={line.cat_no}
-                                                    onChange={(e) => updateLine(idx, "cat_no", e.target.value)}/>
+                                                    onChange={(e) =>
+                                                        updateLine(idx, 'cat_no', e.target.value)
+                                                    }
+                                                />
                                             </TableCell>
                                             <TableCell>
                                                 <BrandInput
                                                     value={line.brand}
                                                     itemId={line._item?.id}
-                                                    onChange={(v) => updateLine(idx, "brand", v)}
+                                                    onChange={(v) => updateLine(idx, 'brand', v)}
                                                 />
                                             </TableCell>
                                             <TableCell>
@@ -212,13 +298,23 @@ const Add = () => {
                                                 />
                                             </TableCell>
                                             <TableCell>
-                                                <TextField size="small" fullWidth placeholder="Notes"
+                                                <TextField
+                                                    size="small"
+                                                    fullWidth
+                                                    placeholder="Notes"
                                                     value={line.notes}
-                                                    onChange={(e) => updateLine(idx, "notes", e.target.value)}/>
+                                                    onChange={(e) =>
+                                                        updateLine(idx, 'notes', e.target.value)
+                                                    }
+                                                />
                                             </TableCell>
                                             <TableCell>
-                                                <IconButton size="small" color="error" onClick={() => removeLine(idx)}>
-                                                    <DeleteIcon fontSize="small"/>
+                                                <IconButton
+                                                    size="small"
+                                                    color="error"
+                                                    onClick={() => removeLine(idx)}
+                                                >
+                                                    <DeleteIcon fontSize="small" />
                                                 </IconButton>
                                             </TableCell>
                                         </TableRow>
@@ -227,18 +323,26 @@ const Add = () => {
                             </Table>
                         )}
                         {errors.lines && (
-                            <Alert severity="error" sx={{mt: 1}}>{errors.lines}</Alert>
+                            <Alert severity="error" sx={{ mt: 1 }}>
+                                {errors.lines}
+                            </Alert>
                         )}
                     </CardContent>
                 </Card>
 
-                <Box sx={{display: "flex", gap: 2}}>
-                    <Button onClick={() => router.visit(route("inventory.purchase-requests.index"))}>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button
+                        onClick={() => router.visit(route('inventory.purchase-requests.index'))}
+                    >
                         Cancel
                     </Button>
-                    <Button type="submit" variant="contained" color="success"
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        color="success"
                         disabled={processing || lineItems.length === 0}
-                        startIcon={processing && <CircularProgress size={16}/>}>
+                        startIcon={processing && <CircularProgress size={16} />}
+                    >
                         Submit Request
                     </Button>
                 </Box>
@@ -248,13 +352,15 @@ const Add = () => {
 };
 
 const breadcrumbs = [
-    {title: "Inventory", link: null},
-    {title: "Purchase Requests", link: route("inventory.purchase-requests.index")},
-    {title: "New Request", link: null},
+    { title: 'Inventory', link: null },
+    { title: 'Purchase Requests', link: route('inventory.purchase-requests.index') },
+    { title: 'New Request', link: null },
 ];
 
 Add.layout = (page) => (
-    <AuthenticatedLayout auth={page.props.auth} breadcrumbs={breadcrumbs}>{page}</AuthenticatedLayout>
+    <AuthenticatedLayout auth={page.props.auth} breadcrumbs={breadcrumbs}>
+        {page}
+    </AuthenticatedLayout>
 );
 
 export default Add;

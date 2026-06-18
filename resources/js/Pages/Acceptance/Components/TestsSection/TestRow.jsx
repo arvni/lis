@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
     TableCell,
     TableRow,
@@ -18,7 +18,7 @@ import {
     DialogContentText,
     Badge,
     Checkbox,
-} from "@mui/material";
+} from '@mui/material';
 import {
     Edit as EditIcon,
     Delete as DeleteIcon,
@@ -30,8 +30,8 @@ import {
     LocalHospital as ServiceIcon,
     Warning as WarningIcon,
     PlaylistAdd as PromoteIcon,
-} from "@mui/icons-material";
-import { Link } from "@inertiajs/react";
+} from '@mui/icons-material';
+import { Link } from '@inertiajs/react';
 
 const PatientChips = ({ patients, maxVisible = 3 }) => {
     const [showAll, setShowAll] = useState(false);
@@ -91,9 +91,8 @@ const DetailsCell = ({ details, maxLength = 100 }) => {
     }
 
     const shouldTruncate = details.length > maxLength;
-    const displayText = expanded || !shouldTruncate
-        ? details
-        : `${details.substring(0, maxLength)}...`;
+    const displayText =
+        expanded || !shouldTruncate ? details : `${details.substring(0, maxLength)}...`;
 
     return (
         <Box>
@@ -122,19 +121,19 @@ const TestTypeChip = ({ type, testTypes }) => {
                 return {
                     color: 'info',
                     icon: <ScienceIcon sx={{ fontSize: 12 }} />,
-                    variant: 'filled'
+                    variant: 'filled',
                 };
             case 'SERVICE':
                 return {
                     color: 'success',
                     icon: <ServiceIcon sx={{ fontSize: 12 }} />,
-                    variant: 'filled'
+                    variant: 'filled',
                 };
             default:
                 return {
                     color: 'warning',
                     icon: <WarningIcon sx={{ fontSize: 12 }} />,
-                    variant: 'outlined'
+                    variant: 'outlined',
                 };
         }
     };
@@ -152,8 +151,8 @@ const TestTypeChip = ({ type, testTypes }) => {
             sx={{
                 fontWeight: 'medium',
                 '& .MuiChip-icon': {
-                    ml: 0.5
-                }
+                    ml: 0.5,
+                },
             }}
         />
     );
@@ -170,8 +169,8 @@ const ActionButtons = ({ test, onEdit, onDelete, onRestore, onPromote }) => {
                     sx={{
                         '&:hover': {
                             backgroundColor: 'success.main',
-                            color: 'white'
-                        }
+                            color: 'white',
+                        },
                     }}
                 >
                     <RestoreIcon />
@@ -181,7 +180,7 @@ const ActionButtons = ({ test, onEdit, onDelete, onRestore, onPromote }) => {
     }
 
     return (
-        <Stack direction="row" spacing={1} sx={{ justifyContent: "center" }}>
+        <Stack direction="row" spacing={1} sx={{ justifyContent: 'center' }}>
             {onPromote && (
                 <Tooltip title="Promote to panel">
                     <IconButton
@@ -230,16 +229,12 @@ const PriceDisplay = ({ price, discount }) => {
             <Typography
                 variant="body2"
                 fontWeight="medium"
-                color={hasDiscount ? "success.main" : "text.primary"}
+                color={hasDiscount ? 'success.main' : 'text.primary'}
             >
                 {price}
             </Typography>
             {hasDiscount && (
-                <Typography
-                    variant="caption"
-                    color="success.main"
-                    sx={{ display: 'block' }}
-                >
+                <Typography variant="caption" color="success.main" sx={{ display: 'block' }}>
                     -{discount} discount
                 </Typography>
             )}
@@ -248,16 +243,16 @@ const PriceDisplay = ({ price, discount }) => {
 };
 
 const TestRow = ({
-                     test,
-                     testTypes,
-                     onEdit,
-                     onDelete,
-                     onRestore,
-                     onPromote,
-                     selected = false,
-                     onSelect,
-                     showButton = false
-                 }) => {
+    test,
+    testTypes,
+    onEdit,
+    onDelete,
+    onRestore,
+    onPromote,
+    selected = false,
+    onSelect,
+    showButton = false,
+}) => {
     const isDeleted = test?.deleted;
     const testName = test?.method_test?.test?.name;
     const testCode = test?.method_test?.test?.code;
@@ -274,16 +269,9 @@ const TestRow = ({
                     <Alert
                         severity="warning"
                         variant="outlined"
-                        action={
-                            <ActionButtons
-                                test={test}
-                                onRestore={onRestore}
-                            />
-                        }
+                        action={<ActionButtons test={test} onRestore={onRestore} />}
                     >
-                        <Typography variant="body2">
-                            Test "{testName}" has been removed
-                        </Typography>
+                        <Typography variant="body2">Test "{testName}" has been removed</Typography>
                     </Alert>
                 </TableCell>
             </TableRow>
@@ -296,8 +284,8 @@ const TestRow = ({
             sx={{
                 '&:last-child td, &:last-child th': { border: 0 },
                 '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
-                }
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                },
             }}
         >
             {/* Selection checkbox */}
@@ -306,20 +294,20 @@ const TestRow = ({
                     <Checkbox
                         size="small"
                         checked={selected}
-                        onChange={e => onSelect(test, e.target.checked)}
+                        onChange={(e) => onSelect(test, e.target.checked)}
                     />
                 </TableCell>
             )}
 
             {/* Test Name */}
             <TableCell>
-  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
+                <Box display="flex" gap={1} sx={{ alignItems: 'center' }}>
                     <ScienceIcon color="primary" sx={{ fontSize: 16 }} />
                     {showButton ? (
                         <Link
-                            href={route("acceptanceItems.show", {
+                            href={route('acceptanceItems.show', {
                                 acceptanceItem: test.id,
-                                acceptance: test.acceptance_id
+                                acceptance: test.acceptance_id,
                             })}
                             style={{ textDecoration: 'none' }}
                         >
@@ -330,7 +318,7 @@ const TestRow = ({
                                 sx={{
                                     justifyContent: 'flex-start',
                                     textTransform: 'none',
-                                    fontWeight: 'medium'
+                                    fontWeight: 'medium',
                                 }}
                             >
                                 {testName}
@@ -354,7 +342,7 @@ const TestRow = ({
                     sx={{
                         fontFamily: 'monospace',
                         fontWeight: 'bold',
-                        backgroundColor: 'rgba(25, 118, 210, 0.08)'
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
                     }}
                 />
             </TableCell>
@@ -373,7 +361,7 @@ const TestRow = ({
 
             {/* Method */}
             <TableCell>
-  <Box display="flex" gap={1} sx={{alignItems: "center"}}>
+                <Box display="flex" gap={1} sx={{ alignItems: 'center' }}>
                     <Badge
                         badgeContent=""
                         color="secondary"
@@ -381,13 +369,11 @@ const TestRow = ({
                         sx={{
                             '& .MuiBadge-dot': {
                                 width: 6,
-                                height: 6
-                            }
+                                height: 6,
+                            },
                         }}
                     >
-                        <Typography variant="body2">
-                            {methodName}
-                        </Typography>
+                        <Typography variant="body2">{methodName}</Typography>
                     </Badge>
                 </Box>
             </TableCell>
@@ -396,11 +382,12 @@ const TestRow = ({
             <TableCell>
                 {!test?.patients?.length ? (
                     test?.samples?.map((sample, sampleIndex) => (
-                        <Box key={sampleIndex} sx={{ mb: sampleIndex < test.samples.length - 1 ? 1 : 0 }}>
+                        <Box
+                            key={sampleIndex}
+                            sx={{ mb: sampleIndex < test.samples.length - 1 ? 1 : 0 }}
+                        >
                             <PatientChips patients={sample.patients} />
-                            {sampleIndex < test.samples.length - 1 && (
-                                <Divider sx={{ my: 1 }} />
-                            )}
+                            {sampleIndex < test.samples.length - 1 && <Divider sx={{ my: 1 }} />}
                         </Box>
                     ))
                 ) : (
@@ -419,7 +406,7 @@ const TestRow = ({
                                 size="small"
                                 color="secondary"
                                 variant="outlined"
-                                sx={{fontSize: '0.7rem'}}
+                                sx={{ fontSize: '0.7rem' }}
                             />
                         ))}
                     </Stack>
@@ -440,7 +427,7 @@ const TestRow = ({
                 <Typography
                     variant="body2"
                     fontWeight="medium"
-                    color={Number(test.discount) > 0 ? "success.main" : "text.primary"}
+                    color={Number(test.discount) > 0 ? 'success.main' : 'text.primary'}
                     sx={{ textAlign: 'right' }}
                 >
                     {test.discount}

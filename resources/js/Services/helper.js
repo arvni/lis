@@ -1,5 +1,3 @@
-
-
 export function makeId(length) {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -13,19 +11,17 @@ export function makeId(length) {
 }
 
 export const sum = (arr = [], field, func = (value) => value) => {
-
-    return arr.map(item => getDotedValue(item, field) * 1).reduce((sum, a) => sum + func(a), 0);
-}
+    return arr.map((item) => getDotedValue(item, field) * 1).reduce((sum, a) => sum + func(a), 0);
+};
 export const getDotedValue = (field, doted) => {
-    let dotedItems = doted.split(".");
+    let dotedItems = doted.split('.');
     if (dotedItems.length > 1) {
         let key = dotedItems.splice(0, 1);
-        return getDotedValue(field[key], dotedItems.join("."))
-    } else
-        return field[doted];
-}
+        return getDotedValue(field[key], dotedItems.join('.'));
+    } else return field[doted];
+};
 
-export const calculateBusinessDays = (date,days) => {
+export const calculateBusinessDays = (date, days) => {
     let currentDate = new Date(date);
     let remainingDays = days;
 
@@ -43,10 +39,9 @@ export const calculateBusinessDays = (date,days) => {
     return currentDate;
 };
 
-
 // Format date
 export const formatDate = (date) => {
-    if (!date) return "N/A";
+    if (!date) return 'N/A';
     return new Intl.DateTimeFormat('en-US', {
         year: 'numeric',
         month: 'short',
@@ -54,6 +49,6 @@ export const formatDate = (date) => {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false,
-        timeZoneName: undefined
+        timeZoneName: undefined,
     }).format(new Date(date));
 };

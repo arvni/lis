@@ -1,7 +1,7 @@
-import Grid from "@mui/material/Grid";
-import TextField from "@mui/material/TextField";
-import Box from "@mui/material/Box";
-import countries from "@/Data/Countries";
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import Box from '@mui/material/Box';
+import countries from '@/Data/Countries';
 import {
     Autocomplete,
     FormControl,
@@ -20,8 +20,9 @@ import {
     Button,
     Chip,
     Collapse,
-    Alert, Stack
-} from "@mui/material";
+    Alert,
+    Stack,
+} from '@mui/material';
 import {
     Man2,
     QuestionMark,
@@ -40,15 +41,15 @@ import {
     AccessibilityNew,
     ArrowDropDown,
     ArrowDropUp,
-    Cake
-} from "@mui/icons-material";
-import AvatarUpload from "@/Components/AvatarUpload";
-import MenuItem from "@mui/material/MenuItem";
-import React, {useState} from "react";
-import Typography from "@mui/material/Typography";
-import {omanWilayats} from "@/Data/omanWilayats.js";
+    Cake,
+} from '@mui/icons-material';
+import AvatarUpload from '@/Components/AvatarUpload';
+import MenuItem from '@mui/material/MenuItem';
+import React, { useState } from 'react';
+import Typography from '@mui/material/Typography';
+import { omanWilayats } from '@/Data/omanWilayats.js';
 
-const PatientForm = ({onChange, data, errors, editable = true, withRelative = false}) => {
+const PatientForm = ({ onChange, data, errors, editable = true, withRelative = false }) => {
     const [unknownAvatar, setUnknownAvatar] = useState(null);
     const [expandedSection, setExpandedSection] = useState('personal');
     const [age, setAge] = useState(calculateAge(data?.dateOfBirth));
@@ -64,7 +65,10 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
         let age = today.getFullYear() - birthDate.getFullYear();
         const monthDifference = today.getMonth() - birthDate.getMonth();
 
-        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+        if (
+            monthDifference < 0 ||
+            (monthDifference === 0 && today.getDate() < birthDate.getDate())
+        ) {
             age--;
         }
 
@@ -108,47 +112,52 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
             const newDOB = calculateDOB(newAge);
             onChange({
                 target: {
-                    name: "dateOfBirth",
-                    value: newDOB
-                }
+                    name: 'dateOfBirth',
+                    value: newDOB,
+                },
             });
         }
     };
 
     const handleUnknownAvatarChange = (e, v) => {
         setUnknownAvatar(v);
-        onChange({target: {name: "avatar", value: e.target.src}});
+        onChange({ target: { name: 'avatar', value: e.target.src } });
     };
 
-    const switchChange = (e, v) => onChange({target: {name: e.target.name, value: !v}});
-    const nationalityChanged = (e, v) => onChange({...e, target: {...e.target, name: "nationality", value: v}});
-    const handleGenderChange = (e, v) => onChange({...e, target: {...e.target, name: "gender", value: v + ""}});
-    const handleAvatarChange = ({data}) => onChange({target: {name: "avatar", value: data}});
+    const switchChange = (e, v) => onChange({ target: { name: e.target.name, value: !v } });
+    const nationalityChanged = (e, v) =>
+        onChange({ ...e, target: { ...e.target, name: 'nationality', value: v } });
+    const handleGenderChange = (e, v) =>
+        onChange({ ...e, target: { ...e.target, name: 'gender', value: v + '' } });
+    const handleAvatarChange = ({ data }) => onChange({ target: { name: 'avatar', value: data } });
 
     // Helper function to check if a field has an error
     const hasError = (fieldName) => !!errors && errors.hasOwnProperty(fieldName);
 
     // Omani nationals must provide second and third names
-    const isOmani = data?.nationality?.code === "OM";
+    const isOmani = data?.nationality?.code === 'OM';
 
     // Governorate / wilayat are cascading: wilayat options depend on the chosen governorate.
     const governorateOptions = Object.keys(omanWilayats);
     // Legacy patients may have a stored wilayat but no governorate — derive it so the
     // wilayat still resolves and displays when editing them.
-    const selectedGovernorate = data?.governorate
-        || (data?.wilayat ? governorateOptions.find(g => omanWilayats[g].includes(data.wilayat)) : "")
-        || "";
+    const selectedGovernorate =
+        data?.governorate ||
+        (data?.wilayat
+            ? governorateOptions.find((g) => omanWilayats[g].includes(data.wilayat))
+            : '') ||
+        '';
     const wilayatOptions = selectedGovernorate ? omanWilayats[selectedGovernorate] : [];
 
     const handleGovernorateChange = (e, v) => {
-        onChange({target: {name: "governorate", value: v || ""}});
+        onChange({ target: { name: 'governorate', value: v || '' } });
         // A wilayat belongs to a single governorate; clear it when the governorate changes.
         if (v !== selectedGovernorate) {
-            onChange({target: {name: "wilayat", value: ""}});
+            onChange({ target: { name: 'wilayat', value: '' } });
         }
     };
 
-    const handleWilayatChange = (e, v) => onChange({target: {name: "wilayat", value: v || ""}});
+    const handleWilayatChange = (e, v) => onChange({ target: { name: 'wilayat', value: v || '' } });
 
     // Toggle section expansion
     const toggleSection = (section) => {
@@ -156,41 +165,47 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
     };
 
     const relationOptions = [
-        ...(data.gender === "male" ?
-                [
-                    {value: "father", label: "Father"},
-                    {value: "grandfather", label: "Grandfather"},
-                    {value: "uncle", label: "Uncle"},
-                    {value: "brother", label: "Brother"},
-                    {value: "husband", label: "Husband"},
-                    {value: "father in law", label: "Father in Law"},
-                    {value: "brother in law", label: "Brother in Law"},
-                ]
-                :
-                [
-                    {value: "mother", label: "Mother"},
-                    {value: "sister", label: "Sister"},
-                    {value: "wife", label: "Wife"},
-                    {value: "grandmother", label: "Grandmother"},
-                    {value: "aunt", label: "Aunt"},
-                    {value: "mother in law", label: "Mother in Law"},
-                    {value: "sister in law", label: "Sister in Law"},
-                ]
-        ),
-        {value: "child", label: "Child"},
-        {value: "first cousin", label: "First Cousin"},
-        {value: "second cousin", label: "Second Cousin"},
-        {value: "other", label: "Other"},
-    ]
+        ...(data.gender === 'male'
+            ? [
+                  { value: 'father', label: 'Father' },
+                  { value: 'grandfather', label: 'Grandfather' },
+                  { value: 'uncle', label: 'Uncle' },
+                  { value: 'brother', label: 'Brother' },
+                  { value: 'husband', label: 'Husband' },
+                  { value: 'father in law', label: 'Father in Law' },
+                  { value: 'brother in law', label: 'Brother in Law' },
+              ]
+            : [
+                  { value: 'mother', label: 'Mother' },
+                  { value: 'sister', label: 'Sister' },
+                  { value: 'wife', label: 'Wife' },
+                  { value: 'grandmother', label: 'Grandmother' },
+                  { value: 'aunt', label: 'Aunt' },
+                  { value: 'mother in law', label: 'Mother in Law' },
+                  { value: 'sister in law', label: 'Sister in Law' },
+              ]),
+        { value: 'child', label: 'Child' },
+        { value: 'first cousin', label: 'First Cousin' },
+        { value: 'second cousin', label: 'Second Cousin' },
+        { value: 'other', label: 'Other' },
+    ];
 
-    const currentRelationship = data.relationship ? (Array.isArray(data.relationship) ? data.relationship : data.relationship.split(",")) : [];
-    const showCustomInput = currentRelationship.includes("other");
+    const currentRelationship = data.relationship
+        ? Array.isArray(data.relationship)
+            ? data.relationship
+            : data.relationship.split(',')
+        : [];
+    const showCustomInput = currentRelationship.includes('other');
 
     const handleAddCustomRelationship = () => {
         const trimmed = customRelationship.trim().toLowerCase();
         if (trimmed && !currentRelationship.includes(trimmed)) {
-            const newRelationship = [...currentRelationship.filter(r => r !== "other"), trimmed, "other"];
-            onChange({target: {name: "relationship", value: newRelationship}});
+            const newRelationship = [
+                ...currentRelationship.filter((r) => r !== 'other'),
+                trimmed,
+                'other',
+            ];
+            onChange({ target: { name: 'relationship', value: newRelationship } });
         }
         setCustomRelationship('');
     };
@@ -203,18 +218,25 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
     };
 
     return (
-        <Card elevation={3} sx={{borderRadius: 2, overflow: 'visible'}}>
-            <CardContent sx={{p: 3}}>
+        <Card elevation={3} sx={{ borderRadius: 2, overflow: 'visible' }}>
+            <CardContent sx={{ p: 3 }}>
                 {/* Header with Avatar */}
-                <Box sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    mb: 4,
-                    position: 'relative'
-                }}>
-                    <Typography variant="h5" component="h1" gutterBottom color="primary"
-                                sx={{fontWeight: 'bold', mb: 3}}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        mb: 4,
+                        position: 'relative',
+                    }}
+                >
+                    <Typography
+                        variant="h5"
+                        component="h1"
+                        gutterBottom
+                        color="primary"
+                        sx={{ fontWeight: 'bold', mb: 3 }}
+                    >
                         Patient Registration
                     </Typography>
 
@@ -224,9 +246,9 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                         tag="AVATAR"
                         label="Choose Avatar"
                         onChange={handleAvatarChange}
-                        error={hasError("avatar")}
+                        error={hasError('avatar')}
                         helperText={errors?.avatar}
-                        uploadUrl={route("documents.store")}
+                        uploadUrl={route('documents.store')}
                         disabled={!editable}
                         sx={{
                             width: 150,
@@ -236,14 +258,21 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                 height: 150,
                                 fontSize: '3.5rem',
                                 border: '4px solid #f5f5f5',
-                                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                            }
+                                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                            },
                         }}
                     />
 
                     {editable && (
-                        <Box sx={{width: '100%', maxWidth: 500, mt: 3}}>
-                            <FormGroup sx={{mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <Box sx={{ width: '100%', maxWidth: 500, mt: 3 }}>
+                            <FormGroup
+                                sx={{
+                                    mb: 2,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
                                 <FormControlLabel
                                     control={
                                         <Switch
@@ -252,7 +281,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                         />
                                     }
                                     label={
-                                        <Typography variant="body2" sx={{fontWeight: 'medium'}}>
+                                        <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
                                             ID Card Not Available
                                         </Typography>
                                     }
@@ -262,14 +291,21 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                             </FormGroup>
 
                             <Collapse in={data.idCardInstAvailable}>
-                                <Card variant="outlined" sx={{
-                                    p: 2,
-                                    bgcolor: 'background.paper',
-                                    borderRadius: 2,
-                                    transition: 'all 0.3s ease'
-                                }}>
-                                    <Typography variant="subtitle1" gutterBottom color="primary"
-                                                sx={{fontWeight: 'medium', textAlign: 'center'}}>
+                                <Card
+                                    variant="outlined"
+                                    sx={{
+                                        p: 2,
+                                        bgcolor: 'background.paper',
+                                        borderRadius: 2,
+                                        transition: 'all 0.3s ease',
+                                    }}
+                                >
+                                    <Typography
+                                        variant="subtitle1"
+                                        gutterBottom
+                                        color="primary"
+                                        sx={{ fontWeight: 'medium', textAlign: 'center' }}
+                                    >
                                         Select Avatar Type
                                     </Typography>
                                     <ToggleButtonGroup
@@ -285,17 +321,17 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                                 m: 0.5,
                                                 transition: 'transform 0.2s ease',
                                                 '&:hover': {
-                                                    transform: 'scale(1.05)'
-                                                }
+                                                    transform: 'scale(1.05)',
+                                                },
                                             },
                                             '& .Mui-selected': {
                                                 border: '2px solid',
-                                                borderColor: 'primary.main'
-                                            }
+                                                borderColor: 'primary.main',
+                                            },
                                         }}
                                     >
                                         <Tooltip title="Female">
-                                            <ToggleButton value="female" sx={{p: 1}}>
+                                            <ToggleButton value="female" sx={{ p: 1 }}>
                                                 <img
                                                     src="/images/female.png"
                                                     height={70}
@@ -305,7 +341,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             </ToggleButton>
                                         </Tooltip>
                                         <Tooltip title="Male">
-                                            <ToggleButton value="male" sx={{p: 1}}>
+                                            <ToggleButton value="male" sx={{ p: 1 }}>
                                                 <img
                                                     src="/images/male.png"
                                                     height={70}
@@ -315,7 +351,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             </ToggleButton>
                                         </Tooltip>
                                         <Tooltip title="Child">
-                                            <ToggleButton value="baby" sx={{p: 1}}>
+                                            <ToggleButton value="baby" sx={{ p: 1 }}>
                                                 <img
                                                     src="/images/baby.png"
                                                     height={70}
@@ -340,7 +376,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                         borderRadius: 2,
                         overflow: 'hidden',
                         border: '1px solid',
-                        borderColor: 'divider'
+                        borderColor: 'divider',
                     }}
                 >
                     <Button
@@ -359,24 +395,28 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                             },
                         }}
                     >
-                        <Box sx={{display: 'flex', alignItems: 'center'}}>
-                            <Person sx={{mr: 1}}/>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Person sx={{ mr: 1 }} />
                             <Typography variant="subtitle1" fontWeight="bold">
                                 Personal Information
                             </Typography>
                         </Box>
-                        {expandedSection === 'personal' ? <ArrowDropUp/> : <ArrowDropDown/>}
+                        {expandedSection === 'personal' ? <ArrowDropUp /> : <ArrowDropDown />}
                     </Button>
 
                     <Collapse in={expandedSection === 'personal'}>
-                        <Box sx={{p: 3}}>
+                        <Box sx={{ p: 3 }}>
                             <Grid container spacing={3}>
                                 {/* ID/Passport Number Field */}
-                                <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <FormControl fullWidth variant="outlined" error={hasError("idNo")}>
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                    <FormControl
+                                        fullWidth
+                                        variant="outlined"
+                                        error={hasError('idNo')}
+                                    >
                                         <TextField
                                             id="idNo"
-                                            error={hasError("idNo")}
+                                            error={hasError('idNo')}
                                             helperText={errors?.idNo}
                                             value={data?.idNo || ''}
                                             disabled={!editable}
@@ -388,18 +428,26 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             variant="outlined"
                                             label="ID/Passport Number"
                                             slotProps={{
-                                                input: {startAdornment: <Badge color="primary" sx={{mr: 1}}/>}
+                                                input: {
+                                                    startAdornment: (
+                                                        <Badge color="primary" sx={{ mr: 1 }} />
+                                                    ),
+                                                },
                                             }}
                                         />
                                     </FormControl>
                                 </Grid>
 
                                 {/* First Name Field */}
-                                <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <FormControl fullWidth variant="outlined" error={hasError("firstName")}>
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                    <FormControl
+                                        fullWidth
+                                        variant="outlined"
+                                        error={hasError('firstName')}
+                                    >
                                         <TextField
                                             id="firstName"
-                                            error={hasError("firstName")}
+                                            error={hasError('firstName')}
                                             helperText={errors?.firstName}
                                             value={data?.firstName || ''}
                                             disabled={!editable}
@@ -411,18 +459,26 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             variant="outlined"
                                             label="First Name"
                                             slotProps={{
-                                                input: {startAdornment: <Person color="primary" sx={{mr: 1}}/>}
+                                                input: {
+                                                    startAdornment: (
+                                                        <Person color="primary" sx={{ mr: 1 }} />
+                                                    ),
+                                                },
                                             }}
                                         />
                                     </FormControl>
                                 </Grid>
 
                                 {/* Second Name Field */}
-                                <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <FormControl fullWidth variant="outlined" error={hasError("secondName")}>
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                    <FormControl
+                                        fullWidth
+                                        variant="outlined"
+                                        error={hasError('secondName')}
+                                    >
                                         <TextField
                                             id="secondName"
-                                            error={hasError("secondName")}
+                                            error={hasError('secondName')}
                                             helperText={errors?.secondName}
                                             value={data?.secondName || ''}
                                             disabled={!editable}
@@ -432,20 +488,30 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             required={isOmani}
                                             placeholder="Enter second name"
                                             variant="outlined"
-                                            label={isOmani ? "Second Name" : "Second Name (optional)"}
+                                            label={
+                                                isOmani ? 'Second Name' : 'Second Name (optional)'
+                                            }
                                             slotProps={{
-                                                input: {startAdornment: <Person color="primary" sx={{mr: 1}}/>}
+                                                input: {
+                                                    startAdornment: (
+                                                        <Person color="primary" sx={{ mr: 1 }} />
+                                                    ),
+                                                },
                                             }}
                                         />
                                     </FormControl>
                                 </Grid>
 
                                 {/* Third Name Field */}
-                                <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <FormControl fullWidth variant="outlined" error={hasError("thirdName")}>
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                    <FormControl
+                                        fullWidth
+                                        variant="outlined"
+                                        error={hasError('thirdName')}
+                                    >
                                         <TextField
                                             id="thirdName"
-                                            error={hasError("thirdName")}
+                                            error={hasError('thirdName')}
                                             helperText={errors?.thirdName}
                                             value={data?.thirdName || ''}
                                             disabled={!editable}
@@ -455,20 +521,28 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             required={isOmani}
                                             placeholder="Enter third name"
                                             variant="outlined"
-                                            label={isOmani ? "Third Name" : "Third Name (optional)"}
+                                            label={isOmani ? 'Third Name' : 'Third Name (optional)'}
                                             slotProps={{
-                                                input: {startAdornment: <Person color="primary" sx={{mr: 1}}/>}
+                                                input: {
+                                                    startAdornment: (
+                                                        <Person color="primary" sx={{ mr: 1 }} />
+                                                    ),
+                                                },
                                             }}
                                         />
                                     </FormControl>
                                 </Grid>
 
                                 {/* Last Name Field */}
-                                <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <FormControl fullWidth variant="outlined" error={hasError("lastName")}>
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                    <FormControl
+                                        fullWidth
+                                        variant="outlined"
+                                        error={hasError('lastName')}
+                                    >
                                         <TextField
                                             id="lastName"
-                                            error={hasError("lastName")}
+                                            error={hasError('lastName')}
                                             helperText={errors?.lastName}
                                             value={data?.lastName || ''}
                                             disabled={!editable}
@@ -480,18 +554,26 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             variant="outlined"
                                             label="Last Name"
                                             slotProps={{
-                                                input: {startAdornment: <Person color="primary" sx={{mr: 1}}/>}
+                                                input: {
+                                                    startAdornment: (
+                                                        <Person color="primary" sx={{ mr: 1 }} />
+                                                    ),
+                                                },
                                             }}
                                         />
                                     </FormControl>
                                 </Grid>
 
                                 {/* Tribe Field */}
-                                <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <FormControl fullWidth variant="outlined" error={hasError("tribe")}>
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                    <FormControl
+                                        fullWidth
+                                        variant="outlined"
+                                        error={hasError('tribe')}
+                                    >
                                         <TextField
                                             id="tribe"
-                                            error={hasError("tribe")}
+                                            error={hasError('tribe')}
                                             helperText={errors?.tribe}
                                             value={data?.tribe || ''}
                                             disabled={!editable}
@@ -503,68 +585,79 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             label="Tribe"
                                             slotProps={{
                                                 input: {
-                                                    startAdornment: <AccessibilityNew color="primary" sx={{mr: 1}}/>
-                                                }
+                                                    startAdornment: (
+                                                        <AccessibilityNew
+                                                            color="primary"
+                                                            sx={{ mr: 1 }}
+                                                        />
+                                                    ),
+                                                },
                                             }}
                                         />
                                     </FormControl>
                                 </Grid>
 
                                 {/* Gender Field */}
-                                <Grid size={{xs: 12, sm: 7}}>
-                                    <FormControlLabel labelPlacement="start"
-  label={<Stack direction="row" sx={{alignItems: "center"}}>
-                                                          <Wc color="primary" sx={{mr: 1}}/>
-                                                          <span style={{minWidth: 70}}>Gender *</span>
-                                                      </Stack>}
-                                                      control={
-                                                          <ToggleButtonGroup
-                                                              exclusive
-                                                              disabled={!editable}
-                                                              onChange={handleGenderChange}
-                                                              value={data?.gender || ""}
-                                                              aria-label="Gender"
-                                                              fullWidth
-                                                              color="primary"
-                                                              sx={{
-                                                                  '& .MuiToggleButton-root': {
-                                                                      py: 1,
-                                                                      borderRadius: '4px',
-                                                                      '&.Mui-selected': {
-                                                                          bgcolor: 'primary.light',
-                                                                          color: 'primary.dark',
-                                                                          fontWeight: 'bold',
-                                                                          '&:hover': {
-                                                                              bgcolor: 'primary.main',
-                                                                              color: 'white'
-                                                                          }
-                                                                      }
-                                                                  }
-                                                              }}
-                                                          >
-                                                              <ToggleButton value="female" aria-label="Female">
-                                                                  <Woman2 sx={{mr: 1}}/> Female
-                                                              </ToggleButton>
-                                                              <ToggleButton value="male" aria-label="Male">
-                                                                  <Man2 sx={{mr: 1}}/> Male
-                                                              </ToggleButton>
-                                                              <ToggleButton value="ambiguous" aria-label="Ambiguous">
-                                                                  <Transgender sx={{mr: 1}}/> Ambiguous
-                                                              </ToggleButton>
-                                                              <ToggleButton value="none" aria-label="None">
-                                                                  <Block sx={{mr: 1}}/> None
-                                                              </ToggleButton>
-                                                          </ToggleButtonGroup>
-                                                      }
-                                                      >
-                                        {hasError("gender") && (
+                                <Grid size={{ xs: 12, sm: 7 }}>
+                                    <FormControlLabel
+                                        labelPlacement="start"
+                                        label={
+                                            <Stack direction="row" sx={{ alignItems: 'center' }}>
+                                                <Wc color="primary" sx={{ mr: 1 }} />
+                                                <span style={{ minWidth: 70 }}>Gender *</span>
+                                            </Stack>
+                                        }
+                                        control={
+                                            <ToggleButtonGroup
+                                                exclusive
+                                                disabled={!editable}
+                                                onChange={handleGenderChange}
+                                                value={data?.gender || ''}
+                                                aria-label="Gender"
+                                                fullWidth
+                                                color="primary"
+                                                sx={{
+                                                    '& .MuiToggleButton-root': {
+                                                        py: 1,
+                                                        borderRadius: '4px',
+                                                        '&.Mui-selected': {
+                                                            bgcolor: 'primary.light',
+                                                            color: 'primary.dark',
+                                                            fontWeight: 'bold',
+                                                            '&:hover': {
+                                                                bgcolor: 'primary.main',
+                                                                color: 'white',
+                                                            },
+                                                        },
+                                                    },
+                                                }}
+                                            >
+                                                <ToggleButton value="female" aria-label="Female">
+                                                    <Woman2 sx={{ mr: 1 }} /> Female
+                                                </ToggleButton>
+                                                <ToggleButton value="male" aria-label="Male">
+                                                    <Man2 sx={{ mr: 1 }} /> Male
+                                                </ToggleButton>
+                                                <ToggleButton
+                                                    value="ambiguous"
+                                                    aria-label="Ambiguous"
+                                                >
+                                                    <Transgender sx={{ mr: 1 }} /> Ambiguous
+                                                </ToggleButton>
+                                                <ToggleButton value="none" aria-label="None">
+                                                    <Block sx={{ mr: 1 }} /> None
+                                                </ToggleButton>
+                                            </ToggleButtonGroup>
+                                        }
+                                    >
+                                        {hasError('gender') && (
                                             <FormHelperText error>{errors?.gender}</FormHelperText>
                                         )}
                                     </FormControlLabel>
                                 </Grid>
 
                                 {/* Date of Birth Field */}
-                                <Grid size={{xs: 12, sm: 6, md: 3}}>
+                                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                                     <TextField
                                         id="dateOfBirth"
                                         type="date"
@@ -573,26 +666,32 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                         disabled={!editable}
                                         fullWidth
                                         variant="outlined"
-                                        error={hasError("dateOfBirth")}
+                                        error={hasError('dateOfBirth')}
                                         helperText={errors?.dateOfBirth}
                                         name="dateOfBirth"
                                         onChange={handleDOBChange}
                                         label="Date of Birth"
-                                        sx={{textAlign: "right"}}
+                                        sx={{ textAlign: 'right' }}
                                         slotProps={{
                                             input: {
-                                                startAdornment: <CalendarMonth color="primary" sx={{mr: 1}}/>,
-                                                slotProps: {}
+                                                startAdornment: (
+                                                    <CalendarMonth color="primary" sx={{ mr: 1 }} />
+                                                ),
+                                                slotProps: {},
                                             },
-                                            inputLabel: {shrink: true},
-                                            htmlInput: {style: {textAlign: "right"}}
+                                            inputLabel: { shrink: true },
+                                            htmlInput: { style: { textAlign: 'right' } },
                                         }}
                                     />
                                 </Grid>
 
                                 {/* Age Field - NEW */}
-                                <Grid size={{xs: 12, sm: 6, md: 2}}>
-                                    <FormControl fullWidth variant="outlined" error={hasError("age")}>
+                                <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                                    <FormControl
+                                        fullWidth
+                                        variant="outlined"
+                                        error={hasError('age')}
+                                    >
                                         <TextField
                                             id="age"
                                             type="number"
@@ -605,31 +704,42 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             variant="outlined"
                                             label="Age"
                                             slotProps={{
-                                                htmlInput: {min: 0, max: 120}
-                                                ,
-                                                input: {startAdornment: <Cake color="primary" sx={{mr: 1}}/>}
+                                                htmlInput: { min: 0, max: 120 },
+                                                input: {
+                                                    startAdornment: (
+                                                        <Cake color="primary" sx={{ mr: 1 }} />
+                                                    ),
+                                                },
                                             }}
                                         />
                                     </FormControl>
                                 </Grid>
 
                                 {/* Phone Field */}
-                                <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <FormControl fullWidth variant="outlined" error={hasError("phone")}>
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                    <FormControl
+                                        fullWidth
+                                        variant="outlined"
+                                        error={hasError('phone')}
+                                    >
                                         <TextField
                                             id="phone"
                                             value={data?.phone || ''}
                                             required
                                             disabled={!editable}
                                             variant="outlined"
-                                            error={hasError("phone")}
+                                            error={hasError('phone')}
                                             helperText={errors?.phone}
                                             name="phone"
                                             onChange={onChange}
                                             placeholder="Enter phone number"
                                             label="Phone Number"
                                             slotProps={{
-                                                input: {startAdornment: <Phone color="primary" sx={{mr: 1}}/>}
+                                                input: {
+                                                    startAdornment: (
+                                                        <Phone color="primary" sx={{ mr: 1 }} />
+                                                    ),
+                                                },
                                             }}
                                         />
                                     </FormControl>
@@ -647,7 +757,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                         borderRadius: 2,
                         overflow: 'hidden',
                         border: '1px solid',
-                        borderColor: 'divider'
+                        borderColor: 'divider',
                     }}
                 >
                     <Button
@@ -666,21 +776,25 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                             },
                         }}
                     >
-                        <Box sx={{display: 'flex', alignItems: 'center'}}>
-                            <Flag sx={{mr: 1}}/>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Flag sx={{ mr: 1 }} />
                             <Typography variant="subtitle1" fontWeight="bold">
                                 Nationality & Location
                             </Typography>
                         </Box>
-                        {expandedSection === 'location' ? <ArrowDropUp/> : <ArrowDropDown/>}
+                        {expandedSection === 'location' ? <ArrowDropUp /> : <ArrowDropDown />}
                     </Button>
 
                     <Collapse in={expandedSection === 'location'}>
-                        <Box sx={{p: 3}}>
+                        <Box sx={{ p: 3 }}>
                             <Grid container spacing={3}>
                                 {/* Nationality Field */}
-                                <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <FormControl fullWidth variant="outlined" error={hasError("nationality")}>
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                    <FormControl
+                                        fullWidth
+                                        variant="outlined"
+                                        error={hasError('nationality')}
+                                    >
                                         <Autocomplete
                                             id="nationality"
                                             fullWidth
@@ -690,8 +804,13 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             autoHighlight
                                             disabled={!editable}
                                             getOptionLabel={(option) => option.label}
-                                            renderOption={({key, ...props}, option) => (
-                                                <Box key={key} component="li" sx={{'& > img': {mr: 2, flexShrink: 0}}} {...props}>
+                                            renderOption={({ key, ...props }, option) => (
+                                                <Box
+                                                    key={key}
+                                                    component="li"
+                                                    sx={{ '& > img': { mr: 2, flexShrink: 0 } }}
+                                                    {...props}
+                                                >
                                                     <img
                                                         loading="lazy"
                                                         width="20"
@@ -706,7 +825,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                                 <TextField
                                                     {...params}
                                                     required
-                                                    error={hasError("nationality")}
+                                                    error={hasError('nationality')}
                                                     helperText={errors?.nationality}
                                                     variant="outlined"
                                                     placeholder="Select nationality"
@@ -716,20 +835,24 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                     </FormControl>
                                 </Grid>
 
-                                {data?.nationality?.code === "OM" && (
+                                {data?.nationality?.code === 'OM' && (
                                     <>
                                         <Grid size={12}>
                                             <Alert
                                                 severity="info"
                                                 variant="outlined"
-                                                sx={{mb: 2}}
+                                                sx={{ mb: 2 }}
                                             >
                                                 Additional information required for Omani nationals
                                             </Alert>
                                         </Grid>
                                         {/* Oman-specific fields */}
-                                        <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                            <FormControl fullWidth sx={{mb: 2}} error={hasError("governorate")}>
+                                        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                            <FormControl
+                                                fullWidth
+                                                sx={{ mb: 2 }}
+                                                error={hasError('governorate')}
+                                            >
                                                 <Autocomplete
                                                     id="governorate"
                                                     fullWidth
@@ -737,7 +860,9 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                                     value={selectedGovernorate || null}
                                                     onChange={handleGovernorateChange}
                                                     getOptionLabel={(option) => option || ''}
-                                                    isOptionEqualToValue={(option, value) => option === value}
+                                                    isOptionEqualToValue={(option, value) =>
+                                                        option === value
+                                                    }
                                                     disabled={!editable}
                                                     renderInput={(params) => (
                                                         <TextField
@@ -745,16 +870,24 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                                             required
                                                             label="Governorate"
                                                             placeholder="Select governorate"
-                                                            error={hasError("governorate")}
+                                                            error={hasError('governorate')}
                                                             helperText={errors?.governorate}
                                                             variant="outlined"
                                                         />
                                                     )}
-                                                    renderOption={({key, ...props}, option) => (
+                                                    renderOption={({ key, ...props }, option) => (
                                                         <li key={key} {...props}>
-                                                            <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                                                <Flag fontSize="small" color="action"
-                                                                      sx={{mr: 1}}/>
+                                                            <Box
+                                                                sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                }}
+                                                            >
+                                                                <Flag
+                                                                    fontSize="small"
+                                                                    color="action"
+                                                                    sx={{ mr: 1 }}
+                                                                />
                                                                 {option}
                                                             </Box>
                                                         </li>
@@ -762,8 +895,12 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                                 />
                                             </FormControl>
                                         </Grid>
-                                        <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                            <FormControl fullWidth sx={{mb: 2}} error={hasError("wilayat")}>
+                                        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                            <FormControl
+                                                fullWidth
+                                                sx={{ mb: 2 }}
+                                                error={hasError('wilayat')}
+                                            >
                                                 <Autocomplete
                                                     id="wilayat"
                                                     fullWidth
@@ -771,24 +908,38 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                                     value={data?.wilayat || null}
                                                     onChange={handleWilayatChange}
                                                     getOptionLabel={(option) => option || ''}
-                                                    isOptionEqualToValue={(option, value) => option === value}
+                                                    isOptionEqualToValue={(option, value) =>
+                                                        option === value
+                                                    }
                                                     disabled={!editable || !selectedGovernorate}
                                                     renderInput={(params) => (
                                                         <TextField
                                                             {...params}
                                                             required
                                                             label="Wilayat"
-                                                            placeholder={selectedGovernorate ? "Search wilayat..." : "Select governorate first"}
-                                                            error={hasError("wilayat")}
+                                                            placeholder={
+                                                                selectedGovernorate
+                                                                    ? 'Search wilayat...'
+                                                                    : 'Select governorate first'
+                                                            }
+                                                            error={hasError('wilayat')}
                                                             helperText={errors?.wilayat}
                                                             variant="outlined"
                                                         />
                                                     )}
-                                                    renderOption={({key, ...props}, option) => (
+                                                    renderOption={({ key, ...props }, option) => (
                                                         <li key={key} {...props}>
-                                                            <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                                                <LocationCity fontSize="small" color="action"
-                                                                              sx={{mr: 1}}/>
+                                                            <Box
+                                                                sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                }}
+                                                            >
+                                                                <LocationCity
+                                                                    fontSize="small"
+                                                                    color="action"
+                                                                    sx={{ mr: 1 }}
+                                                                />
                                                                 {option}
                                                             </Box>
                                                         </li>
@@ -796,11 +947,15 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                                 />
                                             </FormControl>
                                         </Grid>
-                                        <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                            <FormControl fullWidth variant="outlined" error={hasError("village")}>
+                                        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                            <FormControl
+                                                fullWidth
+                                                variant="outlined"
+                                                error={hasError('village')}
+                                            >
                                                 <TextField
                                                     id="village"
-                                                    error={hasError("village")}
+                                                    error={hasError('village')}
                                                     helperText={errors?.village}
                                                     value={data?.village || ''}
                                                     disabled={!editable}
@@ -812,7 +967,14 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                                     variant="outlined"
                                                     label="Village"
                                                     slotProps={{
-                                                        input: {startAdornment: <Home color="primary" sx={{mr: 1}}/>}
+                                                        input: {
+                                                            startAdornment: (
+                                                                <Home
+                                                                    color="primary"
+                                                                    sx={{ mr: 1 }}
+                                                                />
+                                                            ),
+                                                        },
                                                     }}
                                                 />
                                             </FormControl>
@@ -833,7 +995,7 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                             borderRadius: 2,
                             overflow: 'hidden',
                             border: '1px solid',
-                            borderColor: 'divider'
+                            borderColor: 'divider',
                         }}
                     >
                         <Button
@@ -852,19 +1014,25 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                 },
                             }}
                         >
-                            <Box sx={{display: 'flex', alignItems: 'center'}}>
-                                <Info sx={{mr: 1}}/>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <Info sx={{ mr: 1 }} />
                                 <Typography variant="subtitle1" fontWeight="bold">
                                     Relationship Information
                                 </Typography>
                             </Box>
-                            {expandedSection === 'relationship' ? <ArrowDropUp/> : <ArrowDropDown/>}
+                            {expandedSection === 'relationship' ? (
+                                <ArrowDropUp />
+                            ) : (
+                                <ArrowDropDown />
+                            )}
                         </Button>
 
                         <Collapse in={expandedSection === 'relationship'}>
-                            <Box sx={{p: 3}}>
+                            <Box sx={{ p: 3 }}>
                                 <FormControl fullWidth variant="outlined">
-                                    <InputLabel id="relationship-select-label">Relationship *</InputLabel>
+                                    <InputLabel id="relationship-select-label">
+                                        Relationship *
+                                    </InputLabel>
                                     <Select
                                         id="relationship"
                                         labelId="relationship-select-label"
@@ -875,13 +1043,27 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                         disabled={!editable}
                                         variant="outlined"
                                         multiple
-                                        startAdornment={<Info color="primary" sx={{mr: 1}}/>}
+                                        startAdornment={<Info color="primary" sx={{ mr: 1 }} />}
                                         renderValue={(selected) => (
-                                            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
-                                                {selected.filter(v => v !== "other").map((value) => (
-                                                    <Chip key={value} label={value} size="small"/>
-                                                ))}
-                                                {selected.includes("other") && <Chip label="Other" size="small" color="warning"/>}
+                                            <Box
+                                                sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}
+                                            >
+                                                {selected
+                                                    .filter((v) => v !== 'other')
+                                                    .map((value) => (
+                                                        <Chip
+                                                            key={value}
+                                                            label={value}
+                                                            size="small"
+                                                        />
+                                                    ))}
+                                                {selected.includes('other') && (
+                                                    <Chip
+                                                        label="Other"
+                                                        size="small"
+                                                        color="warning"
+                                                    />
+                                                )}
                                             </Box>
                                         )}
                                         MenuProps={{
@@ -894,12 +1076,19 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                                             },
                                         }}
                                     >
-                                        {relationOptions.map(relation => <MenuItem key={relation.value} value={relation.value}
-                                                                                   role="option">{relation.label}</MenuItem>)}
+                                        {relationOptions.map((relation) => (
+                                            <MenuItem
+                                                key={relation.value}
+                                                value={relation.value}
+                                                role="option"
+                                            >
+                                                {relation.label}
+                                            </MenuItem>
+                                        ))}
                                     </Select>
                                 </FormControl>
                                 {showCustomInput && (
-                                    <Stack direction="row" spacing={1} sx={{mt: 2}}>
+                                    <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
                                         <TextField
                                             fullWidth
                                             size="small"
@@ -926,9 +1115,9 @@ const PatientForm = ({onChange, data, errors, editable = true, withRelative = fa
                 )}
 
                 {/* Form Submission Hint */}
-                <Box sx={{mt: 4, display: 'flex', justifyContent: 'center'}}>
+                <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
                     <Chip
-                        icon={<Info/>}
+                        icon={<Info />}
                         label="Fields marked with * are required"
                         variant="outlined"
                         color="primary"

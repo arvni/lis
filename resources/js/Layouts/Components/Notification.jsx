@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import useSWR from 'swr';
 import {
     IconButton,
@@ -10,19 +10,19 @@ import {
     Divider,
     Tooltip,
     alpha,
-    MenuItem as MuiMenuItem
+    MenuItem as MuiMenuItem,
 } from '@mui/material';
-import {useTheme} from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 
-const fetcher = (...args) => fetch(...args).then(res => res.json());
+const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const Notification = () => {
     const theme = useTheme();
     const [notificationsAnchor, setNotificationsAnchor] = useState(null);
 
     // Fetch notifications using SWR
-    const {data, error, mutate} = useSWR(route('api.notifications.unread'), fetcher, {
+    const { data, error, mutate } = useSWR(route('api.notifications.unread'), fetcher, {
         refreshInterval: 30000, // Refresh every 30 seconds
         revalidateOnFocus: true,
         dedupingInterval: 10000, // Dedupe requests within 10 seconds
@@ -43,7 +43,9 @@ const Notification = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                    'X-CSRF-TOKEN': document
+                        .querySelector('meta[name="csrf-token"]')
+                        ?.getAttribute('content'),
                 },
             });
 
@@ -61,11 +63,13 @@ const Notification = () => {
     const markAsRead = async (id) => {
         try {
             // Send request to mark specific notification as read
-            const response = await fetch(route('api.notifications.markAsRead', {id}), {
+            const response = await fetch(route('api.notifications.markAsRead', { id }), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                    'X-CSRF-TOKEN': document
+                        .querySelector('meta[name="csrf-token"]')
+                        ?.getAttribute('content'),
                 },
             });
 
@@ -82,13 +86,9 @@ const Notification = () => {
         <>
             {/* Notifications Icon */}
             <Tooltip title="Notifications">
-                <IconButton
-                    color="inherit"
-                    onClick={handleNotificationsOpen}
-                    sx={{mr: 1}}
-                >
+                <IconButton color="inherit" onClick={handleNotificationsOpen} sx={{ mr: 1 }}>
                     <Badge badgeContent={unreadCount} color="error">
-                        <NotificationsIcon/>
+                        <NotificationsIcon />
                     </Badge>
                 </IconButton>
             </Tooltip>
@@ -107,14 +107,21 @@ const Notification = () => {
                             mt: 1.5,
                             borderRadius: 2,
                             overflow: 'hidden',
-                        }
-                    }
+                        },
+                    },
                 }}
-                transformOrigin={{horizontal: 'right', vertical: 'top'}}
-                anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
+                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
-                <Box sx={{p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                    <Typography variant="subtitle1" sx={{fontWeight: 600}}>
+                <Box
+                    sx={{
+                        p: 2,
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                         Notifications
                     </Typography>
                     {unreadCount > 0 && (
@@ -123,22 +130,22 @@ const Notification = () => {
                         </Button>
                     )}
                 </Box>
-                <Divider/>
+                <Divider />
 
                 {isLoading ? (
-                    <Box sx={{p: 4, textAlign: 'center'}}>
+                    <Box sx={{ p: 4, textAlign: 'center' }}>
                         <Typography variant="body2" color="text.secondary">
                             Loading notifications...
                         </Typography>
                     </Box>
                 ) : error ? (
-                    <Box sx={{p: 4, textAlign: 'center'}}>
+                    <Box sx={{ p: 4, textAlign: 'center' }}>
                         <Typography variant="body2" color="error">
                             Failed to load notifications
                         </Typography>
                     </Box>
                 ) : notifications.length > 0 ? (
-                    <Box sx={{maxHeight: 320, overflow: 'auto'}}>
+                    <Box sx={{ maxHeight: 320, overflow: 'auto' }}>
                         {notifications.map((notification) => (
                             <MuiMenuItem
                                 key={notification.id}
@@ -151,13 +158,17 @@ const Notification = () => {
                                     px: 2,
                                     borderLeft: notification.read ? 'none' : '3px solid',
                                     borderColor: 'primary.main',
-                                    backgroundColor: notification.read ? 'transparent' : alpha(theme.palette.primary.main, 0.04),
+                                    backgroundColor: notification.read
+                                        ? 'transparent'
+                                        : alpha(theme.palette.primary.main, 0.04),
                                 }}
                             >
-                                <Box sx={{width: '100%'}}>
-                                    <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
-                                        <Typography variant="body2"
-                                                    sx={{fontWeight: notification.read ? 400 : 500}}>
+                                <Box sx={{ width: '100%' }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{ fontWeight: notification.read ? 400 : 500 }}
+                                        >
                                             {notification.text || notification.message}
                                         </Typography>
                                     </Box>
@@ -169,15 +180,15 @@ const Notification = () => {
                         ))}
                     </Box>
                 ) : (
-                    <Box sx={{p: 4, textAlign: 'center'}}>
+                    <Box sx={{ p: 4, textAlign: 'center' }}>
                         <Typography variant="body2" color="text.secondary">
                             No notifications yet
                         </Typography>
                     </Box>
                 )}
 
-                <Divider/>
-                <Box sx={{p: 1}}>
+                <Divider />
+                <Box sx={{ p: 1 }}>
                     <Button
                         fullWidth
                         size="small"

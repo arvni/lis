@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from 'react';
 import {
     Alert,
     Box,
@@ -20,15 +20,15 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions
-} from "@mui/material";
-import ClientLayout from "@/Layouts/AuthenticatedLayout";
-import PatientAddForm from "./Components/Form";
-import AcceptanceForm from "./Components/AcceptanceForm";
-import AddSampleForm from "./Components/AddSampleForm";
-import AddFromExistPatientForm from "./Components/AddFromExistPatientForm";
-import SelectAcceptanceDialog from "./Components/SelectAcceptanceDialog";
-import {Head, router} from "@inertiajs/react";
+    DialogActions,
+} from '@mui/material';
+import ClientLayout from '@/Layouts/AuthenticatedLayout';
+import PatientAddForm from './Components/Form';
+import AcceptanceForm from './Components/AcceptanceForm';
+import AddSampleForm from './Components/AddSampleForm';
+import AddFromExistPatientForm from './Components/AddFromExistPatientForm';
+import SelectAcceptanceDialog from './Components/SelectAcceptanceDialog';
+import { Head, router } from '@inertiajs/react';
 import {
     Assignment,
     Description,
@@ -56,13 +56,13 @@ import {
     Biotech,
     LocalShipping,
     AssignmentTurnedIn,
-    MergeType
-} from "@mui/icons-material";
-import axios from "axios";
-import PageHeader from "@/Components/PageHeader.jsx";
+    MergeType,
+} from '@mui/icons-material';
+import axios from 'axios';
+import PageHeader from '@/Components/PageHeader.jsx';
 
 // Custom Tab Panel Component
-function TabPanel({children, value, index, ...other}) {
+function TabPanel({ children, value, index, ...other }) {
     return (
         <div
             role="tabpanel"
@@ -71,15 +71,15 @@ function TabPanel({children, value, index, ...other}) {
             aria-labelledby={`order-tab-${index}`}
             {...other}
         >
-            {value === index && <Box sx={{py: 3}}>{children}</Box>}
+            {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
         </div>
     );
 }
 
 // Patient Card Component
-const PatientCard = ({patient, index, isMultiple, onSelectPatient,mainPatientID}) => {
+const PatientCard = ({ patient, index, isMultiple, onSelectPatient, mainPatientID }) => {
     const formatDate = (dateString) => {
-        if (!dateString) return "Not specified";
+        if (!dateString) return 'Not specified';
         try {
             return new Date(dateString).toLocaleDateString('en-GB');
         } catch (e) {
@@ -90,12 +90,12 @@ const PatientCard = ({patient, index, isMultiple, onSelectPatient,mainPatientID}
     const getGenderInfo = (gender) => {
         const numGender = Number(gender);
         return numGender === 1
-            ? {icon: <Male/>, label: "Male", color: "primary.main"}
-            : {icon: <Female/>, label: "Female", color: "secondary.main"};
+            ? { icon: <Male />, label: 'Male', color: 'primary.main' }
+            : { icon: <Female />, label: 'Female', color: 'secondary.main' };
     };
 
     const genderInfo = getGenderInfo(patient.gender);
-    const hasServerId = (patient.server_id||(patient.is_main&&mainPatientID)) ?? false;
+    const hasServerId = (patient.server_id || (patient.is_main && mainPatientID)) ?? false;
     return (
         <Paper
             elevation={patient.is_main ? 3 : 1}
@@ -110,39 +110,43 @@ const PatientCard = ({patient, index, isMultiple, onSelectPatient,mainPatientID}
                 cursor: !hasServerId ? 'pointer' : 'default',
                 position: 'relative',
                 '&:hover': {
-                    boxShadow: !hasServerId ? 6 : (patient.is_main ? 3 : 1),
-                    transform: !hasServerId ? 'translateY(-2px)' : 'none'
-                }
+                    boxShadow: !hasServerId ? 6 : patient.is_main ? 3 : 1,
+                    transform: !hasServerId ? 'translateY(-2px)' : 'none',
+                },
             }}
         >
             {/* Header */}
-  <Stack direction="row" mb={2} sx={{justifyContent: "space-between", alignItems: "flex-start"}}>
-  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
+            <Stack
+                direction="row"
+                mb={2}
+                sx={{ justifyContent: 'space-between', alignItems: 'flex-start' }}
+            >
+                <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
                     <Avatar
                         sx={{
                             bgcolor: patient.is_main ? 'primary.main' : 'grey.400',
                             width: 56,
-                            height: 56
+                            height: 56,
                         }}
                     >
-                        <Person fontSize="large"/>
+                        <Person fontSize="large" />
                     </Avatar>
                     <Box>
                         <Typography variant="h6" fontWeight={600}>
                             {patient.fullName}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                            Ref ID: {patient.reference_id || "N/A"}
+                            Ref ID: {patient.reference_id || 'N/A'}
                         </Typography>
                     </Box>
                 </Stack>
-  <Stack spacing={1} sx={{alignItems: "flex-end"}}>
+                <Stack spacing={1} sx={{ alignItems: 'flex-end' }}>
                     {patient.is_main && (
                         <Chip
                             label="Main Patient"
                             color="primary"
                             size="small"
-                            sx={{fontWeight: 600}}
+                            sx={{ fontWeight: 600 }}
                         />
                     )}
                     {!hasServerId && (
@@ -150,57 +154,60 @@ const PatientCard = ({patient, index, isMultiple, onSelectPatient,mainPatientID}
                             label="Click to Add"
                             color="warning"
                             size="small"
-                            icon={<PersonAdd fontSize="small"/>}
-                            sx={{fontWeight: 600}}
+                            icon={<PersonAdd fontSize="small" />}
+                            sx={{ fontWeight: 600 }}
                         />
                     )}
                 </Stack>
             </Stack>
 
-            <Divider sx={{my: 2}}/>
+            <Divider sx={{ my: 2 }} />
 
             {/* Patient Details */}
             <Grid container spacing={2}>
-                <Grid size={{xs: 12, sm: 6}}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                     <Stack spacing={1.5}>
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             {genderInfo.icon}
                             <Typography variant="body2" color="text.secondary">
                                 <strong>Gender:</strong> {genderInfo.label}
                             </Typography>
                         </Box>
 
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                            <CalendarToday fontSize="small" color="action"/>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <CalendarToday fontSize="small" color="action" />
                             <Typography variant="body2" color="text.secondary">
                                 <strong>DOB:</strong> {formatDate(patient.dateOfBirth)}
                             </Typography>
                         </Box>
 
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                            <Public fontSize="small" color="action"/>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Public fontSize="small" color="action" />
                             <Typography variant="body2" color="text.secondary">
-                                <strong>Nationality:</strong> {patient.nationality?.label || "N/A"}
+                                <strong>Nationality:</strong> {patient.nationality?.label || 'N/A'}
                             </Typography>
                         </Box>
                     </Stack>
                 </Grid>
 
-                <Grid size={{xs: 12, sm: 6}}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                     <Stack spacing={1.5}>
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                            <Fingerprint fontSize="small" color="action"/>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Fingerprint fontSize="small" color="action" />
                             <Typography variant="body2" color="text.secondary">
-                                <strong>ID No:</strong> {patient.id_no || "N/A"}
+                                <strong>ID No:</strong> {patient.id_no || 'N/A'}
                             </Typography>
                         </Box>
 
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                            <Info fontSize="small" color="action"/>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Info fontSize="small" color="action" />
                             <Typography variant="body2" color="text.secondary">
-                                <strong>Consanguineous:</strong>{" "}
-                                {patient.consanguineousParents === "1" ? "Yes" :
-                                    patient.consanguineousParents === "0" ? "No" : "Unknown"}
+                                <strong>Consanguineous:</strong>{' '}
+                                {patient.consanguineousParents === '1'
+                                    ? 'Yes'
+                                    : patient.consanguineousParents === '0'
+                                      ? 'No'
+                                      : 'Unknown'}
                             </Typography>
                         </Box>
 
@@ -209,7 +216,7 @@ const PatientCard = ({patient, index, isMultiple, onSelectPatient,mainPatientID}
                                 label="Fetus"
                                 size="small"
                                 color="info"
-                                icon={<Biotech fontSize="small"/>}
+                                icon={<Biotech fontSize="small" />}
                             />
                         )}
                     </Stack>
@@ -217,26 +224,26 @@ const PatientCard = ({patient, index, isMultiple, onSelectPatient,mainPatientID}
 
                 {/* Contact Information (only for main patient) */}
                 {patient.is_main && patient.contact && (
-                    <Grid size={{xs: 12}}>
-                        <Divider sx={{my: 2}}>
-                            <Chip label="Contact Information" size="small"/>
+                    <Grid size={{ xs: 12 }}>
+                        <Divider sx={{ my: 2 }}>
+                            <Chip label="Contact Information" size="small" />
                         </Divider>
                         <Stack spacing={1}>
                             {patient.contact.email && (
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                    <Email fontSize="small" color="action"/>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Email fontSize="small" color="action" />
                                     <Typography variant="body2">{patient.contact.email}</Typography>
                                 </Box>
                             )}
                             {patient.contact.phone && (
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                    <Phone fontSize="small" color="action"/>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Phone fontSize="small" color="action" />
                                     <Typography variant="body2">{patient.contact.phone}</Typography>
                                 </Box>
                             )}
                             {patient.contact.address && (
-                                <Box sx={{display: 'flex', alignItems: 'flex-start', gap: 1}}>
-                                    <HomeWork fontSize="small" color="action" sx={{mt: 0.5}}/>
+                                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                                    <HomeWork fontSize="small" color="action" sx={{ mt: 0.5 }} />
                                     <Typography variant="body2">
                                         {patient.contact.address}
                                         {patient.contact.city && <>, {patient.contact.city}</>}
@@ -253,11 +260,11 @@ const PatientCard = ({patient, index, isMultiple, onSelectPatient,mainPatientID}
 };
 
 // Test Order Item Component
-const TestOrderItem = ({orderItem, index}) => {
+const TestOrderItem = ({ orderItem, index }) => {
     const [expanded, setExpanded] = useState(true);
 
     const formatDate = (dateString) => {
-        if (!dateString) return "N/A";
+        if (!dateString) return 'N/A';
         try {
             return new Date(dateString).toLocaleDateString('en-GB');
         } catch (e) {
@@ -266,7 +273,7 @@ const TestOrderItem = ({orderItem, index}) => {
     };
 
     return (
-        <Paper elevation={2} sx={{mb: 2, overflow: 'hidden'}}>
+        <Paper elevation={2} sx={{ mb: 2, overflow: 'hidden' }}>
             {/* Test Header */}
             <ListItemButton
                 onClick={() => setExpanded(!expanded)}
@@ -274,14 +281,14 @@ const TestOrderItem = ({orderItem, index}) => {
                     bgcolor: 'primary.50',
                     borderBottom: '2px solid',
                     borderColor: 'primary.main',
-                    py: 2
+                    py: 2,
                 }}
             >
-  <Stack direction="row" spacing={2} sx={{alignItems: "center", flex: 1}}>
-                    <Avatar sx={{bgcolor: 'primary.main'}}>
-                        <MedicalServices/>
+                <Stack direction="row" spacing={2} sx={{ alignItems: 'center', flex: 1 }}>
+                    <Avatar sx={{ bgcolor: 'primary.main' }}>
+                        <MedicalServices />
                     </Avatar>
-                    <Box sx={{flex: 1}}>
+                    <Box sx={{ flex: 1 }}>
                         <Typography variant="h6" fontWeight={600}>
                             {orderItem.test?.name}
                         </Typography>
@@ -300,38 +307,42 @@ const TestOrderItem = ({orderItem, index}) => {
                         size="small"
                     />
                 </Stack>
-                {expanded ? <ExpandLess/> : <ExpandMore/>}
+                {expanded ? <ExpandLess /> : <ExpandMore />}
             </ListItemButton>
 
             {/* Expandable Content */}
             <Collapse in={expanded} timeout="auto" unmountOnExit>
-                <Box sx={{p: 3}}>
+                <Box sx={{ p: 3 }}>
                     {/* Test Details */}
                     {orderItem.test?.turnaroundTime && (
-                        <Alert severity="info" sx={{mb: 3}}>
+                        <Alert severity="info" sx={{ mb: 3 }}>
                             <Typography variant="body2">
-                                <strong>Turnaround Time:</strong> {orderItem.test.turnaroundTime} days
+                                <strong>Turnaround Time:</strong> {orderItem.test.turnaroundTime}{' '}
+                                days
                             </Typography>
                         </Alert>
                     )}
 
                     {/* Patients */}
                     {orderItem.patients?.length > 0 && (
-                        <Box sx={{mb: 3}}>
-                            <Typography variant="subtitle2" gutterBottom
-                                        sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                <Person fontSize="small" color="primary"/>
+                        <Box sx={{ mb: 3 }}>
+                            <Typography
+                                variant="subtitle2"
+                                gutterBottom
+                                sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                            >
+                                <Person fontSize="small" color="primary" />
                                 Associated Patients
                             </Typography>
-                            <Stack direction="row" spacing={1} sx={{mt: 1, flexWrap: 'wrap'}}>
+                            <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap' }}>
                                 {orderItem.patients.map((patient) => (
                                     <Chip
                                         key={patient.id}
                                         avatar={<Avatar>{patient.fullName?.charAt(0)}</Avatar>}
                                         label={patient.fullName}
-                                        variant={patient.is_main ? "filled" : "outlined"}
-                                        color={patient.is_main ? "primary" : "default"}
-                                        sx={{mb: 1}}
+                                        variant={patient.is_main ? 'filled' : 'outlined'}
+                                        color={patient.is_main ? 'primary' : 'default'}
+                                        sx={{ mb: 1 }}
                                     />
                                 ))}
                             </Stack>
@@ -341,20 +352,23 @@ const TestOrderItem = ({orderItem, index}) => {
                     {/* Samples */}
                     {orderItem.samples?.length > 0 && (
                         <Box>
-                            <Typography variant="subtitle2" gutterBottom
-                                        sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                <Science fontSize="small" color="primary"/>
+                            <Typography
+                                variant="subtitle2"
+                                gutterBottom
+                                sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                            >
+                                <Science fontSize="small" color="primary" />
                                 Sample Requirements
                             </Typography>
-                            <Grid container spacing={2} sx={{mt: 0.5}}>
+                            <Grid container spacing={2} sx={{ mt: 0.5 }}>
                                 {orderItem.samples.map((sample, idx) => (
-                                    <Grid size={{xs: 12, sm: 6, md: 4}} key={sample.id || idx}>
+                                    <Grid size={{ xs: 12, sm: 6, md: 4 }} key={sample.id || idx}>
                                         <Paper
                                             variant="outlined"
                                             sx={{
                                                 p: 2,
                                                 bgcolor: 'grey.50',
-                                                '&:hover': {bgcolor: 'grey.100'}
+                                                '&:hover': { bgcolor: 'grey.100' },
                                             }}
                                         >
                                             <Stack spacing={1}>
@@ -362,26 +376,35 @@ const TestOrderItem = ({orderItem, index}) => {
                                                     Sample #{idx + 1}
                                                 </Typography>
                                                 <Typography variant="body2" color="text.secondary">
-                                                    <strong>Type:</strong> {sample.sampleType?.name || "Unknown"}
+                                                    <strong>Type:</strong>{' '}
+                                                    {sample.sampleType?.name || 'Unknown'}
                                                 </Typography>
                                                 {sample.sampleId && (
-                                                    <Typography variant="body2" color="text.secondary">
+                                                    <Typography
+                                                        variant="body2"
+                                                        color="text.secondary"
+                                                    >
                                                         <strong>ID:</strong> {sample.sampleId}
                                                     </Typography>
                                                 )}
                                                 {sample.collectionDate && (
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        Collected: {formatDate(sample.collectionDate)}
+                                                    <Typography
+                                                        variant="caption"
+                                                        color="text.secondary"
+                                                    >
+                                                        Collected:{' '}
+                                                        {formatDate(sample.collectionDate)}
                                                     </Typography>
                                                 )}
-                                                {sample.sampleType?.sample_id_required === 1 && !sample.sampleId && (
-                                                    <Chip
-                                                        label="ID Required"
-                                                        size="small"
-                                                        color="warning"
-                                                        sx={{mt: 1}}
-                                                    />
-                                                )}
+                                                {sample.sampleType?.sample_id_required === 1 &&
+                                                    !sample.sampleId && (
+                                                        <Chip
+                                                            label="ID Required"
+                                                            size="small"
+                                                            color="warning"
+                                                            sx={{ mt: 1 }}
+                                                        />
+                                                    )}
                                             </Stack>
                                         </Paper>
                                     </Grid>
@@ -396,7 +419,7 @@ const TestOrderItem = ({orderItem, index}) => {
 };
 
 // Status Timeline Component
-const StatusTimeline = ({referrerOrder}) => {
+const StatusTimeline = ({ referrerOrder }) => {
     // Determine current step based on actual order state
     const getCurrentStep = () => {
         const samplesCollected = !referrerOrder.needs_add_sample;
@@ -424,30 +447,38 @@ const StatusTimeline = ({referrerOrder}) => {
     };
 
     const steps = [
-        {key: 'finalize', label: 'Order Finalized', icon: <CheckCircle/>},
-        {key: 'patient_added', label: 'Patient Added', icon: <Person/>},
-        {key: 'acceptance_created', label: 'Acceptance Created', icon: <AssignmentTurnedIn/>},
-        {key: 'samples_collected', label: 'Samples Collected', icon: <Science/>}
+        { key: 'finalize', label: 'Order Finalized', icon: <CheckCircle /> },
+        { key: 'patient_added', label: 'Patient Added', icon: <Person /> },
+        { key: 'acceptance_created', label: 'Acceptance Created', icon: <AssignmentTurnedIn /> },
+        { key: 'samples_collected', label: 'Samples Collected', icon: <Science /> },
     ];
 
     return (
-        <Paper elevation={2} sx={{p: 3, mb: 3}}>
-            <Typography variant="h6" gutterBottom sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                <Timeline color="primary"/>
+        <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+            <Typography
+                variant="h6"
+                gutterBottom
+                sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+                <Timeline color="primary" />
                 Order Progress
             </Typography>
-            <Stack direction="row" spacing={2} sx={{mt: 3, position: 'relative'}}>
+            <Stack direction="row" spacing={2} sx={{ mt: 3, position: 'relative' }}>
                 {steps.map((step, index) => {
                     const status = getStepStatus(step.key);
                     return (
-                        <Box key={step.key} sx={{flex: 1, position: 'relative'}}>
-  <Stack spacing={1} sx={{alignItems: "center"}}>
+                        <Box key={step.key} sx={{ flex: 1, position: 'relative' }}>
+                            <Stack spacing={1} sx={{ alignItems: 'center' }}>
                                 <Avatar
                                     sx={{
-                                        bgcolor: status === 'completed' ? 'success.main' :
-                                            status === 'active' ? 'primary.main' : 'grey.300',
+                                        bgcolor:
+                                            status === 'completed'
+                                                ? 'success.main'
+                                                : status === 'active'
+                                                  ? 'primary.main'
+                                                  : 'grey.300',
                                         width: 48,
-                                        height: 48
+                                        height: 48,
                                     }}
                                 >
                                     {step.icon}
@@ -468,9 +499,10 @@ const StatusTimeline = ({referrerOrder}) => {
                                         top: 24,
                                         left: '50%',
                                         right: '-50%',
-                                        bgcolor: status === 'completed' ? 'success.main' : 'grey.300',
+                                        bgcolor:
+                                            status === 'completed' ? 'success.main' : 'grey.300',
                                         height: 2,
-                                        zIndex: 0
+                                        zIndex: 0,
                                     }}
                                 />
                             )}
@@ -482,7 +514,7 @@ const StatusTimeline = ({referrerOrder}) => {
     );
 };
 
-const Show = ({referrerOrder, errors = {}}) => {
+const Show = ({ referrerOrder, errors = {} }) => {
     // State management
     const [openAddPatient, setOpenAddPatient] = useState(false);
     const [openAddFromExist, setOpenAddFromExist] = useState(false);
@@ -493,7 +525,11 @@ const Show = ({referrerOrder, errors = {}}) => {
     const [loading, setLoading] = useState(false);
     const [barcodes, setBarcodes] = useState([]);
     const [activeTab, setActiveTab] = useState(0);
-    const [notification, setNotification] = useState({open: false, message: "", severity: "info"});
+    const [notification, setNotification] = useState({
+        open: false,
+        message: '',
+        severity: 'info',
+    });
     // Pooling state
     const [openSelectAcceptance, setOpenSelectAcceptance] = useState(false);
     const [selectedExistingAcceptance, setSelectedExistingAcceptance] = useState(null);
@@ -508,7 +544,7 @@ const Show = ({referrerOrder, errors = {}}) => {
         howReport: {},
         acceptanceItems: {
             panels: [],
-            tests: []
+            tests: [],
         },
         referenceCode: referrerOrder?.orderInformation?.patient?.reference_id,
         prescription: null,
@@ -522,17 +558,17 @@ const Show = ({referrerOrder, errors = {}}) => {
         discount: item.discount,
         sampleless: item.sampleless || false,
         no_sample: item.no_sample || 1,
-        samples: (item.samples || []).map(sample => ({
-            patients: (sample.patients || []).map(p => ({ id: p.id })),
-            sampleType: sample.sampleType
+        samples: (item.samples || []).map((sample) => ({
+            patients: (sample.patients || []).map((p) => ({ id: p.id })),
+            sampleType: sample.sampleType,
         })),
         customParameters: {
             sampleType: item.customParameters?.sampleType,
             discounts: item.customParameters?.discounts || [],
-            price: item.customParameters?.price
+            price: item.customParameters?.price,
         },
         details: item.details,
-        deleted: item.deleted || false
+        deleted: item.deleted || false,
     });
 
     // Action handlers
@@ -545,17 +581,17 @@ const Show = ({referrerOrder, errors = {}}) => {
             existing_acceptance_id: data.existing_acceptance_id,
             acceptanceItems: {
                 tests: (data.acceptanceItems?.tests || []).map(cleanAcceptanceItem),
-                panels: (data.acceptanceItems?.panels || []).map(panel => ({
+                panels: (data.acceptanceItems?.panels || []).map((panel) => ({
                     ...cleanAcceptanceItem(panel),
                     sampleless: panel.sampleless || false,
                     reportless: panel.reportless || false,
-                    acceptanceItems: (panel.acceptanceItems || []).map(cleanAcceptanceItem)
-                }))
-            }
+                    acceptanceItems: (panel.acceptanceItems || []).map(cleanAcceptanceItem),
+                })),
+            },
         };
 
-        router.post(route("referrerOrders.acceptance", referrerOrder.id), cleanedData, {
-            onSuccess: handleCloseAddAcceptance
+        router.post(route('referrerOrders.acceptance', referrerOrder.id), cleanedData, {
+            onSuccess: handleCloseAddAcceptance,
         });
     };
 
@@ -563,16 +599,17 @@ const Show = ({referrerOrder, errors = {}}) => {
     const handleAddAcceptance = () => setOpenAddAcceptance(true);
     const handleAddSample = () => {
         setLoading(true);
-        axios.get(route("api.sampleCollection.list", referrerOrder.acceptance_id))
-            .then(res => {
+        axios
+            .get(route('api.sampleCollection.list', referrerOrder.acceptance_id))
+            .then((res) => {
                 setBarcodes(res.data.barcodes);
 
                 // For pooling orders, extract all unique acceptance items
                 if (referrerOrder.pooling) {
                     const allItems = [];
                     const itemIds = new Set();
-                    res.data.barcodes.forEach(barcode => {
-                        barcode.items?.forEach(item => {
+                    res.data.barcodes.forEach((barcode) => {
+                        barcode.items?.forEach((item) => {
                             if (!itemIds.has(item.id)) {
                                 itemIds.add(item.id);
                                 allItems.push(item);
@@ -584,11 +621,13 @@ const Show = ({referrerOrder, errors = {}}) => {
 
                 setOpenAddSample(true);
             })
-            .catch(error => {
+            .catch((error) => {
                 setNotification({
                     open: true,
-                    message: "Failed to load barcodes: " + (error.response?.data?.message || "Unknown error"),
-                    severity: "error"
+                    message:
+                        'Failed to load barcodes: ' +
+                        (error.response?.data?.message || 'Unknown error'),
+                    severity: 'error',
                 });
             })
             .finally(() => {
@@ -628,8 +667,8 @@ const Show = ({referrerOrder, errors = {}}) => {
     };
     const handleAddFromExistsPatient = () => setOpenAddFromExist(true);
     const handleTabChange = (event, newValue) => setActiveTab(newValue);
-    const gotoPage = url => () => router.visit(url);
-    const handleCloseNotification = () => setNotification({...notification, open: false});
+    const gotoPage = (url) => () => router.visit(url);
+    const handleCloseNotification = () => setNotification({ ...notification, open: false });
 
     // Pooling handlers
     const handleOpenSelectAcceptance = () => setOpenSelectAcceptance(true);
@@ -658,24 +697,27 @@ const Show = ({referrerOrder, errors = {}}) => {
 
     const getCompletionColor = () => {
         const percentage = getCompletionPercentage();
-        if (percentage < 50) return "error";
-        if (percentage < 100) return "warning";
-        return "success";
+        if (percentage < 50) return 'error';
+        if (percentage < 100) return 'warning';
+        return 'success';
     };
 
-    const {id: patientID, ...patient} = referrerOrder?.orderInformation?.patient || {};
+    const { id: patientID, ...patient } = referrerOrder?.orderInformation?.patient || {};
     // Use patients array if available, otherwise fall back to single patient object
-    const patients = referrerOrder?.orderInformation?.patients?.length > 0
-        ? referrerOrder.orderInformation.patients
-        : (referrerOrder?.orderInformation?.patient ? [referrerOrder.orderInformation.patient] : []);
+    const patients =
+        referrerOrder?.orderInformation?.patients?.length > 0
+            ? referrerOrder.orderInformation.patients
+            : referrerOrder?.orderInformation?.patient
+              ? [referrerOrder.orderInformation.patient]
+              : [];
     const orderItems = referrerOrder?.orderInformation?.orderItems || [];
 
     return (
         <>
-            <Head title={`Referrer Order #${referrerOrder.order_id}`}/>
+            <Head title={`Referrer Order #${referrerOrder.order_id}`} />
             {/* Page Header */}
             <PageHeader
-                icon={<Assignment sx={{mr: 1}}/>}
+                icon={<Assignment sx={{ mr: 1 }} />}
                 title={`Order #${referrerOrder.order_id}`}
                 subtitle={`Referrer: ${referrerOrder?.referrer?.fullName} | Status: ${referrerOrder?.orderInformation?.status}`}
                 actions={[
@@ -684,18 +726,18 @@ const Show = ({referrerOrder, errors = {}}) => {
                         size="medium"
                         color={getCompletionColor()}
                         label={`${getCompletionPercentage()}% Complete`}
-                        icon={<Timeline/>}
-                    />
+                        icon={<Timeline />}
+                    />,
                 ]}
             />
 
             {/* Status Timeline */}
-            <StatusTimeline referrerOrder={referrerOrder}/>
+            <StatusTimeline referrerOrder={referrerOrder} />
 
             {/* Main Content */}
-            <Paper sx={{borderRadius: 2, overflow: 'hidden'}}>
+            <Paper sx={{ borderRadius: 2, overflow: 'hidden' }}>
                 {/* Tabs Navigation */}
-                <Box sx={{borderBottom: 1, borderColor: 'divider', bgcolor: 'grey.50'}}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'grey.50' }}>
                     <Tabs
                         value={activeTab}
                         onChange={handleTabChange}
@@ -705,24 +747,28 @@ const Show = ({referrerOrder, errors = {}}) => {
                             '& .MuiTab-root': {
                                 minHeight: 64,
                                 textTransform: 'none',
-                                fontSize: '1rem'
-                            }
+                                fontSize: '1rem',
+                            },
                         }}
                     >
-                        <Tab label="Patients & Tests" icon={<Person/>} iconPosition="start"/>
-                        <Tab label="Order Forms" icon={<Description/>} iconPosition="start"/>
-                        <Tab label="Consents" icon={<Assignment/>} iconPosition="start"/>
-                        <Tab label="Documents" icon={<FileCopy/>} iconPosition="start"/>
+                        <Tab label="Patients & Tests" icon={<Person />} iconPosition="start" />
+                        <Tab label="Order Forms" icon={<Description />} iconPosition="start" />
+                        <Tab label="Consents" icon={<Assignment />} iconPosition="start" />
+                        <Tab label="Documents" icon={<FileCopy />} iconPosition="start" />
                     </Tabs>
                 </Box>
 
                 {/* Tab Panels */}
-                <Box sx={{px: 3}}>
+                <Box sx={{ px: 3 }}>
                     {/* Patients & Tests Tab */}
                     <TabPanel value={activeTab} index={0}>
                         {/* Patients Section */}
-                        <Box sx={{mb: 4}}>
-  <Stack direction="row" mb={3} sx={{justifyContent: "space-between", alignItems: "center"}}>
+                        <Box sx={{ mb: 4 }}>
+                            <Stack
+                                direction="row"
+                                mb={3}
+                                sx={{ justifyContent: 'space-between', alignItems: 'center' }}
+                            >
                                 <Typography variant="h5" fontWeight={600}>
                                     Patients ({patients.length})
                                 </Typography>
@@ -731,14 +777,14 @@ const Show = ({referrerOrder, errors = {}}) => {
                                         <Button
                                             variant="contained"
                                             onClick={handleAddPatient}
-                                            startIcon={<PersonAdd/>}
+                                            startIcon={<PersonAdd />}
                                         >
                                             Add New Patient
                                         </Button>
                                         <Button
                                             variant="outlined"
                                             onClick={handleAddFromExistsPatient}
-                                            startIcon={<Person/>}
+                                            startIcon={<Person />}
                                         >
                                             Select Existing
                                         </Button>
@@ -747,8 +793,10 @@ const Show = ({referrerOrder, errors = {}}) => {
                                 {referrerOrder.patient_id && (
                                     <Button
                                         variant="contained"
-                                        onClick={gotoPage(route("patients.show", referrerOrder.patient_id))}
-                                        startIcon={<Person/>}
+                                        onClick={gotoPage(
+                                            route('patients.show', referrerOrder.patient_id),
+                                        )}
+                                        startIcon={<Person />}
                                     >
                                         View Patient Details
                                     </Button>
@@ -757,8 +805,10 @@ const Show = ({referrerOrder, errors = {}}) => {
 
                             <Grid container spacing={3}>
                                 {patients.map((patientData, index) => (
-                                    <Grid size={{xs: 12, md: patients.length > 1 ? 6 : 12}}
-                                          key={patientData.id || index}>
+                                    <Grid
+                                        size={{ xs: 12, md: patients.length > 1 ? 6 : 12 }}
+                                        key={patientData.id || index}
+                                    >
                                         <PatientCard
                                             mainPatientID={referrerOrder.patient_id}
                                             patient={patientData}
@@ -773,14 +823,18 @@ const Show = ({referrerOrder, errors = {}}) => {
 
                         {/* Tests & Samples Section */}
                         <Box>
-  <Stack direction="row" mb={3} sx={{justifyContent: "space-between", alignItems: "center"}}>
-  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
+                            <Stack
+                                direction="row"
+                                mb={3}
+                                sx={{ justifyContent: 'space-between', alignItems: 'center' }}
+                            >
+                                <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
                                     <Typography variant="h5" fontWeight={600}>
                                         Tests & Samples ({orderItems.length})
                                     </Typography>
                                     {referrerOrder.pooling && (
                                         <Chip
-                                            icon={<MergeType/>}
+                                            icon={<MergeType />}
                                             label="Pooling Order"
                                             color="info"
                                             size="small"
@@ -794,8 +848,13 @@ const Show = ({referrerOrder, errors = {}}) => {
                                                 <Button
                                                     variant="contained"
                                                     color="primary"
-                                                    onClick={gotoPage(route("acceptances.show", referrerOrder.acceptance_id))}
-                                                    startIcon={<Description/>}
+                                                    onClick={gotoPage(
+                                                        route(
+                                                            'acceptances.show',
+                                                            referrerOrder.acceptance_id,
+                                                        ),
+                                                    )}
+                                                    startIcon={<Description />}
                                                 >
                                                     View Acceptance
                                                 </Button>
@@ -804,7 +863,13 @@ const Show = ({referrerOrder, errors = {}}) => {
                                                         variant="contained"
                                                         color="success"
                                                         onClick={handleAddSample}
-                                                        startIcon={loading ? <CircularProgress size={20}/> : <Add/>}
+                                                        startIcon={
+                                                            loading ? (
+                                                                <CircularProgress size={20} />
+                                                            ) : (
+                                                                <Add />
+                                                            )
+                                                        }
                                                         disabled={loading}
                                                     >
                                                         Add Samples
@@ -815,7 +880,7 @@ const Show = ({referrerOrder, errors = {}}) => {
                                             <Button
                                                 variant="contained"
                                                 onClick={handleOpenSelectAcceptance}
-                                                startIcon={<MergeType/>}
+                                                startIcon={<MergeType />}
                                                 color="info"
                                             >
                                                 Select Existing Acceptance
@@ -824,7 +889,7 @@ const Show = ({referrerOrder, errors = {}}) => {
                                             <Button
                                                 variant="contained"
                                                 onClick={handleAddAcceptance}
-                                                startIcon={<Add/>}
+                                                startIcon={<Add />}
                                             >
                                                 Create Acceptance
                                             </Button>
@@ -852,29 +917,38 @@ const Show = ({referrerOrder, errors = {}}) => {
                         {referrerOrder.orderInformation.orderForms &&
                         Object.keys(referrerOrder.orderInformation.orderForms).length > 0 ? (
                             <Grid container spacing={3}>
-                                {Object.entries(referrerOrder.orderInformation.orderForms).map(([formKey, formData], index) => (
-                                    <Grid size={{xs: 12, md: 6}} key={index}>
-                                        <Paper elevation={2} sx={{p: 3}}>
-                                            <Typography variant="h6" gutterBottom fontWeight={600}>
-                                                {formKey}
-                                            </Typography>
-                                            <Divider sx={{mb: 2}}/>
-                                            <Stack spacing={2}>
-                                                {formData.map((item, idx) => (
-                                                    <Box key={idx}>
-                                                        <Typography variant="body2" color="text.secondary"
-                                                                    fontWeight={500}>
-                                                            {item.label}
-                                                        </Typography>
-                                                        <Typography variant="body1">
-                                                            {item.value || "Not specified"}
-                                                        </Typography>
-                                                    </Box>
-                                                ))}
-                                            </Stack>
-                                        </Paper>
-                                    </Grid>
-                                ))}
+                                {Object.entries(referrerOrder.orderInformation.orderForms).map(
+                                    ([formKey, formData], index) => (
+                                        <Grid size={{ xs: 12, md: 6 }} key={index}>
+                                            <Paper elevation={2} sx={{ p: 3 }}>
+                                                <Typography
+                                                    variant="h6"
+                                                    gutterBottom
+                                                    fontWeight={600}
+                                                >
+                                                    {formKey}
+                                                </Typography>
+                                                <Divider sx={{ mb: 2 }} />
+                                                <Stack spacing={2}>
+                                                    {formData.map((item, idx) => (
+                                                        <Box key={idx}>
+                                                            <Typography
+                                                                variant="body2"
+                                                                color="text.secondary"
+                                                                fontWeight={500}
+                                                            >
+                                                                {item.label}
+                                                            </Typography>
+                                                            <Typography variant="body1">
+                                                                {item.value || 'Not specified'}
+                                                            </Typography>
+                                                        </Box>
+                                                    ))}
+                                                </Stack>
+                                            </Paper>
+                                        </Grid>
+                                    ),
+                                )}
                             </Grid>
                         ) : (
                             <Alert severity="info">No order form data available.</Alert>
@@ -889,32 +963,57 @@ const Show = ({referrerOrder, errors = {}}) => {
                                 {Object.entries(referrerOrder.orderInformation.consents)
                                     .filter(([key]) => key !== 'consentForm')
                                     .map(([key, consent]) => (
-                                        <Grid size={{xs: 12}} key={key}>
+                                        <Grid size={{ xs: 12 }} key={key}>
                                             <Paper
                                                 elevation={2}
                                                 sx={{
                                                     p: 3,
-                                                    bgcolor: consent.value === "1" ? 'success.50' : 'warning.50',
+                                                    bgcolor:
+                                                        consent.value === '1'
+                                                            ? 'success.50'
+                                                            : 'warning.50',
                                                     border: '2px solid',
-                                                    borderColor: consent.value === "1" ? 'success.main' : 'warning.main'
+                                                    borderColor:
+                                                        consent.value === '1'
+                                                            ? 'success.main'
+                                                            : 'warning.main',
                                                 }}
                                             >
-  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
+                                                <Stack
+                                                    direction="row"
+                                                    spacing={2}
+                                                    sx={{ alignItems: 'center' }}
+                                                >
                                                     <Avatar
                                                         sx={{
-                                                            bgcolor: consent.value === "1" ? 'success.main' : 'warning.main'
+                                                            bgcolor:
+                                                                consent.value === '1'
+                                                                    ? 'success.main'
+                                                                    : 'warning.main',
                                                         }}
                                                     >
-                                                        {consent.value === "1" ? <CheckCircle/> : <Info/>}
+                                                        {consent.value === '1' ? (
+                                                            <CheckCircle />
+                                                        ) : (
+                                                            <Info />
+                                                        )}
                                                     </Avatar>
-                                                    <Box sx={{flex: 1}}>
+                                                    <Box sx={{ flex: 1 }}>
                                                         <Typography variant="body1">
                                                             {consent.title || `Consent ${key}`}
                                                         </Typography>
                                                     </Box>
                                                     <Chip
-                                                        label={consent.value === "1" ? "Accepted" : "Not Accepted"}
-                                                        color={consent.value === "1" ? "success" : "warning"}
+                                                        label={
+                                                            consent.value === '1'
+                                                                ? 'Accepted'
+                                                                : 'Not Accepted'
+                                                        }
+                                                        color={
+                                                            consent.value === '1'
+                                                                ? 'success'
+                                                                : 'warning'
+                                                        }
                                                     />
                                                 </Stack>
                                             </Paper>
@@ -923,41 +1022,53 @@ const Show = ({referrerOrder, errors = {}}) => {
 
                                 {/* Consent Form Files */}
                                 {referrerOrder.orderInformation.consents.consentForm && (
-                                    <Grid size={{xs: 12}}>
-                                        <Paper elevation={2} sx={{p: 3}}>
+                                    <Grid size={{ xs: 12 }}>
+                                        <Paper elevation={2} sx={{ p: 3 }}>
                                             <Typography variant="h6" gutterBottom fontWeight={600}>
                                                 Consent Form Documents
                                             </Typography>
-                                            <Divider sx={{mb: 2}}/>
+                                            <Divider sx={{ mb: 2 }} />
                                             <Stack spacing={2}>
-                                                {referrerOrder.orderInformation.consents.consentForm.map((file, index) => (
-                                                    <Paper
-                                                        key={index}
-                                                        variant="outlined"
-                                                        sx={{
-                                                            p: 2,
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: 2,
-                                                            '&:hover': {bgcolor: 'action.hover'}
-                                                        }}
-                                                    >
-                                                        <Avatar sx={{bgcolor: 'primary.main'}}>
-                                                            <Description/>
-                                                        </Avatar>
-                                                        <Box sx={{flex: 1}}>
-                                                            <Typography variant="body1" fontWeight={500}>
-                                                                Consent Form {index + 1}
-                                                            </Typography>
-                                                            <Typography variant="caption" color="text.secondary">
-                                                                {file}
-                                                            </Typography>
-                                                        </Box>
-                                                        <IconButton color="primary">
-                                                            <Download/>
-                                                        </IconButton>
-                                                    </Paper>
-                                                ))}
+                                                {referrerOrder.orderInformation.consents.consentForm.map(
+                                                    (file, index) => (
+                                                        <Paper
+                                                            key={index}
+                                                            variant="outlined"
+                                                            sx={{
+                                                                p: 2,
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: 2,
+                                                                '&:hover': {
+                                                                    bgcolor: 'action.hover',
+                                                                },
+                                                            }}
+                                                        >
+                                                            <Avatar
+                                                                sx={{ bgcolor: 'primary.main' }}
+                                                            >
+                                                                <Description />
+                                                            </Avatar>
+                                                            <Box sx={{ flex: 1 }}>
+                                                                <Typography
+                                                                    variant="body1"
+                                                                    fontWeight={500}
+                                                                >
+                                                                    Consent Form {index + 1}
+                                                                </Typography>
+                                                                <Typography
+                                                                    variant="caption"
+                                                                    color="text.secondary"
+                                                                >
+                                                                    {file}
+                                                                </Typography>
+                                                            </Box>
+                                                            <IconButton color="primary">
+                                                                <Download />
+                                                            </IconButton>
+                                                        </Paper>
+                                                    ),
+                                                )}
                                             </Stack>
                                         </Paper>
                                     </Grid>
@@ -970,10 +1081,11 @@ const Show = ({referrerOrder, errors = {}}) => {
 
                     {/* Documents Tab */}
                     <TabPanel value={activeTab} index={3}>
-                        {referrerOrder.owned_documents && referrerOrder.owned_documents.length > 0 ? (
+                        {referrerOrder.owned_documents &&
+                        referrerOrder.owned_documents.length > 0 ? (
                             <Grid container spacing={2}>
                                 {referrerOrder.owned_documents.map((item, index) => (
-                                    <Grid size={{xs: 12, sm: 6, md: 4}} key={index}>
+                                    <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
                                         <Paper
                                             elevation={2}
                                             sx={{
@@ -984,25 +1096,35 @@ const Show = ({referrerOrder, errors = {}}) => {
                                                 gap: 2,
                                                 '&:hover': {
                                                     boxShadow: 6,
-                                                    transform: 'translateY(-2px)'
+                                                    transform: 'translateY(-2px)',
                                                 },
-                                                transition: 'all 0.3s ease'
+                                                transition: 'all 0.3s ease',
                                             }}
                                         >
-                                            <Avatar sx={{width: 64, height: 64, bgcolor: 'primary.main'}}>
-                                                <FileCopy fontSize="large"/>
+                                            <Avatar
+                                                sx={{
+                                                    width: 64,
+                                                    height: 64,
+                                                    bgcolor: 'primary.main',
+                                                }}
+                                            >
+                                                <FileCopy fontSize="large" />
                                             </Avatar>
                                             <Typography variant="h6" align="center">
                                                 Document #{index + 1}
                                             </Typography>
-                                            <Typography variant="caption" color="text.secondary" align="center">
+                                            <Typography
+                                                variant="caption"
+                                                color="text.secondary"
+                                                align="center"
+                                            >
                                                 {item.hash.substring(0, 16)}...
                                             </Typography>
                                             <Button
                                                 variant="contained"
-                                                startIcon={<Download/>}
+                                                startIcon={<Download />}
                                                 component="a"
-                                                href={route("documents.download", item.hash)}
+                                                href={route('documents.download', item.hash)}
                                                 target="_blank"
                                                 fullWidth
                                             >
@@ -1028,9 +1150,9 @@ const Show = ({referrerOrder, errors = {}}) => {
                 fullWidth
             >
                 <DialogTitle>
-  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
-                        <Avatar sx={{bgcolor: 'primary.main'}}>
-                            <Person/>
+                    <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+                        <Avatar sx={{ bgcolor: 'primary.main' }}>
+                            <Person />
                         </Avatar>
                         <Box>
                             <Typography variant="h6" component="span">
@@ -1043,8 +1165,9 @@ const Show = ({referrerOrder, errors = {}}) => {
                     </Stack>
                 </DialogTitle>
                 <DialogContent>
-                    <Alert severity="info" sx={{mb: 3}}>
-                        This patient from the order needs to be added to the system. Choose an option below.
+                    <Alert severity="info" sx={{ mb: 3 }}>
+                        This patient from the order needs to be added to the system. Choose an
+                        option below.
                     </Alert>
 
                     <Stack spacing={2}>
@@ -1059,21 +1182,22 @@ const Show = ({referrerOrder, errors = {}}) => {
                                 transition: 'all 0.3s ease',
                                 '&:hover': {
                                     boxShadow: 4,
-                                    transform: 'translateY(-2px)'
-                                }
+                                    transform: 'translateY(-2px)',
+                                },
                             }}
                             onClick={handleAddNewPatient}
                         >
-  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
-                                <Avatar sx={{bgcolor: 'primary.main', width: 48, height: 48}}>
-                                    <PersonAdd/>
+                            <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+                                <Avatar sx={{ bgcolor: 'primary.main', width: 48, height: 48 }}>
+                                    <PersonAdd />
                                 </Avatar>
-                                <Box sx={{flex: 1}}>
+                                <Box sx={{ flex: 1 }}>
                                     <Typography variant="h6" fontWeight={600}>
                                         Add New Patient
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
-                                        Create a new patient record with the information from this order
+                                        Create a new patient record with the information from this
+                                        order
                                     </Typography>
                                 </Box>
                             </Stack>
@@ -1090,16 +1214,16 @@ const Show = ({referrerOrder, errors = {}}) => {
                                 transition: 'all 0.3s ease',
                                 '&:hover': {
                                     boxShadow: 4,
-                                    transform: 'translateY(-2px)'
-                                }
+                                    transform: 'translateY(-2px)',
+                                },
                             }}
                             onClick={handleSelectFromExisting}
                         >
-  <Stack direction="row" spacing={2} sx={{alignItems: "center"}}>
-                                <Avatar sx={{bgcolor: 'secondary.main', width: 48, height: 48}}>
-                                    <Person/>
+                            <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+                                <Avatar sx={{ bgcolor: 'secondary.main', width: 48, height: 48 }}>
+                                    <Person />
                                 </Avatar>
-                                <Box sx={{flex: 1}}>
+                                <Box sx={{ flex: 1 }}>
                                     <Typography variant="h6" fontWeight={600}>
                                         Select Existing Patient
                                     </Typography>
@@ -1112,9 +1236,7 @@ const Show = ({referrerOrder, errors = {}}) => {
                     </Stack>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenPatientActionModal(false)}>
-                        Cancel
-                    </Button>
+                    <Button onClick={() => setOpenPatientActionModal(false)}>Cancel</Button>
                 </DialogActions>
             </Dialog>
 
@@ -1125,10 +1247,14 @@ const Show = ({referrerOrder, errors = {}}) => {
             />
 
             <PatientAddForm
-                defaultValues={selectedPatient ? {...selectedPatient, idNo: selectedPatient?.id_no} : {
-                    ...patient,
-                    idNo: patient?.id_no
-                }}
+                defaultValues={
+                    selectedPatient
+                        ? { ...selectedPatient, idNo: selectedPatient?.id_no }
+                        : {
+                              ...patient,
+                              idNo: patient?.id_no,
+                          }
+                }
                 id={referrerOrder.id}
                 open={openAddPatient}
                 onClose={handleCloseAddPatient}
@@ -1146,7 +1272,7 @@ const Show = ({referrerOrder, errors = {}}) => {
                     onClose={handleCloseAddAcceptance}
                     requestedTests={
                         orderItems.length > 0
-                            ? orderItems.map(item => item.test)
+                            ? orderItems.map((item) => item.test)
                             : referrerOrder?.orderInformation?.tests
                     }
                     maxDiscount={100}
@@ -1167,13 +1293,13 @@ const Show = ({referrerOrder, errors = {}}) => {
                 />
             )}
 
-            {(referrerOrder.acceptance_id && barcodes.length > 0) && (
+            {referrerOrder.acceptance_id && barcodes.length > 0 && (
                 <AddSampleForm
                     referrerOrder={referrerOrder}
                     onClose={handleAddSampleClose}
                     samples={
                         orderItems.length > 0
-                            ? orderItems.flatMap(item => item.samples || [])
+                            ? orderItems.flatMap((item) => item.samples || [])
                             : referrerOrder.orderInformation.samples
                     }
                     open={openAddSample}
@@ -1188,13 +1314,13 @@ const Show = ({referrerOrder, errors = {}}) => {
                 open={notification.open}
                 autoHideDuration={6000}
                 onClose={handleCloseNotification}
-                anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
                 <Alert
                     onClose={handleCloseNotification}
                     severity={notification.severity}
                     variant="filled"
-                    sx={{width: '100%'}}
+                    sx={{ width: '100%' }}
                 >
                     {notification.message}
                 </Alert>
@@ -1206,8 +1332,8 @@ const Show = ({referrerOrder, errors = {}}) => {
 // Breadcrumbs configuration
 const breadCrumbs = [
     {
-        title: "Referrer Orders",
-        link: route("referrer-orders.index"),
+        title: 'Referrer Orders',
+        link: route('referrer-orders.index'),
         icon: null,
     },
 ];
@@ -1219,10 +1345,10 @@ Show.layout = (page) => (
         breadcrumbs={[
             ...breadCrumbs,
             {
-                title: "Order #" + page.props.referrerOrder.order_id,
+                title: 'Order #' + page.props.referrerOrder.order_id,
                 link: null,
-                icon: null
-            }
+                icon: null,
+            },
         ]}
         children={page}
     />

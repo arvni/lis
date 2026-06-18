@@ -1,6 +1,6 @@
-import React, {useCallback, useEffect, useState} from "react";
-import {useForm} from "@inertiajs/react";
-import axios from "axios";
+import React, { useCallback, useEffect, useState } from 'react';
+import { useForm } from '@inertiajs/react';
+import axios from 'axios';
 
 // MUI Components
 import {
@@ -24,25 +24,25 @@ import {
     Box,
     Alert,
     Snackbar,
-    Tooltip
-} from "@mui/material";
+    Tooltip,
+} from '@mui/material';
 
 // Icons
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import PersonIcon from "@mui/icons-material/Person";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import EditIcon from "@mui/icons-material/Edit";
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import PersonIcon from '@mui/icons-material/Person';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import EditIcon from '@mui/icons-material/Edit';
 
 // Components
-import SelectSearch from "@/Components/SelectSearch";
-import Autocomplete from "@mui/material/Autocomplete";
-import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import BadgeIcon from "@mui/icons-material/Badge";
+import SelectSearch from '@/Components/SelectSearch';
+import Autocomplete from '@mui/material/Autocomplete';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import BadgeIcon from '@mui/icons-material/Badge';
 
-const EditForm = ({openEdit, onClose, reservation}) => {
+const EditForm = ({ openEdit, onClose, reservation }) => {
     const [times, setTimes] = useState([]);
     const [waiting, setWaiting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -59,21 +59,23 @@ const EditForm = ({openEdit, onClose, reservation}) => {
     };
 
     // Initialize form data with reservation data
-    const {data, setData, processing, put, errors, setError, reset} = useForm({
-        consultant: reservation?.consultant || "",
-        dueDate: reservation?.started_at ? formatDate(new Date(reservation.started_at)) : "",
-        time: reservation?.started_at ? new Date(reservation.started_at).toLocaleTimeString('en-US', {
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit'
-        }) : null,
+    const { data, setData, processing, put, errors, setError, reset } = useForm({
+        consultant: reservation?.consultant || '',
+        dueDate: reservation?.started_at ? formatDate(new Date(reservation.started_at)) : '',
+        time: reservation?.started_at
+            ? new Date(reservation.started_at).toLocaleTimeString('en-US', {
+                  hour12: false,
+                  hour: '2-digit',
+                  minute: '2-digit',
+              })
+            : null,
         customer: {
-            id: reservation?.reservable?.id || "",
-            phone: reservation?.reservable?.phone || "",
-            name: reservation?.reservable?.name || "",
-            email: reservation?.reservable?.email || ""
+            id: reservation?.reservable?.id || '',
+            phone: reservation?.reservable?.phone || '',
+            name: reservation?.reservable?.name || '',
+            email: reservation?.reservable?.email || '',
         },
-        note: reservation?.note || "",
+        note: reservation?.note || '',
     });
 
     // Load available times when consultant or date changes
@@ -94,57 +96,61 @@ const EditForm = ({openEdit, onClose, reservation}) => {
     }, [reservation]);
 
     useEffect(() => {
-
         if (reservation) {
             setData({
-                consultant: reservation?.consultant || "",
-                dueDate: reservation?.started_at ? formatDate(new Date(reservation.started_at)) : "",
-                time: reservation?.started_at ? new Date(reservation.started_at).toLocaleTimeString('en-US', {
-                    hour12: false,
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }) : null,
+                consultant: reservation?.consultant || '',
+                dueDate: reservation?.started_at
+                    ? formatDate(new Date(reservation.started_at))
+                    : '',
+                time: reservation?.started_at
+                    ? new Date(reservation.started_at).toLocaleTimeString('en-US', {
+                          hour12: false,
+                          hour: '2-digit',
+                          minute: '2-digit',
+                      })
+                    : null,
                 customer: {
-                    id: reservation?.reservable?.id || "",
-                    phone: reservation?.reservable?.phone || "",
-                    name: reservation?.reservable?.name || "",
-                    email: reservation?.reservable?.email || ""
+                    id: reservation?.reservable?.id || '',
+                    phone: reservation?.reservable?.phone || '',
+                    name: reservation?.reservable?.name || '',
+                    email: reservation?.reservable?.email || '',
                 },
-                note: reservation?.note || "",
+                note: reservation?.note || '',
             });
         }
-    }, [open,reservation]);
+    }, [open, reservation]);
 
     const getTimes = () => {
         axios
             .get(
-                route("list-reservation-times", {
+                route('list-reservation-times', {
                     consultant: data.consultant?.id,
                     date: data.dueDate,
-                    excludeTimeId: reservation?.id // Exclude current reservation time
-                })
+                    excludeTimeId: reservation?.id, // Exclude current reservation time
+                }),
             )
-            .then(({data: response}) => {
+            .then(({ data: response }) => {
                 // Add current reservation time to available times
                 const currentTime = {
                     value: new Date(reservation.started_at).toLocaleTimeString('en-US', {
                         hour12: false,
                         hour: '2-digit',
-                        minute: '2-digit'
-                    }),
-                    label: new Date(reservation.started_at).toLocaleTimeString('en-US', {
-                        hour: 'numeric',
                         minute: '2-digit',
-                        hour12: true
-                    }) + ' (Current)',
-                    disabled: false
+                    }),
+                    label:
+                        new Date(reservation.started_at).toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true,
+                        }) + ' (Current)',
+                    disabled: false,
                 };
 
                 setTimes([currentTime, ...response.data]);
             })
             .then(() => setWaiting(false))
             .catch((error) => {
-                console.error("Error fetching times:", error);
+                console.error('Error fetching times:', error);
                 setWaiting(false);
             });
     };
@@ -152,20 +158,20 @@ const EditForm = ({openEdit, onClose, reservation}) => {
     const handleChange = (e) =>
         setData((previousData) => ({
             ...previousData,
-            [e.target.name]: e.target.value
+            [e.target.name]: e.target.value,
         }));
 
     const handleSubmit = () => {
         if (check()) {
-            put(route("times.update", reservation.id), {
+            put(route('times.update', reservation.id), {
                 onSuccess: () => {
                     setShowSuccess(true);
                     onClose();
                     reset();
                 },
                 onError: (errors) => {
-                    console.error("Update errors:", errors);
-                }
+                    console.error('Update errors:', errors);
+                },
             });
         }
     };
@@ -174,27 +180,27 @@ const EditForm = ({openEdit, onClose, reservation}) => {
         let isValid = true;
 
         if (!data.consultant) {
-            setError("consultant", "Please select a consultant");
+            setError('consultant', 'Please select a consultant');
             isValid = false;
         }
 
         if (!data.dueDate) {
-            setError("dueDate", "Please select a date");
+            setError('dueDate', 'Please select a date');
             isValid = false;
         }
 
         if (!data.time) {
-            setError("time", "Please select a time slot");
+            setError('time', 'Please select a time slot');
             isValid = false;
         }
 
         if (reservation.reservable_type === 'customer') {
             if (!data.customer.phone) {
-                setError("customer.phone", "Please enter customer phone number");
+                setError('customer.phone', 'Please enter customer phone number');
                 isValid = false;
             }
             if (!data.customer.name) {
-                setError("customer.name", "Please enter customer name");
+                setError('customer.name', 'Please enter customer name');
                 isValid = false;
             }
         }
@@ -204,10 +210,10 @@ const EditForm = ({openEdit, onClose, reservation}) => {
 
     const fetchData = useCallback((_, search) => {
         setLoading(true);
-        setData(prevData => ({...prevData, customer: {...prevData.customer, phone: search}}));
-        fetch(route("api.customers.list", {search}))
-            .then(response => response.json())
-            .then(data => {
+        setData((prevData) => ({ ...prevData, customer: { ...prevData.customer, phone: search } }));
+        fetch(route('api.customers.list', { search }))
+            .then((response) => response.json())
+            .then((data) => {
                 setOptions((data.data || []).filter(Boolean));
                 setLoading(false);
             })
@@ -219,23 +225,23 @@ const EditForm = ({openEdit, onClose, reservation}) => {
 
     // Handle customer selection
     const handleCustomerSelect = (event, newValue) => {
-        setData(previousData => ({
+        setData((previousData) => ({
             ...previousData,
             customer: newValue || {
-                phone: "",
-                name: "",
-                email: ""
-            }
+                phone: '',
+                name: '',
+                email: '',
+            },
         }));
     };
 
     const handleCustomerChange = (field, value) =>
-        setData(previousData => ({
+        setData((previousData) => ({
             ...previousData,
             customer: {
                 ...previousData.customer,
-                [field]: value
-            }
+                [field]: value,
+            },
         }));
 
     // Don't render if no reservation data
@@ -251,142 +257,199 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                 slotProps={{
                     Paper: {
                         elevation: 3,
-                        sx: {borderRadius: 2}
-                    }
+                        sx: { borderRadius: 2 },
+                    },
                 }}
             >
-                <DialogTitle sx={{
-                    bgcolor: "warning.main",
-                    color: "white",
-                    py: 2
-                }}>
-                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                        <EditIcon/>
+                <DialogTitle
+                    sx={{
+                        bgcolor: 'warning.main',
+                        color: 'white',
+                        py: 2,
+                    }}
+                >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <EditIcon />
                         <Typography variant="h5" fontWeight="500" component="span">
                             Edit Reservation
                         </Typography>
                     </Box>
                 </DialogTitle>
-                <Divider/>
+                <Divider />
 
-                <DialogContent sx={{p: 3, mt: 1}}>
+                <DialogContent sx={{ p: 3, mt: 1 }}>
                     <Container>
-                        {reservation.reservable_type === 'customer' && <Box>
-                            <Typography variant="subtitle1" fontWeight="medium" sx={{mb: 2}}>
-                                Customer Information
-                            </Typography>
+                        {reservation.reservable_type === 'customer' && (
+                            <Box>
+                                <Typography variant="subtitle1" fontWeight="medium" sx={{ mb: 2 }}>
+                                    Customer Information
+                                </Typography>
 
-                            <Grid container spacing={3}>
-                                <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <Box sx={{display: "flex", alignItems: "flex-start"}}>
-                                        <Autocomplete
-                                            id="customer-autocomplete"
-                                            open={open}
-                                            onOpen={() => setOpen(true)}
-                                            onClose={() => setOpen(false)}
-                                            value={data.customer?.id ? data.customer : null}
-                                            onChange={handleCustomerSelect}
-                                            onInputChange={fetchData}
-                                            isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                                            getOptionLabel={(option) => option?.phone || ''}
-                                            options={options}
-                                            loading={loading}
-                                            fullWidth
-                                            freeSolo
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    name="phone"
-                                                    label="Phone Number"
-                                                    placeholder="Search or enter phone"
-                                                    error={Boolean(errors["customer.phone"])}
-                                                    helperText={errors?.["customer.phone"]}
-                                                    slotProps={{
-                                                        ...params.slotProps,
-                                                        htmlInput: params.slotProps?.htmlInput ?? params.inputProps,
-                                                        input: {
-                                                            ...(params.slotProps?.input ?? params.InputProps),
-                                                            startAdornment: (
-                                                                <>
-                                                                    <MedicalServicesIcon color="action" sx={{mr: 1}}/>
-                                                                    {(params.slotProps?.input ?? params.InputProps)?.startAdornment}
-                                                                </>
-                                                            ),
-                                                            endAdornment: (
-                                                                <>
-                                                                    {loading && <CircularProgress size={16}/>}
-                                                                    {(params.slotProps?.input ?? params.InputProps)?.endAdornment}
-                                                                </>
-                                                            ),
-                                                        },
-                                                    }}
+                                <Grid container spacing={3}>
+                                    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                                            <Autocomplete
+                                                id="customer-autocomplete"
+                                                open={open}
+                                                onOpen={() => setOpen(true)}
+                                                onClose={() => setOpen(false)}
+                                                value={data.customer?.id ? data.customer : null}
+                                                onChange={handleCustomerSelect}
+                                                onInputChange={fetchData}
+                                                isOptionEqualToValue={(option, value) =>
+                                                    option?.id === value?.id
+                                                }
+                                                getOptionLabel={(option) => option?.phone || ''}
+                                                options={options}
+                                                loading={loading}
+                                                fullWidth
+                                                freeSolo
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        name="phone"
+                                                        label="Phone Number"
+                                                        placeholder="Search or enter phone"
+                                                        error={Boolean(errors['customer.phone'])}
+                                                        helperText={errors?.['customer.phone']}
+                                                        slotProps={{
+                                                            ...params.slotProps,
+                                                            htmlInput:
+                                                                params.slotProps?.htmlInput ??
+                                                                params.inputProps,
+                                                            input: {
+                                                                ...(params.slotProps?.input ??
+                                                                    params.InputProps),
+                                                                startAdornment: (
+                                                                    <>
+                                                                        <MedicalServicesIcon
+                                                                            color="action"
+                                                                            sx={{ mr: 1 }}
+                                                                        />
+                                                                        {
+                                                                            (
+                                                                                params.slotProps
+                                                                                    ?.input ??
+                                                                                params.InputProps
+                                                                            )?.startAdornment
+                                                                        }
+                                                                    </>
+                                                                ),
+                                                                endAdornment: (
+                                                                    <>
+                                                                        {loading && (
+                                                                            <CircularProgress
+                                                                                size={16}
+                                                                            />
+                                                                        )}
+                                                                        {
+                                                                            (
+                                                                                params.slotProps
+                                                                                    ?.input ??
+                                                                                params.InputProps
+                                                                            )?.endAdornment
+                                                                        }
+                                                                    </>
+                                                                ),
+                                                            },
+                                                        }}
+                                                    />
+                                                )}
+                                            />
+                                            <Tooltip title="Search for an existing customer or enter a new phone">
+                                                <HelpOutlineIcon
+                                                    fontSize="small"
+                                                    color="action"
+                                                    sx={{ ml: 1, mt: 2 }}
                                                 />
-                                            )}
-                                        />
-                                        <Tooltip title="Search for an existing customer or enter a new phone">
-                                            <HelpOutlineIcon fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
-                                        </Tooltip>
-                                    </Box>
-                                </Grid>
+                                            </Tooltip>
+                                        </Box>
+                                    </Grid>
 
-                                <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <Box sx={{display: "flex", alignItems: "flex-start"}}>
-                                        <TextField
-                                            name="name"
-                                            label="Name"
-                                            value={data?.customer?.name || ""}
-                                            onChange={e => handleCustomerChange('name', e.target.value)}
-                                            fullWidth
-                                            required
-                                            placeholder="e.g. Ali"
-                                            error={Boolean(errors["customer.name"])}
-                                            helperText={errors?.["customer.name"]}
-                                            slotProps={{
-                                                input: {
-                                                    startAdornment: (
-                                                        <LocalHospitalIcon color="action" sx={{mr: 1}}/>
-                                                    ),
+                                    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                                            <TextField
+                                                name="name"
+                                                label="Name"
+                                                value={data?.customer?.name || ''}
+                                                onChange={(e) =>
+                                                    handleCustomerChange('name', e.target.value)
                                                 }
-                                            }}
-                                        />
-                                        <Tooltip title="Customer Full Name">
-                                            <HelpOutlineIcon fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
-                                        </Tooltip>
-                                    </Box>
-                                </Grid>
+                                                fullWidth
+                                                required
+                                                placeholder="e.g. Ali"
+                                                error={Boolean(errors['customer.name'])}
+                                                helperText={errors?.['customer.name']}
+                                                slotProps={{
+                                                    input: {
+                                                        startAdornment: (
+                                                            <LocalHospitalIcon
+                                                                color="action"
+                                                                sx={{ mr: 1 }}
+                                                            />
+                                                        ),
+                                                    },
+                                                }}
+                                            />
+                                            <Tooltip title="Customer Full Name">
+                                                <HelpOutlineIcon
+                                                    fontSize="small"
+                                                    color="action"
+                                                    sx={{ ml: 1, mt: 2 }}
+                                                />
+                                            </Tooltip>
+                                        </Box>
+                                    </Grid>
 
-                                <Grid size={{xs: 12, sm: 6, md: 4}}>
-                                    <Box sx={{display: "flex", alignItems: "flex-start"}}>
-                                        <TextField
-                                            name="email"
-                                            label="Email"
-                                            value={data.customer?.email || ""}
-                                            onChange={e => handleCustomerChange('email', e.target.value)}
-                                            fullWidth
-                                            placeholder="example@example.com"
-                                            slotProps={{
-                                                input: {
-                                                    startAdornment: (
-                                                        <BadgeIcon color="action" sx={{mr: 1}}/>
-                                                    ),
+                                    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                                            <TextField
+                                                name="email"
+                                                label="Email"
+                                                value={data.customer?.email || ''}
+                                                onChange={(e) =>
+                                                    handleCustomerChange('email', e.target.value)
                                                 }
-                                            }}
-                                        />
-                                        <Tooltip title="Customer Email">
-                                            <HelpOutlineIcon fontSize="small" color="action" sx={{ml: 1, mt: 2}}/>
-                                        </Tooltip>
-                                    </Box>
+                                                fullWidth
+                                                placeholder="example@example.com"
+                                                slotProps={{
+                                                    input: {
+                                                        startAdornment: (
+                                                            <BadgeIcon
+                                                                color="action"
+                                                                sx={{ mr: 1 }}
+                                                            />
+                                                        ),
+                                                    },
+                                                }}
+                                            />
+                                            <Tooltip title="Customer Email">
+                                                <HelpOutlineIcon
+                                                    fontSize="small"
+                                                    color="action"
+                                                    sx={{ ml: 1, mt: 2 }}
+                                                />
+                                            </Tooltip>
+                                        </Box>
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </Box>}
+                            </Box>
+                        )}
 
-                        <Grid container spacing={3} sx={{mt: 2}}>
+                        <Grid container spacing={3} sx={{ mt: 2 }}>
                             {/* Consultant Selection */}
-                            <Grid size={{xs: 12, md: 6}}>
-                                <Paper elevation={0}
-                                       sx={{p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2}}>
-  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
-                                        <PersonIcon color="primary" sx={{mr: 1}}/>
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        p: 2,
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        borderRadius: 2,
+                                    }}
+                                >
+                                    <Box display="flex" mb={1} sx={{ alignItems: 'center' }}>
+                                        <PersonIcon color="primary" sx={{ mr: 1 }} />
                                         <Typography variant="subtitle1" fontWeight="medium">
                                             Select Consultant
                                         </Typography>
@@ -395,7 +458,7 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                                     <SelectSearch
                                         onChange={handleChange}
                                         value={data.consultant}
-                                        url={route("list-consultants")}
+                                        url={route('list-consultants')}
                                         name="consultant"
                                         label="Consultant"
                                         error={Boolean(errors.consultant)}
@@ -406,11 +469,18 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                             </Grid>
 
                             {/* Date Selection */}
-                            <Grid size={{xs: 12, md: 6}}>
-                                <Paper elevation={0}
-                                       sx={{p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2}}>
-  <Box display="flex" mb={1} sx={{alignItems: "center"}}>
-                                        <CalendarTodayIcon color="primary" sx={{mr: 1}}/>
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        p: 2,
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        borderRadius: 2,
+                                    }}
+                                >
+                                    <Box display="flex" mb={1} sx={{ alignItems: 'center' }}>
+                                        <CalendarTodayIcon color="primary" sx={{ mr: 1 }} />
                                         <Typography variant="subtitle1" fontWeight="medium">
                                             Select Date
                                         </Typography>
@@ -424,8 +494,8 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                                             onChange={handleChange}
                                             fullWidth
                                             slotProps={{
-                                                inputLabel: {shrink: true},
-                                                input: {min: formatDate(new Date())}
+                                                inputLabel: { shrink: true },
+                                                input: { min: formatDate(new Date()) },
                                             }}
                                             error={Boolean(errors.dueDate)}
                                             helperText={errors?.dueDate}
@@ -436,20 +506,38 @@ const EditForm = ({openEdit, onClose, reservation}) => {
 
                             {/* Time Selection */}
                             {(times.length > 0 || waiting) && (
-                                <Grid size={{xs: 12}}>
-                                    <Paper elevation={0}
-                                           sx={{p: 2, border: "1px solid", borderColor: "divider", borderRadius: 2}}>
-  <Box display="flex" mb={2} sx={{alignItems: "center"}}>
-                                            <AccessTimeIcon color="primary" sx={{mr: 1}}/>
+                                <Grid size={{ xs: 12 }}>
+                                    <Paper
+                                        elevation={0}
+                                        sx={{
+                                            p: 2,
+                                            border: '1px solid',
+                                            borderColor: 'divider',
+                                            borderRadius: 2,
+                                        }}
+                                    >
+                                        <Box display="flex" mb={2} sx={{ alignItems: 'center' }}>
+                                            <AccessTimeIcon color="primary" sx={{ mr: 1 }} />
                                             <Typography variant="subtitle1" fontWeight="medium">
                                                 Available Time Slots
                                             </Typography>
                                         </Box>
 
                                         {waiting ? (
-  <Box display="flex" p={4} sx={{justifyContent: "center", alignItems: "center"}}>
-                                                <CircularProgress size={40}/>
-                                                <Typography variant="body2" color="text.secondary" ml={2}>
+                                            <Box
+                                                display="flex"
+                                                p={4}
+                                                sx={{
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                }}
+                                            >
+                                                <CircularProgress size={40} />
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                    ml={2}
+                                                >
                                                     Loading available times...
                                                 </Typography>
                                             </Box>
@@ -459,7 +547,11 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                                                     name="time"
                                                     value={data.time}
                                                     onChange={handleChange}
-                                                    sx={{display: "flex", flexDirection: "row", flexWrap: "wrap"}}
+                                                    sx={{
+                                                        display: 'flex',
+                                                        flexDirection: 'row',
+                                                        flexWrap: 'wrap',
+                                                    }}
                                                 >
                                                     {times.map((item, index) => (
                                                         <FormControlLabel
@@ -471,46 +563,61 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                                                                 <Radio
                                                                     color="primary"
                                                                     disabled={item.disabled}
-                                                                    checkedIcon={<CheckCircleIcon/>}
+                                                                    checkedIcon={
+                                                                        <CheckCircleIcon />
+                                                                    }
                                                                 />
                                                             }
                                                             sx={{
-                                                                border: "1px solid",
-                                                                borderColor: data.time === item.value ? "primary.main" : "divider",
-                                                                borderRadius: "8px",
+                                                                border: '1px solid',
+                                                                borderColor:
+                                                                    data.time === item.value
+                                                                        ? 'primary.main'
+                                                                        : 'divider',
+                                                                borderRadius: '8px',
                                                                 m: 0.5,
                                                                 p: 0.5,
                                                                 pr: 1.5,
-                                                                transition: "all 0.2s",
-                                                                bgcolor: data.time === item.value ? "action.selected" : "background.paper",
-                                                                "&:hover": {
-                                                                    bgcolor: "action.hover",
-                                                                    borderColor: "primary.light"
-                                                                }
+                                                                transition: 'all 0.2s',
+                                                                bgcolor:
+                                                                    data.time === item.value
+                                                                        ? 'action.selected'
+                                                                        : 'background.paper',
+                                                                '&:hover': {
+                                                                    bgcolor: 'action.hover',
+                                                                    borderColor: 'primary.light',
+                                                                },
                                                             }}
                                                         />
                                                     ))}
                                                 </RadioGroup>
 
                                                 {errors.time && (
-                                                    <FormHelperText error>{errors.time}</FormHelperText>
+                                                    <FormHelperText error>
+                                                        {errors.time}
+                                                    </FormHelperText>
                                                 )}
                                             </>
                                         ) : (
-                                            <Typography variant="body2" color="text.secondary" align="center"
-                                                        py={2}>
-                                                No available time slots. Please try another date or consultant.
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                align="center"
+                                                py={2}
+                                            >
+                                                No available time slots. Please try another date or
+                                                consultant.
                                             </Typography>
                                         )}
                                     </Paper>
                                 </Grid>
                             )}
 
-                            <Grid size={{xs: 12}}>
+                            <Grid size={{ xs: 12 }}>
                                 <TextField
                                     name="note"
                                     label="Note"
-                                    value={data?.note || ""}
+                                    value={data?.note || ''}
                                     onChange={handleChange}
                                     fullWidth
                                     multiline
@@ -521,14 +628,14 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                     </Container>
                 </DialogContent>
 
-                <Divider/>
+                <Divider />
 
-                <DialogActions sx={{px: 3, py: 2, justifyContent: "space-between"}}>
+                <DialogActions sx={{ px: 3, py: 2, justifyContent: 'space-between' }}>
                     <Button
                         onClick={onClose}
                         variant="outlined"
                         color="inherit"
-                        sx={{borderRadius: 2}}
+                        sx={{ borderRadius: 2 }}
                     >
                         Cancel
                     </Button>
@@ -539,13 +646,19 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                         color="warning"
                         disableElevation
                         disabled={processing}
-                        startIcon={processing ? <CircularProgress size={20} color="inherit"/> : <EditIcon/>}
+                        startIcon={
+                            processing ? (
+                                <CircularProgress size={20} color="inherit" />
+                            ) : (
+                                <EditIcon />
+                            )
+                        }
                         sx={{
                             borderRadius: 2,
-                            px: 3
+                            px: 3,
                         }}
                     >
-                        {processing ? "Updating..." : "Update Reservation"}
+                        {processing ? 'Updating...' : 'Update Reservation'}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -554,7 +667,7 @@ const EditForm = ({openEdit, onClose, reservation}) => {
                 open={showSuccess}
                 autoHideDuration={3000}
                 onClose={() => setShowSuccess(false)}
-                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
                 <Alert severity="success" variant="filled">
                     Reservation updated successfully!

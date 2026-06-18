@@ -1,16 +1,16 @@
-import React from "react";
-import {Paper, Step, StepLabel, Stepper, Typography, Stack, Chip} from "@mui/material";
-import {AccountCircleOutlined, GroupOutlined} from "@mui/icons-material";
+import React from 'react';
+import { Paper, Step, StepLabel, Stepper, Typography, Stack, Chip } from '@mui/material';
+import { AccountCircleOutlined, GroupOutlined } from '@mui/icons-material';
 
 const formatDate = (date) => {
-    if (!date) return "";
+    if (!date) return '';
     return new Intl.DateTimeFormat('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-        hour12: false
+        hour12: false,
     }).format(new Date(date));
 };
 
@@ -19,31 +19,35 @@ const formatDate = (date) => {
  *
  * @param {Object} props.report - Report with report_template.approval_flow.steps and approvals loaded
  */
-const ApprovalFlowStepper = ({report}) => {
+const ApprovalFlowStepper = ({ report }) => {
     const flow = report.report_template?.approval_flow;
     if (!flow?.steps?.length) return null;
 
     const steps = flow.steps;
     const approvals = report.approvals || [];
     const approvalByStepId = {};
-    approvals.forEach(approval => {
+    approvals.forEach((approval) => {
         if (approval.approval_flow_step_id && approval.action === 'approved')
             approvalByStepId[approval.approval_flow_step_id] = approval;
     });
-    const rejection = approvals.find(approval => approval.action === 'rejected');
+    const rejection = approvals.find((approval) => approval.action === 'rejected');
 
     const currentPosition = report.current_step_position ?? steps[0]?.position;
-    const activeStep = report.approval_status === 'approved'
-        ? steps.length
-        : Math.max(steps.findIndex(step => step.position === currentPosition), 0);
+    const activeStep =
+        report.approval_status === 'approved'
+            ? steps.length
+            : Math.max(
+                  steps.findIndex((step) => step.position === currentPosition),
+                  0,
+              );
 
     return (
-        <Paper elevation={2} sx={{p: 3, mb: 2, borderRadius: 1}}>
-            <Stack direction="row" spacing={2} sx={{alignItems: "center", mb: 2}}>
+        <Paper elevation={2} sx={{ p: 3, mb: 2, borderRadius: 1 }}>
+            <Stack direction="row" spacing={2} sx={{ alignItems: 'center', mb: 2 }}>
                 <Typography variant="h6">Approval Progress</Typography>
-                <Chip label={flow.name} size="small" variant="outlined"/>
+                <Chip label={flow.name} size="small" variant="outlined" />
                 {report.approval_status === 'rejected' && (
-                    <Chip label="Rejected" size="small" color="error"/>
+                    <Chip label="Rejected" size="small" color="error" />
                 )}
             </Stack>
             <Stepper activeStep={activeStep} alternativeLabel>
@@ -57,18 +61,25 @@ const ApprovalFlowStepper = ({report}) => {
                                 optional={
                                     approval ? (
                                         <Typography variant="caption">
-                                            by {approval.user?.name} at {formatDate(approval.created_at)}
+                                            by {approval.user?.name} at{' '}
+                                            {formatDate(approval.created_at)}
                                         </Typography>
                                     ) : rejectedHere ? (
                                         <Typography variant="caption" color="error">
-                                            rejected by {rejection.user?.name} at {formatDate(rejection.created_at)}
+                                            rejected by {rejection.user?.name} at{' '}
+                                            {formatDate(rejection.created_at)}
                                         </Typography>
-                                    ) : (step.role || step.user) ? (
-                                        <Stack direction="row" spacing={0.5}
-                                               sx={{alignItems: "center", justifyContent: "center"}}>
-                                            {step.role
-                                                ? <GroupOutlined sx={{fontSize: 14}}/>
-                                                : <AccountCircleOutlined sx={{fontSize: 14}}/>}
+                                    ) : step.role || step.user ? (
+                                        <Stack
+                                            direction="row"
+                                            spacing={0.5}
+                                            sx={{ alignItems: 'center', justifyContent: 'center' }}
+                                        >
+                                            {step.role ? (
+                                                <GroupOutlined sx={{ fontSize: 14 }} />
+                                            ) : (
+                                                <AccountCircleOutlined sx={{ fontSize: 14 }} />
+                                            )}
                                             <Typography variant="caption">
                                                 {step.role?.name ?? step.user?.name}
                                             </Typography>

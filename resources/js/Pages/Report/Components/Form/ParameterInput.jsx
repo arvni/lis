@@ -1,4 +1,4 @@
-import React, {memo} from "react";
+import React, { memo } from 'react';
 import {
     TextField,
     FormControl,
@@ -10,9 +10,9 @@ import {
     FormGroup,
     Typography,
     Box,
-    Button
-} from "@mui/material";
-import {CloudUpload as CloudUploadIcon} from "@mui/icons-material";
+    Button,
+} from '@mui/material';
+import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 
 /**
  * Component to render a parameter input based on its type
@@ -22,9 +22,10 @@ import {CloudUpload as CloudUploadIcon} from "@mui/icons-material";
  * @param {Function} onChange - Function to handle value changes
  * @param {Object} errors - Validation errors object
  */
-const ParameterInput = memo(({parameter, value, onChange, errors = {}}) => {
-        const {title, type, required, custom_props} = parameter;
-        const options = custom_props ? custom_props.split(',').map(opt => opt.trim()) : [];
+const ParameterInput = memo(
+    ({ parameter, value, onChange, errors = {} }) => {
+        const { title, type, required, custom_props } = parameter;
+        const options = custom_props ? custom_props.split(',').map((opt) => opt.trim()) : [];
         const fieldId = `${title.toLowerCase().replace(/\s+/g, '_')}_${parameter.id}`;
         const error = errors[fieldId];
 
@@ -58,7 +59,7 @@ const ParameterInput = memo(({parameter, value, onChange, errors = {}}) => {
                         required={required}
                         error={!!error}
                         helperText={error || ''}
-                        slotProps={{htmlInput: {step: 'any'}}}
+                        slotProps={{ htmlInput: { step: 'any' } }}
                         variant="outlined"
                         size="medium"
                         margin="normal"
@@ -83,7 +84,7 @@ const ParameterInput = memo(({parameter, value, onChange, errors = {}}) => {
                         slotProps={{
                             inputLabel: {
                                 shrink: true,
-                            }
+                            },
                         }}
                     />
                 );
@@ -135,12 +136,15 @@ const ParameterInput = memo(({parameter, value, onChange, errors = {}}) => {
                             fullWidth
                         >
                             <Typography variant="body2" component="legend" gutterBottom>
-                                {title}{required && <span style={{color: 'red'}}> *</span>}
+                                {title}
+                                {required && <span style={{ color: 'red' }}> *</span>}
                             </Typography>
                             <FormGroup>
                                 {options.map((option, index) => {
                                     // Handle array of selected values
-                                    const values = !Array.isArray(value) ? (value?.split(",").map(item => item.trim())||[]) : value;
+                                    const values = !Array.isArray(value)
+                                        ? value?.split(',').map((item) => item.trim()) || []
+                                        : value;
                                     const isChecked = values.includes(option);
 
                                     return (
@@ -152,11 +156,13 @@ const ParameterInput = memo(({parameter, value, onChange, errors = {}}) => {
                                                     onChange={(e) => {
                                                         let newValues;
                                                         if (e.target.checked) {
-                                                            newValues = [...values, option]
+                                                            newValues = [...values, option];
                                                         } else {
-                                                            newValues = values.filter(val => val !== option);
+                                                            newValues = values.filter(
+                                                                (val) => val !== option,
+                                                            );
                                                         }
-                                                        onChange(fieldId, newValues.join(","));
+                                                        onChange(fieldId, newValues.join(','));
                                                     }}
                                                 />
                                             }
@@ -185,22 +191,23 @@ const ParameterInput = memo(({parameter, value, onChange, errors = {}}) => {
                             }
                             label={title}
                             required={required}
-                            sx={{my: 2}}
+                            sx={{ my: 2 }}
                         />
                     );
                 }
 
             case 'image':
                 return (
-                    <Box sx={{my: 2}}>
+                    <Box sx={{ my: 2 }}>
                         <Typography variant="body2" gutterBottom>
-                            {title}{required && <span style={{color: 'red'}}> *</span>}
+                            {title}
+                            {required && <span style={{ color: 'red' }}> *</span>}
                         </Typography>
                         <Button
                             component="label"
                             variant="outlined"
-                            startIcon={<CloudUploadIcon/>}
-                            sx={{mb: 1}}
+                            startIcon={<CloudUploadIcon />}
+                            sx={{ mb: 1 }}
                         >
                             Upload Image
                             <input
@@ -219,11 +226,15 @@ const ParameterInput = memo(({parameter, value, onChange, errors = {}}) => {
                         </Button>
 
                         {value && (
-                            <Box sx={{mt: 2}}>
+                            <Box sx={{ mt: 2 }}>
                                 <img
-                                    src={typeof value === 'string' ? value : URL.createObjectURL(value)}
+                                    src={
+                                        typeof value === 'string'
+                                            ? value
+                                            : URL.createObjectURL(value)
+                                    }
                                     alt={title}
-                                    style={{maxWidth: '100%', maxHeight: '200px'}}
+                                    style={{ maxWidth: '100%', maxHeight: '200px' }}
                                 />
                             </Box>
                         )}
@@ -237,17 +248,14 @@ const ParameterInput = memo(({parameter, value, onChange, errors = {}}) => {
                 );
 
             default:
-                return (
-                    <Typography color="error">
-                        Unknown parameter type: {type}
-                    </Typography>
-                );
+                return <Typography color="error">Unknown parameter type: {type}</Typography>;
         }
-    }, (prevProps, nextProps) =>
+    },
+    (prevProps, nextProps) =>
         prevProps.parameter.title !== nextProps.parameter.title &&
         prevProps.parameter.type !== nextProps.parameter.type &&
         prevProps.parameter.type !== nextProps.parameter.type &&
-        prevProps.value !== nextProps.value
-)
+        prevProps.value !== nextProps.value,
+);
 
 export default ParameterInput;

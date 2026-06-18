@@ -1,55 +1,59 @@
 import AddForm from './Components/Form';
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {Head, router, useForm} from "@inertiajs/react";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head, router, useForm } from '@inertiajs/react';
 
 const Add = () => {
-    const {data, setData, post, errors, setError, clearErrors} = useForm({
-        name: "",
-        fullName: "",
-        code: "",
+    const { data, setData, post, errors, setError, clearErrors } = useForm({
+        name: '',
+        fullName: '',
+        code: '',
         sample_type_tests: [],
         type: 'TEST',
         method_tests: [],
         test_groups: [],
         report_templates: [],
-        description: "",
+        description: '',
         status: true,
         price: 0,
-        price_type: "Fix",
+        price_type: 'Fix',
         extra: {},
         referrer_price: 0,
-        referrer_price_type: "Fix",
+        referrer_price_type: 'Fix',
         referrer_extra: {},
-        can_merge: true
+        can_merge: true,
     });
-    const handleSubmit = () => post(route('tests.store'))
+    const handleSubmit = () => post(route('tests.store'));
     const handleCancel = () => router.visit(route('tests.index'));
     return (
         <>
-            <Head title="Add Test"/>
-            <AddForm data={data}
-                     setData={setData}
-                     submit={handleSubmit}
-                     cancel={handleCancel}
-                     errors={errors}
-                     setError={setError}
-                     clearErrors={clearErrors}/>
+            <Head title="Add Test" />
+            <AddForm
+                data={data}
+                setData={setData}
+                submit={handleSubmit}
+                cancel={handleCancel}
+                errors={errors}
+                setError={setError}
+                clearErrors={clearErrors}
+            />
         </>
     );
-}
+};
 
 const breadCrumbs = [
     {
-        title: "Tests",
-        link: route("tests.index"),
+        title: 'Tests',
+        link: route('tests.index'),
         icon: null,
     },
     {
-        title: "Add New Test",
-        link: "",
-        icon: null
-    }
-]
+        title: 'Add New Test',
+        link: '',
+        icon: null,
+    },
+];
 
-Add.layout = page => <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs}/>
+Add.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
+);
 export default Add;

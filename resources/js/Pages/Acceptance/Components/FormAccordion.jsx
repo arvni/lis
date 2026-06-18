@@ -1,38 +1,30 @@
-import React from "react";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import Typography from "@mui/material/Typography";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Box, Paper } from "@mui/material";
+import React from 'react';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Typography from '@mui/material/Typography';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Box, Paper } from '@mui/material';
 
-const FormAccordion = ({
-                           children,
-                           title,
-                           id,
-                           defaultExpanded = false,
-                           icon = null
-                       }) => (
-    <Paper elevation={1} sx={{ mb: 3, overflow: "hidden", borderRadius: 2 }}>
+const FormAccordion = ({ children, title, id, defaultExpanded = false, icon = null }) => (
+    <Paper elevation={1} sx={{ mb: 3, overflow: 'hidden', borderRadius: 2 }}>
         <Accordion defaultExpanded={defaultExpanded} disableGutters>
             <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls={id}
                 id={id}
                 sx={{
-                    backgroundColor: "primary.light",
-                    color: "primary.contrastText",
-                    minHeight: 60
+                    backgroundColor: 'primary.light',
+                    color: 'primary.contrastText',
+                    minHeight: 60,
                 }}
             >
-                <Box sx={{display: "flex", alignItems: "center"}}>
-                    {icon && <Box sx={{mr: 1}}>{icon}</Box>}
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    {icon && <Box sx={{ mr: 1 }}>{icon}</Box>}
                     <Typography variant="h6">{title}</Typography>
                 </Box>
             </AccordionSummary>
-            <AccordionDetails sx={{ p: 3 }}>
-                {children}
-            </AccordionDetails>
+            <AccordionDetails sx={{ p: 3 }}>{children}</AccordionDetails>
         </Accordion>
     </Paper>
 );

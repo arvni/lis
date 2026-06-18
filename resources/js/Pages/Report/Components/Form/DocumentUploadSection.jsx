@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo } from 'react';
 import {
     Box,
     Typography,
@@ -7,9 +7,9 @@ import {
     Paper,
     Chip,
     Tooltip,
-    CircularProgress
-} from "@mui/material";
-import Grid from "@mui/material/Grid";
+    CircularProgress,
+} from '@mui/material';
+import Grid from '@mui/material/Grid';
 import {
     UploadFile as UploadFileIcon,
     Info as InfoIcon,
@@ -17,10 +17,10 @@ import {
     Pending as PendingIcon,
     Article as ArticleIcon,
     Assignment as AssignmentIcon,
-    PictureAsPdf as PdfIcon
-} from "@mui/icons-material";
-import Upload from "@/Components/Upload";
-import Signers from "@/Pages/Report/Components/Signers";
+    PictureAsPdf as PdfIcon,
+} from '@mui/icons-material';
+import Upload from '@/Components/Upload';
+import Signers from '@/Pages/Report/Components/Signers';
 
 /**
  * Enhanced DocumentUploadSection Component with improved UX
@@ -33,21 +33,24 @@ import Signers from "@/Pages/Report/Components/Signers";
  * @param {boolean} isSubmitting - Form submission status
  */
 const DocumentUploadSection = ({
-                                   data,
-                                   setData,
-                                   errors,
-                                   handleFileChange,
-                                   patientID,
-                                   isSubmitting = false
-                               }) => {
+    data,
+    setData,
+    errors,
+    handleFileChange,
+    patientID,
+    isSubmitting = false,
+}) => {
     const theme = useTheme();
 
     // Memoized document status indicators
-    const documentStatus = useMemo(() => ({
-        reported: !!data.reported_document,
-        approved: !!data.approveded_document,
-        published: !!data.published_document
-    }), [data.reported_document, data.approveded_document, data.published_document]);
+    const documentStatus = useMemo(
+        () => ({
+            reported: !!data.reported_document,
+            approved: !!data.approveded_document,
+            published: !!data.published_document,
+        }),
+        [data.reported_document, data.approveded_document, data.published_document],
+    );
 
     // Document progress percentage
     const progressPercentage = useMemo(() => {
@@ -64,29 +67,29 @@ const DocumentUploadSection = ({
             border: `1px solid ${theme.palette.divider}`,
             transition: 'all 0.2s ease-in-out',
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'hidden',
         };
 
         const statusColors = {
             active: {
                 backgroundColor: alpha(theme.palette.primary.main, 0.05),
                 borderColor: alpha(theme.palette.primary.main, 0.3),
-                boxShadow: `0 0 0 1px ${alpha(theme.palette.primary.main, 0.1)}`
+                boxShadow: `0 0 0 1px ${alpha(theme.palette.primary.main, 0.1)}`,
             },
             completed: {
                 backgroundColor: alpha(theme.palette.success.main, 0.05),
                 borderColor: alpha(theme.palette.success.main, 0.3),
-                boxShadow: `0 0 0 1px ${alpha(theme.palette.success.main, 0.1)}`
+                boxShadow: `0 0 0 1px ${alpha(theme.palette.success.main, 0.1)}`,
             },
             pending: {
                 backgroundColor: alpha(theme.palette.warning.main, 0.05),
-                borderColor: alpha(theme.palette.warning.main, 0.3)
+                borderColor: alpha(theme.palette.warning.main, 0.3),
             },
             error: {
                 backgroundColor: alpha(theme.palette.error.main, 0.05),
                 borderColor: theme.palette.error.main,
-                boxShadow: `0 0 0 1px ${alpha(theme.palette.error.main, 0.1)}`
-            }
+                boxShadow: `0 0 0 1px ${alpha(theme.palette.error.main, 0.1)}`,
+            },
         };
 
         switch (type) {
@@ -96,8 +99,8 @@ const DocumentUploadSection = ({
                     ...(errors.reported_document
                         ? statusColors.error
                         : documentStatus.reported
-                            ? statusColors.completed
-                            : statusColors.active)
+                          ? statusColors.completed
+                          : statusColors.active),
                 };
             case 'approved':
                 return {
@@ -105,10 +108,10 @@ const DocumentUploadSection = ({
                     ...(documentStatus.approved
                         ? statusColors.completed
                         : documentStatus.reported
-                            ? statusColors.active
-                            : statusColors.pending),
+                          ? statusColors.active
+                          : statusColors.pending),
                     opacity: !documentStatus.reported ? 0.7 : 1,
-                    pointerEvents: !documentStatus.reported ? 'none' : 'auto'
+                    pointerEvents: !documentStatus.reported ? 'none' : 'auto',
                 };
             case 'published':
                 return {
@@ -116,15 +119,15 @@ const DocumentUploadSection = ({
                     ...(documentStatus.published
                         ? statusColors.completed
                         : documentStatus.approved
-                            ? statusColors.active
-                            : statusColors.pending),
+                          ? statusColors.active
+                          : statusColors.pending),
                     opacity: !documentStatus.approved ? 0.7 : 1,
-                    pointerEvents: !documentStatus.approved ? 'none' : 'auto'
+                    pointerEvents: !documentStatus.approved ? 'none' : 'auto',
                 };
             case 'supporting':
                 return {
                     ...baseStyle,
-                    backgroundColor: alpha(theme.palette.secondary.main, 0.04)
+                    backgroundColor: alpha(theme.palette.secondary.main, 0.04),
                 };
             case 'signers':
                 return {
@@ -132,7 +135,7 @@ const DocumentUploadSection = ({
                     backgroundColor: 'background.paper',
                     border: errors.signers
                         ? `1px solid ${theme.palette.error.main}`
-                        : `1px solid ${theme.palette.divider}`
+                        : `1px solid ${theme.palette.divider}`,
                 };
             default:
                 return baseStyle;
@@ -142,41 +145,41 @@ const DocumentUploadSection = ({
     // Document section status indicator
     const StatusIndicator = ({ type }) => {
         let icon = <PendingIcon fontSize="small" />;
-        let color = "warning";
-        let label = "Pending";
+        let color = 'warning';
+        let label = 'Pending';
 
         switch (type) {
             case 'reported':
                 if (documentStatus.reported) {
                     icon = <CheckCircleIcon fontSize="small" />;
-                    color = "success";
-                    label = "Uploaded";
+                    color = 'success';
+                    label = 'Uploaded';
                 } else {
                     icon = <UploadFileIcon fontSize="small" />;
-                    color = "primary";
-                    label = "Required";
+                    color = 'primary';
+                    label = 'Required';
                 }
                 break;
             case 'approved':
                 if (documentStatus.approved) {
                     icon = <CheckCircleIcon fontSize="small" />;
-                    color = "success";
-                    label = "Approved";
+                    color = 'success';
+                    label = 'Approved';
                 } else if (documentStatus.reported) {
                     icon = <UploadFileIcon fontSize="small" />;
-                    color = "primary";
-                    label = "Ready for Approval";
+                    color = 'primary';
+                    label = 'Ready for Approval';
                 }
                 break;
             case 'published':
                 if (documentStatus.published) {
                     icon = <CheckCircleIcon fontSize="small" />;
-                    color = "success";
-                    label = "Published";
+                    color = 'success';
+                    label = 'Published';
                 } else if (documentStatus.approved) {
                     icon = <UploadFileIcon fontSize="small" />;
-                    color = "primary";
-                    label = "Ready to Publish";
+                    color = 'primary';
+                    label = 'Ready to Publish';
                 }
                 break;
             default:
@@ -198,11 +201,11 @@ const DocumentUploadSection = ({
     const getDocumentIcon = (type) => {
         switch (type) {
             case 'reported':
-                return <ArticleIcon color={documentStatus.reported ? "success" : "primary"} />;
+                return <ArticleIcon color={documentStatus.reported ? 'success' : 'primary'} />;
             case 'approved':
-                return <AssignmentIcon color={documentStatus.approved ? "success" : "primary"} />;
+                return <AssignmentIcon color={documentStatus.approved ? 'success' : 'primary'} />;
             case 'published':
-                return <PdfIcon color={documentStatus.published ? "success" : "primary"} />;
+                return <PdfIcon color={documentStatus.published ? 'success' : 'primary'} />;
             default:
                 return <UploadFileIcon />;
         }
@@ -212,32 +215,38 @@ const DocumentUploadSection = ({
     const getHelperText = (type) => {
         switch (type) {
             case 'reported':
-                return "Upload the initial document report (Word format)";
+                return 'Upload the initial document report (Word format)';
             case 'approved':
                 return documentStatus.reported
-                    ? "Upload the approved document with reviewer changes"
-                    : "First upload the reported document";
+                    ? 'Upload the approved document with reviewer changes'
+                    : 'First upload the reported document';
             case 'published':
                 return documentStatus.approved
-                    ? "Upload the final published document (PDF format)"
-                    : "Document needs approval before publishing";
+                    ? 'Upload the final published document (PDF format)'
+                    : 'Document needs approval before publishing';
             default:
-                return "";
+                return '';
         }
     };
 
     // Document upload components
     const renderDocumentUpload = (type, label, acceptTypes) => {
-        const disabled = (type === 'approved' && !documentStatus.reported) ||
+        const disabled =
+            (type === 'approved' && !documentStatus.reported) ||
             (type === 'published' && !documentStatus.approved);
 
         // Key for accessing data and errors
-        const dataKey = type === 'reported' ? 'reported_document' :
-            type === 'approved' ? 'approveded_document' : 'published_document';
+        const dataKey =
+            type === 'reported'
+                ? 'reported_document'
+                : type === 'approved'
+                  ? 'approveded_document'
+                  : 'published_document';
 
         // Show only if value exists or is the next step
-        const shouldShow = data[dataKey] ||
-            (type === 'reported') ||
+        const shouldShow =
+            data[dataKey] ||
+            type === 'reported' ||
             (type === 'approved' && documentStatus.reported) ||
             (type === 'published' && documentStatus.approved);
 
@@ -262,16 +271,12 @@ const DocumentUploadSection = ({
                     onChange={setData}
                     required={type === 'reported'}
                     accept={acceptTypes}
-                    url={route("documents.store")}
+                    url={route('documents.store')}
                     helperText={getHelperText(type)}
                 />
 
                 {errors[dataKey] && (
-                    <Typography
-                        color="error"
-                        variant="caption"
-                        sx={{mt: 1, display: 'block'}}
-                    >
+                    <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
                         {errors[dataKey]}
                     </Typography>
                 )}
@@ -288,17 +293,18 @@ const DocumentUploadSection = ({
                         height: 8,
                         borderRadius: 4,
                         bgcolor: alpha(theme.palette.primary.main, 0.1),
-                        overflow: 'hidden'
+                        overflow: 'hidden',
                     }}
                 >
                     <Box
                         sx={{
                             height: '100%',
                             width: `${progressPercentage}%`,
-                            bgcolor: progressPercentage === 100
-                                ? theme.palette.success.main
-                                : theme.palette.primary.main,
-                            transition: 'width 0.5s ease-in-out'
+                            bgcolor:
+                                progressPercentage === 100
+                                    ? theme.palette.success.main
+                                    : theme.palette.primary.main,
+                            transition: 'width 0.5s ease-in-out',
                         }}
                     />
                 </Box>
@@ -312,18 +318,18 @@ const DocumentUploadSection = ({
     return (
         <>
             {/* Document Upload Progress */}
-            <Grid size={{xs: 12}}>
+            <Grid size={{ xs: 12 }}>
                 <DocumentProgressIndicator />
             </Grid>
 
             {/* Main Document Uploads */}
-            <Grid size={{xs: 12}}>
+            <Grid size={{ xs: 12 }}>
                 <Paper
                     elevation={1}
                     sx={{
                         p: 3,
                         borderRadius: 2,
-                        mb: 3
+                        mb: 3,
                     }}
                 >
                     <Typography
@@ -331,50 +337,53 @@ const DocumentUploadSection = ({
                         fontWeight="500"
                         gutterBottom
                         color="primary"
-                        sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 3}}
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}
                     >
                         <UploadFileIcon />
                         Document Workflow
-                        {isSubmitting && (
-                            <CircularProgress size={16} sx={{ ml: 1 }} />
-                        )}
+                        {isSubmitting && <CircularProgress size={16} sx={{ ml: 1 }} />}
                     </Typography>
 
                     {/* Document uploads in sequential order */}
                     {renderDocumentUpload(
                         'reported',
                         'Reported Document',
-                        ".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        '.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                     )}
                 </Paper>
             </Grid>
 
             {/* Supporting Materials Section */}
-            <Grid size={{xs: 12}}>
+            <Grid size={{ xs: 12 }}>
                 <Box sx={getSectionStyle('supporting')}>
                     <Typography
                         variant="subtitle1"
                         fontWeight="500"
                         gutterBottom
                         color="secondary"
-                        sx={{display: 'flex', alignItems: 'center', gap: 1}}
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                     >
-                        <InfoIcon fontSize="small"/>
+                        <InfoIcon fontSize="small" />
                         Supporting Materials
                     </Typography>
 
                     <Tooltip title="Upload any additional files to support this report">
-                        <Box sx={{mt: 2}}>
+                        <Box sx={{ mt: 2 }}>
                             <Upload
                                 label="Related Documents"
-                                url={route("documents.store", {
-                                    ownerClass: "patient",
+                                url={route('documents.store', {
+                                    ownerClass: 'patient',
                                     ownerId: patientID,
-                                    tag: "related"
+                                    tag: 'related',
                                 })}
                                 onChange={handleFileChange}
                                 multiple
-                                value={data.files.filter(item=>!["REPORTED","PUBLISHED","CLINICAL_COMMENT"].includes(item.tag))}
+                                value={data.files.filter(
+                                    (item) =>
+                                        !['REPORTED', 'PUBLISHED', 'CLINICAL_COMMENT'].includes(
+                                            item.tag,
+                                        ),
+                                )}
                                 helperText="Upload any supporting files related to this report (optional)"
                                 disabled={isSubmitting}
                             />
@@ -385,7 +394,7 @@ const DocumentUploadSection = ({
 
             {/* Signers Section */}
             {data?.signers && data?.id && (
-                <Grid size={{xs: 12}}>
+                <Grid size={{ xs: 12 }}>
                     <Box sx={getSectionStyle('signers')}>
                         <Signers
                             signers={data?.signers}

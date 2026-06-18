@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
     Dialog,
     DialogActions,
@@ -13,14 +13,14 @@ import {
     Paper,
     InputAdornment,
     Tooltip,
-    useTheme
-} from "@mui/material";
+    useTheme,
+} from '@mui/material';
 import {
     Close as CloseIcon,
     QrCode as QrCodeIcon,
     InputOutlined as InputIcon,
-    Send as SendIcon
-} from "@mui/icons-material";
+    Send as SendIcon,
+} from '@mui/icons-material';
 
 const EnteringForm = ({ open, barcode, onChange, submit, onClose }) => {
     const theme = useTheme();
@@ -31,8 +31,8 @@ const EnteringForm = ({ open, barcode, onChange, submit, onClose }) => {
         }
     };
 
-    const checkPressedEnter = e => {
-        if (e.key === "Enter") {
+    const checkPressedEnter = (e) => {
+        if (e.key === 'Enter') {
             checkAndSubmit();
         }
     };
@@ -49,9 +49,9 @@ const EnteringForm = ({ open, barcode, onChange, submit, onClose }) => {
                 Paper: {
                     sx: {
                         borderRadius: 2,
-                        overflow: 'hidden'
-                    }
-                }
+                        overflow: 'hidden',
+                    },
+                },
             }}
         >
             <DialogTitle
@@ -61,12 +61,14 @@ const EnteringForm = ({ open, barcode, onChange, submit, onClose }) => {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    py: 2
+                    py: 2,
                 }}
             >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <InputIcon />
-                    <Typography variant="h6" component="span">Enter Sample to Section</Typography>
+                    <Typography variant="h6" component="span">
+                        Enter Sample to Section
+                    </Typography>
                 </Box>
                 <Tooltip title="Close">
                     <IconButton
@@ -76,8 +78,8 @@ const EnteringForm = ({ open, barcode, onChange, submit, onClose }) => {
                         aria-label="close"
                         sx={{
                             '&:hover': {
-                                bgcolor: 'rgba(255, 255, 255, 0.08)'
-                            }
+                                bgcolor: 'rgba(255, 255, 255, 0.08)',
+                            },
                         }}
                     >
                         <CloseIcon />
@@ -92,7 +94,7 @@ const EnteringForm = ({ open, barcode, onChange, submit, onClose }) => {
                         p: 3,
                         bgcolor: theme.palette.background.default,
                         textAlign: 'center',
-                        borderRadius: 2
+                        borderRadius: 2,
                     }}
                 >
                     <Typography variant="body1" color="text.secondary" gutterBottom>
@@ -101,9 +103,14 @@ const EnteringForm = ({ open, barcode, onChange, submit, onClose }) => {
 
                     <Grid
                         container
-                        sx={{ minHeight: "150px", mt: 2, justifyContent: "center", alignItems: "center" }}
+                        sx={{
+                            minHeight: '150px',
+                            mt: 2,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
                     >
-                        <Grid size={{ xs: 12, sm: 10, md: 8 }} >
+                        <Grid size={{ xs: 12, sm: 10, md: 8 }}>
                             <TextField
                                 value={barcode}
                                 onChange={onChange}
@@ -117,20 +124,20 @@ const EnteringForm = ({ open, barcode, onChange, submit, onClose }) => {
                                     Input: {
                                         startAdornment: (
                                             <InputAdornment position="start">
-                                                <QrCodeIcon color="primary"/>
+                                                <QrCodeIcon color="primary" />
                                             </InputAdornment>
                                         ),
                                         sx: {
                                             borderRadius: 1.5,
                                             fontSize: '1.1rem',
                                             '&.Mui-focused': {
-                                                boxShadow: `0 0 0 2px ${theme.palette.primary.light}`
-                                            }
-                                        }
+                                                boxShadow: `0 0 0 2px ${theme.palette.primary.light}`,
+                                            },
+                                        },
                                     },
-                                    InputLabel:{
+                                    InputLabel: {
                                         shrink: true,
-                                    }
+                                    },
                                 }}
                                 sx={{
                                     '& .MuiOutlinedInput-root': {
@@ -158,7 +165,7 @@ const EnteringForm = ({ open, barcode, onChange, submit, onClose }) => {
                     px: 3,
                     py: 2,
                     bgcolor: theme.palette.background.default,
-                    justifyContent: 'space-between'
+                    justifyContent: 'space-between',
                 }}
             >
                 <Button
@@ -180,8 +187,8 @@ const EnteringForm = ({ open, barcode, onChange, submit, onClose }) => {
                         borderRadius: 1.5,
                         px: 3,
                         '&:hover': {
-                            boxShadow: theme.shadows[4]
-                        }
+                            boxShadow: theme.shadows[4],
+                        },
                     }}
                 >
                     Enter Sample

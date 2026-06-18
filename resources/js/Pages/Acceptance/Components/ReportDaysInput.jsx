@@ -1,7 +1,7 @@
-import {Box, TextField, Typography} from '@mui/material';
-import {useState} from 'react';
+import { Box, TextField, Typography } from '@mui/material';
+import { useState } from 'react';
 
-const ReportDaysInput = ({initialDays = 5}) => {
+const ReportDaysInput = ({ initialDays = 5 }) => {
     const [reportDays, setReportDays] = useState(initialDays);
 
     const handleChange = (event) => {
@@ -17,7 +17,7 @@ const ReportDaysInput = ({initialDays = 5}) => {
                 sx={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    mx: 0.5
+                    mx: 0.5,
                 }}
             >
                 <TextField
@@ -29,8 +29,8 @@ const ReportDaysInput = ({initialDays = 5}) => {
                         input: {
                             min: 1,
                             max: 365,
-                            'aria-label': 'Number of business days until report is available'
-                        }
+                            'aria-label': 'Number of business days until report is available',
+                        },
                     }}
                     sx={{
                         width: '80px',
@@ -53,13 +53,14 @@ const ReportDaysInput = ({initialDays = 5}) => {
                         },
                         '& .MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
                             borderColor: 'primary.main',
-                        }
+                        },
                     }}
                 />
-                <span className="show-print" style={{display:"none"}}>{reportDays}</span>
-            </Box>
-
-            {' '}business day{reportDays !== 1 ? 's' : ''}.
+                <span className="show-print" style={{ display: 'none' }}>
+                    {reportDays}
+                </span>
+            </Box>{' '}
+            business day{reportDays !== 1 ? 's' : ''}.
         </Typography>
     );
 };

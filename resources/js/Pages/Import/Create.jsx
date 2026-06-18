@@ -1,64 +1,64 @@
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import PageHeader from "@/Components/PageHeader.jsx";
-import { Head, useForm } from "@inertiajs/react";
-import { useState } from "react";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PageHeader from '@/Components/PageHeader.jsx';
+import { Head, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 import * as XLSX from 'xlsx';
-import countries from "@/Data/Countries";
-import SelectSearch from "@/Components/SelectSearch";
+import countries from '@/Data/Countries';
+import SelectSearch from '@/Components/SelectSearch';
 
 // Material UI imports
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import Alert from "@mui/material/Alert";
-import CircularProgress from "@mui/material/CircularProgress";
-import Chip from "@mui/material/Chip";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Grid from "@mui/material/Grid";
-import TextField from "@mui/material/TextField";
-import Divider from "@mui/material/Divider";
-import Autocomplete from "@mui/material/Autocomplete";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import IconButton from "@mui/material/IconButton";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import FormHelperText from "@mui/material/FormHelperText";
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
+import Chip from '@mui/material/Chip';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import Divider from '@mui/material/Divider';
+import Autocomplete from '@mui/material/Autocomplete';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import IconButton from '@mui/material/IconButton';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Stepper from '@mui/material/Stepper';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import FormHelperText from '@mui/material/FormHelperText';
 
 // Material UI icons
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import MappingIcon from "@mui/icons-material/Transform";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import SettingsIcon from "@mui/icons-material/Settings";
-import ScienceIcon from "@mui/icons-material/Science";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CheckIcon from "@mui/icons-material/Check";
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import MappingIcon from '@mui/icons-material/Transform';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ScienceIcon from '@mui/icons-material/Science';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CheckIcon from '@mui/icons-material/Check';
 
 const Create = ({ success, error, patientFields }) => {
     const { data, setData, post, processing, errors } = useForm({
@@ -72,9 +72,9 @@ const Create = ({ success, error, patientFields }) => {
             tribe: '',
             wilayat: '',
             village: '',
-            referrer: null
+            referrer: null,
         },
-        tests: []
+        tests: [],
     });
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewData, setPreviewData] = useState(null);
@@ -117,7 +117,7 @@ const Create = ({ success, error, patientFields }) => {
                     // Convert to array of arrays
                     const jsonData = XLSX.utils.sheet_to_json(worksheet, {
                         header: 1,
-                        defval: null
+                        defval: null,
                     });
 
                     resolve(jsonData);
@@ -169,7 +169,7 @@ const Create = ({ success, error, patientFields }) => {
             setPreviewData({
                 columns,
                 preview,
-                totalRows
+                totalRows,
             });
 
             // Initialize column mapping
@@ -179,7 +179,6 @@ const Create = ({ success, error, patientFields }) => {
             });
             setData('column_mapping', initialMapping);
             setStep(2);
-
         } catch (err) {
             console.error('Error reading Excel file:', err);
             alert('Error reading Excel file: ' + err.message);
@@ -208,8 +207,8 @@ const Create = ({ success, error, patientFields }) => {
                 tribe: '',
                 wilayat: '',
                 village: '',
-                referrer: null
-            }
+                referrer: null,
+            },
         });
         setPreviewData(null);
         setStep(1);
@@ -224,14 +223,14 @@ const Create = ({ success, error, patientFields }) => {
     const handleMappingChange = (columnIndex, patientField) => {
         setData('column_mapping', {
             ...data.column_mapping,
-            [columnIndex]: patientField
+            [columnIndex]: patientField,
         });
     };
 
     const handleDefaultValueChange = (field, value) => {
         setData('default_values', {
             ...data.default_values,
-            [field]: value
+            [field]: value,
         });
     };
 
@@ -270,7 +269,7 @@ const Create = ({ success, error, patientFields }) => {
                 ? { referrer: { id: data.default_values.referrer.id } }
                 : {};
 
-            const response = await window.axios.get(route("api.tests.show", testId), { params });
+            const response = await window.axios.get(route('api.tests.show', testId), { params });
             return response.data.data;
         } catch (error) {
             console.error('Error fetching test details:', error);
@@ -315,7 +314,7 @@ const Create = ({ success, error, patientFields }) => {
             type: testType,
             price: currentPrice,
             sampleType: currentSampleType || null,
-            panelSampleTypes: testType === 'PANEL' ? panelSampleTypes : null
+            panelSampleTypes: testType === 'PANEL' ? panelSampleTypes : null,
         };
 
         setSelectedTests([...selectedTests, newTest]);
@@ -330,7 +329,7 @@ const Create = ({ success, error, patientFields }) => {
         updatedTests[testIndex] = {
             ...updatedTests[testIndex],
             method: methodData.method,
-            price: methodData.price
+            price: methodData.price,
         };
         setSelectedTests(updatedTests);
         setData('tests', updatedTests);
@@ -344,7 +343,7 @@ const Create = ({ success, error, patientFields }) => {
 
     return (
         <Box sx={{ position: 'relative' }}>
-            <Head title="Import Excel File"/>
+            <Head title="Import Excel File" />
             <PageHeader
                 title="Import Excel File"
                 subtitle="Upload and import patient data from Excel files"
@@ -357,17 +356,13 @@ const Create = ({ success, error, patientFields }) => {
                     borderRadius: 2,
                     overflow: 'hidden',
                     p: 4,
-                    maxWidth: step === 1 ? 800 : (step === 3 ? 1000 : 1200),
+                    maxWidth: step === 1 ? 800 : step === 3 ? 1000 : 1200,
                     mx: 'auto',
-                    mt: 4
+                    mt: 4,
                 }}
             >
                 {success && (
-                    <Alert
-                        severity="success"
-                        sx={{ mb: 3 }}
-                        icon={<CheckCircleIcon />}
-                    >
+                    <Alert severity="success" sx={{ mb: 3 }} icon={<CheckCircleIcon />}>
                         {success}
                     </Alert>
                 )}
@@ -394,7 +389,7 @@ const Create = ({ success, error, patientFields }) => {
                                     '&:hover': {
                                         borderColor: 'primary.main',
                                         backgroundColor: 'action.hover',
-                                    }
+                                    },
                                 }}
                             >
                                 <input
@@ -410,7 +405,7 @@ const Create = ({ success, error, patientFields }) => {
                                             sx={{
                                                 fontSize: 64,
                                                 color: 'primary.main',
-                                                mb: 2
+                                                mb: 2,
                                             }}
                                         />
                                         <Typography variant="h6" gutterBottom>
@@ -419,7 +414,11 @@ const Create = ({ success, error, patientFields }) => {
                                         <Typography variant="body2" color="textSecondary">
                                             Supported formats: .xlsx, .xls, .csv
                                         </Typography>
-                                        <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
+                                        <Typography
+                                            variant="caption"
+                                            color="textSecondary"
+                                            sx={{ mt: 1, display: 'block' }}
+                                        >
                                             Maximum file size: 10MB
                                         </Typography>
                                     </Box>
@@ -435,7 +434,11 @@ const Create = ({ success, error, patientFields }) => {
                                             variant="outlined"
                                             sx={{ maxWidth: '100%' }}
                                         />
-                                        <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 1 }}>
+                                        <Typography
+                                            variant="caption"
+                                            color="textSecondary"
+                                            sx={{ display: 'block', mt: 1 }}
+                                        >
                                             Size: {(selectedFile.size / 1024).toFixed(2)} KB
                                         </Typography>
                                     </Box>
@@ -470,7 +473,13 @@ const Create = ({ success, error, patientFields }) => {
                                     variant="contained"
                                     disabled={!selectedFile || loadingPreview}
                                     onClick={handlePreview}
-                                    startIcon={loadingPreview ? <CircularProgress size={20} /> : <ArrowForwardIcon />}
+                                    startIcon={
+                                        loadingPreview ? (
+                                            <CircularProgress size={20} />
+                                        ) : (
+                                            <ArrowForwardIcon />
+                                        )
+                                    }
                                     sx={{
                                         px: 4,
                                         py: 1.5,
@@ -518,13 +527,31 @@ const Create = ({ success, error, patientFields }) => {
                                 <Table stickyHeader>
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell sx={{ fontWeight: 'bold', backgroundColor: 'primary.main', color: 'white' }}>
+                                            <TableCell
+                                                sx={{
+                                                    fontWeight: 'bold',
+                                                    backgroundColor: 'primary.main',
+                                                    color: 'white',
+                                                }}
+                                            >
                                                 Excel Column
                                             </TableCell>
-                                            <TableCell sx={{ fontWeight: 'bold', backgroundColor: 'primary.main', color: 'white' }}>
+                                            <TableCell
+                                                sx={{
+                                                    fontWeight: 'bold',
+                                                    backgroundColor: 'primary.main',
+                                                    color: 'white',
+                                                }}
+                                            >
                                                 Sample Data
                                             </TableCell>
-                                            <TableCell sx={{ fontWeight: 'bold', backgroundColor: 'primary.main', color: 'white' }}>
+                                            <TableCell
+                                                sx={{
+                                                    fontWeight: 'bold',
+                                                    backgroundColor: 'primary.main',
+                                                    color: 'white',
+                                                }}
+                                            >
                                                 Maps To Patient Field
                                             </TableCell>
                                         </TableRow>
@@ -539,19 +566,21 @@ const Create = ({ success, error, patientFields }) => {
                                                 </TableCell>
                                                 <TableCell>
                                                     <Box>
-                                                        {previewData.preview.slice(0, 3).map((row, rowIndex) => (
-                                                            <Typography
-                                                                key={rowIndex}
-                                                                variant="caption"
-                                                                display="block"
-                                                                sx={{
-                                                                    color: 'text.secondary',
-                                                                    fontStyle: 'italic'
-                                                                }}
-                                                            >
-                                                                {row[index] || '-'}
-                                                            </Typography>
-                                                        ))}
+                                                        {previewData.preview
+                                                            .slice(0, 3)
+                                                            .map((row, rowIndex) => (
+                                                                <Typography
+                                                                    key={rowIndex}
+                                                                    variant="caption"
+                                                                    display="block"
+                                                                    sx={{
+                                                                        color: 'text.secondary',
+                                                                        fontStyle: 'italic',
+                                                                    }}
+                                                                >
+                                                                    {row[index] || '-'}
+                                                                </Typography>
+                                                            ))}
                                                     </Box>
                                                 </TableCell>
                                                 <TableCell>
@@ -559,14 +588,22 @@ const Create = ({ success, error, patientFields }) => {
                                                         <InputLabel>Select Field</InputLabel>
                                                         <Select
                                                             value={data.column_mapping[index] || ''}
-                                                            onChange={(e) => handleMappingChange(index, e.target.value)}
+                                                            onChange={(e) =>
+                                                                handleMappingChange(
+                                                                    index,
+                                                                    e.target.value,
+                                                                )
+                                                            }
                                                             label="Select Field"
                                                         >
                                                             <MenuItem value="">
                                                                 <em>Skip this column</em>
                                                             </MenuItem>
                                                             {patientFields.map((field) => (
-                                                                <MenuItem key={field.value} value={field.value}>
+                                                                <MenuItem
+                                                                    key={field.value}
+                                                                    value={field.value}
+                                                                >
                                                                     {field.label}
                                                                 </MenuItem>
                                                             ))}
@@ -588,11 +625,19 @@ const Create = ({ success, error, patientFields }) => {
                             {/* Default Values Section */}
                             <Card sx={{ mt: 4 }}>
                                 <CardContent>
-                                    <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <Typography
+                                        variant="h6"
+                                        gutterBottom
+                                        sx={{ display: 'flex', alignItems: 'center' }}
+                                    >
                                         <SettingsIcon sx={{ mr: 1 }} />
                                         Set Default Values for All Records
                                     </Typography>
-                                    <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+                                    <Typography
+                                        variant="body2"
+                                        color="textSecondary"
+                                        sx={{ mb: 3 }}
+                                    >
                                         These values will be applied to all imported records
                                     </Typography>
 
@@ -603,16 +648,29 @@ const Create = ({ success, error, patientFields }) => {
                                             <FormControlLabel
                                                 control={
                                                     <Checkbox
-                                                        checked={data.default_values?.research || false}
-                                                        onChange={(e) => handleDefaultValueChange('research', e.target.checked)}
+                                                        checked={
+                                                            data.default_values?.research || false
+                                                        }
+                                                        onChange={(e) =>
+                                                            handleDefaultValueChange(
+                                                                'research',
+                                                                e.target.checked,
+                                                            )
+                                                        }
                                                         color="primary"
                                                     />
                                                 }
                                                 label={
                                                     <Box>
-                                                        <Typography variant="body1">Research Patient</Typography>
-                                                        <Typography variant="caption" color="textSecondary">
-                                                            Mark all patients as research participants
+                                                        <Typography variant="body1">
+                                                            Research Patient
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="caption"
+                                                            color="textSecondary"
+                                                        >
+                                                            Mark all patients as research
+                                                            participants
                                                         </Typography>
                                                     </Box>
                                                 }
@@ -625,11 +683,20 @@ const Create = ({ success, error, patientFields }) => {
                                                 size="small"
                                                 options={countries}
                                                 value={data.default_values?.nationality || null}
-                                                onChange={(e, newValue) => handleDefaultValueChange('nationality', newValue)}
+                                                onChange={(e, newValue) =>
+                                                    handleDefaultValueChange(
+                                                        'nationality',
+                                                        newValue,
+                                                    )
+                                                }
                                                 autoHighlight
                                                 getOptionLabel={(option) => option?.label || ''}
                                                 renderOption={(props, option) => (
-                                                    <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
+                                                    <Box
+                                                        component="li"
+                                                        sx={{ '& > img': { mr: 2, flexShrink: 0 } }}
+                                                        {...props}
+                                                    >
                                                         <img
                                                             loading="lazy"
                                                             width="20"
@@ -656,7 +723,12 @@ const Create = ({ success, error, patientFields }) => {
                                                 <InputLabel>Default Gender</InputLabel>
                                                 <Select
                                                     value={data.default_values?.gender || ''}
-                                                    onChange={(e) => handleDefaultValueChange('gender', e.target.value)}
+                                                    onChange={(e) =>
+                                                        handleDefaultValueChange(
+                                                            'gender',
+                                                            e.target.value,
+                                                        )
+                                                    }
                                                     label="Default Gender"
                                                 >
                                                     <MenuItem value="">
@@ -673,7 +745,12 @@ const Create = ({ success, error, patientFields }) => {
                                                 fullWidth
                                                 label="Default Tribe"
                                                 value={data.default_values?.tribe || ''}
-                                                onChange={(e) => handleDefaultValueChange('tribe', e.target.value)}
+                                                onChange={(e) =>
+                                                    handleDefaultValueChange(
+                                                        'tribe',
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 size="small"
                                                 helperText="Leave empty if not applicable"
                                             />
@@ -684,7 +761,12 @@ const Create = ({ success, error, patientFields }) => {
                                                 fullWidth
                                                 label="Default Wilayat"
                                                 value={data.default_values?.wilayat || ''}
-                                                onChange={(e) => handleDefaultValueChange('wilayat', e.target.value)}
+                                                onChange={(e) =>
+                                                    handleDefaultValueChange(
+                                                        'wilayat',
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 size="small"
                                                 helperText="Leave empty if not applicable"
                                             />
@@ -695,7 +777,12 @@ const Create = ({ success, error, patientFields }) => {
                                                 fullWidth
                                                 label="Default Village"
                                                 value={data.default_values?.village || ''}
-                                                onChange={(e) => handleDefaultValueChange('village', e.target.value)}
+                                                onChange={(e) =>
+                                                    handleDefaultValueChange(
+                                                        'village',
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 size="small"
                                                 helperText="Leave empty if not applicable"
                                             />
@@ -708,8 +795,13 @@ const Create = ({ success, error, patientFields }) => {
                                                 label="Default Referrer"
                                                 fullWidth
                                                 size="small"
-                                                url={route("api.referrers.list")}
-                                                onChange={(e) => handleDefaultValueChange('referrer', e.target.value)}
+                                                url={route('api.referrers.list')}
+                                                onChange={(e) =>
+                                                    handleDefaultValueChange(
+                                                        'referrer',
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 helperText="Select default referring facility/doctor for all patients"
                                             />
                                         </Grid>
@@ -717,8 +809,10 @@ const Create = ({ success, error, patientFields }) => {
 
                                     <Alert severity="info" sx={{ mt: 3 }}>
                                         <Typography variant="body2">
-                                            <strong>Note:</strong> Default values will only be used when the Excel file doesn't contain data for these fields.
-                                            If you map an Excel column to a field, the Excel data will take priority.
+                                            <strong>Note:</strong> Default values will only be used
+                                            when the Excel file doesn't contain data for these
+                                            fields. If you map an Excel column to a field, the Excel
+                                            data will take priority.
                                         </Typography>
                                     </Alert>
                                 </CardContent>
@@ -759,14 +853,22 @@ const Create = ({ success, error, patientFields }) => {
                     {/* Step 3: Test Selection */}
                     {step === 3 && (
                         <>
-                            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Box
+                                sx={{
+                                    mb: 3,
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                }}
+                            >
                                 <Box>
                                     <Typography variant="h6" gutterBottom>
                                         <ScienceIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
                                         Tests for Patients
                                     </Typography>
                                     <Typography variant="body2" color="textSecondary">
-                                        Add tests or panels that will be assigned to all imported patients
+                                        Add tests or panels that will be assigned to all imported
+                                        patients
                                     </Typography>
                                 </Box>
                                 <Button
@@ -787,12 +889,23 @@ const Create = ({ success, error, patientFields }) => {
                                 <Card sx={{ mb: 3 }}>
                                     <CardContent>
                                         <Box sx={{ textAlign: 'center', py: 6 }}>
-                                            <ScienceIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-                                            <Typography variant="h6" color="text.secondary" gutterBottom>
+                                            <ScienceIcon
+                                                sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }}
+                                            />
+                                            <Typography
+                                                variant="h6"
+                                                color="text.secondary"
+                                                gutterBottom
+                                            >
                                                 No Tests Added
                                             </Typography>
-                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                                                Click "Add Test" button to select tests for your patients
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                sx={{ mb: 3 }}
+                                            >
+                                                Click "Add Test" button to select tests for your
+                                                patients
                                             </Typography>
                                             <Button
                                                 variant="outlined"
@@ -810,7 +923,11 @@ const Create = ({ success, error, patientFields }) => {
                             {selectedTests.length > 0 && (
                                 <Card sx={{ mb: 3 }}>
                                     <CardContent>
-                                        <Typography variant="subtitle1" fontWeight="medium" gutterBottom>
+                                        <Typography
+                                            variant="subtitle1"
+                                            fontWeight="medium"
+                                            gutterBottom
+                                        >
                                             Selected Tests ({selectedTests.length})
                                         </Typography>
                                         <List>
@@ -818,27 +935,53 @@ const Create = ({ success, error, patientFields }) => {
                                                 <Box key={index} sx={{ mb: 2 }}>
                                                     <ListItem
                                                         secondaryAction={
-                                                            <IconButton edge="end" onClick={() => handleRemoveTest(index)}>
+                                                            <IconButton
+                                                                edge="end"
+                                                                onClick={() =>
+                                                                    handleRemoveTest(index)
+                                                                }
+                                                            >
                                                                 <DeleteIcon />
                                                             </IconButton>
                                                         }
-                                                        sx={{ borderBottom: '1px solid', borderColor: 'divider', pb: 2 }}
+                                                        sx={{
+                                                            borderBottom: '1px solid',
+                                                            borderColor: 'divider',
+                                                            pb: 2,
+                                                        }}
                                                     >
                                                         <ListItemText
                                                             primary={test.test?.name}
                                                             secondary={
                                                                 <>
-                                                                    <Typography component="span" variant="body2" display="block">
+                                                                    <Typography
+                                                                        component="span"
+                                                                        variant="body2"
+                                                                        display="block"
+                                                                    >
                                                                         Type: {test.type}
                                                                     </Typography>
                                                                     {test.method && (
-                                                                        <Typography component="span" variant="body2" display="block">
-                                                                            Method: {test.method.method?.name || test.method.name || 'N/A'}
+                                                                        <Typography
+                                                                            component="span"
+                                                                            variant="body2"
+                                                                            display="block"
+                                                                        >
+                                                                            Method:{' '}
+                                                                            {test.method.method
+                                                                                ?.name ||
+                                                                                test.method.name ||
+                                                                                'N/A'}
                                                                         </Typography>
                                                                     )}
                                                                     {test.sampleType && (
-                                                                        <Typography component="span" variant="body2" display="block">
-                                                                            Sample Type: {test.sampleType}
+                                                                        <Typography
+                                                                            component="span"
+                                                                            variant="body2"
+                                                                            display="block"
+                                                                        >
+                                                                            Sample Type:{' '}
+                                                                            {test.sampleType}
                                                                         </Typography>
                                                                     )}
                                                                 </>
@@ -855,42 +998,86 @@ const Create = ({ success, error, patientFields }) => {
                                                             label="Price"
                                                             value={test.price}
                                                             onChange={(e) => {
-                                                                const updatedTests = [...selectedTests];
+                                                                const updatedTests = [
+                                                                    ...selectedTests,
+                                                                ];
                                                                 updatedTests[index] = {
                                                                     ...updatedTests[index],
-                                                                    price: parseFloat(e.target.value) || 0
+                                                                    price:
+                                                                        parseFloat(
+                                                                            e.target.value,
+                                                                        ) || 0,
                                                                 };
                                                                 setSelectedTests(updatedTests);
                                                                 setData('tests', updatedTests);
                                                             }}
-                                                            slotProps={{ input: {
-                                                                endAdornment: <Typography variant="body2" sx={{ ml: 1 }}>OMR</Typography>
-                                                            } }}
+                                                            slotProps={{
+                                                                input: {
+                                                                    endAdornment: (
+                                                                        <Typography
+                                                                            variant="body2"
+                                                                            sx={{ ml: 1 }}
+                                                                        >
+                                                                            OMR
+                                                                        </Typography>
+                                                                    ),
+                                                                },
+                                                            }}
                                                         />
                                                     </Box>
 
                                                     {/* Method Selection for TEST and SERVICE */}
-                                                    {(test.type === 'TEST' || test.type === 'SERVICE') && test.test?.method_tests && test.test.method_tests.length > 1 && (
-                                                        <Box sx={{ pl: 2, pr: 7, pt: 1 }}>
-                                                            <FormControl fullWidth size="small">
-                                                                <InputLabel>Select Method</InputLabel>
-                                                                <Select
-                                                                    value={test.method?.id || ''}
-                                                                    onChange={(e) => {
-                                                                        const method = test.test.method_tests.find(m => m.id === e.target.value);
-                                                                        handleMethodSelect(index, { method, price: method.price });
-                                                                    }}
-                                                                    label="Select Method"
-                                                                >
-                                                                    {test.test.method_tests.map((method) => (
-                                                                        <MenuItem key={method.id} value={method.id}>
-                                                                            {method.method?.name || method.name} - {method.price} OMR
-                                                                        </MenuItem>
-                                                                    ))}
-                                                                </Select>
-                                                            </FormControl>
-                                                        </Box>
-                                                    )}
+                                                    {(test.type === 'TEST' ||
+                                                        test.type === 'SERVICE') &&
+                                                        test.test?.method_tests &&
+                                                        test.test.method_tests.length > 1 && (
+                                                            <Box sx={{ pl: 2, pr: 7, pt: 1 }}>
+                                                                <FormControl fullWidth size="small">
+                                                                    <InputLabel>
+                                                                        Select Method
+                                                                    </InputLabel>
+                                                                    <Select
+                                                                        value={
+                                                                            test.method?.id || ''
+                                                                        }
+                                                                        onChange={(e) => {
+                                                                            const method =
+                                                                                test.test.method_tests.find(
+                                                                                    (m) =>
+                                                                                        m.id ===
+                                                                                        e.target
+                                                                                            .value,
+                                                                                );
+                                                                            handleMethodSelect(
+                                                                                index,
+                                                                                {
+                                                                                    method,
+                                                                                    price: method.price,
+                                                                                },
+                                                                            );
+                                                                        }}
+                                                                        label="Select Method"
+                                                                    >
+                                                                        {test.test.method_tests.map(
+                                                                            (method) => (
+                                                                                <MenuItem
+                                                                                    key={method.id}
+                                                                                    value={
+                                                                                        method.id
+                                                                                    }
+                                                                                >
+                                                                                    {method.method
+                                                                                        ?.name ||
+                                                                                        method.name}{' '}
+                                                                                    - {method.price}{' '}
+                                                                                    OMR
+                                                                                </MenuItem>
+                                                                            ),
+                                                                        )}
+                                                                    </Select>
+                                                                </FormControl>
+                                                            </Box>
+                                                        )}
                                                 </Box>
                                             ))}
                                         </List>
@@ -916,7 +1103,13 @@ const Create = ({ success, error, patientFields }) => {
                                     type="submit"
                                     variant="contained"
                                     disabled={processing || selectedTests.length === 0}
-                                    startIcon={processing ? <CircularProgress size={20} /> : <UploadFileIcon />}
+                                    startIcon={
+                                        processing ? (
+                                            <CircularProgress size={20} />
+                                        ) : (
+                                            <UploadFileIcon />
+                                        )
+                                    }
                                     sx={{
                                         px: 4,
                                         py: 1.5,
@@ -941,7 +1134,10 @@ const Create = ({ success, error, patientFields }) => {
                             <ul style={{ paddingLeft: 20, margin: 0 }}>
                                 <li>Select an Excel file (.xlsx, .xls) or CSV file</li>
                                 <li>File size should not exceed 10MB</li>
-                                <li>Check "First row contains headers" if your Excel has column headers</li>
+                                <li>
+                                    Check "First row contains headers" if your Excel has column
+                                    headers
+                                </li>
                                 <li>Click "Next" to map Excel columns to patient fields</li>
                             </ul>
                         </Typography>
@@ -950,17 +1146,17 @@ const Create = ({ success, error, patientFields }) => {
             </Paper>
 
             {/* Test Selector Modal */}
-            <Dialog
-                open={testModalOpen}
-                onClose={handleCloseTestModal}
-                maxWidth="md"
-                fullWidth
-            >
+            <Dialog open={testModalOpen} onClose={handleCloseTestModal} maxWidth="md" fullWidth>
                 <DialogTitle sx={{ backgroundColor: 'primary.main', color: 'white', p: 2 }}>
-  <Box display="flex" sx={{alignItems: "center", justifyContent: "space-between"}}>
-  <Box display="flex" sx={{alignItems: "center"}}>
+                    <Box
+                        display="flex"
+                        sx={{ alignItems: 'center', justifyContent: 'space-between' }}
+                    >
+                        <Box display="flex" sx={{ alignItems: 'center' }}>
                             <ScienceIcon sx={{ mr: 2 }} />
-                            <Typography variant="h6" component="span">Add Test</Typography>
+                            <Typography variant="h6" component="span">
+                                Add Test
+                            </Typography>
                         </Box>
                         <IconButton onClick={handleCloseTestModal} sx={{ color: 'white' }}>
                             <CloseIcon />
@@ -983,7 +1179,10 @@ const Create = ({ success, error, patientFields }) => {
                 <DialogContent sx={{ p: 3 }}>
                     {/* Step 1: Select Test */}
                     {modalStep === 0 && (
-                        <Paper elevation={0} sx={{ p: 3, backgroundColor: 'grey.50', borderRadius: 2 }}>
+                        <Paper
+                            elevation={0}
+                            sx={{ p: 3, backgroundColor: 'grey.50', borderRadius: 2 }}
+                        >
                             <Typography variant="subtitle1" fontWeight="medium" gutterBottom>
                                 Select Test Type and Test
                             </Typography>
@@ -1013,13 +1212,15 @@ const Create = ({ success, error, patientFields }) => {
                                             value={null}
                                             label={`Select ${testType === 'PANEL' ? 'Panel' : testType === 'SERVICE' ? 'Service' : 'Test'}`}
                                             fullWidth
-                                            url={route("api.tests.list")}
+                                            url={route('api.tests.list')}
                                             defaultData={{
                                                 type: testType,
                                                 status: true,
                                                 ...(data.default_values?.referrer?.id && {
-                                                    referrer: { id: data.default_values.referrer.id }
-                                                })
+                                                    referrer: {
+                                                        id: data.default_values.referrer.id,
+                                                    },
+                                                }),
                                             }}
                                             onChange={handleTestSelect}
                                             name="test"
@@ -1031,7 +1232,14 @@ const Create = ({ success, error, patientFields }) => {
                             </Grid>
 
                             {loadingTestDetails && (
-                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 3 }}>
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        mt: 3,
+                                    }}
+                                >
                                     <CircularProgress size={24} sx={{ mr: 1 }} />
                                     <Typography variant="body2">Loading test details...</Typography>
                                 </Box>
@@ -1039,7 +1247,11 @@ const Create = ({ success, error, patientFields }) => {
 
                             {currentTest && !loadingTestDetails && (
                                 <Box sx={{ mt: 3 }}>
-                                    <Typography variant="subtitle1" fontWeight="medium" gutterBottom>
+                                    <Typography
+                                        variant="subtitle1"
+                                        fontWeight="medium"
+                                        gutterBottom
+                                    >
                                         Test Details
                                     </Typography>
                                     <Paper elevation={1} sx={{ p: 2, mt: 2 }}>
@@ -1069,7 +1281,10 @@ const Create = ({ success, error, patientFields }) => {
 
                     {/* Step 2: Configure Method and Sample Type */}
                     {modalStep === 1 && currentTest && (
-                        <Paper elevation={0} sx={{ p: 3, backgroundColor: 'grey.50', borderRadius: 2 }}>
+                        <Paper
+                            elevation={0}
+                            sx={{ p: 3, backgroundColor: 'grey.50', borderRadius: 2 }}
+                        >
                             <Typography variant="subtitle1" fontWeight="medium" gutterBottom>
                                 Configure Test Parameters
                             </Typography>
@@ -1079,7 +1294,8 @@ const Create = ({ success, error, patientFields }) => {
                                 <Box sx={{ mt: 2 }}>
                                     <Alert severity="info" sx={{ mb: 2 }}>
                                         <Typography variant="body2">
-                                            <strong>Panel Test:</strong> This panel includes multiple tests. Please select sample type for each test.
+                                            <strong>Panel Test:</strong> This panel includes
+                                            multiple tests. Please select sample type for each test.
                                         </Typography>
                                     </Alert>
 
@@ -1098,7 +1314,11 @@ const Create = ({ success, error, patientFields }) => {
                                                 <Typography variant="body2" color="text.secondary">
                                                     Total Price
                                                 </Typography>
-                                                <Typography variant="body1" fontWeight="medium" color="primary">
+                                                <Typography
+                                                    variant="body1"
+                                                    fontWeight="medium"
+                                                    color="primary"
+                                                >
                                                     {currentTest.price || 0} OMR
                                                 </Typography>
                                             </Grid>
@@ -1106,54 +1326,98 @@ const Create = ({ success, error, patientFields }) => {
                                     </Paper>
 
                                     {/* Test Methods List */}
-                                    {currentTest.method_tests && currentTest.method_tests.length > 0 ? (
+                                    {currentTest.method_tests &&
+                                    currentTest.method_tests.length > 0 ? (
                                         <TableContainer component={Paper} elevation={1}>
                                             <Table size="small">
                                                 <TableHead>
                                                     <TableRow>
-                                                        <TableCell><strong>Test Name</strong></TableCell>
-                                                        <TableCell><strong>Sample Type</strong></TableCell>
+                                                        <TableCell>
+                                                            <strong>Test Name</strong>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <strong>Sample Type</strong>
+                                                        </TableCell>
                                                     </TableRow>
                                                 </TableHead>
                                                 <TableBody>
-                                                    {currentTest.method_tests.map((methodTest, index) => (
-                                                        <TableRow key={index} hover>
-                                                            <TableCell>
-                                                                <Typography variant="body2">
-                                                                    {methodTest.method?.test?.name || 'N/A'}
-                                                                </Typography>
-                                                            </TableCell>
-                                                            <TableCell sx={{ width: '50%' }}>
-                                                                {methodTest.method?.test?.sample_types && methodTest.method.test.sample_types.length > 0 ? (
-                                                                    <FormControl fullWidth size="small">
-                                                                        <Select
-                                                                            value={panelSampleTypes[methodTest.id] || ''}
-                                                                            onChange={(e) => {
-                                                                                setPanelSampleTypes(prev => ({
-                                                                                    ...prev,
-                                                                                    [methodTest.id]: e.target.value
-                                                                                }));
-                                                                            }}
-                                                                            displayEmpty
-                                                                        >
-                                                                            <MenuItem value="">
-                                                                                <em>Select Sample Type</em>
-                                                                            </MenuItem>
-                                                                            {methodTest.method.test.sample_types.map((sampleType) => (
-                                                                                <MenuItem key={sampleType.id} value={sampleType.id}>
-                                                                                    {sampleType.name}
-                                                                                </MenuItem>
-                                                                            ))}
-                                                                        </Select>
-                                                                    </FormControl>
-                                                                ) : (
-                                                                    <Typography variant="body2" color="text.secondary">
-                                                                        No sample types available
+                                                    {currentTest.method_tests.map(
+                                                        (methodTest, index) => (
+                                                            <TableRow key={index} hover>
+                                                                <TableCell>
+                                                                    <Typography variant="body2">
+                                                                        {methodTest.method?.test
+                                                                            ?.name || 'N/A'}
                                                                     </Typography>
-                                                                )}
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
+                                                                </TableCell>
+                                                                <TableCell sx={{ width: '50%' }}>
+                                                                    {methodTest.method?.test
+                                                                        ?.sample_types &&
+                                                                    methodTest.method.test
+                                                                        .sample_types.length > 0 ? (
+                                                                        <FormControl
+                                                                            fullWidth
+                                                                            size="small"
+                                                                        >
+                                                                            <Select
+                                                                                value={
+                                                                                    panelSampleTypes[
+                                                                                        methodTest
+                                                                                            .id
+                                                                                    ] || ''
+                                                                                }
+                                                                                onChange={(e) => {
+                                                                                    setPanelSampleTypes(
+                                                                                        (prev) => ({
+                                                                                            ...prev,
+                                                                                            [methodTest.id]:
+                                                                                                e
+                                                                                                    .target
+                                                                                                    .value,
+                                                                                        }),
+                                                                                    );
+                                                                                }}
+                                                                                displayEmpty
+                                                                            >
+                                                                                <MenuItem value="">
+                                                                                    <em>
+                                                                                        Select
+                                                                                        Sample Type
+                                                                                    </em>
+                                                                                </MenuItem>
+                                                                                {methodTest.method.test.sample_types.map(
+                                                                                    (
+                                                                                        sampleType,
+                                                                                    ) => (
+                                                                                        <MenuItem
+                                                                                            key={
+                                                                                                sampleType.id
+                                                                                            }
+                                                                                            value={
+                                                                                                sampleType.id
+                                                                                            }
+                                                                                        >
+                                                                                            {
+                                                                                                sampleType.name
+                                                                                            }
+                                                                                        </MenuItem>
+                                                                                    ),
+                                                                                )}
+                                                                            </Select>
+                                                                        </FormControl>
+                                                                    ) : (
+                                                                        <Typography
+                                                                            variant="body2"
+                                                                            color="text.secondary"
+                                                                        >
+                                                                            No sample types
+                                                                            available
+                                                                        </Typography>
+                                                                    )}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ),
+                                                    )}
                                                 </TableBody>
                                             </Table>
                                         </TableContainer>
@@ -1167,101 +1431,158 @@ const Create = ({ success, error, patientFields }) => {
 
                             <Grid container spacing={3} sx={{ mt: 1 }}>
                                 {/* Method Selection for TEST and SERVICE */}
-                                {(testType === 'TEST' || testType === 'SERVICE') && currentTest.method_tests && currentTest.method_tests.length > 0 && (
-                                    <>
-                                        <Grid size={{ xs: 12 }}>
-                                            <Typography variant="subtitle2" color="primary" gutterBottom>
-                                                Method Selection
-                                            </Typography>
-                                        </Grid>
-                                        <Grid size={{ xs: 12 }}>
-                                            <TableContainer component={Paper}>
-                                                <Table>
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell>Method Name</TableCell>
-                                                            <TableCell align="center">Turnaround Time</TableCell>
-                                                            <TableCell align="center">Price</TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {currentTest.method_tests.map((method) => (
-                                                            <TableRow
-                                                                key={method.id}
-                                                                hover
-                                                                onClick={() => {
-                                                                    setCurrentMethod(method);
-                                                                    setCurrentPrice(method.price || 0);
-                                                                }}
-                                                                selected={currentMethod?.id === method.id}
-                                                                sx={{
-                                                                    cursor: 'pointer',
-                                                                    '&.Mui-selected': {
-                                                                        backgroundColor: 'primary.light',
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <TableCell>
-                                                                    <Typography fontWeight={currentMethod?.id === method.id ? 'medium' : 'normal'}>
-                                                                        {method.method?.name || method.name}
-                                                                    </Typography>
+                                {(testType === 'TEST' || testType === 'SERVICE') &&
+                                    currentTest.method_tests &&
+                                    currentTest.method_tests.length > 0 && (
+                                        <>
+                                            <Grid size={{ xs: 12 }}>
+                                                <Typography
+                                                    variant="subtitle2"
+                                                    color="primary"
+                                                    gutterBottom
+                                                >
+                                                    Method Selection
+                                                </Typography>
+                                            </Grid>
+                                            <Grid size={{ xs: 12 }}>
+                                                <TableContainer component={Paper}>
+                                                    <Table>
+                                                        <TableHead>
+                                                            <TableRow>
+                                                                <TableCell>Method Name</TableCell>
+                                                                <TableCell align="center">
+                                                                    Turnaround Time
                                                                 </TableCell>
                                                                 <TableCell align="center">
-                                                                    {method.method?.turnaround_time || method.turnaround_time || '-'} days
-                                                                </TableCell>
-                                                                <TableCell align="center">
-                                                                    <Typography fontWeight="medium">
-                                                                        {method.price || method.method?.price || 0} OMR
-                                                                    </Typography>
+                                                                    Price
                                                                 </TableCell>
                                                             </TableRow>
-                                                        ))}
-                                                    </TableBody>
-                                                </Table>
-                                            </TableContainer>
-                                        </Grid>
-                                    </>
-                                )}
+                                                        </TableHead>
+                                                        <TableBody>
+                                                            {currentTest.method_tests.map(
+                                                                (method) => (
+                                                                    <TableRow
+                                                                        key={method.id}
+                                                                        hover
+                                                                        onClick={() => {
+                                                                            setCurrentMethod(
+                                                                                method,
+                                                                            );
+                                                                            setCurrentPrice(
+                                                                                method.price || 0,
+                                                                            );
+                                                                        }}
+                                                                        selected={
+                                                                            currentMethod?.id ===
+                                                                            method.id
+                                                                        }
+                                                                        sx={{
+                                                                            cursor: 'pointer',
+                                                                            '&.Mui-selected': {
+                                                                                backgroundColor:
+                                                                                    'primary.light',
+                                                                            },
+                                                                        }}
+                                                                    >
+                                                                        <TableCell>
+                                                                            <Typography
+                                                                                fontWeight={
+                                                                                    currentMethod?.id ===
+                                                                                    method.id
+                                                                                        ? 'medium'
+                                                                                        : 'normal'
+                                                                                }
+                                                                            >
+                                                                                {method.method
+                                                                                    ?.name ||
+                                                                                    method.name}
+                                                                            </Typography>
+                                                                        </TableCell>
+                                                                        <TableCell align="center">
+                                                                            {method.method
+                                                                                ?.turnaround_time ||
+                                                                                method.turnaround_time ||
+                                                                                '-'}{' '}
+                                                                            days
+                                                                        </TableCell>
+                                                                        <TableCell align="center">
+                                                                            <Typography fontWeight="medium">
+                                                                                {method.price ||
+                                                                                    method.method
+                                                                                        ?.price ||
+                                                                                    0}{' '}
+                                                                                OMR
+                                                                            </Typography>
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                ),
+                                                            )}
+                                                        </TableBody>
+                                                    </Table>
+                                                </TableContainer>
+                                            </Grid>
+                                        </>
+                                    )}
 
                                 {/* Sample Type Selection (only for TEST, not PANEL or SERVICE) */}
-                                {testType === 'TEST' && currentMethod && currentMethod.method?.test?.sample_types && currentMethod.method.test.sample_types.length > 0 && (
-                                    <>
-                                        <Grid size={{ xs: 12 }}>
-                                            <Divider sx={{ my: 2 }} />
-                                            <Typography variant="subtitle2" color="primary" gutterBottom>
-                                                Sample Type
-                                            </Typography>
-                                        </Grid>
-                                        <Grid size={{ xs: 12 }}>
-                                            <FormControl fullWidth>
-                                                <InputLabel>Select Sample Type</InputLabel>
-                                                <Select
-                                                    value={currentSampleType}
-                                                    onChange={(e) => setCurrentSampleType(e.target.value)}
-                                                    label="Select Sample Type"
+                                {testType === 'TEST' &&
+                                    currentMethod &&
+                                    currentMethod.method?.test?.sample_types &&
+                                    currentMethod.method.test.sample_types.length > 0 && (
+                                        <>
+                                            <Grid size={{ xs: 12 }}>
+                                                <Divider sx={{ my: 2 }} />
+                                                <Typography
+                                                    variant="subtitle2"
+                                                    color="primary"
+                                                    gutterBottom
                                                 >
-                                                    {currentMethod.method.test.sample_types.map((sampleType) => (
-                                                        <MenuItem key={sampleType.id} value={sampleType.id}>
-                                                            {sampleType.name}
-                                                        </MenuItem>
-                                                    ))}
-                                                </Select>
-                                                <FormHelperText>Type of biological sample to collect</FormHelperText>
-                                            </FormControl>
-                                        </Grid>
-                                    </>
-                                )}
+                                                    Sample Type
+                                                </Typography>
+                                            </Grid>
+                                            <Grid size={{ xs: 12 }}>
+                                                <FormControl fullWidth>
+                                                    <InputLabel>Select Sample Type</InputLabel>
+                                                    <Select
+                                                        value={currentSampleType}
+                                                        onChange={(e) =>
+                                                            setCurrentSampleType(e.target.value)
+                                                        }
+                                                        label="Select Sample Type"
+                                                    >
+                                                        {currentMethod.method.test.sample_types.map(
+                                                            (sampleType) => (
+                                                                <MenuItem
+                                                                    key={sampleType.id}
+                                                                    value={sampleType.id}
+                                                                >
+                                                                    {sampleType.name}
+                                                                </MenuItem>
+                                                            ),
+                                                        )}
+                                                    </Select>
+                                                    <FormHelperText>
+                                                        Type of biological sample to collect
+                                                    </FormHelperText>
+                                                </FormControl>
+                                            </Grid>
+                                        </>
+                                    )}
 
                                 {/* No methods available message */}
-                                {(testType === 'TEST' || testType === 'SERVICE') && (!currentTest.method_tests || currentTest.method_tests.length === 0) && (
-                                    <Grid size={{ xs: 12 }}>
-                                        <Alert severity="warning">
-                                            <Typography variant="body2">
-                                                No methods are configured for this {testType.toLowerCase()}. Please contact administration.
-                                            </Typography>
-                                        </Alert>
-                                    </Grid>
-                                )}
+                                {(testType === 'TEST' || testType === 'SERVICE') &&
+                                    (!currentTest.method_tests ||
+                                        currentTest.method_tests.length === 0) && (
+                                        <Grid size={{ xs: 12 }}>
+                                            <Alert severity="warning">
+                                                <Typography variant="body2">
+                                                    No methods are configured for this{' '}
+                                                    {testType.toLowerCase()}. Please contact
+                                                    administration.
+                                                </Typography>
+                                            </Alert>
+                                        </Grid>
+                                    )}
 
                                 {/* Price Input - Always show in configure step */}
                                 <Grid size={{ xs: 12 }}>
@@ -1276,10 +1597,18 @@ const Create = ({ success, error, patientFields }) => {
                                         type="number"
                                         label="Test Price"
                                         value={currentPrice}
-                                        onChange={(e) => setCurrentPrice(parseFloat(e.target.value) || 0)}
-                                        slotProps={{ input: {
-                                            endAdornment: <Typography variant="body2" sx={{ ml: 1 }}>OMR</Typography>
-                                        } }}
+                                        onChange={(e) =>
+                                            setCurrentPrice(parseFloat(e.target.value) || 0)
+                                        }
+                                        slotProps={{
+                                            input: {
+                                                endAdornment: (
+                                                    <Typography variant="body2" sx={{ ml: 1 }}>
+                                                        OMR
+                                                    </Typography>
+                                                ),
+                                            },
+                                        }}
                                         helperText="You can modify the test price"
                                     />
                                 </Grid>
@@ -1318,8 +1647,12 @@ const Create = ({ success, error, patientFields }) => {
                             variant="contained"
                             disabled={
                                 !currentTest ||
-                                ((testType === 'TEST' || testType === 'SERVICE') && !currentMethod) ||
-                                (testType === 'TEST' && currentMethod && currentMethod.method?.test?.sample_types?.length > 0 && !currentSampleType)
+                                ((testType === 'TEST' || testType === 'SERVICE') &&
+                                    !currentMethod) ||
+                                (testType === 'TEST' &&
+                                    currentMethod &&
+                                    currentMethod.method?.test?.sample_types?.length > 0 &&
+                                    !currentSampleType)
                             }
                             startIcon={<CheckIcon />}
                         >
@@ -1334,23 +1667,19 @@ const Create = ({ success, error, patientFields }) => {
 
 const breadCrumbs = [
     {
-        title: "Dashboard",
+        title: 'Dashboard',
         link: route('dashboard'),
-        icon: null
+        icon: null,
     },
     {
-        title: "Import",
+        title: 'Import',
         link: null,
-        icon: <UploadFileIcon fontSize="small" />
-    }
+        icon: <UploadFileIcon fontSize="small" />,
+    },
 ];
 
-Create.layout = page => (
-    <AuthenticatedLayout
-        auth={page.props.auth}
-        children={page}
-        breadcrumbs={breadCrumbs}
-    />
+Create.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
 );
 
 export default Create;

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     Box,
     Button,
@@ -14,22 +14,22 @@ import {
     Stack,
     TextField,
     Typography,
-} from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import ClearIcon from "@mui/icons-material/Clear";
-import SearchIcon from "@mui/icons-material/Search";
-import PersonIcon from "@mui/icons-material/Person";
-import { usePage } from "@inertiajs/react";
+} from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import ClearIcon from '@mui/icons-material/Clear';
+import SearchIcon from '@mui/icons-material/Search';
+import PersonIcon from '@mui/icons-material/Person';
+import { usePage } from '@inertiajs/react';
 
 const formatDateForBackend = (date) => {
     if (!date) return null;
     const d = new Date(date);
     const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 };
 
@@ -37,8 +37,8 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
     const { consultants = [] } = usePage().props;
 
     const [filters, setFilters] = useState({
-        search: defaultValues.search || "",
-        consultant_id: defaultValues.consultant_id || "",
+        search: defaultValues.search || '',
+        consultant_id: defaultValues.consultant_id || '',
         from_date: defaultValues.from_date ? new Date(defaultValues.from_date) : null,
         date: defaultValues.date ? new Date(defaultValues.date) : null,
     });
@@ -51,7 +51,7 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
             consultant_id: filters.consultant_id,
             from_date: filters.from_date,
             date: filters.date,
-        }).filter((v) => v !== "" && v !== null && v !== undefined).length;
+        }).filter((v) => v !== '' && v !== null && v !== undefined).length;
         setActiveFilters(count);
     }, [filters]);
 
@@ -73,22 +73,22 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
     }, [filters, onFilter]);
 
     const handleClear = useCallback(() => {
-        setFilters({ search: "", consultant_id: "", from_date: null, date: null });
+        setFilters({ search: '', consultant_id: '', from_date: null, date: null });
         onFilter({})();
     }, [onFilter]);
 
     const handleKeyDown = useCallback(
         (e) => {
-            if (e.key === "Enter") handleApply();
+            if (e.key === 'Enter') handleApply();
         },
-        [handleApply]
+        [handleApply],
     );
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <Paper elevation={0} sx={{ p: 3, mb: 2, bgcolor: "background.paper" }}>
+            <Paper elevation={0} sx={{ p: 3, mb: 2, bgcolor: 'background.paper' }}>
                 <Stack spacing={2}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <FilterListIcon color="action" fontSize="small" />
                         <Typography variant="subtitle2" color="text.secondary">
                             Filter Waiting Consultations
@@ -112,7 +112,7 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
                                 label="Search Patient"
                                 placeholder="Search by name or phone..."
                                 value={filters.search}
-                                onChange={(e) => handleChange("search", e.target.value)}
+                                onChange={(e) => handleChange('search', e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 slotProps={{
                                     input: {
@@ -125,7 +125,7 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
                                             <InputAdornment position="end">
                                                 <IconButton
                                                     size="small"
-                                                    onClick={() => handleChange("search", "")}
+                                                    onClick={() => handleChange('search', '')}
                                                     edge="end"
                                                 >
                                                     <ClearIcon fontSize="small" />
@@ -145,7 +145,7 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
                                     labelId="consultant-label"
                                     value={filters.consultant_id}
                                     label="Consultant"
-                                    onChange={(e) => handleChange("consultant_id", e.target.value)}
+                                    onChange={(e) => handleChange('consultant_id', e.target.value)}
                                     startAdornment={
                                         <InputAdornment position="start">
                                             <PersonIcon color="action" />
@@ -157,7 +157,8 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
                                     </MenuItem>
                                     {consultants.map((c) => (
                                         <MenuItem key={c.id} value={c.id}>
-                                            {c.name}{c.title ? ` — ${c.title}` : ""}
+                                            {c.name}
+                                            {c.title ? ` — ${c.title}` : ''}
                                         </MenuItem>
                                     ))}
                                 </Select>
@@ -169,7 +170,7 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
                             <DatePicker
                                 label="Due Date (from)"
                                 value={filters.from_date}
-                                onChange={(value) => handleChange("from_date", value)}
+                                onChange={(value) => handleChange('from_date', value)}
                                 clearable
                                 slotProps={{
                                     textField: { fullWidth: true },
@@ -182,12 +183,13 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
                             <DatePicker
                                 label="Appointment Date"
                                 value={filters.date}
-                                onChange={(value) => handleChange("date", value)}
+                                onChange={(value) => handleChange('date', value)}
                                 clearable
                                 slotProps={{
                                     textField: {
                                         fullWidth: true,
-                                        helperText: "Filter by the date the appointment was created",
+                                        helperText:
+                                            'Filter by the date the appointment was created',
                                     },
                                 }}
                             />
@@ -195,7 +197,7 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
 
                         {/* Action Buttons */}
                         <Grid size={{ xs: 12 }}>
-                            <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>
+                            <Stack direction="row" spacing={2} sx={{ justifyContent: 'flex-end' }}>
                                 <Button
                                     variant="outlined"
                                     startIcon={<ClearIcon />}

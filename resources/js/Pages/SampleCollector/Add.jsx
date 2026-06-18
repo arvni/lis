@@ -1,11 +1,11 @@
 import AddForm from './Components/Form';
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import {Head, router, useForm} from "@inertiajs/react";
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head, router, useForm } from '@inertiajs/react';
 
 const Add = () => {
-    const {data, setData, post, errors, setError, clearErrors} = useForm({
-        name: "",
-        email: "",
+    const { data, setData, post, errors, setError, clearErrors } = useForm({
+        name: '',
+        email: '',
     });
 
     const handleSubmit = () => post(route('sample-collectors.store'));
@@ -18,7 +18,7 @@ const Add = () => {
 
     return (
         <>
-            <Head title="Add Sample Collector"/>
+            <Head title="Add Sample Collector" />
             <AddForm
                 data={data}
                 setData={setData}
@@ -30,22 +30,22 @@ const Add = () => {
             />
         </>
     );
-}
+};
 
 const breadCrumbs = [
     {
-        title: "Sample Collectors",
-        link: route("sample-collectors.index"),
+        title: 'Sample Collectors',
+        link: route('sample-collectors.index'),
         icon: null,
     },
     {
-        title: "Add New Sample Collector",
-        link: "",
-        icon: null
-    }
-]
+        title: 'Add New Sample Collector',
+        link: '',
+        icon: null,
+    },
+];
 
-Add.layout = page => <AuthenticatedLayout auth={page.props.auth}
-                                          children={page}
-                                          breadcrumbs={breadCrumbs}/>
+Add.layout = (page) => (
+    <AuthenticatedLayout auth={page.props.auth} children={page} breadcrumbs={breadCrumbs} />
+);
 export default Add;

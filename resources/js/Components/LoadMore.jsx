@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo } from 'react';
 import {
     Accordion,
     AccordionActions,
@@ -11,14 +11,14 @@ import {
     Tooltip,
     IconButton,
     useTheme,
-    alpha
-} from "@mui/material";
+    alpha,
+} from '@mui/material';
 import {
     ExpandMore as ExpandMoreIcon,
     Refresh as RefreshIcon,
-    OpenInNew as OpenInNewIcon
-} from "@mui/icons-material";
-import { DataGrid } from "@mui/x-data-grid";
+    OpenInNew as OpenInNewIcon,
+} from '@mui/icons-material';
+import { DataGrid } from '@mui/x-data-grid';
 import PropTypes from 'prop-types';
 
 /**
@@ -35,16 +35,16 @@ import PropTypes from 'prop-types';
  * @param {string} emptyMessage - Message to display when there are no items
  */
 const LoadMore = ({
-                      items = [],
-                      columns = [],
-                      loadMoreLink,
-                      title,
-                      defaultExpanded = false,
-                      loading = false,
-                      onRefresh,
-                      pageSize = 5,
-                      emptyMessage = "No items to display"
-                  }) => {
+    items = [],
+    columns = [],
+    loadMoreLink,
+    title,
+    defaultExpanded = false,
+    loading = false,
+    onRefresh,
+    pageSize = 5,
+    emptyMessage = 'No items to display',
+}) => {
     const theme = useTheme();
     const [expanded, setExpanded] = useState(defaultExpanded);
     const [pageModel, setPageModel] = useState({ pageSize, page: 0 });
@@ -52,7 +52,7 @@ const LoadMore = ({
 
     const uniqueItems = useMemo(() => {
         const seen = new Set();
-        return items.filter(item => {
+        return items.filter((item) => {
             if (seen.has(item.id)) return false;
             seen.add(item.id);
             return true;
@@ -74,7 +74,7 @@ const LoadMore = ({
                 justifyContent: 'center',
                 height: '100%',
                 p: 2,
-                color: 'text.secondary'
+                color: 'text.secondary',
             }}
         >
             <Typography variant="body1">{emptyMessage}</Typography>
@@ -91,7 +91,7 @@ const LoadMore = ({
                 transition: {
                     onEntered: () => setGridReady(true),
                     onExited: () => setGridReady(false),
-                }
+                },
             }}
             sx={{
                 border: `1px solid ${theme.palette.divider}`,
@@ -100,7 +100,7 @@ const LoadMore = ({
                     display: 'none',
                 },
                 mb: 2,
-                overflow: 'hidden'
+                overflow: 'hidden',
             }}
         >
             <AccordionSummary
@@ -108,26 +108,30 @@ const LoadMore = ({
                 aria-controls="load-more-content"
                 id={`load-more-header-${title?.replace(/\s+/g, '-').toLowerCase() || 'panel'}`}
                 sx={{
-                    backgroundColor: expanded ? alpha(theme.palette.primary.main, 0.05) : 'transparent',
+                    backgroundColor: expanded
+                        ? alpha(theme.palette.primary.main, 0.05)
+                        : 'transparent',
                     borderBottom: expanded ? `1px solid ${theme.palette.divider}` : 'none',
                     transition: 'all 0.2s ease',
                     '&:hover': {
                         backgroundColor: alpha(theme.palette.primary.main, 0.05),
-                    }
+                    },
                 }}
             >
-                <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    width: '100%',
-                    justifyContent: 'space-between'
-                }}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        width: '100%',
+                        justifyContent: 'space-between',
+                    }}
+                >
                     <Typography
                         variant="h6"
                         sx={{
                             fontWeight: expanded ? 600 : 500,
                             color: expanded ? 'primary.main' : 'text.primary',
-                            transition: 'all 0.2s ease'
+                            transition: 'all 0.2s ease',
                         }}
                     >
                         {title}
@@ -209,13 +213,15 @@ const LoadMore = ({
             </AccordionDetails>
 
             {loadMoreLink && (
-                <AccordionActions sx={{
-                    justifyContent: 'flex-end',
-                    borderTop: `1px solid ${theme.palette.divider}`,
-                    backgroundColor: alpha(theme.palette.background.default, 0.5),
-                    py: 1,
-                    px: 2
-                }}>
+                <AccordionActions
+                    sx={{
+                        justifyContent: 'flex-end',
+                        borderTop: `1px solid ${theme.palette.divider}`,
+                        backgroundColor: alpha(theme.palette.background.default, 0.5),
+                        py: 1,
+                        px: 2,
+                    }}
+                >
                     <Button
                         href={loadMoreLink}
                         target="_blank"
@@ -225,7 +231,7 @@ const LoadMore = ({
                         sx={{
                             borderRadius: 4,
                             textTransform: 'none',
-                            fontWeight: 500
+                            fontWeight: 500,
                         }}
                     >
                         View More
