@@ -4,7 +4,6 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import FlipCameraAndroidIcon from '@mui/icons-material/FlipCameraAndroid';
 import ApprovalIcon from '@mui/icons-material/Approval';
-import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import HorizontalSplitIcon from '@mui/icons-material/HorizontalSplit';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
@@ -29,7 +28,6 @@ import {
     BugReport,
     Inventory as InventoryIcon,
     Speed as SpeedIcon,
-    Science as ScienceQCIcon,
     VerifiedUser as AuditIcon,
     LocalOffer as TagIcon,
 } from '@mui/icons-material';

@@ -6,7 +6,6 @@ import {
     Box,
     Button,
     CircularProgress,
-    Typography,
     Tooltip,
 } from '@mui/material';
 import { LocalOffer as TagIcon, Save as SaveIcon } from '@mui/icons-material';

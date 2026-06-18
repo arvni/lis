@@ -33,7 +33,6 @@ import {
     Visibility,
     VisibilityOff,
     CheckCircle,
-    Info,
     Send,
     ExpandMore,
     ExpandLess,

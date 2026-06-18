@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Box, Typography, Button, CircularProgress, Paper, Fade } from '@mui/material';
-import { WifiOff, Refresh, CheckCircle } from '@mui/icons-material';
+import { WifiOff, Refresh } from '@mui/icons-material';
 
 // Module-level flag: only check once per page load regardless of re-renders
 const checkState = { done: false };

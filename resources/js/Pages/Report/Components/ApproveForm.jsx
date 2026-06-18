@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Grid from '@mui/material/Grid';
 import Editor from '@/Components/Editor';
-import { formatFileSize } from '@/Services/helper';
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
 import {

@@ -30,7 +30,6 @@ import {
     Cancel as CancelIcon,
     LocalHospital as LocalHospitalIcon,
     CheckCircle as CheckCircleIcon,
-    Payments as PaymentsIcon,
     CalendarToday as CalendarTodayIcon,
     QrCode as QrCodeIcon,
     Science as ScienceIcon,

@@ -44,10 +44,7 @@ import TestsTable from '@/Pages/Acceptance/Components/TestsSection/TestsTable.js
 import PromoteToPanelDialog from '@/Pages/Acceptance/Components/TestsSection/PromoteToPanelDialog.jsx';
 import EditItemPricesForm from '@/Pages/Acceptance/Components/EditItemPricesForm.jsx';
 import AddTestOrPanel from '@/Pages/Acceptance/Components/AddTestOrPanel.jsx';
-import TagManager from '@/Components/TagManager';
-import TagChip from '@/Components/TagChip';
 import InlineTagManager from '@/Components/InlineTagManager';
-import { LocalOffer as TagIcon } from '@mui/icons-material';
 
 // Status chip component for better consistency
 const StatusChip = ({ status }) => {

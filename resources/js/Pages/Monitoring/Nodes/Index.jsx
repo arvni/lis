@@ -22,8 +22,6 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SyncIcon from '@mui/icons-material/Sync';
 import SearchIcon from '@mui/icons-material/Search';
-import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
-import BatteryChargingFullIcon from '@mui/icons-material/BatteryChargingFull';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
 

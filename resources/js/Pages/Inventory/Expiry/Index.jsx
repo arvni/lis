@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
-import StockBadge from '@/Pages/Inventory/Components/StockBadge';
 
 const LotTable = ({ lots, emptyText }) =>
     lots.length === 0 ? (

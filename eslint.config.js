@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
+import unusedImports from 'eslint-plugin-unused-imports';
 import prettier from 'eslint-config-prettier';
 
 export default [
@@ -9,7 +10,7 @@ export default [
     js.configs.recommended,
     {
         files: ['resources/js/**/*.{js,jsx}'],
-        plugins: { react, 'react-hooks': reactHooks },
+        plugins: { react, 'react-hooks': reactHooks, 'unused-imports': unusedImports },
         languageOptions: {
             ecmaVersion: 2024,
             sourceType: 'module',
@@ -35,7 +36,13 @@ export default [
             'react/react-in-jsx-scope': 'off',
             'react/prop-types': 'off',
             // Opinionated/cosmetic on a legacy tree — surface as warnings, don't block.
-            'no-unused-vars': ['warn', { args: 'after-used', argsIgnorePattern: '^_' }],
+            // unused-imports auto-removes dead imports on --fix; core rule off to avoid overlap.
+            'no-unused-vars': 'off',
+            'unused-imports/no-unused-imports': 'warn',
+            'unused-imports/no-unused-vars': [
+                'warn',
+                { vars: 'all', varsIgnorePattern: '^_', args: 'after-used', argsIgnorePattern: '^_' },
+            ],
             'react/no-unescaped-entities': 'warn',
             'react/no-children-prop': 'warn',
             'react/display-name': 'warn',

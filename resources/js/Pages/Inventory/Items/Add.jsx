@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Head, router, usePage, useForm } from '@inertiajs/react';
+import { Head, usePage, useForm } from '@inertiajs/react';
 import {
     Box,
     Button,

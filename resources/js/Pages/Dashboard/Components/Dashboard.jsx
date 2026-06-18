@@ -27,7 +27,6 @@ import {
     Collapse,
     CircularProgress,
     Snackbar,
-    useTheme,
     alpha,
     styled,
 } from '@mui/material';

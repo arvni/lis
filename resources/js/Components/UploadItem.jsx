@@ -6,7 +6,6 @@ import {
     Card,
     Box,
     IconButton,
-    Menu,
     MenuItem,
     Select,
     FormControl,
@@ -56,7 +55,6 @@ const UploadItem = ({
     // declared unconditionally at the top level of the component).
     const [isEditingTag, setIsEditingTag] = useState(false);
     const [selectedTag, setSelectedTag] = useState(value?.tag || 'TEMP');
-
 
     // Determine file icon based on file type
     const getFileIcon = () => {

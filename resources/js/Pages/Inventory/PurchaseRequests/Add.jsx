@@ -15,7 +15,6 @@ import {
     TableBody,
     TableRow,
     TableCell,
-    Typography,
     CircularProgress,
     Alert,
 } from '@mui/material';
