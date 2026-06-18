@@ -9,16 +9,7 @@ import {
 } from '@mui/icons-material';
 import React from 'react';
 import PropTypes from 'prop-types';
-
-// Helper function to format file size.
-const formatFileSize = (bytes) => {
-    if (!bytes || typeof bytes !== 'number') return 'Unknown size';
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-};
+import { formatFileSize } from '@/Services/helper';
 
 // File type icon component.
 const FileTypeIcon = ({ fileType }) => {

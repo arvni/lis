@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.jsx';
 import Dashboard from './Components/Dashboard.jsx';
 import { Head, router } from '@inertiajs/react';
-import { Box, Button, Card, CardContent, Chip, Typography } from '@mui/material';
+import { Box, Card, CardContent, Chip, Typography } from '@mui/material';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
 
 const PendingApprovalsWidget = ({ count }) => {

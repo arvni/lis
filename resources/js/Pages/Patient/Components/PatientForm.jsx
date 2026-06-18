@@ -25,7 +25,6 @@ import {
 } from '@mui/material';
 import {
     Man2,
-    QuestionMark,
     Woman2,
     Transgender,
     Block,

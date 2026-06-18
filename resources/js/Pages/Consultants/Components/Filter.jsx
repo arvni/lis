@@ -1,7 +1,6 @@
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import React, { useState } from 'react';
-import SelectSearch from '@/Components/SelectSearch.jsx';
 import FilterTemplate from '@/Components/FilterWraper.jsx';
 
 const Filter = ({ defaultFilter, onFilter }) => {

@@ -7,7 +7,6 @@ import {
     CardContent,
     Chip,
     Divider,
-    FormControlLabel,
     Grid,
     IconButton,
     Stack,

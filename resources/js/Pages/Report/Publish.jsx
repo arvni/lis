@@ -1,21 +1,11 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import { GridActionsCellItem } from '@mui/x-data-grid';
-import {
-    RemoveRedEye,
-    Publish,
-    Schedule,
-    Person,
-    Science,
-    WhatsApp,
-    Email,
-    CheckCircle,
-} from '@mui/icons-material';
+import { RemoveRedEye, Publish, Person, Science, WhatsApp, Email } from '@mui/icons-material';
 import TableLayout from '@/Layouts/TableLayout';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Filter from './Components/Filter';
-import { Stack, Typography, Chip, Box, Tooltip, Avatar, Badge } from '@mui/material';
-import { formatDate } from '@/Services/helper.js';
+import { Stack, Typography, Chip, Box, Tooltip } from '@mui/material';
 import PageHeader from '@/Components/PageHeader.jsx';
 import OnlyPublish from '@/Pages/Report/Components/OnlyPublish.jsx';
 

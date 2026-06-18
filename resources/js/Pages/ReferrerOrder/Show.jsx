@@ -40,7 +40,6 @@ import {
     CalendarToday,
     Email,
     Phone,
-    LocationOn,
     HomeWork,
     Public,
     Male,
@@ -54,7 +53,6 @@ import {
     ExpandMore,
     ExpandLess,
     Biotech,
-    LocalShipping,
     AssignmentTurnedIn,
     MergeType,
 } from '@mui/icons-material';

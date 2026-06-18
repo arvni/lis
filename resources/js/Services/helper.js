@@ -39,6 +39,16 @@ export const calculateBusinessDays = (date, days) => {
     return currentDate;
 };
 
+// Format a byte count into a human-readable size string.
+export const formatFileSize = (bytes) => {
+    if (!bytes || typeof bytes !== 'number') return 'Unknown size';
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
 // Format date
 export const formatDate = (date) => {
     if (!date) return 'N/A';

@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Filter from './Components/Filter';
 import PageHeader from '@/Components/PageHeader.jsx';
 import { Head, router, usePage } from '@inertiajs/react';
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 
 // Material UI components
 import { Paper, Box, Chip, Tooltip, IconButton, Typography, Button, Alert } from '@mui/material';

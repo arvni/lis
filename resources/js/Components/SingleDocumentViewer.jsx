@@ -37,6 +37,7 @@ import {
     TextFields,
     Error as ErrorIcon,
 } from '@mui/icons-material';
+import { formatFileSize } from '@/Services/helper';
 
 // Lazy load all viewer components
 const GenericFileViewer = lazy(() => import('@/Components/GenericFileViewer.jsx'));
@@ -63,16 +64,6 @@ const LoadingComponent = () => (
         </Typography>
     </Box>
 );
-
-// Helper function to format file size
-const formatFileSize = (bytes) => {
-    if (!bytes || typeof bytes !== 'number') return 'Unknown size';
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-};
 
 // File Type icon component
 const FileTypeIcon = ({ fileType }) => {

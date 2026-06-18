@@ -1,20 +1,13 @@
 import Container from '@mui/material/Container';
-import { Box, Button, Chip, Stack, FormControlLabel, Switch, Typography } from '@mui/material';
+import { Box, Button, Stack, FormControlLabel, Switch } from '@mui/material';
 import React from 'react';
 import PatientInfo from '@/Pages/Patient/Components/PatientInfo';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import TestInfo from './Components/TestInfo';
-import TimeLine from './Components/TimeLine';
 import ReportInfo from './Components/ReportInfo';
 import SectionsInfo from './Components/SectionsInfo';
 import { Head, router, Link } from '@inertiajs/react';
-import {
-    Assignment as AssignmentIcon,
-    Timeline as TimelineIcon,
-    LocalOffer as TagIcon,
-} from '@mui/icons-material';
-import TagManager from '@/Components/TagManager';
-import TagChip from '@/Components/TagChip';
+import { Assignment as AssignmentIcon, Timeline as TimelineIcon } from '@mui/icons-material';
 import InlineTagManager from '@/Components/InlineTagManager';
 
 const Show = ({

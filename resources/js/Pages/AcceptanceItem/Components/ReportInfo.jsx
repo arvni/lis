@@ -18,7 +18,6 @@ import {
 } from '@mui/material';
 import {
     ExpandMore as ExpandMoreIcon,
-    Description as DescriptionIcon,
     Person as PersonIcon,
     CheckCircle as ApproveIcon,
     CalendarToday as DateIcon,
