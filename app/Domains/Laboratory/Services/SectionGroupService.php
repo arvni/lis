@@ -56,6 +56,7 @@ class SectionGroupService
             'sections' => function ($q) use ($permittedSections) {
                 $q->whereIn('sections.id', $permittedSections);
                 $q->isActive();
+                $q->with('sectionGroup:id,name');
                 $q->withCount([
                     "waitingItems",
                     "processingItems",
@@ -66,6 +67,7 @@ class SectionGroupService
             'children' => function ($q) use ($permittedSectionGroups) {
                 $q->whereIn("section_groups.id", $permittedSectionGroups);
                 $q->active();
+                $q->with('parent:id,name');
                 $q->withCount([
                     "waitingItems",
                     "processingItems",
