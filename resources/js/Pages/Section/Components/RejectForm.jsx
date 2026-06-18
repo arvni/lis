@@ -62,7 +62,7 @@ const DoneForm = ({ open, onClose, acceptanceItemState, onChange, onSubmit, opti
                         value={item?.value}
                         label={item.name}
                         name={item.name}
-                        url={route('documents.upload', {
+                        url={route('documents.store', {
                             ownerClass: 'Patient',
                             id: acceptanceItemState.patient.id,
                         })}
