@@ -299,5 +299,6 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
         </Box>
     );
 });
+AcceptanceItemsFilter.displayName = 'AcceptanceItemsFilter';
 
 export default AcceptanceItemsFilter;

@@ -300,5 +300,6 @@ const Filter = memo(
     (prevProps, nextProps) =>
         JSON.stringify(prevProps.defaultFilter) !== JSON.stringify(nextProps.defaultFilter),
 );
+Filter.displayName = 'Filter';
 
 export default Filter;

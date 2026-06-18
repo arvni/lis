@@ -16,7 +16,7 @@ export const getPatientByIdNo = (idNo, callback) =>
         .then((res) => callback(res.data))
         .catch((e) => callback(e));
 
-export default function ({ data, setData, back, edit, next, step, ...rest }) {
+export default function PatientFormWizard({ data, setData, back, edit, next, step, ...rest }) {
     const [errors, setErrors] = useState({});
     useEffect(() => {
         if (rest.relative)

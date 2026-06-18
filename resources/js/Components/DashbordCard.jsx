@@ -4,19 +4,20 @@ import { Divider } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import PropTypes from 'prop-types';
 
-const renderElement = (value, level) => (key, index) => {
-    level += 1;
-    if (typeof value[key] != 'object')
-        return (
-            <Grid size={12} display="flex" gap={2} sx={{ alignItems: 'center' }}>
-                <Typography align="left" variant="h6">
-                    {key}
-                </Typography>
-                <Typography align="right">{value[key]}</Typography>
-            </Grid>
-        );
-    return <DashboardCard title={key} value={value[key]} level={level} />;
-};
+const renderElement = (value, level) =>
+    function renderItem(key, index) {
+        level += 1;
+        if (typeof value[key] != 'object')
+            return (
+                <Grid size={12} display="flex" gap={2} sx={{ alignItems: 'center' }}>
+                    <Typography align="left" variant="h6">
+                        {key}
+                    </Typography>
+                    <Typography align="right">{value[key]}</Typography>
+                </Grid>
+            );
+        return <DashboardCard title={key} value={value[key]} level={level} />;
+    };
 const DashboardCard = ({ title, value, level = 0 }) => {
     level += 1;
     return (

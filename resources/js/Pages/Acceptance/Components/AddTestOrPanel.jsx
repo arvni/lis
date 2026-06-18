@@ -526,6 +526,7 @@ const SampleRow = memo(
         );
     },
 );
+SampleRow.displayName = 'SampleRow';
 
 // ─── Pricing Section ───────────────────────────────────────────────────────────
 const PricingSection = ({

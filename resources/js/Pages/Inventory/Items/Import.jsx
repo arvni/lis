@@ -101,6 +101,7 @@ const CellInput = memo(({ value, onChange, type = 'text', highlight }) => (
         }
     />
 ));
+CellInput.displayName = 'CellInput';
 
 const CellSelect = memo(({ value, onChange, options, allowEmpty }) => (
     <select
@@ -118,6 +119,7 @@ const CellSelect = memo(({ value, onChange, options, allowEmpty }) => (
         ))}
     </select>
 ));
+CellSelect.displayName = 'CellSelect';
 
 // ─── Memoized row ─────────────────────────────────────────────────────────────
 const Row = memo(({ row, idx, opts, onUpdate, onDelete }) => {
@@ -163,6 +165,7 @@ const Row = memo(({ row, idx, opts, onUpdate, onDelete }) => {
         </TableRow>
     );
 });
+Row.displayName = 'Row';
 
 // ─── Main component ───────────────────────────────────────────────────────────
 const ItemImport = () => {

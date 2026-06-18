@@ -257,5 +257,6 @@ const ParameterInput = memo(
         prevProps.parameter.type !== nextProps.parameter.type &&
         prevProps.value !== nextProps.value,
 );
+ParameterInput.displayName = 'ParameterInput';
 
 export default ParameterInput;

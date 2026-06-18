@@ -351,5 +351,6 @@ const ShowFilter = memo(
     (prevProps, nextProps) =>
         JSON.stringify(prevProps.defaultFilter) !== JSON.stringify(nextProps.defaultFilter),
 );
+ShowFilter.displayName = 'ShowFilter';
 
 export default ShowFilter;

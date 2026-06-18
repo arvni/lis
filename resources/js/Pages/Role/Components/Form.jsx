@@ -128,6 +128,7 @@ const Permission = memo(({ onChange, checked, permission, label, level, disabled
         </Tooltip>
     );
 });
+Permission.displayName = 'Permission';
 
 // Separate component for permission group to improve code organization
 const PermissionGroup = memo(
@@ -284,6 +285,7 @@ const PermissionGroup = memo(
         );
     },
 );
+PermissionGroup.displayName = 'PermissionGroup';
 
 // Separate component for permission children to improve code organization
 const PermissionChildren = memo(
@@ -368,6 +370,7 @@ const PermissionChildren = memo(
         );
     },
 );
+PermissionChildren.displayName = 'PermissionChildren';
 
 // Actions component for the permissions section
 const PermissionActions = memo(
@@ -473,6 +476,7 @@ const PermissionActions = memo(
         );
     },
 );
+PermissionActions.displayName = 'PermissionActions';
 
 export default function RoleManager({
     data,
