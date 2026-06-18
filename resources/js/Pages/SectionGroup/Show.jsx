@@ -3,6 +3,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import TableLayout from '@/Layouts/TableLayout';
 import AcceptanceItemsFilter from './Components/AcceptanceItemsFilter';
 import InlineTagManager from '@/Components/InlineTagManager';
+import SectionGroupAddForm from './Components/AddForm';
+import SectionAddForm from '@/Pages/Section/Components/AddForm';
 import { Head, Link, router, useRemember } from '@inertiajs/react';
 import {
     Typography,
@@ -40,6 +42,7 @@ import {
     HourglassEmpty as HourglassEmptyIcon,
     DashboardOutlined as DashboardIcon,
     ArrowBack as ArrowBackIcon,
+    Edit as EditIcon,
 } from '@mui/icons-material';
 
 // Grid component with better naming
@@ -78,6 +81,9 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
     const [menuAnchorEl, setMenuAnchorEl] = useState(null);
     const [menuItemId, setMenuItemId] = useState(null);
     const [menuItemType, setMenuItemType] = useState(null);
+    const [menuItem, setMenuItem] = useState(null);
+    // { item, type } captured when the user picks Edit from a node's menu.
+    const [editTarget, setEditTarget] = useState(null);
     const [hoveredCard, setHoveredCard] = useState(null);
 
     // Calculate stats
@@ -251,10 +257,11 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
     );
 
     // Handle card menu actions
-    const handleMenuOpen = (event, id, type) => {
+    const handleMenuOpen = (event, item, type) => {
         event.stopPropagation();
         setMenuAnchorEl(event.currentTarget);
-        setMenuItemId(id);
+        setMenuItem(item);
+        setMenuItemId(item.id);
         setMenuItemType(type);
     };
 
@@ -262,7 +269,18 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
         setMenuAnchorEl(null);
         setMenuItemId(null);
         setMenuItemType(null);
+        setMenuItem(null);
     };
+
+    // Open the edit modal for the node currently selected in the menu.
+    const handleEdit = () => {
+        if (menuItem && menuItemType) {
+            setEditTarget({ item: menuItem, type: menuItemType });
+        }
+        handleMenuClose();
+    };
+
+    const handleEditClose = () => setEditTarget(null);
 
     const handleView = () => {
         if (menuItemType === 'sectionGroup') {
@@ -650,7 +668,7 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
                                                             onClick={(e) =>
                                                                 handleMenuOpen(
                                                                     e,
-                                                                    item.id,
+                                                                    item,
                                                                     'sectionGroup',
                                                                 )
                                                             }
@@ -814,7 +832,7 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
                                                             onClick={(e) =>
                                                                 handleMenuOpen(
                                                                     e,
-                                                                    item.id,
+                                                                    item,
                                                                     'section',
                                                                 )
                                                             }
@@ -979,7 +997,23 @@ const Show = ({ sectionGroup, acceptanceItems, requestInputs, status, success, e
                     <VisibilityIcon fontSize="small" sx={{ mr: 1 }} />
                     View Details
                 </MenuItem>
+
+                <MenuItem onClick={handleEdit}>
+                    <EditIcon fontSize="small" sx={{ mr: 1 }} />
+                    Edit
+                </MenuItem>
             </Menu>
+
+            {editTarget?.type === 'sectionGroup' && (
+                <SectionGroupAddForm
+                    open
+                    onClose={handleEditClose}
+                    defaultData={editTarget.item}
+                />
+            )}
+            {editTarget?.type === 'section' && (
+                <SectionAddForm open onClose={handleEditClose} defaultValue={editTarget.item} />
+            )}
         </Container>
     );
 };
