@@ -333,7 +333,7 @@ const Authenticated = ({ auth, breadcrumbs, children, title }) => {
             icon: <SettingsIcon fontSize="small" />,
             onClick: () => {
                 handleMenuClose();
-                router.visit(route('settings'));
+                router.visit(route('settings.index'));
             },
         },
         {
