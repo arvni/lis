@@ -129,7 +129,7 @@ export default function Welcome(props) {
         for (let key in errors) {
             enqueueSnackbar(errors[key], { variant: 'error' });
         }
-    }, [errors]);
+    }, [errors, enqueueSnackbar]);
 
     const onHandleChange = (event) => {
         setData(

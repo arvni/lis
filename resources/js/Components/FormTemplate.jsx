@@ -29,7 +29,7 @@ export const FormProvider = ({
 
     useEffect(() => {
         setData(defaultValue);
-    }, [defaultValue]);
+    }, [defaultValue, setData]);
 
     // Clear form on close
     const handleClose = () => {

@@ -68,7 +68,7 @@ const AddForm = ({ open, onClose, defaultValue }) => {
             // Auto-expand all rows
             setExpandedRows(new Set((merged.barcodes || []).map((_, i) => i)));
         }
-    }, [defaultValue]);
+    }, [defaultValue, setData]);
 
     const now = new Date().toISOString().slice(0, 16);
 
