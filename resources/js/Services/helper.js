@@ -41,7 +41,7 @@ export const calculateBusinessDays = (date, days) => {
 
 // Format a byte count into a human-readable size string.
 export const formatFileSize = (bytes) => {
-    if (!bytes || typeof bytes !== 'number') return 'Unknown size';
+    if (typeof bytes !== 'number' || Number.isNaN(bytes) || bytes < 0) return 'Unknown size';
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
