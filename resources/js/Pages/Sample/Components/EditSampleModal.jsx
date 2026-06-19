@@ -22,7 +22,7 @@ const EditSampleModal = ({ open, sample, onClose }) => {
             setData('barcode', sample.barcode ?? '');
             clearErrors();
         }
-    }, [sample]);
+    }, [sample, setData, clearErrors]);
 
     const handleClose = () => {
         reset();
