@@ -34,7 +34,7 @@ const Form = ({ defaultValues, open, onClose, id, withRelative = false, mainPati
             referrer_order_id: id,
             relative_id: null,
         }));
-    }, [mainPatientId]);
+    }, [mainPatientId, id, setData]);
     const handleSubmit = () => {
         console.log(data);
         // Use different route based on whether it's a relative or main patient
