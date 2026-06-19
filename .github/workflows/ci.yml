@@ -136,7 +136,7 @@ jobs:
       # can't creep back up. Remaining warnings are all react-hooks/
       # exhaustive-deps (behavioral). Lower this number as they're addressed.
       - name: Run ESLint
-        run: npm run lint -- --max-warnings 114
+        run: npm run lint -- --max-warnings 113
 
   frontend-tests:
     name: Frontend tests (Vitest)
