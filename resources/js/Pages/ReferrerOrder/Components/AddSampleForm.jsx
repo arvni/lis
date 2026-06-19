@@ -51,7 +51,7 @@ const Form = ({
             }));
             setData({ barcodes: initializedBarcodes });
         }
-    }, [isPooling, barcodes]);
+    }, [isPooling, barcodes, setData]);
 
     // Get current datetime in local timezone format
     const now = useMemo(() => {

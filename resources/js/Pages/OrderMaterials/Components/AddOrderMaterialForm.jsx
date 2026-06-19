@@ -49,7 +49,7 @@ const AddOrderMaterialForm = ({ open, onClose }) => {
             }
             return { ...prev, materials: prev.materials.slice(0, count) };
         });
-    }, [data.amount]);
+    }, [data.amount, setData]);
 
     const handleClose = useCallback(() => {
         reset();
