@@ -13,7 +13,7 @@ const AlertComponent = ({ success, status, errors }) => {
                 const msg = Array.isArray(errors[item]) ? errors[item][0] : errors[item];
                 if (msg) enqueueSnackbar(msg, { variant: 'warning' });
             }
-    }, [success, status, errors]);
+    }, [success, status, errors, enqueueSnackbar]);
     return <React.Fragment />;
 };
 
