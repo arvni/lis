@@ -30,11 +30,21 @@ export default function ReferrerForm({
 }) {
     const [emailInput, setEmailInput] = useState('');
 
+    const onChange = useCallback(
+        (key, value) => {
+            setData((prevState) => ({ ...prevState, [key]: value }));
+        },
+        [setData],
+    );
+
     // Memoized handlers
-    const handleChange = useCallback((e) => {
-        const { name, type, checked, value } = e.target;
-        onChange(name, type === 'checkbox' ? checked : value);
-    }, []);
+    const handleChange = useCallback(
+        (e) => {
+            const { name, type, checked, value } = e.target;
+            onChange(name, type === 'checkbox' ? checked : value);
+        },
+        [onChange],
+    );
 
     const handleBillingInfoChange = useCallback(
         (e) => {
@@ -44,7 +54,7 @@ export default function ReferrerForm({
                 [name]: value,
             });
         },
-        [data.billingInfo],
+        [data.billingInfo, onChange],
     );
 
     const handleLogisticInfoChange = useCallback(
@@ -55,7 +65,7 @@ export default function ReferrerForm({
                 [name]: value,
             });
         },
-        [data.logisticInfo],
+        [data.logisticInfo, onChange],
     );
 
     const handleLocationChange = useCallback(
@@ -66,14 +76,7 @@ export default function ReferrerForm({
                 longitude,
             });
         },
-        [data.logisticInfo],
-    );
-
-    const onChange = useCallback(
-        (key, value) => {
-            setData((prevState) => ({ ...prevState, [key]: value }));
-        },
-        [setData],
+        [data.logisticInfo, onChange],
     );
 
     // Report receivers handlers

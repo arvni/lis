@@ -74,23 +74,6 @@ const SimplifiedPDFViewer = ({ fileUrl, fullScreen = false }) => {
         };
     }, [fileUrl]);
 
-    // Handle zoom actions with container size consideration
-    const zoomIn = useCallback(() => {
-        setScale((prevScale) => {
-            const newScale = Math.min(prevScale + 0.2, 3);
-            updateIframeScale(newScale);
-            return newScale;
-        });
-    }, []);
-
-    const zoomOut = useCallback(() => {
-        setScale((prevScale) => {
-            const newScale = Math.max(prevScale - 0.2, 0.6);
-            updateIframeScale(newScale);
-            return newScale;
-        });
-    }, []);
-
     // Update iframe scale with proper positioning
     const updateIframeScale = useCallback(
         (newScale) => {
@@ -107,6 +90,23 @@ const SimplifiedPDFViewer = ({ fileUrl, fullScreen = false }) => {
         },
         [containerSize.height],
     );
+
+    // Handle zoom actions with container size consideration
+    const zoomIn = useCallback(() => {
+        setScale((prevScale) => {
+            const newScale = Math.min(prevScale + 0.2, 3);
+            updateIframeScale(newScale);
+            return newScale;
+        });
+    }, [updateIframeScale]);
+
+    const zoomOut = useCallback(() => {
+        setScale((prevScale) => {
+            const newScale = Math.max(prevScale - 0.2, 0.6);
+            updateIframeScale(newScale);
+            return newScale;
+        });
+    }, [updateIframeScale]);
 
     // Force refresh of PDF
     const refreshPDF = useCallback(() => {

@@ -78,49 +78,7 @@ const EditForm = ({ openEdit, onClose, reservation }) => {
         note: reservation?.note || '',
     });
 
-    // Load available times when consultant or date changes
-    useEffect(() => {
-        if (data.consultant && data.dueDate) {
-            setWaiting(true);
-            getTimes();
-        } else {
-            setTimes([]);
-        }
-    }, [data.consultant, data.dueDate]);
-
-    // Set initial customer options if reservation exists
-    useEffect(() => {
-        if (reservation?.reservable && reservation.reservable_type === 'customer') {
-            setOptions([reservation.reservable]);
-        }
-    }, [reservation]);
-
-    useEffect(() => {
-        if (reservation) {
-            setData({
-                consultant: reservation?.consultant || '',
-                dueDate: reservation?.started_at
-                    ? formatDate(new Date(reservation.started_at))
-                    : '',
-                time: reservation?.started_at
-                    ? new Date(reservation.started_at).toLocaleTimeString('en-US', {
-                          hour12: false,
-                          hour: '2-digit',
-                          minute: '2-digit',
-                      })
-                    : null,
-                customer: {
-                    id: reservation?.reservable?.id || '',
-                    phone: reservation?.reservable?.phone || '',
-                    name: reservation?.reservable?.name || '',
-                    email: reservation?.reservable?.email || '',
-                },
-                note: reservation?.note || '',
-            });
-        }
-    }, [open, reservation]);
-
-    const getTimes = () => {
+    const getTimes = useCallback(() => {
         axios
             .get(
                 route('list-reservation-times', {
@@ -153,7 +111,49 @@ const EditForm = ({ openEdit, onClose, reservation }) => {
                 console.error('Error fetching times:', error);
                 setWaiting(false);
             });
-    };
+    }, [data.consultant, data.dueDate, reservation]);
+
+    // Load available times when consultant or date changes
+    useEffect(() => {
+        if (data.consultant && data.dueDate) {
+            setWaiting(true);
+            getTimes();
+        } else {
+            setTimes([]);
+        }
+    }, [data.consultant, data.dueDate, getTimes]);
+
+    // Set initial customer options if reservation exists
+    useEffect(() => {
+        if (reservation?.reservable && reservation.reservable_type === 'customer') {
+            setOptions([reservation.reservable]);
+        }
+    }, [reservation]);
+
+    useEffect(() => {
+        if (reservation) {
+            setData({
+                consultant: reservation?.consultant || '',
+                dueDate: reservation?.started_at
+                    ? formatDate(new Date(reservation.started_at))
+                    : '',
+                time: reservation?.started_at
+                    ? new Date(reservation.started_at).toLocaleTimeString('en-US', {
+                          hour12: false,
+                          hour: '2-digit',
+                          minute: '2-digit',
+                      })
+                    : null,
+                customer: {
+                    id: reservation?.reservable?.id || '',
+                    phone: reservation?.reservable?.phone || '',
+                    name: reservation?.reservable?.name || '',
+                    email: reservation?.reservable?.email || '',
+                },
+                note: reservation?.note || '',
+            });
+        }
+    }, [open, reservation, setData]);
 
     const handleChange = (e) =>
         setData((previousData) => ({
@@ -208,20 +208,26 @@ const EditForm = ({ openEdit, onClose, reservation }) => {
         return isValid;
     };
 
-    const fetchData = useCallback((_, search) => {
-        setLoading(true);
-        setData((prevData) => ({ ...prevData, customer: { ...prevData.customer, phone: search } }));
-        fetch(route('api.customers.list', { search }))
-            .then((response) => response.json())
-            .then((data) => {
-                setOptions((data.data || []).filter(Boolean));
-                setLoading(false);
-            })
-            .catch(() => {
-                setLoading(false);
-                setOptions([]);
-            });
-    }, []);
+    const fetchData = useCallback(
+        (_, search) => {
+            setLoading(true);
+            setData((prevData) => ({
+                ...prevData,
+                customer: { ...prevData.customer, phone: search },
+            }));
+            fetch(route('api.customers.list', { search }))
+                .then((response) => response.json())
+                .then((data) => {
+                    setOptions((data.data || []).filter(Boolean));
+                    setLoading(false);
+                })
+                .catch(() => {
+                    setLoading(false);
+                    setOptions([]);
+                });
+        },
+        [setData],
+    );
 
     // Handle customer selection
     const handleCustomerSelect = (event, newValue) => {

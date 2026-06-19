@@ -138,6 +138,8 @@ const TemplateParameters = ({ data, setData }) => {
                 ],
             });
         }
+        // Mount-only: seed a single empty parameter when none exist.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Render parameter form

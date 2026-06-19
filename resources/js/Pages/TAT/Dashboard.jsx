@@ -220,10 +220,12 @@ const Dashboard = () => {
         [af],
     );
 
-    // initial load
+    // initial load (mount-only; both fetchers default to the current filter snapshot,
+    // and explicit filter changes call them directly via applyFilters)
     useEffect(() => {
         fetchItems();
         fetchAnalytics();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const applyFilters = (newFilters) => {

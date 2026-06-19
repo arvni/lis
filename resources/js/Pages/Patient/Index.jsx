@@ -254,7 +254,7 @@ const Index = () => {
             setData({ _method: 'delete', ...params });
             setOpenDeleteForm(true);
         },
-        [],
+        [setData],
     );
 
     const pageReload = useCallback(
@@ -274,14 +274,14 @@ const Index = () => {
     const handleCloseDeleteForm = useCallback(() => {
         reset();
         setOpenDeleteForm(false);
-    }, []);
+    }, [reset]);
 
     const handleDestroy = useCallback(
         () =>
             post(route('patients.destroy', data.id), {
                 onSuccess: handleCloseDeleteForm,
             }),
-        [data.id],
+        [data.id, post, handleCloseDeleteForm],
     );
 
     const addPatient = useCallback(() => router.visit(route('patients.create')), []);
@@ -415,7 +415,7 @@ const Index = () => {
                 },
             },
         ],
-        [showPatient, deletePatient],
+        [showPatient, deletePatient, canDelete],
     );
 
     return (

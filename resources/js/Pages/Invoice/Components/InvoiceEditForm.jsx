@@ -314,7 +314,10 @@ const InvoiceEditForm = ({ invoice, open, onClose, onSubmit, onChange }) => {
     const status = formData.status || STATUS_OPTIONS[0].value;
     const meta = statusMeta(status);
 
-    const items = Array.isArray(formData.invoice_items) ? formData.invoice_items : [];
+    const items = useMemo(
+        () => (Array.isArray(formData.invoice_items) ? formData.invoice_items : []),
+        [formData.invoice_items],
+    );
     const activeItems = useMemo(() => items.filter((it) => !it._destroy), [items]);
 
     const totals = useMemo(() => {

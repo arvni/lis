@@ -252,7 +252,7 @@ const Merge = () => {
         if (!comparison) return;
         setChoices(smartDefaults(fields, 'fields', comparison, keepSide));
         setMetaChoices(smartDefaults(metaFields, 'meta', comparison, keepSide));
-    }, [comparison, keepSide]);
+    }, [comparison, keepSide, fields, metaFields]);
 
     const keepPatient = comparison?.[keepSide];
     const removePatient = comparison?.[keepSide === 'first' ? 'second' : 'first'];
@@ -278,7 +278,7 @@ const Merge = () => {
             (k) => (comparison.first.meta[k] ?? '') !== (comparison.second.meta[k] ?? ''),
         ).length;
         return f + m;
-    }, [comparison]);
+    }, [comparison, fields, metaFields]);
 
     const submit = () => {
         if (!comparison) return;

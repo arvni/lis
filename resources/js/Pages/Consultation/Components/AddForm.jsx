@@ -72,16 +72,7 @@ const AddForm = ({ openAdd, onClose }) => {
         note: '',
     });
 
-    useEffect(() => {
-        if (data.consultant && data.dueDate) {
-            setWaiting(true);
-            getTimes();
-        } else {
-            setTimes([]);
-        }
-    }, [data.consultant, data.dueDate]);
-
-    const getTimes = () => {
+    const getTimes = useCallback(() => {
         axios
             .get(
                 route('list-reservation-times', {
@@ -95,7 +86,16 @@ const AddForm = ({ openAdd, onClose }) => {
                 console.error('Error fetching times:', error);
                 setWaiting(false);
             });
-    };
+    }, [data.consultant, data.dueDate]);
+
+    useEffect(() => {
+        if (data.consultant && data.dueDate) {
+            setWaiting(true);
+            getTimes();
+        } else {
+            setTimes([]);
+        }
+    }, [data.consultant, data.dueDate, getTimes]);
 
     const handleChange = (e) =>
         setData((previousData) => ({
@@ -156,7 +156,7 @@ const AddForm = ({ openAdd, onClose }) => {
                     setOptions([]);
                 });
         },
-        [open],
+        [setData],
     );
 
     // Handle customer selection

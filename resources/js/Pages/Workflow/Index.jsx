@@ -14,11 +14,14 @@ const Index = () => {
     const { workflows, status, success, requestInputs } = usePage().props;
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const [workflow, setWorkflow] = useState();
-    const editWorkflow = useCallback((id) => () => router.visit(route('workflows.edit', id)));
-    const deleteWorkflow = (params) => () => {
-        setWorkflow(params);
-        setOpenDeleteForm(true);
-    };
+    const editWorkflow = useCallback((id) => () => router.visit(route('workflows.edit', id)), []);
+    const deleteWorkflow = useCallback(
+        (params) => () => {
+            setWorkflow(params);
+            setOpenDeleteForm(true);
+        },
+        [],
+    );
     const pageReload = useCallback(
         (page, filters, sort, pageSize) =>
             router.visit(route('workflows.index'), {
@@ -38,7 +41,7 @@ const Index = () => {
                 { _method: 'delete' },
                 { onSuccess: handleCloseDeleteForm },
             ),
-        [handleCloseDeleteForm],
+        [workflow?.id, handleCloseDeleteForm],
     );
     const addNew = useCallback(() => router.visit(route('workflows.create')), []);
 

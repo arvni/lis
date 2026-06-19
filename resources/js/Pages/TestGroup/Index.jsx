@@ -50,11 +50,11 @@ const Index = () => {
             }),
         [],
     );
-    const handleCloseDeleteForm = () => {
+    const handleCloseDeleteForm = useCallback(() => {
         setTestGroup(null);
         setOpenDeleteForm(false);
         setOpenAddForm(false);
-    };
+    }, []);
     const handleDestroy = useCallback(() => {
         router.post(
             route('testGroups.destroy', testGroup.id),

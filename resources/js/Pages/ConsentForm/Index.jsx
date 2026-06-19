@@ -69,14 +69,14 @@ const Index = () => {
                 only: ['consentForms', 'status', 'success', 'requestInputs'],
             });
         },
-        [],
+        [requestInputs],
     );
     const handleCloseDeleteForm = useCallback(() => {
         setConsentForm(null);
         if (openDeleteForm) setOpenDeleteForm(false);
         if (openAddForm) setOpenAddForm(false);
         pageReload();
-    }, [openDeleteForm, openAddForm]);
+    }, [openDeleteForm, openAddForm, pageReload]);
     const handleDestroy = useCallback(
         () =>
             router.post(
@@ -84,7 +84,7 @@ const Index = () => {
                 { _method: 'delete' },
                 { onSuccess: handleCloseDeleteForm },
             ),
-        [consentForm?.id],
+        [consentForm?.id, handleCloseDeleteForm],
     );
     const addNew = useCallback(() => setOpenAddForm(true), []);
 

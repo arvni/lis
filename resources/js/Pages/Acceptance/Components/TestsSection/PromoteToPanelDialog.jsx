@@ -69,6 +69,9 @@ const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [] }) => {
             })
             .catch(() => setError('Failed to load panels.'))
             .finally(() => setLoadingPanels(false));
+        // On-open fetch: selectedMethodIds is recomputed from props each render, so it
+        // is not a stable dependency; panels are loaded when the dialog opens.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
     // Fetch panel details (method_tests) when a panel is selected

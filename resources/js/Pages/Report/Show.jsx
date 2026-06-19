@@ -163,7 +163,7 @@ const Show = ({
                 enqueueSnackbar(`${item}: ${errors[item]}`, { variant: 'error' }),
             );
         }
-    }, [wasSuccessful, hasErrors]);
+    }, [wasSuccessful, hasErrors, errors, enqueueSnackbar]);
 
     // Submit approval
     const approve = () => {

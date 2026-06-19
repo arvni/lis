@@ -44,6 +44,10 @@ const DiscountManager = ({
 
     useEffect(() => {
         handleDiscountChange();
+        // Mount-only: push the initial computed discount up to the parent once.
+        // handleDiscountChange is recreated each render and calls the onChange prop,
+        // so depending on it would risk a re-notify loop.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Calculate total discount amount

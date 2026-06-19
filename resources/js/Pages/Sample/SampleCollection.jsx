@@ -19,20 +19,23 @@ const Index = () => {
     const [loading, setLoading] = useState(false);
     const [barcodes, setBarcodes] = useState({ barcodes: [] });
 
-    const print = (id) => () => {
-        if (id) {
-            setLoading(true);
-            axios
-                .get(route('api.sampleCollection.list', id))
-                .then((res) => {
-                    setBarcodes({ ...res.data, acceptanceId: id });
-                })
-                .then(() => {
-                    setLoading(false);
-                    setOpenPrint(true);
-                });
-        }
-    };
+    const print = useCallback(
+        (id) => () => {
+            if (id) {
+                setLoading(true);
+                axios
+                    .get(route('api.sampleCollection.list', id))
+                    .then((res) => {
+                        setBarcodes({ ...res.data, acceptanceId: id });
+                    })
+                    .then(() => {
+                        setLoading(false);
+                        setOpenPrint(true);
+                    });
+            }
+        },
+        [],
+    );
     const handleCloseBarcodes = () => {
         setOpenPrint(false);
         setBarcodes({ barcodes: [] });

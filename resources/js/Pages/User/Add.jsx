@@ -41,7 +41,7 @@ const Add = ({ errors: initialErrors }) => {
     }, [initialErrors]);
 
     // Validate form before submission
-    const validateForm = () => {
+    const validateForm = useCallback(() => {
         const newErrors = {};
 
         // Basic validation example (can be extended)
@@ -60,7 +60,7 @@ const Add = ({ errors: initialErrors }) => {
             newErrors.password_confirmation = 'Passwords do not match';
 
         return newErrors;
-    };
+    }, [data]);
 
     // Handle form submission
     const handleSubmit = useCallback(() => {
@@ -100,7 +100,7 @@ const Add = ({ errors: initialErrors }) => {
                 });
             },
         });
-    }, [data, post]);
+    }, [post, validateForm]);
 
     // Handle form cancellation
     const handleCancel = useCallback(() => {

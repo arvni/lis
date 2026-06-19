@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Autocomplete, TextField, CircularProgress } from '@mui/material';
 import axios from 'axios';
 
@@ -26,6 +26,27 @@ const BrandInput = ({
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    const fetchSuggestions = useCallback(
+        (search) => {
+            if (!itemId) return;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(async () => {
+                setLoading(true);
+                try {
+                    const { data } = await axios.get(route('api.inventory.brands.suggestions'), {
+                        params: { item_id: itemId, search },
+                    });
+                    setOptions(data);
+                } catch {
+                    setOptions([]);
+                } finally {
+                    setLoading(false);
+                }
+            }, 250);
+        },
+        [itemId],
+    );
+
     // Load suggestions whenever itemId changes or on first mount
     useEffect(() => {
         if (!itemId) {
@@ -33,25 +54,7 @@ const BrandInput = ({
             return;
         }
         fetchSuggestions('');
-    }, [itemId]);
-
-    const fetchSuggestions = (search) => {
-        if (!itemId) return;
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(async () => {
-            setLoading(true);
-            try {
-                const { data } = await axios.get(route('api.inventory.brands.suggestions'), {
-                    params: { item_id: itemId, search },
-                });
-                setOptions(data);
-            } catch {
-                setOptions([]);
-            } finally {
-                setLoading(false);
-            }
-        }, 250);
-    };
+    }, [itemId, fetchSuggestions]);
 
     return (
         <Autocomplete

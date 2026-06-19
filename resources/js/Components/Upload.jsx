@@ -691,12 +691,14 @@ const Upload = ({
 
     // --- Cleanup Effect ---
     useEffect(() => {
+        // Capture the ref's Map (never reassigned, only mutated) for use in cleanup.
+        const cancelTokens = cancelTokenMap.current;
         // Clean up any pending cancel tokens on unmount
         return () => {
-            cancelTokenMap.current.forEach((source) => {
+            cancelTokens.forEach((source) => {
                 source.cancel('Component unmounted');
             });
-            cancelTokenMap.current.clear();
+            cancelTokens.clear();
         };
     }, []);
 

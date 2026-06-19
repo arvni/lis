@@ -122,7 +122,7 @@ const DocumentsInfo = ({
         } else {
             setFilteredDocuments(documents.filter((doc) => doc.tag === activeTab));
         }
-    }, [documents]);
+    }, [documents, activeTab]);
 
     // Filter documents when tab changes
     useEffect(() => {

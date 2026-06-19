@@ -26,12 +26,12 @@ const Add = (props) => {
     const [step, setStep] = useState(0);
     useEffect(() => {
         setData(patient);
-    }, []);
+    }, [setData]);
     useEffect(() => {
         props.patient
             ? setData((prevData) => ({ ...prevData, ...props.patient, _method: 'put' }))
             : null;
-    }, [props]);
+    }, [props, setData]);
     const save = () => {
         switch (step) {
             case 0:

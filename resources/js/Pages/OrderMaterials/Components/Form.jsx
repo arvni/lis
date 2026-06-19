@@ -69,7 +69,7 @@ const FormContent = () => {
             setMaterialsList(newMaterials);
             setData((prev) => ({ ...prev, materials: newMaterials }));
         }
-    }, [data.amount, materialsList.length, setData]); // Added missing dependencies
+    }, [data.amount, materialsList, setData]);
 
     const handleMaterialChange = (index, field, value) => {
         const newMaterials = [...materialsList];

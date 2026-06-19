@@ -123,6 +123,8 @@ export default function Welcome(props) {
         return () => {
             reset('password');
         };
+        // Mount-only: redirect-if-authenticated and one-shot flash display.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {

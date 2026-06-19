@@ -33,8 +33,8 @@ const SupplierSelect = ({
 
     // Seed options with current value so it renders on load
     useEffect(() => {
-        if (value && !options.find((o) => o.id === value.id))
-            setOptions((prev) => [value, ...prev]);
+        if (value)
+            setOptions((prev) => (prev.find((o) => o.id === value.id) ? prev : [value, ...prev]));
     }, [value]);
 
     const search = (query) => {

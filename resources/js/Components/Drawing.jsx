@@ -625,6 +625,9 @@ const PedigreeChart = ({
         if (reactFlowInstance) {
             setTimeout(() => fitView({ padding: 0.2 }), 0); // Use timeout to ensure nodes are rendered
         }
+        // Syncs the external defaultValue prop into local node/edge state. Depending on
+        // nodes/edges here would revert in-progress user edits back to defaultValue.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [reactFlowInstance, fitView]);
 
     // Effect to call onChange prop when nodes or edges change
@@ -633,6 +636,9 @@ const PedigreeChart = ({
         if (reactFlowInstance) {
             onChange({ nodes, edges });
         }
+        // Emits the current graph to the parent when nodes/edges change. onChange is the
+        // emit sink, not a trigger; depending on it could re-emit and loop on each render.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nodes, edges, reactFlowInstance]);
 
     // --- Node/Edge Change Handlers ---
@@ -1469,7 +1475,7 @@ const PedigreeChart = ({
             if (singleSelectedNode) {
                 setLocalLabel(singleSelectedNode.data.label || '');
             }
-        }, [singleSelectedNode]);
+        }, []);
 
         if (disabled) return null; // Hide editor completely if disabled
 
@@ -1761,7 +1767,7 @@ const PedigreeChart = ({
 
         useEffect(() => {
             setSelectedStyle(getInitialStyle());
-        }, [singleSelectedEdge]);
+        }, []);
 
         if (disabled) return null; // Don't render modal if disabled
 

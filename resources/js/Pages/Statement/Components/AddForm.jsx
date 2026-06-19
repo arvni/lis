@@ -91,7 +91,7 @@ const AddForm = ({ open, defaultValue = {}, onClose, editMode = false, title }) 
             setSearchTerm('');
             setValidationErrors({});
         }
-    }, [defaultValue, open]);
+    }, [defaultValue, open, currentMonth, editMode, setData]);
 
     // ── Validation ────────────────────────────────────────────────────────────
     const validateForm = useCallback(() => {
