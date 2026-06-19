@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Stack from '@mui/material/Stack';
 import PropTypes from 'prop-types';
 
@@ -30,14 +30,14 @@ const formatTime = (val) => String(val).padStart(2, '0');
 const Counter = ({ date }) => {
     const [time, setTime] = useState(getReturnValues(0));
 
-    const updateTime = () => {
+    const updateTime = useCallback(() => {
         const diff = new Date().getTime() - new Date(date).getTime();
         setTime(getReturnValues(diff));
-    };
+    }, [date]);
 
     useEffect(() => {
         updateTime(); // initial update
-    }, [date]);
+    }, [updateTime]);
 
     useInterval(updateTime, 1000);
 
