@@ -194,7 +194,7 @@ const PaymentDialog = ({ open, onClose, payment, maxAmount, payers, onSave, onDe
                   }
                 : payers[0] || null,
         });
-    }, [payment]);
+    }, [payment, payers]);
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
 

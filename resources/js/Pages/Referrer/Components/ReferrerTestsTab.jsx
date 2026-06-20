@@ -48,12 +48,107 @@ const ReferrerTestsTab = ({ referrer }) => {
     const [openAddForm, setOpenAddForm] = useState(false);
     const [openCopyForm, setOpenCopyForm] = useState(false);
 
-    // Load data on referrer change
+    // Load data on referrer change. pageReload is intentionally omitted: it is
+    // recreated whenever requestInputs changes (which it sets), so depending on it
+    // would cause an infinite refetch loop. Re-fetch only when the referrer changes.
     useEffect(() => {
         if (referrer?.id) {
             pageReload();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [referrer?.id]);
+
+    // Enhanced error handling
+    const handleError = useCallback((error, customMessage = '') => {
+        console.error('API Error:', error);
+        const errorMessage =
+            customMessage ||
+            error?.response?.data?.message ||
+            error?.message ||
+            'An unexpected error occurred';
+        setError(errorMessage);
+        setLoading(false);
+    }, []);
+
+    // Enhanced success handling
+    const handleSuccess = useCallback((message) => {
+        setSuccessMessage(message);
+        setError(null);
+    }, []);
+
+    // Enhanced page reload function
+    const pageReload = useCallback(
+        async (
+            page = requestInputs.page,
+            filters = requestInputs.filters,
+            sort = requestInputs.sort,
+            pageSize = requestInputs.pageSize,
+        ) => {
+            if (!referrer?.id) return;
+
+            setLoading(true);
+            setError(null);
+
+            try {
+                const response = await axios.get(
+                    route('referrer-tests.index', {
+                        referrer: { id: referrer.id },
+                        page,
+                        filters,
+                        sort,
+                        pageSize,
+                    }),
+                );
+
+                setReferrerTests(response.data.referrerTests);
+                setRequestInputs(response.data.requestInputs);
+            } catch (error) {
+                handleError(error, 'Failed to load referrer tests');
+            } finally {
+                setLoading(false);
+            }
+        },
+        [referrer?.id, requestInputs, handleError],
+    );
+
+    // Enhanced edit handler
+    const editReferrerTest = useCallback(
+        (id) => async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            setLoading(true);
+            setError(null);
+
+            try {
+                const response = await axios.get(route('referrer-tests.show', id));
+                console.log(response.data);
+                setReferrerTest({
+                    ...response?.data?.data,
+                    referrer: { id: referrer.id },
+                    _method: 'put',
+                });
+                setOpenAddForm(true);
+            } catch (error) {
+                handleError(error, 'Failed to load test details');
+            } finally {
+                setLoading(false);
+            }
+        },
+        [referrer?.id, handleError],
+    );
+
+    // Enhanced delete handler
+    const deleteReferrerTest = useCallback(
+        (id) => () => {
+            const testToDelete = referrerTests.data.find((item) => item.id === id);
+            if (testToDelete) {
+                setReferrerTest({ ...testToDelete, _method: 'delete' });
+                setOpenDeleteForm(true);
+            }
+        },
+        [referrerTests.data],
+    );
 
     // Enhanced column definition with better UX
     const columns = useMemo(
@@ -157,99 +252,7 @@ const ReferrerTestsTab = ({ referrer }) => {
                 ],
             },
         ],
-        [loading],
-    );
-
-    // Enhanced error handling
-    const handleError = useCallback((error, customMessage = '') => {
-        console.error('API Error:', error);
-        const errorMessage =
-            customMessage ||
-            error?.response?.data?.message ||
-            error?.message ||
-            'An unexpected error occurred';
-        setError(errorMessage);
-        setLoading(false);
-    }, []);
-
-    // Enhanced success handling
-    const handleSuccess = useCallback((message) => {
-        setSuccessMessage(message);
-        setError(null);
-    }, []);
-
-    // Enhanced page reload function
-    const pageReload = useCallback(
-        async (
-            page = requestInputs.page,
-            filters = requestInputs.filters,
-            sort = requestInputs.sort,
-            pageSize = requestInputs.pageSize,
-        ) => {
-            if (!referrer?.id) return;
-
-            setLoading(true);
-            setError(null);
-
-            try {
-                const response = await axios.get(
-                    route('referrer-tests.index', {
-                        referrer: { id: referrer.id },
-                        page,
-                        filters,
-                        sort,
-                        pageSize,
-                    }),
-                );
-
-                setReferrerTests(response.data.referrerTests);
-                setRequestInputs(response.data.requestInputs);
-            } catch (error) {
-                handleError(error, 'Failed to load referrer tests');
-            } finally {
-                setLoading(false);
-            }
-        },
-        [referrer?.id, requestInputs, handleError],
-    );
-
-    // Enhanced edit handler
-    const editReferrerTest = useCallback(
-        (id) => async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            setLoading(true);
-            setError(null);
-
-            try {
-                const response = await axios.get(route('referrer-tests.show', id));
-                console.log(response.data);
-                setReferrerTest({
-                    ...response?.data?.data,
-                    referrer: { id: referrer.id },
-                    _method: 'put',
-                });
-                setOpenAddForm(true);
-            } catch (error) {
-                handleError(error, 'Failed to load test details');
-            } finally {
-                setLoading(false);
-            }
-        },
-        [referrer?.id, handleError],
-    );
-
-    // Enhanced delete handler
-    const deleteReferrerTest = useCallback(
-        (id) => () => {
-            const testToDelete = referrerTests.data.find((item) => item.id === id);
-            if (testToDelete) {
-                setReferrerTest({ ...testToDelete, _method: 'delete' });
-                setOpenDeleteForm(true);
-            }
-        },
-        [referrerTests.data],
+        [loading, editReferrerTest, deleteReferrerTest],
     );
 
     // Reset form state

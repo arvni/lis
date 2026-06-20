@@ -132,11 +132,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Ratchet: 0 errors, and warnings capped at the current count so they
-      # can't creep back up. Remaining warnings are all react-hooks/
-      # exhaustive-deps (behavioral). Lower this number as they're addressed.
+      # Zero-warning policy: all react-hooks/exhaustive-deps warnings have been
+      # cleared. Keep this at 0 — any new warning fails CI.
       - name: Run ESLint
-        run: npm run lint -- --max-warnings 105
+        run: npm run lint -- --max-warnings 0
 
   frontend-tests:
     name: Frontend tests (Vitest)

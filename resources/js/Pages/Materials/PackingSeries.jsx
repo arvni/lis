@@ -10,10 +10,6 @@ const MaterialsPackingSeries = () => {
     const [requestInputs, setRequestInputs] = useState();
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        handlePageReload();
-    }, []);
-
     const handlePageReload = useCallback((page = 1, filters = [], sort = 'id', pageSize = 10) => {
         let searchUrl = new URLSearchParams({
             page,
@@ -30,6 +26,10 @@ const MaterialsPackingSeries = () => {
                 setLoading(false);
             });
     }, []);
+
+    useEffect(() => {
+        handlePageReload();
+    }, [handlePageReload]);
 
     // Memoize columns definition to prevent recreating on every render
     const columns = useMemo(

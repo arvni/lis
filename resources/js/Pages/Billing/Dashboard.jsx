@@ -141,11 +141,14 @@ const Dashboard = () => {
             .catch((e) => {
                 if (!axios.isCancel(e)) setChartsLoading(false);
             });
+        // `filters` is only the default for the no-arg (mount) call; all other callers
+        // pass current filters explicitly, so this stays stable on purpose.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         fetchCharts();
-    }, []);
+    }, [fetchCharts]);
 
     const applyFilters = (patch) => {
         const f = { ...filters, ...patch };
@@ -186,11 +189,14 @@ const Dashboard = () => {
             .catch((e) => {
                 if (!axios.isCancel(e)) setTrendLoading(false);
             });
+        // `trendFilters` is only the default for the no-arg (mount) call; all other
+        // callers pass current filters explicitly, so this stays stable on purpose.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         fetchTrend();
-    }, []);
+    }, [fetchTrend]);
 
     const applyTrendFilters = (patch) => {
         const f = { ...trendFilters, ...patch };

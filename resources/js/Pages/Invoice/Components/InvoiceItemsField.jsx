@@ -73,7 +73,7 @@ const blankItem = () => ({
 const InvoiceItemsField = ({ items = [], onChange, invoiceId }) => {
     const [openDescriptions, setOpenDescriptions] = useState({});
 
-    const safeItems = Array.isArray(items) ? items : [];
+    const safeItems = useMemo(() => (Array.isArray(items) ? items : []), [items]);
 
     const visibleItems = useMemo(() => safeItems.filter((it) => !it._destroy), [safeItems]);
 

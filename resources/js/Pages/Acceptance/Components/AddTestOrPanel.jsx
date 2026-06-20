@@ -906,7 +906,7 @@ const PanelConfigStep = ({ panelData, errors, maxDiscount, patient, onChange }) 
             const item = acceptanceItems[idx];
             if (item) setExpandedItem(item.id);
         }
-    }, [errors]);
+    }, [errors, acceptanceItems]);
 
     const handleSamplelessChange = (e) => {
         const val = e.target.checked;
@@ -1404,6 +1404,9 @@ const AddTestOrPanel = ({
         setErrors({});
         setApiError(null);
         setLoading(false);
+        // Re-initialise form state on dialog open only; depending on the initial*
+        // props or isEdit would reset in-progress edits whenever their identity changes.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
     const isPanel = type === 'PANEL';

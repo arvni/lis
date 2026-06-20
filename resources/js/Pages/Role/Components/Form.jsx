@@ -519,6 +519,9 @@ export default function RoleManager({
         if (edit) {
             setOriginalData({ ...data });
         }
+        // Snapshot once when entering edit mode; depending on `data` would
+        // re-snapshot on every change and defeat the change-detection effect above.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [edit]);
 
     const permissionCount = useMemo(() => {

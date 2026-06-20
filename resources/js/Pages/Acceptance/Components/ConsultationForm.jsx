@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import axios from 'axios';
 
@@ -49,16 +49,7 @@ const ConsultationForm = ({ patientId, embedded = false, _onNext }) => {
         patient_id: patientId,
     });
 
-    useEffect(() => {
-        if (data.consultant && data.dueDate) {
-            setWaiting(true);
-            getTimes();
-        } else {
-            setTimes([]);
-        }
-    }, [data.consultant, data.dueDate]);
-
-    const getTimes = () => {
+    const getTimes = useCallback(() => {
         axios
             .get(
                 route('list-reservation-times', {
@@ -72,7 +63,16 @@ const ConsultationForm = ({ patientId, embedded = false, _onNext }) => {
                 console.error('Error fetching times:', error);
                 setWaiting(false);
             });
-    };
+    }, [data.consultant, data.dueDate]);
+
+    useEffect(() => {
+        if (data.consultant && data.dueDate) {
+            setWaiting(true);
+            getTimes();
+        } else {
+            setTimes([]);
+        }
+    }, [data.consultant, data.dueDate, getTimes]);
 
     const handleChange = (e) =>
         setData((previousData) => ({

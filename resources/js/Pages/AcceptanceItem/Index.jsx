@@ -219,13 +219,15 @@ const StatisticsIndex = () => {
         },
     ];
 
-    // Initialize visible columns on component mount
+    // Initialize visible columns on component mount. allColumns is rebuilt every
+    // render, so it is intentionally omitted — this should run once to seed defaults.
     useEffect(() => {
         // Exclude the 'id' column which is hidden by default
         const initialVisibleColumns = allColumns
             .filter((column) => !column.hidden)
             .map((column) => column.field);
         setVisibleColumns(initialVisibleColumns);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Get currently visible columns

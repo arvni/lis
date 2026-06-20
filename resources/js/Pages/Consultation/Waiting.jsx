@@ -4,7 +4,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Filter from './Components/Filter';
 import PageHeader from '@/Components/PageHeader.jsx';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 
 // Material UI components
 import {
@@ -87,6 +87,14 @@ const Waiting = () => {
     const { post, setData, data, reset, processing } = useForm({});
     const { consultations, status, errors, success, requestInputs } = usePage().props;
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
+
+    const deleteConsultation = useCallback(
+        (params) => () => {
+            setData({ ...params, _method: 'delete' });
+            setOpenDeleteForm(true);
+        },
+        [setData],
+    );
 
     const columns = useMemo(
         () => [
@@ -259,13 +267,8 @@ const Waiting = () => {
                 ),
             },
         ],
-        [],
+        [deleteConsultation],
     );
-
-    const deleteConsultation = (params) => () => {
-        setData({ ...params, _method: 'delete' });
-        setOpenDeleteForm(true);
-    };
 
     const show = (id) => () => router.visit(route('consultations.show', id));
 

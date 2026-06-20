@@ -95,7 +95,7 @@ const FormContent = () => {
             setTubesList(newTubes);
             setData((prev) => ({ ...prev, tubes: newTubes }));
         }
-    }, [data.number_of_tubes]);
+    }, [data.number_of_tubes, tubesList, setData]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;

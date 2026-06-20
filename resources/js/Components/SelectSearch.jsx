@@ -43,6 +43,9 @@ const SelectSearch = ({
                     return a;
                 }, []);
             });
+        // Mount-only: seed options from the initial value and trigger the first search.
+        // handleSearch is recreated each render, so depending on it would loop.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleSearch = (e, inputValue, reason) => {

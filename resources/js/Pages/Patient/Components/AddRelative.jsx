@@ -53,6 +53,10 @@ const AddRelative = ({
         } else {
             setStep(0);
         }
+        // Runs on open toggle only: advance to step 1 for an existing relative.
+        // `next` is recreated each render and depends on `step`, so including it
+        // (or relative.id) would re-fire the wizard advance unexpectedly.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
     const next = async () => {

@@ -281,6 +281,8 @@ const Authenticated = ({ auth, breadcrumbs, children, title }) => {
             document.removeEventListener('inertia:start', handleStart);
             document.removeEventListener('inertia:finish', handleFinish);
         };
+        // Mount-only: register Inertia load listeners once and build the initial routes.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Handle drawer based on screen size
@@ -290,7 +292,7 @@ const Authenticated = ({ auth, breadcrumbs, children, title }) => {
         } else {
             setMobileOpen(false);
         }
-    }, [isMobile]);
+    }, [isMobile, setDrawerOpen, setMobileOpen]);
 
     // Menu Handlers
     const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);

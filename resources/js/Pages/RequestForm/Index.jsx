@@ -76,7 +76,7 @@ const Index = () => {
                 only: ['requestForms', 'status', 'success', 'requestInputs'],
             });
         },
-        [],
+        [requestInputs],
     );
     const handleCloseAddForm = useCallback(() => {
         setRequestForm(null);
@@ -88,7 +88,7 @@ const Index = () => {
         if (openDeleteForm) setOpenDeleteForm(false);
         if (openAddForm) setOpenAddForm(false);
         pageReload();
-    }, [openDeleteForm, openAddForm]);
+    }, [openDeleteForm, openAddForm, pageReload]);
     const handleDestroy = useCallback(
         () =>
             router.post(
@@ -96,7 +96,7 @@ const Index = () => {
                 { _method: 'delete' },
                 { onSuccess: handleCloseDeleteForm },
             ),
-        [requestForm?.id],
+        [requestForm?.id, handleCloseDeleteForm],
     );
     const addNew = useCallback(() => setOpenAddForm(true), []);
 

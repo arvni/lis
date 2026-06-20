@@ -156,7 +156,7 @@ const PaymentComponent = ({
 
     useEffect(() => {
         setPayment(getInitialPaymentState());
-    }, [acceptance.referrer, invoice]);
+    }, [getInitialPaymentState]);
 
     const maxPaymentAmount = useMemo(() => {
         if (!invoice) return 0;

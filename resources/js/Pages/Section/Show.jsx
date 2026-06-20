@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import TableLayout from '@/Layouts/TableLayout';
@@ -134,6 +134,45 @@ const Show = () => {
                     firstRow.acceptance_item?.method?.test?.id,
         );
     }, [selectedRows, acceptanceItemStates]);
+
+    const handleOpenForm = useCallback(
+        (id, type) => () => {
+            setLoading(true);
+            axios
+                .get(route('acceptanceItemStates.show', id))
+                .then((res) => setData({ ...res.data.data, actionType: type, _method: 'put' }))
+                .then(() => {
+                    setLoading(false);
+                    setOpenDoneForm(true);
+                });
+        },
+        [setData],
+    );
+
+    const handleOpenRejectForm = useCallback(
+        (id) => async () => {
+            setLoading(true);
+            axios
+                .get(route('acceptanceItemStates.prevSections', id))
+                .then((res) => {
+                    setOptions(res.data.sections);
+                })
+                .then(() => axios.get(route('acceptanceItemStates.show', id)))
+                .then((res) =>
+                    setData({
+                        ...res.data.data,
+                        next: null,
+                        actionType: ACTION_TYPES.REJECT,
+                        _method: 'put',
+                    }),
+                )
+                .then(() => {
+                    setOpenDoneForm(true);
+                    setLoading(false);
+                });
+        },
+        [setData],
+    );
 
     const columns = useMemo(
         () => [
@@ -358,7 +397,7 @@ const Show = () => {
                 },
             },
         ],
-        [acceptanceItemStates, requestInputs, section, theme],
+        [theme, handleOpenForm, handleOpenRejectForm],
     );
 
     const onSuccess = () => {
@@ -389,17 +428,6 @@ const Show = () => {
     const handleCloseEnteringForm = () => {
         reset();
         setOpenEnteringForm(false);
-    };
-
-    const handleOpenForm = (id, type) => () => {
-        setLoading(true);
-        axios
-            .get(route('acceptanceItemStates.show', id))
-            .then((res) => setData({ ...res.data.data, actionType: type, _method: 'put' }))
-            .then(() => {
-                setLoading(false);
-                setOpenDoneForm(true);
-            });
     };
 
     const handleCloseDoneForm = () => {
@@ -460,28 +488,6 @@ const Show = () => {
                 setData({
                     ...res.data.data,
                     ids: selection,
-                    next: null,
-                    actionType: ACTION_TYPES.REJECT,
-                    _method: 'put',
-                }),
-            )
-            .then(() => {
-                setOpenDoneForm(true);
-                setLoading(false);
-            });
-    };
-
-    const handleOpenRejectForm = (id) => async () => {
-        setLoading(true);
-        axios
-            .get(route('acceptanceItemStates.prevSections', id))
-            .then((res) => {
-                setOptions(res.data.sections);
-            })
-            .then(() => axios.get(route('acceptanceItemStates.show', id)))
-            .then((res) =>
-                setData({
-                    ...res.data.data,
                     next: null,
                     actionType: ACTION_TYPES.REJECT,
                     _method: 'put',

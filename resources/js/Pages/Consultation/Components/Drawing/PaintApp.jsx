@@ -473,6 +473,9 @@ const ReactPaintMUI = ({ defaultImage = null, onChange = () => {} }) => {
                 draw(e);
             }
         },
+        // draw is defined below and only runs while actively dragging (isDrawing); the
+        // tool/colour cannot change mid-drag, so its identity is intentionally omitted.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [getCanvasPosition, isDrawing],
     );
 
@@ -725,6 +728,9 @@ const ReactPaintMUI = ({ defaultImage = null, onChange = () => {} }) => {
         } else {
             saveToHistory();
         }
+        // Canvas (re)initialisation on resize only. saveToHistory changes on every stroke
+        // and re-running this would clear the canvas and wipe in-progress drawing.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [canvasSize]);
 
     useEffect(() => {

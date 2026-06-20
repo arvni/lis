@@ -100,13 +100,7 @@ const AddForm = ({ open, onClose, defaultValue }) => {
             totalSamples: barcodes.length,
             completedSamples: barcodes.filter((b) => b.collection_date && b.received_at).length,
         };
-    }, [
-        data?.barcodes,
-        data?.collect_request,
-        data?.referrer,
-        data?.out_patient,
-        isReferredOutpatient,
-    ]);
+    }, [data?.barcodes, data?.collect_request, isReferredOutpatient]);
 
     const handleClose = useCallback(() => {
         setSubmitSuccess(false);

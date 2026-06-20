@@ -71,7 +71,7 @@ const Index = () => {
                 only: ['approvalFlows', 'status', 'success', 'requestInputs'],
             });
         },
-        [],
+        [requestInputs],
     );
 
     const handleCloseAddForm = useCallback(() => {
@@ -84,7 +84,7 @@ const Index = () => {
         if (openDeleteForm) setOpenDeleteForm(false);
         if (openAddForm) setOpenAddForm(false);
         pageReload();
-    }, [openDeleteForm, openAddForm]);
+    }, [openDeleteForm, openAddForm, pageReload]);
 
     const handleDestroy = useCallback(
         () =>
@@ -93,7 +93,7 @@ const Index = () => {
                 { _method: 'delete' },
                 { onSuccess: handleCloseDeleteForm },
             ),
-        [approvalFlow?.id],
+        [approvalFlow?.id, handleCloseDeleteForm],
     );
 
     const addNew = useCallback(() => setOpenAddForm(true), []);

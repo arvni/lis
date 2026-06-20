@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -37,13 +37,7 @@ const SelectAcceptanceDialog = ({
     const [selectedAcceptanceId, setSelectedAcceptanceId] = useState(null);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        if (open && patientId && referrerId) {
-            fetchAcceptances();
-        }
-    }, [open, patientId, referrerId]);
-
-    const fetchAcceptances = async () => {
+    const fetchAcceptances = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -57,7 +51,13 @@ const SelectAcceptanceDialog = ({
         } finally {
             setLoading(false);
         }
-    };
+    }, [patientId, referrerId, poolingOnly]);
+
+    useEffect(() => {
+        if (open && patientId && referrerId) {
+            fetchAcceptances();
+        }
+    }, [open, patientId, referrerId, fetchAcceptances]);
 
     const handleSelect = () => {
         if (selectedAcceptanceId) {

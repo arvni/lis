@@ -34,7 +34,7 @@ const Edit = ({ acceptance, maxDiscount = 100, errors, canAddPrescription = fals
             }
             return true;
         },
-        [data?.acceptanceItems],
+        [setError],
     );
 
     const validateReferrer = useCallback(
@@ -46,7 +46,7 @@ const Edit = ({ acceptance, maxDiscount = 100, errors, canAddPrescription = fals
             }
             return true;
         },
-        [data?.referred, data?.referrer, setError],
+        [setError],
     );
 
     const validateReporting = useCallback(() => true, []);
@@ -115,7 +115,7 @@ const Edit = ({ acceptance, maxDiscount = 100, errors, canAddPrescription = fals
                 },
             );
         },
-        [setData, validateForm, reset],
+        [setData, validateForm, acceptance.id],
     );
 
     return (

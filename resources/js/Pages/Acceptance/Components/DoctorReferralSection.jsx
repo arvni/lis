@@ -97,7 +97,7 @@ const DoctorSection = ({ doctor, onDoctorChange }) => {
                     setOptions([]);
                 });
         },
-        [open],
+        [onDoctorChange],
     );
 
     // Handle doctor selection

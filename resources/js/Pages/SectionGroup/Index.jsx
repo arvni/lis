@@ -18,8 +18,10 @@ const Index = () => {
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const [openAddForm, setOpenAddForm] = useState(false);
 
-    const findSectionGroup = (id) =>
-        sectionGroups?.data[sectionGroups?.data?.findIndex((sG) => sG.id == id)];
+    const findSectionGroup = useCallback(
+        (id) => sectionGroups?.data[sectionGroups?.data?.findIndex((sG) => sG.id == id)],
+        [sectionGroups],
+    );
 
     const editSectionGroup = useCallback(
         (id) => () => {
@@ -54,14 +56,14 @@ const Index = () => {
         setOpenDeleteForm(false);
         setOpenAddForm(false);
         pageReload();
-    }, []);
+    }, [pageReload]);
     const handleDestroy = useCallback(() => {
         router.post(
             route('sectionGroups.destroy', sectionGroup.id),
             { _method: 'delete' },
             { onSuccess: handleCloseDeleteForm },
         );
-    }, []);
+    }, [sectionGroup?.id, handleCloseDeleteForm]);
 
     const columns = useMemo(
         () => [

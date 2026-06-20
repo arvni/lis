@@ -35,7 +35,7 @@ const ConnectionCheck = ({ children }) => {
     useEffect(() => {
         if (checkState.done) return;
         check();
-    }, []);
+    }, [check]);
 
     if (status === 'connected') return children;
 

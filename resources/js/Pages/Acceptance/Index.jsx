@@ -55,7 +55,6 @@ const Index = () => {
         status,
         success,
         requestInputs,
-        canView,
         canUpdate,
         canDelete,
         canCancel,
@@ -135,6 +134,29 @@ const Index = () => {
         const colors = ['primary', 'secondary', 'success', 'warning', 'info'];
         return colors[index % colors.length];
     };
+
+    const edit = useCallback(
+        (id) => () => {
+            router.visit(route('acceptances.edit', id));
+        },
+        [],
+    );
+
+    const deleteAcceptance = useCallback(
+        (params) => () => {
+            setData({ ...params, _method: 'delete' });
+            setOpenDeleteForm(true);
+        },
+        [setData],
+    );
+
+    const cancelAcceptance = useCallback(
+        (params) => () => {
+            setData({ ...params, _method: 'put' });
+            setOpenCancelForm(true);
+        },
+        [setData],
+    );
 
     const columns = useMemo(
         () => [
@@ -529,30 +551,15 @@ const Index = () => {
                 },
             },
         ],
-        [canView, canUpdate, canDelete, canCancel],
-    );
-
-    const edit = useCallback(
-        (id) => () => {
-            router.visit(route('acceptances.edit', id));
-        },
-        [],
-    );
-
-    const deleteAcceptance = useCallback(
-        (params) => () => {
-            setData({ ...params, _method: 'delete' });
-            setOpenDeleteForm(true);
-        },
-        [setData],
-    );
-
-    const cancelAcceptance = useCallback(
-        (params) => () => {
-            setData({ ...params, _method: 'put' });
-            setOpenCancelForm(true);
-        },
-        [setData],
+        [
+            canUpdate,
+            canDelete,
+            canCancel,
+            canEditInvoiced,
+            edit,
+            deleteAcceptance,
+            cancelAcceptance,
+        ],
     );
 
     const handleCloseCancelForm = useCallback(() => {

@@ -5,7 +5,7 @@ import Filter from '@/Pages/Setting/Components/Filter';
 import AddForm from '@/Pages/Setting/Components/AddForm';
 import { Head, useForm } from '@inertiajs/react';
 import { router, usePage } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 
 // Material UI imports
 import Button from '@mui/material/Button';
@@ -102,6 +102,18 @@ const Index = () => {
     const [openAddForm, setOpenAddForm] = useState(false);
 
     // Define table columns with improved styling
+    const editSetting = useCallback(
+        (id) => () => {
+            // Fixed the findIndex function
+            const settingIndex = settings.data.findIndex((item) => item.id === id);
+            if (settingIndex !== -1) {
+                setData({ ...settings.data[settingIndex], _method: 'put' });
+                setOpenAddForm(true);
+            }
+        },
+        [settings, setData],
+    );
+
     const columns = useMemo(
         () => [
             {
@@ -164,17 +176,8 @@ const Index = () => {
                 ),
             },
         ],
-        [settings],
+        [editSetting],
     );
-
-    const editSetting = (id) => () => {
-        // Fixed the findIndex function
-        const settingIndex = settings.data.findIndex((item) => item.id === id);
-        if (settingIndex !== -1) {
-            setData({ ...settings.data[settingIndex], _method: 'put' });
-            setOpenAddForm(true);
-        }
-    };
 
     const pageReload = (page, filters, sort, pageSize) => {
         router.visit(route('settings.index'), {

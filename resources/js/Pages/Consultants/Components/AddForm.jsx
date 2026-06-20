@@ -59,7 +59,7 @@ const AddTimeSlotForm = ({ open, onClose, consultantId, defaultDate }) => {
             date: new Date() > new Date(defaultDate) ? today : defaultDate,
             consultant_id: consultantId,
         }));
-    }, [consultantId, defaultDate]);
+    }, [consultantId, defaultDate, today]);
 
     // Field change handler
     const handleChange = (e) => {

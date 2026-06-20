@@ -11,19 +11,22 @@ const Basic = styled(Box)`
     text-align: center;
 `;
 export const CardsContainer = ({ onEdit, onDelete, sampleTypes }) => {
-    const renderCard = useCallback((card, index) => {
-        return (
-            <SampleTypeCard
-                key={card.id}
-                index={index}
-                id={card.id}
-                text={card.text}
-                section={card}
-                onEdit={onEdit}
-                onDelete={onDelete}
-            />
-        );
-    }, []);
+    const renderCard = useCallback(
+        (card, index) => {
+            return (
+                <SampleTypeCard
+                    key={card.id}
+                    index={index}
+                    id={card.id}
+                    text={card.text}
+                    sampleType={card}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                />
+            );
+        },
+        [onEdit, onDelete],
+    );
     return sampleTypes.length ? (
         <Basic>{sampleTypes.map((card, i) => renderCard(card, i))}</Basic>
     ) : null;

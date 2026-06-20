@@ -117,7 +117,7 @@ const Add = ({ patient, canAddPrescription, maxDiscount }) => {
                 );
             }
         },
-        [setData, validateForm, reset],
+        [setData, validateForm, reset, patient],
     );
 
     return (

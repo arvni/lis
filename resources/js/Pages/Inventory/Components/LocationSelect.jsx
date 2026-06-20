@@ -48,6 +48,9 @@ const LocationSelect = ({
             })
             .catch(() => setOptions([]))
             .finally(() => setLoading(false));
+        // Reload only when the store/item/type filters change. `onChange`/`value` are
+        // used here to reset/validate the current selection, not as re-run triggers.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [storeId, itemId, transactionType]);
 
     return (

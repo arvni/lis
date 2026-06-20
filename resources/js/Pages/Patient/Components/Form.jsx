@@ -24,7 +24,7 @@ export default function PatientFormWizard({ data, setData, back, edit, next, ste
                 ...prevData,
                 relatives: [...prevData.relatives, { ...rest.relative.data, relationship: '' }],
             }));
-    }, [rest.relative]);
+    }, [rest.relative, setData]);
     const handlePatientChange = (e) => {
         setData((prevData) => ({
             ...prevData,

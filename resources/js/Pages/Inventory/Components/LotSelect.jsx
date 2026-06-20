@@ -56,6 +56,9 @@ const LotSelect = ({ itemId, storeId, value, onChange, size = 'medium', disabled
         onChange(null);
         setInputValue('');
         fetchLots('');
+        // Runs on item/store change only; onChange resets the parent selection here and
+        // is not a re-run trigger (depending on it would clear the lot on every re-render).
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemId, storeId]);
 
     const getLabel = (opt) => {

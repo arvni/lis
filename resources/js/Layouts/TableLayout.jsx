@@ -181,7 +181,7 @@ const TableLayout = ({
 
     const sortModel = useMemo(
         () => (defaultValues.sort?.field ? [defaultValues.sort] : []),
-        [defaultValues.sort?.field, defaultValues.sort?.sort],
+        [defaultValues.sort],
     );
 
     // Effect to handle success message

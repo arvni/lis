@@ -60,6 +60,9 @@ const InlineTagManager = ({ initialTags = [], updateUrl, onUpdate }) => {
         setSelectedTags(initialTags);
         setDraftTags(initialTags);
         draftTagsRef.current = initialTags;
+        // initialTagSignature is the content-stable trigger for initialTags; depending
+        // on initialTags directly would re-run on every new array reference of equal content.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialTagSignature, updateUrl]);
 
     // Fetch all available tags for the autocomplete options

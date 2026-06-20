@@ -45,7 +45,6 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
     const [dateError, setDateError] = useState('');
     const [amountError, setAmountError] = useState('');
     const [activeFilters, setActiveFilters] = useState(0);
-    const today = new Date();
 
     // Count active filters for better UX
     useEffect(() => {
@@ -68,6 +67,7 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
 
     // Enhanced date validation
     useEffect(() => {
+        const today = new Date();
         if (filters.dateFrom && filters.dateTo) {
             const fromDate = new Date(filters.dateFrom);
             const toDate = new Date(filters.dateTo);
@@ -84,7 +84,7 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
         } else {
             setDateError('');
         }
-    }, [filters.dateFrom, filters.dateTo, today]);
+    }, [filters.dateFrom, filters.dateTo]);
 
     // Amount validation
     useEffect(() => {

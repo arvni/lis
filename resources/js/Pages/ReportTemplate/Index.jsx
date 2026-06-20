@@ -76,7 +76,7 @@ const Index = () => {
                 only: ['reportTemplates', 'status', 'success', 'requestInputs'],
             });
         },
-        [],
+        [requestInputs],
     );
     const handleCloseAddForm = useCallback(() => {
         setReportTemplate(null);
@@ -88,7 +88,7 @@ const Index = () => {
         if (openDeleteForm) setOpenDeleteForm(false);
         if (openAddForm) setOpenAddForm(false);
         pageReload();
-    }, [openDeleteForm, openAddForm]);
+    }, [openDeleteForm, openAddForm, pageReload]);
     const handleDestroy = useCallback(
         () =>
             router.post(
@@ -96,7 +96,7 @@ const Index = () => {
                 { _method: 'delete' },
                 { onSuccess: handleCloseDeleteForm },
             ),
-        [reportTemplate?.id],
+        [reportTemplate?.id, handleCloseDeleteForm],
     );
     const addNew = useCallback(() => setOpenAddForm(true), []);
 
