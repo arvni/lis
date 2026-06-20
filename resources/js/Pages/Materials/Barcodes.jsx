@@ -13,6 +13,9 @@ import {
     Chip,
     Stack,
     Divider,
+    FormGroup,
+    ToggleButton,
+    ToggleButtonGroup,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import JsBarcode from 'jsbarcode';
@@ -24,6 +27,59 @@ import {
 } from '@mui/icons-material';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
+
+// Selectable fields for the barcode-view label. Defaults match what prints today.
+const FIELDS = [
+    { key: 'barcodeImage', label: 'Barcode' },
+    { key: 'barcodeNumber', label: 'Barcode number' },
+    { key: 'expireDate', label: 'Expire date' },
+    { key: 'sampleType', label: 'Sample type' },
+    { key: 'manufacturedDate', label: 'Manufactured date' },
+    { key: 'tubeSeries', label: 'Tube series' },
+    { key: 'packingSeries', label: 'Packing series' },
+];
+
+const DEFAULT_FIELDS = {
+    barcodeImage: true,
+    barcodeNumber: true,
+    expireDate: true,
+    sampleType: true,
+    manufacturedDate: false,
+    tubeSeries: false,
+    packingSeries: false,
+};
+
+// Font-size presets multiply the base label text size. 'md' = current default.
+const FONT_SCALES = {
+    sm: 0.85,
+    md: 1,
+    lg: 1.2,
+    xl: 1.4,
+};
+
+// Persist the user's print preferences across visits.
+const STORAGE_KEY = 'materials.barcodes.printPrefs';
+
+const loadPrefs = () => {
+    try {
+        const saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY)) || {};
+        return {
+            // Merge over defaults so newly-added fields keep their default visibility.
+            fields: { ...DEFAULT_FIELDS, ...(saved.fields || {}) },
+            fontSize: saved.fontSize in FONT_SCALES ? saved.fontSize : 'md',
+        };
+    } catch (_) {
+        return { fields: DEFAULT_FIELDS, fontSize: 'md' };
+    }
+};
+
+const savePrefs = (prefs) => {
+    try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+    } catch (_) {
+        /* ignore storage write errors (private mode, quota) */
+    }
+};
 
 // Styled components with enhanced styling
 const BarcodeContainer = styled(Container)(({ theme }) => ({
@@ -63,11 +119,11 @@ const BarcodeItem = styled(Paper)(({ theme, printOnlyBarcode }) => ({
     },
 }));
 
-const BarcodeText = styled(Typography)(({ printOnlyBarcode = false }) => ({
+const BarcodeText = styled(Typography)(({ printOnlyBarcode = false, scale = 1 }) => ({
     margin: '0.5px',
     lineHeight: printOnlyBarcode ? '3.5mm' : '2.5mm',
     fontWeight: 'bold',
-    fontSize: printOnlyBarcode ? '3.5' : '2.5mm',
+    fontSize: printOnlyBarcode ? '3.5mm' : `${2.5 * scale}mm`,
     fontFamily: 'monospace',
     letterSpacing: '.15mm',
     textTransform: 'uppercase',
@@ -79,7 +135,7 @@ const BarcodeText = styled(Typography)(({ printOnlyBarcode = false }) => ({
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     '@media print': {
-        fontSize: printOnlyBarcode ? '3.5mm' : '2.5mm',
+        fontSize: printOnlyBarcode ? '3.5mm' : `${2.5 * scale}mm`,
     },
 }));
 
@@ -128,11 +184,20 @@ const HeaderBar = styled(Box)(({ theme }) => ({
 const BarcodeComponent = ({ materials }) => {
     const [showSnackbar, setShowSnackbar] = useState(false);
     const [printOnlyBarcode, setPrintOnlyBarcode] = useState(false);
+    const [fields, setFields] = useState(() => loadPrefs().fields);
+    const [fontSize, setFontSize] = useState(() => loadPrefs().fontSize);
+    const scale = FONT_SCALES[fontSize] ?? 1;
+
     const handleChange = (e) => setPrintOnlyBarcode(e.target.checked);
+    const toggleField = (key) => setFields((prev) => ({ ...prev, [key]: !prev[key] }));
 
     useEffect(() => {
-        // Initialize barcodes after component mounts
-        if (!printOnlyBarcode) {
+        savePrefs({ fields, fontSize });
+    }, [fields, fontSize]);
+
+    useEffect(() => {
+        // Initialize barcodes after component mounts (barcode view only).
+        if (!printOnlyBarcode && fields.barcodeImage) {
             materials.forEach((material) => {
                 JsBarcode(`#barcode-${material.barcode}`, material.barcode, {
                     format: 'CODE128',
@@ -150,7 +215,7 @@ const BarcodeComponent = ({ materials }) => {
         }, 500);
 
         return () => clearTimeout(printTimeout);
-    }, [materials, printOnlyBarcode]);
+    }, [materials, printOnlyBarcode, fields.barcodeImage]);
 
     // Format date function with enhanced formatting
     const formatDate = (dateString) => {
@@ -201,6 +266,71 @@ const BarcodeComponent = ({ materials }) => {
                     sx={{ display: 'flex' }}
                 />
             </HeaderBar>
+
+            <Paper
+                variant="outlined"
+                sx={{
+                    mx: 2,
+                    mb: 2,
+                    p: 2,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 3,
+                    alignItems: 'center',
+                    '@media print': { display: 'none' },
+                }}
+            >
+                <Box>
+                    <Typography variant="subtitle2" gutterBottom>
+                        Show on label
+                    </Typography>
+                    <FormGroup row>
+                        {FIELDS.map((f) => (
+                            <FormControlLabel
+                                key={f.key}
+                                control={
+                                    <Checkbox
+                                        size="small"
+                                        checked={fields[f.key]}
+                                        onChange={() => toggleField(f.key)}
+                                    />
+                                }
+                                label={f.label}
+                            />
+                        ))}
+                    </FormGroup>
+                    {printOnlyBarcode && (
+                        <Typography variant="caption" color="text.secondary">
+                            Field selection applies to the barcode view (turn off “Print Series &
+                            Dates”).
+                        </Typography>
+                    )}
+                </Box>
+
+                <Divider
+                    orientation="vertical"
+                    flexItem
+                    sx={{ display: { xs: 'none', md: 'block' } }}
+                />
+
+                <Box>
+                    <Typography variant="subtitle2" gutterBottom>
+                        Font size
+                    </Typography>
+                    <ToggleButtonGroup
+                        size="small"
+                        exclusive
+                        value={fontSize}
+                        onChange={(_, value) => value && setFontSize(value)}
+                    >
+                        <ToggleButton value="sm">Small</ToggleButton>
+                        <ToggleButton value="md">Medium</ToggleButton>
+                        <ToggleButton value="lg">Large</ToggleButton>
+                        <ToggleButton value="xl">X-Large</ToggleButton>
+                    </ToggleButtonGroup>
+                </Box>
+            </Paper>
+
             <BarcodeContainer>
                 <Grid container spacing={0} sx={{ justifyContent: 'center', gap: 0 }}>
                     {materials.map((material) => (
@@ -234,38 +364,67 @@ const BarcodeComponent = ({ materials }) => {
                                     </Stack>
                                 ) : (
                                     <>
-                                        <Box
-                                            sx={{
-                                                width: '100%',
-                                                pt: '0mm',
-                                                display: 'flex',
-                                                '& svg ': { width: '100% !important' },
-                                            }}
-                                        >
-                                            <svg
-                                                id={`barcode-${material.barcode}`}
-                                                style={{ width: '100% !important' }}
-                                            ></svg>
-                                        </Box>
+                                        {fields.barcodeImage && (
+                                            <Box
+                                                sx={{
+                                                    width: '100%',
+                                                    pt: '0mm',
+                                                    display: 'flex',
+                                                    '& svg ': { width: '100% !important' },
+                                                }}
+                                            >
+                                                <svg
+                                                    id={`barcode-${material.barcode}`}
+                                                    style={{ width: '100% !important' }}
+                                                ></svg>
+                                            </Box>
+                                        )}
                                         <Stack spacing={0.5} sx={{ mt: '-3mm', zIndex: 1 }}>
-                                            <BarcodeText>{material.barcode}</BarcodeText>
-                                            <BarcodeText>
-                                                <Box
-                                                    component="span"
-                                                    sx={{
-                                                        display: 'inline-flex',
-                                                        alignItems: 'center',
-                                                        mr: 0.5,
-                                                    }}
+                                            {fields.barcodeNumber && (
+                                                <BarcodeText scale={scale}>
+                                                    {material.barcode}
+                                                </BarcodeText>
+                                            )}
+                                            {fields.expireDate && (
+                                                <BarcodeText scale={scale}>
+                                                    <Box
+                                                        component="span"
+                                                        sx={{
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            mr: 0.5,
+                                                        }}
+                                                    >
+                                                        {formatDate(
+                                                            material.expire_date ||
+                                                                material.created_at,
+                                                        )}
+                                                    </Box>
+                                                </BarcodeText>
+                                            )}
+                                            {fields.sampleType && (
+                                                <BarcodeText
+                                                    scale={scale}
+                                                    title={material.sample_type_name}
                                                 >
-                                                    {formatDate(
-                                                        material.expire_date || material.created_at,
-                                                    )}
-                                                </Box>
-                                            </BarcodeText>
-                                            <BarcodeText title={material.sample_type_name}>
-                                                {material.sample_type_name}
-                                            </BarcodeText>
+                                                    {material.sample_type_name}
+                                                </BarcodeText>
+                                            )}
+                                            {fields.manufacturedDate && (
+                                                <BarcodeText scale={scale}>
+                                                    {formatDate(material.manufactured_date)}
+                                                </BarcodeText>
+                                            )}
+                                            {fields.tubeSeries && (
+                                                <BarcodeText scale={scale}>
+                                                    {material.tube_series}
+                                                </BarcodeText>
+                                            )}
+                                            {fields.packingSeries && (
+                                                <BarcodeText scale={scale}>
+                                                    {material.packing_series}
+                                                </BarcodeText>
+                                            )}
                                         </Stack>
                                     </>
                                 )}
