@@ -235,7 +235,7 @@ class MonthlyStatementExport implements
         // Read the original data placed by Laravel Excel
         for ($row = 1; $row <= $highestRow; $row++) {
             $rowData = [];
-            for ($col = 'A'; $col <= $highestCol; $col++) {
+            for ($col = 'A'; $col <= $highestCol; $col = str_increment($col)) {
                 $cellValue = $sheet->getCell($col . $row)->getValue();
                 if ($cellValue !== null) {
                     $rowData[$col] = $cellValue;
