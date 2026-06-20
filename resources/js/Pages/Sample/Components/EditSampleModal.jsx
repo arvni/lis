@@ -51,12 +51,14 @@ const EditSampleModal = ({ open, sample, onClose }) => {
                             helperText={errors.barcode}
                             fullWidth
                             autoFocus
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <QrCodeIcon fontSize="small" />
-                                    </InputAdornment>
-                                ),
+                            slotProps={{
+                                input: {
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <QrCodeIcon fontSize="small" />
+                                        </InputAdornment>
+                                    ),
+                                },
                             }}
                         />
                     </Stack>

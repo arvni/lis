@@ -8,7 +8,7 @@ const AlertComponent = ({ success, status, errors }) => {
         if (success && status) {
             enqueueSnackbar(status, { variant: 'success' });
         } else if (success != null && status) enqueueSnackbar(status, { variant: 'error' });
-        if (errors && errors != {})
+        if (errors)
             for (let item in errors) {
                 const msg = Array.isArray(errors[item]) ? errors[item][0] : errors[item];
                 if (msg) enqueueSnackbar(msg, { variant: 'warning' });

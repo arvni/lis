@@ -9,13 +9,16 @@ describe('helper', () => {
             expect(formatFileSize(1048576)).toBe('1 MB');
         });
 
-        it('returns a fallback for falsy / non-number input', () => {
+        it('returns a fallback for non-number / invalid input', () => {
             expect(formatFileSize(null)).toBe('Unknown size');
             expect(formatFileSize(undefined)).toBe('Unknown size');
             expect(formatFileSize('123')).toBe('Unknown size');
-            // NB: 0 is falsy, so the `bytes === 0 -> '0 Bytes'` branch is
-            // unreachable; 0 falls through to the fallback.
-            expect(formatFileSize(0)).toBe('Unknown size');
+            expect(formatFileSize(NaN)).toBe('Unknown size');
+            expect(formatFileSize(-1)).toBe('Unknown size');
+        });
+
+        it('formats a zero-byte file as "0 Bytes"', () => {
+            expect(formatFileSize(0)).toBe('0 Bytes');
         });
     });
 
