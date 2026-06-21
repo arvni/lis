@@ -1,51 +1,19 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { GridActionsCellItem } from '@mui/x-data-grid';
 import Filter from './Components/Filter';
 import TableLayout from '@/Layouts/TableLayout';
 import DeleteForm from '@/Components/DeleteForm';
 import PageHeader from '@/Components/PageHeader.jsx';
-import { Head, router, useForm, usePage, Link } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Stack, Button, Typography, Box, Paper, alpha } from '@mui/material';
 import {
-    Stack,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    Typography,
-    Box,
-    Chip,
-    Tooltip,
-    Paper,
-    CircularProgress,
-    Avatar,
-    Badge,
-    Divider,
-    alpha,
-} from '@mui/material';
-import {
-    Edit as EditIcon,
-    Delete as DeleteIcon,
-    Cancel as CancelIcon,
     LocalHospital as LocalHospitalIcon,
-    CheckCircle as CheckCircleIcon,
-    CalendarToday as CalendarTodayIcon,
-    QrCode as QrCodeIcon,
-    Science as ScienceIcon,
-    Input as InputIcon,
-    Settings as SettingsIcon,
-    Assignment as AssignmentIcon,
-    HourglassEmpty as HourglassEmptyIcon,
-    Warning as WarningIcon,
-    MergeType as MergeTypeIcon,
     FileDownload as FileDownloadIcon,
-    FlashOn as FlashOnIcon,
-    PriorityHigh as PriorityHighIcon,
 } from '@mui/icons-material';
-import InlineTagManager from '@/Components/InlineTagManager';
-import { formatDate } from '@/Services/helper.js';
 import AddPoolingDialog from '@/Pages/Acceptance/Components/AddPoolingDialog.jsx';
+import { getRowClassName } from './Index/helpers';
+import { buildColumns } from './Index/columns';
+import CancelDialog from './Index/CancelDialog';
 
 const Index = () => {
     const { post, setData, data, reset, processing } = useForm();
@@ -65,75 +33,6 @@ const Index = () => {
     const [openCancelForm, setOpenCancelForm] = useState(false);
     const [openPoolingDialog, setOpenPoolingDialog] = useState(false);
     const [poolingAcceptance, setPoolingAcceptance] = useState(null);
-
-    // Format currency amounts
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'OMR',
-            minimumFractionDigits: 2,
-        }).format(amount);
-    };
-
-    // Get status info based on status text
-    const getStatusInfo = (status) => {
-        const statusMap = {
-            'waiting for payment': {
-                color: 'warning',
-                icon: <HourglassEmptyIcon />,
-                label: 'Waiting for Payment',
-            },
-            sampling: {
-                color: 'info',
-                icon: <ScienceIcon />,
-                label: 'Sampling',
-            },
-            pooling: {
-                color: 'secondary',
-                icon: <MergeTypeIcon />,
-                label: 'Pooling',
-            },
-            'waiting for entering': {
-                color: 'warning',
-                icon: <InputIcon />,
-                label: 'Waiting for Entry',
-            },
-            processing: {
-                color: 'info',
-                icon: <SettingsIcon />,
-                label: 'Processing',
-            },
-            reported: {
-                color: 'success',
-                icon: <AssignmentIcon />,
-                label: 'Reported',
-            },
-            canceled: {
-                color: 'error',
-                icon: <CancelIcon />,
-                label: 'Canceled',
-            },
-        };
-
-        // Default case for backward compatibility
-        if (!statusMap[status?.toLowerCase()]) {
-            if (status === 'Completed')
-                return { color: 'success', icon: <CheckCircleIcon />, label: status };
-            if (status === 'Pending')
-                return { color: 'warning', icon: <HourglassEmptyIcon />, label: status };
-            if (status === 'In Progress')
-                return { color: 'info', icon: <SettingsIcon />, label: status };
-            return { color: 'default', icon: <WarningIcon />, label: status || 'Unknown' };
-        }
-
-        return statusMap[status.toLowerCase()];
-    };
-
-    const getBarcodeChipColor = (index) => {
-        // Cycle through colors for visual distinction
-        const colors = ['primary', 'secondary', 'success', 'warning', 'info'];
-        return colors[index % colors.length];
-    };
 
     const edit = useCallback(
         (id) => () => {
@@ -158,399 +57,23 @@ const Index = () => {
         [setData],
     );
 
+    const handleAddPooling = useCallback((row) => {
+        setPoolingAcceptance(row);
+        setOpenPoolingDialog(true);
+    }, []);
+
     const columns = useMemo(
-        () => [
-            {
-                field: 'patient_fullname',
-                headerName: 'Patient',
-                type: 'string',
-                flex: 1.2,
-                display: 'flex',
-                align: 'left',
-                renderCell: ({ row }) => (
-                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                        <Link href={route('acceptances.show', row.id)} title={row.id}>
-                            {row.patient_fullname || 'N/A'}
-                        </Link>
-                        <Typography variant="caption" color="text.secondary">
-                            ID: {row.patient_idno || 'N/A'}
-                        </Typography>
-                    </Box>
-                ),
-            },
-            {
-                field: 'referrer_fullname',
-                headerName: 'Referrer',
-                type: 'string',
-                flex: 0.5,
-                display: 'flex',
-                renderCell: ({ row }) => (
-                    <Box display="flex" sx={{ alignItems: 'center' }}>
-                        <Box>
-                            <Typography variant="body2">
-                                {row.referrer_fullname || 'N/A'}
-                            </Typography>
-                            {row.referrer_fullname && (
-                                <Typography variant="caption" color="text.secondary">
-                                    Reference Code: {row.referenceCode || 'N/A'}
-                                </Typography>
-                            )}
-                        </Box>
-                    </Box>
-                ),
-            },
-            {
-                field: 'barcodes',
-                headerName: 'Barcodes',
-                type: 'string',
-                sortable: false,
-                flex: 0.6,
-                display: 'flex',
-                renderCell: ({ row }) => {
-                    const samples = row?.samples || [];
-
-                    // If no samples, show "No barcodes"
-                    if (samples.length === 0) {
-                        return (
-                            <Typography variant="caption" color="text.secondary">
-                                No barcodes
-                            </Typography>
-                        );
-                    }
-
-                    // Show up to 2 barcodes and a count badge if there are more
-                    const displayedSamples = samples.slice(0, 2);
-                    const remaining = samples.length - displayedSamples.length;
-
-                    return (
-                        <Stack direction="row" spacing={0.5}>
-                            {displayedSamples.map((item, idx) => (
-                                <Chip
-                                    key={idx}
-                                    icon={<QrCodeIcon fontSize="small" />}
-                                    label={item.barcode}
-                                    size="small"
-                                    color={getBarcodeChipColor(idx)}
-                                    variant="outlined"
-                                    sx={{
-                                        fontSize: '0.7rem',
-                                        borderStyle: 'dashed',
-                                    }}
-                                />
-                            ))}
-                            {remaining > 0 && (
-                                <Tooltip
-                                    title={`${remaining} more barcode${remaining > 1 ? 's' : ''}`}
-                                >
-                                    <Chip
-                                        label={`+${remaining}`}
-                                        size="small"
-                                        variant="outlined"
-                                        sx={{
-                                            fontSize: '0.7rem',
-                                            bgcolor: 'grey.100',
-                                        }}
-                                    />
-                                </Tooltip>
-                            )}
-                        </Stack>
-                    );
-                },
-            },
-            {
-                field: 'tags',
-                headerName: 'Tags',
-                sortable: false,
-                flex: 0.7,
-                display: 'flex',
-                renderCell: ({ row }) => (
-                    <InlineTagManager
-                        initialTags={row.tags || []}
-                        updateUrl={route('acceptances.tags.update', row.id)}
-                        entityType="acceptance"
-                    />
-                ),
-            },
-            {
-                field: 'out_patient',
-                headerName: 'Patient Type',
-                type: 'boolean',
-                flex: 0.3,
-                display: 'flex',
-                renderCell: ({ row }) => (
-                    <Chip
-                        label={row.out_patient ? 'Out patient' : 'In patient'}
-                        color={row.out_patient ? 'info' : 'secondary'}
-                        variant={row.out_patient ? 'filled' : 'filled'}
-                        size="small"
-                        sx={{
-                            fontWeight: 500,
-                            fontSize: '0.7rem',
-                            borderRadius: 1,
-                        }}
-                    />
-                ),
-            },
-            {
-                field: 'remaining_amount',
-                headerName: 'Remaining',
-                flex: 0.3,
-                display: 'flex',
-                type: 'number',
-                renderCell: ({ row }) => {
-                    const remaining = row.payable_amount - row.payments_sum_price;
-                    const isPaid = remaining <= 0;
-
-                    return (
-                        <Tooltip title={isPaid ? 'Fully paid' : 'Remaining amount to be paid'}>
-                            <Chip
-                                label={formatCurrency(remaining)}
-                                color={isPaid ? 'success' : 'warning'}
-                                size="small"
-                                variant={isPaid ? 'outlined' : 'filled'}
-                                sx={{
-                                    fontWeight: 600,
-                                    fontSize: '0.7rem',
-                                    borderRadius: 1,
-                                }}
-                            />
-                        </Tooltip>
-                    );
-                },
-            },
-            {
-                field: 'status',
-                headerName: 'Status',
-                type: 'string',
-                flex: 0.4,
-                display: 'flex',
-                renderCell: ({ row }) => {
-                    const statusInfo = getStatusInfo(row.status);
-
-                    return (
-                        <Chip
-                            icon={statusInfo.icon}
-                            label={statusInfo.label}
-                            color={statusInfo.color}
-                            size="small"
-                            sx={{
-                                fontWeight: 500,
-                                fontSize: '0.75rem',
-                                borderRadius: 1,
-                            }}
-                        />
-                    );
-                },
-            },
-            {
-                field: 'priority',
-                headerName: 'Priority',
-                type: 'string',
-                flex: 0.25,
-                display: 'flex',
-                renderCell: ({ row }) => {
-                    const map = {
-                        stat: {
-                            label: 'STAT',
-                            color: 'error',
-                            icon: <FlashOnIcon fontSize="small" />,
-                        },
-                        urgent: {
-                            label: 'Urgent',
-                            color: 'warning',
-                            icon: <PriorityHighIcon fontSize="small" />,
-                        },
-                        routine: { label: 'Routine', color: 'default', icon: null },
-                    };
-                    const cfg = map[row.priority] ?? map.routine;
-                    if (row.priority === 'routine') return null;
-                    return (
-                        <Chip
-                            icon={cfg.icon}
-                            label={cfg.label}
-                            color={cfg.color}
-                            size="small"
-                            variant="filled"
-                            sx={{ fontWeight: 600, fontSize: '0.7rem' }}
-                        />
-                    );
-                },
-            },
-            {
-                field: 'report_date',
-                headerName: 'Est. Report Date',
-                flex: 0.4,
-                display: 'flex',
-                valueGetter: (value) => value && new Date(value),
-                renderCell: ({ value, row }) => {
-                    // Calculate if report date is today, in the past or future
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-
-                    const reportDate = value ?? null;
-                    const reportDay = reportDate ? new Date(reportDate) : null;
-                    if (reportDay) reportDay.setHours(0, 0, 0, 0);
-
-                    const isToday = reportDay && reportDay.getTime() === today.getTime();
-                    const isPast = reportDay && reportDay.getTime() < today.getTime();
-
-                    const isReported = row.status?.toLowerCase() === 'reported';
-
-                    return reportDate ? (
-                        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                            {isReported ? (
-                                <CheckCircleIcon fontSize="small" color="success" sx={{ mr: 1 }} />
-                            ) : row.waiting_for_pooling ? (
-                                <HourglassEmptyIcon
-                                    fontSize="small"
-                                    color="secondary"
-                                    sx={{ mr: 1 }}
-                                />
-                            ) : (
-                                <Badge
-                                    color={isToday ? 'warning' : isPast ? 'error' : 'success'}
-                                    variant="dot"
-                                    sx={{ mr: 1 }}
-                                >
-                                    <CalendarTodayIcon fontSize="small" color="action" />
-                                </Badge>
-                            )}
-                            <Box>
-                                <Typography
-                                    variant="body2"
-                                    color={
-                                        isPast && !isReported && !row.waiting_for_pooling
-                                            ? 'error.main'
-                                            : 'text.primary'
-                                    }
-                                >
-                                    {formatDate(reportDate).split(',')[0]}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                    {formatDate(reportDate).split(',')[1]}
-                                </Typography>
-                            </Box>
-                        </Box>
-                    ) : (
-                        <Typography variant="body2" color="text.secondary">
-                            N/A
-                        </Typography>
-                    );
-                },
-            },
-            {
-                field: 'created_at',
-                headerName: 'Registered At',
-                flex: 0.4,
-                type: 'datetime',
-                display: 'flex',
-                valueGetter: (value) => value && new Date(value),
-                renderCell: ({ value }) => formatDate(value),
-            },
-            {
-                field: 'published_at',
-                headerName: 'Published At',
-                flex: 0.4,
-                type: 'datetime',
-                display: 'flex',
-                valueGetter: (value) => value && new Date(value),
-                renderCell: ({ value }) => (value ? formatDate(value) : '-'),
-            },
-            {
-                field: 'how_found_us',
-                headerName: 'How Found Us',
-                type: 'string',
-                flex: 0.4,
-                display: 'flex',
-                renderCell: ({ row }) =>
-                    row.how_found_us ? (
-                        <Chip
-                            label={row.how_found_us}
-                            size="small"
-                            variant="outlined"
-                            color="secondary"
-                            sx={{ fontSize: '0.7rem', maxWidth: 140 }}
-                        />
-                    ) : null,
-            },
-            {
-                field: 'id',
-                headerName: 'Actions',
-                type: 'actions',
-                flex: 0.6,
-                display: 'flex',
-                getActions: (params) => {
-                    const isInvoiced = Boolean(params.row.invoice_id);
-                    const invoicedAllowed = !isInvoiced || canEditInvoiced;
-                    let cols = [];
-
-                    if ((canUpdate || params.row.status === 'pending') && invoicedAllowed) {
-                        cols.push(
-                            <GridActionsCellItem
-                                icon={
-                                    <Tooltip title="Edit acceptance">
-                                        <EditIcon color="primary" />
-                                    </Tooltip>
-                                }
-                                label="Edit"
-                                onClick={edit(params.row.id)}
-                            />,
-                        );
-                    }
-
-                    if ((canDelete || params.row.status === 'pending') && invoicedAllowed) {
-                        cols.push(
-                            <GridActionsCellItem
-                                icon={
-                                    <Tooltip title="Delete acceptance">
-                                        <DeleteIcon color="error" />
-                                    </Tooltip>
-                                }
-                                label="Delete"
-                                onClick={deleteAcceptance(params.row)}
-                            />,
-                        );
-                    }
-
-                    if (
-                        canCancel &&
-                        params.row.status?.toLowerCase() !== 'canceled' &&
-                        invoicedAllowed
-                    ) {
-                        cols.push(
-                            <GridActionsCellItem
-                                icon={
-                                    <Tooltip title="Cancel acceptance">
-                                        <CancelIcon color="warning" />
-                                    </Tooltip>
-                                }
-                                label="Cancel"
-                                onClick={cancelAcceptance(params.row)}
-                            />,
-                        );
-                    }
-
-                    if (params.row.status?.toLowerCase() === 'pooling' && invoicedAllowed) {
-                        cols.push(
-                            <GridActionsCellItem
-                                icon={
-                                    <Tooltip title="Add pooling sample">
-                                        <MergeTypeIcon color="secondary" />
-                                    </Tooltip>
-                                }
-                                label="Add Pooling"
-                                onClick={() => {
-                                    setPoolingAcceptance(params.row);
-                                    setOpenPoolingDialog(true);
-                                }}
-                            />,
-                        );
-                    }
-
-                    return cols;
-                },
-            },
-        ],
+        () =>
+            buildColumns({
+                canUpdate,
+                canDelete,
+                canCancel,
+                canEditInvoiced,
+                edit,
+                deleteAcceptance,
+                cancelAcceptance,
+                onAddPooling: handleAddPooling,
+            }),
         [
             canUpdate,
             canDelete,
@@ -559,6 +82,7 @@ const Index = () => {
             edit,
             deleteAcceptance,
             cancelAcceptance,
+            handleAddPooling,
         ],
     );
 
@@ -592,20 +116,6 @@ const Index = () => {
             onSuccess: handleCloseDeleteForm,
         });
     }, [post, data?.id, handleCloseDeleteForm]);
-
-    const getRowClassName = (params) => {
-        const status = params.row.status?.toLowerCase();
-
-        if (status === 'canceled') {
-            return 'canceled-row';
-        }
-
-        if (status === 'reported') {
-            return 'reported-row';
-        }
-
-        return '';
-    };
 
     return (
         <>
@@ -695,106 +205,13 @@ const Index = () => {
                 }
             />
 
-            <Dialog
+            <CancelDialog
                 open={openCancelForm}
-                onClose={processing ? undefined : handleCloseCancelForm}
-                slotProps={{
-                    paper: {
-                        elevation: 3,
-                        sx: {
-                            borderRadius: 2,
-                            maxWidth: 450,
-                        },
-                    },
-                }}
-            >
-                <DialogTitle
-                    sx={{
-                        bgcolor: 'warning.light',
-                        color: 'warning.dark',
-                        py: 2,
-                        display: 'flex',
-                        alignItems: 'center',
-                    }}
-                >
-                    <CancelIcon sx={{ mr: 1.5 }} />
-                    Cancel Acceptance #{data?.id}
-                </DialogTitle>
-
-                <DialogContent sx={{ pt: 3, pb: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Avatar
-                            sx={{
-                                bgcolor: 'warning.light',
-                                color: 'warning.dark',
-                                mr: 2,
-                                width: 40,
-                                height: 40,
-                            }}
-                        >
-                            <WarningIcon />
-                        </Avatar>
-                        <Typography variant="h6">Confirm Cancellation</Typography>
-                    </Box>
-
-                    <Divider sx={{ my: 2 }} />
-
-                    <Typography variant="body1">
-                        Are you sure you want to cancel the acceptance for{' '}
-                        <strong>{data?.patient_fullname || 'this patient'}</strong>?
-                    </Typography>
-
-                    <Paper
-                        variant="outlined"
-                        sx={{
-                            mt: 2,
-                            p: 2,
-                            bgcolor: 'warning.lighter',
-                            borderColor: 'warning.light',
-                        }}
-                    >
-                        <Typography variant="body2" color="warning.dark">
-                            <WarningIcon
-                                fontSize="small"
-                                sx={{
-                                    verticalAlign: 'middle',
-                                    mr: 1,
-                                }}
-                            />
-                            This action cannot be undone. All linked records will be marked as
-                            cancelled.
-                        </Typography>
-                    </Paper>
-                </DialogContent>
-
-                <DialogActions sx={{ px: 3, pb: 3 }}>
-                    <Button
-                        onClick={handleCloseCancelForm}
-                        disabled={processing}
-                        variant="outlined"
-                        startIcon={<CancelIcon />}
-                        sx={{ borderRadius: 1.5 }}
-                    >
-                        No, Keep It
-                    </Button>
-                    <Button
-                        color="warning"
-                        variant="contained"
-                        onClick={handleCancel}
-                        disabled={processing}
-                        startIcon={
-                            processing ? (
-                                <CircularProgress size={20} color="inherit" />
-                            ) : (
-                                <CheckCircleIcon />
-                            )
-                        }
-                        sx={{ borderRadius: 1.5 }}
-                    >
-                        Yes, Cancel Acceptance
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                onClose={handleCloseCancelForm}
+                onConfirm={handleCancel}
+                data={data}
+                processing={processing}
+            />
 
             <AddPoolingDialog
                 open={openPoolingDialog}
