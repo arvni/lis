@@ -4,11 +4,26 @@ namespace App\Domains\Referrer\Repositories;
 
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Referrer\Models\CollectRequest;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class CollectRequestRepository
 {
     use LogsUserActivity;
+
+    /**
+     * Barcoded collect requests for barcode lookup — newest first, optionally
+     * filtered by referrer and a barcode search term.
+     */
+    public function listBarcodedForLookup(?int $referrerId, ?string $search, int $perPage = 20): LengthAwarePaginator
+    {
+        return CollectRequest::query()
+            ->whereNotNull('barcode')
+            ->when($referrerId, fn (Builder $q) => $q->where('referrer_id', $referrerId))
+            ->when($search, fn (Builder $q) => $q->where('barcode', 'like', "%{$search}%"))
+            ->orderBy('id', 'desc')
+            ->paginate($perPage);
+    }
 
     public function listCollectRequest(array $queryData): LengthAwarePaginator
     {

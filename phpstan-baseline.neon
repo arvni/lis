@@ -8218,66 +8218,6 @@ parameters:
 			path: app/Http/Controllers/Inventory/Api/FifoPreviewController.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$barcode\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Inventory/Api/ItemLotsController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$brand\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Inventory/Api/ItemLotsController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$expiry_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Inventory/Api/ItemLotsController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Inventory/Api/ItemLotsController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$lot_number\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Inventory/Api/ItemLotsController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity_base_units\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Inventory/Api/ItemLotsController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$store_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Inventory/Api/ItemLotsController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$store_location_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Inventory/Api/ItemLotsController.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Http/Controllers/Inventory/Api/ItemLotsController.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: app/Http/Controllers/Inventory/Api/ItemLotsController.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
@@ -8348,12 +8288,6 @@ parameters:
 			identifier: method.unresolvableReturnType
 			count: 1
 			path: app/Http/Controllers/Inventory/Api/ItemUnitsController.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:active\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/Inventory/Api/StoreLocationsController.php
 
 		-
 			message: '#^Unable to resolve the template type TKey in call to function collect$#'
@@ -9121,7 +9055,7 @@ parameters:
 			message: '#^Relation ''referrer'' is not found in App\\Domains\\Referrer\\Models\\Material model\.$#'
 			identifier: larastan.relationExistence
 			count: 1
-			path: app/Http/Controllers/Referrer/Api/CheckMaterialForReferrerController.php
+			path: app/Domains/Referrer/Repositories/MaterialRepository.php
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Referrer\\Api\\StoreOrderMaterialsController\:\:__invoke\(\) has no return type specified\.$#'
@@ -9186,12 +9120,6 @@ parameters:
 		-
 			message: '#^Method App\\Http\\Controllers\\Referrer\\ListCollectRequestsController\:\:__invoke\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/ListCollectRequestsController.php
-
-		-
-			message: '#^Parameter \#1 \$collection of method Illuminate\\Pagination\\AbstractPaginator\<int,App\\Domains\\Referrer\\Models\\CollectRequest\>\:\:setCollection\(\) expects Illuminate\\Support\\Collection\<int, App\\Domains\\Referrer\\Models\\CollectRequest\>, Illuminate\\Support\\Collection\<int, array\{id\: int, name\: string\|null, barcode\: string\|null\}\> given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/Http/Controllers/Referrer/ListCollectRequestsController.php
 
