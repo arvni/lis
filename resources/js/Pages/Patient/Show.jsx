@@ -1,23 +1,6 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { Box } from '@mui/material';
 import {
-    Box,
-    Tab,
-    Tabs,
-    Chip,
-    Tooltip,
-    IconButton,
-    Typography,
-    Divider,
-    Card,
-    CardContent,
-    Fade,
-    Badge,
-    useTheme,
-    alpha,
-    CircularProgress,
-} from '@mui/material';
-import {
-    RemoveRedEye,
     InterpreterMode as InterpreterModeIcon,
     ReceiptLong as ReceiptLongIcon,
     Person as PersonIcon,
@@ -26,7 +9,6 @@ import {
     Payments as PaymentsIcon,
     Receipt as ReceiptIcon,
     MedicalServices as MedicalServicesIcon,
-    ContactPhone as ContactPhoneIcon,
 } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 
@@ -39,104 +21,15 @@ import DocumentsInfo from '@/Components/DocumentsInfo';
 import LoadMore from '@/Components/LoadMore';
 import AddForm from './Components/AddForm.jsx';
 import { Head, router, usePage } from '@inertiajs/react';
-import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
-
-// --- Helper Components & Functions ---
-
-// TabPanel component with minHeight via sx prop and optional loading state
-function TabPanel(props) {
-    const { children, value, index, loading, ...other } = props;
-    const isActive = value === index;
-
-    return (
-        <div
-            role="tabpanel"
-            hidden={!isActive}
-            id={`patient-tabpanel-${index}`}
-            aria-labelledby={`patient-tab-${index}`}
-            {...other}
-            style={{ position: 'relative' }}
-        >
-            {loading && (
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        minHeight: 200,
-                        py: 3,
-                    }}
-                >
-                    <CircularProgress />
-                </Box>
-            )}
-            <Fade in={isActive && !loading}>
-                <Box sx={{ py: 3, minHeight: 200 }}>{isActive && !loading ? children : null}</Box>
-            </Fade>
-        </div>
-    );
-}
-
-// Helper for consistent currency formatting (using OMR for Oman)
-const formatCurrency = (value) => {
-    if (typeof value !== 'number') return '-';
-    return new Intl.NumberFormat('en-OM', {
-        // Using locale for Oman
-        style: 'currency',
-        currency: 'OMR', // Omani Rial
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    }).format(value);
-};
-
-// Helper for formatting dates consistently
-const formatDate = (dateString, options = {}) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    const defaultOptions = {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false,
-        timeZoneName: undefined,
-    };
-    return new Intl.DateTimeFormat('en-US', { ...defaultOptions, ...options }).format(date);
-};
-
-// Helper for rendering status chips consistently
-const renderStatusChip = (value, colorMap) => {
-    if (!value) return null;
-    return (
-        <Chip
-            label={value}
-            size="small"
-            color={colorMap[value] || 'default'}
-            sx={{ fontWeight: 500 }}
-        />
-    );
-};
-
-// Helper for rendering the view button consistently
-const renderViewButton = (href, onClickHandler) => (
-    <Tooltip title="View Details">
-        {/* Use span to avoid Tooltip warning if IconButton is disabled */}
-        <span>
-            <IconButton
-                href={href}
-                onClick={onClickHandler}
-                size="small"
-                color="primary"
-                disabled={!href} // Disable if no link
-            >
-                <RemoveRedEye fontSize="small" />
-            </IconButton>
-        </span>
-    </Tooltip>
-);
+import TabPanel from './Show/TabPanel';
+import PatientSummaryCard from './Show/PatientSummaryCard';
+import PatientTabsNav from './Show/PatientTabsNav';
+import {
+    buildInvoiceColumns,
+    buildPaymentColumns,
+    buildConsultationsColumns,
+    buildAcceptanceColumns,
+} from './Show/columns';
 
 // --- Main Component ---
 const Show = ({
@@ -151,7 +44,6 @@ const Show = ({
     canCreateConsultation = false,
     allowedTags = [],
 }) => {
-    const theme = useTheme();
     const { enqueueSnackbar } = useSnackbar();
     const [tabValue, setTabValue] = useState(0);
     const [openConsultationForm, setOpenConsultationForm] = useState(false);
@@ -245,191 +137,14 @@ const Show = ({
     }, []);
 
     // --- Column Definitions (Memoized) ---
-    const invoiceColumns = useMemo(
-        () => [
-            {
-                field: 'total_amount',
-                headerName: 'Total Amount',
-                type: 'number',
-                flex: 0.5,
-                align: 'center',
-                valueFormatter: (value) => formatCurrency(value * 1),
-            },
-            {
-                field: 'total_discount',
-                headerName: 'Total Discount',
-                type: 'number',
-                flex: 0.5,
-                align: 'center',
-                valueFormatter: (value) => formatCurrency(value * 1),
-            },
-            {
-                field: 'total_paid',
-                headerName: 'Total Paid',
-                type: 'number',
-                flex: 0.5,
-                align: 'center',
-                valueFormatter: (value) => formatCurrency(value * 1),
-            },
-            {
-                field: 'status',
-                headerName: 'Status',
-                flex: 1,
-                align: 'center',
-                renderCell: ({ value }) =>
-                    renderStatusChip(value, {
-                        Paid: 'success',
-                        Pending: 'warning',
-                        Overdue: 'error',
-                    }),
-            },
-            {
-                field: 'id',
-                headerName: 'View',
-                flex: 0.5,
-                align: 'center',
-                sortable: false,
-                filterable: false,
-                renderCell: ({ row }) =>
-                    renderViewButton(route('invoices.show', row.id), handleNavigate),
-            },
-        ],
-        [handleNavigate],
-    );
-
-    const paymentColumns = useMemo(
-        () => [
-            {
-                field: 'price',
-                headerName: 'Amount',
-                type: 'number',
-                flex: 1,
-                align: 'center',
-                valueFormatter: (value) => formatCurrency(value), // Standardized currency
-            },
-            {
-                field: 'paymentMethod',
-                headerName: 'Method',
-                flex: 1,
-                align: 'center',
-                renderCell: ({ value }) =>
-                    renderStatusChip(value, {
-                        Card: 'primary',
-                        Cash: 'success',
-                        Credit: 'info',
-                        Transfer: 'secondary',
-                    }),
-            },
-            {
-                field: 'created_at',
-                headerName: 'Date',
-                flex: 1,
-                align: 'center',
-                type: 'date',
-                valueGetter: (value) => value && new Date(value),
-                valueFormatter: (value) => formatDate(value),
-            },
-        ],
-        [],
-    );
-
+    const invoiceColumns = useMemo(() => buildInvoiceColumns(handleNavigate), [handleNavigate]);
+    const paymentColumns = useMemo(() => buildPaymentColumns(), []);
     const consultationsColumns = useMemo(
-        () => [
-            {
-                field: 'consultant',
-                headerName: 'Consultant',
-                flex: 1.2,
-                display: 'flex',
-                renderCell: ({ row }) => (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, overflow: 'hidden' }}>
-                        <ContactPhoneIcon fontSize="small" color="action" />
-                        <Typography
-                            variant="body2"
-                            sx={{
-                                fontWeight: 500,
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                            }}
-                        >
-                            {row?.consultant_name || 'N/A'}
-                        </Typography>
-                    </Box>
-                ),
-            },
-            {
-                field: 'status',
-                headerName: 'Status',
-                flex: 0.8,
-                align: 'center',
-                renderCell: ({ value }) =>
-                    renderStatusChip(value, {
-                        Completed: 'success',
-                        Scheduled: 'primary',
-                        Waiting: 'warning',
-                        Canceled: 'error',
-                    }),
-                display: 'flex',
-            },
-            {
-                field: 'dueDate',
-                headerName: 'Due Date',
-                flex: 1,
-                align: 'center',
-                type: 'dateTime',
-                valueGetter: (value) => value && new Date(value),
-                valueFormatter: (value) =>
-                    formatDate(value, { hour: '2-digit', minute: '2-digit' }), // Add time
-            },
-            {
-                field: 'action',
-                headerName: 'View',
-                flex: 0.5,
-                align: 'center',
-                sortable: false,
-                filterable: false,
-                renderCell: ({ row }) =>
-                    renderViewButton(route('consultations.show', row.id), handleNavigate),
-            },
-        ],
+        () => buildConsultationsColumns(handleNavigate),
         [handleNavigate],
     );
-
     const acceptanceColumns = useMemo(
-        () => [
-            { field: 'id', headerName: 'ID', flex: 0.5, align: 'center' },
-            {
-                field: 'status',
-                headerName: 'Status',
-                flex: 1,
-                align: 'center',
-                renderCell: ({ value }) =>
-                    renderStatusChip(value, {
-                        Accepted: 'success',
-                        Pending: 'warning',
-                        Rejected: 'error',
-                    }),
-            },
-            {
-                field: 'created_at',
-                headerName: 'Created',
-                flex: 1,
-                align: 'center',
-                type: 'date',
-                valueGetter: (value) => value && new Date(value),
-                valueFormatter: (value) => formatDate(value),
-            },
-            {
-                field: 'view',
-                headerName: 'View',
-                flex: 0.5,
-                align: 'center',
-                sortable: false,
-                filterable: false,
-                renderCell: ({ row }) =>
-                    renderViewButton(route('acceptances.show', row.id), handleNavigate),
-            },
-        ],
+        () => buildAcceptanceColumns(handleNavigate),
         [handleNavigate],
     );
 
@@ -490,187 +205,28 @@ const Show = ({
         }
     }, [success, status, errors, enqueueSnackbar]); // Rerun if flash messages change
 
-    // --- Patient Summary Card ---
-    const PatientSummaryCard = useMemo(
-        () => (
-            <Card
-                elevation={0}
-                sx={{
-                    mb: 3,
-                    border: `1px solid ${theme.palette.divider}`,
-                    borderRadius: 2,
-                    backgroundColor: alpha(theme.palette.primary.main, 0.03), // Use theme alpha
-                }}
-            >
-                <CardContent>
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 3,
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                        }}
-                    >
-                        {/* Patient Info */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Avatar
-                                src={patient.avatar} // Assuming patient object has avatar URL
-                                alt={patient.fullName}
-                                sx={{
-                                    bgcolor: 'primary.main', // Background color if no image
-                                    width: 56,
-                                    height: 56,
-                                }}
-                            >
-                                {patient.fullName?.charAt(0).toUpperCase()} {/* Fallback initial */}
-                            </Avatar>
-                            <Box>
-                                <Typography
-                                    variant="h6"
-                                    component="div"
-                                    color="primary.main"
-                                    sx={{ mb: 0.5 }}
-                                >
-                                    {patient.fullName}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    ID: {patient.idNo || 'N/A'}
-                                </Typography>
-                                {/* Actions */}
-                                <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                                    {actions.map((action, index) => (
-                                        <Button
-                                            key={index}
-                                            variant="outlined"
-                                            color={action.color}
-                                            size="small"
-                                            startIcon={action.icon}
-                                            onClick={action.onClick}
-                                        >
-                                            {action.name}
-                                        </Button>
-                                    ))}
-                                </Box>
-                            </Box>
-                        </Box>
-
-                        {/* Stats */}
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                gap: { xs: 2, md: 3 },
-                                flexWrap: 'wrap',
-                                justifyContent: { xs: 'flex-start', md: 'flex-end' },
-                            }}
-                        >
-                            {/* Use tabs array for consistency */}
-                            {tabs.slice(1).map(
-                                (
-                                    tab,
-                                    index, // Start from index 1 (skip Overview)
-                                ) => (
-                                    <React.Fragment key={tab.label}>
-                                        {index > 0 && <Divider orientation="vertical" flexItem />}
-                                        <Box sx={{ textAlign: 'center' }}>
-                                            <Typography
-                                                variant="overline"
-                                                color="text.secondary"
-                                                sx={{ display: 'block', lineHeight: 1.2 }}
-                                            >
-                                                {tab.label}
-                                            </Typography>
-                                            <Typography variant="h6">
-                                                {/* Use data from props directly for summary */}
-                                                {pageProps[tab.dataKey]?.length ??
-                                                    stats?.[tab.dataKey] ??
-                                                    0}
-                                            </Typography>
-                                        </Box>
-                                    </React.Fragment>
-                                ),
-                            )}
-                        </Box>
-                    </Box>
-                </CardContent>
-            </Card>
-        ),
-        [patient, stats, actions, theme, tabs, pageProps],
-    ); // Depend on relevant data
-
     // --- Main Render ---
     return (
         <Box>
             <Head title={patient.fullName} />
-            {PatientSummaryCard}
+            <PatientSummaryCard
+                patient={patient}
+                stats={stats}
+                actions={actions}
+                tabs={tabs}
+                pageProps={pageProps}
+            />
 
             {/* Tabs Navigation */}
-            <Tabs
-                value={tabValue}
+            <PatientTabsNav
+                tabs={tabs}
+                tabValue={tabValue}
                 onChange={handleTabChange}
-                variant="scrollable"
-                scrollButtons="auto"
-                aria-label="Patient details tabs"
-                sx={{
-                    borderBottom: 1,
-                    borderColor: 'divider',
-                    bgcolor: alpha(theme.palette.primary.main, 0.02), // Subtle background
-                    '& .MuiTab-root': {
-                        minHeight: 56, // Slightly smaller height
-                        textTransform: 'none',
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                        px: 2, // Adjust padding
-                    },
-                    '& .Mui-selected': {
-                        color: 'primary.main',
-                        fontWeight: 600,
-                    },
-                    '& .MuiTabs-indicator': {
-                        height: 3,
-                        borderTopLeftRadius: 3,
-                        borderTopRightRadius: 3,
-                    },
-                }}
-            >
-                {tabs.map((tab, index) => (
-                    <Tab
-                        key={index}
-                        label={
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                {tab.icon}
-                                <Badge
-                                    badgeContent={tab.count ?? 0} // Use count from memoized tabs state
-                                    color={tabValue === index ? 'primary' : 'default'}
-                                    invisible={tab.count === null || tab.count === 0} // Hide if null or 0
-                                    max={99}
-                                    sx={{
-                                        '& .MuiBadge-badge': {
-                                            fontSize: '0.65rem',
-                                            height: 18,
-                                            minWidth: 18,
-                                            right: -8, // Adjust position
-                                            top: -2,
-                                        },
-                                        // Apply badge directly to the label text container
-                                        '& .MuiBox-root': { pr: tab.count ? 2 : 0 }, // Add padding only if badge is potentially visible
-                                    }}
-                                >
-                                    {tab.label}
-                                </Badge>
-                            </Box>
-                        }
-                        id={`patient-tab-${index}`}
-                        aria-controls={`patient-tabpanel-${index}`}
-                        disabled={loadingTabs[tab.dataKey]} // Disable tab while its data is loading
-                    />
-                ))}
-            </Tabs>
+                loadingTabs={loadingTabs}
+            />
 
             {/* Tab Content */}
             <Box>
-                {' '}
-                {/* Removed default padding p:3 */}
                 {/* Overview Tab (Always loaded) */}
                 <TabPanel value={tabValue} index={0}>
                     <PatientInfo patient={patient} editable={canEdit} defaultExpanded />
