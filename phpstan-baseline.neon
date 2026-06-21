@@ -7909,7 +7909,7 @@ parameters:
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:onlyTrashed\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: app/Http/Controllers/Billing/InvoiceItemController.php
+			path: app/Domains/Billing/Repositories/InvoiceRepository.php
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Billing\\InvoiceItemController\:\:rebuild\(\) has no return type specified\.$#'

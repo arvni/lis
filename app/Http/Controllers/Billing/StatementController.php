@@ -7,11 +7,9 @@ use App\Domains\Billing\Models\Statement;
 use App\Domains\Billing\Requests\StoreStatementRequest;
 use App\Domains\Billing\Requests\UpdateStatementRequest;
 use App\Domains\Billing\Services\StatementService;
-use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StatementResource;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -52,41 +50,7 @@ class StatementController extends Controller
      */
     public function show(Statement $statement)
     {
-        $reportDateSubquery = DB::table('acceptance_items')
-            ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
-            ->join('methods', 'methods.id', '=', 'method_tests.method_id')
-            ->selectRaw('MAX(DATE_ADD(acceptance_items.created_at, INTERVAL methods.turnaround_time + 2 * FLOOR((methods.turnaround_time + WEEKDAY(acceptance_items.created_at)) / 5) DAY))')
-            ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id');
-
-        $statement->load([
-            "acceptances"=>fn ($query) =>
-            $query->with([
-                'acceptanceItems.test',
-                'samples:samples.id,barcode',
-                'invoice' => function ($query) {
-                    $query->addSelect([
-                            'id',
-                            'created_at',
-                            DB::raw('CONCAT(
-                    DATE_FORMAT(created_at, "%Y-%m"),
-                    "/",
-                    (SELECT COUNT(*)
-                     FROM invoices i2
-                     WHERE i2.id <= invoices.id
-                     AND YEAR(i2.created_at) = YEAR(invoices.created_at)
-                    )
-                ) AS invoice_no')
-                        ]
-                    );
-                }
-            ])
-                ->withAggregate('patient', 'fullName')
-                ->withAggregate('patient', 'idNo')
-                ->selectRaw("({$this->getPayableAmountSql()}) as payable_amount")
-                ->addSelect(['report_date' => $reportDateSubquery]),
-            "referrer:id,fullName"
-        ]);
-        return new StatementResource($statement);
+        return new StatementResource($this->statementService->loadStatementForResource($statement));
     }
 
     /**
@@ -105,12 +69,6 @@ class StatementController extends Controller
     {
         $this->statementService->deleteStatement($statement);
         return back()->with(["success" => true, "status" => "Statement deleted successfully!"]);
-    }
-
-    private function getPayableAmountSql(): string
-    {
-        return 'COALESCE((SELECT SUM(acceptance_items.price) FROM acceptance_items WHERE acceptances.id = acceptance_items.acceptance_id), 0) -
-                COALESCE((SELECT SUM(acceptance_items.discount) FROM acceptance_items WHERE acceptances.id = acceptance_items.acceptance_id), 0)';
     }
 
 }

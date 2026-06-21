@@ -4,6 +4,7 @@ namespace App\Domains\Billing\Repositories;
 
 use App\Domains\Shared\Traits\FiltersByDateRange;
 use App\Domains\Shared\Traits\LogsUserActivity;
+use App\Domains\Billing\Enums\InvoiceItemKind;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\Statement;
 use Carbon\Carbon;
@@ -60,6 +61,21 @@ class InvoiceRepository
     public function findInvoiceById($id): ?Invoice
     {
         return Invoice::find($id);
+    }
+
+    /**
+     * Prepare an invoice's items for a rebuild: drop deletion tombstones (and any
+     * swept rows) so removed test/panel lines return, and reset derived test/panel
+     * rows to auto so the composer recomputes their price/qty/discount.
+     */
+    public function resetItemsForRebuild(Invoice $invoice): void
+    {
+        DB::transaction(function () use ($invoice) {
+            $invoice->invoiceItems()->onlyTrashed()->forceDelete();
+            $invoice->invoiceItems()
+                ->whereIn('kind', [InvoiceItemKind::TEST->value, InvoiceItemKind::PANEL->value])
+                ->update(['locked_at' => null]);
+        });
     }
 
     public function listReferrerInvoicesForStatement(int $referrerId, ?string $month = null)

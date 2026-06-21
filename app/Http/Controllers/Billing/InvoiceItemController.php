@@ -5,16 +5,18 @@ namespace App\Http\Controllers\Billing;
 use App\Domains\Billing\Enums\InvoiceItemKind;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\InvoiceItem;
+use App\Domains\Billing\Repositories\InvoiceRepository;
 use App\Domains\Billing\Services\InvoiceComposer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class InvoiceItemController extends Controller
 {
-    public function __construct(private readonly InvoiceComposer $composer)
-    {
+    public function __construct(
+        private readonly InvoiceComposer $composer,
+        private readonly InvoiceRepository $invoiceRepository,
+    ) {
     }
 
     /**
@@ -57,14 +59,7 @@ class InvoiceItemController extends Controller
     {
         $this->authorize('update', $invoice);
 
-        DB::transaction(function () use ($invoice) {
-            // Drop deletion tombstones (and any swept rows) so removed test/panel lines return.
-            $invoice->invoiceItems()->onlyTrashed()->forceDelete();
-            // Reset derived rows to auto so the composer recomputes their price/qty/discount.
-            $invoice->invoiceItems()
-                ->whereIn('kind', [InvoiceItemKind::TEST->value, InvoiceItemKind::PANEL->value])
-                ->update(['locked_at' => null]);
-        });
+        $this->invoiceRepository->resetItemsForRebuild($invoice);
 
         // force: bypass the composer's paid/statemented lock so settled invoices still rebuild.
         $this->composer->recompose($invoice, force: true);

@@ -3,50 +3,23 @@
 namespace App\Http\Controllers\Billing;
 
 use App\Domains\Billing\Models\Statement;
+use App\Domains\Billing\Services\StatementService;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ShowStatementController extends Controller
 {
+    public function __construct(private StatementService $statementService) {}
+
     public function __invoke(Statement $statement): Response
     {
         $this->authorize('view', $statement);
 
-        $statement->load([
-            'referrer',
-            'invoices' => function ($query) {
-                $reportDateSubquery = DB::table('acceptance_items')
-                    ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
-                    ->join('methods', 'methods.id', '=', 'method_tests.method_id')
-                    ->selectRaw('MAX(DATE_ADD(acceptance_items.created_at, INTERVAL methods.turnaround_time + 2 * FLOOR((methods.turnaround_time + WEEKDAY(acceptance_items.created_at)) / 5) DAY))')
-                    ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id');
-
-                $query->with([
-                    "acceptance" => function ($q) use ($reportDateSubquery) {
-                        $q->with("patient")->addSelect(['report_date' => $reportDateSubquery]);
-                    },
-                    "acceptanceItems.test",
-                    "acceptanceItems.report:id,published_at,acceptance_item_id",
-                ])
-                    ->withSum("payments", "price")
-                    ->withSum("acceptanceItems", "discount")
-                    ->withSum("acceptanceItems", "price")
-                    ->addSelect(DB::raw('CONCAT(
-                        DATE_FORMAT(created_at, "%Y-%m"),
-                        "/",
-                        (SELECT COUNT(*)
-                         FROM invoices i2
-                         WHERE i2.id <= invoices.id
-                         AND YEAR(i2.created_at) = YEAR(invoices.created_at)
-                        )
-                    ) AS invoice_no'));
-            }
-        ]);
+        $this->statementService->loadStatementForReport($statement);
 
         $invoices = $this->prepareInvoicesData($statement->invoices);
 
