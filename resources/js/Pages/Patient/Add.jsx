@@ -35,7 +35,6 @@ const Add = (props) => {
     const save = () => {
         switch (step) {
             case 0:
-                console.log('here');
                 setStep(1);
                 break;
             case 1:

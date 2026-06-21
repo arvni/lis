@@ -142,8 +142,7 @@ const Index = () => {
     const handleViewReport = (id) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        // Add report viewing functionality here
-        console.log(`View report for order ${id}`);
+        // TODO: add report viewing functionality for order `id`
     };
 
     const pageReload = (page, filters, sort, pageSize) => {

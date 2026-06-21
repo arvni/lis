@@ -49,6 +49,8 @@ export default [
                     caughtErrors: 'none',
                 },
             ],
+            // Keep stray debug logging out of the tree; warn/error are allowed.
+            'no-console': ['warn', { allow: ['warn', 'error'] }],
             'react/no-unescaped-entities': 'warn',
             'react/no-children-prop': 'warn',
             'react/display-name': 'warn',

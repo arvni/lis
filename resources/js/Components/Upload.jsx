@@ -345,7 +345,6 @@ const Upload = ({
                 return response.data.data;
             } catch (error) {
                 if (axios.isCancel(error)) {
-                    console.log('Upload canceled:', file.name);
                     setManagedFiles((current) => current.filter((f) => f.tempId !== tempId));
                     return null;
                 } else {
@@ -660,7 +659,7 @@ const Upload = ({
                 );
             })
             .catch((error) => {
-                console.log('Delete error:', error);
+                console.error('Delete error:', error);
                 if (error.status === 404 || error.response?.status === 404) {
                     const newFiles = managedFiles.filter((f) => f.tempId !== tempId);
                     setManagedFiles(newFiles);

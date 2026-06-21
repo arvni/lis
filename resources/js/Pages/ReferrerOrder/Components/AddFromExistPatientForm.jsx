@@ -12,7 +12,7 @@ const AddFromExistPatientForm = ({ open, referrerOrder, onClose }) => {
     const submit = () => {
         post(route('referrerOrders.patient', referrerOrder.id), {
             onSuccess: handleClose,
-            onError: console.log,
+            onError: console.error,
         });
     };
     const handleClose = () => {
