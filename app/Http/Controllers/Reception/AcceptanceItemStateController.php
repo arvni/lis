@@ -8,14 +8,17 @@ use App\Domains\Reception\Events\PatientDocumentUpdateEvent;
 use App\Domains\Reception\Models\AcceptanceItemState;
 use App\Domains\Reception\Requests\UpdateAcceptanceItemStateRequest;
 use App\Domains\Reception\Requests\BulkUpdateAcceptanceItemStateRequest;
+use App\Domains\Reception\Repositories\AcceptanceItemStateRepository;
 use App\Domains\Reception\Resources\AcceptanceItemStateResource;
 use App\Domains\Reception\Services\AcceptanceItemStateService;
 use App\Http\Controllers\Controller;
 
 class AcceptanceItemStateController extends Controller
 {
-    public function __construct(private readonly AcceptanceItemStateService $acceptanceItemStateService)
-    {
+    public function __construct(
+        private readonly AcceptanceItemStateService $acceptanceItemStateService,
+        private readonly AcceptanceItemStateRepository $acceptanceItemStateRepository,
+    ) {
     }
 
     /**
@@ -82,7 +85,7 @@ class AcceptanceItemStateController extends Controller
         $ids = $request->ids;
 
         foreach ($ids as $id) {
-            $acceptanceItemState = AcceptanceItemState::find($id);
+            $acceptanceItemState = $this->acceptanceItemStateRepository->findAcceptanceItemStateById($id);
             if (!$acceptanceItemState) continue;
 
             foreach ($request["parameters"] as $parameter) {

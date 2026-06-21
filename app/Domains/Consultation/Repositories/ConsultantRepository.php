@@ -4,10 +4,24 @@ namespace App\Domains\Consultation\Repositories;
 
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Consultation\Models\Consultant;
+use Illuminate\Database\Eloquent\Collection;
 
 class ConsultantRepository
 {
     use LogsUserActivity;
+
+    /**
+     * Active consultants as lightweight {id, name, title} options, ordered by name.
+     *
+     * @return Collection<int, Consultant>
+     */
+    public function activeForSelect(): Collection
+    {
+        return Consultant::query()
+            ->where('active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'title']);
+    }
 
     public function all(array $queryData = [])
     {

@@ -19,7 +19,6 @@ import React from 'react';
 import { CheckBox, FormatListNumbered, TextFields } from '@mui/icons-material';
 
 const AddForm = ({ open, onClose, defaultValue }) => {
-    console.log(defaultValue);
     const url = defaultValue?.id
         ? route('requestForms.update', defaultValue.id)
         : route('requestForms.store');

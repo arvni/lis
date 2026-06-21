@@ -10,7 +10,6 @@ use App\Domains\Reception\Enums\AcceptanceStatus;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 
 class StatementService
 {
@@ -79,34 +78,25 @@ class StatementService
         );
     }
 
+    /**
+     * Load a statement with its invoices for the report view (Inertia page).
+     */
+    public function loadStatementForReport(Statement $statement): Statement
+    {
+        return $this->statementRepository->loadWithInvoicesForReport($statement);
+    }
+
+    /**
+     * Load a statement with its acceptances for resource/API output.
+     */
+    public function loadStatementForResource(Statement $statement): Statement
+    {
+        return $this->statementRepository->loadWithAcceptancesForResource($statement);
+    }
+
     private function loadStatement(Statement $statement): void
     {
-        $reportDateSubquery = DB::table('acceptance_items')
-            ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
-            ->join('methods', 'methods.id', '=', 'method_tests.method_id')
-            ->selectRaw('MAX(DATE_ADD(acceptance_items.created_at, INTERVAL methods.turnaround_time + 2 * FLOOR((methods.turnaround_time + WEEKDAY(acceptance_items.created_at)) / 5) DAY))')
-            ->whereColumn('acceptance_items.acceptance_id', 'acceptances.id');
-
-        $statement->load([
-            'referrer',
-            'invoices' => function ($query) use ($reportDateSubquery) {
-                $query->with([
-                    'acceptance' => fn($q) => $q->with('patient')->addSelect(['report_date' => $reportDateSubquery]),
-                    'acceptanceItems.test',
-                    'acceptanceItems.report:id,published_at,acceptance_item_id',
-                ])
-                    ->withSum('payments', 'price')
-                    ->withSum('acceptanceItems', 'discount')
-                    ->withSum('acceptanceItems', 'price')
-                    ->addSelect(DB::raw('CONCAT(
-                        DATE_FORMAT(created_at, "%Y-%m"),
-                        "/",
-                        (SELECT COUNT(*) FROM invoices i2
-                         WHERE i2.id <= invoices.id
-                         AND YEAR(i2.created_at) = YEAR(invoices.created_at))
-                    ) AS invoice_no'));
-            },
-        ]);
+        $this->statementRepository->loadWithInvoicesForReport($statement);
     }
 
     private function buildExportOptions(Statement $statement): array

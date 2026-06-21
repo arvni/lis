@@ -5,25 +5,23 @@ namespace App\Http\Controllers\Inventory;
 use App\Domains\Inventory\Models\StockLot;
 use App\Domains\Inventory\Models\StockTransaction;
 use App\Domains\Inventory\Models\StockTransactionLine;
+use App\Domains\Inventory\Repositories\StockTransactionRepository;
 use App\Http\Controllers\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class StockLotController extends Controller
 {
+    public function __construct(private StockTransactionRepository $stockTransactions) {}
+
     public function show(StockLot $lot): Response
     {
         $this->authorize('viewAny', StockTransaction::class);
 
         $lot->load(['item.defaultUnit', 'store', 'location']);
 
-        // All transaction lines that reference this lot_number for this item
-        $lines = StockTransactionLine::with(['transaction.store', 'unit', 'location'])
-            ->where('item_id', $lot->item_id)
-            ->where('lot_number', $lot->lot_number)
-            ->whereHas('transaction', fn($q) => $q->where('status', 'APPROVED'))
-            ->orderBy('created_at', 'asc')
-            ->get()
+        $lines = $this->stockTransactions
+            ->approvedLinesForLot($lot->item_id, $lot->lot_number)
             ->map(function (StockTransactionLine $line) {
                 $tx    = $line->transaction;
                 $type  = $tx->transaction_type->value;

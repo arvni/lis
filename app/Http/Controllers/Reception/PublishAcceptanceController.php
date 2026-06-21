@@ -3,25 +3,23 @@
 namespace App\Http\Controllers\Reception;
 
 use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Reception\Repositories\AcceptanceRepository;
 use App\Domains\Reception\Requests\PublishAcceptanceRequest;
 use App\Domains\Reception\Services\AcceptanceService;
 use App\Http\Controllers\Controller;
 
 class PublishAcceptanceController extends Controller
 {
-    public function __construct(private readonly AcceptanceService $acceptanceService)
-    {
+    public function __construct(
+        private readonly AcceptanceService $acceptanceService,
+        private readonly AcceptanceRepository $acceptanceRepository,
+    ) {
     }
 
     public function __invoke(Acceptance $acceptance, PublishAcceptanceRequest $request)
     {
         // Validate that all acceptance items have approved reports
-        $acceptance->load([
-            'acceptanceItems' => function ($q) {
-                $q->where('reportless', false)
-                    ->with('report');
-            }
-        ]);
+        $this->acceptanceRepository->loadReportableItemsWithReports($acceptance);
 
         // Check if all non-reportless items have reports
         foreach ($acceptance->acceptanceItems as $item) {

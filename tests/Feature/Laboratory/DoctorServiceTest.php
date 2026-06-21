@@ -7,6 +7,7 @@ use App\Domains\Laboratory\Models\Doctor;
 use App\Domains\Laboratory\Repositories\DoctorRepository;
 use App\Domains\Laboratory\Services\DoctorService;
 use Exception;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Mockery;
 use Tests\TestCase;
 
@@ -31,10 +32,10 @@ class DoctorServiceTest extends TestCase
 
     private function doctorWithMethods(bool $has): Doctor
     {
-        $relation = Mockery::mock();
+        $relation = Mockery::mock(HasMany::class);
         $relation->shouldReceive('exists')->andReturn($has);
         $doctor = Mockery::mock(Doctor::class)->makePartial();
-        $doctor->shouldReceive('methods')->andReturn($relation);
+        $doctor->shouldReceive('acceptances')->andReturn($relation);
         return $doctor;
     }
 

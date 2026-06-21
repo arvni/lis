@@ -6,10 +6,26 @@ use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Inventory\Models\Supplier;
 use App\Domains\Inventory\Models\SupplierContact;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class SupplierRepository
 {
     use LogsUserActivity;
+
+    /**
+     * Active suppliers matching a name/code search term, limited for typeahead lookups.
+     */
+    public function searchActiveForLookup(string $search, int $limit = 20): Collection
+    {
+        return Supplier::active()
+            ->where(function (Builder $q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%");
+            })
+            ->limit($limit)
+            ->get(['id', 'name', 'code']);
+    }
 
     public function listSuppliers(array $queryData): LengthAwarePaginator
     {

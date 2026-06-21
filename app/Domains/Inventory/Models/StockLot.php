@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property-read Item|null $item
+ * @property-read Store|null $store
+ * @property-read StoreLocation|null $location
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, StockTransactionLine> $transactionLines
+ */
 class StockLot extends Model
 {
     protected $fillable = [

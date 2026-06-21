@@ -66,7 +66,7 @@ class ReferrerService
      */
     public function deleteReferrer(Referrer $referrer): void
     {
-        if (!$referrer->acceptances()->exists() && !$referrer->consultations()->exists()) {
+        if (!$referrer->acceptances()->exists() && !$referrer->referrerOrders()->exists()) {
             $this->referrerRepository->deleteReferrer($referrer);
         } else {
             throw new Exception("Referrer has associated acceptances or Orders.");

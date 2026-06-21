@@ -83,9 +83,8 @@ const ConsultationForm = ({ patientId, embedded = false, _onNext }) => {
     const handleSubmit = () => {
         if (check()) {
             post(route('consultations.store'), {
-                onSuccess: (e) => {
+                onSuccess: () => {
                     setShowSuccess(true);
-                    console.log(e);
                 },
             });
         }

@@ -9,7 +9,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import SelectSearch from '@/Components/SelectSearch.jsx';
 
 const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
-    console.log(defaultValues);
     const [filters, setFilters] = useState({
         search: defaultValues.search || '',
         sampleType: defaultValues.sampleType || null,

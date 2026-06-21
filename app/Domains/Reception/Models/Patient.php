@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Notifications\Notification;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 class Patient extends Model
@@ -142,6 +143,20 @@ class Patient extends Model
         return $this->belongsToMany(AcceptanceItem::class, "acceptance_item_patient")
             ->withPivot("order");
     }
+
+    /**
+     * Route mail notifications to an address the notification supplies
+     * (e.g. WelcomeNotification's per-acceptance email), else the default.
+     */
+    public function routeNotificationForMail(Notification $notification): string|array|null
+    {
+        if (method_exists($notification, "routeAddressForMail") && ($address = $notification->routeAddressForMail())) {
+            return $address;
+        }
+
+        return $this->email ?? null;
+    }
+
     public function acceptances()
     {
         // Use a pivot-free base so hasManyDeepFromRelations doesn't SELECT acceptance_item_patient.order,

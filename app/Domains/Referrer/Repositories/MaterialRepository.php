@@ -202,4 +202,16 @@ class MaterialRepository
         return Material::find($id);
     }
 
+    /**
+     * Material matching a barcode and sample type that belongs to the given referrer.
+     */
+    public function findForReferrer(string $barcode, int $sampleTypeId, int $referrerId): ?Material
+    {
+        return Material::query()
+            ->where('barcode', $barcode)
+            ->where('sample_type_id', $sampleTypeId)
+            ->whereHas('referrer', fn($q) => $q->where('referrers.id', $referrerId))
+            ->first();
+    }
+
 }

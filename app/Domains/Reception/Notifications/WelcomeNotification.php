@@ -57,8 +57,16 @@ class WelcomeNotification extends Notification implements ShouldQueue
             ->line('If you have any questions in the meantime, please don\'t hesitate to contact us.')
             ->action('Check Status', url('/dashboard'))
             ->line('Thank you for your patience!');
-        $message->to($this->acceptance->howReport["emailAddress"]);
         return $message;
+    }
+
+    /**
+     * Address the mail channel should be delivered to, overriding the
+     * notifiable's default. Read by the notifiable's routeNotificationForMail().
+     */
+    public function routeAddressForMail(): ?string
+    {
+        return $this->acceptance->howReport["emailAddress"] ?? null;
     }
 
     /**

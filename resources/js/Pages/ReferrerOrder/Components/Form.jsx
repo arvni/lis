@@ -36,7 +36,6 @@ const Form = ({ defaultValues, open, onClose, id, withRelative = false, mainPati
         }));
     }, [mainPatientId, id, setData]);
     const handleSubmit = () => {
-        console.log(data);
         // Use different route based on whether it's a relative or main patient
         const submitRoute = withRelative
             ? route('relatives.store')

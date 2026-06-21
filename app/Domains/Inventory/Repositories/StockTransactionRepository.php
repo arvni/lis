@@ -5,11 +5,47 @@ namespace App\Domains\Inventory\Repositories;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Inventory\Enums\TransactionStatus;
 use App\Domains\Inventory\Models\StockTransaction;
+use App\Domains\Inventory\Models\StockTransactionLine;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection as SupportCollection;
 
 class StockTransactionRepository
 {
     use LogsUserActivity;
+
+    /**
+     * Approved transaction lines that reference a lot (by item + lot number),
+     * oldest first, with transaction/store/unit/location eager-loaded.
+     *
+     * @return EloquentCollection<int, StockTransactionLine>
+     */
+    public function approvedLinesForLot(int $itemId, string $lotNumber): EloquentCollection
+    {
+        return StockTransactionLine::with(['transaction.store', 'unit', 'location'])
+            ->where('item_id', $itemId)
+            ->where('lot_number', $lotNumber)
+            ->whereHas('transaction', fn (Builder $q) => $q->where('status', 'APPROVED'))
+            ->orderBy('created_at', 'asc')
+            ->get();
+    }
+
+    /**
+     * Distinct, non-empty brand names recorded for an item on transaction lines,
+     * optionally narrowed by a search term — used for brand typeahead.
+     */
+    public function brandSuggestionsForItem(int $itemId, ?string $search = null, int $limit = 20): SupportCollection
+    {
+        return StockTransactionLine::where('item_id', $itemId)
+            ->whereNotNull('brand')
+            ->where('brand', '!=', '')
+            ->when($search, fn (Builder $q) => $q->where('brand', 'like', "%{$search}%"))
+            ->distinct()
+            ->orderBy('brand')
+            ->limit($limit)
+            ->pluck('brand');
+    }
 
     public function listTransactions(array $queryData): LengthAwarePaginator
     {

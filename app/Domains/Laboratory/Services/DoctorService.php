@@ -34,7 +34,7 @@ class DoctorService
      */
     public function deleteDoctor(Doctor $doctor): void
     {
-        if (!$doctor->methods()->exists()) {
+        if (!$doctor->acceptances()->exists()) {
             $this->doctorRepository->deleteDoctor($doctor);
         } else
             throw new Exception("This Doctor has some Acceptances");
