@@ -1,481 +1,24 @@
 import React, { useState, useMemo } from 'react';
 import {
     Box,
-    Card,
-    CardContent,
     Typography,
-    Grid as Grid,
+    Grid,
     Container,
-    Skeleton,
     Alert,
     AlertTitle,
     Button,
-    IconButton,
-    Chip,
-    Tooltip,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
-    Fade,
-    Badge,
-    AppBar,
-    Toolbar,
     Paper,
-    Divider,
     Stack,
-    Collapse,
     CircularProgress,
     Snackbar,
-    alpha,
-    styled,
 } from '@mui/material';
-import {
-    TrendingUp,
-    Assignment,
-    CreditCard,
-    AccessTime,
-    CheckCircle,
-    Warning,
-    Description,
-    AttachMoney,
-    MonetizationOn,
-    Refresh,
-    Visibility,
-    VisibilityOff,
-    Info,
-    Timeline,
-    Dashboard as DashboardIcon,
-    NotificationsActive,
-    ExpandMore,
-    ExpandLess,
-    Error as ErrorIcon,
-    CurrencyExchange,
-    RequestQuote,
-} from '@mui/icons-material';
-import { Link } from '@inertiajs/react';
-
-// PropTypes for better documentation (optional)
+import { Refresh, Error as ErrorIcon } from '@mui/icons-material';
 import PropTypes from 'prop-types';
-import TextField from '@mui/material/TextField';
-import Excel from '../../../../images/excel.svg';
-
-// Styled components for enhanced UI
-const StyledCard = styled(Card, {
-    shouldForwardProp: (prop) => prop !== 'isAlert' && prop !== 'priority',
-})(({ theme, priority, isAlert }) => ({
-    height: '100%',
-    transition: 'all 0.3s ease-in-out',
-    borderRadius: theme.spacing(2),
-    position: 'relative',
-    overflow: 'visible',
-    borderLeft: `4px solid ${
-        isAlert
-            ? theme.palette.warning.main
-            : priority === 'high'
-              ? theme.palette.primary.main
-              : theme.palette.grey[300]
-    }`,
-    '&:hover': {
-        transform: 'translateY(-4px)',
-        boxShadow: theme.shadows[8],
-    },
-    ...(priority === 'high' && {
-        boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
-    }),
-}));
-
-const MetricValue = styled(Typography, {
-    shouldForwardProp: (prop) => prop !== 'isAlert',
-})(({ theme, isAlert }) => ({
-    fontWeight: 'bold',
-    fontSize: '2rem',
-    background: isAlert
-        ? `linear-gradient(45deg, ${theme.palette.warning.main}, ${theme.palette.error.main})`
-        : `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-    backgroundClip: 'text',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    transition: 'all 0.3s ease',
-}));
-
-const IconContainer = styled(Box)(({ theme, color = 'primary' }) => ({
-    width: 56,
-    height: 56,
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: alpha(theme.palette[color].main, 0.1),
-    color: theme.palette[color].main,
-    transition: 'all 0.3s ease',
-    '&:hover': {
-        transform: 'scale(1.1)',
-        backgroundColor: alpha(theme.palette[color].main, 0.2),
-    },
-}));
-
-// Metric configuration
-const getMetricConfig = (label) => {
-    const configs = {
-        'Total Acceptances': {
-            icon: Assignment,
-            color: 'primary',
-            description: 'New patient acceptances registered today',
-            priority: 'high',
-            category: 'operations',
-            unit: 'patients',
-            route: 'acceptances.index',
-            filter: true,
-        },
-        'Total Tests': {
-            icon: Description,
-            color: 'success',
-            description: 'Laboratory tests completed and processed',
-            priority: 'medium',
-            category: 'operations',
-            unit: 'tests',
-            route: 'acceptanceItems.index',
-            filters: { 'test.type': ['TEST', 'PANEL'] },
-            filter: true,
-        },
-        'Total Consultation': {
-            icon: CheckCircle,
-            color: 'info',
-            description: 'Patient consultations completed today',
-            priority: 'high',
-            category: 'medical',
-            unit: 'consultations',
-            route: 'consultations.index',
-            filter: true,
-        },
-        'Total Payments': {
-            icon: AttachMoney,
-            color: 'success',
-            description: 'Total revenue collected from all sources',
-            priority: 'high',
-            category: 'financial',
-            unit: 'currency',
-            route: 'payments.index',
-            filter: true,
-        },
-        'Total Cash Payments': {
-            icon: MonetizationOn,
-            color: 'success',
-            description: 'Cash payments received at reception',
-            priority: 'low',
-            category: 'financial',
-            unit: 'currency',
-            route: 'payments.index',
-            filters: { type: 'cash' },
-            filter: true,
-        },
-        'Total Card Payments': {
-            icon: CreditCard,
-            color: 'success',
-            description: 'Credit/debit card payments processed',
-            priority: 'low',
-            category: 'financial',
-            unit: 'currency',
-            route: 'payments.index',
-            filters: { type: 'card' },
-            filter: true,
-        },
-        'Total Transfer Payments': {
-            icon: CurrencyExchange,
-            color: 'success',
-            description: 'transfer payments processed',
-            priority: 'low',
-            category: 'financial',
-            unit: 'currency',
-            route: 'payments.index',
-            filters: { type: 'transfer' },
-            filter: true,
-        },
-        'Total Credit Payments': {
-            icon: RequestQuote,
-            color: 'success',
-            description: 'credit payments processed',
-            priority: 'low',
-            category: 'financial',
-            unit: 'currency',
-            route: 'payments.index',
-            filters: { type: 'credit' },
-            filter: true,
-        },
-        'Waiting For Sampling': {
-            icon: AccessTime,
-            color: 'warning',
-            description: 'Patients awaiting sample collection',
-            priority: 'high',
-            category: 'alerts',
-            unit: 'patients',
-            isAlert: true,
-            route: 'sampleCollection',
-            filter: false,
-        },
-        'Waiting For Consultation': {
-            icon: AccessTime,
-            color: 'warning',
-            description: 'Patients in consultation queue',
-            priority: 'high',
-            category: 'alerts',
-            unit: 'patients',
-            isAlert: true,
-            route: 'consultations.waiting-list',
-            filter: false,
-        },
-        'Reports Waiting For Approving': {
-            icon: Warning,
-            color: 'error',
-            description: 'Laboratory reports pending approval',
-            priority: 'high',
-            category: 'alerts',
-            unit: 'reports',
-            isAlert: true,
-            route: 'reports.approvingList',
-            filter: false,
-        },
-    };
-    return (
-        configs[label] || {
-            icon: TrendingUp,
-            color: 'primary',
-            description: 'Metric description not available',
-            priority: 'medium',
-            category: 'general',
-            unit: 'units',
-        }
-    );
-};
-
-// Enhanced metric card component
-
-const MetricCard = React.memo(
-    ({ label, valueData, category, delay = 0, onToggleVisibility, isVisible = true, date }) => {
-        const [showDetails, setShowDetails] = useState(false);
-        const config = getMetricConfig(label);
-        const Icon = config.icon;
-        const url = route(
-            config.route,
-            config.filter ? { filters: { ...config.filters, date } } : null,
-        );
-
-        const value = valueData?.value || valueData;
-        const trend = valueData?.trend || 0;
-        const previousValue = valueData?.previousValue;
-
-        const numericValue =
-            typeof value === 'string' ? parseFloat(value.replace(/[^\d.]/g, '')) || 0 : value;
-
-        const formatValue = (val) => {
-            if (typeof val === 'string' && val.includes('OMR')) {
-                return val;
-            }
-            return typeof val === 'number' && val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val;
-        };
-
-        const getTrendColor = (trend) => {
-            if (trend > 0) return config.isAlert ? 'error' : 'success';
-            if (trend < 0) return config.isAlert ? 'success' : 'error';
-            return 'text.secondary';
-        };
-
-        const getTrendIcon = (trend) => {
-            if (trend > 0) return '↗';
-            if (trend < 0) return '↘';
-            return '→';
-        };
-
-        return (
-            <Fade in={isVisible} timeout={500} style={{ transitionDelay: `${delay}ms` }}>
-                <StyledCard priority={config.priority} isAlert={config.isAlert && numericValue > 0}>
-                    {config.priority === 'high' && (
-                        <Box
-                            sx={{
-                                position: 'absolute',
-                                top: -8,
-                                right: -8,
-                                width: 16,
-                                height: 16,
-                                bgcolor: 'primary.main',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                zIndex: 1,
-                            }}
-                        >
-                            <Box
-                                sx={{ width: 8, height: 8, bgcolor: 'white', borderRadius: '50%' }}
-                            />
-                        </Box>
-                    )}
-
-                    {config.isAlert && numericValue > 0 && (
-                        <Badge
-                            badgeContent={<NotificationsActive sx={{ fontSize: 12 }} />}
-                            color="error"
-                            sx={{ position: 'absolute', top: 16, right: 16 }}
-                        />
-                    )}
-
-                    <CardContent sx={{ p: 3 }}>
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'flex-start',
-                            }}
-                        >
-                            <Box sx={{ flex: 1 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                    <Typography
-                                        variant="body2"
-                                        color="text.secondary"
-                                        sx={{ fontWeight: 500 }}
-                                    >
-                                        {label}
-                                    </Typography>
-                                    <Tooltip title={config.description} arrow>
-                                        <IconButton size="small" sx={{ p: 0 }}>
-                                            <Info sx={{ fontSize: 14 }} />
-                                        </IconButton>
-                                    </Tooltip>
-                                </Box>
-
-                                <MetricValue
-                                    variant="h3"
-                                    component="div"
-                                    isAlert={config.isAlert && numericValue > 0}
-                                    sx={{ mb: 1 }}
-                                >
-                                    {formatValue(value)}
-                                </MetricValue>
-
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                    }}
-                                >
-                                    <Stack
-                                        direction="row"
-                                        spacing={1}
-                                        sx={{ alignItems: 'center' }}
-                                    >
-                                        <Chip
-                                            label={category}
-                                            size="small"
-                                            color={config.color}
-                                            variant="outlined"
-                                            sx={{ fontSize: '0.75rem' }}
-                                        />
-
-                                        {trend !== 0 && (
-                                            <Typography
-                                                variant="caption"
-                                                sx={{
-                                                    color: getTrendColor(trend),
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    fontWeight: 'bold',
-                                                }}
-                                            >
-                                                {getTrendIcon(trend)} {Math.abs(trend)}%
-                                            </Typography>
-                                        )}
-                                    </Stack>
-
-                                    {config.isAlert && numericValue > 0 && (
-                                        <Chip
-                                            label="Attention"
-                                            size="small"
-                                            color="warning"
-                                            variant="filled"
-                                            sx={{ animation: 'pulse 2s infinite' }}
-                                        />
-                                    )}
-                                </Box>
-
-                                <Collapse in={showDetails}>
-                                    <Box
-                                        sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}
-                                    >
-                                        <Typography variant="caption" color="text.secondary">
-                                            Category: {config.category} • Unit: {config.unit}
-                                        </Typography>
-                                        {previousValue && (
-                                            <Typography
-                                                variant="caption"
-                                                display="block"
-                                                color="text.secondary"
-                                            >
-                                                Previous: {formatValue(previousValue)}
-                                            </Typography>
-                                        )}
-                                    </Box>
-                                </Collapse>
-
-                                <Box
-                                    sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}
-                                >
-                                    <IconButton
-                                        size="small"
-                                        onClick={() => setShowDetails(!showDetails)}
-                                        sx={{ opacity: 0.7 }}
-                                    >
-                                        {showDetails ? <ExpandLess /> : <ExpandMore />}
-                                    </IconButton>
-
-                                    {onToggleVisibility && (
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => onToggleVisibility(label)}
-                                            sx={{ opacity: 0.7 }}
-                                        >
-                                            <VisibilityOff />
-                                        </IconButton>
-                                    )}
-                                </Box>
-                            </Box>
-
-                            <IconContainer color={config.color}>
-                                <Link href={url}>
-                                    <Icon sx={{ fontSize: 28 }} />
-                                </Link>
-                            </IconContainer>
-                        </Box>
-                    </CardContent>
-                </StyledCard>
-            </Fade>
-        );
-    },
-);
-MetricCard.displayName = 'MetricCard';
-
-// Loading skeleton component
-const MetricSkeleton = React.memo(() => (
-    <Card sx={{ height: '100%', borderRadius: 2 }}>
-        <CardContent sx={{ p: 3 }}>
-            <Box
-                sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
-            >
-                <Box sx={{ flex: 1, mr: 2 }}>
-                    <Skeleton variant="text" width="70%" height={24} />
-                    <Skeleton variant="text" width="50%" height={48} sx={{ my: 1 }} />
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Skeleton variant="rounded" width={80} height={24} />
-                        <Skeleton variant="rounded" width={60} height={24} />
-                    </Box>
-                </Box>
-                <Skeleton variant="circular" width={56} height={56} />
-            </Box>
-        </CardContent>
-    </Card>
-));
-MetricSkeleton.displayName = 'MetricSkeleton';
+import { getMetricConfig, getNumericValue } from './Dashboard/metricConfig';
+import MetricSkeleton from './Dashboard/MetricSkeleton';
+import DashboardHeader from './Dashboard/DashboardHeader';
+import DashboardControls from './Dashboard/DashboardControls';
+import CategorySection from './Dashboard/CategorySection';
 
 // Main Dashboard component that accepts data as props
 const Dashboard = ({
@@ -528,11 +71,7 @@ const Dashboard = ({
 
             Object.entries(metrics).forEach(([label, valueData]) => {
                 const config = getMetricConfig(label);
-                const value = valueData?.value || valueData;
-                const numericValue =
-                    typeof value === 'string'
-                        ? parseFloat(value.replace(/[^\d.]/g, '')) || 0
-                        : value;
+                const numericValue = getNumericValue(valueData);
 
                 // Apply priority filter
                 if (filter === 'high' && config.priority !== 'high') return;
@@ -575,12 +114,7 @@ const Dashboard = ({
         Object.values(data).forEach((category) => {
             Object.entries(category).forEach(([label, valueData]) => {
                 const config = getMetricConfig(label);
-                const value = valueData?.value || valueData;
-                const numericValue =
-                    typeof value === 'string'
-                        ? parseFloat(value.replace(/[^\d.]/g, '')) || 0
-                        : value;
-                if (config.isAlert && numericValue > 0) count++;
+                if (config.isAlert && getNumericValue(valueData) > 0) count++;
             });
         });
         return count;
@@ -626,51 +160,18 @@ const Dashboard = ({
         <Box sx={{ flexGrow: 1 }} className={className} {...props}>
             {/* Header */}
             {showHeader && (
-                <AppBar
-                    position="static"
-                    elevation={0}
-                    sx={{ bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider' }}
-                >
-                    <Toolbar>
-                        <DashboardIcon sx={{ color: 'primary.main', mr: 2 }} />
-                        <Typography variant="h6" sx={{ flexGrow: 1, color: 'text.primary' }}>
-                            {title}
-                        </Typography>
-
-                        {showSystemHealth && totalAlerts > 0 && (
-                            <Badge badgeContent={totalAlerts} color="error" sx={{ mr: 2 }}>
-                                <NotificationsActive color="action" />
-                            </Badge>
-                        )}
-
-                        {showSystemHealth && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Chip
-                                    icon={<Timeline />}
-                                    label={
-                                        systemHealth === 'good'
-                                            ? 'All Systems Operational'
-                                            : 'System Issues Detected'
-                                    }
-                                    color={systemHealth === 'good' ? 'success' : 'warning'}
-                                    variant="outlined"
-                                    size="small"
-                                />
-                            </Box>
-                        )}
-                    </Toolbar>
-                </AppBar>
+                <DashboardHeader
+                    title={title}
+                    showSystemHealth={showSystemHealth}
+                    totalAlerts={totalAlerts}
+                    systemHealth={systemHealth}
+                />
             )}
 
             <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
                 {/* Dashboard Title */}
                 <Box mb={4}>
-                    <Typography
-                        variant="h3"
-                        component="h1"
-                        gutterBottom
-                        sx={{ fontWeight: 'bold' }}
-                    >
+                    <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
                         Dashboard Overview
                     </Typography>
 
@@ -695,86 +196,19 @@ const Dashboard = ({
                         </Box>
 
                         {showFilters && (
-                            <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-                                <Tooltip title="Export to Excel">
-                                    <IconButton
-                                        href={route('api.dailyCashReport.export', { date })}
-                                        color="success"
-                                        target="_blank"
-                                        sx={{
-                                            border: '1px solid #e0e0e0',
-                                            borderRadius: 1,
-                                            p: 1,
-                                        }}
-                                    >
-                                        <Stack
-                                            direction="row"
-                                            spacing={1}
-                                            sx={{ alignItems: 'center' }}
-                                        >
-                                            <img src={Excel} alt="Excel" width="24px" />
-                                            <Typography
-                                                variant="button"
-                                                sx={{ display: { xs: 'none', sm: 'block' } }}
-                                            >
-                                                Export
-                                            </Typography>
-                                        </Stack>
-                                    </IconButton>
-                                </Tooltip>
-                                <TextField
-                                    onChange={handleDateChange}
-                                    value={date}
-                                    size="small"
-                                    type="date"
-                                    sx={{ minWidth: 120 }}
-                                    slotProps={{ htmlInput: { max: today() } }}
-                                />
-                                <FormControl size="small" sx={{ minWidth: 120 }}>
-                                    <InputLabel>Priority</InputLabel>
-                                    <Select
-                                        value={filter}
-                                        label="Priority"
-                                        onChange={(e) => setFilter(e.target.value)}
-                                    >
-                                        <MenuItem value="all">All Metrics</MenuItem>
-                                        <MenuItem value="high">High Priority</MenuItem>
-                                        <MenuItem value="alerts">Alerts Only</MenuItem>
-                                    </Select>
-                                </FormControl>
-
-                                <FormControl size="small" sx={{ minWidth: 120 }}>
-                                    <InputLabel>Category</InputLabel>
-                                    <Select
-                                        value={categoryFilter}
-                                        label="Category"
-                                        onChange={(e) => setCategoryFilter(e.target.value)}
-                                    >
-                                        <MenuItem value="all">All Categories</MenuItem>
-                                        <MenuItem value="operations">Operations</MenuItem>
-                                        <MenuItem value="financial">Financial</MenuItem>
-                                        <MenuItem value="medical">Medical</MenuItem>
-                                        <MenuItem value="alerts">Alerts</MenuItem>
-                                    </Select>
-                                </FormControl>
-
-                                {onRefresh && (
-                                    <Button
-                                        variant="outlined"
-                                        startIcon={
-                                            isRefreshing ? (
-                                                <CircularProgress size={16} />
-                                            ) : (
-                                                <Refresh />
-                                            )
-                                        }
-                                        onClick={handleRefresh}
-                                        disabled={isRefreshing}
-                                    >
-                                        {refreshButtonText}
-                                    </Button>
-                                )}
-                            </Stack>
+                            <DashboardControls
+                                date={date}
+                                maxDate={today()}
+                                onDateChange={handleDateChange}
+                                filter={filter}
+                                onFilterChange={(e) => setFilter(e.target.value)}
+                                categoryFilter={categoryFilter}
+                                onCategoryFilterChange={(e) => setCategoryFilter(e.target.value)}
+                                onRefresh={onRefresh}
+                                isRefreshing={isRefreshing}
+                                onRefreshClick={handleRefresh}
+                                refreshButtonText={refreshButtonText}
+                            />
                         )}
                     </Stack>
                 </Box>
@@ -798,106 +232,19 @@ const Dashboard = ({
                     </Grid>
                 ) : (
                     <Stack spacing={4}>
-                        {Object.entries(filteredData || {}).map(
-                            ([category, metrics], categoryIndex) => {
-                                const visibleMetrics = Object.entries(metrics);
-                                const totalMetrics = data
-                                    ? Object.keys(data[category] || {}).length
-                                    : 0;
-
-                                return (
-                                    <Paper
-                                        key={category}
-                                        elevation={1}
-                                        sx={{ p: 3, borderRadius: 3 }}
-                                    >
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                mb: 3,
-                                            }}
-                                        >
-                                            <Typography
-                                                variant="h4"
-                                                component="h2"
-                                                sx={{ fontWeight: 'bold' }}
-                                            >
-                                                {category} Metrics
-                                            </Typography>
-                                            <Chip
-                                                label={`${visibleMetrics.length} of ${totalMetrics} shown`}
-                                                variant="outlined"
-                                                size="small"
-                                            />
-                                        </Box>
-
-                                        <Grid container spacing={3}>
-                                            {visibleMetrics.map(([label, valueData], index) => (
-                                                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={label}>
-                                                    <MetricCard
-                                                        label={label}
-                                                        valueData={valueData}
-                                                        date={date}
-                                                        category={category}
-                                                        delay={categoryIndex * 100 + index * 50}
-                                                        onToggleVisibility={
-                                                            enableAutoHide
-                                                                ? toggleMetricVisibility
-                                                                : undefined
-                                                        }
-                                                    />
-                                                </Grid>
-                                            ))}
-                                        </Grid>
-
-                                        {/* Hidden metrics section */}
-                                        {enableAutoHide &&
-                                            data &&
-                                            Object.keys(data[category] || {}).some((label) =>
-                                                hiddenMetrics.has(label),
-                                            ) && (
-                                                <Box sx={{ mt: 3, pt: 3 }}>
-                                                    <Divider sx={{ mb: 2 }} />
-                                                    <Typography
-                                                        variant="subtitle2"
-                                                        color="text.secondary"
-                                                        gutterBottom
-                                                    >
-                                                        Hidden Metrics
-                                                    </Typography>
-                                                    <Stack
-                                                        direction="row"
-                                                        spacing={1}
-                                                        sx={{ flexWrap: 'wrap' }}
-                                                    >
-                                                        {Object.keys(data[category] || {})
-                                                            .filter((label) =>
-                                                                hiddenMetrics.has(label),
-                                                            )
-                                                            .map((label) => (
-                                                                <Chip
-                                                                    key={label}
-                                                                    label={label}
-                                                                    icon={<Visibility />}
-                                                                    onClick={() =>
-                                                                        toggleMetricVisibility(
-                                                                            label,
-                                                                        )
-                                                                    }
-                                                                    variant="outlined"
-                                                                    size="small"
-                                                                    sx={{ m: 0.5 }}
-                                                                />
-                                                            ))}
-                                                    </Stack>
-                                                </Box>
-                                            )}
-                                    </Paper>
-                                );
-                            },
-                        )}
+                        {Object.entries(filteredData || {}).map(([category, metrics], categoryIndex) => (
+                            <CategorySection
+                                key={category}
+                                category={category}
+                                metrics={metrics}
+                                data={data}
+                                date={date}
+                                categoryIndex={categoryIndex}
+                                enableAutoHide={enableAutoHide}
+                                hiddenMetrics={hiddenMetrics}
+                                onToggleVisibility={toggleMetricVisibility}
+                            />
+                        ))}
                     </Stack>
                 )}
 

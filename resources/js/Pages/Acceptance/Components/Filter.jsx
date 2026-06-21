@@ -9,7 +9,6 @@ import {
     Tooltip,
     Chip,
     Box,
-    Typography,
     Select,
     OutlinedInput,
     MenuItem,
@@ -23,41 +22,18 @@ import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-    slotProps: {
-        paper: {
-            style: {
-                maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-                width: 250,
-            },
-        },
-    },
-};
-
-const HOW_FOUND_OPTIONS = [
-    { value: 'google', label: 'Google Search' },
-    { value: 'instagram', label: 'Instagram' },
-    { value: 'friends', label: 'Friends / Family' },
-    { value: 'doctor', label: "Doctor's Recommendation" },
-    { value: 'website', label: 'Website / Online Ad' },
-    { value: 'walk_in', label: 'Walk-in / Signboard' },
-];
-
-const statuses = [
-    'pending',
-    'waiting for payment',
-    'sampling',
-    'pooling',
-    'waiting for entering',
-    'processing',
-    'waiting for publishing',
-    'reported',
-    'Canceled',
-];
+import {
+    MenuProps,
+    HOW_FOUND_OPTIONS,
+    STATUSES,
+    REGISTERED_PRESETS,
+    REPORT_DATE_PRESETS,
+    rangePreset,
+    reportRangePreset,
+} from './Filter/constants';
+import ActiveFilterChips from './Filter/ActiveFilterChips';
+import ClearableDateField from './Filter/ClearableDateField';
+import PresetChipRow from './Filter/PresetChipRow';
 
 const Filter = ({ defaultFilter, onFilter }) => {
     const [filter, setFilter] = useState(defaultFilter || {});
@@ -181,269 +157,70 @@ const Filter = ({ defaultFilter, onFilter }) => {
     );
 
     const handleQuickDatePreset = useCallback((preset) => {
-        const today = new Date();
-        let fromDate = new Date();
-
-        switch (preset) {
-            case 'today':
-                fromDate = new Date(today);
-                break;
-            case 'yesterday':
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() - 1);
-                break;
-            case 'thisWeek':
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() - fromDate.getDay());
-                break;
-            case 'lastWeek': {
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() - fromDate.getDay() - 7);
-                const toDate = new Date(fromDate);
-                toDate.setDate(toDate.getDate() + 6);
-                setFilter((prevState) => ({
-                    ...prevState,
-                    from_date: fromDate.toISOString().split('T')[0],
-                    to_date: toDate.toISOString().split('T')[0],
-                }));
-                return;
-            }
-            case 'thisMonth':
-                fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                break;
-            case 'lastMonth': {
-                fromDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-                const lastDayLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-                setFilter((prevState) => ({
-                    ...prevState,
-                    from_date: fromDate.toISOString().split('T')[0],
-                    to_date: lastDayLastMonth.toISOString().split('T')[0],
-                }));
-                return;
-            }
-            default:
-                return;
+        const range = rangePreset(preset);
+        if (range) {
+            setFilter((prevState) => ({
+                ...prevState,
+                from_date: range.from,
+                to_date: range.to,
+            }));
         }
-
-        setFilter((prevState) => ({
-            ...prevState,
-            from_date: fromDate.toISOString().split('T')[0],
-            to_date: today.toISOString().split('T')[0],
-        }));
     }, []);
 
     const handleQuickPublishedAtPreset = useCallback((preset) => {
-        const today = new Date();
-        let fromDate = new Date();
-
-        switch (preset) {
-            case 'today':
-                fromDate = new Date(today);
-                break;
-            case 'yesterday':
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() - 1);
-                break;
-            case 'thisWeek':
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() - fromDate.getDay());
-                break;
-            case 'lastWeek': {
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() - fromDate.getDay() - 7);
-                const toDate = new Date(fromDate);
-                toDate.setDate(toDate.getDate() + 6);
-                setFilter((prevState) => ({
-                    ...prevState,
-                    published_at_from: fromDate.toISOString().split('T')[0],
-                    published_at_to: toDate.toISOString().split('T')[0],
-                }));
-                return;
-            }
-            case 'thisMonth':
-                fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                break;
-            case 'lastMonth': {
-                fromDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-                const lastDayLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-                setFilter((prevState) => ({
-                    ...prevState,
-                    published_at_from: fromDate.toISOString().split('T')[0],
-                    published_at_to: lastDayLastMonth.toISOString().split('T')[0],
-                }));
-                return;
-            }
-            default:
-                return;
+        const range = rangePreset(preset);
+        if (range) {
+            setFilter((prevState) => ({
+                ...prevState,
+                published_at_from: range.from,
+                published_at_to: range.to,
+            }));
         }
-
-        setFilter((prevState) => ({
-            ...prevState,
-            published_at_from: fromDate.toISOString().split('T')[0],
-            published_at_to: today.toISOString().split('T')[0],
-        }));
     }, []);
 
     const handleQuickReportDatePreset = useCallback((preset) => {
-        const today = new Date();
-        let fromDate, toDate;
-
-        switch (preset) {
-            case 'today':
-                fromDate = new Date(today);
-                toDate = new Date(today);
-                break;
-            case 'tomorrow':
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() + 1);
-                toDate = new Date(fromDate);
-                break;
-            case 'thisWeek':
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() - fromDate.getDay() + 1);
-                toDate = new Date(fromDate);
-                toDate.setDate(toDate.getDate() + 6);
-                break;
-            case 'nextWeek':
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() - fromDate.getDay() + 8);
-                toDate = new Date(fromDate);
-                toDate.setDate(toDate.getDate() + 6);
-                break;
-            case 'thisMonth':
-                fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                toDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-                break;
-            case 'nextMonth':
-                fromDate = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-                toDate = new Date(today.getFullYear(), today.getMonth() + 2, 0);
-                break;
-            default:
-                return;
+        const range = reportRangePreset(preset);
+        if (range) {
+            setFilter((prevState) => ({
+                ...prevState,
+                report_date_from: range.from,
+                report_date_to: range.to,
+            }));
         }
-
-        setFilter((prevState) => ({
-            ...prevState,
-            report_date_from: fromDate.toISOString().split('T')[0],
-            report_date_to: toDate.toISOString().split('T')[0],
-        }));
     }, []);
+
+    const hasErrors = Boolean(dateError) || Boolean(reportDateError) || Boolean(publishedAtError);
 
     return (
         <Box sx={{ mb: 2 }}>
             {/* Active filters indicator */}
             {activeFilters > 0 && (
-                <Box
-                    sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}
-                >
-                    <FilterListIcon color="primary" fontSize="small" />
-                    <Chip
-                        label={`${activeFilters} filter${activeFilters > 1 ? 's' : ''} active`}
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                    />
-                    {/* Show active filter chips */}
-                    {filter?.search && (
-                        <Chip
-                            label={`Search: ${filter.search}`}
-                            size="small"
-                            onDelete={handleClearSearch}
-                            variant="outlined"
-                        />
-                    )}
-                    {filter?.status && filter.status.length > 0 && (
-                        <Chip
-                            label={`Status: ${filter.status.length} selected`}
-                            size="small"
-                            onDelete={handleClearStatus}
-                            variant="outlined"
-                        />
-                    )}
-                    {filter?.priority && (
-                        <Chip
-                            label={`Priority: ${filter.priority}`}
-                            size="small"
-                            onDelete={handleClearPriority}
-                            variant="outlined"
-                        />
-                    )}
-                    {filter?.tags && filter.tags.length > 0 && (
-                        <Chip
-                            label={`Tags: ${filter.tags.length} selected`}
-                            size="small"
-                            onDelete={handleClearTags}
-                            variant="outlined"
-                        />
-                    )}
-                    {filter?.how_found_us && filter.how_found_us.length > 0 && (
-                        <Chip
-                            label={`How Found: ${filter.how_found_us.length} selected`}
-                            size="small"
-                            onDelete={handleClearHowFoundUs}
-                            variant="outlined"
-                        />
-                    )}
-                    {filter?.waiting_for_pooling && (
-                        <Chip
-                            label="Waiting for Pooling"
-                            size="small"
-                            onDelete={() =>
-                                setFilter((p) => ({ ...p, waiting_for_pooling: false }))
-                            }
-                            variant="outlined"
-                        />
-                    )}
-                    {filter?.out_patient !== undefined && filter?.out_patient !== '' && (
-                        <Chip
-                            label={filter.out_patient === '1' ? 'Out Patient' : 'In Patient'}
-                            size="small"
-                            onDelete={() => setFilter((p) => ({ ...p, out_patient: '' }))}
-                            variant="outlined"
-                        />
-                    )}
-                    {(filter?.from_date || filter?.to_date) && (
-                        <Chip
-                            label={`Registered: ${filter.from_date || '...'} - ${filter.to_date || '...'}`}
-                            size="small"
-                            onDelete={() => {
-                                handleClearDate('from_date');
-                                handleClearDate('to_date');
-                            }}
-                            variant="outlined"
-                        />
-                    )}
-                    {(filter?.report_date_from || filter?.report_date_to) && (
-                        <Chip
-                            label={`Report Date: ${filter.report_date_from || '...'} - ${filter.report_date_to || '...'}`}
-                            size="small"
-                            onDelete={() => {
-                                handleClearDate('report_date_from');
-                                handleClearDate('report_date_to');
-                            }}
-                            variant="outlined"
-                        />
-                    )}
-                    {(filter?.published_at_from || filter?.published_at_to) && (
-                        <Chip
-                            label={`Published: ${filter.published_at_from || '...'} - ${filter.published_at_to || '...'}`}
-                            size="small"
-                            onDelete={() => {
-                                handleClearDate('published_at_from');
-                                handleClearDate('published_at_to');
-                            }}
-                            variant="outlined"
-                        />
-                    )}
-                    <Button
-                        size="small"
-                        onClick={handleClearAll}
-                        startIcon={<ClearIcon />}
-                        sx={{ ml: 1 }}
-                    >
-                        Clear All
-                    </Button>
-                </Box>
+                <ActiveFilterChips
+                    filter={filter}
+                    activeFilters={activeFilters}
+                    onClearSearch={handleClearSearch}
+                    onClearStatus={handleClearStatus}
+                    onClearPriority={handleClearPriority}
+                    onClearTags={handleClearTags}
+                    onClearHowFoundUs={handleClearHowFoundUs}
+                    onClearWaitingPooling={() =>
+                        setFilter((p) => ({ ...p, waiting_for_pooling: false }))
+                    }
+                    onClearOutPatient={() => setFilter((p) => ({ ...p, out_patient: '' }))}
+                    onClearRegistered={() => {
+                        handleClearDate('from_date');
+                        handleClearDate('to_date');
+                    }}
+                    onClearReportDate={() => {
+                        handleClearDate('report_date_from');
+                        handleClearDate('report_date_to');
+                    }}
+                    onClearPublished={() => {
+                        handleClearDate('published_at_from');
+                        handleClearDate('published_at_to');
+                    }}
+                    onClearAll={handleClearAll}
+                />
             )}
 
             <form action="#" onSubmit={handleSubmit}>
@@ -513,7 +290,7 @@ const Filter = ({ defaultFilter, onFilter }) => {
                                     </Box>
                                 )}
                             >
-                                {statuses.map((name) => (
+                                {STATUSES.map((name) => (
                                     <MenuItem key={name} value={name}>
                                         <Checkbox
                                             checked={(filter?.status || []).includes(name)}
@@ -561,10 +338,7 @@ const Filter = ({ defaultFilter, onFilter }) => {
                         </FormControl>
                     </Grid>
 
-                    <Grid
-                        size={{ xs: 12, sm: 6, md: 4 }}
-                        sx={{ display: 'flex', alignItems: 'center' }}
-                    >
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }} sx={{ display: 'flex', alignItems: 'center' }}>
                         <FormControlLabel
                             control={
                                 <Checkbox
@@ -633,291 +407,102 @@ const Filter = ({ defaultFilter, onFilter }) => {
                     </Grid>
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography
-                            variant="subtitle2"
-                            sx={{ mb: 1, display: 'flex', alignItems: 'center' }}
-                        >
-                            <CalendarTodayIcon fontSize="small" sx={{ mr: 1 }} />
-                            Registered Date
-                        </Typography>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                            {[
-                                { key: 'today', label: 'Today' },
-                                { key: 'yesterday', label: 'Yesterday' },
-                                { key: 'thisWeek', label: 'This Week' },
-                                { key: 'lastWeek', label: 'Last Week' },
-                                { key: 'thisMonth', label: 'This Month' },
-                                { key: 'lastMonth', label: 'Last Month' },
-                            ].map((preset) => (
-                                <Chip
-                                    key={preset.key}
-                                    label={preset.label}
-                                    onClick={() => handleQuickDatePreset(preset.key)}
-                                    size="small"
-                                    clickable
-                                    color="primary"
-                                    variant="outlined"
-                                />
-                            ))}
-                        </Box>
+                        <PresetChipRow
+                            title="Registered Date"
+                            presets={REGISTERED_PRESETS}
+                            color="primary"
+                            onSelect={handleQuickDatePreset}
+                        />
                     </Grid>
 
                     <Grid size={{ xs: 12, sm: 6 }}>
-                        <TextField
-                            fullWidth
+                        <ClearableDateField
                             name="from_date"
-                            value={filter?.from_date || ''}
-                            onChange={handleChange}
+                            value={filter?.from_date}
                             label="From Date"
-                            type="date"
-                            error={Boolean(dateError)}
-                            slotProps={{
-                                inputLabel: {
-                                    shrink: true,
-                                },
-                                htmlInput: {
-                                    max: today,
-                                },
-                                input: {
-                                    endAdornment: filter?.from_date ? (
-                                        <InputAdornment position="end">
-                                            <Tooltip title="Clear date">
-                                                <IconButton
-                                                    onClick={() => handleClearDate('from_date')}
-                                                    edge="end"
-                                                    size="small"
-                                                >
-                                                    <ClearIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </InputAdornment>
-                                    ) : null,
-                                },
-                            }}
+                            onChange={handleChange}
+                            onClear={() => handleClearDate('from_date')}
+                            error={dateError}
+                            max={today}
                         />
                     </Grid>
 
                     <Grid size={{ xs: 12, sm: 6 }}>
-                        <TextField
-                            fullWidth
+                        <ClearableDateField
                             name="to_date"
-                            value={filter?.to_date || ''}
-                            onChange={handleChange}
+                            value={filter?.to_date}
                             label="To Date"
-                            type="date"
-                            error={Boolean(dateError)}
+                            onChange={handleChange}
+                            onClear={() => handleClearDate('to_date')}
+                            error={dateError}
                             helperText={dateError}
-                            slotProps={{
-                                inputLabel: { shrink: true },
-                                htmlInput: { max: today },
-                                input: {
-                                    endAdornment: filter?.to_date ? (
-                                        <InputAdornment position="end">
-                                            <Tooltip title="Clear date">
-                                                <IconButton
-                                                    onClick={() => handleClearDate('to_date')}
-                                                    edge="end"
-                                                    size="small"
-                                                >
-                                                    <ClearIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </InputAdornment>
-                                    ) : null,
-                                },
-                            }}
+                            max={today}
                         />
                     </Grid>
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography
-                            variant="subtitle2"
-                            sx={{ mb: 1, display: 'flex', alignItems: 'center' }}
-                        >
-                            <CalendarTodayIcon fontSize="small" sx={{ mr: 1 }} />
-                            Est. Report Date
-                        </Typography>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                            {[
-                                { key: 'today', label: 'Today' },
-                                { key: 'tomorrow', label: 'Tomorrow' },
-                                { key: 'thisWeek', label: 'This Week' },
-                                { key: 'nextWeek', label: 'Next Week' },
-                                { key: 'thisMonth', label: 'This Month' },
-                                { key: 'nextMonth', label: 'Next Month' },
-                            ].map((preset) => (
-                                <Chip
-                                    key={preset.key}
-                                    label={preset.label}
-                                    onClick={() => handleQuickReportDatePreset(preset.key)}
-                                    size="small"
-                                    clickable
-                                    color="secondary"
-                                    variant="outlined"
-                                />
-                            ))}
-                        </Box>
+                        <PresetChipRow
+                            title="Est. Report Date"
+                            presets={REPORT_DATE_PRESETS}
+                            color="secondary"
+                            onSelect={handleQuickReportDatePreset}
+                        />
                     </Grid>
 
                     <Grid size={{ xs: 12, sm: 6 }}>
-                        <TextField
-                            fullWidth
+                        <ClearableDateField
                             name="report_date_from"
-                            value={filter?.report_date_from || ''}
-                            onChange={handleChange}
+                            value={filter?.report_date_from}
                             label="Report Date From"
-                            type="date"
-                            error={Boolean(reportDateError)}
-                            slotProps={{
-                                inputLabel: { shrink: true },
-                                input: {
-                                    endAdornment: filter?.report_date_from ? (
-                                        <InputAdornment position="end">
-                                            <Tooltip title="Clear date">
-                                                <IconButton
-                                                    onClick={() =>
-                                                        handleClearDate('report_date_from')
-                                                    }
-                                                    edge="end"
-                                                    size="small"
-                                                >
-                                                    <ClearIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </InputAdornment>
-                                    ) : null,
-                                },
-                            }}
+                            onChange={handleChange}
+                            onClear={() => handleClearDate('report_date_from')}
+                            error={reportDateError}
                         />
                     </Grid>
 
                     <Grid size={{ xs: 12, sm: 6 }}>
-                        <TextField
-                            fullWidth
+                        <ClearableDateField
                             name="report_date_to"
-                            value={filter?.report_date_to || ''}
-                            onChange={handleChange}
+                            value={filter?.report_date_to}
                             label="Report Date To"
-                            type="date"
-                            error={Boolean(reportDateError)}
+                            onChange={handleChange}
+                            onClear={() => handleClearDate('report_date_to')}
+                            error={reportDateError}
                             helperText={reportDateError}
-                            slotProps={{
-                                inputLabel: { shrink: true },
-                                input: {
-                                    endAdornment: filter?.report_date_to ? (
-                                        <InputAdornment position="end">
-                                            <Tooltip title="Clear date">
-                                                <IconButton
-                                                    onClick={() =>
-                                                        handleClearDate('report_date_to')
-                                                    }
-                                                    edge="end"
-                                                    size="small"
-                                                >
-                                                    <ClearIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </InputAdornment>
-                                    ) : null,
-                                },
-                            }}
                         />
                     </Grid>
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography
-                            variant="subtitle2"
-                            sx={{ mb: 1, display: 'flex', alignItems: 'center' }}
-                        >
-                            <CalendarTodayIcon fontSize="small" sx={{ mr: 1 }} />
-                            Published At
-                        </Typography>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                            {[
-                                { key: 'today', label: 'Today' },
-                                { key: 'yesterday', label: 'Yesterday' },
-                                { key: 'thisWeek', label: 'This Week' },
-                                { key: 'lastWeek', label: 'Last Week' },
-                                { key: 'thisMonth', label: 'This Month' },
-                                { key: 'lastMonth', label: 'Last Month' },
-                            ].map((preset) => (
-                                <Chip
-                                    key={preset.key}
-                                    label={preset.label}
-                                    onClick={() => handleQuickPublishedAtPreset(preset.key)}
-                                    size="small"
-                                    clickable
-                                    color="info"
-                                    variant="outlined"
-                                />
-                            ))}
-                        </Box>
-                    </Grid>
-
-                    <Grid size={{ xs: 12, sm: 6 }}>
-                        <TextField
-                            fullWidth
-                            name="published_at_from"
-                            value={filter?.published_at_from || ''}
-                            onChange={handleChange}
-                            label="Published From"
-                            type="date"
-                            error={Boolean(publishedAtError)}
-                            slotProps={{
-                                inputLabel: { shrink: true },
-                                htmlInput: { max: today },
-                                input: {
-                                    endAdornment: filter?.published_at_from ? (
-                                        <InputAdornment position="end">
-                                            <Tooltip title="Clear date">
-                                                <IconButton
-                                                    onClick={() =>
-                                                        handleClearDate('published_at_from')
-                                                    }
-                                                    edge="end"
-                                                    size="small"
-                                                >
-                                                    <ClearIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </InputAdornment>
-                                    ) : null,
-                                },
-                            }}
+                        <PresetChipRow
+                            title="Published At"
+                            presets={REGISTERED_PRESETS}
+                            color="info"
+                            onSelect={handleQuickPublishedAtPreset}
                         />
                     </Grid>
 
                     <Grid size={{ xs: 12, sm: 6 }}>
-                        <TextField
-                            fullWidth
-                            name="published_at_to"
-                            value={filter?.published_at_to || ''}
+                        <ClearableDateField
+                            name="published_at_from"
+                            value={filter?.published_at_from}
+                            label="Published From"
                             onChange={handleChange}
+                            onClear={() => handleClearDate('published_at_from')}
+                            error={publishedAtError}
+                            max={today}
+                        />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                        <ClearableDateField
+                            name="published_at_to"
+                            value={filter?.published_at_to}
                             label="Published To"
-                            type="date"
-                            error={Boolean(publishedAtError)}
+                            onChange={handleChange}
+                            onClear={() => handleClearDate('published_at_to')}
+                            error={publishedAtError}
                             helperText={publishedAtError}
-                            slotProps={{
-                                inputLabel: { shrink: true },
-                                htmlInput: { max: today },
-                                input: {
-                                    endAdornment: filter?.published_at_to ? (
-                                        <InputAdornment position="end">
-                                            <Tooltip title="Clear date">
-                                                <IconButton
-                                                    onClick={() =>
-                                                        handleClearDate('published_at_to')
-                                                    }
-                                                    edge="end"
-                                                    size="small"
-                                                >
-                                                    <ClearIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </InputAdornment>
-                                    ) : null,
-                                },
-                            }}
+                            max={today}
                         />
                     </Grid>
 
@@ -932,11 +517,7 @@ const Filter = ({ defaultFilter, onFilter }) => {
                         <Button
                             variant="contained"
                             type="submit"
-                            disabled={
-                                Boolean(dateError) ||
-                                Boolean(reportDateError) ||
-                                Boolean(publishedAtError)
-                            }
+                            disabled={hasErrors}
                             startIcon={<FilterListIcon />}
                             sx={{ minWidth: 120 }}
                         >
