@@ -1,0 +1,153 @@
+import {
+    TrendingUp,
+    Assignment,
+    CreditCard,
+    AccessTime,
+    CheckCircle,
+    Warning,
+    Description,
+    AttachMoney,
+    MonetizationOn,
+    CurrencyExchange,
+    RequestQuote,
+} from '@mui/icons-material';
+
+// Metric configuration
+export const getMetricConfig = (label) => {
+    const configs = {
+        'Total Acceptances': {
+            icon: Assignment,
+            color: 'primary',
+            description: 'New patient acceptances registered today',
+            priority: 'high',
+            category: 'operations',
+            unit: 'patients',
+            route: 'acceptances.index',
+            filter: true,
+        },
+        'Total Tests': {
+            icon: Description,
+            color: 'success',
+            description: 'Laboratory tests completed and processed',
+            priority: 'medium',
+            category: 'operations',
+            unit: 'tests',
+            route: 'acceptanceItems.index',
+            filters: { 'test.type': ['TEST', 'PANEL'] },
+            filter: true,
+        },
+        'Total Consultation': {
+            icon: CheckCircle,
+            color: 'info',
+            description: 'Patient consultations completed today',
+            priority: 'high',
+            category: 'medical',
+            unit: 'consultations',
+            route: 'consultations.index',
+            filter: true,
+        },
+        'Total Payments': {
+            icon: AttachMoney,
+            color: 'success',
+            description: 'Total revenue collected from all sources',
+            priority: 'high',
+            category: 'financial',
+            unit: 'currency',
+            route: 'payments.index',
+            filter: true,
+        },
+        'Total Cash Payments': {
+            icon: MonetizationOn,
+            color: 'success',
+            description: 'Cash payments received at reception',
+            priority: 'low',
+            category: 'financial',
+            unit: 'currency',
+            route: 'payments.index',
+            filters: { type: 'cash' },
+            filter: true,
+        },
+        'Total Card Payments': {
+            icon: CreditCard,
+            color: 'success',
+            description: 'Credit/debit card payments processed',
+            priority: 'low',
+            category: 'financial',
+            unit: 'currency',
+            route: 'payments.index',
+            filters: { type: 'card' },
+            filter: true,
+        },
+        'Total Transfer Payments': {
+            icon: CurrencyExchange,
+            color: 'success',
+            description: 'transfer payments processed',
+            priority: 'low',
+            category: 'financial',
+            unit: 'currency',
+            route: 'payments.index',
+            filters: { type: 'transfer' },
+            filter: true,
+        },
+        'Total Credit Payments': {
+            icon: RequestQuote,
+            color: 'success',
+            description: 'credit payments processed',
+            priority: 'low',
+            category: 'financial',
+            unit: 'currency',
+            route: 'payments.index',
+            filters: { type: 'credit' },
+            filter: true,
+        },
+        'Waiting For Sampling': {
+            icon: AccessTime,
+            color: 'warning',
+            description: 'Patients awaiting sample collection',
+            priority: 'high',
+            category: 'alerts',
+            unit: 'patients',
+            isAlert: true,
+            route: 'sampleCollection',
+            filter: false,
+        },
+        'Waiting For Consultation': {
+            icon: AccessTime,
+            color: 'warning',
+            description: 'Patients in consultation queue',
+            priority: 'high',
+            category: 'alerts',
+            unit: 'patients',
+            isAlert: true,
+            route: 'consultations.waiting-list',
+            filter: false,
+        },
+        'Reports Waiting For Approving': {
+            icon: Warning,
+            color: 'error',
+            description: 'Laboratory reports pending approval',
+            priority: 'high',
+            category: 'alerts',
+            unit: 'reports',
+            isAlert: true,
+            route: 'reports.approvingList',
+            filter: false,
+        },
+    };
+    return (
+        configs[label] || {
+            icon: TrendingUp,
+            color: 'primary',
+            description: 'Metric description not available',
+            priority: 'medium',
+            category: 'general',
+            unit: 'units',
+        }
+    );
+};
+
+// Parses the raw numeric value out of a metric's value/valueData shape.
+export const getNumericValue = (valueData) => {
+    const value = valueData?.value || valueData;
+    return typeof value === 'string' ? parseFloat(value.replace(/[^\d.]/g, '')) || 0 : value;
+};
