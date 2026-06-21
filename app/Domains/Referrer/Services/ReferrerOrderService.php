@@ -5,12 +5,14 @@ namespace App\Domains\Referrer\Services;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
+use App\Domains\Reception\Models\Patient;
 use App\Domains\Referrer\DTOs\ReferrerOrderDTO;
 use App\Domains\Referrer\Events\ReferrerOrderCreated;
 use App\Domains\Referrer\Events\ReferrerOrderUpdated;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Referrer\Repositories\ReferrerOrderRepository;
 use App\Domains\Referrer\Support\ReferrerOrderPayloadBuilder;
+use App\Events\ReferrerOrderPatientCreated;
 use Exception;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
@@ -521,5 +523,58 @@ class ReferrerOrderService
             ->values()->all();
 
         return $merged;
+    }
+
+    /**
+     * Stamp a freshly created/linked patient's server_id onto the order's stored
+     * payload (matching by reference_id or id_no) in both the top-level patients
+     * list and any per-orderItem patients lists, persist it, then notify the provider.
+     */
+    public function attachServerPatientToOrder(ReferrerOrder $referrerOrder, Patient $patient, mixed $referenceId, ?string $idNo): void
+    {
+        $orderInformation = $referrerOrder->orderInformation;
+
+        if (isset($orderInformation['patients'])) {
+            $orderInformation['patients'] = $this->stampServerId(
+                $orderInformation['patients'], $patient->id, $referenceId, $idNo, true
+            );
+        }
+
+        if (isset($orderInformation['orderItems'])) {
+            foreach ($orderInformation['orderItems'] as &$orderItem) {
+                if (isset($orderItem['patients'])) {
+                    $orderItem['patients'] = $this->stampServerId(
+                        $orderItem['patients'], $patient->id, $referenceId, $idNo, false
+                    );
+                }
+            }
+            unset($orderItem);
+        }
+
+        $this->referrerRepository->updateReferrerOrder($referrerOrder, ['orderInformation' => $orderInformation]);
+
+        ReferrerOrderPatientCreated::dispatch($referrerOrder, $patient, false);
+    }
+
+    /**
+     * Set server_id on every patient entry matching the given reference_id/id_no.
+     *
+     * @param array<int, array<string, mixed>> $patients
+     * @return array<int, array<string, mixed>>
+     */
+    private function stampServerId(array $patients, int $serverId, mixed $referenceId, ?string $idNo, bool $stopAtFirstMatch): array
+    {
+        foreach ($patients as &$entry) {
+            if (($entry['reference_id'] ?? null) === ($referenceId ?? 0)
+                || ($entry['id_no'] ?? null) === $idNo) {
+                $entry['server_id'] = $serverId;
+                if ($stopAtFirstMatch) {
+                    break;
+                }
+            }
+        }
+        unset($entry);
+
+        return $patients;
     }
 }

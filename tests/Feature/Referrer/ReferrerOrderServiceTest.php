@@ -2,12 +2,14 @@
 
 namespace Tests\Feature\Referrer;
 
+use App\Domains\Reception\Models\Patient;
 use App\Domains\Referrer\DTOs\ReferrerOrderDTO;
 use App\Domains\Referrer\Events\ReferrerOrderCreated;
 use App\Domains\Referrer\Events\ReferrerOrderUpdated;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Referrer\Repositories\ReferrerOrderRepository;
 use App\Domains\Referrer\Services\ReferrerOrderService;
+use App\Events\ReferrerOrderPatientCreated;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -101,6 +103,66 @@ class ReferrerOrderServiceTest extends TestCase
         $this->repo->shouldNotReceive('deleteReferrerOrder');
         $this->expectException(Exception::class);
         $this->service->deleteReferrerOrder($order);
+    }
+
+    public function test_attach_server_patient_stamps_server_id_and_dispatches_event(): void
+    {
+        Event::fake([ReferrerOrderPatientCreated::class]);
+
+        $order = new ReferrerOrder();
+        $order->orderInformation = [
+            'patients' => [
+                ['reference_id' => 'R1', 'id_no' => '111'],
+                ['reference_id' => 'R2', 'id_no' => '222'],
+            ],
+            'orderItems' => [
+                ['patients' => [['reference_id' => 'R2', 'id_no' => '222']]],
+            ],
+        ];
+
+        $patient = new Patient();
+        $patient->id = 77;
+
+        $captured = null;
+        $this->repo->shouldReceive('updateReferrerOrder')->once()
+            ->with($order, Mockery::on(function ($data) use (&$captured) {
+                $captured = $data['orderInformation'];
+                return true;
+            }))->andReturn($order);
+
+        $this->service->attachServerPatientToOrder($order, $patient, 'R2', '222');
+
+        // Matched entry (top-level + per-orderItem) gets the server_id; non-matching stays untouched.
+        $this->assertSame(77, $captured['patients'][1]['server_id']);
+        $this->assertArrayNotHasKey('server_id', $captured['patients'][0]);
+        $this->assertSame(77, $captured['orderItems'][0]['patients'][0]['server_id']);
+
+        Event::assertDispatched(ReferrerOrderPatientCreated::class, function (ReferrerOrderPatientCreated $e) use ($order, $patient) {
+            return $e->referrerOrder === $order && $e->patient === $patient && $e->isMainPatient === false;
+        });
+    }
+
+    public function test_attach_server_patient_matches_by_id_no_when_reference_absent(): void
+    {
+        Event::fake([ReferrerOrderPatientCreated::class]);
+
+        $order = new ReferrerOrder();
+        $order->orderInformation = ['patients' => [['id_no' => '999']]];
+
+        $patient = new Patient();
+        $patient->id = 5;
+
+        $captured = null;
+        $this->repo->shouldReceive('updateReferrerOrder')->once()
+            ->with($order, Mockery::on(function ($data) use (&$captured) {
+                $captured = $data['orderInformation'];
+                return true;
+            }))->andReturn($order);
+
+        $this->service->attachServerPatientToOrder($order, $patient, null, '999');
+
+        $this->assertSame(5, $captured['patients'][0]['server_id']);
+        Event::assertDispatched(ReferrerOrderPatientCreated::class);
     }
 
     private function orderWithAcceptance(bool $has): ReferrerOrder
