@@ -37,6 +37,20 @@ class AcceptanceRepository
     {
     }
 
+    /**
+     * Eager-load the acceptance's reportable (non-reportless) items together with
+     * their reports, for publish-time validation.
+     */
+    public function loadReportableItemsWithReports(Acceptance $acceptance): void
+    {
+        $acceptance->load([
+            'acceptanceItems' => function ($q) {
+                $q->where('reportless', false)
+                    ->with('report');
+            },
+        ]);
+    }
+
     /** Base subquery for the acceptance_items → method_tests → methods join used in report-date calculations. */
     private function reportDateSubquery(): \Illuminate\Database\Query\Builder
     {
