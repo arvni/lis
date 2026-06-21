@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Notifications\Notification;
 
 class Referrer extends Model
 {
@@ -46,6 +47,19 @@ class Referrer extends Model
     public function getNameAttribute()
     {
         return $this->attributes["fullName"] ?? null;
+    }
+
+    /**
+     * Route mail notifications to an address the notification supplies
+     * (e.g. WelcomeNotification's per-acceptance email), else the default.
+     */
+    public function routeNotificationForMail(Notification $notification): string|array|null
+    {
+        if (method_exists($notification, "routeAddressForMail") && ($address = $notification->routeAddressForMail())) {
+            return $address;
+        }
+
+        return $this->email ?? null;
     }
 
     public function acceptances()
