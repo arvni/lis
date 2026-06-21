@@ -35,15 +35,15 @@ class ReferrerServiceTest extends TestCase
         return $dto;
     }
 
-    private function referrerWith(bool $acc, bool $cons): Referrer
+    private function referrerWith(bool $acc, bool $orders): Referrer
     {
         $accRel = Mockery::mock();
         $accRel->shouldReceive('exists')->andReturn($acc);
-        $consRel = Mockery::mock();
-        $consRel->shouldReceive('exists')->andReturn($cons);
+        $ordersRel = Mockery::mock();
+        $ordersRel->shouldReceive('exists')->andReturn($orders);
         $referrer = Mockery::mock(Referrer::class)->makePartial();
         $referrer->shouldReceive('acceptances')->andReturn($accRel);
-        $referrer->shouldReceive('consultations')->andReturn($consRel);
+        $referrer->shouldReceive('referrerOrders')->andReturn($ordersRel);
         return $referrer;
     }
 
@@ -84,7 +84,7 @@ class ReferrerServiceTest extends TestCase
 
     public function test_delete_removes_referrer_without_associations(): void
     {
-        $referrer = $this->referrerWith(acc: false, cons: false);
+        $referrer = $this->referrerWith(acc: false, orders: false);
         $this->repo->shouldReceive('deleteReferrer')->once()->with($referrer)->andReturnNull();
         $this->service->deleteReferrer($referrer);
         $this->assertTrue(true);
@@ -92,7 +92,7 @@ class ReferrerServiceTest extends TestCase
 
     public function test_delete_throws_when_referrer_has_acceptances(): void
     {
-        $referrer = $this->referrerWith(acc: true, cons: false);
+        $referrer = $this->referrerWith(acc: true, orders: false);
         $this->repo->shouldNotReceive('deleteReferrer');
         $this->expectException(Exception::class);
         $this->service->deleteReferrer($referrer);

@@ -139,10 +139,10 @@ const Index = () => {
         });
     };
 
-    const handleViewReport = (id) => (e) => {
+    const handleViewReport = (_id) => (e) => {
         e.preventDefault();
         e.stopPropagation();
-        // TODO: add report viewing functionality for order `id`
+        // TODO: add report viewing functionality for the order
     };
 
     const pageReload = (page, filters, sort, pageSize) => {
