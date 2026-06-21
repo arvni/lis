@@ -6,6 +6,7 @@ use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Referrer\DTOs\ReferrerTestDTO;
 use App\Domains\Referrer\Models\ReferrerTest;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 class ReferrerTestRepository
 {
@@ -29,6 +30,22 @@ class ReferrerTestRepository
     public function findById(int $id): ?ReferrerTest
     {
         return ReferrerTest::find($id);
+    }
+
+    /**
+     * A referrer's tests limited to active underlying tests, eager-loaded for export.
+     *
+     * @return Collection<int, ReferrerTest>
+     */
+    public function getActiveTestsForReferrer(int $referrerId): Collection
+    {
+        return ReferrerTest::query()
+            ->with(["test.testGroup", "test.methodTests.method"])
+            ->whereHas("test", function ($query) {
+                $query->active();
+            })
+            ->where("referrer_id", $referrerId)
+            ->get();
     }
 
     public function findByMethodIdAdnReferrerId(int $methodId, int $referrerId): ?ReferrerTest

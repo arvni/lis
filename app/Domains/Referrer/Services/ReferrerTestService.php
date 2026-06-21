@@ -7,6 +7,7 @@ use App\Domains\Referrer\Models\Referrer;
 use App\Domains\Referrer\Models\ReferrerTest;
 use App\Domains\Referrer\Repositories\ReferrerTestRepository;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -36,6 +37,16 @@ class ReferrerTestService
     public function findById(int $id): ?ReferrerTest
     {
             return $this->referrerTestRepository->findById($id);
+    }
+
+    /**
+     * A referrer's active tests, eager-loaded for export.
+     *
+     * @return Collection<int, ReferrerTest>
+     */
+    public function getActiveTestsForReferrer(int $referrerId): Collection
+    {
+        return $this->referrerTestRepository->getActiveTestsForReferrer($referrerId);
     }
 
     /**

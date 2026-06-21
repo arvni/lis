@@ -377,6 +377,31 @@ class AcceptanceRepository
     }
 
     /**
+     * Fetch a patient's acceptances for a given referrer, with the test/method
+     * relations needed to describe each acceptance item. When $poolingOnly is set,
+     * restrict to POOLING acceptances; otherwise exclude already-REPORTED ones.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, Acceptance>
+     */
+    public function getForPatientAndReferrer(int $patientId, ?int $referrerId, bool $poolingOnly): \Illuminate\Database\Eloquent\Collection
+    {
+        return Acceptance::query()
+            ->where('patient_id', $patientId)
+            ->where('referrer_id', $referrerId)
+            ->when($poolingOnly, function (Builder $query) {
+                $query->where('status', AcceptanceStatus::POOLING);
+            }, function (Builder $query) {
+                $query->whereNot('status', AcceptanceStatus::REPORTED);
+            })
+            ->with([
+                'acceptanceItems.methodTest.method.test',
+                'acceptanceItems.methodTest.method.barcodeGroup',
+            ])
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
      * Group acceptance items by test type.
      *
      * @param array $acceptanceItemsData Array of acceptance item data (e.g., from a request).

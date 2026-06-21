@@ -6945,9 +6945,15 @@ parameters:
 			path: app/Domains/Referrer/Repositories/ReferrerTestRepository.php
 
 		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:active\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Domains/Referrer/Repositories/ReferrerTestRepository.php
+
+		-
 			message: '#^Relation ''test'' is not found in App\\Domains\\Referrer\\Models\\ReferrerTest model\.$#'
 			identifier: larastan.relationExistence
-			count: 1
+			count: 3
 			path: app/Domains/Referrer/Repositories/ReferrerTestRepository.php
 
 		-
@@ -9016,52 +9022,34 @@ parameters:
 			path: app/Http/Controllers/Referrer/CopyReferrerTestsFromOtherReferrerController.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:active\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/Referrer/ExportReferrerTestsController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\Referrer\\ExportReferrerTestsController\:\:__invoke\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Referrer/ExportReferrerTestsController.php
 
 		-
-			message: '#^Relation ''test'' is not found in App\\Domains\\Referrer\\Models\\ReferrerTest model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: app/Http/Controllers/Referrer/ExportReferrerTestsController.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Http/Controllers/Referrer/GetPatientAcceptancesController.php
-
-		-
-			message: '#^Anonymous function should return array\{id\: int, created_at\: non\-falsy\-string, status\: ''Canceled''\|''pending''\|''pooling''\|''processing''\|''reported''\|''sampling''\|''waiting for entering''\|''waiting for payment''\|''waiting for…'', referenceCode\: string\|null, acceptance_items\: Illuminate\\Support\\Collection\<int, array\{id\: mixed, test_name\: mixed, method_name\: mixed, barcode_group\: mixed\}\>\} but returns array\{id\: int, created_at\: non\-falsy\-string, status\: ''Canceled''\|''pending''\|''pooling''\|''processing''\|''reported''\|''sampling''\|''waiting for entering''\|''waiting for payment''\|''waiting for…'', referenceCode\: string\|null, acceptance_items\: Illuminate\\Support\\Collection\<int, array\{id\: int, test_name\: mixed, method_name\: mixed, barcode_group\: mixed\}\>\}\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/Referrer/GetPatientAcceptancesController.php
+			path: app/Domains/Referrer/Resources/PatientAcceptanceResource.php
 
 		-
 			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
 			identifier: argument.unresolvableType
 			count: 1
-			path: app/Http/Controllers/Referrer/GetPatientAcceptancesController.php
+			path: app/Domains/Referrer/Resources/PatientAcceptanceResource.php
 
 		-
 			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
 			identifier: method.unresolvableReturnType
 			count: 1
-			path: app/Http/Controllers/Referrer/GetPatientAcceptancesController.php
+			path: app/Domains/Referrer/Resources/PatientAcceptanceResource.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 3
-			path: app/Http/Controllers/Referrer/GetPatientAcceptancesController.php
+			path: app/Domains/Referrer/Resources/PatientAcceptanceResource.php
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Referrer\\ListCollectRequestsController\:\:__invoke\(\) has no return type specified\.$#'
