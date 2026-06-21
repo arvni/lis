@@ -4929,6 +4929,18 @@ parameters:
 			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
 
 		-
+			message: '#^Relation ''methodTest'' is not found in App\\Domains\\Reception\\Models\\AcceptanceItem model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\AcceptanceItem\:\:\$methodTest\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Domains/Reception/Services/AcceptanceItemService.php
+
+		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:applyAll\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -8648,72 +8660,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Reception/AcceptanceItemStateController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$no_sample\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Reception/AddPoolingController.php
-
-		-
-			message: '#^Parameter \#1 \$acceptanceItem of method App\\Domains\\Reception\\Services\\AcceptanceItemService\:\:updateAcceptanceItemTimeline\(\) expects App\\Domains\\Reception\\Models\\AcceptanceItem, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/Reception/AddPoolingController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$discount\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Http/Controllers/Reception/Api/GetAcceptancePoolingItemsController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Http/Controllers/Reception/Api/GetAcceptancePoolingItemsController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$methodTest\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Http/Controllers/Reception/Api/GetAcceptancePoolingItemsController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$panel_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Reception/Api/GetAcceptancePoolingItemsController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$price\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Http/Controllers/Reception/Api/GetAcceptancePoolingItemsController.php
-
-		-
-			message: '#^Parameter \#1 \$array of function array_values contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 3
-			path: app/Http/Controllers/Reception/Api/GetAcceptancePoolingItemsController.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Http/Controllers/Reception/Api/GetAcceptancePoolingItemsController.php
-
-		-
-			message: '#^Return type of call to function array_values contains unresolvable type\.$#'
-			identifier: function.unresolvableReturnType
-			count: 3
-			path: app/Http/Controllers/Reception/Api/GetAcceptancePoolingItemsController.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: app/Http/Controllers/Reception/Api/GetAcceptancePoolingItemsController.php
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Reception\\ApproveFinancialController\:\:__invoke\(\) has no return type specified\.$#'

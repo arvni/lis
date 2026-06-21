@@ -5,10 +5,12 @@ namespace App\Domains\Reception\Repositories;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Laboratory\Enums\TestType;
+use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Report;
 use App\Domains\Reception\Traits\ExtractsTagFilterIds;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 
@@ -130,6 +132,33 @@ class AcceptanceItemRepository
     public function findAcceptanceItemById($id): ?AcceptanceItem
     {
         return AcceptanceItem::find($id);
+    }
+
+    /**
+     * The original (non-pooling) acceptance items for an acceptance, by id.
+     *
+     * @param  array<int, int|string>  $ids
+     * @return Collection<int, AcceptanceItem>
+     */
+    public function getOriginalNonPoolingItems(Acceptance $acceptance, array $ids): Collection
+    {
+        return AcceptanceItem::whereIn('id', $ids)
+            ->where('acceptance_id', $acceptance->id)
+            ->where('is_pooling', false)
+            ->get();
+    }
+
+    /**
+     * An acceptance's items with method/test relations loaded, for building the
+     * pooling-items payload.
+     *
+     * @return Collection<int, AcceptanceItem>
+     */
+    public function getPoolingSourceItems(Acceptance $acceptance): Collection
+    {
+        return AcceptanceItem::where('acceptance_id', $acceptance->id)
+            ->with(['methodTest.test', 'methodTest.method'])
+            ->get();
     }
 
     public function getWithReportingDetails(AcceptanceItem $acceptanceItem): AcceptanceItem
