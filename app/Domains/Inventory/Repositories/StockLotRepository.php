@@ -4,6 +4,7 @@ namespace App\Domains\Inventory\Repositories;
 
 use App\Domains\Inventory\Enums\LotStatus;
 use App\Domains\Inventory\Models\StockLot;
+use App\Domains\Inventory\Models\StockTransaction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -109,6 +110,26 @@ class StockLotRepository
             ->where('status', LotStatus::ACTIVE->value)
             ->when($storeId, fn (Builder $q) => $q->where('store_id', $storeId))
             ->sum('quantity_base_units');
+    }
+
+    /**
+     * Lots created by an ENTRY/RETURN transaction — matched by store, received
+     * date, and the lot numbers recorded on that transaction's lines.
+     *
+     * @return Collection<int, StockLot>
+     */
+    public function lotsCreatedByTransaction(StockTransaction $transaction): Collection
+    {
+        return StockLot::where('store_id', $transaction->store_id)
+            ->where('received_date', $transaction->transaction_date)
+            ->whereIn('lot_number', function ($q) use ($transaction) {
+                $q->select('lot_number')
+                    ->from('stock_transaction_lines')
+                    ->where('transaction_id', $transaction->id)
+                    ->whereNotNull('lot_number');
+            })
+            ->with(['item', 'store', 'location'])
+            ->get();
     }
 
     public function markExpiredLots(): int

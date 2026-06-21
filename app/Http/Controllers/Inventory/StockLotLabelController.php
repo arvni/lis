@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Inventory;
 
 use App\Domains\Inventory\Models\StockLot;
 use App\Domains\Inventory\Models\StockTransaction;
+use App\Domains\Inventory\Repositories\StockLotRepository;
 use App\Http\Controllers\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class StockLotLabelController extends Controller
 {
+    public function __construct(private StockLotRepository $stockLots) {}
+
     /**
      * Print labels for all lots created by a specific ENTRY/RETURN transaction.
      */
@@ -17,16 +20,7 @@ class StockLotLabelController extends Controller
     {
         $this->authorize('viewAny', StockTransaction::class);
 
-        $lots = StockLot::where('store_id', $transaction->store_id)
-            ->where('received_date', $transaction->transaction_date)
-            ->whereIn('lot_number', function ($q) use ($transaction) {
-                $q->select('lot_number')
-                  ->from('stock_transaction_lines')
-                  ->where('transaction_id', $transaction->id)
-                  ->whereNotNull('lot_number');
-            })
-            ->with(['item', 'store', 'location'])
-            ->get();
+        $lots = $this->stockLots->lotsCreatedByTransaction($transaction);
 
         return Inertia::render('Inventory/Lots/Labels', [
             'lots'      => $lots,

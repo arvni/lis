@@ -6,6 +6,7 @@ use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\StoreLocation;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class StoreRepository
@@ -18,6 +19,32 @@ class StoreRepository
     public function activeForSelect(): Collection
     {
         return Store::active()->get(['id', 'name']);
+    }
+
+    /**
+     * Active locations in a store for transaction lookups. For outbound
+     * transaction types, only locations currently holding the given item with
+     * available stock are returned; otherwise all active locations.
+     *
+     * @return Collection<int, StoreLocation>
+     */
+    public function locationsForLookup(Store $store, ?int $itemId, ?string $type): Collection
+    {
+        $query = StoreLocation::where('store_id', $store->id)->active();
+
+        if ($itemId && $type) {
+            $isOutbound = in_array($type, ['EXPORT', 'RETURN', 'EXPIRED_REMOVAL', 'TRANSFER']);
+
+            if ($isOutbound) {
+                $query->whereHas('lots', fn (Builder $q) => $q
+                    ->where('item_id', $itemId)
+                    ->where('status', 'ACTIVE')
+                    ->where('quantity_base_units', '>', 0)
+                );
+            }
+        }
+
+        return $query->get(['id', 'label', 'zone', 'row', 'shelf', 'bin']);
     }
 
     public function listStores(array $queryData): LengthAwarePaginator
