@@ -2,28 +2,27 @@
 
 namespace App\Http\Controllers\Inventory\Api;
 
-use App\Domains\Inventory\Models\StockTransactionLine;
+use App\Domains\Inventory\Repositories\StockTransactionRepository;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class BrandSuggestionsController extends Controller
 {
+    public function __construct(private StockTransactionRepository $stockTransactions) {}
+
     public function __invoke(Request $request): JsonResponse
     {
-        $itemId = $request->input('item_id');
-        $search = $request->input('search', '');
+        $itemId = $request->integer('item_id') ?: null;
 
-        if (!$itemId) return response()->json([]);
+        if (!$itemId) {
+            return response()->json([]);
+        }
 
-        $brands = StockTransactionLine::where('item_id', $itemId)
-            ->whereNotNull('brand')
-            ->where('brand', '!=', '')
-            ->when($search, fn($q) => $q->where('brand', 'like', "%{$search}%"))
-            ->distinct()
-            ->orderBy('brand')
-            ->limit(20)
-            ->pluck('brand');
+        $brands = $this->stockTransactions->brandSuggestionsForItem(
+            $itemId,
+            $request->filled('search') ? $request->input('search') : null,
+        );
 
         return response()->json($brands);
     }

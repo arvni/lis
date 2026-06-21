@@ -69,6 +69,48 @@ class StockLotRepository
             ->get();
     }
 
+    /**
+     * Active, in-stock lots for an item — optionally filtered by store and a
+     * lot-number/brand search term. Returns a lightweight column subset.
+     *
+     * @return Collection<int, StockLot>
+     */
+    public function activeLotsForItem(int $itemId, ?int $storeId = null, ?string $search = null): Collection
+    {
+        return StockLot::where('item_id', $itemId)
+            ->where('status', LotStatus::ACTIVE->value)
+            ->where('quantity_base_units', '>', 0)
+            ->when($storeId, fn (Builder $q) => $q->where('store_id', $storeId))
+            ->when($search, fn (Builder $q) => $q->where(function (Builder $q2) use ($search) {
+                $q2->where('lot_number', 'like', "%{$search}%")
+                    ->orWhere('brand', 'like', "%{$search}%");
+            }))
+            ->orderBy('received_date')
+            ->get(['id', 'lot_number', 'brand', 'barcode', 'expiry_date', 'quantity_base_units', 'store_id', 'store_location_id']);
+    }
+
+    /**
+     * Active lot matching a scanned barcode, with item/unit/store/location loaded.
+     */
+    public function findActiveByBarcode(string $barcode): ?StockLot
+    {
+        return StockLot::with(['item.defaultUnit', 'store', 'location'])
+            ->where('barcode', $barcode)
+            ->where('status', LotStatus::ACTIVE->value)
+            ->first();
+    }
+
+    /**
+     * Total active base-unit quantity for an item, optionally scoped to a store.
+     */
+    public function totalActiveBaseUnits(int $itemId, ?int $storeId = null): float
+    {
+        return (float) StockLot::where('item_id', $itemId)
+            ->where('status', LotStatus::ACTIVE->value)
+            ->when($storeId, fn (Builder $q) => $q->where('store_id', $storeId))
+            ->sum('quantity_base_units');
+    }
+
     public function markExpiredLots(): int
     {
         return StockLot::where('status', 'ACTIVE')

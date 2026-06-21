@@ -5,11 +5,30 @@ namespace App\Domains\Inventory\Repositories;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Inventory\Enums\TransactionStatus;
 use App\Domains\Inventory\Models\StockTransaction;
+use App\Domains\Inventory\Models\StockTransactionLine;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection as SupportCollection;
 
 class StockTransactionRepository
 {
     use LogsUserActivity;
+
+    /**
+     * Distinct, non-empty brand names recorded for an item on transaction lines,
+     * optionally narrowed by a search term — used for brand typeahead.
+     */
+    public function brandSuggestionsForItem(int $itemId, ?string $search = null, int $limit = 20): SupportCollection
+    {
+        return StockTransactionLine::where('item_id', $itemId)
+            ->whereNotNull('brand')
+            ->where('brand', '!=', '')
+            ->when($search, fn (Builder $q) => $q->where('brand', 'like', "%{$search}%"))
+            ->distinct()
+            ->orderBy('brand')
+            ->limit($limit)
+            ->pluck('brand');
+    }
 
     public function listTransactions(array $queryData): LengthAwarePaginator
     {
