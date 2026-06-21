@@ -1,154 +1,15 @@
-import React, { useCallback, useEffect, useRef, useState, useMemo, memo } from 'react';
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import {
-    Alert,
-    Box,
-    Chip,
-    FormControl,
-    FormGroup,
-    InputLabel,
-    MenuItem,
-    Select,
-    Typography,
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { Chip, FormGroup, InputLabel } from '@mui/material';
 import axios from 'axios';
 
-// Assuming UploadItem and DeleteForm exist and are adapted
-import UploadItem from './UploadItem';
+// Assuming DeleteForm exists and is adapted
 import DeleteForm from './DeleteForm';
-
-// --- Styled Components ---
-const UploadBox = styled(Box, {
-    shouldForwardProp: (prop) => prop !== 'isDragOver' && prop !== 'error',
-})(({ theme, isDragOver, error }) => ({
-    border: `2px dashed ${
-        error
-            ? theme.palette.error.main
-            : isDragOver
-              ? theme.palette.primary.main
-              : theme.palette.divider
-    }`,
-    borderRadius: theme.shape.borderRadius,
-    padding: theme.spacing(3),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: 'center',
-    minHeight: '120px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease-in-out',
-    backgroundColor: isDragOver ? `${theme.palette.primary.light}20` : 'transparent',
-    outline: 'none', // Remove default outline
-    '&:hover': {
-        backgroundColor: `${theme.palette.primary.light}10`,
-        borderColor: theme.palette.primary.main,
-    },
-    '&:focus-visible': {
-        // Style for keyboard focus
-        borderColor: theme.palette.primary.main,
-        boxShadow: `0 0 0 2px ${theme.palette.primary.light}`,
-    },
-}));
-
-const FileTypeInfo = styled(Typography)(({ theme }) => ({
-    fontSize: '0.75rem',
-    color: theme.palette.text.secondary,
-    marginTop: theme.spacing(1),
-}));
-
-// --- Helper Functions ---
-const generateTempId = () => `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-
-const formatFileTypes = (accept) => {
-    // If accept is empty, undefined, or null, return "All files"
-    if (!accept || accept.trim() === '') {
-        return 'All files';
-    }
-    return accept
-        .split(',')
-        .map((type) => type.trim())
-        .map((type) => {
-            if (type === 'image/*') return 'Images';
-            if (type.includes('pdf')) return 'PDF';
-            if (type.includes('doc') || type.includes('word')) return 'Word';
-            if (type.startsWith('.')) return type.substring(1).toUpperCase();
-            if (type.includes('/')) return type.split('/')[1]; // Basic MIME type part
-            return type;
-        })
-        .filter((value, index, self) => self.indexOf(value) === index) // Unique types
-        .join(', ');
-};
-
-// --- Sub-Components ---
-
-// Tag Selection Dialog Component
-const TagSelector = memo(({ files, tags, onConfirm, onCancel }) => {
-    const [selectedTag, setSelectedTag] = useState(tags[0]?.value || 'TEMP');
-
-    return (
-        <Box
-            sx={{
-                border: '1px solid',
-                borderColor: 'divider',
-                p: 2,
-                mb: 2,
-                borderRadius: 1,
-                bgcolor: 'background.paper',
-                boxShadow: 1,
-            }}
-        >
-            <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                Select a tag for {files.length} file{files.length !== 1 ? 's' : ''}:
-            </Typography>
-
-            <FormControl fullWidth sx={{ mb: 2 }}>
-                <Select
-                    value={selectedTag}
-                    onChange={(e) => setSelectedTag(e.target.value)}
-                    displayEmpty
-                    size="small"
-                >
-                    {tags.map((tag) => (
-                        <MenuItem key={tag.value} value={tag.value}>
-                            {tag.label}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
-
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                <Chip label="Cancel" onClick={onCancel} color="default" variant="outlined" />
-                <Chip label="Confirm" onClick={() => onConfirm(selectedTag)} color="primary" />
-            </Box>
-        </Box>
-    );
-});
-
-TagSelector.displayName = 'TagSelector';
-
-// File Error Alert Component
-const FileErrorAlert = memo(({ errors, generalError, externalHelperText, onClear }) => {
-    if (!errors.length && !generalError && !externalHelperText) return null;
-
-    return (
-        <Alert severity="error" sx={{ mt: 1 }} onClose={onClear}>
-            {externalHelperText && <p>{externalHelperText}</p>}
-            {generalError && <p>{generalError}</p>}
-            {errors.length > 0 && (
-                <ul>
-                    {errors.map((err, i) => (
-                        <li key={i}>{err.message}</li>
-                    ))}
-                </ul>
-            )}
-        </Alert>
-    );
-});
-
-FileErrorAlert.displayName = 'FileErrorAlert';
+import { generateTempId, formatFileTypes } from './Upload/helpers';
+import TagSelector from './Upload/TagSelector.jsx';
+import FileErrorAlert from './Upload/FileErrorAlert.jsx';
+import FileList from './Upload/FileList.jsx';
+import DropZone from './Upload/DropZone.jsx';
 
 /**
  * Enhanced file upload component with tag selection
@@ -715,49 +576,14 @@ const Upload = ({
                 )}
 
                 {/* Display Existing & Uploading Files */}
-                {managedFiles.length > 0 && (
-                    <Box sx={{ mb: 2 }}>
-                        {managedFiles.map((fileState) => (
-                            <UploadItem
-                                key={fileState.tempId}
-                                value={
-                                    fileState.serverData || {
-                                        originalName: fileState.file?.name,
-                                        size: fileState.file?.size,
-                                    }
-                                }
-                                file={fileState.file}
-                                status={fileState.status}
-                                progress={fileState.progress}
-                                error={fileState.error}
-                                editable={
-                                    editable &&
-                                    fileState.status !== 'uploading' &&
-                                    fileState.status !== 'deleting'
-                                }
-                                onDelete={() =>
-                                    fileState.status === 'success' && fileState.serverData
-                                        ? openDeleteDialog(fileState)
-                                        : null
-                                }
-                                onCancel={
-                                    fileState.status === 'uploading'
-                                        ? () => handleCancelUpload(fileState.tempId)
-                                        : undefined
-                                }
-                                showFileSize
-                                onTagChange={
-                                    editable &&
-                                    fileState.status === 'success' &&
-                                    fileState.serverData
-                                        ? (newTag) => handleTagChange(fileState.tempId, newTag)
-                                        : undefined
-                                }
-                                availableTags={tags}
-                            />
-                        ))}
-                    </Box>
-                )}
+                <FileList
+                    files={managedFiles}
+                    editable={editable}
+                    tags={tags}
+                    onOpenDelete={openDeleteDialog}
+                    onCancelUpload={handleCancelUpload}
+                    onTagChange={handleTagChange}
+                />
 
                 {/* Tag Selection Dialog */}
                 {showTagSelector && (
@@ -771,36 +597,17 @@ const Upload = ({
 
                 {/* Upload Box / Drop Zone */}
                 {canUploadMore && editable && (
-                    <UploadBox
-                        {...dragEvents}
-                        onClick={handleTriggerInput}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') handleTriggerInput();
-                        }}
+                    <DropZone
+                        dragEvents={dragEvents}
+                        onTrigger={handleTriggerInput}
                         isDragOver={isDragOver}
-                        error={displayError}
-                        tabIndex={0}
-                        aria-label={label || 'File Upload Area'}
-                        aria-describedby="upload-helper-text"
-                        role="button"
-                    >
-                        <CloudUploadIcon
-                            sx={{
-                                fontSize: 40,
-                                mb: 1,
-                                color: isDragOver ? 'primary.main' : 'text.secondary',
-                            }}
-                        />
-                        <Typography variant="body1" sx={{ mb: 1 }}>
-                            {isDragOver ? 'Drop files here' : 'Drag files or click to upload'}
-                        </Typography>
-                        <FileTypeInfo id="upload-helper-text">
-                            {multiple
-                                ? `Up to ${remainingSlots} more file${remainingSlots !== 1 ? 's' : ''}.`
-                                : 'Select one file.'}
-                            {` Max ${maxFileSize}MB each. Allowed: ${acceptedFileTypes || 'any'}.`}
-                        </FileTypeInfo>
-                    </UploadBox>
+                        displayError={displayError}
+                        label={label}
+                        multiple={multiple}
+                        remainingSlots={remainingSlots}
+                        maxFileSize={maxFileSize}
+                        acceptedFileTypes={acceptedFileTypes}
+                    />
                 )}
 
                 {/* Hidden file input */}
