@@ -5,6 +5,9 @@ namespace App\Domains\Laboratory\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin \App\Domains\Laboratory\Models\Method
+ */
 class MethodResource extends JsonResource
 {
     /**
@@ -41,7 +44,7 @@ class MethodResource extends JsonResource
     /**
      * Resolve the price type based on the referrer method relationship.
      *
-     * @return string|null
+     * @return \App\Domains\Laboratory\Enums\MethodPriceType|string|null
      */
     protected function resolvePriceType()
     {

@@ -5,6 +5,9 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin \App\Domains\Billing\Models\Statement
+ */
 class StatementResource extends JsonResource
 {
     /**

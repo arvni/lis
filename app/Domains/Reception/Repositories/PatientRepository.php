@@ -111,13 +111,11 @@ class PatientRepository
                     ->orderBy('count', 'desc')
                     ->pluck('count', 'nationality')
                     ->toArray();
-                break;
             case "gender":
                 return Patient::select('gender', DB::raw('count(*) as count'))
                     ->groupBy('gender')
                     ->pluck('count', 'gender')
                     ->toArray();
-                break;
             default:
                 return Patient::count();
         }
