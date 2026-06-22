@@ -15,6 +15,11 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Notifications\Notification;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
+/**
+ * @property-read int $consultations_count
+ * @property-read int $invoices_count
+ * @property-read int $payments_count
+ */
 class Patient extends Model
 {
     use HasFactory, Notifiable, Searchable,HasRelationships;

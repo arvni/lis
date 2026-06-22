@@ -691,18 +691,6 @@ parameters:
 			path: app/Domains/Billing/Services/InvoiceItemSyncService.php
 
 		-
-			message: '#^Access to an undefined property App\\Domains\\Billing\\Models\\Invoice\:\:\$has_different_owner\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceService.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Billing\\Models\\Invoice\:\:\$invoiceNo\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$can_merge\.$#'
 			identifier: property.notFound
 			count: 1
@@ -2870,12 +2858,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$referrerTest\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$withDefaultReferrerPrice\.$#'
 			identifier: property.notFound
 			count: 4
 			path: app/Domains/Laboratory/Resources/TestResource.php
@@ -5565,19 +5547,7 @@ parameters:
 			path: app/Domains/Reception/Services/PatientService.php
 
 		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Patient\:\:\$consultations_count\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Patient\:\:\$invoices\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Patient\:\:\$invoices_count\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Domains/Reception/Services/PatientService.php
@@ -5596,12 +5566,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Patient\:\:\$payments\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Patient\:\:\$payments_count\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Domains/Reception/Services/PatientService.php
@@ -8090,12 +8054,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Laboratory/SectionGroupController.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Models\\Test\:\:\$withDefaultReferrerPrice\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Laboratory/TestController.php
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Laboratory\\TestGroupController\:\:store\(\) has no return type specified\.$#'
