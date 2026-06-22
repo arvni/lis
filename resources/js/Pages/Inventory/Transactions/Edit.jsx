@@ -1,89 +1,13 @@
 import { useState } from 'react';
 import { Head, router, usePage, useForm } from '@inertiajs/react';
-import {
-    Box,
-    Button,
-    Card,
-    CardContent,
-    CardHeader,
-    CircularProgress,
-    Grid,
-    IconButton,
-    MenuItem,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableRow,
-    TextField,
-    Alert,
-} from '@mui/material';
+import { Alert, Box, Button, Card, CardContent, CardHeader, CircularProgress } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import LockOpenIcon from '@mui/icons-material/LockOpen';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
-import ItemSelect from '@/Pages/Inventory/Components/ItemSelect';
-import UnitSelect from '@/Pages/Inventory/Components/UnitSelect';
-import LocationSelect from '@/Pages/Inventory/Components/LocationSelect';
-import LotSelect from '@/Pages/Inventory/Components/LotSelect';
-import BarcodeInput from '@/Pages/Inventory/Components/BarcodeInput';
-import SupplierSelect from '@/Pages/Inventory/Components/SupplierSelect';
-import BrandInput from '@/Pages/Inventory/Components/BrandInput';
 import LotPickerDialog from '@/Pages/Inventory/Components/LotPickerDialog';
-
-const USES_EXISTING_LOTS = ['EXPORT', 'RETURN', 'EXPIRED_REMOVAL', 'TRANSFER'];
-
-const toPayloadLine = ({
-    _item,
-    _unit,
-    _location,
-    _lot,
-    _barcode_locked,
-    _lots_from_scan,
-    ...rest
-}) => rest;
-
-// Build a line state object from an existing transaction line (loaded from server)
-const lineFromExisting = (line) => ({
-    _item: line.item ?? null,
-    _unit: line.unit ?? null,
-    _location: line.location ?? null,
-    _lot: null,
-    _barcode_locked: false,
-    _lots_from_scan: [],
-    item_id: line.item_id,
-    unit_id: line.unit_id,
-    quantity: line.quantity,
-    barcode: line.barcode ?? '',
-    lot_number: line.lot_number ?? '',
-    brand: line.brand ?? '',
-    cat_no: line.cat_no ?? '',
-    expiry_date: line.expiry_date ?? '',
-    unit_price: line.unit_price ?? '',
-    store_location_id: line.store_location_id ?? null,
-    notes: line.notes ?? '',
-});
-
-const emptyLine = () => ({
-    _item: null,
-    _unit: null,
-    _location: null,
-    _lot: null,
-    _barcode_locked: false,
-    _lots_from_scan: [],
-    item_id: null,
-    unit_id: null,
-    quantity: '',
-    barcode: '',
-    lot_number: '',
-    brand: '',
-    cat_no: '',
-    expiry_date: '',
-    unit_price: '',
-    store_location_id: null,
-    notes: '',
-});
+import { USES_EXISTING_LOTS, emptyLine, lineFromExisting, toPayloadLine } from './Add/helpers';
+import TransactionDetailsCard from './Edit/TransactionDetailsCard';
+import LineItemsTable from './Edit/LineItemsTable';
 
 const TransactionEdit = () => {
     const { transaction, stores, success, status } = usePage().props;
@@ -316,91 +240,17 @@ const TransactionEdit = () => {
             )}
 
             <Box component="form" onSubmit={handleSubmit}>
-                <Card sx={{ mb: 3 }}>
-                    <CardHeader title="Transaction Details" />
-                    <CardContent>
-                        <Grid container spacing={2}>
-                            <Grid size={{ xs: 12, md: 4 }}>
-                                <TextField
-                                    fullWidth
-                                    disabled
-                                    label="Transaction Type"
-                                    value={txType}
-                                />
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
-                                <TextField
-                                    fullWidth
-                                    required
-                                    type="date"
-                                    label="Transaction Date"
-                                    value={data.transaction_date}
-                                    onChange={(e) => setData('transaction_date', e.target.value)}
-                                    slotProps={{ inputLabel: { shrink: true } }}
-                                />
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
-                                <TextField
-                                    select
-                                    fullWidth
-                                    required
-                                    label="Source Store"
-                                    value={data.store_id}
-                                    onChange={(e) => setData('store_id', e.target.value)}
-                                    error={!!errors.store_id}
-                                >
-                                    {stores.map((s) => (
-                                        <MenuItem key={s.id} value={s.id}>
-                                            {s.name}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                            </Grid>
-                            {isTransfer && (
-                                <Grid size={{ xs: 12, md: 4 }}>
-                                    <TextField
-                                        select
-                                        fullWidth
-                                        required
-                                        label="Destination Store"
-                                        value={data.destination_store_id}
-                                        onChange={(e) =>
-                                            setData('destination_store_id', e.target.value)
-                                        }
-                                    >
-                                        {stores.map((s) => (
-                                            <MenuItem key={s.id} value={s.id}>
-                                                {s.name}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
-                                </Grid>
-                            )}
-                            {isEntry && (
-                                <Grid size={{ xs: 12, md: 4 }}>
-                                    <SupplierSelect
-                                        label="Supplier (optional)"
-                                        value={supplierObj}
-                                        onChange={(s) => {
-                                            setSupplierObj(s);
-                                            setData('supplier_id', s?.id ?? '');
-                                        }}
-                                    />
-                                </Grid>
-                            )}
-                            <Grid size={12}>
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={2}
-                                    label="Notes"
-                                    value={data.notes}
-                                    onChange={(e) => setData('notes', e.target.value)}
-                                />
-                            </Grid>
-                        </Grid>
-                    </CardContent>
-                </Card>
+                <TransactionDetailsCard
+                    txType={txType}
+                    data={data}
+                    setData={setData}
+                    errors={errors}
+                    stores={stores}
+                    isEntry={isEntry}
+                    isTransfer={isTransfer}
+                    supplierObj={supplierObj}
+                    setSupplierObj={setSupplierObj}
+                />
 
                 <Card sx={{ mb: 3 }}>
                     <CardHeader
@@ -417,239 +267,24 @@ const TransactionEdit = () => {
                         }
                     />
                     <CardContent sx={{ p: lineItems.length ? 0 : undefined, overflowX: 'auto' }}>
-                        {lineItems.length === 0 ? (
-                            <Alert severity="info" sx={{ m: 2 }}>
-                                Click &quot;Add Line&quot; to add items.
-                            </Alert>
-                        ) : (
-                            <Table size="small" sx={{ minWidth: 900 }}>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell sx={{ width: 170 }}>Barcode</TableCell>
-                                        <TableCell sx={{ minWidth: 230 }}>Item</TableCell>
-                                        <TableCell sx={{ minWidth: 140 }}>Unit</TableCell>
-                                        <TableCell sx={{ width: 85 }}>Qty</TableCell>
-                                        <TableCell sx={{ minWidth: 160 }}>Location</TableCell>
-                                        <TableCell sx={{ width: 110 }}>Lot #</TableCell>
-                                        {showExpiry && (
-                                            <TableCell sx={{ width: 120 }}>Brand</TableCell>
-                                        )}
-                                        {showExpiry && (
-                                            <TableCell sx={{ width: 100 }}>Cat No</TableCell>
-                                        )}
-                                        {showExpiry && (
-                                            <TableCell sx={{ width: 130 }}>Expiry</TableCell>
-                                        )}
-                                        {isEntry && (
-                                            <TableCell sx={{ width: 100 }}>Unit Price</TableCell>
-                                        )}
-                                        <TableCell sx={{ width: 48 }} />
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {lineItems.map((line, idx) => (
-                                        <TableRow
-                                            key={idx}
-                                            sx={
-                                                line._barcode_locked
-                                                    ? { bgcolor: 'action.hover' }
-                                                    : {}
-                                            }
-                                        >
-                                            <TableCell>
-                                                <Box
-                                                    sx={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: 0.5,
-                                                    }}
-                                                >
-                                                    <BarcodeInput
-                                                        value={line.barcode}
-                                                        onChange={(val) =>
-                                                            updateLine(idx, 'barcode', val)
-                                                        }
-                                                        onFound={(d) => handleBarcodeFound(idx, d)}
-                                                        onNotFound={(bc) =>
-                                                            handleBarcodeNotFound(idx, bc)
-                                                        }
-                                                    />
-                                                    {line._barcode_locked && (
-                                                        <IconButton
-                                                            size="small"
-                                                            title="Unlock"
-                                                            onClick={() => unlockLine(idx)}
-                                                        >
-                                                            <LockOpenIcon
-                                                                fontSize="small"
-                                                                color="warning"
-                                                            />
-                                                        </IconButton>
-                                                    )}
-                                                </Box>
-                                            </TableCell>
-                                            <TableCell>
-                                                <ItemSelect
-                                                    size="small"
-                                                    value={line._item}
-                                                    onChange={(item) => setLineItem(idx, item)}
-                                                    required
-                                                    disabled={line._barcode_locked}
-                                                    error={!!errors[`lines.${idx}.item_id`]}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <UnitSelect
-                                                    size="small"
-                                                    itemId={line._item?.id}
-                                                    allUnits={[]}
-                                                    value={line._unit}
-                                                    onChange={(u) => setLineUnit(idx, u)}
-                                                    required
-                                                    disabled={line._barcode_locked}
-                                                    error={!!errors[`lines.${idx}.unit_id`]}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <TextField
-                                                    size="small"
-                                                    type="number"
-                                                    fullWidth
-                                                    value={line.quantity}
-                                                    onChange={(e) =>
-                                                        updateLine(idx, 'quantity', e.target.value)
-                                                    }
-                                                    slotProps={{
-                                                        htmlInput: { min: 0, step: 'any' },
-                                                    }}
-                                                    error={!!errors[`lines.${idx}.quantity`]}
-                                                    autoFocus={line._barcode_locked}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <LocationSelect
-                                                    size="small"
-                                                    storeId={data.store_id}
-                                                    itemId={line._item?.id}
-                                                    transactionType={txType}
-                                                    value={line._location}
-                                                    onChange={(loc) => setLineLocation(idx, loc)}
-                                                    label="Location"
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                {usesExistingLots ? (
-                                                    <LotSelect
-                                                        size="small"
-                                                        itemId={line._item?.id}
-                                                        storeId={data.store_id}
-                                                        value={line._lot}
-                                                        onChange={(lot) => setLineLot(idx, lot)}
-                                                        disabled={line._barcode_locked}
-                                                    />
-                                                ) : (
-                                                    // Entry: lot number always editable
-                                                    <TextField
-                                                        size="small"
-                                                        fullWidth
-                                                        label="Lot #"
-                                                        value={line.lot_number}
-                                                        onChange={(e) =>
-                                                            updateLine(
-                                                                idx,
-                                                                'lot_number',
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                    />
-                                                )}
-                                            </TableCell>
-                                            {showExpiry && (
-                                                <TableCell>
-                                                    <BrandInput
-                                                        value={line.brand}
-                                                        itemId={line._item?.id}
-                                                        onChange={(v) =>
-                                                            updateLine(idx, 'brand', v)
-                                                        }
-                                                    />
-                                                </TableCell>
-                                            )}
-                                            {showExpiry && (
-                                                <TableCell>
-                                                    <TextField
-                                                        size="small"
-                                                        fullWidth
-                                                        label="Cat No"
-                                                        value={line.cat_no}
-                                                        onChange={(e) =>
-                                                            updateLine(
-                                                                idx,
-                                                                'cat_no',
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                    />
-                                                </TableCell>
-                                            )}
-                                            {showExpiry && (
-                                                <TableCell>
-                                                    <TextField
-                                                        size="small"
-                                                        type="date"
-                                                        fullWidth
-                                                        label="Expiry"
-                                                        value={line.expiry_date}
-                                                        onChange={(e) =>
-                                                            updateLine(
-                                                                idx,
-                                                                'expiry_date',
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                        slotProps={{ inputLabel: { shrink: true } }}
-                                                    />
-                                                </TableCell>
-                                            )}
-                                            {isEntry && (
-                                                <TableCell>
-                                                    <TextField
-                                                        size="small"
-                                                        type="number"
-                                                        fullWidth
-                                                        value={line.unit_price}
-                                                        onChange={(e) =>
-                                                            updateLine(
-                                                                idx,
-                                                                'unit_price',
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                        slotProps={{
-                                                            htmlInput: { min: 0, step: 'any' },
-                                                        }}
-                                                    />
-                                                </TableCell>
-                                            )}
-                                            <TableCell>
-                                                <IconButton
-                                                    size="small"
-                                                    color="error"
-                                                    onClick={() => removeLine(idx)}
-                                                >
-                                                    <DeleteIcon fontSize="small" />
-                                                </IconButton>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        )}
-                        {errors.lines && (
-                            <Alert severity="error" sx={{ mt: 1 }}>
-                                {errors.lines}
-                            </Alert>
-                        )}
+                        <LineItemsTable
+                            lineItems={lineItems}
+                            errors={errors}
+                            storeId={data.store_id}
+                            txType={txType}
+                            isEntry={isEntry}
+                            usesExistingLots={usesExistingLots}
+                            showExpiry={showExpiry}
+                            onUpdate={updateLine}
+                            onSetItem={setLineItem}
+                            onSetUnit={setLineUnit}
+                            onSetLot={setLineLot}
+                            onSetLocation={setLineLocation}
+                            onBarcodeFound={handleBarcodeFound}
+                            onBarcodeNotFound={handleBarcodeNotFound}
+                            onUnlock={unlockLine}
+                            onRemove={removeLine}
+                        />
                     </CardContent>
                 </Card>
 

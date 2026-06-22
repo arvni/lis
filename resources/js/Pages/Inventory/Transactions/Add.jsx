@@ -7,84 +7,22 @@ import {
     Card,
     CardContent,
     CardHeader,
-    Chip,
     CircularProgress,
-    Divider,
-    Grid,
-    IconButton,
-    MenuItem,
     Stack,
-    TextField,
-    Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import LockOpenIcon from '@mui/icons-material/LockOpen';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
-import ItemSelect from '@/Pages/Inventory/Components/ItemSelect';
-import UnitSelect from '@/Pages/Inventory/Components/UnitSelect';
-import LocationSelect from '@/Pages/Inventory/Components/LocationSelect';
-import LotSelect from '@/Pages/Inventory/Components/LotSelect';
-import BarcodeInput from '@/Pages/Inventory/Components/BarcodeInput';
-import SupplierSelect from '@/Pages/Inventory/Components/SupplierSelect';
-import BrandInput from '@/Pages/Inventory/Components/BrandInput';
-import FifoPreview from '@/Pages/Inventory/Components/FifoPreview';
 import LotPickerDialog from '@/Pages/Inventory/Components/LotPickerDialog';
-
-const USES_EXISTING_LOTS = ['EXPORT', 'RETURN', 'EXPIRED_REMOVAL', 'TRANSFER'];
-
-const emptyLine = () => ({
-    _item: null,
-    _unit: null,
-    _location: null,
-    _lot: null,
-    _barcode_locked: false,
-    _lots_from_scan: [],
-    item_id: null,
-    unit_id: null,
-    quantity: '',
-    barcode: '',
-    lot_number: '',
-    brand: '',
-    cat_no: '',
-    expiry_date: '',
-    unit_price: '',
-    store_location_id: null,
-    notes: '',
-});
-
-const toPayloadLine = ({
-    _item,
-    _unit,
-    _location,
-    _lot,
-    _barcode_locked,
-    _lots_from_scan,
-    ...rest
-}) => rest;
-
-const lineFromSource = (line) => ({
-    _item: line.item ?? null,
-    _unit: line.unit ?? null,
-    _location: null,
-    _lot: null,
-    _barcode_locked: false,
-    _lots_from_scan: [],
-    item_id: line.item_id,
-    unit_id: line.unit_id,
-    quantity: line.quantity ?? '',
-    barcode: '',
-    lot_number: line.lot_number ?? '',
-    brand: line.brand ?? '',
-    cat_no: line.cat_no ?? '',
-    expiry_date: line.expiry_date ?? '',
-    unit_price: line.unit_price ?? '',
-    store_location_id: null,
-    notes: line.notes ?? '',
-});
-
-const payloadFromSource = (line) => toPayloadLine(lineFromSource(line));
+import {
+    USES_EXISTING_LOTS,
+    emptyLine,
+    linesFromSource,
+    payloadFromSource,
+    toPayloadLine,
+} from './Add/helpers';
+import TransactionDetailsCard from './Add/TransactionDetailsCard';
+import LineItemCard from './Add/LineItemCard';
 
 const TransactionAdd = () => {
     const { transactionTypes, stores, defaults } = usePage().props;
@@ -99,7 +37,7 @@ const TransactionAdd = () => {
         lines: defaults?.lines?.map(payloadFromSource) ?? [],
     });
 
-    const [lineItems, setLineItems] = useState(() => defaults?.lines?.map(lineFromSource) ?? []);
+    const [lineItems, setLineItems] = useState(() => linesFromSource(defaults?.lines));
     const [supplierObj, setSupplierObj] = useState(defaults?.supplier ?? null);
     const [lotPickerLine, setLotPickerLine] = useState(null); // index of line with open lot picker
 
@@ -303,100 +241,17 @@ const TransactionAdd = () => {
             <Head title="New Stock Transaction" />
             <PageHeader title="New Stock Transaction" />
             <Box component="form" onSubmit={handleSubmit}>
-                <Card sx={{ mb: 3 }}>
-                    <CardHeader title="Transaction Details" />
-                    <CardContent>
-                        <Grid container spacing={2}>
-                            <Grid size={{ xs: 12, md: 4 }}>
-                                <TextField
-                                    select
-                                    fullWidth
-                                    required
-                                    label="Transaction Type"
-                                    value={data.transaction_type}
-                                    onChange={(e) => setData('transaction_type', e.target.value)}
-                                    error={!!errors.transaction_type}
-                                >
-                                    {transactionTypes.map((t) => (
-                                        <MenuItem key={t.value} value={t.value}>
-                                            {t.name ?? t.value}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
-                                <TextField
-                                    fullWidth
-                                    required
-                                    type="date"
-                                    label="Transaction Date"
-                                    value={data.transaction_date}
-                                    onChange={(e) => setData('transaction_date', e.target.value)}
-                                    slotProps={{ inputLabel: { shrink: true } }}
-                                />
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
-                                <TextField
-                                    select
-                                    fullWidth
-                                    required
-                                    label="Source Store"
-                                    value={data.store_id}
-                                    onChange={(e) => setData('store_id', e.target.value)}
-                                    error={!!errors.store_id}
-                                >
-                                    {stores.map((s) => (
-                                        <MenuItem key={s.id} value={s.id}>
-                                            {s.name}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                            </Grid>
-                            {isTransfer && (
-                                <Grid size={{ xs: 12, md: 4 }}>
-                                    <TextField
-                                        select
-                                        fullWidth
-                                        required
-                                        label="Destination Store"
-                                        value={data.destination_store_id}
-                                        onChange={(e) =>
-                                            setData('destination_store_id', e.target.value)
-                                        }
-                                    >
-                                        {stores.map((s) => (
-                                            <MenuItem key={s.id} value={s.id}>
-                                                {s.name}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
-                                </Grid>
-                            )}
-                            {isEntry && (
-                                <Grid size={{ xs: 12, md: 4 }}>
-                                    <SupplierSelect
-                                        label="Supplier (optional)"
-                                        value={supplierObj}
-                                        onChange={(s) => {
-                                            setSupplierObj(s);
-                                            setData('supplier_id', s?.id ?? '');
-                                        }}
-                                    />
-                                </Grid>
-                            )}
-                            <Grid size={12}>
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={2}
-                                    label="Notes"
-                                    value={data.notes}
-                                    onChange={(e) => setData('notes', e.target.value)}
-                                />
-                            </Grid>
-                        </Grid>
-                    </CardContent>
-                </Card>
+                <TransactionDetailsCard
+                    data={data}
+                    setData={setData}
+                    errors={errors}
+                    transactionTypes={transactionTypes}
+                    stores={stores}
+                    isEntry={isEntry}
+                    isTransfer={isTransfer}
+                    supplierObj={supplierObj}
+                    setSupplierObj={setSupplierObj}
+                />
 
                 <Card sx={{ mb: 3 }}>
                     <CardHeader
@@ -421,268 +276,29 @@ const TransactionAdd = () => {
                         ) : (
                             <Stack spacing={2}>
                                 {lineItems.map((line, idx) => (
-                                    <Card
+                                    <LineItemCard
                                         key={idx}
-                                        variant="outlined"
-                                        sx={{
-                                            bgcolor: line._barcode_locked
-                                                ? 'action.hover'
-                                                : 'background.paper',
-                                        }}
-                                    >
-                                        <Stack
-                                            direction="row"
-                                            spacing={1}
-                                            sx={{
-                                                alignItems: 'center',
-                                                justifyContent: 'space-between',
-                                                px: 2,
-                                                py: 1,
-                                                bgcolor: 'action.selected',
-                                            }}
-                                        >
-                                            <Stack
-                                                direction="row"
-                                                spacing={1}
-                                                sx={{ alignItems: 'center' }}
-                                            >
-                                                <Typography variant="subtitle2">
-                                                    Line {idx + 1}
-                                                </Typography>
-                                                {line._barcode_locked && (
-                                                    <Chip
-                                                        size="small"
-                                                        color="warning"
-                                                        variant="outlined"
-                                                        icon={<LockOpenIcon fontSize="small" />}
-                                                        label="Auto-filled — click Unlock to edit"
-                                                    />
-                                                )}
-                                            </Stack>
-                                            <Stack
-                                                direction="row"
-                                                spacing={1}
-                                                sx={{ alignItems: 'center' }}
-                                            >
-                                                {line._barcode_locked && (
-                                                    <Button
-                                                        size="small"
-                                                        color="warning"
-                                                        startIcon={
-                                                            <LockOpenIcon fontSize="small" />
-                                                        }
-                                                        onClick={() => unlockLine(idx)}
-                                                    >
-                                                        Unlock
-                                                    </Button>
-                                                )}
-                                                <IconButton
-                                                    size="small"
-                                                    color="error"
-                                                    title="Remove line"
-                                                    onClick={() => removeLine(idx)}
-                                                >
-                                                    <DeleteIcon fontSize="small" />
-                                                </IconButton>
-                                            </Stack>
-                                        </Stack>
-                                        <Divider />
-                                        <CardContent>
-                                            <Grid container spacing={2}>
-                                                <Grid size={{ xs: 12, md: 4 }}>
-                                                    <BarcodeInput
-                                                        size="small"
-                                                        value={line.barcode}
-                                                        onChange={(val) =>
-                                                            updateLine(idx, 'barcode', val)
-                                                        }
-                                                        onFound={(scanData) =>
-                                                            handleBarcodeFound(idx, scanData)
-                                                        }
-                                                        onNotFound={(bc) =>
-                                                            handleBarcodeNotFound(idx, bc)
-                                                        }
-                                                    />
-                                                </Grid>
-                                                <Grid size={{ xs: 12, md: 5 }}>
-                                                    <ItemSelect
-                                                        size="small"
-                                                        value={line._item}
-                                                        onChange={(item) => setLineItem(idx, item)}
-                                                        required
-                                                        disabled={line._barcode_locked}
-                                                        error={!!errors[`lines.${idx}.item_id`]}
-                                                    />
-                                                </Grid>
-                                                <Grid size={{ xs: 6, md: 3 }}>
-                                                    <UnitSelect
-                                                        size="small"
-                                                        itemId={line._item?.id}
-                                                        allUnits={[]}
-                                                        value={line._unit}
-                                                        onChange={(unit) => setLineUnit(idx, unit)}
-                                                        required
-                                                        disabled={line._barcode_locked}
-                                                        error={!!errors[`lines.${idx}.unit_id`]}
-                                                    />
-                                                </Grid>
-                                                <Grid size={{ xs: 6, md: 2 }}>
-                                                    <TextField
-                                                        size="small"
-                                                        type="number"
-                                                        fullWidth
-                                                        required
-                                                        label="Quantity"
-                                                        value={line.quantity}
-                                                        onChange={(e) =>
-                                                            updateLine(
-                                                                idx,
-                                                                'quantity',
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                        slotProps={{
-                                                            htmlInput: { min: 0, step: 'any' },
-                                                        }}
-                                                        error={!!errors[`lines.${idx}.quantity`]}
-                                                        autoFocus={line._barcode_locked}
-                                                    />
-                                                </Grid>
-                                                <Grid size={{ xs: 12, md: 5 }}>
-                                                    <LocationSelect
-                                                        size="small"
-                                                        storeId={data.store_id}
-                                                        itemId={line._item?.id}
-                                                        transactionType={data.transaction_type}
-                                                        value={line._location}
-                                                        onChange={(loc) =>
-                                                            setLineLocation(idx, loc)
-                                                        }
-                                                        label="Location"
-                                                    />
-                                                </Grid>
-                                                <Grid size={{ xs: 12, md: 5 }}>
-                                                    {usesExistingLots ? (
-                                                        <LotSelect
-                                                            size="small"
-                                                            itemId={line._item?.id}
-                                                            storeId={data.store_id}
-                                                            value={line._lot}
-                                                            onChange={(lot) => setLineLot(idx, lot)}
-                                                            disabled={line._barcode_locked}
-                                                        />
-                                                    ) : (
-                                                        // Entry: lot number is always free-text, never locked
-                                                        <TextField
-                                                            size="small"
-                                                            fullWidth
-                                                            label="Lot #"
-                                                            value={line.lot_number}
-                                                            onChange={(e) =>
-                                                                updateLine(
-                                                                    idx,
-                                                                    'lot_number',
-                                                                    e.target.value,
-                                                                )
-                                                            }
-                                                        />
-                                                    )}
-                                                </Grid>
-                                                {isEntry && (
-                                                    <Grid size={{ xs: 6, md: 2 }}>
-                                                        <TextField
-                                                            size="small"
-                                                            type="number"
-                                                            fullWidth
-                                                            label="Unit Price"
-                                                            value={line.unit_price}
-                                                            onChange={(e) =>
-                                                                updateLine(
-                                                                    idx,
-                                                                    'unit_price',
-                                                                    e.target.value,
-                                                                )
-                                                            }
-                                                            slotProps={{
-                                                                htmlInput: { min: 0, step: 'any' },
-                                                            }}
-                                                        />
-                                                    </Grid>
-                                                )}
-                                                {showExpiry && (
-                                                    <>
-                                                        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                                                            <BrandInput
-                                                                size="small"
-                                                                value={line.brand}
-                                                                itemId={line._item?.id}
-                                                                onChange={(v) =>
-                                                                    updateLine(idx, 'brand', v)
-                                                                }
-                                                            />
-                                                        </Grid>
-                                                        <Grid size={{ xs: 6, sm: 3, md: 4 }}>
-                                                            <TextField
-                                                                size="small"
-                                                                fullWidth
-                                                                label="Catalog No"
-                                                                value={line.cat_no}
-                                                                onChange={(e) =>
-                                                                    updateLine(
-                                                                        idx,
-                                                                        'cat_no',
-                                                                        e.target.value,
-                                                                    )
-                                                                }
-                                                            />
-                                                        </Grid>
-                                                        <Grid size={{ xs: 6, sm: 3, md: 4 }}>
-                                                            <TextField
-                                                                size="small"
-                                                                type="date"
-                                                                fullWidth
-                                                                label="Expiry Date"
-                                                                value={line.expiry_date}
-                                                                onChange={(e) =>
-                                                                    updateLine(
-                                                                        idx,
-                                                                        'expiry_date',
-                                                                        e.target.value,
-                                                                    )
-                                                                }
-                                                                slotProps={{
-                                                                    inputLabel: { shrink: true },
-                                                                }}
-                                                            />
-                                                        </Grid>
-                                                    </>
-                                                )}
-                                            </Grid>
-                                            {showFifo && line._item && line.quantity && (
-                                                <Box
-                                                    sx={{
-                                                        mt: 2,
-                                                        pt: 2,
-                                                        borderTop: '1px dashed',
-                                                        borderColor: 'divider',
-                                                    }}
-                                                >
-                                                    <FifoPreview
-                                                        itemId={line._item?.id}
-                                                        storeId={data.store_id}
-                                                        quantityBaseUnits={
-                                                            line._unit?.conversion_to_base
-                                                                ? parseFloat(line.quantity) *
-                                                                  parseFloat(
-                                                                      line._unit.conversion_to_base,
-                                                                  )
-                                                                : null
-                                                        }
-                                                    />
-                                                </Box>
-                                            )}
-                                        </CardContent>
-                                    </Card>
+                                        line={line}
+                                        idx={idx}
+                                        errors={errors}
+                                        storeId={data.store_id}
+                                        transactionType={data.transaction_type}
+                                        isEntry={isEntry}
+                                        usesExistingLots={usesExistingLots}
+                                        showExpiry={showExpiry}
+                                        showFifo={showFifo}
+                                        onRemove={() => removeLine(idx)}
+                                        onUnlock={() => unlockLine(idx)}
+                                        onUpdate={(field, value) => updateLine(idx, field, value)}
+                                        onSetItem={(item) => setLineItem(idx, item)}
+                                        onSetUnit={(unit) => setLineUnit(idx, unit)}
+                                        onSetLot={(lot) => setLineLot(idx, lot)}
+                                        onSetLocation={(loc) => setLineLocation(idx, loc)}
+                                        onBarcodeFound={(scanData) =>
+                                            handleBarcodeFound(idx, scanData)
+                                        }
+                                        onBarcodeNotFound={(bc) => handleBarcodeNotFound(idx, bc)}
+                                    />
                                 ))}
                             </Stack>
                         )}

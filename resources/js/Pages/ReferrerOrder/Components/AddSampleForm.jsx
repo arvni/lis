@@ -4,30 +4,22 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import {
     Button,
-    Select,
     Table,
     TableBody,
-    TableCell,
     TableContainer,
-    TableHead,
-    TableRow,
-    TextField,
     Typography,
     Chip,
     Alert,
     CircularProgress,
-    Checkbox,
-    FormControlLabel,
-    FormGroup,
-    Collapse,
-    IconButton,
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import MenuItem from '@mui/material/MenuItem';
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm, router } from '@inertiajs/react';
-import { ExpandMore, ExpandLess, MergeType } from '@mui/icons-material';
+import { MergeType } from '@mui/icons-material';
+import SampleTableHead from './AddSampleForm/SampleTableHead';
+import BarcodeSampleRow from './AddSampleForm/BarcodeSampleRow';
+import { buildCleanedBarcodes } from './AddSampleForm/helpers';
 
 const Form = ({
     barcodes,
@@ -114,23 +106,7 @@ const Form = ({
         setIsSubmitting(true);
 
         // Clean up data to only send what's needed
-        const cleanedBarcodes = data.barcodes.map((barcode) => ({
-            patient: { id: barcode.patient?.id },
-            sampleType: barcode.sampleType,
-            sampleLocation: barcode.sampleLocation || 'In Lab',
-            collection_date: barcode.collection_date,
-            items: (barcode.selectedItems || barcode.items?.map((i) => i.id) || []).map((id) =>
-                typeof id === 'object' ? { id: id.id } : { id },
-            ),
-            barcodeGroup: {
-                id: barcode.barcodeGroup?.id,
-                name: barcode.barcodeGroup?.name,
-                abbr: barcode.barcodeGroup?.abbr,
-            },
-            barcode: barcode.barcode,
-            material: barcode.sample?.material ? { id: barcode.sample.material.id } : null,
-            received_at: barcode.received_at,
-        }));
+        const cleanedBarcodes = buildCleanedBarcodes(data.barcodes);
 
         // Use router.post directly with cleaned data
         router.post(
@@ -197,23 +173,6 @@ const Form = ({
         setData({ barcodes: updatedBarcodes });
     };
 
-    // Get unique sample types for a barcode
-    const getAvailableSampleTypes = (barcode) => {
-        const sampleTypes = new Map();
-        barcode.items.forEach((item) => {
-            item.method.test.sample_types?.forEach((sampleType) => {
-                sampleTypes.set(sampleType.id, sampleType);
-            });
-        });
-        return Array.from(sampleTypes.values());
-    };
-
-    // Filter samples based on selected sample type
-    const getFilteredSamples = (selectedSampleType) => {
-        if (!selectedSampleType) return samples;
-        return samples.filter((sample) => sample.sample_type?.server_id === selectedSampleType);
-    };
-
     if (!data?.barcodes?.length) return null;
 
     return (
@@ -251,421 +210,24 @@ const Form = ({
 
                     <TableContainer sx={{ border: 1, borderColor: 'divider', borderRadius: 1 }}>
                         <Table>
-                            <TableHead>
-                                <TableRow sx={{ bgcolor: 'grey.50' }}>
-                                    <TableCell
-                                        rowSpan={2}
-                                        align="center"
-                                        sx={{ fontWeight: 'bold', minWidth: 120 }}
-                                    >
-                                        Barcode Group
-                                    </TableCell>
-                                    {isPooling && (
-                                        <TableCell
-                                            rowSpan={2}
-                                            align="center"
-                                            sx={{ fontWeight: 'bold', minWidth: 200 }}
-                                        >
-                                            Linked Tests *
-                                        </TableCell>
-                                    )}
-                                    <TableCell
-                                        colSpan={2}
-                                        align="center"
-                                        sx={{ fontWeight: 'bold', borderBottom: 1 }}
-                                    >
-                                        Test Information
-                                    </TableCell>
-                                    <TableCell
-                                        colSpan={4}
-                                        align="center"
-                                        sx={{ fontWeight: 'bold', borderBottom: 1 }}
-                                    >
-                                        Sample Details
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow sx={{ bgcolor: 'grey.50' }}>
-                                    <TableCell
-                                        align="center"
-                                        sx={{ fontWeight: 'medium', minWidth: 200 }}
-                                    >
-                                        Test Name
-                                    </TableCell>
-                                    <TableCell
-                                        align="center"
-                                        sx={{ fontWeight: 'medium', minWidth: 180 }}
-                                    >
-                                        Accepted Sample Types
-                                    </TableCell>
-                                    <TableCell
-                                        align="center"
-                                        sx={{ fontWeight: 'medium', minWidth: 150 }}
-                                    >
-                                        Selected Sample Type *
-                                    </TableCell>
-                                    <TableCell
-                                        align="center"
-                                        sx={{ fontWeight: 'medium', minWidth: 200 }}
-                                    >
-                                        Selected Sample *
-                                    </TableCell>
-                                    <TableCell
-                                        align="center"
-                                        sx={{ fontWeight: 'medium', minWidth: 200 }}
-                                    >
-                                        Sample Information
-                                    </TableCell>
-                                    <TableCell
-                                        align="center"
-                                        sx={{ fontWeight: 'medium', minWidth: 200 }}
-                                    >
-                                        Received Date & Time *
-                                    </TableCell>
-                                </TableRow>
-                            </TableHead>
+                            <SampleTableHead isPooling={isPooling} />
                             <TableBody>
                                 {data.barcodes.map((barcode, index) => (
-                                    <TableRow key={`barcode-${barcode.barcodeGroup.id}`}>
-                                        <TableCell
-                                            rowSpan={barcode?.items?.length || 1}
-                                            sx={{
-                                                verticalAlign: 'top',
-                                                bgcolor: 'primary.50',
-                                                fontWeight: 'medium',
-                                            }}
-                                        >
-                                            <Typography
-                                                variant="body2"
-                                                sx={{ wordBreak: 'break-word' }}
-                                            >
-                                                {barcode.barcodeGroup.name}
-                                            </Typography>
-                                        </TableCell>
-
-                                        {isPooling && (
-                                            <TableCell sx={{ verticalAlign: 'top' }}>
-                                                <Box>
-                                                    <Stack
-                                                        direction="row"
-                                                        spacing={1}
-                                                        sx={{ alignItems: 'center' }}
-                                                    >
-                                                        <Typography
-                                                            variant="body2"
-                                                            color="text.secondary"
-                                                        >
-                                                            {barcode.selectedItems?.length || 0}{' '}
-                                                            items selected
-                                                        </Typography>
-                                                        <IconButton
-                                                            size="small"
-                                                            onClick={() =>
-                                                                toggleRowExpansion(index)
-                                                            }
-                                                        >
-                                                            {expandedRows[index] ? (
-                                                                <ExpandLess />
-                                                            ) : (
-                                                                <ExpandMore />
-                                                            )}
-                                                        </IconButton>
-                                                    </Stack>
-                                                    <Collapse in={expandedRows[index]}>
-                                                        <FormGroup
-                                                            sx={{
-                                                                mt: 1,
-                                                                maxHeight: 200,
-                                                                overflow: 'auto',
-                                                            }}
-                                                        >
-                                                            {allAcceptanceItems.map((item) => (
-                                                                <FormControlLabel
-                                                                    key={item.id}
-                                                                    control={
-                                                                        <Checkbox
-                                                                            size="small"
-                                                                            checked={
-                                                                                barcode.selectedItems?.includes(
-                                                                                    item.id,
-                                                                                ) || false
-                                                                            }
-                                                                            onChange={() =>
-                                                                                handleItemSelectionChange(
-                                                                                    index,
-                                                                                    item.id,
-                                                                                )
-                                                                            }
-                                                                        />
-                                                                    }
-                                                                    label={
-                                                                        <Box>
-                                                                            <Typography variant="body2">
-                                                                                {item.method?.test
-                                                                                    ?.name ||
-                                                                                    item.test
-                                                                                        ?.name ||
-                                                                                    'Unknown Test'}
-                                                                            </Typography>
-                                                                            <Typography
-                                                                                variant="caption"
-                                                                                color="text.secondary"
-                                                                            >
-                                                                                Created:{' '}
-                                                                                {item.created_at
-                                                                                    ? new Date(
-                                                                                          item.created_at,
-                                                                                      ).toLocaleDateString()
-                                                                                    : 'N/A'}
-                                                                            </Typography>
-                                                                        </Box>
-                                                                    }
-                                                                />
-                                                            ))}
-                                                        </FormGroup>
-                                                    </Collapse>
-                                                    {(!barcode.selectedItems ||
-                                                        barcode.selectedItems.length === 0) && (
-                                                        <Typography variant="caption" color="error">
-                                                            Please select at least one test
-                                                        </Typography>
-                                                    )}
-                                                </Box>
-                                            </TableCell>
-                                        )}
-
-                                        <TableCell sx={{ verticalAlign: 'top' }}>
-                                            <Stack spacing={1}>
-                                                {barcode.items?.map((item) => (
-                                                    <Box key={`test-${item.id || item.method?.id}`}>
-                                                        <Typography
-                                                            variant="body2"
-                                                            sx={{ fontWeight: 'medium' }}
-                                                        >
-                                                            {item.method?.test?.name ||
-                                                                item.test?.name ||
-                                                                'Unknown'}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant="caption"
-                                                            color="text.secondary"
-                                                        >
-                                                            Method: {item.method?.name || 'N/A'}
-                                                        </Typography>
-                                                    </Box>
-                                                ))}
-                                            </Stack>
-                                        </TableCell>
-
-                                        <TableCell sx={{ verticalAlign: 'top' }}>
-                                            <Stack spacing={1}>
-                                                {barcode.items.map((item) => (
-                                                    <Box key={`sample-types-${item.method.id}`}>
-                                                        {item.method.test.sample_types.map(
-                                                            (sampleType) => (
-                                                                <Chip
-                                                                    key={sampleType.id}
-                                                                    label={`${sampleType.name}${sampleType.pivot.description ? ` (${sampleType.pivot.description})` : ''}`}
-                                                                    size="small"
-                                                                    variant="outlined"
-                                                                    sx={{ mr: 0.5, mb: 0.5 }}
-                                                                />
-                                                            ),
-                                                        )}
-                                                    </Box>
-                                                ))}
-                                            </Stack>
-                                        </TableCell>
-
-                                        <TableCell sx={{ verticalAlign: 'top' }}>
-                                            <Select
-                                                fullWidth
-                                                size="small"
-                                                onChange={sampleTypeChange(index)}
-                                                value={barcode.sampleType || ''}
-                                                displayEmpty
-                                                error={!barcode.sampleType}
-                                            >
-                                                <MenuItem value="">
-                                                    <em>Select sample type</em>
-                                                </MenuItem>
-                                                {getAvailableSampleTypes(barcode).map(
-                                                    (sampleType) => (
-                                                        <MenuItem
-                                                            key={`sample-type-${sampleType.id}`}
-                                                            value={sampleType.id}
-                                                        >
-                                                            {sampleType.name}
-                                                        </MenuItem>
-                                                    ),
-                                                )}
-                                            </Select>
-                                        </TableCell>
-
-                                        <TableCell sx={{ verticalAlign: 'top' }}>
-                                            <Select
-                                                fullWidth
-                                                size="small"
-                                                onChange={sampleChange(index)}
-                                                value={barcode?.sample?.id || ''}
-                                                displayEmpty
-                                                disabled={!barcode.sampleType}
-                                                error={!barcode.sample}
-                                            >
-                                                <MenuItem value="">
-                                                    <em>Select sample</em>
-                                                </MenuItem>
-                                                {getFilteredSamples(barcode.sampleType)?.map(
-                                                    (sample) => (
-                                                        <MenuItem
-                                                            key={`sample-${sample.id}`}
-                                                            value={sample.id}
-                                                        >
-                                                            <Box>
-                                                                <Typography variant="body2">
-                                                                    {sample.sample_type?.name}
-                                                                    {sample.sampleId &&
-                                                                        ` | ${sample.sampleId}`}
-                                                                </Typography>
-                                                                {sample.collection_date && (
-                                                                    <Typography
-                                                                        variant="caption"
-                                                                        color="text.secondary"
-                                                                    >
-                                                                        Collected:{' '}
-                                                                        {new Date(
-                                                                            sample.collection_date,
-                                                                        ).toLocaleDateString()}
-                                                                    </Typography>
-                                                                )}
-                                                            </Box>
-                                                        </MenuItem>
-                                                    ),
-                                                )}
-                                            </Select>
-                                            {barcode.sampleType &&
-                                                !getFilteredSamples(barcode.sampleType)?.length && (
-                                                    <Typography
-                                                        variant="caption"
-                                                        color="error"
-                                                        sx={{ display: 'block', mt: 1 }}
-                                                    >
-                                                        No samples available for this type
-                                                    </Typography>
-                                                )}
-                                        </TableCell>
-
-                                        <TableCell sx={{ verticalAlign: 'top' }}>
-                                            {barcode.sample && (
-                                                <Box
-                                                    sx={{
-                                                        p: 1,
-                                                        bgcolor: 'grey.50',
-                                                        borderRadius: 1,
-                                                    }}
-                                                >
-                                                    <Stack spacing={0.5}>
-                                                        <Box
-                                                            display="flex"
-                                                            sx={{ alignItems: 'center' }}
-                                                        >
-                                                            <Typography
-                                                                variant="caption"
-                                                                sx={{
-                                                                    fontWeight: 'medium',
-                                                                    minWidth: 80,
-                                                                }}
-                                                            >
-                                                                Type:
-                                                            </Typography>
-                                                            <Typography variant="caption">
-                                                                {barcode.sample.sample_type?.name}
-                                                            </Typography>
-                                                        </Box>
-                                                        {barcode.collectionDate && (
-                                                            <Box
-                                                                display="flex"
-                                                                sx={{ alignItems: 'center' }}
-                                                            >
-                                                                <Typography
-                                                                    variant="caption"
-                                                                    sx={{
-                                                                        fontWeight: 'medium',
-                                                                        minWidth: 80,
-                                                                    }}
-                                                                >
-                                                                    Collected:
-                                                                </Typography>
-                                                                <Typography variant="caption">
-                                                                    {new Date(
-                                                                        barcode.collectionDate,
-                                                                    ).toLocaleString()}
-                                                                </Typography>
-                                                            </Box>
-                                                        )}
-                                                        {barcode.sample.sampleId && (
-                                                            <Box
-                                                                display="flex"
-                                                                sx={{ alignItems: 'center' }}
-                                                            >
-                                                                <Typography
-                                                                    variant="caption"
-                                                                    sx={{
-                                                                        fontWeight: 'medium',
-                                                                        minWidth: 80,
-                                                                    }}
-                                                                >
-                                                                    Barcode:
-                                                                </Typography>
-                                                                <Typography
-                                                                    variant="caption"
-                                                                    sx={{ fontFamily: 'monospace' }}
-                                                                >
-                                                                    {barcode.sample.sampleId}
-                                                                </Typography>
-                                                            </Box>
-                                                        )}
-                                                    </Stack>
-                                                </Box>
-                                            )}
-                                        </TableCell>
-
-                                        <TableCell sx={{ verticalAlign: 'top' }}>
-                                            <TextField
-                                                fullWidth
-                                                size="small"
-                                                type="datetime-local"
-                                                label="Received Date & Time"
-                                                value={barcode.received_at || ''}
-                                                onChange={handleReceivedDateChange(index)}
-                                                slotProps={{
-                                                    htmlInput: {
-                                                        max: now,
-                                                        min: barcode.collectionDate
-                                                            ? new Date(barcode.collectionDate)
-                                                                  .toISOString()
-                                                                  .slice(0, 16)
-                                                            : undefined,
-                                                    },
-                                                    inputLabel: { shrink: true },
-                                                }}
-                                                error={
-                                                    !barcode.received_at ||
-                                                    (barcode.collectionDate &&
-                                                        new Date(barcode.collectionDate) >
-                                                            new Date(barcode.received_at))
-                                                }
-                                                helperText={
-                                                    !barcode.received_at
-                                                        ? 'Required field'
-                                                        : barcode.collectionDate &&
-                                                            new Date(barcode.collectionDate) >
-                                                                new Date(barcode.received_at)
-                                                          ? 'Must be after collection date'
-                                                          : ''
-                                                }
-                                            />
-                                        </TableCell>
-                                    </TableRow>
+                                    <BarcodeSampleRow
+                                        key={`barcode-${barcode.barcodeGroup.id}`}
+                                        barcode={barcode}
+                                        index={index}
+                                        isPooling={isPooling}
+                                        expanded={expandedRows[index]}
+                                        allAcceptanceItems={allAcceptanceItems}
+                                        samples={samples}
+                                        now={now}
+                                        onToggleExpand={toggleRowExpansion}
+                                        onItemSelectionChange={handleItemSelectionChange}
+                                        onSampleTypeChange={sampleTypeChange}
+                                        onSampleChange={sampleChange}
+                                        onReceivedDateChange={handleReceivedDateChange}
+                                    />
                                 ))}
                             </TableBody>
                         </Table>

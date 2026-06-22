@@ -5,216 +5,30 @@ import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import {
     Alert,
-    Avatar,
     Box,
     Button,
     Card,
     CardContent,
     Chip,
     CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
     Divider,
     FormControlLabel,
     Paper,
-    Radio,
     Stack,
     Switch,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
     Tooltip,
     Typography,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import MergeIcon from '@mui/icons-material/Merge';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import axios from 'axios';
-import countries from '@/Data/Countries.js';
-
-const FIELD_LABELS = {
-    firstName: 'First Name',
-    secondName: 'Second Name',
-    thirdName: 'Third Name',
-    lastName: 'Last Name',
-    fullName: 'Full Name',
-    idNo: 'ID No./Passport No.',
-    nationality: 'Nationality',
-    dateOfBirth: 'Date Of Birth',
-    gender: 'Gender',
-    phone: 'Phone',
-    tribe: 'Tribe',
-    wilayat: 'Wilayat',
-    governorate: 'Governorate',
-    village: 'Village',
-};
-
-const META_FIELD_LABELS = {
-    maritalStatus: 'Marital Status',
-    company: 'Company',
-    profession: 'Profession',
-    address: 'Address',
-    email: 'Email',
-    details: 'Details',
-};
-
-const RELATION_LABELS = {
-    acceptances: 'Acceptances',
-    consultations: 'Consultations',
-    samples: 'Samples',
-    invoices: 'Invoices',
-    payments: 'Payments',
-    documents: 'Documents',
-    relatives: 'Relatives',
-};
-
-const isEmpty = (v) => v === null || v === undefined || v === '';
-
-const avatarUrl = (value, gender) =>
-    value || `/images/${['male', 'female'].includes(gender) ? gender : 'unknown'}.png`;
-
-const formatAge = (date) => {
-    const now = new Date();
-    let years = now.getFullYear() - date.getFullYear();
-    let months = now.getMonth() - date.getMonth();
-    let days = now.getDate() - date.getDate();
-    if (days < 0) months -= 1;
-    if (months < 0) {
-        years -= 1;
-        months += 12;
-    }
-    if (years >= 1) return `${years} Y`;
-    if (months >= 1) return `${months} M`;
-    return `${Math.max(0, Math.round((now - date) / 86400000))} D`;
-};
-
-const formatDob = (value) => {
-    if (isEmpty(value)) return '—';
-    const d = new Date(value);
-    if (isNaN(d.getTime())) return String(value);
-    const date = new Intl.DateTimeFormat('en-GB', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    }).format(d);
-    return `${date} (${formatAge(d)})`;
-};
-
-const displayValue = (field, value) => {
-    if (isEmpty(value)) return '—';
-    if (field === 'dateOfBirth') return formatDob(value);
-    if (field === 'nationality') return countries.find((c) => c.code === value)?.label ?? value;
-    return String(value);
-};
-
-const displayMetaValue = (field, value) => {
-    if (field === 'maritalStatus') {
-        if (value === 1 || value === '1') return 'Married';
-        if (value === 0 || value === '0') return 'Single';
-        return 'Unknown';
-    }
-    if (isEmpty(value)) return '—';
-    return String(value);
-};
-
-// Default value source per key: the kept patient's value, falling back to the
-// other patient only when the kept value is empty.
-const smartDefaults = (keys, bucket, data, keepSide) => {
-    const other = keepSide === 'first' ? 'second' : 'first';
-    const next = {};
-    keys.forEach((key) => {
-        next[key] = isEmpty(data[keepSide][bucket][key]) ? other : keepSide;
-    });
-    return next;
-};
-
-/** A clickable value cell that doubles as a radio. */
-const ChoiceCell = ({ selected, onSelect, children }) => (
-    <TableCell
-        onClick={onSelect}
-        sx={{
-            cursor: 'pointer',
-            borderLeft: '3px solid',
-            borderLeftColor: selected ? 'primary.main' : 'transparent',
-            backgroundColor: selected ? 'action.selected' : 'transparent',
-            transition: 'background-color .15s',
-            '&:hover': { backgroundColor: selected ? 'action.selected' : 'action.hover' },
-        }}
-    >
-        <Stack direction="row" spacing={1} alignItems="center">
-            <Radio checked={selected} size="small" sx={{ p: 0.5 }} />
-            <Box sx={{ minWidth: 0, wordBreak: 'break-word' }}>{children}</Box>
-        </Stack>
-    </TableCell>
-);
-
-const PatientSummaryCard = ({ patient, keep, onKeep }) => (
-    <Card
-        variant="outlined"
-        sx={{
-            height: '100%',
-            borderWidth: 2,
-            borderColor: keep ? 'success.main' : 'error.light',
-            position: 'relative',
-            overflow: 'hidden',
-        }}
-    >
-        <Box
-            sx={{
-                px: 2,
-                py: 0.75,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                color: '#fff',
-                backgroundColor: keep ? 'success.main' : 'error.main',
-            }}
-        >
-            {keep ? <CheckCircleIcon fontSize="small" /> : <DeleteOutlineIcon fontSize="small" />}
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, letterSpacing: 0.5 }}>
-                {keep ? 'KEEP — survives the merge' : 'DELETE — removed after merge'}
-            </Typography>
-        </Box>
-        <CardContent>
-            <Stack direction="row" spacing={2} alignItems="center">
-                <Avatar
-                    src={avatarUrl(patient.fields.avatar, patient.fields.gender)}
-                    sx={{ width: 64, height: 64, border: '1px solid', borderColor: 'divider' }}
-                />
-                <Box sx={{ minWidth: 0 }}>
-                    <Typography variant="h6" noWrap>
-                        {patient.fullName}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        {displayValue('idNo', patient.fields.idNo)}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        {displayValue('phone', patient.fields.phone)}
-                    </Typography>
-                </Box>
-            </Stack>
-            {!keep && (
-                <Button
-                    size="small"
-                    sx={{ mt: 1.5 }}
-                    startIcon={<SwapHorizIcon />}
-                    onClick={onKeep}
-                >
-                    Keep this one instead
-                </Button>
-            )}
-        </CardContent>
-    </Card>
-);
+import { FIELD_LABELS, META_FIELD_LABELS, RELATION_LABELS } from './Merge/constants';
+import { displayMetaValue, displayValue, smartDefaults } from './Merge/helpers';
+import PatientSummaryCard from './Merge/PatientSummaryCard';
+import ComparisonTable from './Merge/ComparisonTable';
+import AvatarPicker from './Merge/AvatarPicker';
+import ConfirmMergeDialog from './Merge/ConfirmMergeDialog';
 
 const Merge = () => {
     const { fields, metaFields } = usePage().props;
@@ -451,90 +265,12 @@ const Merge = () => {
                                 </Box>
                             </Stack>
 
-                            {/* Avatar picker */}
-                            <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 2 }}>
-                                <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
-                                    Photo / ID image
-                                </Typography>
-                                <Grid container spacing={2} alignItems="center">
-                                    {['first', 'second'].map((side) => {
-                                        const selected = (choices.avatar ?? keepSide) === side;
-                                        const p = comparison[side];
-                                        return (
-                                            <Grid size={{ xs: 6, sm: 3 }} key={side}>
-                                                <Paper
-                                                    onClick={() => setChoice('avatar', side)}
-                                                    elevation={selected ? 6 : 0}
-                                                    variant={selected ? 'elevation' : 'outlined'}
-                                                    sx={{
-                                                        p: 1,
-                                                        cursor: 'pointer',
-                                                        textAlign: 'center',
-                                                        borderColor: selected
-                                                            ? 'primary.main'
-                                                            : 'divider',
-                                                        outline: selected ? '2px solid' : 'none',
-                                                        outlineColor: 'primary.main',
-                                                    }}
-                                                >
-                                                    <Box
-                                                        component="img"
-                                                        src={avatarUrl(
-                                                            p.fields.avatar,
-                                                            p.fields.gender,
-                                                        )}
-                                                        alt={p.fullName}
-                                                        sx={{
-                                                            width: '100%',
-                                                            height: 120,
-                                                            objectFit: 'cover',
-                                                            borderRadius: 1,
-                                                            mb: 1,
-                                                            backgroundColor: 'grey.100',
-                                                        }}
-                                                    />
-                                                    <Stack
-                                                        direction="row"
-                                                        spacing={0.5}
-                                                        justifyContent="center"
-                                                        alignItems="center"
-                                                    >
-                                                        <Radio
-                                                            checked={selected}
-                                                            size="small"
-                                                            sx={{ p: 0 }}
-                                                        />
-                                                        <Typography variant="caption" noWrap>
-                                                            {p.fullName}
-                                                        </Typography>
-                                                    </Stack>
-                                                </Paper>
-                                            </Grid>
-                                        );
-                                    })}
-                                    <Grid size={{ xs: 12, sm: 6 }}>
-                                        <Stack direction="row" spacing={1.5} alignItems="center">
-                                            <Typography variant="caption" color="text.secondary">
-                                                Result
-                                            </Typography>
-                                            <Avatar
-                                                src={avatarUrl(
-                                                    comparison[choices.avatar ?? keepSide].fields
-                                                        .avatar,
-                                                    comparison[choices.avatar ?? keepSide].fields
-                                                        .gender,
-                                                )}
-                                                sx={{
-                                                    width: 56,
-                                                    height: 56,
-                                                    border: '2px solid',
-                                                    borderColor: 'primary.main',
-                                                }}
-                                            />
-                                        </Stack>
-                                    </Grid>
-                                </Grid>
-                            </Paper>
+                            <AvatarPicker
+                                comparison={comparison}
+                                choices={choices}
+                                keepSide={keepSide}
+                                onChoose={setChoice}
+                            />
 
                             <ComparisonTable
                                 title="Basic information"
@@ -629,113 +365,14 @@ const Merge = () => {
                 </>
             )}
 
-            <Dialog
+            <ConfirmMergeDialog
                 open={confirmOpen}
                 onClose={() => setConfirmOpen(false)}
-                maxWidth="sm"
-                fullWidth
-            >
-                <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <WarningAmberIcon color="warning" /> Confirm merge
-                </DialogTitle>
-                <DialogContent>
-                    <DialogContentText component="div">
-                        This will permanently delete <strong>{removePatient?.fullName}</strong> and
-                        move all of its acceptances, samples, invoices, payments, documents and
-                        other records to <strong>{keepPatient?.fullName}</strong>.
-                        <Alert severity="warning" sx={{ mt: 2 }}>
-                            This action cannot be undone.
-                        </Alert>
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
-                    <Button
-                        color="error"
-                        variant="contained"
-                        disabled={processing}
-                        onClick={submit}
-                    >
-                        Merge &amp; Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </>
-    );
-};
-
-const ComparisonTable = ({
-    title,
-    keys,
-    labels,
-    bucket,
-    display,
-    comparison,
-    choices,
-    keepSide,
-    onlyDiff,
-    onChoose,
-    alwaysShow = [],
-}) => {
-    const rows = keys.filter((key) => {
-        if (!onlyDiff || alwaysShow.includes(key)) return true;
-        return (comparison.first[bucket][key] ?? '') !== (comparison.second[bucket][key] ?? '');
-    });
-
-    return (
-        <>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                {title}
-            </Typography>
-            {rows.length === 0 ? (
-                <Alert severity="success" variant="outlined" sx={{ mb: 1 }}>
-                    All {title.toLowerCase()} fields match — nothing to choose.
-                </Alert>
-            ) : (
-                <TableContainer component={Paper} variant="outlined">
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow
-                                sx={{ '& th': { fontWeight: 700, backgroundColor: 'grey.50' } }}
-                            >
-                                <TableCell sx={{ width: '20%' }}>Field</TableCell>
-                                <TableCell>{comparison.first.fullName}</TableCell>
-                                <TableCell>{comparison.second.fullName}</TableCell>
-                                <TableCell sx={{ width: '22%' }}>Result</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {rows.map((key) => {
-                                const a = comparison.first[bucket][key];
-                                const b = comparison.second[bucket][key];
-                                const source = choices[key] ?? keepSide;
-                                return (
-                                    <TableRow key={key} hover>
-                                        <TableCell sx={{ fontWeight: 500 }}>
-                                            {labels[key] ?? key}
-                                        </TableCell>
-                                        <ChoiceCell
-                                            selected={source === 'first'}
-                                            onSelect={() => onChoose(key, 'first')}
-                                        >
-                                            {display(key, a)}
-                                        </ChoiceCell>
-                                        <ChoiceCell
-                                            selected={source === 'second'}
-                                            onSelect={() => onChoose(key, 'second')}
-                                        >
-                                            {display(key, b)}
-                                        </ChoiceCell>
-                                        <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
-                                            {display(key, comparison[source][bucket][key])}
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            )}
+                onConfirm={submit}
+                processing={processing}
+                keepPatient={keepPatient}
+                removePatient={removePatient}
+            />
         </>
     );
 };
