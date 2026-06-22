@@ -7,13 +7,31 @@ use App\Domains\Referrer\Enums\CollectRequestStatus;
 use App\Domains\Referrer\Events\CollectRequestEvent;
 use App\Domains\Referrer\Models\CollectRequest;
 use App\Domains\Referrer\Repositories\CollectRequestRepository;
+use App\Domains\Referrer\Repositories\ReferrerRepository;
+use App\Domains\Referrer\Repositories\SampleCollectorRepository;
 use Exception;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class CollectRequestService
 {
-    public function __construct(protected CollectRequestRepository $collectRequestRepository)
+    public function __construct(
+        protected CollectRequestRepository $collectRequestRepository,
+        protected SampleCollectorRepository $sampleCollectorRepository,
+        protected ReferrerRepository $referrerRepository,
+    ) {
+    }
+
+    /**
+     * Reference data (sample collectors, referrers) for the create/edit form.
+     *
+     * @return array<string, mixed>
+     */
+    public function formReferenceData(): array
     {
+        return [
+            'sampleCollectors' => $this->sampleCollectorRepository->all(),
+            'referrers'        => $this->referrerRepository->all(),
+        ];
     }
 
     public function listCollectRequests(array $filters): LengthAwarePaginator

@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Monitoring;
 
-use App\Domains\Laboratory\Models\Section;
 use App\Domains\Monitoring\Jobs\FetchNodeSamplesJob;
 use App\Domains\Monitoring\Models\MonitoringNode;
 use App\Domains\Monitoring\Requests\UpdateNodeSectionRequest;
-use App\Domains\Monitoring\Services\MocreoService;
 use App\Domains\Monitoring\Services\NodeService;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
@@ -49,10 +47,7 @@ class NodeController extends Controller
 
         $node     = $this->nodeService->getNode($nodeId);
         $samples  = $this->nodeService->getSamples($nodeId, $limit, $offset, $beginTime, $endTime);
-        $sections = Section::without('sectionGroup')->active()->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn($s) => ['id' => $s->id, 'name' => $s->name])
-            ->values();
+        $sections = $this->nodeService->getSectionsForSelect();
 
         return Inertia::render('Monitoring/Nodes/Show',
             compact('node', 'samples', 'sections', 'period', 'limit', 'offset', 'beginTime', 'endTime'));
@@ -64,27 +59,13 @@ class NodeController extends Controller
         return back()->with(['success' => true, 'status' => 'Node updated.']);
     }
 
-    public function fetchAll(MocreoService $mocreoService): RedirectResponse
+    public function fetchAll(): RedirectResponse
     {
         $this->authorize('viewAny', MonitoringNode::class);
 
-        $nodes = $mocreoService->getNodes();
-        foreach ($nodes as $node) {
-            MonitoringNode::updateOrCreate(
-                ['node_id' => $node['nodeId']],
-                [
-                    'name'         => $node['name'] ?? null,
-                    'model'        => $node['model'] ?? null,
-                    'info'         => $node['info'] ?? null,
-                    'onlined'      => $node['onlined'] ?? null,
-                    'signal_level' => $node['signalLevel'] ?? null,
-                    'battery_level'=> $node['batteryLevel'] ?? null,
-                ],
-            );
-            FetchNodeSamplesJob::dispatch($node['nodeId']);
-        }
+        $count = $this->nodeService->syncFromRemote();
 
-        return back()->with(['success' => true, 'status' => 'Fetch queued for ' . count($nodes) . ' node(s).']);
+        return back()->with(['success' => true, 'status' => 'Fetch queued for ' . $count . ' node(s).']);
     }
 
     public function fetchNode(string $nodeId, Request $request): RedirectResponse

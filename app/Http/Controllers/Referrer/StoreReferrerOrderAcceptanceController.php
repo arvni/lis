@@ -14,6 +14,7 @@ use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Services\AcceptanceService;
 use App\Domains\Reception\Services\AcceptanceItemService;
+use App\Domains\Referrer\Adapters\ReceptionAdapter;
 use App\Domains\Referrer\DTOs\ReferrerOrderDTO;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Referrer\Requests\StoreReferrerOrderAcceptanceRequest;
@@ -29,6 +30,7 @@ class StoreReferrerOrderAcceptanceController extends Controller
         private AcceptanceService     $acceptanceService,
         private AcceptanceItemService $acceptanceItemService,
         private ReferrerOrderService  $referrerOrderService,
+        private ReceptionAdapter      $receptionAdapter,
     )
     {
     }
@@ -79,7 +81,7 @@ class StoreReferrerOrderAcceptanceController extends Controller
      */
     private function handlePoolingAcceptance(ReferrerOrder $referrerOrder, array $validated, $user)
     {
-        $existingAcceptance = Acceptance::find($validated['existing_acceptance_id']);
+        $existingAcceptance = $this->receptionAdapter->findAcceptance((int) $validated['existing_acceptance_id']);
 
         if (!$existingAcceptance) {
             return back()->withErrors("Selected acceptance not found");

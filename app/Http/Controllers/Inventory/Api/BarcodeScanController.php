@@ -2,27 +2,34 @@
 
 namespace App\Http\Controllers\Inventory\Api;
 
-use App\Domains\Inventory\Models\ItemBarcode;
 use App\Domains\Inventory\Models\StockLot;
-use App\Domains\Inventory\Models\StockTransactionLine;
+use App\Domains\Inventory\Repositories\ItemBarcodeRepository;
+use App\Domains\Inventory\Repositories\StockLotRepository;
+use App\Domains\Inventory\Repositories\StockTransactionRepository;
 use App\Domains\Inventory\Requests\BarcodeScanRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 
 class BarcodeScanController extends Controller
 {
+    public function __construct(
+        private ItemBarcodeRepository $itemBarcodes,
+        private StockLotRepository $stockLots,
+        private StockTransactionRepository $transactions,
+    ) {}
+
     public function __invoke(BarcodeScanRequest $request): JsonResponse
     {
         $barcode = $request->input('barcode');
 
         // 1. Item-level barcode table (one item → many barcodes)
-        $itemBarcode = ItemBarcode::with(['item.defaultUnit', 'item.unitConversions.unit'])
-            ->where('barcode', $barcode)
-            ->first();
+        $itemBarcode = $this->itemBarcodes->findByBarcodeWithItem($barcode);
 
         if ($itemBarcode) {
             $item = $itemBarcode->item;
-            $lots = $this->activeLotsForItem($item->id);
+            $lots = $this->stockLots->activeLotsForItem($item->id)
+                ->map(fn (StockLot $l) => $this->lotShape($l))
+                ->values();
 
             return response()->json([
                 'found'   => true,
@@ -35,12 +42,7 @@ class BarcodeScanController extends Controller
         }
 
         // 2. Lot-level barcode (one barcode → possibly many lots)
-        $lots = StockLot::with(['item.defaultUnit', 'item.unitConversions.unit'])
-            ->where('barcode', $barcode)
-            ->where('status', 'ACTIVE')
-            ->where('quantity_base_units', '>', 0)
-            ->orderBy('received_date')
-            ->get();
+        $lots = $this->stockLots->activeLotsByBarcode($barcode);
 
         if ($lots->isNotEmpty()) {
             $item = $lots->first()->item;
@@ -50,16 +52,13 @@ class BarcodeScanController extends Controller
                 'source'  => 'lot',
                 'item'    => $item,
                 'unit'    => $item->defaultUnit,
-                'lots'    => $lots->map(fn($l) => $this->lotShape($l))->values(),
+                'lots'    => $lots->map(fn ($l) => $this->lotShape($l))->values(),
                 'barcode' => $barcode,
             ]);
         }
 
         // 3. History fallback — item identification only, no active lots
-        $line = StockTransactionLine::with(['item.defaultUnit', 'item.unitConversions.unit', 'unit'])
-            ->where('barcode', $barcode)
-            ->latest()
-            ->first();
+        $line = $this->transactions->latestLineByBarcode($barcode);
 
         if ($line) {
             return response()->json([
@@ -73,18 +72,6 @@ class BarcodeScanController extends Controller
         }
 
         return response()->json(['found' => false, 'barcode' => $barcode]);
-    }
-
-    private function activeLotsForItem(int $itemId): array
-    {
-        return StockLot::where('item_id', $itemId)
-            ->where('status', 'ACTIVE')
-            ->where('quantity_base_units', '>', 0)
-            ->orderBy('received_date')
-            ->get(['id', 'lot_number', 'brand', 'expiry_date', 'quantity_base_units'])
-            ->map(fn($l) => $this->lotShape($l))
-            ->values()
-            ->toArray();
     }
 
     private function lotShape(StockLot $lot): array

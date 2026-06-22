@@ -22,6 +22,14 @@ class SampleCollectorRepository
         return $query->paginate($queryData["pageSize"]);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, SampleCollector>
+     */
+    public function all(): \Illuminate\Database\Eloquent\Collection
+    {
+        return SampleCollector::all();
+    }
+
     public function createSampleCollector(array $data): SampleCollector
     {
         $sampleCollector = SampleCollector::create($data);

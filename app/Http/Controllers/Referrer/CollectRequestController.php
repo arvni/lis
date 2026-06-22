@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Referrer;
 
 use App\Domains\Referrer\DTOs\CollectRequestDTO;
 use App\Domains\Referrer\Models\CollectRequest;
-use App\Domains\Referrer\Models\SampleCollector;
-use App\Domains\Referrer\Models\Referrer;
 use App\Domains\Referrer\Requests\StoreCollectRequestRequest;
 use App\Domains\Referrer\Requests\UpdateCollectRequestRequest;
 use App\Domains\Referrer\Services\CollectRequestService;
@@ -45,10 +43,7 @@ class CollectRequestController extends Controller
     {
         $this->authorize("create", CollectRequest::class);
 
-        $sampleCollectors = SampleCollector::all();
-        $referrers = Referrer::all();
-
-        return Inertia::render('CollectRequest/Add', compact('sampleCollectors', 'referrers'));
+        return Inertia::render('CollectRequest/Add', $this->collectRequestService->formReferenceData());
     }
 
     public function store(StoreCollectRequestRequest $request): RedirectResponse
@@ -86,13 +81,9 @@ class CollectRequestController extends Controller
     {
         $this->authorize("update", $collectRequest);
 
-        $sampleCollectors = SampleCollector::all();
-        $referrers = Referrer::all();
-
         return Inertia::render('CollectRequest/Edit', [
             "collectRequest" => $collectRequest,
-            "sampleCollectors" => $sampleCollectors,
-            "referrers" => $referrers
+            ...$this->collectRequestService->formReferenceData(),
         ]);
     }
 

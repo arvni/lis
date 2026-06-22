@@ -91,6 +91,22 @@ class StockLotRepository
     }
 
     /**
+     * Active, in-stock lots carrying a scanned lot-level barcode — soonest
+     * received first, with item/unit loaded.
+     *
+     * @return Collection<int, StockLot>
+     */
+    public function activeLotsByBarcode(string $barcode): Collection
+    {
+        return StockLot::with(['item.defaultUnit', 'item.unitConversions.unit'])
+            ->where('barcode', $barcode)
+            ->where('status', LotStatus::ACTIVE->value)
+            ->where('quantity_base_units', '>', 0)
+            ->orderBy('received_date')
+            ->get();
+    }
+
+    /**
      * Active lot matching a scanned barcode, with item/unit/store/location loaded.
      */
     public function findActiveByBarcode(string $barcode): ?StockLot
@@ -130,6 +146,20 @@ class StockLotRepository
             })
             ->with(['item', 'store', 'location'])
             ->get();
+    }
+
+    /**
+     * Activate quarantined lots in a store that match the given lot numbers
+     * (e.g. on transfer-receipt confirmation). Returns the number of lots updated.
+     *
+     * @param  iterable<int, string>  $lotNumbers
+     */
+    public function activateQuarantinedLots(int $storeId, iterable $lotNumbers): int
+    {
+        return StockLot::where('store_id', $storeId)
+            ->where('status', LotStatus::QUARANTINE->value)
+            ->whereIn('lot_number', $lotNumbers)
+            ->update(['status' => LotStatus::ACTIVE->value]);
     }
 
     public function markExpiredLots(): int

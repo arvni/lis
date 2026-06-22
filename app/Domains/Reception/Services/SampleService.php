@@ -7,20 +7,47 @@ use App\Domains\Reception\DTOs\SampleDTO;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Sample;
+use App\Domains\Reception\Repositories\AcceptanceItemRepository;
 use App\Domains\Reception\Repositories\SampleRepository;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 
 class SampleService
 {
-    public function __construct(private SampleRepository $sampleRepository)
-    {
+    public function __construct(
+        private SampleRepository $sampleRepository,
+        private AcceptanceItemRepository $acceptanceItemRepository,
+    ) {
     }
 
     public function listSamples($queryData)
     {
         return $this->sampleRepository->listSamples($queryData);
+    }
+
+    public function listPendingQcSamples(int $perPage = 50): LengthAwarePaginator
+    {
+        return $this->sampleRepository->listPendingQc($perPage);
+    }
+
+    /**
+     * Resolve the acceptance (with patient) that owns the first item id, if any.
+     */
+    public function resolveAcceptanceForItem(?int $itemId): ?Acceptance
+    {
+        return $itemId ? $this->acceptanceItemRepository->findAcceptanceForItem($itemId) : null;
+    }
+
+    public function loadForBarcodeView(Sample $sample): Sample
+    {
+        return $this->sampleRepository->loadForBarcodeView($sample);
+    }
+
+    public function updateBarcode(Sample $sample, string $barcode): Sample
+    {
+        return $this->sampleRepository->updateBarcode($sample, $barcode);
     }
 
     public function listSampleBarcodes($filters): Collection

@@ -26,4 +26,12 @@ class ReceptionAdapter
     {
         return $this->acceptanceRepository->getForPatientAndReferrer($patient->id, $referrerId, $poolingOnly);
     }
+
+    /**
+     * A single acceptance by id, or null when it does not exist.
+     */
+    public function findAcceptance(int $acceptanceId): ?Acceptance
+    {
+        return $this->acceptanceRepository->getAcceptanceById($acceptanceId);
+    }
 }

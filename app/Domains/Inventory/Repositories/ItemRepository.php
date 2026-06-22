@@ -5,10 +5,30 @@ namespace App\Domains\Inventory\Repositories;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Inventory\Models\Item;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 class ItemRepository
 {
     use LogsUserActivity;
+
+    /**
+     * Active items for typeahead/scan lookup — matched by exact item code when a
+     * barcode is given, otherwise by a search term. Returns a lightweight subset.
+     *
+     * @return Collection<int, Item>
+     */
+    public function lookupForScan(?string $barcode = null, ?string $search = null, int $limit = 20): Collection
+    {
+        $query = Item::with('defaultUnit')->active()->limit($limit);
+
+        if ($barcode !== null && $barcode !== '') {
+            $query->where('item_code', $barcode);
+        } elseif ($search !== null && $search !== '') {
+            $query->search($search);
+        }
+
+        return $query->get(['id', 'item_code', 'name', 'default_unit_id']);
+    }
 
     public function listItems(array $queryData): LengthAwarePaginator
     {

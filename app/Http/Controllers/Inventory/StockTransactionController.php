@@ -37,8 +37,7 @@ class StockTransactionController extends Controller
 
         $defaults = null;
         if ($repeatFrom = $request->integer('repeat_from')) {
-            $source = StockTransaction::with(['lines.item.defaultUnit', 'lines.unit', 'supplier'])->find($repeatFrom);
-            if ($source) $defaults = $source;
+            $defaults = $this->transactionService->findForRepeat($repeatFrom);
         }
 
         return Inertia::render('Inventory/Transactions/Add', [

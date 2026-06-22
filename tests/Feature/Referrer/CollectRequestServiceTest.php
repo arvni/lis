@@ -7,6 +7,8 @@ use App\Domains\Referrer\Enums\CollectRequestStatus;
 use App\Domains\Referrer\Events\CollectRequestEvent;
 use App\Domains\Referrer\Models\CollectRequest;
 use App\Domains\Referrer\Repositories\CollectRequestRepository;
+use App\Domains\Referrer\Repositories\ReferrerRepository;
+use App\Domains\Referrer\Repositories\SampleCollectorRepository;
 use App\Domains\Referrer\Services\CollectRequestService;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -25,7 +27,11 @@ class CollectRequestServiceTest extends TestCase
     {
         parent::setUp();
         $this->repo = Mockery::mock(CollectRequestRepository::class);
-        $this->service = new CollectRequestService($this->repo);
+        $this->service = new CollectRequestService(
+            $this->repo,
+            Mockery::mock(SampleCollectorRepository::class),
+            Mockery::mock(ReferrerRepository::class),
+        );
     }
 
     private function dto(array $data): CollectRequestDTO

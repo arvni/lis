@@ -12,6 +12,7 @@ use App\Domains\Inventory\Models\PurchaseRequestHistory;
 use App\Domains\Inventory\Models\PurchaseRequestLine;
 use App\Domains\Inventory\Models\PurchaseRequestReceipt;
 use App\Domains\Inventory\Models\PurchaseRequestReceiptLine;
+use App\Domains\Inventory\Models\WorkflowTemplate;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
@@ -97,6 +98,135 @@ readonly class PurchaseRequestService
                     $q2->orWhereIn('ws.approver_role', $userRoles);
                 }
             });
+    }
+
+    /**
+     * Purchase request hydrated for the "repeat from" create flow, or null when
+     * the source does not exist.
+     */
+    public function findForRepeat(int $purchaseRequestId): ?PurchaseRequest
+    {
+        return PurchaseRequest::with(['lines.item.defaultUnit', 'lines.unit', 'lines.preferredSupplier'])
+            ->find($purchaseRequestId);
+    }
+
+    /**
+     * Approve the active workflow step for each of the given purchase requests on
+     * behalf of $user, skipping any that can't be acted on. Returns counts.
+     *
+     * @param  array<int, int>  $ids
+     * @return array{approved: int, skipped: int}
+     */
+    public function bulkApproveSteps(array $ids, User $user): array
+    {
+        $prs = PurchaseRequest::whereIn('id', $ids)
+            ->with(['workflowTemplate', 'requestedBy'])
+            ->get()
+            ->keyBy('id');
+
+        $approved = 0;
+        $skipped  = 0;
+        foreach ($ids as $id) {
+            $pr = $prs->get($id);
+            if (!$pr) continue;
+            try {
+                $this->workflowService->approveStep($pr, $user);
+                $approved++;
+            } catch (\Throwable) {
+                $skipped++;
+            }
+        }
+
+        return ['approved' => $approved, 'skipped' => $skipped];
+    }
+
+    /**
+     * Add a comment to a purchase request on behalf of the current user.
+     */
+    public function addComment(PurchaseRequest $pr, string $body): void
+    {
+        $pr->comments()->create([
+            'user_id' => auth()->id(),
+            'body'    => $body,
+        ]);
+    }
+
+    /**
+     * Evaluate every workflow template against a purchase request, explaining
+     * which match and why, and report the template the matcher actually selects.
+     * Used by the template-matching debug endpoint.
+     *
+     * @return array<string, mixed>
+     */
+    public function evaluateTemplates(PurchaseRequest $pr): array
+    {
+        $pr->load('lines', 'requestedBy');
+        $urgency        = $pr->urgency;
+        $estimatedTotal = $pr->estimatedTotal();
+        $requesterRoles = $pr->requestedBy?->getRoleNames()->all() ?? [];
+
+        $templates = WorkflowTemplate::with('steps')
+            ->orderBy('priority')
+            ->orderBy('id')
+            ->get();
+
+        $evaluated = $templates->map(function (WorkflowTemplate $t) use ($urgency, $requesterRoles, $estimatedTotal) {
+            $conditions    = $t->conditions ?? [];
+            $urgencies     = $conditions['urgencies']       ?? [];
+            $requiredRoles = $conditions['requester_roles'] ?? [];
+            $minTotal      = isset($conditions['min_total']) ? (float) $conditions['min_total'] : null;
+
+            $reasons = [];
+
+            if ($t->is_default) {
+                $result = 'default_fallback';
+            } elseif (empty($urgencies) && empty($requiredRoles) && $minTotal === null) {
+                $result    = 'skip';
+                $reasons[] = 'No conditions defined on a non-default template — never matches';
+            } else {
+                $result = 'match';
+                if (!empty($urgencies) && !in_array($urgency, $urgencies, true)) {
+                    $result    = 'no_match';
+                    $reasons[] = 'Urgency "' . $urgency . '" not in [' . implode(', ', $urgencies) . ']';
+                }
+                if (!empty($requiredRoles) && empty(array_intersect($requiredRoles, $requesterRoles))) {
+                    $result    = 'no_match';
+                    $reasons[] = 'Requester roles [' . implode(', ', $requesterRoles) . '] don\'t intersect required [' . implode(', ', $requiredRoles) . ']';
+                }
+                if ($minTotal !== null && $estimatedTotal < $minTotal) {
+                    $result    = 'no_match';
+                    $reasons[] = "Estimated total {$estimatedTotal} < min_total {$minTotal}";
+                }
+            }
+
+            return [
+                'id'         => $t->id,
+                'name'       => $t->name,
+                'is_active'  => $t->is_active,
+                'is_default' => $t->is_default,
+                'priority'   => $t->priority,
+                'steps'      => $t->steps->count(),
+                'conditions' => [
+                    'urgencies'       => $urgencies,
+                    'requester_roles' => $requiredRoles,
+                    'min_total'       => $minTotal,
+                ],
+                'result'     => $result,   // match | no_match | skip | default_fallback
+                'reasons'    => $reasons,
+            ];
+        });
+
+        $matched = $this->templateMatcher->find($pr->requestedBy, $urgency, $estimatedTotal);
+
+        return [
+            'pr' => [
+                'urgency'         => $urgency,
+                'estimated_total' => $estimatedTotal,
+                'requester_roles' => $requesterRoles,
+            ],
+            'matched_template' => $matched ? ['id' => $matched->id, 'name' => $matched->name] : null,
+            'evaluated'        => $evaluated,
+        ];
     }
 
     public function createRequest(array $data): PurchaseRequest

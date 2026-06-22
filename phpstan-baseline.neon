@@ -3536,12 +3536,6 @@ parameters:
 			path: app/Domains/Monitoring/Services/NodeService.php
 
 		-
-			message: '#^Property App\\Domains\\Monitoring\\Services\\NodeService\:\:\$mocreoService is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: app/Domains/Monitoring/Services/NodeService.php
-
-		-
 			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Domains\\Monitoring\\Models\\MonitoringNode\>\:\:map\(\) contains unresolvable type\.$#'
 			identifier: method.unresolvableReturnType
 			count: 1
@@ -7864,18 +7858,6 @@ parameters:
 			path: app/Http/Controllers/Api/Reception/ListReferrerAcceptanceReportedOrExpectedToBeReportedController.php
 
 		-
-			message: '#^Call to static method create\(\) on an unknown class App\\Models\\User\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Http/Controllers/Auth/RegisteredUserController.php
-
-		-
-			message: '#^Class App\\Models\\User not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Http/Controllers/Auth/RegisteredUserController.php
-
-		-
 			message: '#^Parameter \#1 \$user of class Illuminate\\Auth\\Events\\Verified constructor expects Illuminate\\Contracts\\Auth\\MustVerifyEmail, App\\Domains\\User\\Models\\User\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -8164,25 +8146,7 @@ parameters:
 			path: app/Http/Controllers/GetUserDetailsController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\ImportController\:\:convertAgeToDateOfBirth\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/ImportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ImportController\:\:convertAgeToDateOfBirth\(\) has parameter \$age with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Http/Controllers/ImportController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\ImportController\:\:create\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/ImportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ImportController\:\:getPatientFields\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/ImportController.php
@@ -8323,13 +8287,13 @@ parameters:
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getRoleNames\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: app/Http/Controllers/Inventory/PurchaseRequestController.php
+			path: app/Domains/Inventory/Services/PurchaseRequestService.php
 
 		-
 			message: '#^Parameter \#1 \$requester of method App\\Domains\\Inventory\\Services\\WorkflowTemplateMatcher\:\:find\(\) expects App\\Domains\\User\\Models\\User, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
 			identifier: argument.type
 			count: 1
-			path: app/Http/Controllers/Inventory/PurchaseRequestController.php
+			path: app/Domains/Inventory/Services/PurchaseRequestService.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
@@ -8605,7 +8569,7 @@ parameters:
 			message: '#^Relation ''activeAcceptanceItems'' is not found in App\\Domains\\Reception\\Models\\Sample model\.$#'
 			identifier: larastan.relationExistence
 			count: 1
-			path: app/Http/Controllers/QC/QCSamplesController.php
+			path: app/Domains/Reception/Repositories/SampleRepository.php
 
 		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Sample\:\:\$activeAcceptanceItems\.$#'
@@ -8902,10 +8866,10 @@ parameters:
 			path: app/Http/Controllers/Reception/SampleCollectionController.php
 
 		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\AcceptanceItem\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Domains\\Reception\\Models\\AcceptanceItem\>\:\:\$acceptance\.$#'
+			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\AcceptanceItem\:\:\$acceptance\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Http/Controllers/Reception/SampleController.php
+			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Reception\\SampleController\:\:destroy\(\) has no return type specified\.$#'
@@ -8935,7 +8899,7 @@ parameters:
 			message: '#^Relation ''acceptance'' is not found in App\\Domains\\Reception\\Models\\AcceptanceItem model\.$#'
 			identifier: larastan.relationExistence
 			count: 1
-			path: app/Http/Controllers/Reception/SampleController.php
+			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
 
 		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\AcceptanceItem\:\:\$test\.$#'

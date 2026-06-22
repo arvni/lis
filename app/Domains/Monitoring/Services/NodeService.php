@@ -2,13 +2,55 @@
 
 namespace App\Domains\Monitoring\Services;
 
+use App\Domains\Laboratory\Models\Section;
+use App\Domains\Monitoring\Jobs\FetchNodeSamplesJob;
 use App\Domains\Monitoring\Models\MonitoringNode;
 use App\Domains\Monitoring\Models\MonitoringSample;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class NodeService
 {
     public function __construct(private MocreoService $mocreoService) {}
+
+    /**
+     * Active lab sections as lightweight {id, name} options for the node form.
+     *
+     * @return Collection<int, array{id: int, name: string}>
+     */
+    public function getSectionsForSelect(): Collection
+    {
+        return Section::without('sectionGroup')->active()->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (Section $s) => ['id' => $s->id, 'name' => $s->name])
+            ->values();
+    }
+
+    /**
+     * Pull the node list from the remote service, upsert each node locally, and
+     * queue a sample fetch for it. Returns the number of nodes processed.
+     */
+    public function syncFromRemote(): int
+    {
+        $nodes = $this->mocreoService->getNodes();
+
+        foreach ($nodes as $node) {
+            MonitoringNode::updateOrCreate(
+                ['node_id' => $node['nodeId']],
+                [
+                    'name'          => $node['name'] ?? null,
+                    'model'         => $node['model'] ?? null,
+                    'info'          => $node['info'] ?? null,
+                    'onlined'       => $node['onlined'] ?? null,
+                    'signal_level'  => $node['signalLevel'] ?? null,
+                    'battery_level' => $node['batteryLevel'] ?? null,
+                ],
+            );
+            FetchNodeSamplesJob::dispatch($node['nodeId']);
+        }
+
+        return count($nodes);
+    }
 
     public function getNodes(): array
     {
