@@ -12,6 +12,13 @@ use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Runtime-computed attributes (not DB columns): a formatted invoice number set by
+ * InvoiceService/selectRaw, and an owner-mismatch flag set during shaping.
+ *
+ * @property string|null $invoiceNo
+ * @property bool $has_different_owner
+ */
 class Invoice extends Model
 {
     use Searchable;

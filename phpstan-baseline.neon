@@ -229,12 +229,6 @@ parameters:
 			path: app/Domains/Billing/Models/Invoice.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Billing/Models/Invoice.php
-
-		-
 			message: '#^Method App\\Domains\\Billing\\Models\\Payment\:\:cashier\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -259,12 +253,6 @@ parameters:
 			path: app/Domains/Billing/Models/Payment.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Billing/Models/Payment.php
-
-		-
 			message: '#^Method App\\Domains\\Billing\\Models\\Statement\:\:acceptances\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -286,12 +274,6 @@ parameters:
 			message: '#^Property App\\Domains\\Billing\\Models\\Statement\:\:\$searchable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
-			path: app/Domains/Billing/Models/Statement.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Billing/Models/Statement.php
 
 		-
@@ -709,18 +691,6 @@ parameters:
 			path: app/Domains/Billing/Services/InvoiceItemSyncService.php
 
 		-
-			message: '#^Access to an undefined property App\\Domains\\Billing\\Models\\Invoice\:\:\$has_different_owner\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceService.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Billing\\Models\\Invoice\:\:\$invoiceNo\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$can_merge\.$#'
 			identifier: property.notFound
 			count: 1
@@ -943,12 +913,6 @@ parameters:
 			path: app/Domains/Consultation/Events/ConsultantDocumentUpdateEvent.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Consultation/Models/Consultant.php
-
-		-
 			message: '#^Method App\\Domains\\Consultation\\Models\\Consultation\:\:acceptance\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -988,12 +952,6 @@ parameters:
 			message: '#^Property App\\Domains\\Consultation\\Models\\Customer\:\:\$searchable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
-			path: app/Domains/Consultation/Models/Customer.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Consultation/Models/Customer.php
 
 		-
@@ -1207,36 +1165,6 @@ parameters:
 			path: app/Domains/Document/Models/Document.php
 
 		-
-			message: '#^Access to an undefined property App\\Domains\\Document\\Resources\\DocumentResource\:\:\$created_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Document/Resources/DocumentResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Document\\Resources\\DocumentResource\:\:\$ext\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Document/Resources/DocumentResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Document\\Resources\\DocumentResource\:\:\$hash\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Document/Resources/DocumentResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Document\\Resources\\DocumentResource\:\:\$originalName\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Document/Resources/DocumentResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Document\\Resources\\DocumentResource\:\:\$tag\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Document/Resources/DocumentResource.php
-
-		-
 			message: '#^Method App\\Domains\\Document\\Services\\DocumentService\:\:getDocument\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1288,12 +1216,6 @@ parameters:
 			message: '#^Property App\\Domains\\Inventory\\Models\\Item\:\:\$searchable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
-			path: app/Domains/Inventory/Models/Item.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Inventory/Models/Item.php
 
 		-
@@ -1393,21 +1315,9 @@ parameters:
 			path: app/Domains/Inventory/Models/Supplier.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Inventory/Models/Supplier.php
-
-		-
 			message: '#^Property App\\Domains\\Inventory\\Models\\Unit\:\:\$searchable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
-			path: app/Domains/Inventory/Models/Unit.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Inventory/Models/Unit.php
 
 		-
@@ -2035,12 +1945,6 @@ parameters:
 			path: app/Domains/Laboratory/Models/ApprovalFlow.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Laboratory/Models/ApprovalFlow.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 2
@@ -2050,12 +1954,6 @@ parameters:
 			message: '#^Method App\\Domains\\Laboratory\\Models\\BarcodeGroup\:\:methods\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: app/Domains/Laboratory/Models/BarcodeGroup.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Laboratory/Models/BarcodeGroup.php
 
 		-
@@ -2071,21 +1969,9 @@ parameters:
 			path: app/Domains/Laboratory/Models/ConsentForm.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Laboratory/Models/ConsentForm.php
-
-		-
 			message: '#^Property App\\Domains\\Laboratory\\Models\\Doctor\:\:\$searchable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
-			path: app/Domains/Laboratory/Models/Doctor.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Laboratory/Models/Doctor.php
 
 		-
@@ -2098,12 +1984,6 @@ parameters:
 			message: '#^Method App\\Domains\\Laboratory\\Models\\Instruction\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
-			path: app/Domains/Laboratory/Models/Instruction.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Laboratory/Models/Instruction.php
 
 		-
@@ -2155,12 +2035,6 @@ parameters:
 			path: app/Domains/Laboratory/Models/Method.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Laboratory/Models/Method.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Models\\MethodTest\:\:acceptanceItems\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2203,12 +2077,6 @@ parameters:
 			path: app/Domains/Laboratory/Models/Parameter.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Laboratory/Models/ReportTemplate.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Models\\ReportTemplateParameter\:\:getElementAttribute\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2245,12 +2113,6 @@ parameters:
 			path: app/Domains/Laboratory/Models/RequestForm.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Laboratory/Models/RequestForm.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Models\\SampleType\:\:materials\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2266,12 +2128,6 @@ parameters:
 			message: '#^Method App\\Domains\\Laboratory\\Models\\SampleType\:\:tests\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: app/Domains/Laboratory/Models/SampleType.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Laboratory/Models/SampleType.php
 
 		-
@@ -2356,12 +2212,6 @@ parameters:
 			message: '#^Method App\\Domains\\Laboratory\\Models\\Section\:\:workflows\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: app/Domains/Laboratory/Models/Section.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Laboratory/Models/Section.php
 
 		-
@@ -2461,12 +2311,6 @@ parameters:
 			path: app/Domains/Laboratory/Models/SectionGroup.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Laboratory/Models/SectionGroup.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Models\\SectionWorkflow\:\:section\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2527,12 +2371,6 @@ parameters:
 			path: app/Domains/Laboratory/Models/Test.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Laboratory/Models/Test.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Models\\TestGroup\:\:tests\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2542,12 +2380,6 @@ parameters:
 			message: '#^Property App\\Domains\\Laboratory\\Models\\TestGroup\:\:\$searchable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
-			path: app/Domains/Laboratory/Models/TestGroup.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Laboratory/Models/TestGroup.php
 
 		-
@@ -2578,12 +2410,6 @@ parameters:
 			message: '#^Method App\\Domains\\Laboratory\\Models\\Workflow\:\:sections\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: app/Domains/Laboratory/Models/Workflow.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Laboratory/Models/Workflow.php
 
 		-
@@ -3001,51 +2827,9 @@ parameters:
 			path: app/Domains/Laboratory/Requests/UpdateWorkflowRequest.php
 
 		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\MethodResource\:\:\$extra\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/MethodResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\MethodResource\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/MethodResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\MethodResource\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/MethodResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\MethodResource\:\:\$no_patient\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/MethodResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\MethodResource\:\:\$price\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/MethodResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\MethodResource\:\:\$price_type\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/MethodResource.php
-
-		-
 			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\MethodResource\:\:\$test\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Domains/Laboratory/Resources/MethodResource.php
-
-		-
-			message: '#^Call to an undefined method App\\Domains\\Laboratory\\Resources\\MethodResource\:\:relationLoaded\(\)\.$#'
-			identifier: method.notFound
-			count: 3
 			path: app/Domains/Laboratory/Resources/MethodResource.php
 
 		-
@@ -3067,61 +2851,7 @@ parameters:
 			path: app/Domains/Laboratory/Resources/TestResource.php
 
 		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$description\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$extra\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$fullName\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
 			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$methodTests\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$offers\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$price\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$price_type\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Domains/Laboratory/Resources/TestResource.php
@@ -3130,54 +2860,6 @@ parameters:
 			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$referrerTest\.$#'
 			identifier: property.notFound
 			count: 4
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$referrer_extra\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$referrer_price\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$referrer_price_type\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$sampleTypes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$type\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\TestResource\:\:\$withDefaultReferrerPrice\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
-			message: '#^Call to an undefined method App\\Domains\\Laboratory\\Resources\\TestResource\:\:relationLoaded\(\)\.$#'
-			identifier: method.notFound
-			count: 7
 			path: app/Domains/Laboratory/Resources/TestResource.php
 
 		-
@@ -3725,12 +3407,6 @@ parameters:
 			message: '#^Property App\\Domains\\Notification\\Models\\WhatsappMessage\:\:\$seachable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
-			path: app/Domains/Notification/Models/WhatsappMessage.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Notification/Models/WhatsappMessage.php
 
 		-
@@ -4286,12 +3962,6 @@ parameters:
 			path: app/Domains/Reception/Models/Acceptance.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Reception/Models/Acceptance.php
-
-		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\AcceptanceItem\:\:\$latestState\.$#'
 			identifier: property.notFound
 			count: 1
@@ -4496,12 +4166,6 @@ parameters:
 			path: app/Domains/Reception/Models/AcceptanceItemState.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Reception/Models/AcceptanceItemState.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Models\\Patient\:\:acceptanceItems\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4613,12 +4277,6 @@ parameters:
 			message: '#^Property App\\Domains\\Reception\\Models\\Patient\:\:\$searchable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
-			path: app/Domains/Reception/Models/Patient.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Reception/Models/Patient.php
 
 		-
@@ -4844,12 +4502,6 @@ parameters:
 			path: app/Domains/Reception/Models/Sample.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Reception/Models/Sample.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Models\\Signer\:\:report\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4865,12 +4517,6 @@ parameters:
 			message: '#^Property App\\Domains\\Reception\\Models\\Tag\:\:\$searchable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
-			path: app/Domains/Reception/Models/Tag.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Reception/Models/Tag.php
 
 		-
@@ -5196,12 +4842,6 @@ parameters:
 			message: '#^Method App\\Domains\\Reception\\Repositories\\PatientRepository\:\:listPatient\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: app/Domains/Reception/Repositories/PatientRepository.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 2
 			path: app/Domains/Reception/Repositories/PatientRepository.php
 
 		-
@@ -5907,19 +5547,7 @@ parameters:
 			path: app/Domains/Reception/Services/PatientService.php
 
 		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Patient\:\:\$consultations_count\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Patient\:\:\$invoices\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Patient\:\:\$invoices_count\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Domains/Reception/Services/PatientService.php
@@ -5938,12 +5566,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Patient\:\:\$payments\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Patient\:\:\$payments_count\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Domains/Reception/Services/PatientService.php
@@ -6567,12 +6189,6 @@ parameters:
 			path: app/Domains/Referrer/Models/Material.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/Referrer/Models/Material.php
-
-		-
 			message: '#^Method App\\Domains\\Referrer\\Models\\OrderMaterial\:\:materials\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6648,12 +6264,6 @@ parameters:
 			message: '#^Property App\\Domains\\Referrer\\Models\\Referrer\:\:\$searchable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
-			path: app/Domains/Referrer/Models/Referrer.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/Referrer/Models/Referrer.php
 
 		-
@@ -6997,36 +6607,6 @@ parameters:
 			identifier: property.nonObject
 			count: 1
 			path: app/Domains/Referrer/Requests/UpdateReferrerTestRequest.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Referrer\\Resources\\ReferrerTestResource\:\:\$extra\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Referrer/Resources/ReferrerTestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Referrer\\Resources\\ReferrerTestResource\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Referrer/Resources/ReferrerTestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Referrer\\Resources\\ReferrerTestResource\:\:\$methods\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Referrer/Resources/ReferrerTestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Referrer\\Resources\\ReferrerTestResource\:\:\$price\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Referrer/Resources/ReferrerTestResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Referrer\\Resources\\ReferrerTestResource\:\:\$price_type\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Referrer/Resources/ReferrerTestResource.php
 
 		-
 			message: '#^Access to an undefined property App\\Domains\\Referrer\\Resources\\ReferrerTestResource\:\:\$test\.$#'
@@ -7648,21 +7228,9 @@ parameters:
 			path: app/Domains/User/Listeners/SectionPermissionsListener.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
-			path: app/Domains/User/Models/Role.php
-
-		-
 			message: '#^PHPDoc type array\<int, string\> of property App\\Domains\\User\\Models\\User\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
 			identifier: property.phpDocType
 			count: 1
-			path: app/Domains/User/Models/User.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 4
 			path: app/Domains/User/Models/User.php
 
 		-
@@ -8488,12 +8056,6 @@ parameters:
 			path: app/Http/Controllers/Laboratory/SectionGroupController.php
 
 		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Models\\Test\:\:\$withDefaultReferrerPrice\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Laboratory/TestController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\Laboratory\\TestGroupController\:\:store\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -9268,18 +8830,6 @@ parameters:
 			path: app/Http/Resources/ListResource.php
 
 		-
-			message: '#^Access to an undefined property App\\Http\\Resources\\OrderMaterialResource\:\:\$amount\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Resources/OrderMaterialResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Http\\Resources\\OrderMaterialResource\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Resources/OrderMaterialResource.php
-
-		-
 			message: '#^Access to an undefined property App\\Http\\Resources\\OrderMaterialResource\:\:\$materials\.$#'
 			identifier: property.notFound
 			count: 1
@@ -9292,25 +8842,7 @@ parameters:
 			path: app/Http/Resources/OrderMaterialResource.php
 
 		-
-			message: '#^Access to an undefined property App\\Http\\Resources\\OrderMaterialResource\:\:\$sample_type_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Resources/OrderMaterialResource.php
-
-		-
 			message: '#^Access to an undefined property App\\Http\\Resources\\OrderMaterialResource\:\:\$sample_type_name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Resources/OrderMaterialResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Http\\Resources\\OrderMaterialResource\:\:\$server_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Resources/OrderMaterialResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Http\\Resources\\OrderMaterialResource\:\:\$status\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Resources/OrderMaterialResource.php
@@ -9326,42 +8858,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Resources/StatementResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Http\\Resources\\StatementResource\:\:\$referrer_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Resources/StatementResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Resources/UserResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Resources/UserResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$signature\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Resources/UserResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$stamp\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Resources/UserResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Http\\Resources\\UserResource\:\:\$title\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Resources/UserResource.php
 
 		-
 			message: '#^Using nullsafe method call on non\-nullable type Carbon\\Carbon\. Use \-\> instead\.$#'

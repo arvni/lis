@@ -72,8 +72,6 @@ trait Searchable
 
                 return [request(config('searchable.key', "search")), $this->searchableAttributes()];
 
-                break;
-
 
             case 2:
 
@@ -83,8 +81,6 @@ trait Searchable
 
                     : [request(config('searchable.key')), $arguments[1]];
 
-                break;
-
 
             case 3:
                 return is_string($arguments[1])
@@ -93,14 +89,10 @@ trait Searchable
 
                     : [$arguments[2], $arguments[1]];
 
-                break;
-
 
             default:
 
                 return [null, []];
-
-                break;
         }
     }
 

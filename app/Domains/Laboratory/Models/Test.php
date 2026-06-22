@@ -11,6 +11,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * Runtime flag set by TestController to signal referrer-default pricing during shaping
+ * (not a DB column).
+ *
+ * @property bool $withDefaultReferrerPrice
+ */
 class Test extends Model
 {
     use Searchable;

@@ -5,6 +5,9 @@ namespace App\Domains\Referrer\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin \App\Domains\Referrer\Models\ReferrerTest
+ */
 class ReferrerTestResource extends JsonResource
 {
     /**
