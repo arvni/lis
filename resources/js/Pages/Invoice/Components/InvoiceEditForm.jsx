@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-    Alert,
     Avatar,
     Box,
     Button,
@@ -10,294 +9,23 @@ import {
     DialogContent,
     DialogTitle,
     Divider,
-    FormControl,
-    FormControlLabel,
     Grid,
     IconButton,
-    InputLabel,
-    MenuItem,
     Paper,
-    Select,
     Stack,
-    Switch,
-    TextField,
-    ToggleButton,
-    ToggleButtonGroup,
     Typography,
     alpha,
     useTheme,
 } from '@mui/material';
-import {
-    AccountBalance,
-    AddCircle as AddCircleOutline,
-    Business,
-    CheckCircle,
-    Close,
-    CreditScore,
-    Delete as DeleteOutline,
-    PaymentRounded,
-    Person,
-    ReceiptLong,
-    Save,
-} from '@mui/icons-material';
+import { Business, Close, Person, ReceiptLong, Save } from '@mui/icons-material';
 import { router } from '@inertiajs/react';
 import InvoiceItemsField from '@/Pages/Invoice/Components/InvoiceItemsField.jsx';
 import InvoicePaymentManager from '@/Pages/Invoice/Components/InvoicePaymentManager.jsx';
-
-// Backend enum values — must match App\Domains\Billing\Enums\InvoiceStatus.
-const STATUS_OPTIONS = [
-    {
-        value: 'Waiting',
-        label: 'Waiting for Payment',
-        color: 'info',
-        icon: <AccountBalance fontSize="small" />,
-    },
-    { value: 'Paid', label: 'Paid', color: 'success', icon: <CheckCircle fontSize="small" /> },
-    {
-        value: 'Partially Paid',
-        label: 'Partially Paid',
-        color: 'warning',
-        icon: <PaymentRounded fontSize="small" />,
-    },
-    {
-        value: 'Credit Paid',
-        label: 'Credit Paid',
-        color: 'warning',
-        icon: <CreditScore fontSize="small" />,
-    },
-    { value: 'Canceled', label: 'Canceled', color: 'error', icon: <Close fontSize="small" /> },
-];
-
-const statusMeta = (status) => STATUS_OPTIONS.find((s) => s.value === status) ?? STATUS_OPTIONS[0];
-
-const num = (v) => {
-    const n = parseFloat(v);
-    return Number.isFinite(n) ? n : 0;
-};
-
-const formatMoney = (v) => num(v).toFixed(3);
-
-const SubjectEditor = ({ subject, onChange }) => {
-    const enabled = Boolean(subject);
-
-    const handleToggle = (e) => {
-        if (e.target.checked) {
-            onChange({ title: '', lines: [{ label: '', value: '' }] });
-        } else {
-            onChange(null);
-        }
-    };
-
-    const updateField = (patch) => onChange({ ...subject, ...patch });
-
-    const updateLine = (idx, patch) => {
-        const lines = [...(subject?.lines || [])];
-        lines[idx] = { ...lines[idx], ...patch };
-        updateField({ lines });
-    };
-
-    const addLine = () =>
-        updateField({ lines: [...(subject?.lines || []), { label: '', value: '' }] });
-
-    const removeLine = (idx) => {
-        const lines = [...(subject?.lines || [])];
-        lines.splice(idx, 1);
-        updateField({ lines });
-    };
-
-    return (
-        <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 2 }}>
-            <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-                sx={{ mb: enabled ? 2 : 0 }}
-            >
-                <Box>
-                    <Typography variant="subtitle2">Subject / For</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                        Defaults to patient info on the printed invoice. Override here to show a
-                        project or custom block.
-                    </Typography>
-                </Box>
-                <FormControlLabel
-                    control={<Switch checked={enabled} onChange={handleToggle} />}
-                    label={enabled ? 'Custom' : 'Patient info'}
-                />
-            </Stack>
-
-            {enabled && (
-                <Stack spacing={1.5}>
-                    <TextField
-                        size="small"
-                        fullWidth
-                        label="Title"
-                        placeholder="e.g. Project Name"
-                        value={subject?.title || ''}
-                        onChange={(e) => updateField({ title: e.target.value })}
-                    />
-                    <Box>
-                        <Stack
-                            direction="row"
-                            justifyContent="space-between"
-                            alignItems="center"
-                            sx={{ mb: 1 }}
-                        >
-                            <Typography variant="caption" color="text.secondary">
-                                Fields
-                            </Typography>
-                            <Button
-                                size="small"
-                                startIcon={<AddCircleOutline fontSize="small" />}
-                                onClick={addLine}
-                            >
-                                Add field
-                            </Button>
-                        </Stack>
-                        <Stack spacing={1}>
-                            {(subject?.lines || []).map((line, idx) => (
-                                <Grid key={idx} container spacing={1} alignItems="center">
-                                    <Grid size={{ xs: 12, sm: 4 }}>
-                                        <TextField
-                                            size="small"
-                                            fullWidth
-                                            placeholder="Label (e.g. Reference)"
-                                            value={line.label || ''}
-                                            onChange={(e) =>
-                                                updateLine(idx, { label: e.target.value })
-                                            }
-                                        />
-                                    </Grid>
-                                    <Grid size={{ xs: 11, sm: 7 }}>
-                                        <TextField
-                                            size="small"
-                                            fullWidth
-                                            placeholder="Value"
-                                            value={line.value || ''}
-                                            onChange={(e) =>
-                                                updateLine(idx, { value: e.target.value })
-                                            }
-                                        />
-                                    </Grid>
-                                    <Grid size={{ xs: 1, sm: 1 }}>
-                                        <IconButton
-                                            size="small"
-                                            color="error"
-                                            onClick={() => removeLine(idx)}
-                                        >
-                                            <DeleteOutline fontSize="small" />
-                                        </IconButton>
-                                    </Grid>
-                                </Grid>
-                            ))}
-                        </Stack>
-                    </Box>
-                </Stack>
-            )}
-        </Paper>
-    );
-};
-
-const SummaryRow = ({ label, value, valueColor = 'text.primary', strong }) => (
-    <Box
-        sx={{
-            display: 'flex',
-            alignItems: 'baseline',
-            justifyContent: 'space-between',
-            gap: 2,
-            py: 0.5,
-        }}
-    >
-        <Typography
-            variant={strong ? 'subtitle2' : 'body2'}
-            color={strong ? 'text.primary' : 'text.secondary'}
-        >
-            {label}
-        </Typography>
-        <Typography
-            variant={strong ? 'subtitle2' : 'body2'}
-            color={valueColor}
-            sx={{ fontVariantNumeric: 'tabular-nums' }}
-        >
-            {value}
-        </Typography>
-    </Box>
-);
-
-const PartyCard = ({
-    title,
-    icon,
-    color = 'primary',
-    name,
-    lines = [],
-    selected,
-    onSelect,
-    selectable,
-}) => {
-    const theme = useTheme();
-    const borderColor = selected ? `${color}.main` : 'divider';
-    const bg = selected ? alpha(theme.palette[color].main, 0.06) : 'background.paper';
-
-    return (
-        <Paper
-            variant="outlined"
-            onClick={selectable ? onSelect : undefined}
-            sx={{
-                p: 2,
-                borderRadius: 2,
-                borderColor,
-                backgroundColor: bg,
-                cursor: selectable ? 'pointer' : 'default',
-                position: 'relative',
-                transition: 'all 0.15s',
-                height: '100%',
-                '&:hover': selectable ? { borderColor: `${color}.main` } : {},
-            }}
-        >
-            {selected && selectable && (
-                <Chip
-                    icon={<CheckCircle fontSize="small" />}
-                    label="Owner"
-                    color={color}
-                    size="small"
-                    sx={{ position: 'absolute', top: 8, right: 8 }}
-                />
-            )}
-            <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1.5 }}>
-                <Avatar sx={{ bgcolor: `${color}.main`, width: 40, height: 40 }}>{icon}</Avatar>
-                <Box>
-                    <Typography variant="overline" color="text.secondary" sx={{ lineHeight: 1 }}>
-                        {title}
-                    </Typography>
-                    <Typography variant="subtitle1" fontWeight="medium">
-                        {name || '—'}
-                    </Typography>
-                </Box>
-            </Stack>
-            <Stack spacing={0.5}>
-                {lines
-                    .filter((l) => l && l.value)
-                    .map((l) => (
-                        <Box
-                            key={l.label}
-                            sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}
-                        >
-                            <Typography variant="caption" color="text.secondary">
-                                {l.label}
-                            </Typography>
-                            <Typography
-                                variant="caption"
-                                fontWeight="medium"
-                                sx={{ textAlign: 'right' }}
-                            >
-                                {l.value}
-                            </Typography>
-                        </Box>
-                    ))}
-            </Stack>
-        </Paper>
-    );
-};
+import { STATUS_OPTIONS, num, statusMeta } from './InvoiceEditForm/constants';
+import SubjectEditor from './InvoiceEditForm/SubjectEditor';
+import PartyCard from './InvoiceEditForm/PartyCard';
+import QuickControls from './InvoiceEditForm/QuickControls';
+import TotalsSummary from './InvoiceEditForm/TotalsSummary';
 
 const InvoiceEditForm = ({ invoice, open, onClose, onSubmit, onChange }) => {
     const theme = useTheme();
@@ -535,83 +263,13 @@ const InvoiceEditForm = ({ invoice, open, onClose, onSubmit, onChange }) => {
                     </Grid>
 
                     {/* Quick controls — owner switch + status */}
-                    <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 2 }}>
-                        <Grid container spacing={2} alignItems="center">
-                            <Grid size={{ xs: 12, md: 6 }}>
-                                <Typography
-                                    variant="caption"
-                                    color="text.secondary"
-                                    sx={{ mb: 0.5, display: 'block' }}
-                                >
-                                    Bill to
-                                </Typography>
-                                <ToggleButtonGroup
-                                    exclusive
-                                    size="small"
-                                    value={formData.owner_type || ''}
-                                    onChange={handleOwnerChange}
-                                    color="primary"
-                                >
-                                    <ToggleButton
-                                        value="patient"
-                                        disabled={!ownerAvailable.patient}
-                                    >
-                                        <Person fontSize="small" sx={{ mr: 1 }} />
-                                        Patient
-                                    </ToggleButton>
-                                    <ToggleButton
-                                        value="referrer"
-                                        disabled={!ownerAvailable.referrer}
-                                    >
-                                        <Business fontSize="small" sx={{ mr: 1 }} />
-                                        Referrer
-                                    </ToggleButton>
-                                </ToggleButtonGroup>
-                                {errors.owner_type && (
-                                    <Typography
-                                        variant="caption"
-                                        color="error"
-                                        sx={{ mt: 0.5, display: 'block' }}
-                                    >
-                                        {errors.owner_type}
-                                    </Typography>
-                                )}
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 6 }}>
-                                <FormControl fullWidth error={!!errors.status} size="small">
-                                    <InputLabel id="status-label">Status</InputLabel>
-                                    <Select
-                                        labelId="status-label"
-                                        label="Status"
-                                        value={formData.status || ''}
-                                        onChange={(e) => handleChange('status', e.target.value)}
-                                    >
-                                        {STATUS_OPTIONS.map((opt) => (
-                                            <MenuItem key={opt.value} value={opt.value}>
-                                                <Stack
-                                                    direction="row"
-                                                    spacing={1}
-                                                    alignItems="center"
-                                                >
-                                                    {opt.icon}
-                                                    <span>{opt.label}</span>
-                                                </Stack>
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                    {errors.status && (
-                                        <Typography
-                                            variant="caption"
-                                            color="error"
-                                            sx={{ mt: 0.5 }}
-                                        >
-                                            {errors.status}
-                                        </Typography>
-                                    )}
-                                </FormControl>
-                            </Grid>
-                        </Grid>
-                    </Paper>
+                    <QuickControls
+                        formData={formData}
+                        errors={errors}
+                        ownerAvailable={ownerAvailable}
+                        onOwnerChange={handleOwnerChange}
+                        onStatusChange={(value) => handleChange('status', value)}
+                    />
 
                     {/* Subject / For */}
                     <SubjectEditor
@@ -629,48 +287,7 @@ const InvoiceEditForm = ({ invoice, open, onClose, onSubmit, onChange }) => {
                     </Paper>
 
                     {/* Totals summary mirroring the print invoice footer */}
-                    <Grid container spacing={2} sx={{ mb: 3 }}>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <Alert
-                                severity={balance > 0 ? 'warning' : 'success'}
-                                variant="outlined"
-                                sx={{ borderRadius: 2, height: '100%' }}
-                            >
-                                <Typography variant="body2">
-                                    {balance > 0
-                                        ? `Outstanding balance: ${formatMoney(balance)} OMR`
-                                        : 'Invoice fully paid.'}
-                                </Typography>
-                            </Alert>
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-                                <SummaryRow
-                                    label="Subtotal"
-                                    value={`${formatMoney(totals.subtotal)} OMR`}
-                                />
-                                <SummaryRow
-                                    label="Discount"
-                                    value={`−${formatMoney(totals.discount)} OMR`}
-                                    valueColor="success.main"
-                                />
-                                <Divider sx={{ my: 1 }} />
-                                <SummaryRow
-                                    label="Net Amount"
-                                    value={`${formatMoney(totals.net)} OMR`}
-                                    valueColor="primary.main"
-                                    strong
-                                />
-                                <SummaryRow label="Paid" value={`${formatMoney(paidSum)} OMR`} />
-                                <SummaryRow
-                                    label="Balance"
-                                    value={`${formatMoney(balance)} OMR`}
-                                    valueColor={balance > 0 ? 'warning.main' : 'success.main'}
-                                    strong
-                                />
-                            </Paper>
-                        </Grid>
-                    </Grid>
+                    <TotalsSummary totals={totals} paidSum={paidSum} balance={balance} />
 
                     {/* Payments */}
                     <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>

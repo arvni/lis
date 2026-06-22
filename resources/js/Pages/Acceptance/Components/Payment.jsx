@@ -1,44 +1,18 @@
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import {
     Accordion,
     AccordionDetails,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableFooter,
-    TableHead,
-    TableRow,
-    Input,
-    Stack,
     Typography,
-    Paper,
-    Button,
-    IconButton,
     Box,
     Chip,
     Divider,
-    Card,
-    CardContent,
-    LinearProgress,
-    Alert,
     useTheme,
     useMediaQuery,
 } from '@mui/material';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import Grid from '@mui/material/Grid';
 import {
     ExpandMore as ExpandMoreIcon,
-    Remove as RemoveIcon,
-    Edit as EditIcon,
-    Delete as DeleteIcon,
     Payment as PaymentIcon,
-    Add as AddIcon,
-    Receipt as ReceiptIcon,
-    Print as PrintIcon,
-    AttachMoney as AttachMoneyIcon,
-    CreditCard as CreditCardIcon,
-    AccountBalance as AccountBalanceIcon,
 } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 import { sum } from '@/Services/helper';
@@ -46,18 +20,11 @@ import AddPayment from '@/Pages/Acceptance/Components/AddPayment';
 import CreateInvoiceForm from '@/Pages/Acceptance/Components/CreateInvoiceForm';
 import DeleteForm from '@/Components/DeleteForm.jsx';
 import { router } from '@inertiajs/react';
-
-// Utility functions
-const formatCurrency = (value) => {
-    return Math.round((value + Number.EPSILON) * 100) / 100;
-};
-
-// Payment method icons mapper
-const PAYMENT_METHOD_ICONS = {
-    cash: <AttachMoneyIcon color="success" />,
-    card: <CreditCardIcon color="primary" />,
-    credit: <AccountBalanceIcon color="warning" />,
-};
+import { formatCurrency } from './Payment/constants';
+import PaymentSummary from './Payment/PaymentSummary';
+import PaymentsTable from './Payment/PaymentsTable';
+import NoInvoiceView from './Payment/NoInvoiceView';
+import ActionButtons from './Payment/ActionButtons';
 
 /**
  * Improved Payment Component
@@ -228,400 +195,6 @@ const PaymentComponent = ({
         enqueueSnackbar(status || 'Payment processed successfully', { variant: 'success' });
     }, [status, enqueueSnackbar]);
 
-    // Payment Summary Component
-    const PaymentSummary = () => (
-        <Box sx={{ mb: 3 }}>
-            <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Card elevation={1} sx={{ borderRadius: 2 }}>
-                        <CardContent>
-                            <Typography color="text.secondary" gutterBottom>
-                                Total Amount
-                            </Typography>
-                            <Typography variant="h5" fontWeight="bold">
-                                {totalSum.toFixed(2)}
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                </Grid>
-
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Card elevation={1} sx={{ borderRadius: 2 }}>
-                        <CardContent>
-                            <Typography color="text.secondary" gutterBottom>
-                                Amount Paid
-                            </Typography>
-                            <Typography variant="h5" fontWeight="bold" color="success.main">
-                                {totalPayments.toFixed(2)}
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                </Grid>
-
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Card elevation={1} sx={{ borderRadius: 2 }}>
-                        <CardContent>
-                            <Typography color="text.secondary" gutterBottom>
-                                Amount Due
-                            </Typography>
-                            <Typography
-                                variant="h5"
-                                fontWeight="bold"
-                                color={payableAmount > 0 ? 'error.main' : 'success.main'}
-                            >
-                                {payableAmount > 0 ? payableAmount.toFixed(2) : '0.00'}
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                </Grid>
-
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Card elevation={1} sx={{ borderRadius: 2 }}>
-                        <CardContent>
-                            <Typography color="text.secondary" gutterBottom>
-                                Payment Status
-                            </Typography>
-                            <Chip
-                                label={payableAmount > 0 ? 'Pending' : 'Paid'}
-                                color={payableAmount > 0 ? 'warning' : 'success'}
-                                sx={{ fontWeight: 'bold' }}
-                            />
-                        </CardContent>
-                    </Card>
-                </Grid>
-            </Grid>
-
-            {invoice && (
-                <Box sx={{ mt: 3 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography>Payment Progress</Typography>
-                        <Typography fontWeight="medium">{paymentProgress.toFixed(0)}%</Typography>
-                    </Box>
-                    <LinearProgress
-                        variant="determinate"
-                        value={paymentProgress}
-                        sx={{
-                            height: 8,
-                            borderRadius: 4,
-                            mb: 1,
-                        }}
-                    />
-                </Box>
-            )}
-        </Box>
-    );
-
-    // Table components
-    const PaymentTableHeader = () => (
-        <TableHead>
-            <TableRow>
-                <TableCell align="center" width="5%">
-                    <Typography fontWeight="bold">#</Typography>
-                </TableCell>
-                <TableCell width="20%">
-                    <Typography fontWeight="bold">Payment Method</Typography>
-                </TableCell>
-                <TableCell align="right" width="15%">
-                    <Typography fontWeight="bold">Amount</Typography>
-                </TableCell>
-                <TableCell width="20%">
-                    <Typography fontWeight="bold">Cashier</Typography>
-                </TableCell>
-                <TableCell width="25%">
-                    <Typography fontWeight="bold">Date</Typography>
-                </TableCell>
-                <TableCell align="center" width="15%" aria-label="Actions">
-                    Actions
-                </TableCell>
-            </TableRow>
-        </TableHead>
-    );
-
-    const PaymentTableBody = () => (
-        <TableBody>
-            {invoice.payments?.length > 0 ? (
-                invoice.payments.map((item, index) => (
-                    <TableRow
-                        key={`payment-${item.id}`}
-                        sx={{
-                            '&:nth-of-type(odd)': {
-                                backgroundColor: 'rgba(0, 0, 0, 0.03)',
-                            },
-                        }}
-                    >
-                        <TableCell align="center">{index + 1}</TableCell>
-                        <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                {PAYMENT_METHOD_ICONS[item.paymentMethod] || <PaymentIcon />}
-                                <Typography sx={{ ml: 1 }}>
-                                    {item.paymentMethod === 'cash'
-                                        ? 'Cash'
-                                        : item.paymentMethod === 'card'
-                                          ? 'Card'
-                                          : item.paymentMethod === 'credit'
-                                            ? 'Credit'
-                                            : item.paymentMethod}
-                                </Typography>
-                            </Box>
-                        </TableCell>
-                        <TableCell align="right">
-                            <Typography fontWeight="bold">
-                                {parseFloat(item.price).toFixed(2)}
-                            </Typography>
-                        </TableCell>
-                        <TableCell>{item.cashier.name}</TableCell>
-                        <TableCell>{new Date(item.created_at).toLocaleString()}</TableCell>
-                        <TableCell align="center">
-                            <IconButton
-                                onClick={handleEditPayment(item)}
-                                aria-label={`Edit payment ${index + 1}`}
-                                size="small"
-                            >
-                                <EditIcon color="warning" />
-                            </IconButton>
-                            <IconButton
-                                onClick={handleDelPayment(item)}
-                                aria-label={`Delete payment ${index + 1}`}
-                                size="small"
-                            >
-                                <DeleteIcon color="error" />
-                            </IconButton>
-                        </TableCell>
-                    </TableRow>
-                ))
-            ) : (
-                <TableRow>
-                    <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                        <Typography color="text.secondary">No payments recorded yet</Typography>
-                    </TableCell>
-                </TableRow>
-            )}
-        </TableBody>
-    );
-
-    const PaymentTableFooter = () => (
-        <TableFooter>
-            <TableRow>
-                <TableCell colSpan={2} />
-                <TableCell align="left">
-                    <Typography fontWeight="bold">Total:</Typography>
-                </TableCell>
-                <TableCell align="right">
-                    <Typography fontWeight="bold">
-                        {sum(acceptanceItems, 'price').toFixed(2)}
-                    </Typography>
-                </TableCell>
-                <TableCell align="left">
-                    <Typography variant="caption">OMR</Typography>
-                </TableCell>
-                <TableCell />
-            </TableRow>
-            <TableRow>
-                <TableCell colSpan={2} />
-                <TableCell align="left">
-                    <Typography fontWeight="bold">Item Discounts:</Typography>
-                </TableCell>
-                <TableCell align="right">
-                    <Typography fontWeight="bold" color="error">
-                        <RemoveIcon fontSize="small" />
-                        {sum(acceptanceItems, 'discount').toFixed(2)}
-                    </Typography>
-                </TableCell>
-                <TableCell align="left">
-                    <Typography variant="caption">OMR</Typography>
-                </TableCell>
-                <TableCell />
-            </TableRow>
-            <TableRow>
-                <TableCell colSpan={2} />
-                <TableCell align="left">
-                    <Typography fontWeight="bold">Additional Discount:</Typography>
-                </TableCell>
-                <TableCell align="right">
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                        <RemoveIcon fontSize="small" color="error" />
-                        {invoice ? (
-                            <Typography fontWeight="bold" color="error">
-                                {invoice.discount}
-                            </Typography>
-                        ) : (
-                            <Input
-                                type="number"
-                                min={0}
-                                value={data?.discount || 0}
-                                onChange={handleChange}
-                                name="discount"
-                                max={
-                                    sum(acceptanceItems, 'price') - sum(acceptanceItems, 'discount')
-                                }
-                                slotProps={{ htmlInput: { style: { textAlign: 'right' } } }}
-                                sx={{ width: 80 }}
-                            />
-                        )}
-                    </Box>
-                </TableCell>
-                <TableCell align="left">
-                    <Typography variant="caption">OMR</Typography>
-                </TableCell>
-                <TableCell />
-            </TableRow>
-            <TableRow>
-                <TableCell colSpan={2} />
-                <TableCell align="left">
-                    <Typography fontWeight="bold">Total Payments:</Typography>
-                </TableCell>
-                <TableCell align="right">
-                    <Typography fontWeight="bold" color="success.main">
-                        {totalPayments.toFixed(2)}
-                    </Typography>
-                </TableCell>
-                <TableCell align="left">
-                    <Typography variant="caption">OMR</Typography>
-                </TableCell>
-                <TableCell />
-            </TableRow>
-            <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                <TableCell colSpan={2} />
-                <TableCell align="left">
-                    <Typography variant="h6" fontWeight="bold">
-                        Payable Amount:
-                    </Typography>
-                </TableCell>
-                <TableCell align="right">
-                    <Typography
-                        variant="h6"
-                        fontWeight="bold"
-                        color={payableAmount > 0 ? 'error.main' : 'success.main'}
-                    >
-                        {payableAmount.toFixed(2)}
-                    </Typography>
-                </TableCell>
-                <TableCell align="left">
-                    <Typography variant="caption">OMR</Typography>
-                </TableCell>
-                <TableCell />
-            </TableRow>
-        </TableFooter>
-    );
-
-    const ActionButtons = () => (
-        <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-            {isPendingPayment && (
-                <Button
-                    variant="contained"
-                    onClick={handleOpenAddPayment}
-                    disabled={!invoice}
-                    startIcon={<AddIcon />}
-                    color="primary"
-                    sx={{ borderRadius: 1 }}
-                >
-                    Add Payment
-                </Button>
-            )}
-            {isMinPaymentMet && (
-                <Button
-                    variant="outlined"
-                    onClick={handlePrintReceipt}
-                    startIcon={<PrintIcon />}
-                    color="secondary"
-                    sx={{ borderRadius: 1 }}
-                >
-                    Print Receipt
-                </Button>
-            )}
-        </Stack>
-    );
-
-    const NoInvoiceView = () => (
-        <Box sx={{ py: 2 }}>
-            <Alert severity="info" sx={{ mb: 3 }}>
-                No invoice has been created for this acceptance yet.
-            </Alert>
-
-            <Card variant="outlined" sx={{ mb: 3 }}>
-                <CardContent>
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            py: 2,
-                        }}
-                    >
-                        <ReceiptIcon color="primary" sx={{ fontSize: 48, mb: 2 }} />
-                        <Typography variant="h6" gutterBottom>
-                            Items Summary
-                        </Typography>
-                        <Box sx={{ width: '100%', maxWidth: 500, mt: 2 }}>
-                            <Stack spacing={1.5}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography>Total Items:</Typography>
-                                    <Typography fontWeight="bold">
-                                        {acceptanceItems.length}
-                                    </Typography>
-                                </Box>
-                                <Divider />
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography>Subtotal:</Typography>
-                                    <Typography>
-                                        {sum(acceptanceItems, 'price').toFixed(2)}
-                                    </Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography>Item Discounts:</Typography>
-                                    <Typography color="error">
-                                        - {sum(acceptanceItems, 'discount').toFixed(2)}
-                                    </Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography>Additional Discount:</Typography>
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <RemoveIcon fontSize="small" sx={{ color: 'error.main' }} />
-                                        <Input
-                                            type="number"
-                                            min={0}
-                                            value={data?.discount || 0}
-                                            onChange={handleChange}
-                                            name="discount"
-                                            size="small"
-                                            sx={{ width: 80 }}
-                                            slotProps={{
-                                                htmlInput: {
-                                                    min: 0,
-                                                    max:
-                                                        sum(acceptanceItems, 'price') -
-                                                        sum(acceptanceItems, 'discount'),
-                                                    step: 0.01,
-                                                    style: { textAlign: 'right' },
-                                                },
-                                            }}
-                                        />
-                                    </Box>
-                                </Box>
-                                <Divider />
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <Typography fontWeight="bold">Net Total:</Typography>
-                                    <Typography fontWeight="bold">{totalSum.toFixed(2)}</Typography>
-                                </Box>
-                            </Stack>
-                        </Box>
-                    </Box>
-                </CardContent>
-            </Card>
-
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                <Button
-                    variant="contained"
-                    onClick={handleCreateInvoice}
-                    startIcon={<ReceiptIcon />}
-                    size="large"
-                >
-                    Create Invoice
-                </Button>
-            </Box>
-        </Box>
-    );
-
     return (
         <>
             <Accordion defaultExpanded={defaultExpanded}>
@@ -652,26 +225,45 @@ const PaymentComponent = ({
                 <AccordionDetails>
                     {invoice ? (
                         <>
-                            <PaymentSummary />
+                            <PaymentSummary
+                                totalSum={totalSum}
+                                totalPayments={totalPayments}
+                                payableAmount={payableAmount}
+                                invoice={invoice}
+                                paymentProgress={paymentProgress}
+                            />
 
                             {invoice.payments?.length > 0 && (
-                                <TableContainer component={Paper} variant="outlined" sx={{ mb: 3 }}>
-                                    <Table
-                                        sx={{ minWidth: 700 }}
-                                        aria-label="payments table"
-                                        size={isMobile ? 'small' : 'medium'}
-                                    >
-                                        <PaymentTableHeader />
-                                        <PaymentTableBody />
-                                        {!acceptance.referrer && <PaymentTableFooter />}
-                                    </Table>
-                                </TableContainer>
+                                <PaymentsTable
+                                    invoice={invoice}
+                                    acceptance={acceptance}
+                                    acceptanceItems={acceptanceItems}
+                                    data={data}
+                                    handleChange={handleChange}
+                                    totalPayments={totalPayments}
+                                    payableAmount={payableAmount}
+                                    isMobile={isMobile}
+                                    onEdit={handleEditPayment}
+                                    onDelete={handleDelPayment}
+                                />
                             )}
 
-                            <ActionButtons />
+                            <ActionButtons
+                                isPendingPayment={isPendingPayment}
+                                isMinPaymentMet={isMinPaymentMet}
+                                invoice={invoice}
+                                onAddPayment={handleOpenAddPayment}
+                                onPrintReceipt={handlePrintReceipt}
+                            />
                         </>
                     ) : (
-                        <NoInvoiceView />
+                        <NoInvoiceView
+                            acceptanceItems={acceptanceItems}
+                            data={data}
+                            handleChange={handleChange}
+                            totalSum={totalSum}
+                            onCreateInvoice={handleCreateInvoice}
+                        />
                     )}
                 </AccordionDetails>
             </Accordion>
