@@ -53,3 +53,24 @@ const lineFromSource = (line) => ({
 export const linesFromSource = (lines) => (lines ?? []).map(lineFromSource);
 
 export const payloadFromSource = (line) => toPayloadLine(lineFromSource(line));
+
+// Build a line state object from an existing transaction line (loaded from server, for Edit)
+export const lineFromExisting = (line) => ({
+    _item: line.item ?? null,
+    _unit: line.unit ?? null,
+    _location: line.location ?? null,
+    _lot: null,
+    _barcode_locked: false,
+    _lots_from_scan: [],
+    item_id: line.item_id,
+    unit_id: line.unit_id,
+    quantity: line.quantity,
+    barcode: line.barcode ?? '',
+    lot_number: line.lot_number ?? '',
+    brand: line.brand ?? '',
+    cat_no: line.cat_no ?? '',
+    expiry_date: line.expiry_date ?? '',
+    unit_price: line.unit_price ?? '',
+    store_location_id: line.store_location_id ?? null,
+    notes: line.notes ?? '',
+});

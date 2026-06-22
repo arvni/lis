@@ -1,21 +1,15 @@
-import React, { useState, Suspense, memo } from 'react';
+import React, { useState, Suspense } from 'react';
 import {
     Box,
     Container,
     Typography,
-    Divider,
     Button,
     Stepper,
     Step,
     StepLabel,
-    Paper,
     Alert,
     Checkbox,
     FormControlLabel,
-    Card,
-    CardContent,
-    Avatar,
-    IconButton,
 } from '@mui/material';
 import useAcceptanceFormState from './hooks/useAcceptanceFormState';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -26,151 +20,17 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import ScienceIcon from '@mui/icons-material/Science';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import DescriptionIcon from '@mui/icons-material/Description';
 import EventNoteIcon from '@mui/icons-material/EventNote';
-import {
-    AccessTime,
-    CalendarToday,
-    EventAvailable,
-    LocalHospital,
-    PersonOutlined,
-} from '@mui/icons-material';
-import Grid from '@mui/material/Grid';
-import EditIcon from '@mui/icons-material/Edit';
+import ConsultationCard from './AcceptanceForm/ConsultationCard';
+import AcceptanceSummary from './AcceptanceForm/AcceptanceSummary';
 
 // Lazy-loaded sections
 const FormAccordion = React.lazy(() => import('./FormAccordion'));
 const PatientSection = React.lazy(() => import('./PatientSection'));
 const TestsSection = React.lazy(() => import('./TestsSection'));
-const PrescriptionSection = React.lazy(() => import('./PrescriptionSection'));
 const ConsultationForm = React.lazy(() => import('./ConsultationForm'));
 const DoctorReferralSection = React.lazy(() => import('./DoctorReferralSection'));
 const SamplingDeliverySection = React.lazy(() => import('./ReportSection.jsx'));
-
-const ConsultationCard = memo(({ initialData: { patient, consultant, ...consultation } }) => {
-    // Format date for better display
-    const formatDate = (dateString) => {
-        if (!dateString) return 'Not specified';
-
-        try {
-            const date = new Date(dateString);
-            return date.toLocaleString(undefined, {
-                weekday: 'short',
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-            });
-        } catch (e) {
-            return dateString;
-        }
-    };
-
-    return (
-        <Card elevation={3} sx={{ borderRadius: 2, overflow: 'hidden' }}>
-            <CardContent sx={{ p: 0 }}>
-                <Box sx={{ p: 2, bgcolor: 'background.paper' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
-                            <PersonOutlined />
-                        </Avatar>
-                        <Box>
-                            <Typography variant="subtitle1" fontWeight="bold">
-                                {patient.name}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                {patient.age} years • {patient.gender}
-                            </Typography>
-                        </Box>
-                    </Box>
-
-                    <Divider sx={{ my: 2 }} />
-
-                    <Grid container spacing={2}>
-                        <Grid size={6}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <LocalHospital color="primary" fontSize="small" />
-                                <Typography variant="body2" color="text.secondary">
-                                    Consultant
-                                </Typography>
-                            </Box>
-                            <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 500 }}>
-                                {consultant.name || 'Not assigned'}
-                            </Typography>
-                        </Grid>
-
-                        <Grid size={6}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <CalendarToday color="primary" fontSize="small" />
-                                <Typography variant="body2" color="text.secondary">
-                                    Due Date
-                                </Typography>
-                            </Box>
-                            <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                {formatDate(consultation.dueDate)}
-                            </Typography>
-                        </Grid>
-
-                        {consultation.started_at && (
-                            <>
-                                <Grid size={6}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <EventAvailable color="primary" fontSize="small" />
-                                        <Typography variant="body2" color="text.secondary">
-                                            Started At
-                                        </Typography>
-                                    </Box>
-                                    <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                        {formatDate(consultation.started_at)}
-                                    </Typography>
-                                </Grid>
-
-                                <Grid size={6}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <AccessTime color="primary" fontSize="small" />
-                                        <Typography variant="body2" color="text.secondary">
-                                            Duration
-                                        </Typography>
-                                    </Box>
-                                    <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                        {consultation.duration} minutes
-                                    </Typography>
-                                </Grid>
-                            </>
-                        )}
-                    </Grid>
-
-                    {consultation.status === 'done' && (
-                        <>
-                            <Divider sx={{ my: 2 }} />
-                            <Box>
-                                <Typography variant="subtitle2" color="primary" gutterBottom>
-                                    Report Summary
-                                </Typography>
-                                <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                    sx={{
-                                        maxHeight: 80,
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        display: '-webkit-box',
-                                        WebkitLineClamp: 3,
-                                        WebkitBoxOrient: 'vertical',
-                                    }}
-                                >
-                                    {consultation.information.report || 'No report available'}
-                                </Typography>
-                            </Box>
-                        </>
-                    )}
-                </Box>
-            </CardContent>
-        </Card>
-    );
-});
-ConsultationCard.displayName = 'ConsultationCard';
 
 const AcceptanceForm = ({
     initialData,
@@ -366,261 +226,12 @@ const AcceptanceForm = ({
                 );
             case 5:
                 return (
-                    <Suspense fallback={<div>Loading...</div>}>
-                        <Paper elevation={1} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-                            <Typography variant="h5" sx={{ mb: 3 }}>
-                                Acceptance Summary
-                            </Typography>
-
-                            <Box sx={{ mb: 3 }}>
-                                <Typography variant="subtitle1" color="primary" gutterBottom>
-                                    Patient Information
-                                </Typography>
-                                <Box sx={{ pl: 2 }}>
-                                    <Typography variant="body1">
-                                        <strong>Name:</strong> {data.patient.fullName}
-                                    </Typography>
-                                    <Typography variant="body1">
-                                        <strong>ID/Passport:</strong> {data.patient.idNo}
-                                    </Typography>
-                                </Box>
-                            </Box>
-
-                            <Divider sx={{ my: 2 }} />
-                            {needsConsultation && (
-                                <>
-                                    <Box sx={{ mb: 3 }}>
-                                        <Typography
-                                            variant="subtitle1"
-                                            color="primary"
-                                            gutterBottom
-                                        >
-                                            Consultation
-                                        </Typography>
-                                        <Box sx={{ pl: 2 }}>
-                                            <Typography variant="body1">
-                                                <strong>Consultation Requested:</strong> Yes
-                                            </Typography>
-                                            {/* We would add details about the consultation here */}
-                                        </Box>
-                                    </Box>
-                                    <Divider sx={{ my: 2 }} />
-                                </>
-                            )}
-
-                            <Box sx={{ mb: 3 }}>
-                                <Typography variant="subtitle1" color="primary" gutterBottom>
-                                    Referral Information
-                                </Typography>
-                                <Box
-                                    sx={{
-                                        pl: 2,
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                    }}
-                                >
-                                    <Box>
-                                        <Typography variant="body1">
-                                            <strong>Referred:</strong>{' '}
-                                            {data.referred ? 'Yes' : 'No'}
-                                        </Typography>
-                                        {data.referred && (
-                                            <>
-                                                <Typography variant="body1">
-                                                    <strong>Referrer:</strong>{' '}
-                                                    {data.referrer ? data.referrer.name : 'N/A'}
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    <strong>Reference Code:</strong>{' '}
-                                                    {data.referenceCode || 'N/A'}
-                                                </Typography>
-                                            </>
-                                        )}
-                                    </Box>
-                                    <IconButton onClick={handleChangeStep(2)}>
-                                        <EditIcon />
-                                    </IconButton>
-                                </Box>
-                            </Box>
-                            {data.doctor && data.doctor.name && (
-                                <Box sx={{ mb: 3 }}>
-                                    <Typography variant="subtitle1" color="primary" gutterBottom>
-                                        Doctor Information
-                                    </Typography>
-                                    <Box
-                                        sx={{
-                                            pl: 2,
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            justifyContent: 'space-between',
-                                        }}
-                                    >
-                                        <Box>
-                                            <Typography variant="body1">
-                                                <strong>Name:</strong> {data.doctor.name}
-                                            </Typography>
-                                            {data.doctor.expertise && (
-                                                <Typography variant="body1">
-                                                    <strong>Speciality:</strong>{' '}
-                                                    {data.doctor.expertise}
-                                                </Typography>
-                                            )}
-                                            {data.doctor.phone && (
-                                                <Typography variant="body1">
-                                                    <strong>Phone:</strong> {data.doctor.phone}
-                                                </Typography>
-                                            )}
-                                            {data.doctor.licenseNo && (
-                                                <Typography variant="body1">
-                                                    <strong>License:</strong>{' '}
-                                                    {data.doctor.licenseNo}
-                                                </Typography>
-                                            )}
-                                        </Box>
-                                        <IconButton onClick={handleChangeStep(2)}>
-                                            <EditIcon />
-                                        </IconButton>
-                                    </Box>
-                                </Box>
-                            )}
-
-                            <Divider sx={{ my: 2 }} />
-
-                            <Box sx={{ mb: 3 }}>
-                                <Typography variant="subtitle1" color="primary" gutterBottom>
-                                    Sampling & Delivery
-                                </Typography>
-                                <Box
-                                    sx={{
-                                        pl: 2,
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                    }}
-                                >
-                                    <Box>
-                                        <Typography variant="body1">
-                                            <strong>Out Patient:</strong>{' '}
-                                            {data.out_patient ? 'Yes' : 'No'}
-                                        </Typography>
-                                        <Typography variant="body1">
-                                            <strong>Waiting for Pooling:</strong>{' '}
-                                            {data.waiting_for_pooling ? 'Yes' : 'No'}
-                                        </Typography>
-                                        {data.sampler && (
-                                            <Typography variant="body1">
-                                                <strong>Sampler:</strong> {data.sampler.name}
-                                            </Typography>
-                                        )}
-                                        {!data.referred && (
-                                            <>
-                                                {data?.howReport && (
-                                                    <Typography variant="body1">
-                                                        <strong>Report Method:</strong>{' '}
-                                                        {Object.keys(data?.howReport)
-                                                            .filter(
-                                                                (method) =>
-                                                                    data.howReport[method] &&
-                                                                    [
-                                                                        'print',
-                                                                        'sms',
-                                                                        'whatsapp',
-                                                                        'sendToReferrer',
-                                                                    ].includes(method),
-                                                            )
-                                                            .map((method) => method.toUpperCase())
-                                                            .join(', ')}
-                                                    </Typography>
-                                                )}
-                                            </>
-                                        )}
-                                        {data?.how_found_us && (
-                                            <Typography variant="body1">
-                                                <strong>How Found Us:</strong> {data.how_found_us}
-                                            </Typography>
-                                        )}
-                                    </Box>
-                                    <IconButton onClick={handleChangeStep(4)}>
-                                        <EditIcon />
-                                    </IconButton>
-                                </Box>
-                            </Box>
-
-                            <Divider sx={{ my: 2 }} />
-
-                            <Box sx={{ mb: 3 }}>
-                                <Typography variant="subtitle1" color="primary" gutterBottom>
-                                    Tests & Panels
-                                </Typography>
-                                <Box
-                                    sx={{
-                                        pl: 2,
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                    }}
-                                >
-                                    <Box>
-                                        <Typography variant="body1">
-                                            <strong>Tests:</strong>{' '}
-                                            {(data.acceptanceItems?.tests || []).length}
-                                        </Typography>
-                                        <Typography variant="body1">
-                                            <strong>Panels:</strong>{' '}
-                                            {(data.acceptanceItems?.panels || []).length}
-                                        </Typography>
-                                        <Typography variant="body1" color="error">
-                                            <strong>Total Price:</strong>{' '}
-                                            {(data.acceptanceItems?.tests || []).reduce(
-                                                (sum, item) => sum + (Number(item.price) || 0),
-                                                0,
-                                            ) +
-                                                (data.acceptanceItems?.panels || []).reduce(
-                                                    (sum, item) => sum + (Number(item.price) || 0),
-                                                    0,
-                                                )}
-                                        </Typography>
-                                    </Box>
-                                    <IconButton onClick={handleChangeStep(3)}>
-                                        <EditIcon />
-                                    </IconButton>
-                                </Box>
-                            </Box>
-
-                            {canAddPrescription && data.prescription && (
-                                <>
-                                    <Divider sx={{ my: 2 }} />
-                                    <Box sx={{ mb: 3 }}>
-                                        <Typography
-                                            variant="subtitle1"
-                                            color="primary"
-                                            gutterBottom
-                                        >
-                                            Prescription
-                                        </Typography>
-                                        <Box sx={{ pl: 2 }}>
-                                            <Typography variant="body1">
-                                                <strong>Document:</strong>{' '}
-                                                {data.prescription.originalName}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                </>
-                            )}
-                        </Paper>
-
-                        {canAddPrescription && !data.prescription && (
-                            <FormAccordion
-                                title="Prescription"
-                                id="prescription-information"
-                                defaultExpanded
-                                icon={<DescriptionIcon />}
-                            >
-                                <PrescriptionSection prescription={data.prescription} />
-                            </FormAccordion>
-                        )}
-                    </Suspense>
+                    <AcceptanceSummary
+                        data={data}
+                        needsConsultation={needsConsultation}
+                        canAddPrescription={canAddPrescription}
+                        onEditStep={handleChangeStep}
+                    />
                 );
             default:
                 return null;
