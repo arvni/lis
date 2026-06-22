@@ -31,6 +31,47 @@ class SampleRepository
         return $query->paginate($queryData["pageSize"] ?? 10);
     }
 
+    /**
+     * Samples awaiting QC review, newest first, with the relations the QC list
+     * screen renders.
+     */
+    public function listPendingQc(int $perPage = 50): LengthAwarePaginator
+    {
+        return Sample::where('qc_status', 'pending')
+            ->with([
+                'sampler:id,name',
+                'sampleType:id,name',
+                'patient:id,fullName,idNo',
+                'activeAcceptanceItems.acceptance:id,referenceCode',
+                'activeAcceptanceItems.test' => fn ($q) => $q->select('tests.id', 'tests.name'),
+            ])
+            ->latest()
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    /**
+     * Hydrate a sample with the patient and its active acceptance items
+     * (method + test) for the barcode view.
+     */
+    public function loadForBarcodeView(Sample $sample): Sample
+    {
+        return $sample->load([
+            'patient',
+            'acceptanceItems' => function ($q) {
+                $q->wherePivot('active', true);
+                $q->with('method.test');
+            },
+        ]);
+    }
+
+    public function updateBarcode(Sample $sample, string $barcode): Sample
+    {
+        $sample->update(['barcode' => $barcode]);
+        $this->logUpdated($sample);
+        return $sample;
+    }
+
     public function listSampleBarcodes($filters): Collection
     {
         $query = Sample::query()

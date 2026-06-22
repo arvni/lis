@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Reception;
 
 use App\Domains\Reception\DTOs\SampleDTO;
-use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Sample;
 use App\Domains\Reception\Requests\StoreSampleRequest;
 use App\Domains\Reception\Requests\UpdateSampleRequest;
@@ -58,9 +57,7 @@ class SampleController extends Controller
         }
 
         $firstItemId = data_get($barcodes, '0.items.0.id');
-        $acceptance  = $firstItemId
-            ? AcceptanceItem::with('acceptance.patient')->find($firstItemId)?->acceptance
-            : null;
+        $acceptance  = $this->sampleService->resolveAcceptanceForItem($firstItemId ? (int) $firstItemId : null);
 
         if ($acceptance) {
             // Pooling acceptances update their existing order (carrying the
@@ -84,15 +81,8 @@ class SampleController extends Controller
      */
     public function show(Sample $sample)
     {
-        $sample->load([
-            "patient",
-            "acceptanceItems" => function ($q) {
-                $q->wherePivot("active", true);
-                $q->with("method.test");
-            }
-        ]);
         return Inertia::render('Acceptance/Barcodes', ["barcodes" => [
-            $sample
+            $this->sampleService->loadForBarcodeView($sample),
         ]]);
     }
 
@@ -101,7 +91,7 @@ class SampleController extends Controller
      */
     public function update(UpdateSampleRequest $request, Sample $sample)
     {
-        $sample->update(['barcode' => $request->validated('barcode')]);
+        $this->sampleService->updateBarcode($sample, $request->validated('barcode'));
 
         return redirect()->back()->with(["success" => true, "status" => "Sample barcode updated successfully."]);
     }

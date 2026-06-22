@@ -6,6 +6,7 @@ use App\Domains\Inventory\Enums\TransactionStatus;
 use App\Domains\Inventory\Enums\TransactionType;
 use App\Domains\Inventory\Models\StockTransaction;
 use App\Domains\Inventory\Models\TransactionHistory;
+use App\Domains\Inventory\Repositories\StockLotRepository;
 use App\Domains\Inventory\Repositories\StockTransactionRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +19,48 @@ class StockTransactionService
         private readonly ReferenceNumberService     $referenceNumberService,
         private readonly UnitConversionService      $unitConversionService,
         private readonly StockMutationService       $stockMutationService,
+        private readonly StockLotRepository         $stockLotRepository,
     ) {}
+
+    /**
+     * Transaction hydrated for the "repeat from" create flow, or null when the
+     * source does not exist.
+     */
+    public function findForRepeat(int $transactionId): ?StockTransaction
+    {
+        return $this->transactionRepository->findForRepeat($transactionId);
+    }
+
+    /**
+     * Confirm receipt of an APPROVED TRANSFER: activate the quarantined lots in
+     * the destination store and stamp the receipt. Returns false when receipt
+     * was already confirmed (idempotent no-op); throws on invalid state.
+     */
+    public function confirmTransferReceipt(StockTransaction $tx, int $userId): bool
+    {
+        if ($tx->transaction_type !== TransactionType::TRANSFER) {
+            throw new RuntimeException('Only TRANSFER transactions can be confirmed.');
+        }
+        if ($tx->status !== TransactionStatus::APPROVED) {
+            throw new RuntimeException('Transaction must be APPROVED before confirming receipt.');
+        }
+        if ($tx->transfer_received_at) {
+            return false;
+        }
+
+        DB::transaction(function () use ($tx, $userId) {
+            $lotNumbers = $tx->lines->pluck('lot_number')->filter()->unique();
+
+            $this->stockLotRepository->activateQuarantinedLots($tx->destination_store_id, $lotNumbers);
+
+            $tx->update([
+                'transfer_received_at'         => now(),
+                'transfer_received_by_user_id' => $userId,
+            ]);
+        });
+
+        return true;
+    }
 
     public function listTransactions(array $filters): LengthAwarePaginator
     {

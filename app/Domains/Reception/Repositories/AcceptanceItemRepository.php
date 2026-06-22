@@ -135,6 +135,15 @@ class AcceptanceItemRepository
     }
 
     /**
+     * The acceptance (with patient loaded) that owns a given acceptance item,
+     * or null when the item does not exist.
+     */
+    public function findAcceptanceForItem(int $itemId): ?Acceptance
+    {
+        return AcceptanceItem::with('acceptance.patient')->find($itemId)?->acceptance;
+    }
+
+    /**
      * The original (non-pooling) acceptance items for an acceptance, by id.
      *
      * @param  array<int, int|string>  $ids

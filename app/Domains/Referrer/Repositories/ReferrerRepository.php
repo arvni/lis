@@ -22,6 +22,14 @@ class ReferrerRepository
         return $query->paginate($queryData["pageSize"]);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Referrer>
+     */
+    public function all(): \Illuminate\Database\Eloquent\Collection
+    {
+        return Referrer::all();
+    }
+
     public function createReferrer(array $data): Referrer
     {
         $referrer= Referrer::create($data);

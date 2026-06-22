@@ -11,6 +11,7 @@ use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Models\Sample;
+use App\Domains\Reception\Repositories\AcceptanceItemRepository;
 use App\Domains\Reception\Repositories\SampleRepository;
 use App\Domains\Reception\Services\SampleService;
 use App\Domains\User\Models\User;
@@ -65,7 +66,7 @@ class SampleServiceTest extends TestCase
         $paginator = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
         $repo = Mockery::mock(SampleRepository::class);
         $repo->shouldReceive('listSamples')->once()->with(['q' => 1])->andReturn($paginator);
-        $service = new SampleService($repo);
+        $service = new SampleService($repo, Mockery::mock(AcceptanceItemRepository::class));
 
         $this->assertSame($paginator, $service->listSamples(['q' => 1]));
     }
@@ -74,7 +75,7 @@ class SampleServiceTest extends TestCase
     {
         $repo = Mockery::mock(SampleRepository::class);
         $repo->shouldReceive('listSampleBarcodes')->once()->andReturn(new Collection());
-        $service = new SampleService($repo);
+        $service = new SampleService($repo, Mockery::mock(AcceptanceItemRepository::class));
 
         $this->assertInstanceOf(Collection::class, $service->listSampleBarcodes([]));
     }
@@ -84,7 +85,7 @@ class SampleServiceTest extends TestCase
         $sample = new Sample();
         $repo = Mockery::mock(SampleRepository::class);
         $repo->shouldReceive('findSampleById')->once()->with(7)->andReturn($sample);
-        $service = new SampleService($repo);
+        $service = new SampleService($repo, Mockery::mock(AcceptanceItemRepository::class));
 
         $this->assertSame($sample, $service->findSampleById(7));
     }
@@ -93,7 +94,7 @@ class SampleServiceTest extends TestCase
     {
         $repo = Mockery::mock(SampleRepository::class);
         $repo->shouldReceive('findSampleByBarcode')->once()->with('BL123')->andReturnNull();
-        $service = new SampleService($repo);
+        $service = new SampleService($repo, Mockery::mock(AcceptanceItemRepository::class));
 
         $this->assertNull($service->findSampleByBarcode('BL123'));
     }
@@ -103,7 +104,7 @@ class SampleServiceTest extends TestCase
         $sample = new Sample();
         $repo = Mockery::mock(SampleRepository::class);
         $repo->shouldReceive('updateSample')->once()->andReturn($sample);
-        $service = new SampleService($repo);
+        $service = new SampleService($repo, Mockery::mock(AcceptanceItemRepository::class));
 
         $this->assertSame($sample, $service->updateSample($sample, $this->makeDTO()));
     }
@@ -113,7 +114,7 @@ class SampleServiceTest extends TestCase
         $sample = new Sample();
         $repo = Mockery::mock(SampleRepository::class);
         $repo->shouldReceive('deleteSample')->once()->with($sample)->andReturnNull();
-        $service = new SampleService($repo);
+        $service = new SampleService($repo, Mockery::mock(AcceptanceItemRepository::class));
 
         $service->deleteSample($sample);
         $this->assertTrue(true);
@@ -134,7 +135,7 @@ class SampleServiceTest extends TestCase
             return $created;
         });
 
-        $service = new SampleService($repo);
+        $service = new SampleService($repo, Mockery::mock(AcceptanceItemRepository::class));
         // Provide barcode + materialId so generateBarcode (DB) is skipped.
         $result = $service->storeSample($this->makeDTO(['barcode' => 'BL999', 'materialId' => 5]));
 
@@ -157,7 +158,7 @@ class SampleServiceTest extends TestCase
             return new Sample();
         });
 
-        $service = new SampleService($repo);
+        $service = new SampleService($repo, Mockery::mock(AcceptanceItemRepository::class));
         // materialId set so the recycled barcode "BL123R" is kept rather than regenerated.
         $service->storeSample($this->makeDTO(['materialId' => 5]));
 
@@ -172,7 +173,7 @@ class SampleServiceTest extends TestCase
         // No acceptance_items in DB → "needs more samples" query is false → reuse path.
         $repo->shouldReceive('syncAcceptanceItems')->once()->with($existing, [1])->andReturnNull();
 
-        $service = new SampleService($repo);
+        $service = new SampleService($repo, Mockery::mock(AcceptanceItemRepository::class));
         $result = $service->storeSample($this->makeDTO(['acceptanceItems' => [['id' => 1]]]));
 
         $this->assertSame($existing, $result);
@@ -208,7 +209,7 @@ class SampleServiceTest extends TestCase
             'timeline'         => [],
         ]);
 
-        $service = new SampleService(app(SampleRepository::class));
+        $service = new SampleService(app(SampleRepository::class), app(AcceptanceItemRepository::class));
         $barcode = $service->generateBarcode($this->makeDTO(['acceptanceItems' => [['id' => $item->id]]]), 0);
 
         $this->assertStringStartsWith('BL', $barcode);

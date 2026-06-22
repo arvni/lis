@@ -29,6 +29,14 @@ class UserRepository
         return User::create($data);
     }
 
+    /**
+     * Set a user's (already-hashed) password by id.
+     */
+    public function updatePasswordById(int $id, string $hashedPassword): void
+    {
+        User::where('id', $id)->update(['password' => $hashedPassword]);
+    }
+
     public function update(User $user, array $data): User
     {
         $user->update($data);

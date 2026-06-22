@@ -47,6 +47,29 @@ class StockTransactionRepository
             ->pluck('brand');
     }
 
+    /**
+     * Most recent transaction line carrying a scanned barcode — used as a
+     * history fallback for item identification when no active lots remain.
+     * Item (with default unit + conversions) and the line's unit are loaded.
+     */
+    public function latestLineByBarcode(string $barcode): ?StockTransactionLine
+    {
+        return StockTransactionLine::with(['item.defaultUnit', 'item.unitConversions.unit', 'unit'])
+            ->where('barcode', $barcode)
+            ->latest()
+            ->first();
+    }
+
+    /**
+     * A transaction's lines/items/units/supplier hydrated for the "repeat from"
+     * create flow. Returns null when the source transaction does not exist.
+     */
+    public function findForRepeat(int $transactionId): ?StockTransaction
+    {
+        return StockTransaction::with(['lines.item.defaultUnit', 'lines.unit', 'supplier'])
+            ->find($transactionId);
+    }
+
     public function listTransactions(array $queryData): LengthAwarePaginator
     {
         $query = StockTransaction::with(['store', 'supplier', 'requestedBy'])

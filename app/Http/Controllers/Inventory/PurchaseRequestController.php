@@ -33,7 +33,6 @@ class PurchaseRequestController extends Controller
     public function __construct(
         private PurchaseRequestService $prService,
         private PurchaseRequestWorkflowService $workflowService,
-        private \App\Domains\Inventory\Services\WorkflowTemplateMatcher $templateMatcher,
     ) {
         $this->middleware('indexProvider')->only('index');
     }
@@ -53,8 +52,7 @@ class PurchaseRequestController extends Controller
 
         $defaults = null;
         if ($repeatFrom = $request->integer('repeat_from')) {
-            $source = PurchaseRequest::with(['lines.item.defaultUnit', 'lines.unit', 'lines.preferredSupplier'])->find($repeatFrom);
-            if ($source) $defaults = $source;
+            $defaults = $this->prService->findForRepeat($repeatFrom);
         }
 
         return Inertia::render('Inventory/PurchaseRequests/Add', [
@@ -175,23 +173,7 @@ class PurchaseRequestController extends Controller
         $this->authorize('viewAny', PurchaseRequest::class);
         $ids = $request->validated()['ids'];
 
-        $prs = PurchaseRequest::whereIn('id', $ids)
-            ->with(['workflowTemplate', 'requestedBy'])
-            ->get()
-            ->keyBy('id');
-
-        $approved = 0;
-        $skipped  = 0;
-        foreach ($ids as $id) {
-            $pr = $prs->get($id);
-            if (!$pr) continue;
-            try {
-                $this->workflowService->approveStep($pr, auth()->user());
-                $approved++;
-            } catch (\Throwable) {
-                $skipped++;
-            }
-        }
+        ['approved' => $approved, 'skipped' => $skipped] = $this->prService->bulkApproveSteps($ids, auth()->user());
 
         $msg = "Approved {$approved} step(s).";
         if ($skipped) $msg .= " {$skipped} skipped (already acted or not authorised).";
@@ -201,10 +183,7 @@ class PurchaseRequestController extends Controller
     public function addComment(AddCommentRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('viewAny', PurchaseRequest::class);
-        $purchaseRequest->comments()->create([
-            'user_id' => auth()->id(),
-            'body'    => $request->validated()['body'],
-        ]);
+        $this->prService->addComment($purchaseRequest, $request->validated()['body']);
         return back()->with(['success' => true, 'status' => 'Comment added.']);
     }
 
@@ -257,74 +236,7 @@ class PurchaseRequestController extends Controller
     {
         $this->authorize('viewAny', PurchaseRequest::class);
 
-        $purchaseRequest->load('lines', 'requestedBy');
-        $urgency        = $purchaseRequest->urgency;
-        $estimatedTotal = $purchaseRequest->estimatedTotal();
-        $requesterRoles = $purchaseRequest->requestedBy?->getRoleNames()->all() ?? [];
-
-        $templates = \App\Domains\Inventory\Models\WorkflowTemplate::with('steps')
-            ->orderBy('priority')
-            ->orderBy('id')
-            ->get();
-
-        $evaluated = $templates->map(function ($t) use ($urgency, $requesterRoles, $estimatedTotal) {
-            $conditions     = $t->conditions ?? [];
-            $urgencies      = $conditions['urgencies']       ?? [];
-            $requiredRoles  = $conditions['requester_roles'] ?? [];
-            $minTotal       = isset($conditions['min_total']) ? (float) $conditions['min_total'] : null;
-
-            $reasons = [];
-
-            if ($t->is_default) {
-                $result = 'default_fallback';
-            } elseif (empty($urgencies) && empty($requiredRoles) && $minTotal === null) {
-                $result  = 'skip';
-                $reasons[] = 'No conditions defined on a non-default template — never matches';
-            } else {
-                $result = 'match';
-                if (!empty($urgencies) && !in_array($urgency, $urgencies, true)) {
-                    $result    = 'no_match';
-                    $reasons[] = 'Urgency "' . $urgency . '" not in [' . implode(', ', $urgencies) . ']';
-                }
-                if (!empty($requiredRoles) && empty(array_intersect($requiredRoles, $requesterRoles))) {
-                    $result    = 'no_match';
-                    $reasons[] = 'Requester roles [' . implode(', ', $requesterRoles) . '] don\'t intersect required [' . implode(', ', $requiredRoles) . ']';
-                }
-                if ($minTotal !== null && $estimatedTotal < $minTotal) {
-                    $result    = 'no_match';
-                    $reasons[] = "Estimated total {$estimatedTotal} < min_total {$minTotal}";
-                }
-            }
-
-            return [
-                'id'         => $t->id,
-                'name'       => $t->name,
-                'is_active'  => $t->is_active,
-                'is_default' => $t->is_default,
-                'priority'   => $t->priority,
-                'steps'      => $t->steps->count(),
-                'conditions' => [
-                    'urgencies'       => $urgencies,
-                    'requester_roles' => $requiredRoles,
-                    'min_total'       => $minTotal,
-                ],
-                'result'     => $result,   // match | no_match | skip | default_fallback
-                'reasons'    => $reasons,
-            ];
-        });
-
-        $matched = $this->templateMatcher
-            ->find($purchaseRequest->requestedBy, $urgency, $estimatedTotal);
-
-        return response()->json([
-            'pr' => [
-                'urgency'         => $urgency,
-                'estimated_total' => $estimatedTotal,
-                'requester_roles' => $requesterRoles,
-            ],
-            'matched_template' => $matched ? ['id' => $matched->id, 'name' => $matched->name] : null,
-            'evaluated'        => $evaluated,
-        ]);
+        return response()->json($this->prService->evaluateTemplates($purchaseRequest));
     }
 
     public function cancel(CancelPurchaseRequestRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
