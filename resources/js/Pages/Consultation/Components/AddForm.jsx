@@ -12,10 +12,6 @@ import {
     Container,
     Grid as Grid,
     FormGroup,
-    FormHelperText,
-    Radio,
-    RadioGroup,
-    FormControlLabel,
     CircularProgress,
     Typography,
     TextField,
@@ -24,22 +20,17 @@ import {
     Box,
     Alert,
     Snackbar,
-    Tooltip,
 } from '@mui/material';
 
 // Icons
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PersonIcon from '@mui/icons-material/Person';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 // Components
 import SelectSearch from '@/Components/SelectSearch';
-import Autocomplete from '@mui/material/Autocomplete';
-import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import BadgeIcon from '@mui/icons-material/Badge';
+import { formatDate } from './EditForm/helpers';
+import TimeSlotPicker from './EditForm/TimeSlotPicker';
+import CustomerInfoSection from './AddForm/CustomerInfoSection';
 
 const AddForm = ({ openAdd, onClose }) => {
     const [times, setTimes] = useState([]);
@@ -48,14 +39,6 @@ const AddForm = ({ openAdd, onClose }) => {
     const [open, setOpen] = React.useState(false);
     const [options, setOptions] = React.useState([]);
     const [loading, setLoading] = React.useState(false);
-
-    // Format current date properly
-    const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // +1 because months are 0-indexed
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
 
     const today = new Date();
     const formattedDate = formatDate(today);
@@ -206,153 +189,16 @@ const AddForm = ({ openAdd, onClose }) => {
 
                 <DialogContent sx={{ p: 3, mt: 1 }}>
                     <Container>
-                        <Box>
-                            <Typography variant="subtitle1" fontWeight="medium" sx={{ mb: 2 }}>
-                                Referring Customer Information
-                            </Typography>
-
-                            <Grid container spacing={3}>
-                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                        <Autocomplete
-                                            id="doctor-autocomplete"
-                                            open={open}
-                                            onOpen={() => setOpen(true)}
-                                            onClose={() => setOpen(false)}
-                                            value={data.customer?.id ? data.customer : null}
-                                            onChange={handleCustomerSelect}
-                                            onInputChange={fetchData}
-                                            isOptionEqualToValue={(option, value) =>
-                                                option?.id === value?.id
-                                            }
-                                            getOptionLabel={(option) => option?.phone || ''}
-                                            options={options}
-                                            loading={loading}
-                                            fullWidth
-                                            freeSolo
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    name="phone"
-                                                    label="Phone Number"
-                                                    placeholder="Search or enter phone"
-                                                    slotProps={{
-                                                        ...params.slotProps,
-                                                        htmlInput:
-                                                            params.slotProps?.htmlInput ??
-                                                            params.inputProps,
-                                                        input: {
-                                                            ...(params.slotProps?.input ??
-                                                                params.InputProps),
-                                                            startAdornment: (
-                                                                <>
-                                                                    <MedicalServicesIcon
-                                                                        color="action"
-                                                                        sx={{ mr: 1 }}
-                                                                    />
-                                                                    {
-                                                                        (
-                                                                            params.slotProps
-                                                                                ?.input ??
-                                                                            params.InputProps
-                                                                        )?.startAdornment
-                                                                    }
-                                                                </>
-                                                            ),
-                                                            endAdornment: (
-                                                                <>
-                                                                    {loading && (
-                                                                        <CircularProgress
-                                                                            size={16}
-                                                                        />
-                                                                    )}
-                                                                    {
-                                                                        (
-                                                                            params.slotProps
-                                                                                ?.input ??
-                                                                            params.InputProps
-                                                                        )?.endAdornment
-                                                                    }
-                                                                </>
-                                                            ),
-                                                        },
-                                                    }}
-                                                />
-                                            )}
-                                        />
-                                        <Tooltip title="Search for an existing customer or enter a new phone">
-                                            <HelpOutlineIcon
-                                                fontSize="small"
-                                                color="action"
-                                                sx={{ ml: 1, mt: 2 }}
-                                            />
-                                        </Tooltip>
-                                    </Box>
-                                </Grid>
-
-                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                        <TextField
-                                            name="name"
-                                            label="Name"
-                                            value={data?.customer?.name || ''}
-                                            onChange={(e) =>
-                                                handleCustomerChange('name', e.target.value)
-                                            }
-                                            fullWidth
-                                            required
-                                            placeholder="e.g. Ali"
-                                            slotProps={{
-                                                input: {
-                                                    startAdornment: (
-                                                        <LocalHospitalIcon
-                                                            color="action"
-                                                            sx={{ mr: 1 }}
-                                                        />
-                                                    ),
-                                                },
-                                            }}
-                                        />
-                                        <Tooltip title="Customer Full Name">
-                                            <HelpOutlineIcon
-                                                fontSize="small"
-                                                color="action"
-                                                sx={{ ml: 1, mt: 2 }}
-                                            />
-                                        </Tooltip>
-                                    </Box>
-                                </Grid>
-
-                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                        <TextField
-                                            name="email"
-                                            label="Email"
-                                            value={data.customer?.email || ''}
-                                            onChange={(e) =>
-                                                handleCustomerChange('email', e.target.value)
-                                            }
-                                            fullWidth
-                                            placeholder="example@example.com"
-                                            slotProps={{
-                                                input: {
-                                                    startAdornment: (
-                                                        <BadgeIcon color="action" sx={{ mr: 1 }} />
-                                                    ),
-                                                },
-                                            }}
-                                        />
-                                        <Tooltip title="Customer Email">
-                                            <HelpOutlineIcon
-                                                fontSize="small"
-                                                color="action"
-                                                sx={{ ml: 1, mt: 2 }}
-                                            />
-                                        </Tooltip>
-                                    </Box>
-                                </Grid>
-                            </Grid>
-                        </Box>
+                        <CustomerInfoSection
+                            data={data}
+                            options={options}
+                            loading={loading}
+                            open={open}
+                            setOpen={setOpen}
+                            onCustomerSelect={handleCustomerSelect}
+                            onInputChange={fetchData}
+                            onCustomerChange={handleCustomerChange}
+                        />
 
                         <Grid container spacing={3} sx={{ mt: 2 }}>
                             {/* Consultant Selection */}
@@ -428,109 +274,13 @@ const AddForm = ({ openAdd, onClose }) => {
                             {/* Time Selection */}
                             {(times.length > 0 || waiting) && (
                                 <Grid size={{ xs: 12 }}>
-                                    <Paper
-                                        elevation={0}
-                                        sx={{
-                                            p: 2,
-                                            border: '1px solid',
-                                            borderColor: 'divider',
-                                            borderRadius: 2,
-                                        }}
-                                    >
-                                        <Box display="flex" mb={2} sx={{ alignItems: 'center' }}>
-                                            <AccessTimeIcon color="primary" sx={{ mr: 1 }} />
-                                            <Typography variant="subtitle1" fontWeight="medium">
-                                                Available Time Slots
-                                            </Typography>
-                                        </Box>
-
-                                        {waiting ? (
-                                            <Box
-                                                display="flex"
-                                                p={4}
-                                                sx={{
-                                                    justifyContent: 'center',
-                                                    alignItems: 'center',
-                                                }}
-                                            >
-                                                <CircularProgress size={40} />
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                    ml={2}
-                                                >
-                                                    Loading available times...
-                                                </Typography>
-                                            </Box>
-                                        ) : times.length > 0 ? (
-                                            <>
-                                                <RadioGroup
-                                                    name="time"
-                                                    value={data.time}
-                                                    onChange={handleChange}
-                                                    sx={{
-                                                        display: 'flex',
-                                                        flexDirection: 'row',
-                                                        flexWrap: 'wrap',
-                                                    }}
-                                                >
-                                                    {times.map((item, index) => (
-                                                        <FormControlLabel
-                                                            key={index}
-                                                            value={item.value}
-                                                            label={item.label}
-                                                            disabled={item.disabled}
-                                                            control={
-                                                                <Radio
-                                                                    color="primary"
-                                                                    disabled={item.disabled}
-                                                                    checkedIcon={
-                                                                        <CheckCircleIcon />
-                                                                    }
-                                                                />
-                                                            }
-                                                            sx={{
-                                                                border: '1px solid',
-                                                                borderColor:
-                                                                    data.time === item.value
-                                                                        ? 'primary.main'
-                                                                        : 'divider',
-                                                                borderRadius: '8px',
-                                                                m: 0.5,
-                                                                p: 0.5,
-                                                                pr: 1.5,
-                                                                transition: 'all 0.2s',
-                                                                bgcolor:
-                                                                    data.time === item.value
-                                                                        ? 'action.selected'
-                                                                        : 'background.paper',
-                                                                '&:hover': {
-                                                                    bgcolor: 'action.hover',
-                                                                    borderColor: 'primary.light',
-                                                                },
-                                                            }}
-                                                        />
-                                                    ))}
-                                                </RadioGroup>
-
-                                                {errors.time && (
-                                                    <FormHelperText error>
-                                                        {errors.time}
-                                                    </FormHelperText>
-                                                )}
-                                            </>
-                                        ) : (
-                                            <Typography
-                                                variant="body2"
-                                                color="text.secondary"
-                                                align="center"
-                                                py={2}
-                                            >
-                                                No available time slots. Please try another date or
-                                                consultant.
-                                            </Typography>
-                                        )}
-                                    </Paper>
+                                    <TimeSlotPicker
+                                        times={times}
+                                        waiting={waiting}
+                                        value={data.time}
+                                        onChange={handleChange}
+                                        error={errors.time}
+                                    />
                                 </Grid>
                             )}
                             <Grid size={{ xs: 12 }}>

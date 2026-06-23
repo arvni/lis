@@ -6,34 +6,22 @@ import {
     DialogActions,
     FormControl,
     FormLabel,
-    Radio,
     RadioGroup,
-    FormControlLabel,
     Button,
     Typography,
     Box,
     Paper,
     Divider,
     alpha,
-    Stack,
-    Avatar,
     IconButton,
-    Chip,
     Alert,
     CircularProgress,
     useTheme,
 } from '@mui/material';
-import {
-    Close,
-    Save,
-    ReceiptLong,
-    Person,
-    Business,
-    CheckCircle,
-    Info,
-    ArrowForward,
-} from '@mui/icons-material';
+import { Close, Save, ReceiptLong, Person, Business, Info, ArrowForward } from '@mui/icons-material';
 import { router, usePage } from '@inertiajs/react';
+import OwnerCard from './CreateInvoiceForm/OwnerCard';
+import InvoiceSummary from './CreateInvoiceForm/InvoiceSummary';
 
 /**
  * Enhanced CreateInvoiceForm component with improved UI/UX
@@ -111,38 +99,6 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                 return newErrors;
             });
         }
-    };
-
-    // Get avatar based on owner type
-    const getOwnerAvatar = (type, data) => {
-        if (!data) return null;
-
-        if (data.avatar) {
-            return (
-                <Avatar
-                    src={data.avatar}
-                    alt={data.fullName}
-                    sx={{
-                        width: 40,
-                        height: 40,
-                        border: '2px solid',
-                        borderColor: type === 'patient' ? 'primary.main' : 'secondary.main',
-                    }}
-                />
-            );
-        }
-
-        return (
-            <Avatar
-                sx={{
-                    bgcolor: type === 'patient' ? 'primary.main' : 'secondary.main',
-                    width: 40,
-                    height: 40,
-                }}
-            >
-                {type === 'patient' ? <Person /> : <Business />}
-            </Avatar>
-        );
     };
 
     return (
@@ -273,203 +229,53 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                                         gap: 2,
                                     }}
                                 >
-                                    <Paper
-                                        variant={
-                                            formData.owner_type === 'patient'
-                                                ? 'elevation'
-                                                : 'outlined'
-                                        }
-                                        elevation={formData.owner_type === 'patient' ? 3 : 0}
-                                        sx={{
-                                            p: 2,
-                                            borderRadius: 2,
-                                            flex: 1,
-                                            borderColor:
-                                                formData.owner_type === 'patient'
-                                                    ? 'primary.main'
-                                                    : 'divider',
-                                            backgroundColor:
-                                                formData.owner_type === 'patient'
-                                                    ? alpha(theme.palette.primary.main, 0.05)
-                                                    : 'background.paper',
-                                            transition: 'all 0.2s',
-                                            position: 'relative',
-                                            overflow: 'hidden',
-                                        }}
-                                    >
-                                        {formData.owner_type === 'patient' && (
-                                            <Chip
-                                                icon={<CheckCircle fontSize="small" />}
-                                                label="Selected"
-                                                color="primary"
-                                                size="small"
-                                                sx={{
-                                                    position: 'absolute',
-                                                    top: 8,
-                                                    right: 8,
-                                                }}
+                                    <OwnerCard
+                                        theme={theme}
+                                        type="patient"
+                                        color="primary"
+                                        selected={formData.owner_type === 'patient'}
+                                        owner={formData.patient}
+                                        title={formData.patient?.fullName || 'Patient'}
+                                        label="Patient"
+                                        labelIcon={
+                                            <Person
+                                                fontSize="small"
+                                                sx={{ mr: 0.5, color: 'primary.light' }}
                                             />
-                                        )}
-
-                                        <FormControlLabel
-                                            value="patient"
-                                            control={<Radio color="primary" sx={{ mr: 1 }} />}
-                                            label=""
-                                            sx={{
-                                                m: 0,
-                                                width: '100%',
-                                                alignItems: 'flex-start',
-                                            }}
-                                        />
-
-                                        <Box
-                                            sx={{
-                                                mt: 1,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                            }}
-                                        >
-                                            {getOwnerAvatar('patient', formData.patient)}
-
-                                            <Box sx={{ ml: 2 }}>
-                                                <Typography variant="subtitle1" fontWeight="medium">
-                                                    {formData.patient?.fullName || 'Patient'}
-                                                </Typography>
-                                                <Box
-                                                    sx={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        mt: 0.5,
-                                                    }}
+                                        }
+                                        extra={
+                                            formData.patient?.idNo && (
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                    sx={{ ml: 2 }}
                                                 >
-                                                    <Typography
-                                                        variant="body2"
-                                                        color="text.secondary"
-                                                        sx={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                        }}
-                                                    >
-                                                        <Person
-                                                            fontSize="small"
-                                                            sx={{
-                                                                mr: 0.5,
-                                                                color: 'primary.light',
-                                                            }}
-                                                        />
-                                                        Patient
-                                                    </Typography>
-
-                                                    {formData.patient?.idNo && (
-                                                        <Typography
-                                                            variant="body2"
-                                                            color="text.secondary"
-                                                            sx={{ ml: 2 }}
-                                                        >
-                                                            ID: {formData.patient.idNo}
-                                                        </Typography>
-                                                    )}
-                                                </Box>
-                                            </Box>
-                                        </Box>
-                                    </Paper>
+                                                    ID: {formData.patient.idNo}
+                                                </Typography>
+                                            )
+                                        }
+                                    />
 
                                     {formData.referrer && (
-                                        <Paper
-                                            variant={
-                                                formData.owner_type === 'referrer'
-                                                    ? 'elevation'
-                                                    : 'outlined'
+                                        <OwnerCard
+                                            theme={theme}
+                                            type="referrer"
+                                            color="secondary"
+                                            selected={formData.owner_type === 'referrer'}
+                                            owner={formData.referrer}
+                                            title={
+                                                formData.referrer?.fullName ||
+                                                formData.referrer?.name ||
+                                                'Referrer'
                                             }
-                                            elevation={formData.owner_type === 'referrer' ? 3 : 0}
-                                            sx={{
-                                                p: 2,
-                                                borderRadius: 2,
-                                                flex: 1,
-                                                borderColor:
-                                                    formData.owner_type === 'referrer'
-                                                        ? 'secondary.main'
-                                                        : 'divider',
-                                                backgroundColor:
-                                                    formData.owner_type === 'referrer'
-                                                        ? alpha(theme.palette.secondary.main, 0.05)
-                                                        : 'background.paper',
-                                                transition: 'all 0.2s',
-                                                position: 'relative',
-                                                overflow: 'hidden',
-                                            }}
-                                        >
-                                            {formData.owner_type === 'referrer' && (
-                                                <Chip
-                                                    icon={<CheckCircle fontSize="small" />}
-                                                    label="Selected"
-                                                    color="secondary"
-                                                    size="small"
-                                                    sx={{
-                                                        position: 'absolute',
-                                                        top: 8,
-                                                        right: 8,
-                                                    }}
+                                            label="Referrer"
+                                            labelIcon={
+                                                <Business
+                                                    fontSize="small"
+                                                    sx={{ mr: 0.5, color: 'secondary.light' }}
                                                 />
-                                            )}
-
-                                            <FormControlLabel
-                                                value="referrer"
-                                                control={<Radio color="secondary" sx={{ mr: 1 }} />}
-                                                label=""
-                                                sx={{
-                                                    m: 0,
-                                                    width: '100%',
-                                                    alignItems: 'flex-start',
-                                                }}
-                                            />
-
-                                            <Box
-                                                sx={{
-                                                    mt: 1,
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                }}
-                                            >
-                                                {getOwnerAvatar('referrer', formData.referrer)}
-
-                                                <Box sx={{ ml: 2 }}>
-                                                    <Typography
-                                                        variant="subtitle1"
-                                                        fontWeight="medium"
-                                                    >
-                                                        {formData.referrer?.fullName ||
-                                                            formData.referrer?.name ||
-                                                            'Referrer'}
-                                                    </Typography>
-                                                    <Box
-                                                        sx={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            mt: 0.5,
-                                                        }}
-                                                    >
-                                                        <Typography
-                                                            variant="body2"
-                                                            color="text.secondary"
-                                                            sx={{
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                            }}
-                                                        >
-                                                            <Business
-                                                                fontSize="small"
-                                                                sx={{
-                                                                    mr: 0.5,
-                                                                    color: 'secondary.light',
-                                                                }}
-                                                            />
-                                                            Referrer
-                                                        </Typography>
-                                                    </Box>
-                                                </Box>
-                                            </Box>
-                                        </Paper>
+                                            }
+                                        />
                                     )}
                                 </Box>
                             </RadioGroup>
@@ -482,80 +288,7 @@ const CreateInvoiceForm = ({ open, initialData, onClose, onCreated }) => {
                         </FormControl>
 
                         {formData.owner_type && (
-                            <Box
-                                sx={{
-                                    mt: 3,
-                                    p: 2,
-                                    borderRadius: 2,
-                                    border: '1px dashed',
-                                    borderColor: 'divider',
-                                    backgroundColor: alpha(theme.palette.background.default, 0.5),
-                                }}
-                            >
-                                <Typography variant="subtitle2" gutterBottom>
-                                    Invoice Summary
-                                </Typography>
-
-                                <Stack spacing={1}>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Acceptance ID
-                                        </Typography>
-                                        <Typography variant="body2" fontWeight="medium">
-                                            #{formData.acceptance_id}
-                                        </Typography>
-                                    </Box>
-
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Owner
-                                        </Typography>
-                                        <Typography variant="body2" fontWeight="medium">
-                                            {formData.owner_type === 'patient'
-                                                ? formData.patient?.fullName
-                                                : formData.referrer?.fullName ||
-                                                  formData.referrer?.name}
-                                        </Typography>
-                                    </Box>
-
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Type
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                            }}
-                                        >
-                                            {formData.owner_type === 'patient' ? (
-                                                <>
-                                                    <Person
-                                                        fontSize="small"
-                                                        sx={{
-                                                            mr: 0.5,
-                                                            color: 'primary.main',
-                                                        }}
-                                                    />
-                                                    Patient Invoice
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Business
-                                                        fontSize="small"
-                                                        sx={{
-                                                            mr: 0.5,
-                                                            color: 'secondary.main',
-                                                        }}
-                                                    />
-                                                    Referrer Invoice
-                                                </>
-                                            )}
-                                        </Typography>
-                                    </Box>
-                                </Stack>
-                            </Box>
+                            <InvoiceSummary theme={theme} formData={formData} />
                         )}
                     </>
                 )}
