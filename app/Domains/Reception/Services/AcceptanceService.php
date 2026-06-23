@@ -6,6 +6,8 @@ namespace App\Domains\Reception\Services;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Adapters\LaboratoryAdapter;
+use App\Domains\Reception\Adapters\ReferrerAdapter;
+use App\Domains\Reception\Adapters\SettingAdapter;
 use App\Domains\Reception\DTOs\AcceptanceDTO;
 use App\Domains\Reception\DTOs\AcceptanceItemDTO;
 use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
@@ -17,8 +19,6 @@ use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Models\Report;
 use App\Domains\Reception\Notifications\PatientReportPublished;
 use App\Domains\Reception\Repositories\AcceptanceRepository;
-use App\Domains\Referrer\Services\ReferrerOrderService;
-use App\Domains\Setting\Repositories\SettingRepository;
 use App\Domains\User\Models\User;
 use App\Notifications\ReferrerReportPublished;
 use Carbon\Carbon;
@@ -39,8 +39,8 @@ class AcceptanceService
         private readonly AcceptanceRepository  $acceptanceRepository,
         private readonly AcceptanceItemService $acceptanceItemService,
         private readonly LaboratoryAdapter     $laboratoryAdapter,
-        private readonly SettingRepository     $settingRepository,
-        private readonly ReferrerOrderService  $referrerOrderService,
+        private readonly SettingAdapter        $settingAdapter,
+        private readonly ReferrerAdapter       $referrerAdapter,
     )
     {
     }
@@ -97,7 +97,7 @@ class AcceptanceService
             ->createAcceptance(Arr::except($acceptanceDTO->toArray(), ["acceptance_items"]));
 
         if ($acceptanceDTO->consultationId) {
-            $test = $this->settingRepository->getSettingsByClassAndKey("Acceptance", "defaultConsultationMethod");
+            $test = $this->settingAdapter->getSettingByClassAndKey("Acceptance", "defaultConsultationMethod");
             if ($test && isset($test["id"])) {
                 $test = $this->laboratoryAdapter->getTestById($test["id"]);
                 if ($test) {
@@ -313,7 +313,7 @@ class AcceptanceService
         // Remove items not in the update
         $acceptance->acceptanceItems()->whereNotIn("id", collect($updatedAcceptanceItems)->pluck("id")->toArray())->delete();
 
-        $this->referrerOrderService->syncReferrerOrdersForAcceptance($acceptance);
+        $this->referrerAdapter->syncOrdersForAcceptance($acceptance);
     }
 
     /**
@@ -342,7 +342,7 @@ class AcceptanceService
                     $this->acceptanceItemService->updateAcceptanceItem($existing, $dto);
                 }
             }
-            $this->referrerOrderService->syncReferrerOrdersForAcceptance($acceptance);
+            $this->referrerAdapter->syncOrdersForAcceptance($acceptance);
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();
@@ -419,7 +419,7 @@ class AcceptanceService
         $referrerOrderStatus = $status === AcceptanceStatus::REPORTED ? 'reported' : 'processing';
         $acceptance->load("referrerOrders");
         foreach ($acceptance->referrerOrders as $referrerOrder) {
-            $this->referrerOrderService->updateReferrerOrderStatus($referrerOrder, $referrerOrderStatus);
+            $this->referrerAdapter->updateOrderStatus($referrerOrder, $referrerOrderStatus);
         }
     }
 
@@ -849,7 +849,7 @@ class AcceptanceService
                     $acceptance->load("referrerOrders");
                     // Update referrer order status across all linked referrer orders (pooling + non-pooling)
                     foreach ($acceptance->referrerOrders as $referrerOrder) {
-                        $this->referrerOrderService->updateReferrerOrderStatus($referrerOrder, 'reported');
+                        $this->referrerAdapter->updateOrderStatus($referrerOrder, 'reported');
                     }
                 }
             }

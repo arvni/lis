@@ -2,8 +2,7 @@
 
 namespace App\Domains\Reception\Services;
 
-use App\Domains\Document\Models\Document;
-use App\Domains\Document\Services\DocumentService;
+use App\Domains\Reception\Adapters\DocumentAdapter;
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Arr;
@@ -216,9 +215,9 @@ class BuildWordFileService
             return storage_path('app/public' . substr($path, 9));
         } elseif (Str::endsWith($path, '/download') && Str::startsWith($path, "/documents")) {
             $id = Str::remove(["/download", "/documents/", "/"], $path);
-            $doc = Document::find($id);
-            if ($doc)
-                return storage_path("app/private/" . $doc->path);
+            $docPath = app(DocumentAdapter::class)->pathById($id);
+            if ($docPath)
+                return storage_path("app/private/" . $docPath);
         }
 
         // Otherwise, point to the public directory

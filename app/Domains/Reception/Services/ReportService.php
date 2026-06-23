@@ -3,9 +3,9 @@
 namespace App\Domains\Reception\Services;
 
 use App\Domains\Document\Enums\DocumentTag;
-use App\Domains\Document\Services\DocumentService;
 use App\Domains\Laboratory\Models\Method;
 use App\Domains\Laboratory\Models\Test;
+use App\Domains\Reception\Adapters\DocumentAdapter;
 use App\Domains\Reception\Adapters\LaboratoryAdapter;
 use App\Domains\Reception\Enums\ReportApprovalStatus;
 use App\Domains\Reception\Events\PatientDocumentUpdateEvent;
@@ -50,7 +50,7 @@ class ReportService
         SignerRepository                      $signerRepository,
         SignerFactory                         $signerFactory,
         ReportParameterRepository             $reportParameterRepository,
-        private readonly DocumentService      $documentService,
+        private readonly DocumentAdapter      $documentAdapter,
         private readonly BuildWordFileService $buildWordFileService,
     )
     {
@@ -125,7 +125,7 @@ class ReportService
         elseif (count($parameters) > 0) {
             $data = $this->getReportData($report);
             $docAddr = $this->buildWordFileService->build($report->reportTemplate->template->path, $data);
-            $this->documentService->storeDocument(
+            $this->documentAdapter->storeDocument(
                 "patient",
                 $report->acceptanceItem->patient->id,
                 new UploadedFile($docAddr, "Report.docx"),
@@ -187,7 +187,7 @@ class ReportService
         elseif (count($parameters) > 0 && !$report->reportedDocument()->exists()) {
             $data = $this->getReportData($report);
             $docAddr = $this->buildWordFileService->build($report->reportTemplate->template->path, $data);
-            $this->documentService->storeDocument(
+            $this->documentAdapter->storeDocument(
                 "patient",
                 $report->acceptanceItem->patient->id,
                 new UploadedFile($docAddr, "Report.docx"),
@@ -445,7 +445,7 @@ class ReportService
     {
         $report->load("publishedDocument");
         if ($report->publishedDocument) {
-            $this->documentService->deleteDocument($report->publishedDocument);
+            $this->documentAdapter->deleteDocument($report->publishedDocument);
         }
 
     }

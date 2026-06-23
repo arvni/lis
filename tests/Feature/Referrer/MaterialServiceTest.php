@@ -3,7 +3,7 @@
 namespace Tests\Feature\Referrer;
 
 use App\Domains\Laboratory\Models\SampleType;
-use App\Domains\Laboratory\Services\SampleTypeService;
+use App\Domains\Referrer\Adapters\LaboratoryAdapter;
 use App\Domains\Referrer\DTOs\GroupMaterialDTO;
 use App\Domains\Referrer\DTOs\MaterialDTO;
 use App\Domains\Referrer\Models\Material;
@@ -28,8 +28,8 @@ class MaterialServiceTest extends TestCase
         parent::setUp();
         $this->actingAs(User::factory()->create());
         $this->repo = Mockery::mock(MaterialRepository::class);
-        // SampleTypeService is a readonly class (cannot be mocked); use the real one.
-        $this->service = new MaterialService($this->repo, app(SampleTypeService::class));
+        // LaboratoryAdapter wraps the readonly SampleTypeService; resolve the real one.
+        $this->service = new MaterialService($this->repo, app(LaboratoryAdapter::class));
     }
 
     public function test_list_materials_delegates(): void

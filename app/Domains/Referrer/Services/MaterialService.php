@@ -3,7 +3,7 @@
 namespace App\Domains\Referrer\Services;
 
 
-use App\Domains\Laboratory\Services\SampleTypeService;
+use App\Domains\Referrer\Adapters\LaboratoryAdapter;
 use App\Domains\Referrer\DTOs\GroupMaterialDTO;
 use App\Domains\Referrer\DTOs\MaterialDTO;
 use App\Domains\Referrer\Enums\OrderMaterialStatus;
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 readonly class MaterialService
 {
-    public function __construct(private MaterialRepository $materialRepository, private SampleTypeService $sampleTypeService)
+    public function __construct(private MaterialRepository $materialRepository, private LaboratoryAdapter $laboratoryAdapter)
     {
     }
 
@@ -33,13 +33,13 @@ readonly class MaterialService
 
     public function storeMaterial(GroupMaterialDTO $groupMaterialDTO): string
     {
-        $sampleType = $this->sampleTypeService->getSampleTypeById($groupMaterialDTO->sampleTypeId);
+        $sampleTypeName = $this->laboratoryAdapter->getSampleTypeName($groupMaterialDTO->sampleTypeId);
         $now = Carbon::now();
-        $packingSeries = $this->generatePackingSeries($sampleType->name, $now);
+        $packingSeries = $this->generatePackingSeries($sampleTypeName, $now);
         foreach ($groupMaterialDTO->tubes as $key => $tube) {
             $this->materialRepository->creatMaterial([
                 "sample_type_id" => $groupMaterialDTO->sampleTypeId,
-                "barcode" => $this->generateBarcode($now, $sampleType->name, $key),
+                "barcode" => $this->generateBarcode($now, $sampleTypeName, $key),
                 "tube_barcode" => $tube["tube_barcode"],
                 "tube_series" => $tube["tube_series"] ?? null,
                 "expire_date" => $tube["expire_date"],
