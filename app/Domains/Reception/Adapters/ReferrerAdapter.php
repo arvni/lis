@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Reception\Adapters;
 
+use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
+use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Referrer\Repositories\ReferrerOrderRepository;
 use App\Domains\Referrer\Services\ReferrerOrderService;
 
@@ -32,5 +34,22 @@ class ReferrerAdapter
         }
 
         $this->referrerOrderService->attachServerPatientToOrder($referrerOrder, $patient, $referenceId, $idNo);
+    }
+
+    /**
+     * Re-sync the referrer orders linked to an acceptance after its items change.
+     */
+    public function syncOrdersForAcceptance(Acceptance $acceptance): void
+    {
+        $this->referrerOrderService->syncReferrerOrdersForAcceptance($acceptance);
+    }
+
+    /**
+     * Mirror a status onto a referrer order (only dispatches a webhook when the
+     * order's status actually changes).
+     */
+    public function updateOrderStatus(ReferrerOrder $referrerOrder, string $status): void
+    {
+        $this->referrerOrderService->updateReferrerOrderStatus($referrerOrder, $status);
     }
 }

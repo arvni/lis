@@ -8,8 +8,8 @@ use App\Domains\Consultation\Models\Consultant;
 use App\Domains\Consultation\Models\Consultation;
 use App\Domains\Consultation\Repositories\ConsultantRepository;
 use App\Domains\Consultation\Repositories\ConsultationRepository;
+use App\Domains\Consultation\Adapters\SettingAdapter;
 use App\Domains\Consultation\Repositories\TimeRepository;
-use App\Domains\Setting\Repositories\SettingRepository;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -20,19 +20,19 @@ use Log;
 class ConsultationService
 {
     protected ConsultationRepository $consultationRepository;
-    protected SettingRepository $settingRepository;
+    protected SettingAdapter $settingAdapter;
     protected ConsultantRepository $consultantRepository;
     protected TimeRepository $timeRepository;
 
     public function __construct(
         ConsultationRepository $consultationRepository,
-        SettingRepository      $settingRepository,
+        SettingAdapter         $settingAdapter,
         ConsultantRepository   $consultantRepository,
         TimeRepository         $timeRepository
     )
     {
         $this->consultationRepository = $consultationRepository;
-        $this->settingRepository = $settingRepository;
+        $this->settingAdapter = $settingAdapter;
         $this->consultantRepository = $consultantRepository;
         $this->timeRepository = $timeRepository;
     }
@@ -76,7 +76,7 @@ class ConsultationService
         }
 
         // Get consultation settings
-        $consultationSettings = $this->settingRepository->getSettingsByClass("Consultation");
+        $consultationSettings = $this->settingAdapter->getSettingsByClass("Consultation");
 
         return $this->generateAndCheckTimeSlots($date, $consultationSettings["consultationDuration"] ?? 30, $consultant);
     }

@@ -3746,7 +3746,7 @@ parameters:
 			path: app/Domains/Reception/Services/AcceptanceService.php
 
 		-
-			message: '#^Parameter \#1 \$referrerOrder of method App\\Domains\\Referrer\\Services\\ReferrerOrderService\:\:updateReferrerOrderStatus\(\) expects App\\Domains\\Referrer\\Models\\ReferrerOrder, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			message: '#^Parameter \#1 \$referrerOrder of method App\\Domains\\Reception\\Adapters\\ReferrerAdapter\:\:updateOrderStatus\(\) expects App\\Domains\\Referrer\\Models\\ReferrerOrder, Illuminate\\Database\\Eloquent\\Model given\.$#'
 			identifier: argument.type
 			count: 2
 			path: app/Domains/Reception/Services/AcceptanceService.php
@@ -3998,7 +3998,7 @@ parameters:
 			path: app/Domains/Reception/Services/ReportService.php
 
 		-
-			message: '#^Parameter \#1 \$document of method App\\Domains\\Document\\Services\\DocumentService\:\:deleteDocument\(\) expects App\\Domains\\Document\\Models\\Document, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			message: '#^Parameter \#1 \$document of method App\\Domains\\Reception\\Adapters\\DocumentAdapter\:\:deleteDocument\(\) expects App\\Domains\\Document\\Models\\Document, Illuminate\\Database\\Eloquent\\Model given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Domains/Reception/Services/ReportService.php

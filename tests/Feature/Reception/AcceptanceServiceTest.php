@@ -24,8 +24,8 @@ use App\Domains\Reception\Services\AcceptanceItemService;
 use App\Domains\Reception\Services\AcceptanceService;
 use App\Domains\Referrer\Models\Referrer;
 use App\Domains\Referrer\Models\ReferrerOrder;
-use App\Domains\Referrer\Services\ReferrerOrderService;
-use App\Domains\Setting\Repositories\SettingRepository;
+use App\Domains\Reception\Adapters\ReferrerAdapter;
+use App\Domains\Reception\Adapters\SettingAdapter;
 use App\Notifications\ReferrerReportPublished;
 use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -82,8 +82,8 @@ class AcceptanceServiceTest extends TestCase
         $acceptanceRepo    = Mockery::mock(AcceptanceRepository::class);
         $acceptanceItemSvc = Mockery::mock(AcceptanceItemService::class);
         $labAdapter        = Mockery::mock(LaboratoryAdapter::class);
-        $settingRepo       = Mockery::mock(SettingRepository::class);
-        $referrerOrderSvc  = Mockery::mock(ReferrerOrderService::class);
+        $settingRepo       = Mockery::mock(SettingAdapter::class);
+        $referrerOrderSvc  = Mockery::mock(ReferrerAdapter::class);
 
         $service = new AcceptanceService(
             $acceptanceRepo,
@@ -188,7 +188,7 @@ class AcceptanceServiceTest extends TestCase
             ->andReturn($fakeAcceptance);
 
         // No consultation, so settingRepo should not be called
-        $settingRepo->shouldNotReceive('getSettingsByClassAndKey');
+        $settingRepo->shouldNotReceive('getSettingByClassAndKey');
 
         // One AcceptanceItem should be stored
         $acceptanceItemSvc
@@ -239,7 +239,7 @@ class AcceptanceServiceTest extends TestCase
             ->once()
             ->andReturn($fakeAcceptance);
 
-        $settingRepo->shouldNotReceive('getSettingsByClassAndKey');
+        $settingRepo->shouldNotReceive('getSettingByClassAndKey');
 
         $storedItems = [];
         $acceptanceItemSvc
@@ -290,7 +290,7 @@ class AcceptanceServiceTest extends TestCase
             ->once()
             ->andReturn($fakeAcceptance);
 
-        $settingRepo->shouldNotReceive('getSettingsByClassAndKey');
+        $settingRepo->shouldNotReceive('getSettingByClassAndKey');
 
         $capturedDTO = null;
         $acceptanceItemSvc
@@ -318,7 +318,7 @@ class AcceptanceServiceTest extends TestCase
         [$service, $acceptanceRepo, $acceptanceItemSvc, , , $referrerOrderSvc] = $this->makeServiceWithMocks();
 
         // step 3 reconciles referrer orders for the acceptance.
-        $referrerOrderSvc->shouldReceive('syncReferrerOrdersForAcceptance')->andReturnNull();
+        $referrerOrderSvc->shouldReceive('syncOrdersForAcceptance')->andReturnNull();
 
         // Build a real-ish Acceptance model (no DB)
         $acceptance         = new Acceptance();
@@ -1050,7 +1050,7 @@ class AcceptanceServiceTest extends TestCase
             $captured = $dto;
             return $i;
         });
-        $referrerSvc->shouldReceive('syncReferrerOrdersForAcceptance')->once();
+        $referrerSvc->shouldReceive('syncOrdersForAcceptance')->once();
 
         $service->updateAcceptanceItemsFromEditor($acceptance, [
             'tests' => [[
@@ -1092,7 +1092,7 @@ class AcceptanceServiceTest extends TestCase
 
         $itemSvc->shouldReceive('findAcceptanceItemById')->once()->with($foreign->id)->andReturn($foreign);
         $itemSvc->shouldReceive('updateAcceptanceItem')->never();
-        $referrerSvc->shouldReceive('syncReferrerOrdersForAcceptance')->once();
+        $referrerSvc->shouldReceive('syncOrdersForAcceptance')->once();
 
         $service->updateAcceptanceItemsFromEditor($acceptance, [
             'tests' => [[

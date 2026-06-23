@@ -5,8 +5,7 @@ namespace App\Domains\Inventory\Services;
 use Illuminate\Database\Eloquent\Builder;
 
 use App\Domains\Document\Enums\DocumentTag;
-use App\Domains\Document\Models\Document;
-use App\Domains\Document\Services\DocumentService;
+use App\Domains\Inventory\Adapters\DocumentAdapter;
 use App\Domains\Inventory\Enums\PurchaseRequestStatus;
 use App\Domains\Inventory\Models\PurchaseRequest;
 use App\Domains\Inventory\Models\PurchaseRequestApproval;
@@ -25,7 +24,7 @@ readonly class PurchaseRequestService
 {
     public function __construct(
         private StockTransactionService $transactionService,
-        private DocumentService $documentService,
+        private DocumentAdapter $documentAdapter,
         private PurchaseRequestWorkflowService $workflowService,
         private WorkflowTemplateMatcher $templateMatcher,
     ) {}
@@ -314,7 +313,7 @@ readonly class PurchaseRequestService
             'supplier_id' => $supplierId,
         ];
         if ($file) {
-            $doc = $this->documentService->storeDocument(
+            $doc = $this->documentAdapter->storeDocument(
                 PurchaseRequest::class, $pr->id, $file, DocumentTag::PURCHASE_ORDER->value
             );
             $updates['po_file'] = $doc->hash;
@@ -333,7 +332,7 @@ readonly class PurchaseRequestService
             'payment_reference'  => $data['payment_reference'] ?? null,
         ];
         if ($file) {
-            $doc = $this->documentService->storeDocument(
+            $doc = $this->documentAdapter->storeDocument(
                 PurchaseRequest::class, $pr->id, $file, DocumentTag::PAYMENT_RECEIPT->value
             );
             $updates['payment_file'] = $doc->hash;
@@ -469,8 +468,8 @@ readonly class PurchaseRequestService
         ]);
 
         $approvals       = $this->getOrderedApprovals($pr);
-        $poDocument      = $pr->po_file      ? Document::find($pr->po_file)      : null;
-        $paymentDocument = $pr->payment_file  ? Document::find($pr->payment_file)  : null;
+        $poDocument      = $pr->po_file      ? $this->documentAdapter->findDocument($pr->po_file)      : null;
+        $paymentDocument = $pr->payment_file  ? $this->documentAdapter->findDocument($pr->payment_file)  : null;
 
         $isRequester      = $pr->requested_by_user_id === $user->id;
         $canActOnWorkflow = $pr->workflow_template_id

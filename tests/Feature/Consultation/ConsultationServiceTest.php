@@ -10,7 +10,7 @@ use App\Domains\Consultation\Repositories\ConsultantRepository;
 use App\Domains\Consultation\Repositories\ConsultationRepository;
 use App\Domains\Consultation\Repositories\TimeRepository;
 use App\Domains\Consultation\Services\ConsultationService;
-use App\Domains\Setting\Repositories\SettingRepository;
+use App\Domains\Consultation\Adapters\SettingAdapter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -21,7 +21,7 @@ use Tests\TestCase;
 class ConsultationServiceTest extends TestCase
 {
     private ConsultationRepository $consultationRepo;
-    private SettingRepository $settingRepo;
+    private SettingAdapter $settingRepo;
     private ConsultantRepository $consultantRepo;
     private TimeRepository $timeRepo;
     private ConsultationService $service;
@@ -30,7 +30,7 @@ class ConsultationServiceTest extends TestCase
     {
         parent::setUp();
         $this->consultationRepo = Mockery::mock(ConsultationRepository::class);
-        $this->settingRepo = Mockery::mock(SettingRepository::class);
+        $this->settingRepo = Mockery::mock(SettingAdapter::class);
         $this->consultantRepo = Mockery::mock(ConsultantRepository::class);
         $this->timeRepo = Mockery::mock(TimeRepository::class);
         $this->service = new ConsultationService(

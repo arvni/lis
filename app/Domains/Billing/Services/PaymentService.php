@@ -7,8 +7,8 @@ use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Events\PaymentsAddedEvent;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\Payment;
+use App\Domains\Billing\Adapters\SettingAdapter;
 use App\Domains\Billing\Repositories\PaymentRepository;
-use App\Domains\Setting\Services\SettingService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 readonly class PaymentService
@@ -16,7 +16,7 @@ readonly class PaymentService
     public function __construct(
         private PaymentRepository $paymentRepository,
         private InvoiceService    $invoiceService,
-        private SettingService    $settingService
+        private SettingAdapter    $settingAdapter
     )
     {
     }
@@ -91,7 +91,7 @@ readonly class PaymentService
 
         $payableAmount = $invoice->acceptanceItems->sum('price') - $invoice->acceptanceItems->sum('discount');
         $totalPaid = $invoice->payments->sum('price');
-        $minAllowablePaymentPercentage = $this->settingService->getSettingByKey("Payment", "minPayment");
+        $minAllowablePaymentPercentage = $this->settingAdapter->getSettingByKey("Payment", "minPayment");
 
         if ($payableAmount > 0 && ($totalPaid * $minAllowablePaymentPercentage / 100) >= $payableAmount) {
             $invoice->acceptanceItems
