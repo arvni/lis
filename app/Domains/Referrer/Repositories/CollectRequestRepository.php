@@ -62,7 +62,7 @@ class CollectRequestRepository
         $this->logDeleted($collectRequest);
     }
 
-    public function findCollectRequestById($id): ?CollectRequest
+    public function findCollectRequestById(int|string $id): ?CollectRequest
     {
         return CollectRequest::with(['sampleCollector', 'referrer'])->find($id);
     }

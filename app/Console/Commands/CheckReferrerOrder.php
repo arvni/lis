@@ -25,7 +25,7 @@ class CheckReferrerOrder extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         ReferrerOrder::withoutEvents(function () {
             ReferrerOrder::query()

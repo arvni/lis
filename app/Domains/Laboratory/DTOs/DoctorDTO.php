@@ -13,7 +13,7 @@ class DoctorDTO
     {
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             "name" => $this->name,

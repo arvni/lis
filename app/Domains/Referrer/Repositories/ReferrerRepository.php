@@ -2,6 +2,7 @@
 
 namespace App\Domains\Referrer\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Referrer\Models\Referrer;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -54,17 +55,20 @@ class ReferrerRepository
     }
 
 
-    public function findReferrerById($id): ?Referrer
+    public function findReferrerById(int|string $id): ?Referrer
     {
         return Referrer::find($id);
     }
 
-    public function findReferrerByEmail($email): ?Referrer
+    public function findReferrerByEmail(string $email): ?Referrer
     {
         return Referrer::where("email", $email)->first();
     }
 
-    public function applyFilters($query, array $filters)
+    /**
+     * @param  Builder<Referrer>  $query
+     */
+    public function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"])) {
             $query->search($filters["search"]);

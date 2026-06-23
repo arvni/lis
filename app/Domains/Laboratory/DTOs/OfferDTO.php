@@ -34,7 +34,7 @@ class OfferDTO
             $data["ended_at"] ?? null,);
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             "title" => $this->title,

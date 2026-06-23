@@ -31,7 +31,7 @@ class TimeSlotAvailable implements ValidationRule
      * @param string $dueDate
      * @return void
      */
-    public function __construct(int|string $consultantId, string $dueDate, $exceptID = null)
+    public function __construct(int|string $consultantId, string $dueDate, string|int|null $exceptID = null)
     {
         $this->consultantId = $consultantId;
         $this->dueDate = $dueDate;

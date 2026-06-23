@@ -21,9 +21,9 @@ class SendCollectRequestWebhook implements ShouldQueue
     public array $backoff = [10, 30, 60]; // Wait times between retries
 
     protected string $action;
-    protected $id;
+    protected ?int $id;
 
-    public function __construct($id = null, string $action = "update")
+    public function __construct(?int $id = null, string $action = "update")
     {
         $this->action = $action;
         $this->id = $id;

@@ -1,18 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Method App\\Console\\Commands\\CheckAcceptance\:\:handle\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Console/Commands/CheckAcceptance.php
-
-		-
-			message: '#^Method App\\Console\\Commands\\CheckReferrerOrder\:\:handle\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Console/Commands/CheckReferrerOrder.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$approver_role\.$#'
 			identifier: property.notFound
 			count: 1
@@ -61,18 +49,6 @@ parameters:
 			path: app/Console/Commands/ValidateEnvCommand.php
 
 		-
-			message: '#^Method App\\Domains\\Billing\\DTOs\\PaymentDTO\:\:fromRequest\(\) has parameter \$request with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/DTOs/PaymentDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\DTOs\\StatementDTO\:\:fromRequest\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/DTOs/StatementDTO.php
-
-		-
 			message: '#^Method App\\Domains\\Billing\\Events\\InvoiceAcceptanceUpdateEvent\:\:__construct\(\) has parameter \$acceptanceId with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -89,12 +65,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Billing/Events/PaymentsAddedEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Exports\\DailyCashReportExport\:\:styles\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Exports/DailyCashReportExport.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$acceptanceItems\.$#'
@@ -141,12 +111,6 @@ parameters:
 		-
 			message: '#^Method App\\Domains\\Billing\\Exports\\InvoicesExport\:\:getCustomParameterValue\(\) has parameter \$acceptanceItem with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Exports/InvoicesExport.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Exports\\InvoicesExport\:\:styles\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/Domains/Billing/Exports/InvoicesExport.php
 
@@ -865,54 +829,6 @@ parameters:
 			path: app/Domains/Billing/Services/StatementService.php
 
 		-
-			message: '#^Method App\\Domains\\Consultation\\Events\\ConsultantDocumentUpdateEvent\:\:__construct\(\) has parameter \$document with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Consultation/Events/ConsultantDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Events\\ConsultantDocumentUpdateEvent\:\:__construct\(\) has parameter \$ownerId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Consultation/Events/ConsultantDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Events\\ConsultantDocumentUpdateEvent\:\:__construct\(\) has parameter \$relatedId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Consultation/Events/ConsultantDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Events\\ConsultantDocumentUpdateEvent\:\:__construct\(\) has parameter \$relatedType with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Consultation/Events/ConsultantDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Events\\ConsultantDocumentUpdateEvent\:\:__construct\(\) has parameter \$tag with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Consultation/Events/ConsultantDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Consultation\\Events\\ConsultantDocumentUpdateEvent\:\:\$document has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Consultation/Events/ConsultantDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Consultation\\Events\\ConsultantDocumentUpdateEvent\:\:\$ownerId has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Consultation/Events/ConsultantDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Consultation\\Events\\ConsultantDocumentUpdateEvent\:\:\$relatedId has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Consultation/Events/ConsultantDocumentUpdateEvent.php
-
-		-
 			message: '#^Method App\\Domains\\Consultation\\Models\\Consultation\:\:acceptance\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1049,12 +965,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Consultation/Repositories/TimeRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Requests\\StoreConsultationRequest\:\:authorize\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Requests/StoreConsultationRequest.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ended_at\.$#'
@@ -1579,274 +1489,16 @@ parameters:
 			path: app/Domains/Inventory/Services/UnitConversionService.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\BarcodeGroupDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/BarcodeGroupDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\ConsentFormDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/ConsentFormDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\DoctorDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/DoctorDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\InstructionDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/InstructionDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\MethodDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/MethodDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\MethodTestDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/MethodTestDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\OfferDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/OfferDTO.php
-
-		-
 			message: '#^Right side of \|\| is always false\.$#'
 			identifier: booleanOr.rightAlwaysFalse
 			count: 2
 			path: app/Domains/Laboratory/DTOs/OfferDTO.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\ReportTemplateDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/ReportTemplateDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\RequestFormDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/RequestFormDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\SampleTypeDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/SampleTypeDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\SectionDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/SectionDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\SectionGroupDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/SectionGroupDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\TestDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/TestDTO.php
-
-		-
 			message: '#^Variable \$existingType on left side of \?\? is never defined\.$#'
 			identifier: nullCoalesce.variable
 			count: 1
 			path: app/Domains/Laboratory/DTOs/TestDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\TestGroupDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/TestGroupDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\DTOs\\WorkflowDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/DTOs/WorkflowDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\ConsentFormDocumentUpdateEvent\:\:__construct\(\) has parameter \$document with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/ConsentFormDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\ConsentFormDocumentUpdateEvent\:\:__construct\(\) has parameter \$ownerId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/ConsentFormDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\ConsentFormDocumentUpdateEvent\:\:__construct\(\) has parameter \$relatedId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/ConsentFormDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\ConsentFormDocumentUpdateEvent\:\:__construct\(\) has parameter \$relatedType with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/ConsentFormDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\ConsentFormDocumentUpdateEvent\:\:__construct\(\) has parameter \$tag with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/ConsentFormDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Laboratory\\Events\\ConsentFormDocumentUpdateEvent\:\:\$document has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Laboratory/Events/ConsentFormDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Laboratory\\Events\\ConsentFormDocumentUpdateEvent\:\:\$relatedId has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Laboratory/Events/ConsentFormDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\InstructionDocumentUpdateEvent\:\:__construct\(\) has parameter \$document with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/InstructionDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\InstructionDocumentUpdateEvent\:\:__construct\(\) has parameter \$ownerId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/InstructionDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\InstructionDocumentUpdateEvent\:\:__construct\(\) has parameter \$relatedId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/InstructionDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\InstructionDocumentUpdateEvent\:\:__construct\(\) has parameter \$relatedType with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/InstructionDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\InstructionDocumentUpdateEvent\:\:__construct\(\) has parameter \$tag with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/InstructionDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Laboratory\\Events\\InstructionDocumentUpdateEvent\:\:\$document has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Laboratory/Events/InstructionDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Laboratory\\Events\\InstructionDocumentUpdateEvent\:\:\$relatedId has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Laboratory/Events/InstructionDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\ReportTemplateDocumentUpdateEvent\:\:__construct\(\) has parameter \$document with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/ReportTemplateDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\ReportTemplateDocumentUpdateEvent\:\:__construct\(\) has parameter \$ownerId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/ReportTemplateDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\ReportTemplateDocumentUpdateEvent\:\:__construct\(\) has parameter \$relatedId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/ReportTemplateDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\ReportTemplateDocumentUpdateEvent\:\:__construct\(\) has parameter \$relatedType with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/ReportTemplateDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\ReportTemplateDocumentUpdateEvent\:\:__construct\(\) has parameter \$tag with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/ReportTemplateDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Laboratory\\Events\\ReportTemplateDocumentUpdateEvent\:\:\$document has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Laboratory/Events/ReportTemplateDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Laboratory\\Events\\ReportTemplateDocumentUpdateEvent\:\:\$relatedId has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Laboratory/Events/ReportTemplateDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\RequestFormDocumentUpdateEvent\:\:__construct\(\) has parameter \$document with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/RequestFormDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\RequestFormDocumentUpdateEvent\:\:__construct\(\) has parameter \$ownerId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/RequestFormDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\RequestFormDocumentUpdateEvent\:\:__construct\(\) has parameter \$relatedId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/RequestFormDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\RequestFormDocumentUpdateEvent\:\:__construct\(\) has parameter \$relatedType with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/RequestFormDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Events\\RequestFormDocumentUpdateEvent\:\:__construct\(\) has parameter \$tag with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Events/RequestFormDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Laboratory\\Events\\RequestFormDocumentUpdateEvent\:\:\$document has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Laboratory/Events/RequestFormDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Laboratory\\Events\\RequestFormDocumentUpdateEvent\:\:\$relatedId has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Laboratory/Events/RequestFormDocumentUpdateEvent.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
@@ -1892,18 +1544,6 @@ parameters:
 
 		-
 			message: '#^Method App\\Domains\\Laboratory\\Exports\\TestExport\:\:formatMethodConditionalReferrerPrice\(\) has parameter \$method with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Exports/TestExport.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Exports\\TestExport\:\:formatMultipleMethodPrices\(\) has parameter \$methods with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Exports/TestExport.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Exports\\TestExport\:\:formatMultipleMethodReferrerPrices\(\) has parameter \$methods with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Laboratory/Exports/TestExport.php
@@ -3260,18 +2900,6 @@ parameters:
 			path: app/Domains/Notification/Jobs/SendCollectRequestWebhook.php
 
 		-
-			message: '#^Method App\\Domains\\Notification\\Jobs\\SendCollectRequestWebhook\:\:__construct\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Notification/Jobs/SendCollectRequestWebhook.php
-
-		-
-			message: '#^Property App\\Domains\\Notification\\Jobs\\SendCollectRequestWebhook\:\:\$id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Notification/Jobs/SendCollectRequestWebhook.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>logisticInfo" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -3488,12 +3116,6 @@ parameters:
 			path: app/Domains/Notification/Services/WhatsappMessageService.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Adapters\\BillingAdapter\:\:getInvoiceNo\(\) has parameter \$invoice with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Adapters/BillingAdapter.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$template\.$#'
 			identifier: property.notFound
 			count: 1
@@ -3504,54 +3126,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Domains/Reception/Adapters/LaboratoryAdapter.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Adapters\\UserAdapter\:\:getUserAllowedDocumentTags\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Adapters/UserAdapter.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Adapters\\WorkflowAdapter\:\:getPrevSections\(\) has parameter \$method_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Adapters/WorkflowAdapter.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Adapters\\WorkflowAdapter\:\:getPrevSections\(\) has parameter \$order with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Adapters/WorkflowAdapter.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Adapters\\WorkflowAdapter\:\:getSectionWorkflow\(\) has parameter \$method_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Adapters/WorkflowAdapter.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Adapters\\WorkflowAdapter\:\:getSectionWorkflowByMethodTestAndOrder\(\) has parameter \$method_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Adapters/WorkflowAdapter.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Adapters\\WorkflowAdapter\:\:getSectionWorkflowByMethodTestAndOrder\(\) has parameter \$order with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Adapters/WorkflowAdapter.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\DTOs\\AcceptanceItemDTO\:\:__construct\(\) has parameter \$reportless with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/DTOs/AcceptanceItemDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\DTOs\\AcceptanceItemStateDTO\:\:__construct\(\) has parameter \$parameters with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/DTOs/AcceptanceItemStateDTO.php
 
 		-
 			message: '#^Parameter \#7 \$details of class App\\Domains\\Reception\\DTOs\\AcceptanceItemStateDTO constructor expects string\|null, bool given\.$#'
@@ -3566,70 +3140,10 @@ parameters:
 			path: app/Domains/Reception/DTOs/AcceptanceItemStateDTO.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\DTOs\\PatientDTO\:\:fromRequest\(\) has parameter \$validatedRequest with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/DTOs/PatientDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\DTOs\\RelativeDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/DTOs/RelativeDTO.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Events\\AcceptanceDeletedEvent\:\:__construct\(\) has parameter \$invoiceId with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Events/AcceptanceDeletedEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Events\\PatientDocumentUpdateEvent\:\:__construct\(\) has parameter \$document with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Events/PatientDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Events\\PatientDocumentUpdateEvent\:\:__construct\(\) has parameter \$ownerId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Events/PatientDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Events\\PatientDocumentUpdateEvent\:\:__construct\(\) has parameter \$relatedId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Events/PatientDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Events\\PatientDocumentUpdateEvent\:\:__construct\(\) has parameter \$relatedType with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Events/PatientDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Events\\PatientDocumentUpdateEvent\:\:__construct\(\) has parameter \$tag with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Events/PatientDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Reception\\Events\\PatientDocumentUpdateEvent\:\:\$document has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Reception/Events/PatientDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Reception\\Events\\PatientDocumentUpdateEvent\:\:\$ownerId has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Reception/Events/PatientDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Reception\\Events\\PatientDocumentUpdateEvent\:\:\$relatedId has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Reception/Events/PatientDocumentUpdateEvent.php
 
 		-
 			message: '#^Method App\\Domains\\Reception\\Events\\ReportPublishedEvent\:\:__construct\(\) has parameter \$silent with no type specified\.$#'
@@ -3746,37 +3260,7 @@ parameters:
 			path: app/Domains/Reception/Exports/AcceptanceItemsExport.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Exports\\AcceptanceItemsExport\:\:formatDate\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Exports/AcceptanceItemsExport.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Exports\\AcceptanceItemsExport\:\:formatDateTime\(\) has parameter \$datetime with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Exports/AcceptanceItemsExport.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Exports\\AcceptanceItemsExport\:\:formatDiscount\(\) has parameter \$discount with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Exports/AcceptanceItemsExport.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Exports\\AcceptanceItemsExport\:\:formatEstimatedReportDate\(\) has parameter \$row with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Exports/AcceptanceItemsExport.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Exports\\AcceptanceItemsExport\:\:formatPrice\(\) has parameter \$price with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Exports/AcceptanceItemsExport.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Exports\\AcceptanceItemsExport\:\:formatStatus\(\) has parameter \$status with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Exports/AcceptanceItemsExport.php
@@ -3842,12 +3326,6 @@ parameters:
 			path: app/Domains/Reception/Exports/AcceptanceItemsExport.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Exports\\AcceptancesExport\:\:formatDateTime\(\) has parameter \$value with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Exports/AcceptancesExport.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Exports\\AcceptancesExport\:\:formatTests\(\) has parameter \$row with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -3898,12 +3376,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$total_transfer on array\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Reception/Exports/DailyReceptionReportExport.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Exports\\DailyReceptionReportExport\:\:styles\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/Domains/Reception/Exports/DailyReceptionReportExport.php
 
@@ -6051,12 +5523,6 @@ parameters:
 			path: app/Domains/Reception/Services/WorkflowProgressionService.php
 
 		-
-			message: '#^Method App\\Domains\\Referrer\\DTOs\\GroupMaterialDTO\:\:toArray\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/DTOs/GroupMaterialDTO.php
-
-		-
 			message: '#^Method App\\Domains\\Referrer\\Events\\CollectRequestEvent\:\:__construct\(\) has parameter \$id with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -6351,72 +5817,6 @@ parameters:
 			path: app/Domains/Referrer/Repositories/CollectRequestRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\CollectRequestRepository\:\:findCollectRequestById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/CollectRequestRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\MaterialRepository\:\:applyDateRangeFilter\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/MaterialRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\MaterialRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Repositories/MaterialRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\MaterialRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/MaterialRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\MaterialRepository\:\:ensureCarbonDate\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/MaterialRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\MaterialRepository\:\:getByBarcode\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Repositories/MaterialRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\MaterialRepository\:\:getByBarcode\(\) has parameter \$barcode with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/MaterialRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\MaterialRepository\:\:getById\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Repositories/MaterialRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\MaterialRepository\:\:getById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/MaterialRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\MaterialRepository\:\:isBarcodeAvailableToAssign\(\) has parameter \$barcode with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/MaterialRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\MaterialRepository\:\:isBarcodeAvailableToAssign\(\) has parameter \$sampleTypeId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/MaterialRepository.php
-
-		-
 			message: '#^Relation ''referrer'' is not found in App\\Domains\\Referrer\\Models\\Material model\.$#'
 			identifier: larastan.relationExistence
 			count: 1
@@ -6429,12 +5829,6 @@ parameters:
 			path: app/Domains/Referrer/Repositories/MaterialRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\OrderMaterialRepository\:\:applyDateRangeFilter\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/OrderMaterialRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Referrer\\Repositories\\OrderMaterialRepository\:\:applyFilters\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6445,36 +5839,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Referrer/Repositories/OrderMaterialRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\OrderMaterialRepository\:\:ensureCarbonDate\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/OrderMaterialRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerOrderRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Repositories/ReferrerOrderRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerOrderRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/ReferrerOrderRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerOrderRepository\:\:findReferrerOrderByEmail\(\) has parameter \$email with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/ReferrerOrderRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerOrderRepository\:\:findReferrerOrderById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/ReferrerOrderRepository.php
 
 		-
 			message: '#^Relation ''patient'' is not found in App\\Domains\\Referrer\\Models\\ReferrerOrder model\.$#'
@@ -6495,30 +5859,6 @@ parameters:
 			path: app/Domains/Referrer/Repositories/ReferrerOrderRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Repositories/ReferrerRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/ReferrerRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerRepository\:\:findReferrerByEmail\(\) has parameter \$email with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/ReferrerRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerRepository\:\:findReferrerById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/ReferrerRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerTestRepository\:\:applyFilter\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6526,24 +5866,6 @@ parameters:
 
 		-
 			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerTestRepository\:\:applyFilter\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/ReferrerTestRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerTestRepository\:\:store\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/ReferrerTestRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerTestRepository\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Repositories/ReferrerTestRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerTestRepository\:\:update\(\) has parameter \$data with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Referrer/Repositories/ReferrerTestRepository.php
@@ -6559,30 +5881,6 @@ parameters:
 			identifier: larastan.relationExistence
 			count: 3
 			path: app/Domains/Referrer/Repositories/ReferrerTestRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\SampleCollectorRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Repositories/SampleCollectorRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\SampleCollectorRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/SampleCollectorRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\SampleCollectorRepository\:\:findSampleCollectorByEmail\(\) has parameter \$email with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/SampleCollectorRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\SampleCollectorRepository\:\:findSampleCollectorById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Repositories/SampleCollectorRepository.php
 
 		-
 			message: '#^Cannot access property \$id on object\|string\.$#'
@@ -6615,38 +5913,8 @@ parameters:
 			path: app/Domains/Referrer/Resources/ReferrerTestResource.php
 
 		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\CollectRequestService\:\:getCollectRequestById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/CollectRequestService.php
-
-		-
 			message: '#^Access to an undefined property App\\Domains\\Referrer\\Models\\Material\:\:\$orderMaterial\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Domains/Referrer/Services/MaterialService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\MaterialService\:\:generateBarcode\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/MaterialService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\MaterialService\:\:generateBarcode\(\) has parameter \$i with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/MaterialService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\MaterialService\:\:generateBarcode\(\) has parameter \$sampleType with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/MaterialService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\MaterialService\:\:generatePackingSeries\(\) has parameter \$sampleTypeName with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Referrer/Services/MaterialService.php
 
@@ -6655,42 +5923,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Domains/Referrer/Services/MaterialService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\MaterialService\:\:getMaterialByBarcode\(\) has parameter \$barcode with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/MaterialService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\MaterialService\:\:isBarcodeAvailableToAssign\(\) has parameter \$barcode with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/MaterialService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\MaterialService\:\:isBarcodeAvailableToAssign\(\) has parameter \$sampleId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/MaterialService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\MaterialService\:\:listMaterials\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/MaterialService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\MaterialService\:\:listPackingSeriesMaterials\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/MaterialService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\OrderMaterialService\:\:listOrderMaterials\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/OrderMaterialService.php
 
 		-
 			message: '#^Access to an undefined property App\\Domains\\Referrer\\Models\\ReferrerOrder\:\:\$acceptance\.$#'
@@ -6771,18 +6003,6 @@ parameters:
 			path: app/Domains/Referrer/Services/ReferrerOrderService.php
 
 		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\ReferrerOrderService\:\:buildGroupedOrderItems\(\) has parameter \$acceptanceItems with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/ReferrerOrderService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\ReferrerOrderService\:\:updateReferrerOrderStatus\(\) has parameter \$status with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/ReferrerOrderService.php
-
-		-
 			message: '#^Parameter \#1 \$array \(list\<array\<''id''\|''patients''\|''samples''\|''test'', mixed\>\>\) of array_values is already a list, call has no effect\.$#'
 			identifier: arrayValues.list
 			count: 1
@@ -6856,24 +6076,6 @@ parameters:
 
 
 		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\ReferrerService\:\:getReferrerByEmail\(\) has parameter \$idNo with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/ReferrerService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\ReferrerService\:\:getReferrerById\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Services/ReferrerService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\ReferrerService\:\:getReferrerById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/ReferrerService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$methods\.$#'
 			identifier: property.notFound
 			count: 2
@@ -6889,12 +6091,6 @@ parameters:
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$test_id\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Domains/Referrer/Services/ReferrerTestService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\ReferrerTestService\:\:copyFromOtherReferrer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
 			path: app/Domains/Referrer/Services/ReferrerTestService.php
 
 		-
@@ -6920,18 +6116,6 @@ parameters:
 			identifier: argument.templateType
 			count: 2
 			path: app/Domains/Referrer/Services/ReferrerTestService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\SampleCollectorService\:\:getSampleCollectorByEmail\(\) has parameter \$email with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/SampleCollectorService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\SampleCollectorService\:\:getSampleCollectorById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Services/SampleCollectorService.php
 
 		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\AcceptanceItem\:\:\$methodTest\.$#'
@@ -7042,48 +6226,6 @@ parameters:
 			path: app/Domains/Referrer/Support/ReferrerOrderPayloadBuilder.php
 
 		-
-			message: '#^Method App\\Domains\\Setting\\Repositories\\SettingRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Setting/Repositories/SettingRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Setting\\Repositories\\SettingRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Setting/Repositories/SettingRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Setting\\Repositories\\SettingRepository\:\:getSettingsByClass\(\) has parameter \$class with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Setting/Repositories/SettingRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Setting\\Repositories\\SettingRepository\:\:getSettingsByClassAndKey\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Setting/Repositories/SettingRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Setting\\Repositories\\SettingRepository\:\:getSettingsByClassAndKey\(\) has parameter \$class with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Setting/Repositories/SettingRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Setting\\Repositories\\SettingRepository\:\:getSettingsByClassAndKey\(\) has parameter \$key with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Setting/Repositories/SettingRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Setting\\Repositories\\SettingRepository\:\:updateSetting\(\) has parameter \$value with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Setting/Repositories/SettingRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Setting\\Services\\SettingService\:\:getSettingByKey\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7124,108 +6266,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Domains/User/DTOs/RoleDTO.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Events\\UserDocumentUpdateEvent\:\:__construct\(\) has parameter \$document with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Events/UserDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Events\\UserDocumentUpdateEvent\:\:__construct\(\) has parameter \$ownerId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Events/UserDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Events\\UserDocumentUpdateEvent\:\:__construct\(\) has parameter \$relatedId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Events/UserDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Events\\UserDocumentUpdateEvent\:\:__construct\(\) has parameter \$relatedType with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Events/UserDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Events\\UserDocumentUpdateEvent\:\:__construct\(\) has parameter \$tag with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Events/UserDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\User\\Events\\UserDocumentUpdateEvent\:\:\$document has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/User/Events/UserDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\User\\Events\\UserDocumentUpdateEvent\:\:\$ownerId has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/User/Events/UserDocumentUpdateEvent.php
-
-		-
-			message: '#^Property App\\Domains\\User\\Events\\UserDocumentUpdateEvent\:\:\$relatedId has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/User/Events/UserDocumentUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Listeners\\SectionPermissionsListener\:\:deleteSectionPermissions\(\) has parameter \$sectionData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Listeners/SectionPermissionsListener.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Listeners\\SectionPermissionsListener\:\:getSectionGroupIds\(\) has parameter \$sectionGroup with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Listeners/SectionPermissionsListener.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Listeners\\SectionPermissionsListener\:\:getSectionGroupPermission\(\) has parameter \$sectionGroup with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Listeners/SectionPermissionsListener.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Listeners\\SectionPermissionsListener\:\:getSectionPermissions\(\) has parameter \$prefix with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Listeners/SectionPermissionsListener.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Listeners\\SectionPermissionsListener\:\:getSectionPermissions\(\) has parameter \$sectionId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Listeners/SectionPermissionsListener.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Listeners\\SectionPermissionsListener\:\:permissions\(\) has parameter \$sectionGroup with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Listeners/SectionPermissionsListener.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Listeners\\SectionPermissionsListener\:\:permissions\(\) has parameter \$sectionId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Listeners/SectionPermissionsListener.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Listeners\\SectionPermissionsListener\:\:updateSectionPermissions\(\) has parameter \$newData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Listeners/SectionPermissionsListener.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Listeners\\SectionPermissionsListener\:\:updateSectionPermissions\(\) has parameter \$oldData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Listeners/SectionPermissionsListener.php
 
 		-
 			message: '#^PHPDoc type array\<int, string\> of property App\\Domains\\User\\Models\\User\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
@@ -8788,12 +7828,6 @@ parameters:
 			path: app/Http/Requests/ReservationListRequest.php
 
 		-
-			message: '#^Method App\\Http\\Requests\\SettingRequest\:\:authorize\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Requests/SettingRequest.php
-
-		-
 			message: '#^Unable to resolve the template type TKey in call to function collect$#'
 			identifier: argument.templateType
 			count: 1
@@ -8884,18 +7918,6 @@ parameters:
 			path: app/Notifications/Channels/TwilioWhatsAppChannel.php
 
 		-
-			message: '#^Method App\\Notifications\\Channels\\TwilioWhatsAppChannel\:\:__construct\(\) has parameter \$messagingServiceSid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Notifications/Channels/TwilioWhatsAppChannel.php
-
-		-
-			message: '#^Method App\\Notifications\\Channels\\TwilioWhatsAppChannel\:\:saveWhatsAppMessage\(\) has parameter \$notifiable with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Notifications/Channels/TwilioWhatsAppChannel.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Notifications\\Notification\:\:toWhatsApp\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -8914,24 +7936,6 @@ parameters:
 			path: app/Notifications/Channels/TwilioWhatsAppTemplateChannel.php
 
 		-
-			message: '#^Method App\\Notifications\\Channels\\TwilioWhatsAppTemplateChannel\:\:__construct\(\) has parameter \$messagingServiceSid with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Notifications/Channels/TwilioWhatsAppTemplateChannel.php
-
-		-
-			message: '#^Method App\\Notifications\\Channels\\TwilioWhatsAppTemplateChannel\:\:saveWhatsAppMessage\(\) has parameter \$notifiable with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Notifications/Channels/TwilioWhatsAppTemplateChannel.php
-
-		-
-			message: '#^Method App\\Notifications\\Channels\\TwilioWhatsAppTemplateChannel\:\:saveWhatsAppMessage\(\) has parameter \$to with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Notifications/Channels/TwilioWhatsAppTemplateChannel.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fullName\.$#'
 			identifier: property.notFound
 			count: 1
@@ -8944,13 +7948,8 @@ parameters:
 			path: app/Notifications/ReferrerReportPublished.php
 
 		-
-			message: '#^Method App\\Rules\\TimeSlotAvailable\:\:__construct\(\) has parameter \$exceptID with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Rules/TimeSlotAvailable.php
-
-		-
-			message: '#^Method App\\Utils\\Constants\:\:countries\(\) has no return type specified\.$#'
+			message: '#^Method App\\Domains\\Referrer\\Repositories\\MaterialRepository\:\:getByBarcode\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: app/Utils/Constants.php
+			path: app/Domains/Referrer/Repositories/MaterialRepository.php
+

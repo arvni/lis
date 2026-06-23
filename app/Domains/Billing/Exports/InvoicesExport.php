@@ -59,7 +59,7 @@ class InvoicesExport implements FromCollection
         return $this->invoices;
     }
 
-    public function styles(Worksheet $sheet)
+    public function styles(Worksheet $sheet): array
     {
         // Calculate the last column dynamically
         $totalColumns = 19 + count($this->dynamicColumns); // 19 base columns + dynamic columns

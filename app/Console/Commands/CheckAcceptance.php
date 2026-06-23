@@ -28,7 +28,7 @@ class CheckAcceptance extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         Acceptance::withoutEvents(function () {
             Acceptance::query()

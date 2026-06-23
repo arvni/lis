@@ -90,7 +90,7 @@ class StoreReferrerOrderPatientController extends Controller
         if ($referrerOrder->ownedDocuments()->count()) {
             $referrerOrder->load("ownedDocuments");
             foreach ($referrerOrder->ownedDocuments as $document) {
-                PatientDocumentUpdateEvent::dispatch($document->id, $patient->id, DocumentTag::DOCUMENT, "referrerOrder", $referrerOrder->id);
+                PatientDocumentUpdateEvent::dispatch($document->id, $patient->id, DocumentTag::DOCUMENT->value, "referrerOrder", $referrerOrder->id);
             }
         }
 

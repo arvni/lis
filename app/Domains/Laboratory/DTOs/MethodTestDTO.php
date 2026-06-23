@@ -13,7 +13,7 @@ class MethodTestDTO
     {
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             "method_id" => $this->method_id,

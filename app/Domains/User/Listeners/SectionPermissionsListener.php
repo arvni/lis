@@ -35,7 +35,7 @@ class SectionPermissionsListener
         }
     }
 
-    private function permissions($sectionId, $sectionGroup): array
+    private function permissions(int|string $sectionId, array $sectionGroup): array
     {
         [$prefix, $sectionGroupPermissions] = $this->getSectionGroupPermission($sectionGroup);
         return [
@@ -55,7 +55,7 @@ class SectionPermissionsListener
         $adminRole?->givePermissionTo($permissions);
     }
 
-    private function updateSectionPermissions($newData, $oldData): void
+    private function updateSectionPermissions(array $newData, array $oldData): void
     {
         $permissions = [];
         $oldPermissions = $this->permissions($oldData["id"], $oldData["section_group"]);
@@ -72,7 +72,7 @@ class SectionPermissionsListener
         $adminRole?->givePermissionTo($permissions);
     }
 
-    private function deleteSectionPermissions($sectionData): void
+    private function deleteSectionPermissions(array $sectionData): void
     {
         [$prefix, $_] = $this->getSectionGroupPermission($sectionData["section_group"]);
         $permissionNames = $this->getSectionPermissions($sectionData["id"], $prefix);
@@ -82,7 +82,7 @@ class SectionPermissionsListener
         }
     }
 
-    private function getSectionPermissions($sectionId, $prefix): array
+    private function getSectionPermissions(int|string $sectionId, string $prefix): array
     {
         return [
             "Sections$prefix.Section.$sectionId",
@@ -98,7 +98,7 @@ class SectionPermissionsListener
     }
 
 
-    private function getSectionGroupPermission($sectionGroup): array
+    private function getSectionGroupPermission(array $sectionGroup): array
     {
         $idList = $this->getSectionGroupIds($sectionGroup);
         $output = [];
@@ -110,7 +110,7 @@ class SectionPermissionsListener
         return [$tmp, $output];
     }
 
-    private function getSectionGroupIds($sectionGroup): array
+    private function getSectionGroupIds(array $sectionGroup): array
     {
         if (isset($sectionGroup["parent"]) && $sectionGroup["section_group_id"]) {
             return [... $this->getSectionGroupIds($sectionGroup["parent"]), $sectionGroup["id"]];

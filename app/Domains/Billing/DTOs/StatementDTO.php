@@ -12,7 +12,7 @@ class StatementDTO
     {
     }
 
-    public static function fromRequest($data): self
+    public static function fromRequest(array $data): self
     {
         return new self(
             referrerId: $data['referrer']['id'] ?? $data['referrer_id'],

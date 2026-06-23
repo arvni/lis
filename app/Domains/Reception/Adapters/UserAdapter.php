@@ -10,7 +10,7 @@ readonly class UserAdapter
     {
     }
 
-    public function getUserAllowedDocumentTags()
+    public function getUserAllowedDocumentTags(): array
     {
         return $this->permissionService->getUserAllowedDocumentTags();
     }

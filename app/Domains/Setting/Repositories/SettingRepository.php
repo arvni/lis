@@ -4,6 +4,7 @@ namespace App\Domains\Setting\Repositories;
 
 use App\Domains\Setting\Models\Setting;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 class SettingRepository
 {
@@ -19,13 +20,13 @@ class SettingRepository
     }
 
 
-    public function updateSetting(Setting $setting, $value): Setting
+    public function updateSetting(Setting $setting, mixed $value): Setting
     {
         $setting->update(["value" => [...$setting->value, "value" => $value]]);
         return $setting;
     }
 
-    public function getSettingsByClass($class): array
+    public function getSettingsByClass(string $class): array
     {
         $settings = Setting::where("class", $class)
             ->get()
@@ -36,17 +37,20 @@ class SettingRepository
         return $settings;
     }
 
-    public function getSettingsByClassAndKey($class, $key)
+    public function getSettingsByClassAndKey(string $class, string $key): mixed
     {
         return Setting::where("class", $class)
             ->where("key", $key)
             ->first()?->value["value"];
     }
 
-    protected function applyFilters($query, array $filters)
+    /**
+     * @param  Builder<Setting>  $query
+     */
+    protected function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
-            $query->search(["name"], $filters["search"]);
+            $query->search(["title"], $filters["search"]);
         if (isset($filters["settingClass"]))
             $query->where("class", $filters["settingClass"]);
     }

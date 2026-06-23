@@ -2,6 +2,7 @@
 
 namespace App\Domains\Referrer\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Referrer\Models\Material;
 use Carbon\Carbon;
@@ -83,7 +84,11 @@ class MaterialRepository
         $this->logDeleted($material);
     }
 
-    protected function applyFilters($query, array $filters)
+    /**
+     * @param  Builder<Material>  $query
+     * @return Builder<Material>
+     */
+    protected function applyFilters(Builder $query, array $filters): Builder
     {
         // Define filter mappings for cleaner code
         $simpleFilters = [
@@ -132,7 +137,10 @@ class MaterialRepository
     /**
      * Apply date range filter to the query
      */
-    private function applyDateRangeFilter($query, string $field, array $dateFilter): void
+    /**
+     * @param  Builder<Material>  $query
+     */
+    private function applyDateRangeFilter(Builder $query, string $field, array $dateFilter): void
     {
         $timezone = config('app.timezone', 'Asia/Muscat');
 
@@ -169,7 +177,7 @@ class MaterialRepository
     /**
      * Ensure the given date is a Carbon instance
      */
-    private function ensureCarbonDate($date, string $timezone): Carbon
+    private function ensureCarbonDate(mixed $date, string $timezone): Carbon
     {
         if ($date instanceof Carbon) {
             return $date->timezone($timezone);
@@ -182,7 +190,7 @@ class MaterialRepository
         }
     }
 
-    public function isBarcodeAvailableToAssign($barcode, $sampleTypeId): bool
+    public function isBarcodeAvailableToAssign(string $barcode, int|string $sampleTypeId): bool
     {
         return Material::query()
             ->where('barcode', $barcode)
@@ -192,12 +200,12 @@ class MaterialRepository
             ->exists();
     }
 
-    public function getByBarcode($barcode)
+    public function getByBarcode(string $barcode)
     {
         return Material::query()->where("barcode", $barcode)->first();
     }
 
-    public function getById($id)
+    public function getById(int|string $id): ?Material
     {
         return Material::find($id);
     }

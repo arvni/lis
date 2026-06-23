@@ -19,7 +19,7 @@ class PaymentDTO
     {
     }
 
-    public static function fromRequest($request): self
+    public static function fromRequest(array $request): self
     {
         return new self(
             invoiceId: $request['invoice_id'],

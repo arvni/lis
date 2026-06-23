@@ -3,7 +3,7 @@
 namespace App\Utils;
 class Constants
 {
-    public static function countries(string $x)
+    public static function countries(string $x): string
     {
         return match ($x) {
             "AF" => "Afghanistan",

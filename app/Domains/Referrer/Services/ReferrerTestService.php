@@ -127,7 +127,7 @@ class ReferrerTestService
         return 0;
     }
 
-    public function copyFromOtherReferrer(Referrer $sourceReferrer, Referrer $referrer)
+    public function copyFromOtherReferrer(Referrer $sourceReferrer, Referrer $referrer): void
     {
         $sourceReferrer->load("referrerTests");
         $referrer->load("referrerTests");

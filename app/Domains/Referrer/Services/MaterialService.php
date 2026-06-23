@@ -21,12 +21,12 @@ readonly class MaterialService
     {
     }
 
-    public function listMaterials($queryData): LengthAwarePaginator
+    public function listMaterials(array $queryData): LengthAwarePaginator
     {
         return $this->materialRepository->ListMaterials($queryData);
     }
 
-    public function listPackingSeriesMaterials($queryData): LengthAwarePaginator
+    public function listPackingSeriesMaterials(array $queryData): LengthAwarePaginator
     {
         return $this->materialRepository->listPackingSeriesMaterials($queryData);
     }
@@ -105,12 +105,12 @@ readonly class MaterialService
     }
 
 
-    private function generateBarcode($date, $sampleType, $i): string
+    private function generateBarcode(mixed $date, string $sampleType, int $i): string
     {
         return Carbon::parse($date)->format("y") . ucfirst(substr($sampleType, 0, 1)) . (Carbon::now()->getTimestamp() + $i);
     }
 
-    private function generatePackingSeries($sampleTypeName, Carbon $date): string
+    private function generatePackingSeries(string $sampleTypeName, Carbon $date): string
     {
         $prefix = implode("", array_map(fn($item) => strtoupper(substr($item, 0, 1)), explode(" ", $sampleTypeName)));
         return $prefix . "-" . $date->format("Y-m-d-") . $date->timestamp;
@@ -121,12 +121,12 @@ readonly class MaterialService
         return $this->materialRepository->getAll(["filters" => ["packing_series" => $packingSeries]]);
     }
 
-    public function isBarcodeAvailableToAssign($barcode,$sampleId): bool
+    public function isBarcodeAvailableToAssign(string $barcode, int|string $sampleId): bool
     {
         return $this->materialRepository->isBarcodeAvailableToAssign($barcode,$sampleId);
     }
 
-    public function getMaterialByBarcode($barcode)
+    public function getMaterialByBarcode(string $barcode)
     {
         return $this->materialRepository->getByBarcode($barcode);
     }

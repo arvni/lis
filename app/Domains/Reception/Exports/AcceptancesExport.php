@@ -126,7 +126,7 @@ class AcceptancesExport implements
         return implode(', ', array_unique($parts));
     }
 
-    private function formatDateTime($value): string
+    private function formatDateTime(mixed $value): string
     {
         if (!$value) return '';
         return Carbon::parse($value, self::TIMEZONE)->format('Y-m-d H:i');
