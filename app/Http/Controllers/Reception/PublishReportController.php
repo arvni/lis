@@ -16,7 +16,7 @@ class PublishReportController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Report $report, PublishReportRequest $request)
+    public function __invoke(Report $report, PublishReportRequest $request): \Illuminate\Http\RedirectResponse
     {
         if (!$report->status)
             return back()->withErrors("this report has been rejected before");

@@ -19,7 +19,7 @@ class ShowSectionController extends Controller
      * Handle the incoming request.
      * @throws AuthorizationException
      */
-    public function __invoke(Section $section, Request $request)
+    public function __invoke(Section $section, Request $request): \Inertia\Response
     {
 
         $section->load("sectionGroup");

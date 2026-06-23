@@ -35,7 +35,7 @@ class UserController extends Controller
         return Inertia::render('User/Add',);
     }
 
-    public function store(StoreUserRequest $request)
+    public function store(StoreUserRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
 
@@ -55,7 +55,7 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
 
-    public function edit(User $user)
+    public function edit(User $user): \Inertia\Response
     {
         $user->load('roles:id,name');
         $this->authorize("update", $user);
@@ -64,7 +64,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(UpdateUserRequest $request, User $user)
+    public function update(UpdateUserRequest $request, User $user): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
         $userDto = new UserDTO(
@@ -84,7 +84,7 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
 
-    public function destroy(User $user)
+    public function destroy(User $user): \Illuminate\Http\RedirectResponse
     {
         $this->authorize("delete", $user);
         $this->userService->deleteUser($user);

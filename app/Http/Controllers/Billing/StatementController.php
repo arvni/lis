@@ -38,7 +38,7 @@ class StatementController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreStatementRequest $request)
+    public function store(StoreStatementRequest $request): \Illuminate\Http\RedirectResponse
     {
         $data = array_merge($request->validated(), ['issue_date' => now()->toDateString()]);
         $this->statementService->storeStatement(StatementDTO::fromRequest($data));
@@ -48,7 +48,7 @@ class StatementController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Statement $statement)
+    public function show(Statement $statement): \Illuminate\Http\Resources\Json\JsonResource
     {
         return new StatementResource($this->statementService->loadStatementForResource($statement));
     }
@@ -56,7 +56,7 @@ class StatementController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateStatementRequest $request, Statement $statement)
+    public function update(UpdateStatementRequest $request, Statement $statement): \Illuminate\Http\RedirectResponse
     {
         $this->statementService->updateStatement($statement, StatementDTO::fromRequest([...$request->validated(),"referrer_id"=>$statement->referrer_id,"issue_date"=>$statement->issue_date]));
         return redirect()->back()->with(["success" => true, "status" => "Statement updated successfully."]);
@@ -65,7 +65,7 @@ class StatementController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Statement $statement)
+    public function destroy(Statement $statement): \Illuminate\Http\RedirectResponse
     {
         $this->statementService->deleteStatement($statement);
         return back()->with(["success" => true, "status" => "Statement deleted successfully!"]);

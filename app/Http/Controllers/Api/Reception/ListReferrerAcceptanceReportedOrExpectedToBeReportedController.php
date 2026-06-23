@@ -16,7 +16,7 @@ class ListReferrerAcceptanceReportedOrExpectedToBeReportedController extends Con
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
         $acceptances = $this->acceptanceService->getReferrerAcceptanceReported($request->input("referrer.id"), $request->input("date"));
         return AcceptanceResource::collection($acceptances);

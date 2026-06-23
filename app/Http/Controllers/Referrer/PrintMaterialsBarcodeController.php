@@ -15,7 +15,7 @@ class PrintMaterialsBarcodeController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(string $packingSeries)
+    public function __invoke(string $packingSeries): \Inertia\Response
     {
         $materials = $this->materialService->getMaterialsByPackingSeries($packingSeries);
         return Inertia::render("Materials/Barcodes", ["materials" => $materials]);

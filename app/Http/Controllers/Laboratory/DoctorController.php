@@ -38,7 +38,7 @@ class DoctorController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreDoctorRequest $doctorRequest)
+    public function store(StoreDoctorRequest $doctorRequest): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $doctorRequest->validated();
         $doctorDto = new DoctorDTO(
@@ -55,7 +55,7 @@ class DoctorController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Doctor $doctor, UpdateDoctorRequest $request)
+    public function update(Doctor $doctor, UpdateDoctorRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $request->validated();
         $doctorDto = new DoctorDTO(

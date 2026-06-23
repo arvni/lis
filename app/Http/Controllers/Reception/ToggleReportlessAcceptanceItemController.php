@@ -13,7 +13,7 @@ class ToggleReportlessAcceptanceItemController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request, Acceptance $acceptance, AcceptanceItem $acceptanceItem)
+    public function __invoke(Request $request, Acceptance $acceptance, AcceptanceItem $acceptanceItem): \Illuminate\Http\RedirectResponse
     {
         Gate::authorize('Reception.Acceptances.Toggle Reportless Acceptance Item');
 

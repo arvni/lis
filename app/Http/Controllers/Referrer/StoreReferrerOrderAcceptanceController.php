@@ -79,7 +79,7 @@ class StoreReferrerOrderAcceptanceController extends Controller
     /**
      * Handle pooling mode - add tests to existing acceptance
      */
-    private function handlePoolingAcceptance(ReferrerOrder $referrerOrder, array $validated, $user)
+    private function handlePoolingAcceptance(ReferrerOrder $referrerOrder, array $validated, $user): \Illuminate\Http\RedirectResponse
     {
         $existingAcceptance = $this->receptionAdapter->findAcceptance((int) $validated['existing_acceptance_id']);
 

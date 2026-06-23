@@ -16,7 +16,7 @@ class ListRoleController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
         $roles= $this->roleService->listRoles(["filters" => ["search"=>$request->get("search")]]);
         return ListResource::collection($roles);

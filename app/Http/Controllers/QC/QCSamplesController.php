@@ -12,7 +12,7 @@ class QCSamplesController extends Controller
 {
     public function __construct(private SampleService $sampleService) {}
 
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): \Inertia\Response
     {
         Gate::authorize('QC.Samples.List Samples');
 

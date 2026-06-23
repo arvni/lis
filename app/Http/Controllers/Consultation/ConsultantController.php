@@ -43,7 +43,7 @@ class ConsultantController extends Controller
         return Inertia::render('Consultants/Add',);
     }
 
-    public function store(StoreConsultantRequest $request)
+    public function store(StoreConsultantRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
         $consultantDto = new ConsultantDTO(
@@ -87,7 +87,7 @@ class ConsultantController extends Controller
         ]);
     }
 
-    public function edit(Consultant $consultant)
+    public function edit(Consultant $consultant): \Inertia\Response
     {
         $this->authorize("update", $consultant);
         $consultant->load('user');
@@ -96,7 +96,7 @@ class ConsultantController extends Controller
         ]);
     }
 
-    public function update(UpdateConsultantRequest $request, Consultant $consultant)
+    public function update(UpdateConsultantRequest $request, Consultant $consultant): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
         $consultantDto = new ConsultantDTO(
@@ -112,7 +112,7 @@ class ConsultantController extends Controller
         return redirect()->route('consultants.index')->with('success', 'Consultant updated successfully.');
     }
 
-    public function destroy(Consultant $consultant)
+    public function destroy(Consultant $consultant): \Illuminate\Http\RedirectResponse
     {
         $this->authorize("delete", $consultant);
         $this->consultantService->deleteConsultant($consultant);

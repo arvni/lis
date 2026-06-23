@@ -14,7 +14,7 @@ class ListAcceptanceItemsController extends Controller
         $this->middleware("indexProvider");
     }
 
-    public function __invoke(ListAcceptanceItemsRequest $request)
+    public function __invoke(ListAcceptanceItemsRequest $request): \Inertia\Response
     {
         $requestInputs = $request->all();
          $acceptanceItems=$this->acceptanceItemService->listAcceptanceItems($request->all());

@@ -16,7 +16,7 @@ class CancelAcceptanceController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Acceptance $acceptance)
+    public function __invoke(Acceptance $acceptance): \Illuminate\Http\RedirectResponse
     {
         $this->authorize("cancel", $acceptance);
         $this->acceptanceService->cancelAcceptance($acceptance);

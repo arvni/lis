@@ -61,7 +61,7 @@ class OrderMaterialController extends Controller
     /**
      * show the specified resource in storage.
      */
-    public function show(OrderMaterial $orderMaterial)
+    public function show(OrderMaterial $orderMaterial): \Illuminate\Http\Resources\Json\JsonResource
     {
         $loadedOrderMaterial = $this->orderMaterialService->loadForEdit($orderMaterial);
         return new OrderMaterialResource($loadedOrderMaterial);

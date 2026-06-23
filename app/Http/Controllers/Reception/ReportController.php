@@ -36,7 +36,7 @@ class ReportController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): \Inertia\Response
     {
         $requestInputs = $request->all();
         $reports = $this->reportService->listReports($requestInputs);
@@ -78,7 +78,7 @@ class ReportController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Report $report)
+    public function show(Report $report): \Inertia\Response
     {
 //        $this->authorize("view", $report);
 
@@ -147,7 +147,7 @@ class ReportController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateReportRequest $request, Report $report)
+    public function update(UpdateReportRequest $request, Report $report): \Illuminate\Http\RedirectResponse
     {
         $user = auth()->user();
         $report->loadMissing('acceptanceItem.acceptance');

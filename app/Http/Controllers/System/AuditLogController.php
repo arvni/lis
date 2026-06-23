@@ -13,7 +13,7 @@ class AuditLogController extends Controller
 {
     public function __construct(private UserActivityRepository $userActivities) {}
 
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): \Inertia\Response
     {
         Gate::authorize('System.Audit Log.View Audit Log');
 

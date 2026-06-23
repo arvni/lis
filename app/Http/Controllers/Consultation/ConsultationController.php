@@ -82,7 +82,7 @@ class ConsultationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Consultation $consultation)
+    public function show(Consultation $consultation): \Inertia\Response
     {
         $consultation->load(["patient", "consultant"]);
         return Inertia::render("Consultation/Show", [

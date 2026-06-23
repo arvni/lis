@@ -16,7 +16,7 @@ class FinancialCheckController extends Controller
         $this->middleware("indexProvider");
     }
 
-    public function __invoke(FinancialCheckRequest $request)
+    public function __invoke(FinancialCheckRequest $request): \Inertia\Response
     {
         $requestInputs = $request->all();
 

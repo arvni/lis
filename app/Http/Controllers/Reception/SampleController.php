@@ -45,7 +45,7 @@ class SampleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreSampleRequest $request)
+    public function store(StoreSampleRequest $request): \Illuminate\Http\RedirectResponse
     {
         $barcodes = $request->validated('barcodes', []);
         $collectRequestId = $request->validated('collect_request.id');
@@ -79,7 +79,7 @@ class SampleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Sample $sample)
+    public function show(Sample $sample): \Inertia\Response
     {
         return Inertia::render('Acceptance/Barcodes', ["barcodes" => [
             $this->sampleService->loadForBarcodeView($sample),
@@ -89,7 +89,7 @@ class SampleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateSampleRequest $request, Sample $sample)
+    public function update(UpdateSampleRequest $request, Sample $sample): \Illuminate\Http\RedirectResponse
     {
         $this->sampleService->updateBarcode($sample, $request->validated('barcode'));
 

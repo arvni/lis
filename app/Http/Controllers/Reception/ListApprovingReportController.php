@@ -18,7 +18,7 @@ class ListApprovingReportController extends Controller
         $this->middleware("indexProvider");
     }
 
-    public function __invoke(ListApprovingReportRequest $request)
+    public function __invoke(ListApprovingReportRequest $request): \Inertia\Response
     {
         $requestInputs = $request->all();
         $reports = $this->reportService->listWaitingForApprovalReports($requestInputs);

@@ -33,7 +33,7 @@ class AcceptanceItemStateController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateAcceptanceItemStateRequest $request, AcceptanceItemState $acceptanceItemState)
+    public function update(UpdateAcceptanceItemStateRequest $request, AcceptanceItemState $acceptanceItemState): \Illuminate\Http\RedirectResponse
     {
         $userId = auth()->id();
 
@@ -79,7 +79,7 @@ class AcceptanceItemStateController extends Controller
         ]);
     }
 
-    public function bulkUpdate(BulkUpdateAcceptanceItemStateRequest $request)
+    public function bulkUpdate(BulkUpdateAcceptanceItemStateRequest $request): \Illuminate\Http\RedirectResponse
     {
         $userId = auth()->id();
         $ids = $request->ids;

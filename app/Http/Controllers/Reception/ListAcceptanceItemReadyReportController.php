@@ -14,7 +14,7 @@ class ListAcceptanceItemReadyReportController extends Controller
         $this->middleware("indexProvider");
     }
 
-    public function __invoke(ListAcceptanceItemReadyReportRequest $request)
+    public function __invoke(ListAcceptanceItemReadyReportRequest $request): \Inertia\Response
     {
         $requestInputs = $request->all();
         $acceptanceItems=$this->acceptanceItemService->listAcceptanceItemsReadyReport($requestInputs);

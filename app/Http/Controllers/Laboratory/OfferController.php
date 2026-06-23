@@ -38,7 +38,7 @@ class OfferController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreOfferRequest $offerRequest)
+    public function store(StoreOfferRequest $offerRequest): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $offerRequest->validated();
         $offerDto = OfferDTO::fromArray($validatedData);
@@ -50,7 +50,7 @@ class OfferController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Offer $offer, UpdateOfferRequest $request)
+    public function update(Offer $offer, UpdateOfferRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $request->validated();
         $offerDto = OfferDTO::fromArray($validatedData);

@@ -15,7 +15,7 @@ class DashboardController extends Controller
         private readonly PurchaseRequestService $prService,
     ) {}
 
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): \Inertia\Response
     {
         $date = Carbon::parse($request->get('date'), "Asia/Muscat");
         return Inertia::render('Dashboard/Index', [

@@ -18,7 +18,7 @@ class WaitingForPublishController extends Controller
         $this->middleware("indexProvider");
     }
 
-    public function __invoke(WaitingForPublishRequest $request)
+    public function __invoke(WaitingForPublishRequest $request): \Inertia\Response
     {
         $requestInputs = $request->all();
         $acceptances = $this->acceptanceService->listWaitingForPublish($requestInputs);

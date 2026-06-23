@@ -21,7 +21,7 @@ class ApproveReportController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Report $report, ApproveReportRequest $request)
+    public function __invoke(Report $report, ApproveReportRequest $request): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('approve', $report);
 

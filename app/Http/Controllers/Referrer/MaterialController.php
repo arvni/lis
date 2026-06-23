@@ -55,7 +55,7 @@ class MaterialController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Material $material, UpdateMaterialRequest $request)
+    public function update(Material $material, UpdateMaterialRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $request->validated();
         $materialDto = MaterialDTO::fromArray($validatedData);

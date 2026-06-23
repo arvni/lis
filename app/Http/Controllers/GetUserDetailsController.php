@@ -11,7 +11,7 @@ class GetUserDetailsController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(User $user)
+    public function __invoke(User $user): \Illuminate\Http\Resources\Json\JsonResource
     {
         return new UserResource($user);
     }

@@ -38,7 +38,7 @@ class TestGroupController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreTestGroupRequest $testGroupRequest)
+    public function store(StoreTestGroupRequest $testGroupRequest): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $testGroupRequest->validated();
         $testGroupDto = new TestGroupDTO(
@@ -52,7 +52,7 @@ class TestGroupController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(TestGroup $testGroup, UpdateTestGroupRequest $request)
+    public function update(TestGroup $testGroup, UpdateTestGroupRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $request->validated();
         $testGroupDto = new TestGroupDTO(

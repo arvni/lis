@@ -50,7 +50,7 @@ class RequestFormController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreRequestFormRequest $requestFormRequest)
+    public function store(StoreRequestFormRequest $requestFormRequest): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $requestFormRequest->validated();
         $requestFormDto = new RequestFormDTO(
@@ -67,7 +67,7 @@ class RequestFormController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(RequestForm $requestForm, UpdateRequestFormRequest $request)
+    public function update(RequestForm $requestForm, UpdateRequestFormRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $request->validated();
         $requestFormDto = new RequestFormDTO(

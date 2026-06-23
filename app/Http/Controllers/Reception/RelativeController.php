@@ -20,7 +20,7 @@ class RelativeController extends Controller
     {
     }
 
-    public function store(RelativeRequest $request)
+    public function store(RelativeRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $request->validated();
         if ($validatedData['patient_id'] == ($validatedData['relative_id'] ?? null))
@@ -57,7 +57,7 @@ class RelativeController extends Controller
 
     }
 
-    public function update(Relative $relative, UpdateRelativeRequest $request)
+    public function update(Relative $relative, UpdateRelativeRequest $request): \Illuminate\Http\RedirectResponse
     {
         $relativeDto = new RelativeDTO(
             $relative->patient_id,
@@ -68,7 +68,7 @@ class RelativeController extends Controller
         return back()->with(["success" => true, "status" => "Relative updated successfully"]);
     }
 
-    public function destroy(Relative $relative)
+    public function destroy(Relative $relative): \Illuminate\Http\RedirectResponse
     {
         $this->relativeService->deleteRelation($relative);
         return back()->with(["success" => true, "status" => "Relative deleted successfully"]);

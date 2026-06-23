@@ -14,7 +14,7 @@ class BillingDashboardController extends Controller
     {
     }
 
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): \Inertia\Response
     {
         Gate::authorize('Billing.Dashboard.View Dashboard');
 

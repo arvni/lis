@@ -24,7 +24,7 @@ class InvoiceItemController extends Controller
      * Only meaningful for test/panel rows derived from acceptance_items —
      * manual rows have nothing to fall back to and would be swept on the next recompose.
      */
-    public function unlock(Request $request, Invoice $invoice, InvoiceItem $item)
+    public function unlock(Request $request, Invoice $invoice, InvoiceItem $item): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('update', $invoice);
 
@@ -55,7 +55,7 @@ class InvoiceItemController extends Controller
      * This is an explicit, user-triggered override: it forces a recompose even on settled
      * or statemented invoices, so it can change the invoice's (and its statement's) totals.
      */
-    public function rebuild(Request $request, Invoice $invoice)
+    public function rebuild(Request $request, Invoice $invoice): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('update', $invoice);
 

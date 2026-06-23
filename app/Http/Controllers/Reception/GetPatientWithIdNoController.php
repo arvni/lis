@@ -15,7 +15,7 @@ class GetPatientWithIdNoController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke($idNo)
+    public function __invoke(string $idNo): \Illuminate\Http\JsonResponse|\Illuminate\Http\Resources\Json\JsonResource
     {
         $patient = $this->patientService->getPatientByIdNo($idNo);
         if (!$patient) {

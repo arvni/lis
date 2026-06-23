@@ -35,7 +35,7 @@ class ReferrerOrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ReferrerOrder $referrerOrder)
+    public function show(ReferrerOrder $referrerOrder): \Inertia\Response
     {
         $this->authorize("view", $referrerOrder);
         $referrerOrder=$this->referrerOrderService->loadShowRequirementLoaded($referrerOrder);

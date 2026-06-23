@@ -50,7 +50,7 @@ class WorkflowController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreWorkflowRequest $workflowRequest)
+    public function store(StoreWorkflowRequest $workflowRequest): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $workflowRequest->validated();
         $workflowDto = new WorkflowDTO(

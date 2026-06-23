@@ -11,7 +11,7 @@ class PrintOrderMaterialController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(OrderMaterial $orderMaterial)
+    public function __invoke(OrderMaterial $orderMaterial): \Inertia\Response
     {
         $orderMaterial->load(["materials" => fn($q) => $q->withAggregate("sampleType", "name")]);
         return Inertia::render("Materials/Barcodes", ["materials" => $orderMaterial->materials]);

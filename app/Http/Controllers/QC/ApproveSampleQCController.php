@@ -17,7 +17,7 @@ class ApproveSampleQCController extends Controller
         private readonly AcceptanceService          $acceptanceService,
     ) {}
 
-    public function __invoke(Request $request, Sample $sample)
+    public function __invoke(Request $request, Sample $sample): \Illuminate\Http\RedirectResponse
     {
         Gate::authorize('QC.Samples.Approve Sample');
 

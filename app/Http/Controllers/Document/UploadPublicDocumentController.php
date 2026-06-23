@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class UploadPublicDocumentController extends Controller
 {
-    public function __invoke(UploadPublicDocumentRequest $request)
+    public function __invoke(UploadPublicDocumentRequest $request): \Illuminate\Http\JsonResponse
     {
         $file = $request->file('file');
 

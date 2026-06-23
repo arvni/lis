@@ -4983,52 +4983,16 @@ parameters:
 			path: app/Domains/User/Services/RoleService.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Api\\Billing\\GetInvoiceController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Api/Billing/GetInvoiceController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Api\\Billing\\ListReferrerInvoicesController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Api/Billing/ListReferrerInvoicesController.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>fullName" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Controllers/Api/Billing/ListReferrerInvoicesController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Api\\Laboratory\\GetMethodController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Api/Laboratory/GetMethodController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Api\\ListRoleController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Api/ListRoleController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Api\\Reception\\ListReferrerAcceptanceReportedOrExpectedToBeReportedController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Api/Reception/ListReferrerAcceptanceReportedOrExpectedToBeReportedController.php
-
-		-
 			message: '#^Parameter \#1 \$user of class Illuminate\\Auth\\Events\\Verified constructor expects Illuminate\\Contracts\\Auth\\MustVerifyEmail, App\\Domains\\User\\Models\\User\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Http/Controllers/Auth/VerifyEmailController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\BillingDashboardController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/BillingDashboardController.php
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Billing\\DailyCashReportController\:\:__invoke\(\) has no return type specified\.$#'
@@ -5043,67 +5007,13 @@ parameters:
 			path: app/Http/Controllers/Billing/ExportInvoicesController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\InvoiceController\:\:destroy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/InvoiceController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\InvoiceController\:\:show\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/InvoiceController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\InvoiceController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/InvoiceController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\InvoiceController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/InvoiceController.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:onlyTrashed\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: app/Domains/Billing/Repositories/InvoiceRepository.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\InvoiceItemController\:\:rebuild\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/InvoiceItemController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\InvoiceItemController\:\:unlock\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/InvoiceItemController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\PaymentController\:\:destroy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/PaymentController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\Billing\\PaymentController\:\:show\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/PaymentController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\PaymentController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/PaymentController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\PaymentController\:\:update\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Billing/PaymentController.php
@@ -5151,60 +5061,6 @@ parameters:
 			path: app/Http/Controllers/Billing/ShowStatementController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\StatementController\:\:destroy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/StatementController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\StatementController\:\:show\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/StatementController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\StatementController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/StatementController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\StatementController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/StatementController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Consultation\\BookAnAppointmentController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Consultation/BookAnAppointmentController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Consultation\\ConsultantController\:\:destroy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Consultation/ConsultantController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Consultation\\ConsultantController\:\:edit\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Consultation/ConsultantController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Consultation\\ConsultantController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Consultation/ConsultantController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Consultation\\ConsultantController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Consultation/ConsultantController.php
-
-		-
 			message: '#^Access to an undefined property App\\Domains\\Consultation\\Models\\Consultation\:\:\$consultant\.$#'
 			identifier: property.notFound
 			count: 1
@@ -5217,44 +5073,8 @@ parameters:
 			path: app/Http/Controllers/Consultation/ConsultationController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Consultation\\ConsultationController\:\:show\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Consultation/ConsultationController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Consultation\\ListConsultantsController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Consultation/ListConsultantsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Consultation\\ListWaitingConsultationsController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Consultation/ListWaitingConsultationsController.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Consultation/TimeController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Consultation\\TimeController\:\:index\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Consultation/TimeController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Consultation\\TimeController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Consultation/TimeController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Consultation\\TimeController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Consultation/TimeController.php
 
@@ -5271,12 +5091,6 @@ parameters:
 			path: app/Http/Controllers/Consultation/UpdateCustomerToPatientWithConsultationController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\DashboardController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/DashboardController.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$template\.$#'
 			identifier: property.notFound
 			count: 1
@@ -5287,36 +5101,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Document/DownloadReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Document\\UpdateBatchDocumentsController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Document/UpdateBatchDocumentsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Document\\UploadPublicDocumentController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Document/UploadPublicDocumentController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\GetUserDetailsController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/GetUserDetailsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ImportController\:\:create\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/ImportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ImportController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/ImportController.php
 
 		-
 			message: '#^Parameter \#1 \$import of static method Maatwebsite\\Excel\\Facades\\Excel\:\:toArray\(\) expects object, array given\.$#'
@@ -5517,42 +5301,6 @@ parameters:
 			path: app/Http/Controllers/Inventory/StockTransactionController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\BarcodeGroupController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/BarcodeGroupController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\BarcodeGroupController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/BarcodeGroupController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\ConsentFormController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/ConsentFormController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\ConsentFormController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/ConsentFormController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\DoctorController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/DoctorController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\DoctorController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/DoctorController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\Laboratory\\ExportReportTemplateParametersController\:\:__invoke\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -5565,110 +5313,8 @@ parameters:
 			path: app/Http/Controllers/Laboratory/ExportTestsController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\InstructionController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/InstructionController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\InstructionController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/InstructionController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\OfferController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/OfferController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\OfferController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/OfferController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\ReportTemplateController\:\:show\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/ReportTemplateController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\RequestFormController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/RequestFormController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\RequestFormController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/RequestFormController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\SampleTypeController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/SampleTypeController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\SampleTypeController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/SampleTypeController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\SectionController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/SectionController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\SectionController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/SectionController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\SectionGroupController\:\:show\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/SectionGroupController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\SectionGroupController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/SectionGroupController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\SectionGroupController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/SectionGroupController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\TestGroupController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/TestGroupController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\TestGroupController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/TestGroupController.php
-
-		-
 			message: '#^If condition is always false\.$#'
 			identifier: if.alwaysFalse
-			count: 1
-			path: app/Http/Controllers/Laboratory/WorkflowController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\WorkflowController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Laboratory/WorkflowController.php
 
@@ -5677,24 +5323,6 @@ parameters:
 			identifier: isset.offset
 			count: 1
 			path: app/Http/Controllers/Laboratory/WorkflowController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\ListUsersController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/ListUsersController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Notification\\GetUnreadNotificationsController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Notification/GetUnreadNotificationsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Notification\\ShowNotificationPageController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Notification/ShowNotificationPageController.php
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Notification\\WhatsappMessageController\:\:index\(\) has no return type specified\.$#'
@@ -5709,18 +5337,6 @@ parameters:
 			path: app/Http/Controllers/QC/ApproveSampleQCController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\QC\\ApproveSampleQCController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/QC/ApproveSampleQCController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\QC\\QCSamplesController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/QC/QCSamplesController.php
-
-		-
 			message: '#^Relation ''activeAcceptanceItems'' is not found in App\\Domains\\Reception\\Models\\Sample model\.$#'
 			identifier: larastan.relationExistence
 			count: 1
@@ -5729,12 +5345,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Sample\:\:\$activeAcceptanceItems\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/QC/RejectSampleQCController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\QC\\RejectSampleQCController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/QC/RejectSampleQCController.php
 
@@ -5769,52 +5379,16 @@ parameters:
 			path: app/Http/Controllers/Reception/AcceptanceItemStateController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\AcceptanceItemStateController\:\:bulkUpdate\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/AcceptanceItemStateController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\Reception\\AcceptanceItemStateController\:\:show\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Reception/AcceptanceItemStateController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\AcceptanceItemStateController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/AcceptanceItemStateController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ApproveFinancialController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ApproveFinancialController.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$acceptance\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/Reception/ApproveReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ApproveReportController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ApproveReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\CancelAcceptanceController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/CancelAcceptanceController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\CheckAcceptanceStatusController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/CheckAcceptanceStatusController.php
 
 		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\AcceptanceItem\:\:\$patients\.$#'
@@ -5825,12 +5399,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\AcceptanceItem\:\:\$report\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Reception/CreateReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\CreateReportController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Reception/CreateReportController.php
 
@@ -5847,64 +5415,10 @@ parameters:
 			path: app/Http/Controllers/Reception/ExportAcceptancesController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\FinancialCheckController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/FinancialCheckController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\GetPatientWithIdNoController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/GetPatientWithIdNoController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\GetPatientWithIdNoController\:\:__invoke\(\) has parameter \$idNo with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Http/Controllers/Reception/GetPatientWithIdNoController.php
-
-		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\AcceptanceItemState\:\:\$acceptanceItem\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/Reception/GetPrevSectionsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\GetPrevSectionsController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/GetPrevSectionsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ListAcceptanceItemReadyReportController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ListAcceptanceItemReadyReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ListAcceptanceItemsController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ListAcceptanceItemsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ListApprovingReportController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ListApprovingReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ListBarcodesController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ListBarcodesController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\PrintAcceptanceBarcodeController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/PrintAcceptanceBarcodeController.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
@@ -5917,42 +5431,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/Reception/PublishAcceptanceController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\PublishAcceptanceController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/PublishAcceptanceController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\PublishReportController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/PublishReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\RejectReportController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/RejectReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\RelativeController\:\:destroy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/RelativeController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\RelativeController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/RelativeController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\RelativeController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/RelativeController.php
 
 		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Report\:\:\$files\.$#'
@@ -5985,24 +5463,6 @@ parameters:
 			path: app/Http/Controllers/Reception/ReportController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ReportController\:\:index\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ReportController\:\:show\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ReportController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ReportController.php
-
-		-
 			message: '#^Parameter \#1 \$acceptanceItem of method App\\Domains\\Reception\\Services\\ReportService\:\:getHistoryForAcceptanceItem\(\) expects App\\Domains\\Reception\\Models\\AcceptanceItem, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -6015,12 +5475,6 @@ parameters:
 			path: app/Http/Controllers/Reception/ReportController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\SampleCollectionController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/SampleCollectionController.php
-
-		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\AcceptanceItem\:\:\$acceptance\.$#'
 			identifier: property.notFound
 			count: 1
@@ -6028,24 +5482,6 @@ parameters:
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Reception\\SampleController\:\:destroy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/SampleController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\SampleController\:\:show\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/SampleController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\SampleController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/SampleController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\SampleController\:\:update\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Reception/SampleController.php
@@ -6063,64 +5499,10 @@ parameters:
 			path: app/Http/Controllers/Reception/ShowAcceptanceItemController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ShowAcceptanceItemController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ShowAcceptanceItemController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\TATDashboardController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/TATDashboardController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ToggleReportlessAcceptanceItemController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ToggleReportlessAcceptanceItemController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ToggleSamplelessAcceptanceItemController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ToggleSamplelessAcceptanceItemController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\Reception\\UnPublishReportController\:\:__invoke\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Reception/UnPublishReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\UpdateAcceptancePriorityController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/UpdateAcceptancePriorityController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\UpdatePatientMetaController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/UpdatePatientMetaController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\WaitingForPublishController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/WaitingForPublishController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\Api\\CheckMaterialBarcodeIsAvailableController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/Api/CheckMaterialBarcodeIsAvailableController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\Api\\CheckMaterialForReferrerController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/Api/CheckMaterialForReferrerController.php
 
 		-
 			message: '#^Relation ''referrer'' is not found in App\\Domains\\Referrer\\Models\\Material model\.$#'
@@ -6133,12 +5515,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Referrer/Api/StoreOrderMaterialsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\CopyReferrerTestsFromOtherReferrerController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/CopyReferrerTestsFromOtherReferrerController.php
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Referrer\\ExportReferrerTestsController\:\:__invoke\(\) has no return type specified\.$#'
@@ -6171,44 +5547,8 @@ parameters:
 			path: app/Domains/Referrer/Resources/PatientAcceptanceResource.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\ListCollectRequestsController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/ListCollectRequestsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\ListMaterialsBasedOnPackingSeriesController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/ListMaterialsBasedOnPackingSeriesController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\MaterialController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/MaterialController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\OrderMaterialController\:\:show\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/OrderMaterialController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\PrintMaterialsBarcodeController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/PrintMaterialsBarcodeController.php
-
-		-
 			message: '#^Access to an undefined property App\\Domains\\Referrer\\Models\\OrderMaterial\:\:\$materials\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Referrer/PrintOrderMaterialController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\PrintOrderMaterialController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Referrer/PrintOrderMaterialController.php
 
@@ -6225,12 +5565,6 @@ parameters:
 			path: app/Http/Controllers/Referrer/ReferrerOrderController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\ReferrerOrderController\:\:show\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/ReferrerOrderController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\Referrer\\ReferrerOrderController\:\:update\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6238,12 +5572,6 @@ parameters:
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Referrer\\StoreReferrerOrderAcceptanceController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/StoreReferrerOrderAcceptanceController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\StoreReferrerOrderAcceptanceController\:\:handlePoolingAcceptance\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Referrer/StoreReferrerOrderAcceptanceController.php
@@ -6297,12 +5625,6 @@ parameters:
 			path: app/Http/Controllers/ShowSectionController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\ShowSectionController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/ShowSectionController.php
-
-		-
 			message: '#^Unable to resolve the template type TMapValue in call to method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\)$#'
 			identifier: argument.templateType
 			count: 1
@@ -6315,64 +5637,10 @@ parameters:
 			path: app/Http/Controllers/ShowSectionController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\System\\AuditLogController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/System/AuditLogController.php
-
-		-
 			message: '#^Relation ''user'' is not found in App\\Domains\\User\\Models\\UserActivity model\.$#'
 			identifier: larastan.relationExistence
 			count: 1
 			path: app/Domains/User/Repositories/UserActivityRepository.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\System\\FailedJobController\:\:destroy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/System/FailedJobController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\System\\FailedJobController\:\:destroyAll\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/System/FailedJobController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\System\\FailedJobController\:\:retry\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/System/FailedJobController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\System\\FailedJobController\:\:retryAll\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/System/FailedJobController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:destroy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:edit\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/UserController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\UserController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/UserController.php
 
 		-
 			message: '#^Constant t not found\.$#'

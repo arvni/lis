@@ -33,7 +33,7 @@ class PaymentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StorePaymentRequest $request)
+    public function store(StorePaymentRequest $request): \Illuminate\Http\RedirectResponse
     {
         $this->paymentService->storePayment(PaymentDTO::fromRequest($request->validated()));
         return redirect()->back()->with(["success" => true, "status" => "Payment created successfully."]);
@@ -50,7 +50,7 @@ class PaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePaymentRequest $request, Payment $payment)
+    public function update(UpdatePaymentRequest $request, Payment $payment): \Illuminate\Http\RedirectResponse
     {
         $this->paymentService->updatePayment($payment, PaymentDTO::fromRequest($request->validated()));
         return redirect()->back()->with(["success" => true, "status" => "Payment updated successfully."]);
@@ -59,7 +59,7 @@ class PaymentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Payment $payment)
+    public function destroy(Payment $payment): \Illuminate\Http\RedirectResponse
     {
         $this->paymentService->deletePayment($payment);
         return back()->with(["success" => true, "status" => "Payment deleted successfully!"]);

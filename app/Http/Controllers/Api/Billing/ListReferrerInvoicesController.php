@@ -10,7 +10,7 @@ class ListReferrerInvoicesController extends Controller
 {
     public function __construct(private readonly InvoiceRepository $invoiceRepository) {}
 
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): \Illuminate\Http\JsonResponse
     {
         $referrerId = (int) $request->input('referrer_id');
         if (!$referrerId) {
