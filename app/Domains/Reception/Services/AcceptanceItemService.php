@@ -25,17 +25,17 @@ class AcceptanceItemService
     {
     }
 
-    public function listAcceptanceItems($queryData)
+    public function listAcceptanceItems(array $queryData)
     {
         return $this->acceptanceItemRepository->listAcceptanceItems($queryData);
     }
 
-    public function exportAcceptanceItems($queryData)
+    public function exportAcceptanceItems(array $queryData)
     {
         return $this->acceptanceItemRepository->listAllAcceptanceItems($queryData);
     }
 
-    public function listAcceptanceItemsReadyReport($queryData): LengthAwarePaginator
+    public function listAcceptanceItemsReadyReport(array $queryData): LengthAwarePaginator
     {
         return $this->acceptanceItemRepository->listAcceptanceItemsReadyReport($queryData);
     }
@@ -313,7 +313,7 @@ class AcceptanceItemService
         }
     }
 
-    public function updateAcceptanceItemTimeline(AcceptanceItem $acceptanceItem, $message): AcceptanceItem
+    public function updateAcceptanceItemTimeline(AcceptanceItem $acceptanceItem, string $message): AcceptanceItem
     {
         $timeline = $acceptanceItem->timeline;
         if (!is_array($timeline))
@@ -322,7 +322,7 @@ class AcceptanceItemService
         return $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, ["timeline" => $timeline]);
     }
 
-    public function findAcceptanceItemById($id): ?AcceptanceItem
+    public function findAcceptanceItemById(int|string|null $id): ?AcceptanceItem
     {
         return $this->acceptanceItemRepository->findAcceptanceItemById($id);
     }
@@ -332,13 +332,13 @@ class AcceptanceItemService
         $this->acceptanceItemRepository->deleteAcceptanceItem($acceptanceItem);
     }
 
-    public function getReportHistory($acceptanceItemId): Collection
+    public function getReportHistory(int|string $acceptanceItemId): Collection
     {
         $acceptanceItem = $this->findAcceptanceItemById($acceptanceItemId);
         return $this->reportRepository->getHistoryForAcceptanceItem($acceptanceItem);
     }
 
-    public function rejectSample(AcceptanceItem $acceptanceItem, $sampleId): void
+    public function rejectSample(AcceptanceItem $acceptanceItem, int|string $sampleId): void
     {
         $acceptanceItem->acceptanceItemSamples()->where("sample_id", $sampleId)->update(["active" => false]);
         $user = auth()->user();

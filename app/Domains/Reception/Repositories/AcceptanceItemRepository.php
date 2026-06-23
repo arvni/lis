@@ -19,7 +19,7 @@ class AcceptanceItemRepository
     use LogsUserActivity, ExtractsTagFilterIds;
 
 
-    public function listAcceptanceItems($queryData = [])
+    public function listAcceptanceItems(array $queryData = [])
     {
         $query = AcceptanceItem::query()->with([
             "latestState" => function ($q) {
@@ -43,7 +43,7 @@ class AcceptanceItemRepository
         return $this->applyAll($query, $queryData);
     }
 
-    public function listAllAcceptanceItems($queryData = [])
+    public function listAllAcceptanceItems(array $queryData = [])
     {
         $query = AcceptanceItem::query()->with([
             "invoice.owner",
@@ -82,7 +82,7 @@ class AcceptanceItemRepository
     }
 
 
-    public function listAcceptanceItemsReadyReport($queryData)
+    public function listAcceptanceItemsReadyReport(array $queryData)
     {
         $query = AcceptanceItem::query();
         $query->reportLess();
@@ -129,7 +129,7 @@ class AcceptanceItemRepository
         $this->logDeleted($acceptanceItem);
     }
 
-    public function findAcceptanceItemById($id): ?AcceptanceItem
+    public function findAcceptanceItemById(int|string|null $id): ?AcceptanceItem
     {
         return AcceptanceItem::find($id);
     }
@@ -196,7 +196,7 @@ class AcceptanceItemRepository
         return $acceptanceItem;
     }
 
-    private function syncPatients(AcceptanceItem $acceptanceItem, $patients): void
+    private function syncPatients(AcceptanceItem $acceptanceItem, array $patients): void
     {
         $patientsList = collect($patients)
             ->unique("id") // Keep only first occurrence of each patient ID
@@ -261,7 +261,7 @@ class AcceptanceItemRepository
 
     }
 
-    public function getTotalTestsForDateRange($dateRange): int
+    public function getTotalTestsForDateRange(array $dateRange): int
     {
         return AcceptanceItem::query()
             ->whereBetween("created_at", $dateRange)
@@ -271,7 +271,7 @@ class AcceptanceItemRepository
             ->count();
     }
 
-    public function getPanelItems($panelId, $acceptanceId = null)
+    public function getPanelItems(int|string $panelId, int|string|null $acceptanceId = null)
     {
         $query = AcceptanceItem::query()
             ->where("panel_id", $panelId)

@@ -10,7 +10,7 @@ class ReportParameterRepository
      * @param $data
      * @return mixed
      */
-    public function create($data): ReportParameter
+    public function create(array $data): ReportParameter
     {
         return ReportParameter::create($data);
     }
@@ -21,7 +21,7 @@ class ReportParameterRepository
         return $reportParameter;
     }
 
-    public function find($id): ?ReportParameter
+    public function find(int|string $id): ?ReportParameter
     {
         return ReportParameter::find($id);
     }

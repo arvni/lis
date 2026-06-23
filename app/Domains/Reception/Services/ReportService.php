@@ -64,17 +64,17 @@ class ReportService
 
     }
 
-    public function listReports($queryData)
+    public function listReports(array $queryData)
     {
         return $this->reportRepository->list($queryData);
     }
 
-    public function listWaitingForApprovalReports($queryData): LengthAwarePaginator
+    public function listWaitingForApprovalReports(array $queryData): LengthAwarePaginator
     {
         return $this->reportRepository->listWaitingForApproving($queryData);
     }
 
-    public function listWaitingForPublishReports($queryData): LengthAwarePaginator
+    public function listWaitingForPublishReports(array $queryData): LengthAwarePaginator
     {
         return $this->reportRepository->listWaitingForPublish($queryData);
     }
@@ -285,9 +285,9 @@ class ReportService
      * Format document files for frontend display
      *
      * @param  $documents
-     * @return Collection
+     * @return \Illuminate\Support\Collection
      */
-    public function formatDocumentFiles($documents)
+    public function formatDocumentFiles(\Illuminate\Support\Collection $documents)
     {
         return $documents->map(function ($item) {
             return [
@@ -421,7 +421,7 @@ class ReportService
      * @param DocumentTag $documentTag
      * @return void
      */
-    private function processDocument($documentId, Report $report, DocumentTag $documentTag): void
+    private function processDocument(int|string $documentId, Report $report, DocumentTag $documentTag): void
     {
         $report->load("acceptanceItem.patient");
         // Associate main document
@@ -568,7 +568,7 @@ class ReportService
      * @param Report $report
      * @return void
      */
-    private function processPublishedReport(Report $report, $silentlyPublish = false): void
+    private function processPublishedReport(Report $report, bool $silentlyPublish = false): void
     {
 
         $report->loadMissing("acceptanceItem.acceptance");
@@ -680,7 +680,7 @@ class ReportService
     /**
      * Get sample data for report
      */
-    public function getSampleData($samples): array
+    public function getSampleData(iterable $samples): array
     {
         $data = ["images" => ["logo" => url("/images/logo.png"),]];
 
@@ -788,7 +788,7 @@ class ReportService
         DB::commit();
     }
 
-    private function prepareParametersData($parameters): array
+    private function prepareParametersData(iterable $parameters): array
     {
         $output = [];
         foreach ($parameters as $parameter) {

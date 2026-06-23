@@ -19,7 +19,7 @@ class SampleCollectedEvent
     /**
      * Create a new event instance.
      */
-    public function __construct($acceptanceItemId,$barcode,$sampleId)
+    public function __construct(int $acceptanceItemId, string $barcode, int $sampleId)
     {
         $this->acceptanceItemId=$acceptanceItemId;
         $this->barcode=$barcode;

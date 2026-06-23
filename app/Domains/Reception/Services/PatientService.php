@@ -117,12 +117,12 @@ readonly class PatientService
         }
     }
 
-    public function getPatientByIdNo($idNo): ?Patient
+    public function getPatientByIdNo(string $idNo): ?Patient
     {
         return $this->patientRepository->findPatientByIdNo($idNo);
     }
 
-    public function getPatientById($id)
+    public function getPatientById(int|string $id)
     {
         return $this->patientRepository->findPatientById($id);
     }

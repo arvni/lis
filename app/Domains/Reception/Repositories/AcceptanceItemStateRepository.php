@@ -14,7 +14,7 @@ class AcceptanceItemStateRepository
     use LogsUserActivity, ExtractsTagFilterIds;
 
 
-    public function listAcceptanceItemStates($queryData)
+    public function listAcceptanceItemStates(array $queryData)
     {
         $query = AcceptanceItemState::with([
             "acceptanceItem.test",
@@ -53,13 +53,13 @@ class AcceptanceItemStateRepository
         $this->logDeleted($acceptanceItemState);
     }
 
-    public function findAcceptanceItemStateById($id): ?AcceptanceItemState
+    public function findAcceptanceItemStateById(int|string $id): ?AcceptanceItemState
     {
         return AcceptanceItemState::find($id);
     }
 
 
-    public function findAcceptanceItemStateByBarcode($barcode): Collection
+    public function findAcceptanceItemStateByBarcode(string $barcode): Collection
     {
         return AcceptanceItemState::whereHas("sample", function ($q) use ($barcode) {
             $q->where("barcode", $barcode);
@@ -67,7 +67,7 @@ class AcceptanceItemStateRepository
             ->get();
     }
 
-    public function getAcceptanceItemStatesStats($sectionId): Collection
+    public function getAcceptanceItemStatesStats(int|string $sectionId): Collection
     {
         return AcceptanceItemState::where("section_id", $sectionId)
             ->select("status", DB::raw("count(*) as total"))

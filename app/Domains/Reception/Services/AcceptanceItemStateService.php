@@ -51,7 +51,7 @@ readonly class AcceptanceItemStateService
         return $this->acceptanceItemStateRepository->updateAcceptanceItemState($acceptanceItemState, $acceptanceItemStateDTO->toArray());
     }
 
-    public function findAcceptanceItemStateByBarcode($barcode): Collection
+    public function findAcceptanceItemStateByBarcode(string $barcode): Collection
     {
         return $this->acceptanceItemStateRepository->findAcceptanceItemStateByBarcode($barcode);
     }
@@ -139,7 +139,7 @@ readonly class AcceptanceItemStateService
         return $state;
     }
 
-    public function getAcceptanceItemStatesStats($sectionId): Collection
+    public function getAcceptanceItemStatesStats(int|string $sectionId): Collection
     {
         return $this->acceptanceItemStateRepository->getAcceptanceItemStatesStats($sectionId);
     }

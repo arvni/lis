@@ -124,7 +124,7 @@ class AcceptanceRepository
         return $query;
     }
 
-    public function getReported($referrerId, $date = null): Collection
+    public function getReported(int|string $referrerId, mixed $date = null): Collection
     {
         $carbonDate = Carbon::parse($date);
         $dateRange = [

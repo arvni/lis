@@ -19,7 +19,7 @@ class ReportPublishedEvent
     /**
      * Create a new event instance.
      */
-    public function __construct(Acceptance $acceptance, $silent = false)
+    public function __construct(Acceptance $acceptance, bool $silent = false)
     {
         $this->acceptance = $acceptance;
         $this->silent = $silent;

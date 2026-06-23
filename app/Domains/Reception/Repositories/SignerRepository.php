@@ -9,7 +9,7 @@ class SignerRepository
 {
     use LogsUserActivity;
 
-    public function create($data)
+    public function create(array $data)
     {
         $signer= Signer::create($data);
         $this->logCreated($signer);

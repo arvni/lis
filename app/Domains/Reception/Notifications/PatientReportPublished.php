@@ -38,7 +38,7 @@ class PatientReportPublished extends Notification
     /**
      * @return array{0: ?string, 1: string}
      */
-    public function toSms($notifiable): array
+    public function toSms(mixed $notifiable): array
     {
         $portalUrl = config('services.patient_portal.url');
         $message = "Hi {$notifiable->fullName}, your medical report is ready. View it here: {$portalUrl}";
@@ -46,7 +46,7 @@ class PatientReportPublished extends Notification
         return [$notifiable->phone, $message];
     }
 
-    public function toWhatsAppTemplate($notifiable): array
+    public function toWhatsAppTemplate(mixed $notifiable): array
     {
         return [
             'name' => config('services.twilio.templates.acceptance_report_published'),

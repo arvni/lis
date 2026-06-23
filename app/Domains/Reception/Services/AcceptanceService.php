@@ -45,7 +45,7 @@ class AcceptanceService
     {
     }
 
-    public function listAcceptances($queryData): LengthAwarePaginator
+    public function listAcceptances(array $queryData): LengthAwarePaginator
     {
         return $this->acceptanceRepository->ListAcceptances($queryData);
     }
@@ -55,22 +55,22 @@ class AcceptanceService
         return $this->acceptanceRepository->exportAcceptances($queryData);
     }
 
-    public function getReferrerAcceptanceReported($referrer_id, $date)
+    public function getReferrerAcceptanceReported(int|string $referrer_id, mixed $date)
     {
         return $this->acceptanceRepository->getReported($referrer_id, $date);
     }
 
-    public function listSampleCollections($queryData): LengthAwarePaginator
+    public function listSampleCollections(array $queryData): LengthAwarePaginator
     {
         return $this->acceptanceRepository->listSampleCollection($queryData);
     }
 
-    public function listWaitingForPublish($queryData): LengthAwarePaginator
+    public function listWaitingForPublish(array $queryData): LengthAwarePaginator
     {
         return $this->acceptanceRepository->listWaitingForPublish($queryData);
     }
 
-    public function listWaitingForFinancialCheck($queryData): LengthAwarePaginator
+    public function listWaitingForFinancialCheck(array $queryData): LengthAwarePaginator
     {
         return $this->acceptanceRepository->listWaitingForFinancialCheck($queryData);
     }
@@ -394,12 +394,12 @@ class AcceptanceService
             throw new Exception("this Acceptance cannot be deleted");
     }
 
-    public function getAcceptanceById($id): ?Acceptance
+    public function getAcceptanceById(int|string $id): ?Acceptance
     {
         return $this->acceptanceRepository->getAcceptanceById($id);
     }
 
-    public function updateAcceptanceInvoice(Acceptance $acceptance, $invoiceId): void
+    public function updateAcceptanceInvoice(Acceptance $acceptance, int|string $invoiceId): void
     {
         $this->acceptanceRepository->updateAcceptance($acceptance, [
             "invoice_id" => $invoiceId,
@@ -627,7 +627,7 @@ class AcceptanceService
         }
     }
 
-    public function checkAcceptanceReport(Acceptance $acceptance, $silent = false): void
+    public function checkAcceptanceReport(Acceptance $acceptance, bool $silent = false): void
     {
         // Check if all tests are published and financial is approved
         if ($this->areAllTestsPublished($acceptance)) {
