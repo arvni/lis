@@ -26,21 +26,25 @@ class ApprovalFlowStep extends Model
         "allow_self_approval" => "boolean",
     ];
 
+    /** @return BelongsTo<ApprovalFlow, $this> */
     public function approvalFlow(): BelongsTo
     {
         return $this->belongsTo(ApprovalFlow::class);
     }
 
+    /** @return BelongsTo<Role, $this> */
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return HasMany<ReportApproval, $this> */
     public function approvals(): HasMany
     {
         return $this->hasMany(ReportApproval::class);

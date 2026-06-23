@@ -39,11 +39,13 @@ class Tag extends Model
         return (bool) preg_match('/^[A-Za-z0-9 ]+$/', $name);
     }
 
+    /** @return MorphToMany<Acceptance, $this> */
     public function acceptances(): MorphToMany
     {
         return $this->morphedByMany(Acceptance::class, 'taggable');
     }
 
+    /** @return MorphToMany<AcceptanceItem, $this> */
     public function acceptanceItems(): MorphToMany
     {
         return $this->morphedByMany(AcceptanceItem::class, 'taggable');

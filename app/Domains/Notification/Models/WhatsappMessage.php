@@ -6,6 +6,7 @@ use App\Domains\Notification\Enums\WhatsappMessageType;
 use App\Domains\Notification\Enums\WhatsappMessageWritten;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class WhatsappMessage extends Model
 {
@@ -37,12 +38,12 @@ class WhatsappMessage extends Model
         "messageable.phone",
     ];
 
-    public function messageable()
+    public function messageable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    public function related()
+    public function related(): MorphTo
     {
         return $this->morphTo();
     }

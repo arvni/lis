@@ -6,6 +6,9 @@ use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Models\AcceptanceItemState;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class SectionGroup extends Model
 {
@@ -24,27 +27,32 @@ class SectionGroup extends Model
 
     protected $with = ["parent"];
 
-    public function children()
+    /** @return HasMany<SectionGroup, $this> */
+    public function children(): HasMany
     {
         return $this->hasMany(SectionGroup::class, "section_group_id");
     }
 
-    public function recursiveChildren()
+    /** @return HasMany<SectionGroup, $this> */
+    public function recursiveChildren(): HasMany
     {
         return $this->children()->with(['sections', 'recursiveChildren']);
     }
 
-    public function parent()
+    /** @return BelongsTo<SectionGroup, $this> */
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(SectionGroup::class, "section_group_id");
     }
 
-    public function sections()
+    /** @return HasMany<Section, $this> */
+    public function sections(): HasMany
     {
         return $this->hasMany(Section::class);
     }
 
-    public function acceptanceItemStates()
+    /** @return HasManyThrough<AcceptanceItemState, Section, $this> */
+    public function acceptanceItemStates(): HasManyThrough
     {
         return $this->hasManyThrough(AcceptanceItemState::class, Section::class);
     }

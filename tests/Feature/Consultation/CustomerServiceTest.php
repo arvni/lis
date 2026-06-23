@@ -31,7 +31,7 @@ class CustomerServiceTest extends TestCase
 
     private function customerWithTimes(bool $has): Customer
     {
-        $rel = Mockery::mock();
+        $rel = Mockery::mock(\Illuminate\Database\Eloquent\Relations\MorphMany::class);
         $rel->shouldReceive('exists')->andReturn($has);
         $customer = Mockery::mock(Customer::class)->makePartial();
         $customer->shouldReceive('times')->andReturn($rel);

@@ -3,6 +3,7 @@
 namespace App\Domains\Laboratory\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SectionWorkflow extends Model
 {
@@ -18,12 +19,14 @@ class SectionWorkflow extends Model
     ];
 
 
-    public function section()
+    /** @return BelongsTo<Section, $this> */
+    public function section(): BelongsTo
     {
         return $this->belongsTo(Section::class);
     }
 
-    public function workflow()
+    /** @return BelongsTo<Workflow, $this> */
+    public function workflow(): BelongsTo
     {
         return $this->belongsTo(Workflow::class);
     }

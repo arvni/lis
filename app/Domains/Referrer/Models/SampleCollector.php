@@ -15,6 +15,7 @@ class SampleCollector extends Model
         "email",
     ];
 
+    /** @return HasMany<CollectRequest, $this> */
     public function collectRequests(): HasMany
     {
         return $this->hasMany(CollectRequest::class);

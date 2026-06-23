@@ -18,21 +18,25 @@ class Store extends Model
         'is_active' => 'boolean',
     ];
 
+    /** @return BelongsTo<User, $this> */
     public function manager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'manager_user_id');
     }
 
+    /** @return HasMany<StoreLocation, $this> */
     public function locations(): HasMany
     {
         return $this->hasMany(StoreLocation::class);
     }
 
+    /** @return HasMany<StockLot, $this> */
     public function lots(): HasMany
     {
         return $this->hasMany(StockLot::class);
     }
 
+    /** @return HasMany<StockTransaction, $this> */
     public function transactions(): HasMany
     {
         return $this->hasMany(StockTransaction::class);

@@ -30,21 +30,25 @@ class StockLot extends Model
         'unit_price_base'     => 'decimal:4',
     ];
 
+    /** @return BelongsTo<Item, $this> */
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
     }
 
+    /** @return BelongsTo<Store, $this> */
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
     }
 
+    /** @return BelongsTo<StoreLocation, $this> */
     public function location(): BelongsTo
     {
         return $this->belongsTo(StoreLocation::class, 'store_location_id');
     }
 
+    /** @return HasMany<StockTransactionLine, $this> */
     public function transactionLines(): HasMany
     {
         return $this->hasMany(StockTransactionLine::class, 'lot_number', 'lot_number')

@@ -16,6 +16,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class AcceptanceItem extends Model
 {
@@ -72,43 +76,51 @@ class AcceptanceItem extends Model
         return "-";
     }
 
-    public function acceptance()
+    /** @return BelongsTo<Acceptance, $this> */
+    public function acceptance(): BelongsTo
     {
         return $this->belongsTo(Acceptance::class);
     }
 
+    /** @return MorphToMany<Tag, $this> */
     public function tags(): MorphToMany
     {
         return $this->morphToMany(Tag::class, 'taggable')->withTimestamps();
     }
 
-    public function methodTest()
+    /** @return BelongsTo<MethodTest, $this> */
+    public function methodTest(): BelongsTo
     {
         return $this->belongsTo(MethodTest::class);
     }
 
+    /** @return BelongsTo<Test, $this> */
     public function panelTest(): BelongsTo
     {
         return $this->belongsTo(Test::class, 'panel_id');
     }
 
-    public function method()
+    /** @return HasOneThrough<Method, MethodTest, $this> */
+    public function method(): HasOneThrough
     {
         return $this->hasOneThrough(Method::class, MethodTest::class, "id", "id", "method_test_id", "method_id");
     }
 
-    public function test()
+    /** @return HasOneThrough<Test, MethodTest, $this> */
+    public function test(): HasOneThrough
     {
         return $this->hasOneThrough(Test::class, MethodTest::class, "id", "id", "method_test_id", "test_id");
     }
 
-    public function patients()
+    /** @return BelongsToMany<Patient, $this> */
+    public function patients(): BelongsToMany
     {
         return $this->belongsToMany(Patient::class, "acceptance_item_patient")
             ->withPivot("order", "main");
     }
 
-    public function patient()
+    /** @return HasOneThrough<Patient, AcceptanceItemPatient, $this> */
+    public function patient(): HasOneThrough
     {
         return $this->hasOneThrough(
             Patient::class,
@@ -129,48 +141,57 @@ class AcceptanceItem extends Model
         );
     }
 
-    public function invoice()
+    /** @return HasOneThrough<Invoice, Acceptance, $this> */
+    public function invoice(): HasOneThrough
     {
         return $this->hasOneThrough(Invoice::class, Acceptance::class, "id", "id", "acceptance_id", "invoice_id");
     }
 
+    /** @return BelongsTo<InvoiceItem, $this> */
     public function invoiceItem(): BelongsTo
     {
         return $this->belongsTo(InvoiceItem::class);
     }
 
-    public function referrer()
+    /** @return HasOneThrough<Referrer, Acceptance, $this> */
+    public function referrer(): HasOneThrough
     {
         return $this->hasOneThrough(Referrer::class, Acceptance::class, "id", "id", "acceptance_id", "referrer_id");
     }
 
-    public function acceptanceItemStates()
+    /** @return HasMany<AcceptanceItemState, $this> */
+    public function acceptanceItemStates(): HasMany
     {
         return $this->hasMany(AcceptanceItemState::class);
     }
 
-    public function latestState()
+    /** @return HasOne<AcceptanceItemState, $this> */
+    public function latestState(): HasOne
     {
         return $this->hasOne(AcceptanceItemState::class)->latest();
     }
 
-    public function samples()
+    /** @return BelongsToMany<Sample, $this> */
+    public function samples(): BelongsToMany
     {
         return $this->belongsToMany(Sample::class, "acceptance_item_samples")
             ->withPivot("active");
     }
 
-    public function activeSamples()
+    /** @return BelongsToMany<Sample, $this> */
+    public function activeSamples(): BelongsToMany
     {
         return $this->samples()->wherePivot("active", true);
     }
 
-    public function acceptanceItemSamples()
+    /** @return HasMany<AcceptanceItemSample, $this> */
+    public function acceptanceItemSamples(): HasMany
     {
         return $this->hasMany(AcceptanceItemSample::class);
     }
 
-    public function activeSample()
+    /** @return HasOneThrough<Sample, AcceptanceItemSample, $this> */
+    public function activeSample(): HasOneThrough
     {
         return $this->hasOneThrough(
             Sample::class,
@@ -183,12 +204,14 @@ class AcceptanceItem extends Model
             ->where('acceptance_item_samples.active', true);
     }
 
-    public function reports()
+    /** @return HasMany<Report, $this> */
+    public function reports(): HasMany
     {
         return $this->hasMany(Report::class);
     }
 
-    public function report()
+    /** @return HasOne<Report, $this> */
+    public function report(): HasOne
     {
         return $this->hasOne(Report::class)
             ->where("status", true);

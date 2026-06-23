@@ -4,6 +4,7 @@ namespace App\Domains\Laboratory\Models;
 
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SampleTypeTest extends Pivot
 {
@@ -16,12 +17,14 @@ class SampleTypeTest extends Pivot
         "defaultType" => "boolean"
     ];
 
-    public function sampleType()
+    /** @return BelongsTo<SampleType, $this> */
+    public function sampleType(): BelongsTo
     {
         return $this->belongsTo(SampleType::class);
     }
 
-    public function test()
+    /** @return BelongsTo<Test, $this> */
+    public function test(): BelongsTo
     {
         return $this->belongsTo(Test::class);
     }

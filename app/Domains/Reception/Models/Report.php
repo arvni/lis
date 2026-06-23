@@ -62,31 +62,37 @@ class Report extends Model
         "additionalFiles"
     ];
 
+    /** @return BelongsTo<AcceptanceItem, $this> */
     public function acceptanceItem(): BelongsTo
     {
         return $this->belongsTo(AcceptanceItem::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function reporter(): BelongsTo
     {
         return $this->belongsTo(User::class, "reporter_id", "id");
     }
 
+    /** @return BelongsTo<User, $this> */
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, "approver_id");
     }
 
+    /** @return BelongsTo<User, $this> */
     public function publisher(): BelongsTo
     {
         return $this->belongsTo(User::class, "publisher_id");
     }
 
+    /** @return MorphMany<Document, $this> */
     public function documents(): MorphMany
     {
         return $this->morphMany(Document::class, 'related');
     }
 
+    /** @return MorphMany<Document, $this> */
     public function additionalFiles(): MorphMany
     {
         return $this->morphMany(Document::class, 'related')
@@ -94,6 +100,7 @@ class Report extends Model
             ->where("tag", DocumentTag::ADDITIONAL);
     }
 
+    /** @return MorphOne<Document, $this> */
     public function publishedDocument(): MorphOne
     {
         return $this->morphOne(Document::class, 'related')
@@ -101,6 +108,7 @@ class Report extends Model
             ->where("tag", DocumentTag::PUBLISHED);
     }
 
+    /** @return MorphOne<Document, $this> */
     public function approvedDocument(): MorphOne
     {
         return $this->morphOne(Document::class, 'related')
@@ -108,6 +116,7 @@ class Report extends Model
             ->where("tag", DocumentTag::APPROVED);
     }
 
+    /** @return MorphOne<Document, $this> */
     public function reportedDocument(): MorphOne
     {
         return $this->morphOne(Document::class, 'related')
@@ -115,6 +124,7 @@ class Report extends Model
             ->where("tag", DocumentTag::REPORTED);
     }
 
+    /** @return MorphOne<Document, $this> */
     public function clinicalCommentDocument(): MorphOne
     {
         return $this->morphOne(Document::class, 'related')
@@ -122,6 +132,7 @@ class Report extends Model
             ->where("tag", DocumentTag::CLINICAL_COMMENT);
     }
 
+    /** @return HasMany<Signer, $this> */
     public function signers(): HasMany
     {
         return $this->hasMany(Signer::class)
@@ -133,16 +144,19 @@ class Report extends Model
         return $query->whereNotNull("published_at");
     }
 
+    /** @return HasMany<ReportParameter, $this> */
     public function parameters(): HasMany
     {
         return $this->hasMany(ReportParameter::class);
     }
 
+    /** @return BelongsTo<ReportTemplate, $this> */
     public function reportTemplate(): BelongsTo
     {
         return $this->belongsTo(ReportTemplate::class);
     }
 
+    /** @return HasMany<ReportApproval, $this> */
     public function approvals(): HasMany
     {
         return $this->hasMany(ReportApproval::class)

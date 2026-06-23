@@ -22,31 +22,37 @@ class ReportTemplate extends Model
         "approval_flow_id",
     ];
 
+    /** @return BelongsTo<ApprovalFlow, $this> */
     public function approvalFlow(): BelongsTo
     {
         return $this->belongsTo(ApprovalFlow::class);
     }
 
+    /** @return MorphOne<Document, $this> */
     public function template(): MorphOne
     {
         return $this->morphOne(Document::class, "owner")->latest();
     }
 
+    /** @return MorphMany<Document, $this> */
     public function oldTemplates(): MorphMany
     {
         return $this->morphMany(Document::class, "owner")->whereNot("tag", DocumentTag::LATEST);
     }
 
+    /** @return BelongsToMany<Test, $this> */
     public function tests(): BelongsToMany
     {
         return $this->belongsToMany(Test::class);
     }
 
+    /** @return HasMany<ReportTemplateParameter, $this> */
     public function parameters(): HasMany
     {
         return $this->hasMany(ReportTemplateParameter::class);
     }
 
+    /** @return HasMany<ReportTemplateParameter, $this> */
     public function activeParameters(): HasMany
     {
         return $this->hasMany(ReportTemplateParameter::class)->where("active", true);

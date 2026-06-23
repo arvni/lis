@@ -5,6 +5,7 @@ namespace App\Domains\Referrer\Models;
 use App\Domains\Laboratory\Models\Test;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ReferrerTest extends Model
 {
@@ -24,12 +25,14 @@ class ReferrerTest extends Model
         "extra" => "json",
     ];
 
-    public function test()
+    /** @return BelongsTo<Test, $this> */
+    public function test(): BelongsTo
     {
         return $this->belongsTo(Test::class);
     }
 
-    public function referrer()
+    /** @return BelongsTo<Referrer, $this> */
+    public function referrer(): BelongsTo
     {
         return $this->belongsTo(Referrer::class);
     }

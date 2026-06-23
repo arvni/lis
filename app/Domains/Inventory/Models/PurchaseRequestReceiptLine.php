@@ -18,16 +18,19 @@ class PurchaseRequestReceiptLine extends Model
         'expiry_date'  => 'date:Y-m-d',
     ];
 
+    /** @return BelongsTo<PurchaseRequestReceipt, $this> */
     public function receipt(): BelongsTo
     {
         return $this->belongsTo(PurchaseRequestReceipt::class, 'receipt_id');
     }
 
+    /** @return BelongsTo<PurchaseRequestLine, $this> */
     public function prLine(): BelongsTo
     {
         return $this->belongsTo(PurchaseRequestLine::class, 'pr_line_id');
     }
 
+    /** @return BelongsTo<StoreLocation, $this> */
     public function location(): BelongsTo
     {
         return $this->belongsTo(StoreLocation::class, 'store_location_id');

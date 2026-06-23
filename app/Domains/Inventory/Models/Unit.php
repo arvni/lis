@@ -15,6 +15,7 @@ class Unit extends Model
 
     protected $fillable = ['name', 'abbreviation', 'description'];
 
+    /** @return HasMany<ItemUnitConversion, $this> */
     public function itemConversions(): HasMany
     {
         return $this->hasMany(ItemUnitConversion::class);

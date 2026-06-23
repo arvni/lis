@@ -27,21 +27,25 @@ class Consultant extends Model
         "active" => "boolean"
     ];
 
+    /** @return HasMany<Consultation, $this> */
     public function consultations(): HasMany
     {
         return $this->hasMany(Consultation::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return HasMany<Time, $this> */
     public function times(): HasMany
     {
         return $this->hasMany(Time::class);
     }
 
+    /** @return HasMany<Time, $this> */
     public function upcomingTimes(): HasMany
     {
         return $this->hasMany(Time::class)
@@ -49,6 +53,7 @@ class Consultant extends Model
             ->where("active", true);
     }
 
+    /** @return HasMany<Consultation, $this> */
     public function upcomingConsultations(): HasMany
     {
         return $this->hasMany(Consultation::class)->whereDate('started_at', '>=', now("Asia/Muscat"));

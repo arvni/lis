@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Acceptance extends Model
 {
@@ -73,16 +74,19 @@ class Acceptance extends Model
         return boolval($this->referrer_id);
     }
 
+    /** @return BelongsTo<Patient, $this> */
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
     }
 
+    /** @return BelongsTo<Invoice, $this> */
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
     }
 
+    /** @return HasManyThrough<Payment, Invoice, $this> */
     public function payments(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -95,57 +99,68 @@ class Acceptance extends Model
         );
     }
 
+    /** @return BelongsTo<Referrer, $this> */
     public function referrer(): BelongsTo
     {
         return $this->belongsTo(Referrer::class);
     }
 
+    /** @return HasMany<ReferrerOrder, $this> */
     public function referrerOrders(): HasMany
     {
         return $this->hasMany(ReferrerOrder::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function acceptor(): BelongsTo
     {
         return $this->belongsTo(User::class, "acceptor_id");
     }
 
+    /** @return BelongsTo<Doctor, $this> */
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
     }
 
 
+    /** @return BelongsTo<User, $this> */
     public function sampler(): BelongsTo
     {
         return $this->belongsTo(User::class,"sampler_id");
     }
 
+    /** @return BelongsTo<Consultation, $this> */
     public function consultation(): BelongsTo
     {
         return $this->belongsTo(Consultation::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function financialApprovedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, "financial_approved_by");
     }
 
+    /** @return HasMany<AcceptanceItem, $this> */
     public function acceptanceItems(): HasMany
     {
         return $this->hasMany(AcceptanceItem::class);
     }
 
+    /** @return MorphToMany<Tag, $this> */
     public function tags(): MorphToMany
     {
         return $this->morphToMany(Tag::class, 'taggable')->withTimestamps();
     }
 
-    public function acceptanceItemStates()
+    /** @return HasManyThrough<AcceptanceItemState, AcceptanceItem, $this> */
+    public function acceptanceItemStates(): HasManyThrough
     {
         return $this->hasManyThrough(AcceptanceItemState::class, AcceptanceItem::class);
     }
 
+    /** @return MorphOne<Document, $this> */
     public function prescription(): MorphOne
     {
         return $this->morphOne(Document::class, "related")
@@ -168,7 +183,8 @@ class Acceptance extends Model
         );
     }
     // In your Acceptance model
-    public function reportDate()
+    /** @return HasOne<AcceptanceItem, $this> */
+    public function reportDate(): HasOne
     {
         return $this->hasOne(AcceptanceItem::class)
             ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')

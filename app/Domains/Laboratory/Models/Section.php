@@ -6,7 +6,18 @@ use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Models\AcceptanceItemState;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Aggregate counts populated by withCount([...]) in SectionGroupService (not DB columns).
+ *
+ * @property-read int|null $waiting_items_count
+ * @property-read int|null $processing_items_count
+ * @property-read int|null $finished_items_count
+ * @property-read int|null $rejected_items_count
+ */
 class Section extends Model
 {
     use Searchable;
@@ -26,7 +37,8 @@ class Section extends Model
     protected $with = ["sectionGroup"];
 
 
-    public function workflows()
+    /** @return BelongsToMany<Workflow, $this> */
+    public function workflows(): BelongsToMany
     {
         return $this->belongsToMany(Workflow::class, "section_workflows")
             ->withPivot("order", "parameters", "id")
@@ -34,17 +46,20 @@ class Section extends Model
             ->orderByPivot('order');
     }
 
-    public function sectionWorkflows()
+    /** @return HasMany<SectionWorkflow, $this> */
+    public function sectionWorkflows(): HasMany
     {
         return $this->hasMany(SectionWorkflow::class);
     }
 
-    public function acceptanceItemStates()
+    /** @return HasMany<AcceptanceItemState, $this> */
+    public function acceptanceItemStates(): HasMany
     {
         return $this->hasMany(AcceptanceItemState::class);
     }
 
-    public function sectionGroup()
+    /** @return BelongsTo<SectionGroup, $this> */
+    public function sectionGroup(): BelongsTo
     {
         return $this->belongsTo(SectionGroup::class);
     }

@@ -31,7 +31,7 @@ class BarcodeGroupServiceTest extends TestCase
 
     private function groupWithMethods(bool $hasMethods): BarcodeGroup
     {
-        $relation = Mockery::mock();
+        $relation = Mockery::mock(\Illuminate\Database\Eloquent\Relations\HasMany::class);
         $relation->shouldReceive('exists')->andReturn($hasMethods);
         $group = Mockery::mock(BarcodeGroup::class)->makePartial();
         $group->shouldReceive('methods')->andReturn($relation);

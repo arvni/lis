@@ -20,11 +20,13 @@ class ReorderAlert extends Model
         'resolved_at'          => 'datetime',
     ];
 
+    /** @return BelongsTo<Item, $this> */
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
     }
 
+    /** @return BelongsTo<Store, $this> */
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);

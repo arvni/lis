@@ -36,36 +36,43 @@ class Item extends Model
         'maximum_stock_level' => 'decimal:6',
     ];
 
+    /** @return BelongsTo<Unit, $this> */
     public function defaultUnit(): BelongsTo
     {
         return $this->belongsTo(Unit::class, 'default_unit_id');
     }
 
+    /** @return HasMany<ItemUnitConversion, $this> */
     public function unitConversions(): HasMany
     {
         return $this->hasMany(ItemUnitConversion::class);
     }
 
+    /** @return HasMany<SupplierItem, $this> */
     public function supplierItems(): HasMany
     {
         return $this->hasMany(SupplierItem::class);
     }
 
+    /** @return HasMany<ItemBarcode, $this> */
     public function barcodes(): HasMany
     {
         return $this->hasMany(ItemBarcode::class);
     }
 
+    /** @return HasMany<StockLot, $this> */
     public function lots(): HasMany
     {
         return $this->hasMany(StockLot::class);
     }
 
+    /** @return HasMany<StockTransactionLine, $this> */
     public function transactionLines(): HasMany
     {
         return $this->hasMany(StockTransactionLine::class);
     }
 
+    /** @return HasMany<ReorderAlert, $this> */
     public function reorderAlerts(): HasMany
     {
         return $this->hasMany(ReorderAlert::class);

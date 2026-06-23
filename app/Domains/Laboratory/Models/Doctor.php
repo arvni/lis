@@ -25,6 +25,7 @@ class Doctor extends Model
         "license_no"
     ];
 
+    /** @return HasMany<Acceptance, $this> */
     public function acceptances(): HasMany
     {
         return $this->hasMany(Acceptance::class);

@@ -10,11 +10,13 @@ class PurchaseRequestHistory extends Model
 {
     protected $fillable = ['purchase_request_id', 'user_id', 'event', 'notes', 'change_notes'];
 
+    /** @return BelongsTo<PurchaseRequest, $this> */
     public function purchaseRequest(): BelongsTo
     {
         return $this->belongsTo(PurchaseRequest::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

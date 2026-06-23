@@ -28,6 +28,7 @@ class MonitoringSample extends Model
         return parent::asDateTime($value);
     }
 
+    /** @return BelongsTo<MonitoringNode, $this> */
     public function monitoringNode(): BelongsTo
     {
         return $this->belongsTo(MonitoringNode::class, 'node_id', 'node_id');

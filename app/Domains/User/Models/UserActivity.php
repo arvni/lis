@@ -4,6 +4,8 @@ namespace App\Domains\User\Models;
 
 use App\Domains\User\Enums\ActivityType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class UserActivity extends Model
 {
@@ -19,12 +21,13 @@ class UserActivity extends Model
         "activity_type" => ActivityType::class,
     ];
 
-    public function user()
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function related()
+    public function related(): MorphTo
     {
         return $this->morphTo();
     }

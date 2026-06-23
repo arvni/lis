@@ -150,7 +150,7 @@ class TestServiceTest extends TestCase
         $methodsRel->shouldReceive('whereIn')->andReturnSelf();
         $methodsRel->shouldReceive('count')->andReturn(0); // count mismatch → triggers disabling
 
-        $mtRel = Mockery::mock();
+        $mtRel = Mockery::mock(\Illuminate\Database\Eloquent\Relations\HasMany::class);
         $mtRel->shouldReceive('whereNotIn')->once()->with('method_id', [3])->andReturnSelf();
         $mtRel->shouldReceive('update')->once()->with(['status' => false])->andReturn(1);
 

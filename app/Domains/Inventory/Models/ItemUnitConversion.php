@@ -13,11 +13,13 @@ class ItemUnitConversion extends Model
         'conversion_to_base' => 'decimal:6',
     ];
 
+    /** @return BelongsTo<Item, $this> */
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
     }
 
+    /** @return BelongsTo<Unit, $this> */
     public function unit(): BelongsTo
     {
         return $this->belongsTo(Unit::class);

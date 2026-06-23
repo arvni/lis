@@ -6,6 +6,9 @@ use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Referrer\Models\Referrer;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Statement extends Model
 {
@@ -21,17 +24,20 @@ class Statement extends Model
         "referrer.fullName"
     ];
 
-    public function acceptances()
+    /** @return HasManyThrough<Acceptance, Invoice, $this> */
+    public function acceptances(): HasManyThrough
     {
         return $this->hasManyThrough(Acceptance::class,Invoice::class);
     }
 
-    public function referrer()
+    /** @return BelongsTo<Referrer, $this> */
+    public function referrer(): BelongsTo
     {
         return $this->belongsTo(Referrer::class);
     }
 
-    public function invoices()
+    /** @return HasMany<Invoice, $this> */
+    public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }

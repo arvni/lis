@@ -4,6 +4,7 @@ namespace App\Domains\Reception\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PatientMeta extends Model
 {
@@ -21,7 +22,8 @@ class PatientMeta extends Model
 
     public $timestamps=false;
 
-    public function Patient()
+    /** @return BelongsTo<Patient, $this> */
+    public function Patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
     }

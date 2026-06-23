@@ -22,16 +22,19 @@ class ReportApproval extends Model
         "action" => ReportApprovalAction::class,
     ];
 
+    /** @return BelongsTo<Report, $this> */
     public function report(): BelongsTo
     {
         return $this->belongsTo(Report::class);
     }
 
+    /** @return BelongsTo<ApprovalFlowStep, $this> */
     public function step(): BelongsTo
     {
         return $this->belongsTo(ApprovalFlowStep::class, "approval_flow_step_id");
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

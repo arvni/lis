@@ -220,7 +220,7 @@ class AcceptanceItemServiceTest extends TestCase
     {
         $this->actingAs(User::factory()->make(['name' => 'Tech']));
 
-        $relation = Mockery::mock();
+        $relation = Mockery::mock(\Illuminate\Database\Eloquent\Relations\HasMany::class);
         $relation->shouldReceive('where')->once()->with('sample_id', 33)->andReturnSelf();
         $relation->shouldReceive('update')->once()->with(['active' => false])->andReturn(1);
 

@@ -4,6 +4,7 @@ namespace App\Domains\Reception\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Relative extends Model
 {
@@ -25,12 +26,14 @@ class Relative extends Model
         return explode(',', $value);
     }
 
-    public function patient()
+    /** @return BelongsTo<Patient, $this> */
+    public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
     }
 
-    public function relative()
+    /** @return BelongsTo<Patient, $this> */
+    public function relative(): BelongsTo
     {
         return $this->belongsTo(Patient::class, 'relative_id');
     }

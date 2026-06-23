@@ -42,26 +42,31 @@ class InvoiceItem extends Model
         'locked_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Invoice, $this> */
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
     }
 
+    /** @return BelongsTo<Acceptance, $this> */
     public function acceptance(): BelongsTo
     {
         return $this->belongsTo(Acceptance::class);
     }
 
+    /** @return HasMany<AcceptanceItem, $this> */
     public function acceptanceItems(): HasMany
     {
         return $this->hasMany(AcceptanceItem::class);
     }
 
+    /** @return BelongsTo<Test, $this> */
     public function test(): BelongsTo
     {
         return $this->belongsTo(Test::class);
     }
 
+    /** @return BelongsTo<Test, $this> */
     public function panelTest(): BelongsTo
     {
         return $this->belongsTo(Test::class, 'panel_id');

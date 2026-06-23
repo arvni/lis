@@ -4,6 +4,7 @@ namespace App\Domains\Reception\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AcceptanceItemSample extends Pivot
 {
@@ -19,12 +20,14 @@ class AcceptanceItemSample extends Pivot
         "active"=>"boolean"
     ];
 
-    public function sample()
+    /** @return BelongsTo<Sample, $this> */
+    public function sample(): BelongsTo
     {
         return $this->belongsTo(Sample::class);
     }
 
-    public function acceptanceItem()
+    /** @return BelongsTo<AcceptanceItem, $this> */
+    public function acceptanceItem(): BelongsTo
     {
         return $this->belongsTo(AcceptanceItem::class);
     }

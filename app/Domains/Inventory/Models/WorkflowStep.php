@@ -19,16 +19,19 @@ class WorkflowStep extends Model
         'deadline_days' => 'integer',
     ];
 
+    /** @return BelongsTo<WorkflowTemplate, $this> */
     public function template(): BelongsTo
     {
         return $this->belongsTo(WorkflowTemplate::class, 'workflow_template_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function approverUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approver_user_id');
     }
 
+    /** @return HasMany<PurchaseRequestApproval, $this> */
     public function approvals(): HasMany
     {
         return $this->hasMany(PurchaseRequestApproval::class);

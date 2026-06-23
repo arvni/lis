@@ -32,7 +32,7 @@ class SampleTypeServiceTest extends TestCase
 
     private function typeWithSamples(bool $has): SampleType
     {
-        $relation = Mockery::mock();
+        $relation = Mockery::mock(\Illuminate\Database\Eloquent\Relations\HasMany::class);
         $relation->shouldReceive('exists')->andReturn($has);
         $type = Mockery::mock(SampleType::class)->makePartial();
         $type->shouldReceive('samples')->andReturn($relation);

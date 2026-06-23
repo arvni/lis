@@ -6,6 +6,7 @@ namespace App\Domains\Laboratory\Models;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BarcodeGroup extends Model
 {
@@ -15,7 +16,8 @@ class BarcodeGroup extends Model
         "abbr"
     ];
 
-    public function methods()
+    /** @return HasMany<Method, $this> */
+    public function methods(): HasMany
     {
         return $this->hasMany(Method::class);
     }
