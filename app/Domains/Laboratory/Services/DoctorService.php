@@ -2,6 +2,8 @@
 
 namespace App\Domains\Laboratory\Services;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
 
 use App\Domains\Laboratory\DTOs\DoctorDTO;
 use App\Domains\Laboratory\Models\Doctor;
@@ -14,7 +16,7 @@ class DoctorService
     {
     }
 
-    public function listDoctors($queryData)
+    public function listDoctors(array $queryData): LengthAwarePaginator
     {
         return $this->doctorRepository->ListDoctors($queryData);
     }

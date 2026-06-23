@@ -2,6 +2,10 @@
 
 namespace App\Domains\Billing\Repositories;
 
+use Illuminate\Database\Eloquent\Collection;
+
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Shared\Traits\FiltersByDateRange;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Billing\Enums\InvoiceItemKind;
@@ -17,7 +21,7 @@ class InvoiceRepository
     use LogsUserActivity, FiltersByDateRange;
 
 
-    public function listInvoices(array $queryData)
+    public function listInvoices(array $queryData): LengthAwarePaginator
     {
 
         $query = $this->applyQuery(["owner", "acceptance", "patient", "statement"]);
@@ -26,7 +30,7 @@ class InvoiceRepository
         return $this->applyPaginate($query, $queryData["pageSize"] ?? 10);
     }
 
-    public function listAllInvoices(array $queryData)
+    public function listAllInvoices(array $queryData): Collection
     {
 
         $query = $this->applyQuery(["owner", "patient", "payments", "acceptanceItems.method", "acceptanceItems.patient", "acceptanceItems.test", "statement"]);
@@ -58,7 +62,7 @@ class InvoiceRepository
         $this->logDeleted($invoice);
     }
 
-    public function findInvoiceById($id): ?Invoice
+    public function findInvoiceById(int|string $id): ?Invoice
     {
         return Invoice::find($id);
     }
@@ -114,7 +118,11 @@ class InvoiceRepository
             ->withAggregate("acceptance", "id");
     }
 
-    private function applyFilters($query, array $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Billing\Models\Invoice>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<\App\Domains\Billing\Models\Invoice>
+     */
+    private function applyFilters(Builder $query, array $filters): Builder
     {
         // Owner type filter (polymorphic)
         if (isset($filters["owner_type"])) {
@@ -136,30 +144,37 @@ class InvoiceRepository
         return $query;
     }
 
-    private function applyOrderBy($query, array $orderBy)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Billing\Models\Invoice>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<\App\Domains\Billing\Models\Invoice>
+     */
+    private function applyOrderBy(Builder $query, array $orderBy): Builder
     {
         $query->orderBy($orderBy["field"], $orderBy["sort"]);
         return $query;
     }
 
-    private function applyPaginate($query, $pageSize): LengthAwarePaginator
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Billing\Models\Invoice>  $query
+     */
+    private function applyPaginate(Builder $query, int $pageSize): LengthAwarePaginator
     {
         return $query->paginate($pageSize);
     }
 
 
-    public function getInvoiceNo(Invoice $invoice)
+    public function getInvoiceNo(Invoice $invoice): string
     {
         $created_at = Carbon::parse(($invoice->created_at));
         return "{$created_at->format('Y-m')}/" . $this->countInvoicesBeforeInThisYear($invoice->id, $created_at);
     }
 
-    private function countInvoicesBeforeInThisYear($id, Carbon $created_at)
+    private function countInvoicesBeforeInThisYear(int|string $id, Carbon $created_at): int
     {
         return Invoice::where("id", "<=", $id)->whereBetween("created_at", [$created_at->copy()->startOf("year")->toDate(), $created_at])->count();
     }
 
-    public function updateMany(array $invoiceIds, Statement $statement)
+    public function updateMany(array $invoiceIds, Statement $statement): void
     {
         $statement->invoices()->whereNotIn("id", $invoiceIds)->update(["statement_id" => null]);
         Invoice::query()->whereIn("id", $invoiceIds)

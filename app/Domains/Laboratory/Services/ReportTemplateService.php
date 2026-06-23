@@ -24,7 +24,7 @@ readonly class ReportTemplateService
     {
     }
 
-    public function listReportTemplates($queryData): LengthAwarePaginator
+    public function listReportTemplates(array $queryData): LengthAwarePaginator
     {
         return $this->reportTemplateRepository->ListReportTemplates($queryData);
     }

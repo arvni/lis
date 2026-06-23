@@ -19,7 +19,7 @@ class SectionService
     {
     }
 
-    public function listSections($queryData): LengthAwarePaginator
+    public function listSections(array $queryData): LengthAwarePaginator
     {
         return $this->sectionRepository->ListSections($queryData);
     }

@@ -21,7 +21,7 @@ class StatementService
     {
     }
 
-    public function listStatements($queryData): LengthAwarePaginator
+    public function listStatements(array $queryData): LengthAwarePaginator
     {
         return $this->statementRepository->listStatements($queryData);
     }
@@ -169,7 +169,7 @@ class StatementService
         return $acceptance->report_date ? $this->formatDate($acceptance->report_date) : 'Pending';
     }
 
-    private function formatDate($date): string
+    private function formatDate(mixed $date): string
     {
         return $date ? Carbon::parse($date)->format('M d, Y') : 'N/A';
     }

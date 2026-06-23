@@ -2,6 +2,8 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\Workflow;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -43,7 +45,10 @@ class WorkflowRepository
         $this->logDeleted($workflow);
     }
 
-    protected function applyFilters($query, array $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Laboratory\Models\Workflow>  $query
+     */
+    protected function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search(["name"], $filters["search"]);

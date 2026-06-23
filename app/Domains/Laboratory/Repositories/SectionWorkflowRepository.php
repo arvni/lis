@@ -34,12 +34,12 @@ class SectionWorkflowRepository
         $this->logDeleted($workflow);
     }
 
-    public function findSectionWorkflowById($id): ?SectionWorkflow
+    public function findSectionWorkflowById(int|string $id): ?SectionWorkflow
     {
         return SectionWorkflow::find($id);
     }
 
-    public function findBySectionByMethodTestId($methodId, $sectionId): ?SectionWorkflow
+    public function findBySectionByMethodTestId(int|string $methodId, int|string $sectionId): ?SectionWorkflow
     {
         return SectionWorkflow::query()
             ->whereHas("workflow", function ($query) use ($methodId) {
@@ -51,7 +51,7 @@ class SectionWorkflowRepository
             ->first();
     }
 
-    public function findByOrderByMethodTestId($methodId, $order): ?SectionWorkflow
+    public function findByOrderByMethodTestId(int|string $methodId, int|string $order): ?SectionWorkflow
     {
         return SectionWorkflow::query()
             ->whereHas("workflow", function ($query) use ($methodId) {
@@ -63,7 +63,7 @@ class SectionWorkflowRepository
             ->first();
     }
 
-    public function getPrevSections($methodId, $order): ?Collection
+    public function getPrevSections(int|string $methodId, int|string $order): ?Collection
     {
         return SectionWorkflow::query()
             ->whereHas("workflow", function ($query) use ($methodId) {

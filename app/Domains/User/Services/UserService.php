@@ -65,7 +65,7 @@ class UserService
             $user->save();
     }
 
-    public static function getAllowedDocumentTags(?User $user = null)
+    public static function getAllowedDocumentTags(?User $user = null): array
     {
         if (!$user)
             $user = auth()->user();

@@ -21,7 +21,7 @@ readonly class PaymentService
     {
     }
 
-    public function listPayments($queryData): LengthAwarePaginator
+    public function listPayments(array $queryData): LengthAwarePaginator
     {
         return $this->paymentRepository->listPayments($queryData);
     }

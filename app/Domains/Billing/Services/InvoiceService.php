@@ -2,6 +2,8 @@
 
 namespace App\Domains\Billing\Services;
 
+use Illuminate\Database\Eloquent\Collection;
+
 
 use App\Domains\Billing\DTOs\InvoiceDTO;
 use App\Domains\Billing\Enums\InvoiceStatus;
@@ -22,12 +24,12 @@ readonly class InvoiceService
     {
     }
 
-    public function listInvoices($queryData): LengthAwarePaginator
+    public function listInvoices(array $queryData): LengthAwarePaginator
     {
         return $this->invoiceRepository->listInvoices($queryData);
     }
 
-    public function listAllInvoices($queryData)
+    public function listAllInvoices(array $queryData): Collection
     {
         return $this->invoiceRepository->listAllInvoices($queryData);
     }
@@ -104,7 +106,7 @@ readonly class InvoiceService
         return $this->invoiceRepository->updateInvoice($invoice, $invoiceDTO->toArray());
     }
 
-    public function findInvoiceById($id): ?Invoice
+    public function findInvoiceById(int|string $id): ?Invoice
     {
         return $this->invoiceRepository->findInvoiceById($id);
     }
@@ -125,7 +127,7 @@ readonly class InvoiceService
             $invoice->update(["status" => InvoiceStatus::WAITING_FOR_PAYMENT]);
     }
 
-    public function updateInvoicesStatementID(Statement $statement, $invoices)
+    public function updateInvoicesStatementID(Statement $statement, array $invoices): void
     {
         $statement->loadMissing("invoices");
         $this->invoiceRepository->updateMany(Arr::pluck($invoices, "id"), $statement);

@@ -22,7 +22,7 @@ readonly class ConsentFormService
     {
     }
 
-    public function listConsentForms($queryData): LengthAwarePaginator
+    public function listConsentForms(array $queryData): LengthAwarePaginator
     {
         return $this->consentFormRepository->ListConsentForms($queryData);
     }

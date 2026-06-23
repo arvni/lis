@@ -43,14 +43,14 @@ class RoleService
         return $this->roleRepository->getAdminRole();
     }
 
-    public function preparePermissions()
+    public function preparePermissions(): array
     {
         $permissions = $this->roleRepository->getPermissions();
         $permissions = $this->getSectionAndGroupSections($permissions);
         return $this->getName(Arr::undot($permissions->keyBy("name")->toArray()));
     }
 
-    protected function getName($permissions)
+    protected function getName(array $permissions): array
     {
         $output = [];
         foreach ($permissions as $key => $value) {

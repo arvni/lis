@@ -17,7 +17,7 @@ class PaymentsAddedEvent
     /**
      * Create a new event instance.
      */
-    public function __construct($acceptanceId)
+    public function __construct(int $acceptanceId)
     {
         $this->acceptanceId = $acceptanceId;
     }

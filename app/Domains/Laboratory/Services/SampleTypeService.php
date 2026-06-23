@@ -15,7 +15,7 @@ readonly class SampleTypeService
     {
     }
 
-    public function listSampleTypes($queryData): LengthAwarePaginator
+    public function listSampleTypes(array $queryData): LengthAwarePaginator
     {
         return $this->sampleTypeRepository->ListSampleTypes($queryData);
     }
@@ -41,7 +41,7 @@ readonly class SampleTypeService
             throw new Exception("This sampleType has some Acceptance or participate in Workflow");
     }
 
-    public function getSampleTypeById($id): SampleType
+    public function getSampleTypeById(int|string $id): SampleType
     {
         return $this->sampleTypeRepository->getSampleTypeById($id);
     }

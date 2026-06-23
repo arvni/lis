@@ -2,6 +2,8 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\SampleType;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -45,7 +47,10 @@ class SampleTypeRepository
         $this->logDeleted($sampleType);
     }
 
-    protected function applyFilters($query, array $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Laboratory\Models\SampleType>  $query
+     */
+    protected function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search(["name"], $filters["search"]);
@@ -53,7 +58,7 @@ class SampleTypeRepository
             $query->where("orderable", filter_var($filters["orderable"], FILTER_VALIDATE_BOOLEAN));
     }
 
-    public function getSampleTypeById($id): ?SampleType
+    public function getSampleTypeById(int|string $id): ?SampleType
     {
         return SampleType::query()->findOrFail($id);
     }

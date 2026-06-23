@@ -24,7 +24,7 @@ class MethodTestService
         return $this->methodTestRepository->updateMethodTest($methodTest, $methodTestDTO->toArray());
     }
 
-    public function findMethodTestById($id): ?MethodTest
+    public function findMethodTestById(int|string $id): ?MethodTest
     {
         return $this->methodTestRepository->findMethodTestById($id);
     }

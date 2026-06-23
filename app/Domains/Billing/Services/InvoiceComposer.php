@@ -235,7 +235,7 @@ class InvoiceComposer
      * customParameters is cast to json on the model, but historical rows occasionally hold
      * a double-encoded string. Decode defensively so we never feed a string into array_*.
      */
-    private function normalizeCustomParameters($value): array
+    private function normalizeCustomParameters(mixed $value): array
     {
         if (is_array($value)) {
             return $value;

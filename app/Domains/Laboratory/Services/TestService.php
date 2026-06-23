@@ -24,12 +24,12 @@ readonly class TestService
         private MethodTestService $methodTestService,
     ) {}
 
-    public function listTests($queryData): LengthAwarePaginator
+    public function listTests(array $queryData): LengthAwarePaginator
     {
         return $this->testRepository->ListTests($queryData);
     }
 
-    public function allTests($queryData): Collection
+    public function allTests(array $queryData): Collection
     {
         return $this->testRepository->allTests($queryData);
     }

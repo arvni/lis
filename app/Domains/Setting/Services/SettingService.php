@@ -2,6 +2,8 @@
 
 namespace App\Domains\Setting\Services;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
 
 use App\Domains\Setting\Models\Setting;
 use App\Domains\Setting\Repositories\SettingRepository;
@@ -13,11 +15,11 @@ class SettingService
     {
     }
 
-    public function listSettings($queryData)
+    public function listSettings(array $queryData): LengthAwarePaginator
     {
         return $this->settingRepository->ListSettings($queryData);
     }
-    public function updateSetting(Setting $setting, $settingData): Setting
+    public function updateSetting(Setting $setting, array $settingData): Setting
     {
         $value = $settingData["value"];
         if ($setting->value["type"] === "password" && ($value["value"] === '' || $value["value"] === null)) {
@@ -34,7 +36,7 @@ class SettingService
         return $this->settingRepository->updateSetting($setting, $v);
     }
 
-    public function getSettingByKey($class,$key)
+    public function getSettingByKey(string $class, string $key): mixed
     {
         return $this->settingRepository->getSettingsByClassAndKey($class,$key);
     }

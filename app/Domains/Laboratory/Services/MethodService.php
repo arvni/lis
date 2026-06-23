@@ -24,7 +24,7 @@ class MethodService
         return $this->methodRepository->updateMethod($method, $methodDTO->toArray());
     }
 
-    public function findMethodById($id): ?Method
+    public function findMethodById(int|string $id): ?Method
     {
         return $this->methodRepository->findMethodById($id);
     }

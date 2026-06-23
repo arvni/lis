@@ -15,7 +15,7 @@ class ApprovalFlowService
     {
     }
 
-    public function listApprovalFlows($queryData): LengthAwarePaginator
+    public function listApprovalFlows(array $queryData): LengthAwarePaginator
     {
         return $this->approvalFlowRepository->listApprovalFlows($queryData);
     }

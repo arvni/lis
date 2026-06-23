@@ -2,6 +2,8 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\Method;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -44,17 +46,20 @@ class MethodRepository
         $this->logDeleted($method);
     }
 
-    public function findMethodById($id):?Method
+    public function findMethodById(int|string $id):?Method
     {
         return Method::find($id);
     }
 
-    public function findMethodByMethodTestId($id):?Method
+    public function findMethodByMethodTestId(int|string $id):?Method
     {
         return Method::whereHas("methodTests", fn($q) => $q->where("method_tests.id", $id))->first();
     }
 
-    protected function applyFilters($query, array $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Laboratory\Models\Method>  $query
+     */
+    protected function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search($filters["search"]);

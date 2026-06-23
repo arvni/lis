@@ -2,6 +2,8 @@
 
 namespace App\Domains\Consultation\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Consultation\Enums\ConsultationStatus;
 use App\Domains\Consultation\Models\Consultation;
@@ -51,7 +53,10 @@ class ConsultationRepository
         return $query->get();
     }
 
-    public function getQuery()
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder<\App\Domains\Consultation\Models\Consultation>
+     */
+    public function getQuery(): Builder
     {
         return Consultation::query()->selectRaw('*, ' . $this->durationStatement)
             ->withAggregate("consultant", "name")
@@ -99,7 +104,7 @@ class ConsultationRepository
         }
     }
 
-    public function getTotalConsultationForDateRange($dateRange): int
+    public function getTotalConsultationForDateRange(array $dateRange): int
     {
         return Consultation::query()
             ->whereBetween("dueDate", $dateRange)

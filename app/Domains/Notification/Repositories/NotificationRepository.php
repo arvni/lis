@@ -14,7 +14,7 @@ class NotificationRepository
      * @param $queryData
      * @return LengthAwarePaginator
      */
-    public function listNotifications($queryData): LengthAwarePaginator
+    public function listNotifications(array $queryData): LengthAwarePaginator
     {
         $query = $this->makeQuery($queryData["notifiable"]["type"] ?? null, $queryData["notifiable"]["id"] ?? null);
         $query->orderBy($queryData['sort']['field'] ?? 'id', $queryData['sort']['sort'] ?? 'asc');
@@ -26,7 +26,7 @@ class NotificationRepository
      * @param $queryData
      * @return Collection
      */
-    public function getUnreadNotifications($queryData): Collection
+    public function getUnreadNotifications(array $queryData): Collection
     {
         $query = $this->makeQuery($queryData["notifiable"]["type"] ?? null, $queryData["notifiable"]["id"] ?? null);
         $query->orderBy($queryData['sort']['field'] ?? 'id', $queryData['sort']['sort'] ?? 'desc');
@@ -93,7 +93,7 @@ class NotificationRepository
             ->delete();
     }
 
-    private function makeQuery(?string $notifiableType = null, $notifiableId = null): Builder
+    private function makeQuery(?string $notifiableType = null, int|string|null $notifiableId = null): Builder
     {
         $query = Notification::query();
         if ($notifiableType && $notifiableId) {

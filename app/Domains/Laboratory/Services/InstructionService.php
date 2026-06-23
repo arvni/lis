@@ -21,7 +21,7 @@ readonly class InstructionService
     {
     }
 
-    public function listInstructions($queryData): LengthAwarePaginator
+    public function listInstructions(array $queryData): LengthAwarePaginator
     {
         return $this->instructionRepository->ListInstructions($queryData);
     }
