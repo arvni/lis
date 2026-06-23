@@ -15,7 +15,7 @@ class CheckMaterialBarcodeIsAvailableController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): \Illuminate\Http\JsonResponse
     {
         $barcode = $request->input('barcode');
         $sampleId = $request->input('sample_id');

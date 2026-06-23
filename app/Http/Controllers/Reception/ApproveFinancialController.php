@@ -18,7 +18,7 @@ class ApproveFinancialController extends Controller
     /**
      * Approve financial check for acceptance
      */
-    public function __invoke(Acceptance $acceptance, Request $request)
+    public function __invoke(Acceptance $acceptance, Request $request): \Illuminate\Http\RedirectResponse
     {
         // Check permission using policy
         $this->authorize('approveFinancial', $acceptance);

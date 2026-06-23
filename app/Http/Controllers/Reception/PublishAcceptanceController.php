@@ -16,7 +16,7 @@ class PublishAcceptanceController extends Controller
     ) {
     }
 
-    public function __invoke(Acceptance $acceptance, PublishAcceptanceRequest $request)
+    public function __invoke(Acceptance $acceptance, PublishAcceptanceRequest $request): \Illuminate\Http\RedirectResponse
     {
         // Validate that all acceptance items have approved reports
         $this->acceptanceRepository->loadReportableItemsWithReports($acceptance);

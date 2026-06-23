@@ -17,7 +17,7 @@ class RejectReportController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Report $report, RejectReportRequest $request)
+    public function __invoke(Report $report, RejectReportRequest $request): \Illuminate\Http\RedirectResponse
     {
         if (!$report->status)
             return back()->withErrors("this report has been rejected before");

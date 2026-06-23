@@ -38,7 +38,7 @@ class SectionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreSectionRequest $sectionRequest)
+    public function store(StoreSectionRequest $sectionRequest): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $sectionRequest->validated();
         $sectionDto = new SectionDTO(
@@ -56,7 +56,7 @@ class SectionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Section $section, UpdateSectionRequest $request)
+    public function update(Section $section, UpdateSectionRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $request->validated();
         $sectionDto = new SectionDTO(

@@ -17,7 +17,7 @@ class ListMaterialsBasedOnPackingSeriesController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): \Illuminate\Http\JsonResponse
     {
         $this->authorize("viewAny", Material::class);
         $requestInputs = $request->all();

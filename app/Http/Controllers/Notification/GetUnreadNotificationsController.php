@@ -15,7 +15,7 @@ class GetUnreadNotificationsController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke()
+    public function __invoke(): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
         $notifications = $this->notificationService->getUserUnreadNotifications();
         return NotificationResource::collection($notifications);

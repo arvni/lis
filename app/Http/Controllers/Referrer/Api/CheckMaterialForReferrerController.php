@@ -10,7 +10,7 @@ class CheckMaterialForReferrerController extends Controller
 {
     public function __construct(private MaterialRepository $materials) {}
 
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): \Illuminate\Http\JsonResponse
     {
         $material = $this->materials->findForReferrer(
             (string) $request->input('barcode'),

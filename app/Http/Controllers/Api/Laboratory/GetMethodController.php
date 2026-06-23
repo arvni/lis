@@ -13,7 +13,7 @@ class GetMethodController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Method $method, Request $request)
+    public function __invoke(Method $method, Request $request): \Illuminate\Http\Resources\Json\JsonResource
     {
         $load = ["test.sampleTypes"];
         if ($request->has("referrer")) {

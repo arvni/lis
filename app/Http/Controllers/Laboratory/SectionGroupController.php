@@ -39,7 +39,7 @@ class SectionGroupController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreSectionGroupRequest $sectionGroupRequest)
+    public function store(StoreSectionGroupRequest $sectionGroupRequest): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $sectionGroupRequest->validated();
         $sectionGroupDto = new SectionGroupDTO(
@@ -52,7 +52,7 @@ class SectionGroupController extends Controller
     }
 
 
-    public function show(SectionGroup $sectionGroup, Request $request)
+    public function show(SectionGroup $sectionGroup, Request $request): \Inertia\Response
     {
         $this->authorize("view", $sectionGroup);
         $this->sectionGroupService->getSectionGroupWithChildrenAndSection($sectionGroup);
@@ -65,7 +65,7 @@ class SectionGroupController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(SectionGroup $sectionGroup, UpdateSectionGroupRequest $request)
+    public function update(SectionGroup $sectionGroup, UpdateSectionGroupRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $request->validated();
         $sectionGroupDto = new SectionGroupDTO(

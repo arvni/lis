@@ -46,7 +46,7 @@ class InvoiceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreInvoiceRequest $request)
+    public function store(StoreInvoiceRequest $request): \Illuminate\Http\RedirectResponse
     {
 
         $invoice = $this->invoiceService
@@ -70,7 +70,7 @@ class InvoiceController extends Controller
      * Display the specified resource.
      * @throws AuthorizationException
      */
-    public function show(Invoice $invoice)
+    public function show(Invoice $invoice): \Inertia\Response
     {
         $this->authorize("view", $invoice);
 //        $vat = (int)(Setting::where("key", "vat")->first()->value["value"]);
@@ -85,7 +85,7 @@ class InvoiceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateInvoiceRequest $request, Invoice $invoice)
+    public function update(UpdateInvoiceRequest $request, Invoice $invoice): \Illuminate\Http\RedirectResponse
     {
         $data = $request->validated();
         $invoiceDto = InvoiceDTO::fromArray(array_merge($invoice->toArray(), $data));
@@ -98,7 +98,7 @@ class InvoiceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Invoice $invoice)
+    public function destroy(Invoice $invoice): \Illuminate\Http\RedirectResponse
     {
         $this->authorize("delete", $invoice);
         $this->invoiceService->deleteInvoice($invoice);

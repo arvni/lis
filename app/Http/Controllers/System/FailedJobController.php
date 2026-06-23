@@ -60,7 +60,7 @@ class FailedJobController extends Controller
         ]);
     }
 
-    public function retry(string $uuid)
+    public function retry(string $uuid): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('failed-jobs.retry');
 
@@ -73,7 +73,7 @@ class FailedJobController extends Controller
         return back()->with(['success' => true, 'status' => "Job {$uuid} queued for retry."]);
     }
 
-    public function destroy(string $uuid)
+    public function destroy(string $uuid): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('failed-jobs.delete');
 
@@ -82,7 +82,7 @@ class FailedJobController extends Controller
         return back()->with(['success' => true, 'status' => 'Failed job deleted.']);
     }
 
-    public function retryAll(Request $request)
+    public function retryAll(Request $request): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('failed-jobs.retry');
 
@@ -99,7 +99,7 @@ class FailedJobController extends Controller
         return back()->with(['success' => true, 'status' => $message]);
     }
 
-    public function destroyAll(Request $request)
+    public function destroyAll(Request $request): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('failed-jobs.delete');
 

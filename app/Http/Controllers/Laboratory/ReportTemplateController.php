@@ -50,7 +50,7 @@ class ReportTemplateController extends Controller
         return redirect()->route('reportTemplates.index')->with('success', 'Report Template created successfully.');
     }
 
-    public function show(ReportTemplate $reportTemplate)
+    public function show(ReportTemplate $reportTemplate): \Illuminate\Http\RedirectResponse
     {
         $template = $this->reportTemplateService->getTemplate($reportTemplate);
         abort_unless(!!$template, 404);

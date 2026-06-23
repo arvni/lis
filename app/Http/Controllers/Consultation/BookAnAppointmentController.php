@@ -17,7 +17,7 @@ class BookAnAppointmentController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(BookAnAppointmentRequest $request)
+    public function __invoke(BookAnAppointmentRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
         $customerID = $request->input("customer.id");

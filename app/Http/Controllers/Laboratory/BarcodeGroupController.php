@@ -38,7 +38,7 @@ class BarcodeGroupController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreBarcodeGroupRequest $barcodeGroupRequest)
+    public function store(StoreBarcodeGroupRequest $barcodeGroupRequest): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $barcodeGroupRequest->validated();
         $barcodeGroupDto = new BarcodeGroupDTO(
@@ -53,7 +53,7 @@ class BarcodeGroupController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(BarcodeGroup $barcodeGroup, UpdateBarcodeGroupRequest $request)
+    public function update(BarcodeGroup $barcodeGroup, UpdateBarcodeGroupRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $request->validated();
         $barcodeGroupDto = new BarcodeGroupDTO(

@@ -10,7 +10,7 @@ class ListCollectRequestsController extends Controller
 {
     public function __construct(private CollectRequestRepository $collectRequests) {}
 
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): \Illuminate\Http\JsonResponse
     {
         $paginated = $this->collectRequests->listBarcodedForLookup(
             $request->integer('referrer_id') ?: null,

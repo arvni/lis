@@ -16,7 +16,7 @@ class PrintAcceptanceBarcodeController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Acceptance $acceptance)
+    public function __invoke(Acceptance $acceptance): \Inertia\Response
     {
         $barcodes=$this->sampleService->listSampleBarcodes(["acceptance_id" => $acceptance->id]);
         return Inertia::render("Acceptance/Barcodes", compact("barcodes"));

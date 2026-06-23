@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Gate;
 
 class RejectSampleQCController extends Controller
 {
-    public function __invoke(Request $request, Sample $sample, AcceptanceItemService $acceptanceItemService)
+    public function __invoke(Request $request, Sample $sample, AcceptanceItemService $acceptanceItemService): \Illuminate\Http\RedirectResponse
     {
         Gate::authorize('QC.Samples.Approve Sample');
 

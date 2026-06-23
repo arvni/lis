@@ -14,7 +14,7 @@ class SampleCollectionController extends Controller
         $this->middleware("indexProvider");
     }
 
-    public function __invoke(SampleCollectionRequest $request)
+    public function __invoke(SampleCollectionRequest $request): \Inertia\Response
     {
         $requestInputs = $request->all();
         $acceptances = $this->acceptanceService->listSampleCollections($requestInputs);

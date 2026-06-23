@@ -19,7 +19,7 @@ class CopyReferrerTestsFromOtherReferrerController extends Controller
      * Handle the incoming request.
      * @throws Exception
      */
-    public function __invoke(Referrer $referrer, Request $request)
+    public function __invoke(Referrer $referrer, Request $request): \Illuminate\Http\RedirectResponse
     {
         if ($request->has("source.id")) {
             $sourceReferrer = $this->referrerService->getReferrerById($request->input("source.id"));

@@ -39,7 +39,7 @@ class InstructionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreInstructionRequest $instructionRequest)
+    public function store(StoreInstructionRequest $instructionRequest): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $instructionRequest->validated();
         $instructionDto = new InstructionDTO(
@@ -55,7 +55,7 @@ class InstructionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Instruction $instruction, UpdateInstructionRequest $request)
+    public function update(Instruction $instruction, UpdateInstructionRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $request->validated();
         $instructionDto = new InstructionDTO(

@@ -39,7 +39,7 @@ class SampleTypeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreSampleTypeRequest $sampleTypeRequest)
+    public function store(StoreSampleTypeRequest $sampleTypeRequest): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $sampleTypeRequest->validated();
         $sampleTypeDto = new SampleTypeDTO(
@@ -57,7 +57,7 @@ class SampleTypeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(SampleType $sampleType, UpdateSampleTypeRequest $request)
+    public function update(SampleType $sampleType, UpdateSampleTypeRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $request->validated();
         $sampleTypeDto = new SampleTypeDTO(

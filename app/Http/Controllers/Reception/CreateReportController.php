@@ -27,7 +27,7 @@ class CreateReportController extends Controller
         $this->reportRepository = $reportRepository;
     }
 
-    public function __invoke(AcceptanceItem $acceptanceItem)
+    public function __invoke(AcceptanceItem $acceptanceItem): \Illuminate\Http\RedirectResponse|\Inertia\Response
     {
         $this->authorize("create", [Report::class, $acceptanceItem]);
 

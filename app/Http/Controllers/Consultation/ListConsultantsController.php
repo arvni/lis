@@ -17,7 +17,7 @@ class ListConsultantsController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
         $requestInputs = $request->all();
         $consultants = $this->consultantService->listConsultants([...$requestInputs, "filters" => [...($requestInputs["filters"] ?? []), "active" => true]]);

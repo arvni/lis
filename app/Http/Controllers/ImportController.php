@@ -16,7 +16,7 @@ class ImportController extends Controller
     /**
      * Display the import form.
      */
-    public function create()
+    public function create(): \Inertia\Response
     {
         return Inertia::render('Import/Create', [
             'patientFields' => $this->importService->patientFields(),
@@ -26,7 +26,7 @@ class ImportController extends Controller
     /**
      * Handle the Excel file import.
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|\Illuminate\Http\Response
     {
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv|max:10240',

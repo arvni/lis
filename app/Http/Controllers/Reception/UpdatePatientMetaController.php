@@ -17,7 +17,7 @@ class UpdatePatientMetaController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Patient $patient, UpdatePatientMetaRequest $request)
+    public function __invoke(Patient $patient, UpdatePatientMetaRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
         $patientMetaDto = new PatientMetaDTO(

@@ -39,7 +39,7 @@ class ConsentFormController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreConsentFormRequest $consentFormRequest)
+    public function store(StoreConsentFormRequest $consentFormRequest): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $consentFormRequest->validated();
         $consentFormDto = new ConsentFormDTO(
@@ -55,7 +55,7 @@ class ConsentFormController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ConsentForm $consentForm, UpdateConsentFormRequest $request)
+    public function update(ConsentForm $consentForm, UpdateConsentFormRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validatedData = $request->validated();
         $consentFormDto = new ConsentFormDTO(

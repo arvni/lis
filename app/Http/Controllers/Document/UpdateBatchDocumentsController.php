@@ -16,7 +16,7 @@ class UpdateBatchDocumentsController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(UpdateDocumentBatchUpdateRequest $request)
+    public function __invoke(UpdateDocumentBatchUpdateRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
         foreach ($validated['documents'] as $documentData) {

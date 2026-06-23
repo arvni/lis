@@ -16,7 +16,7 @@ class ListUsersController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
         $users = $this->userService->listUsers($request->all());
         return ListResource::collection($users);

@@ -17,7 +17,7 @@ class GetPrevSectionsController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(AcceptanceItemState $acceptanceItemState)
+    public function __invoke(AcceptanceItemState $acceptanceItemState): \Illuminate\Http\JsonResponse
     {
         $acceptanceItemState->load("acceptanceItem");
         $pervSections = $this->workflowAdapter->getPrevSections($acceptanceItemState->acceptanceItem->method_test_id, $acceptanceItemState->order);

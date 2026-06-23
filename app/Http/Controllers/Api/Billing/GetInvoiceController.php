@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class GetInvoiceController extends Controller
 {
-    public function __invoke(Invoice $invoice, Request $request, InvoiceComposer $composer)
+    public function __invoke(Invoice $invoice, Request $request, InvoiceComposer $composer): \Illuminate\Http\Resources\Json\JsonResource
     {
         // Ensure invoice_items reflect the latest acceptance_items before exposing them.
         $composer->recompose($invoice);

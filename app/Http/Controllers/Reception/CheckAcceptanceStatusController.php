@@ -18,7 +18,7 @@ class CheckAcceptanceStatusController extends Controller
     /**
      * Check and update acceptance status
      */
-    public function __invoke(Acceptance $acceptance, Request $request)
+    public function __invoke(Acceptance $acceptance, Request $request): \Illuminate\Http\RedirectResponse
     {
         // Check permission using policy
         $this->authorize('checkStatus', $acceptance);

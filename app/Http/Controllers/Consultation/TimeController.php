@@ -36,7 +36,7 @@ class TimeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): \Inertia\Response
     {
         return Inertia::render('Consultation/Reservations', [
             "times" => $this->timeService->listTimes($request->all()),
@@ -50,7 +50,7 @@ class TimeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreTimeRequest $request)
+    public function store(StoreTimeRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
         $startTime = Carbon::createFromFormat("Y-m-d H:i", $validated["date"] . " " . $validated["startTime"], "Asia/Muscat");
@@ -68,7 +68,7 @@ class TimeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateTimeRequest $request, Time $time)
+    public function update(UpdateTimeRequest $request, Time $time): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
         $dueDate = Carbon::createFromFormat("Y-m-d H:i", $validated["dueDate"] . " " . $validated["time"], "Asia/Muscat");

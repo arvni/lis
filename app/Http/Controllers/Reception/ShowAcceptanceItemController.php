@@ -20,7 +20,7 @@ class ShowAcceptanceItemController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Acceptance $acceptance, AcceptanceItem $acceptanceItem)
+    public function __invoke(Acceptance $acceptance, AcceptanceItem $acceptanceItem): \Illuminate\Http\RedirectResponse|\Inertia\Response
     {
         $acceptanceItem->load("test");
         if ($acceptanceItem->test->type == TestType::SERVICE) {

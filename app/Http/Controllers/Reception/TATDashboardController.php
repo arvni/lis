@@ -13,7 +13,7 @@ class TATDashboardController extends Controller
     {
     }
 
-    public function __invoke(TATDashboardRequest $request)
+    public function __invoke(TATDashboardRequest $request): \Inertia\Response
     {
         $filters = $request->only(['priority', 'section_id', 'date_from', 'date_to']);
 
