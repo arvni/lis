@@ -57,12 +57,12 @@ class SampleCollectorService
         $this->sampleCollectorRepository->deleteSampleCollector($sampleCollector);
     }
 
-    public function getSampleCollectorByEmail($email): ?SampleCollector
+    public function getSampleCollectorByEmail(string $email): ?SampleCollector
     {
         return $this->sampleCollectorRepository->findSampleCollectorByEmail($email);
     }
 
-    public function getSampleCollectorById($id): ?SampleCollector
+    public function getSampleCollectorById(int|string $id): ?SampleCollector
     {
         return $this->sampleCollectorRepository->findSampleCollectorById($id);
     }

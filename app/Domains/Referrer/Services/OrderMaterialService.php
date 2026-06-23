@@ -22,7 +22,7 @@ readonly class OrderMaterialService
     {
     }
 
-    public function listOrderMaterials($queryData): LengthAwarePaginator
+    public function listOrderMaterials(array $queryData): LengthAwarePaginator
     {
         return $this->orderMaterialRepository->ListOrderMaterials($queryData);
     }

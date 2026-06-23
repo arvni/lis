@@ -2,6 +2,7 @@
 
 namespace App\Domains\Reception\Adapters;
 
+use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Repositories\InvoiceRepository;
 
 class BillingAdapter
@@ -10,7 +11,7 @@ class BillingAdapter
     {
     }
 
-    public function getInvoiceNo($invoice): string
+    public function getInvoiceNo(Invoice $invoice): string
     {
         return $this->invoiceRepository->getInvoiceNo($invoice);
     }

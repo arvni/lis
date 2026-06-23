@@ -116,7 +116,7 @@ class CollectRequestService
         $this->collectRequestRepository->deleteCollectRequest($collectRequest);
     }
 
-    public function getCollectRequestById($id): ?CollectRequest
+    public function getCollectRequestById(int|string $id): ?CollectRequest
     {
         return $this->collectRequestRepository->findCollectRequestById($id);
     }

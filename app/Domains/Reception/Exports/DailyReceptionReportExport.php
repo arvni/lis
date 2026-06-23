@@ -71,7 +71,7 @@ class DailyReceptionReportExport implements FromCollection, WithHeadings, WithTi
         return 'B6';
     }
 
-    public function styles(Worksheet $sheet)
+    public function styles(Worksheet $sheet): array
     {
         // Apply styles to the entire sheet
         $sheet->getStyle('B6:K6')->getFont()->setBold(true);

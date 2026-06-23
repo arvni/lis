@@ -34,7 +34,7 @@ class TwilioWhatsAppChannel
      * @param string $from
      * @param $messagingServiceSid
      */
-    public function __construct(TwilioClient $twilio, string $from, $messagingServiceSid)
+    public function __construct(TwilioClient $twilio, string $from, string $messagingServiceSid)
     {
         $this->twilio = $twilio;
         $this->from = $from;
@@ -209,7 +209,7 @@ class TwilioWhatsAppChannel
      * @param $notifiable
      * @return WhatsappMessage
      */
-    protected function saveWhatsAppMessage($notifiable): WhatsappMessage
+    protected function saveWhatsAppMessage(mixed $notifiable): WhatsappMessage
     {
         $whatsappMessage = new WhatsappMessage([
             "data" => [],

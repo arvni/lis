@@ -18,7 +18,7 @@ class AcceptanceItemDTO
         public int|string|null $panelId = null,
         public bool            $deleted = false,
         public bool            $sampleless = false,
-        public                 $reportless = false
+        public bool            $reportless = false
     )
     {
     }

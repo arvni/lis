@@ -58,7 +58,7 @@ class ReferrerOrderService
         return $this->referrerRepository->updateReferrerOrder($referrerOrder, $referrerDTO->toArray());
     }
 
-    public function updateReferrerOrderStatus(ReferrerOrder $referrerOrder, $status): ReferrerOrder
+    public function updateReferrerOrderStatus(ReferrerOrder $referrerOrder, string $status): ReferrerOrder
     {
         if ((string) $referrerOrder->status === (string) $status) {
             return $referrerOrder;
@@ -445,7 +445,7 @@ class ReferrerOrderService
         return [$itemPatients, $itemSamplesMap, $samples];
     }
 
-    private function buildGroupedOrderItems($acceptanceItems, array $itemPatients, array $itemSamplesMap, array $patientData): array
+    private function buildGroupedOrderItems(iterable $acceptanceItems, array $itemPatients, array $itemSamplesMap, array $patientData): array
     {
         $orderItems = [];
         foreach ($acceptanceItems as $item) {

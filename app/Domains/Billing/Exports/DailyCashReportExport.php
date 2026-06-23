@@ -118,7 +118,7 @@ class DailyCashReportExport implements
     /**
      * Apply styles to the worksheet
      */
-    public function styles(Worksheet $sheet)
+    public function styles(Worksheet $sheet): array
     {
         // Set column widths
         $sheet->getColumnDimension('A')->setWidth(5);

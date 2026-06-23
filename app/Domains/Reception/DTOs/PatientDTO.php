@@ -24,7 +24,7 @@ class PatientDTO
     {
     }
 
-    public static function fromRequest($validatedRequest): self
+    public static function fromRequest(array $validatedRequest): self
     {
         return new self(
             $validatedRequest['firstName'],

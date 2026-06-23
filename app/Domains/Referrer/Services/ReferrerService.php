@@ -73,12 +73,12 @@ class ReferrerService
         }
     }
 
-    public function getReferrerByEmail($idNo): ?Referrer
+    public function getReferrerByEmail(string $idNo): ?Referrer
     {
         return $this->referrerRepository->findReferrerByEmail($idNo);
     }
 
-    public function getReferrerById($id)
+    public function getReferrerById(int|string $id): ?Referrer
     {
         return $this->referrerRepository->findReferrerById($id);
     }

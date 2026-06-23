@@ -279,7 +279,7 @@ class TestExport implements
         };
     }
 
-    private function formatMultipleMethodPrices($methods): string
+    private function formatMultipleMethodPrices(Collection $methods): string
     {
         $formatted = [];
 
@@ -296,7 +296,7 @@ class TestExport implements
         return implode("\n", $formatted) ?: '-';
     }
 
-    private function formatMultipleMethodReferrerPrices($methods): string
+    private function formatMultipleMethodReferrerPrices(Collection $methods): string
     {
         $formatted = [];
 

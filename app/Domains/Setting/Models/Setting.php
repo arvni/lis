@@ -2,10 +2,12 @@
 
 namespace App\Domains\Setting\Models;
 
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
+    use Searchable;
 
     protected $fillable = [
         'title',

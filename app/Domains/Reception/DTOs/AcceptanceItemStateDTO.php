@@ -10,7 +10,7 @@ class AcceptanceItemStateDTO
     public function __construct(
         public int                       $acceptanceItemId,
         public int                       $sectionId,
-        public                           $parameters,
+        public mixed                     $parameters,
         public AcceptanceItemStateStatus $status,
         public int                       $order = 0,
         public bool                      $isFirstSection = false,

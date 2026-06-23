@@ -2,6 +2,7 @@
 
 namespace App\Domains\Referrer\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Referrer\DTOs\ReferrerTestDTO;
 use App\Domains\Referrer\Models\ReferrerTest;
@@ -53,14 +54,14 @@ class ReferrerTestRepository
         return ReferrerTest::where('method_id', $methodId)->where('referrer_id', $referrerId)->first();
     }
 
-    public function store($data): ReferrerTest
+    public function store(array $data): ReferrerTest
     {
         $referrerTest = ReferrerTest::create($data);
         $this->logCreated($referrerTest);
         return $referrerTest;
     }
 
-    public function update(ReferrerTest $referrerTest, $data)
+    public function update(ReferrerTest $referrerTest, array $data): ReferrerTest
     {
         $referrerTest->update($data);
         $this->logDeleted($referrerTest);

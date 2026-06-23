@@ -10,18 +10,18 @@ class ReportTemplateDocumentUpdateEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $document;
+    public mixed $document;
     public string $ownerClass = "reporttemplate";
     public string|int $ownerId;
     public string $tag;
     public ?string $relatedType = null;
-    public $relatedId = null;
+    public int|string|null $relatedId = null;
 
 
     /**
      * Create a new event instance.
      */
-    public function __construct($document, $ownerId, $tag, $relatedType = null, $relatedId = null)
+    public function __construct(mixed $document, int|string $ownerId, string $tag, ?string $relatedType = null, int|string|null $relatedId = null)
     {
         $this->document = $document;
         $this->ownerId = $ownerId;

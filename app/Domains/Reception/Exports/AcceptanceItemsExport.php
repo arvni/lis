@@ -191,7 +191,7 @@ class AcceptanceItemsExport implements
     /**
      * Formats price with proper decimal places
      */
-    private function formatPrice($price): string
+    private function formatPrice(mixed $price): string
     {
         return number_format((float) $price, 2);
     }
@@ -199,7 +199,7 @@ class AcceptanceItemsExport implements
     /**
      * Formats discount with proper decimal places
      */
-    private function formatDiscount($discount): string
+    private function formatDiscount(mixed $discount): string
     {
         return number_format((float) $discount, 2);
     }
@@ -215,7 +215,7 @@ class AcceptanceItemsExport implements
     /**
      * Formats date to consistent format
      */
-    private function formatDate($date): string
+    private function formatDate(mixed $date): string
     {
         if (!$date) {
             return '';
@@ -227,7 +227,7 @@ class AcceptanceItemsExport implements
     /**
      * Formats datetime to consistent format
      */
-    private function formatDateTime($datetime): string
+    private function formatDateTime(mixed $datetime): string
     {
         if (!$datetime) {
             return '';
@@ -239,7 +239,7 @@ class AcceptanceItemsExport implements
     /**
      * Formats status for better readability
      */
-    private function formatStatus($status): string
+    private function formatStatus(string $status): string
     {
         return ucfirst(strtolower($status));
     }

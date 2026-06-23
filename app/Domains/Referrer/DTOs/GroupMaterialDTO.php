@@ -18,7 +18,7 @@ class GroupMaterialDTO
             $data['tubes'],);
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             "sample_type_id"=>$this->sampleTypeId,

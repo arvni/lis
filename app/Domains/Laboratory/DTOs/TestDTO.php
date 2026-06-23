@@ -52,7 +52,7 @@ class TestDTO
             $data["can_merge"] ?? null,);
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             "name" => $this->name,

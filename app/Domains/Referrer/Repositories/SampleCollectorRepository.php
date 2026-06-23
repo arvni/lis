@@ -2,6 +2,7 @@
 
 namespace App\Domains\Referrer\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Referrer\Models\SampleCollector;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -53,17 +54,20 @@ class SampleCollectorRepository
         $this->logDeleted($sampleCollector);
     }
 
-    public function findSampleCollectorById($id): ?SampleCollector
+    public function findSampleCollectorById(int|string $id): ?SampleCollector
     {
         return SampleCollector::find($id);
     }
 
-    public function findSampleCollectorByEmail($email): ?SampleCollector
+    public function findSampleCollectorByEmail(string $email): ?SampleCollector
     {
         return SampleCollector::where("email", $email)->first();
     }
 
-    public function applyFilters($query, array $filters)
+    /**
+     * @param  Builder<SampleCollector>  $query
+     */
+    public function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"])) {
             $query->where(function ($q) use ($filters) {

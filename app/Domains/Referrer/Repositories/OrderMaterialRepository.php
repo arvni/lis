@@ -2,6 +2,8 @@
 
 namespace App\Domains\Referrer\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Referrer\Models\OrderMaterial;
 use Carbon\Carbon;
@@ -92,7 +94,10 @@ class OrderMaterialRepository
     /**
      * Apply date range filter to the query
      */
-    private function applyDateRangeFilter($query, string $field, array $dateFilter): void
+    /**
+     * @param  Builder<OrderMaterial>  $query
+     */
+    private function applyDateRangeFilter(Builder $query, string $field, array $dateFilter): void
     {
         $timezone = config('app.timezone', 'Asia/Muscat');
 
@@ -129,7 +134,7 @@ class OrderMaterialRepository
     /**
      * Ensure the given date is a Carbon instance
      */
-    private function ensureCarbonDate($date, string $timezone): Carbon
+    private function ensureCarbonDate(mixed $date, string $timezone): Carbon
     {
         if ($date instanceof Carbon) {
             return $date->timezone($timezone);

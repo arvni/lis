@@ -12,7 +12,7 @@ class RelativeDTO
     {
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             "patient_id" => $this->patientId,

@@ -22,7 +22,7 @@ readonly class WorkflowAdapter
     /**
      * Get the workflow section by ID for a specific acceptance item.
      */
-    public function getSectionWorkflow($method_id, int $sectionId): ?object
+    public function getSectionWorkflow(int $method_id, int $sectionId): ?object
     {
         return $this->sectionWorkflowRepository->findBySectionByMethodTestId(
             $sectionId,
@@ -30,7 +30,7 @@ readonly class WorkflowAdapter
         );
     }
 
-    public function getSectionWorkflowByMethodTestAndOrder($method_id, $order): ?object
+    public function getSectionWorkflowByMethodTestAndOrder(int $method_id, int $order): ?object
     {
         return $this->sectionWorkflowRepository->findByOrderByMethodTestId(
             $method_id,
@@ -38,7 +38,7 @@ readonly class WorkflowAdapter
         );
     }
 
-    public function getPrevSections($method_id, $order): Collection
+    public function getPrevSections(int $method_id, int $order): Collection
     {
         return $this->sectionWorkflowRepository->getPrevSections(
             $method_id,

@@ -24,7 +24,7 @@ class MethodDTO
     {
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             "name" => $this->name,

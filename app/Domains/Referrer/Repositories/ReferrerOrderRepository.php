@@ -2,6 +2,8 @@
 
 namespace App\Domains\Referrer\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -43,17 +45,20 @@ class ReferrerOrderRepository
     }
 
 
-    public function findReferrerOrderById($id): ?ReferrerOrder
+    public function findReferrerOrderById(int|string $id): ?ReferrerOrder
     {
         return ReferrerOrder::find($id);
     }
 
-    public function findReferrerOrderByEmail($email): ?ReferrerOrder
+    public function findReferrerOrderByEmail(string $email): ?ReferrerOrder
     {
         return ReferrerOrder::where("email", $email)->first();
     }
 
-    public function applyFilters($query, array $filters)
+    /**
+     * @param  Builder<ReferrerOrder>  $query
+     */
+    public function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"])) {
             $query->search($filters["search"]);
