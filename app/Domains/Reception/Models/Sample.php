@@ -9,6 +9,11 @@ use App\Domains\User\Models\User;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Sample extends Model
 {
@@ -43,13 +48,15 @@ class Sample extends Model
         "samples.barcode"
     ];
 
-    public function acceptanceItems()
+    /** @return BelongsToMany<AcceptanceItem, $this> */
+    public function acceptanceItems(): BelongsToMany
     {
         return $this->belongsToMany(AcceptanceItem::class, "acceptance_item_samples")
             ->withPivot("active");
     }
 
-    public function acceptances()
+    /** @return HasManyThrough<Sample, AcceptanceItemSample, $this> */
+    public function acceptances(): HasManyThrough
     {
         return $this->hasManyThrough(
             Sample::class,
@@ -62,7 +69,8 @@ class Sample extends Model
             ->distinct();
     }
 
-    public function acceptance()
+    /** @return HasOneThrough<Sample, AcceptanceItemSample, $this> */
+    public function acceptance(): HasOneThrough
     {
         return $this->hasOneThrough(
             Sample::class,
@@ -90,42 +98,50 @@ class Sample extends Model
     }
 
 
-    public function patient()
+    /** @return BelongsTo<Patient, $this> */
+    public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
     }
 
-    public function sampleType()
+    /** @return BelongsTo<SampleType, $this> */
+    public function sampleType(): BelongsTo
     {
         return $this->belongsTo(SampleType::class);
     }
 
-    public function sampler()
+    /** @return BelongsTo<User, $this> */
+    public function sampler(): BelongsTo
     {
         return $this->belongsTo(User::class, "sampler_id",);
     }
 
-    public function qCPerson()
+    /** @return BelongsTo<User, $this> */
+    public function qCPerson(): BelongsTo
     {
         return $this->belongsTo(User::class, "qc_by_id");
     }
 
-    public function qcApprovedBy()
+    /** @return BelongsTo<User, $this> */
+    public function qcApprovedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, "qc_approved_by_id");
     }
 
-    public function samples()
+    /** @return HasMany<Sample, $this> */
+    public function samples(): HasMany
     {
         return $this->hasMany(Sample::class);
     }
 
-    public function material()
+    /** @return BelongsTo<Material, $this> */
+    public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
     }
 
-    public function collectRequest()
+    /** @return BelongsTo<CollectRequest, $this> */
+    public function collectRequest(): BelongsTo
     {
         return $this->belongsTo(CollectRequest::class);
     }

@@ -18,6 +18,7 @@ class MonitoringNode extends Model
         'onlined' => 'boolean',
     ];
 
+    /** @return BelongsTo<Section, $this> */
     public function section(): BelongsTo
     {
         return $this->belongsTo(Section::class);

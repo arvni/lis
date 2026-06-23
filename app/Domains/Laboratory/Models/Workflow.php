@@ -4,6 +4,9 @@ namespace App\Domains\Laboratory\Models;
 
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Workflow extends Model
 {
@@ -18,12 +21,14 @@ class Workflow extends Model
         "status" => "boolean"
     ];
 
-    public function methods()
+    /** @return HasMany<Method, $this> */
+    public function methods(): HasMany
     {
         return $this->hasMany(Method::class);
     }
 
-    public function sections()
+    /** @return BelongsToMany<Section, $this> */
+    public function sections(): BelongsToMany
     {
         return $this->belongsToMany(Section::class,"section_workflows")
             ->withPivot("order", "parameters", "id")
@@ -31,12 +36,14 @@ class Workflow extends Model
             ->orderByPivot('order');
     }
 
-    public function sectionWorkflows()
+    /** @return HasMany<SectionWorkflow, $this> */
+    public function sectionWorkflows(): HasMany
     {
         return $this->hasMany(SectionWorkflow::class);
     }
 
-    public function firstSection()
+    /** @return HasOneThrough<Section, SectionWorkflow, $this> */
+    public function firstSection(): HasOneThrough
     {
         return $this->hasOneThrough(
             Section::class,
@@ -51,7 +58,8 @@ class Workflow extends Model
             ->withAggregate('sectionWorkflows as section_workflows_parameters', 'parameters');
     }
 
-    public function lastSection()
+    /** @return HasOneThrough<Section, SectionWorkflow, $this> */
+    public function lastSection(): HasOneThrough
     {
         return $this->hasOneThrough(
             Section::class,           // Final model

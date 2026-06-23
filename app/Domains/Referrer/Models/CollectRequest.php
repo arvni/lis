@@ -29,21 +29,25 @@ class CollectRequest extends Model
         "preferred_date"       => "datetime",
     ];
 
+    /** @return BelongsTo<SampleCollector, $this> */
     public function sampleCollector(): BelongsTo
     {
         return $this->belongsTo(SampleCollector::class);
     }
 
+    /** @return BelongsTo<Referrer, $this> */
     public function referrer(): BelongsTo
     {
         return $this->belongsTo(Referrer::class);
     }
 
+    /** @return HasMany<ReferrerOrder, $this> */
     public function referrerOrders(): HasMany
     {
         return $this->hasMany(ReferrerOrder::class);
     }
 
+    /** @return HasMany<Sample, $this> */
     public function samples(): HasMany
     {
         return $this->hasMany(Sample::class);

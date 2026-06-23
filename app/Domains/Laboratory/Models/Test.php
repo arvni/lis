@@ -10,6 +10,9 @@ use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Runtime flag set by TestController to signal referrer-default pricing during shaping
@@ -57,74 +60,88 @@ class Test extends Model
         'referrer_extra' => 'json',
     ];
 
+    /** @return BelongsTo<TestGroup, $this> */
     public function testGroup(): BelongsTo
     {
         return $this->belongsTo(TestGroup::class);
     }
 
+    /** @return BelongsToMany<TestGroup, $this> */
     public function testGroups(): BelongsToMany
     {
         return $this->belongsToMany(TestGroup::class, "test_group_test");
     }
 
 
-    public function acceptanceItems()
+    /** @return HasManyThrough<AcceptanceItem, MethodTest, $this> */
+    public function acceptanceItems(): HasManyThrough
     {
         return $this->hasManyThrough(AcceptanceItem::class, MethodTest::class, "test_id", "method_test_id");
     }
 
+    /** @return BelongsToMany<ReportTemplate, $this> */
     public function reportTemplates(): BelongsToMany
     {
         return $this->belongsToMany(ReportTemplate::class);
     }
 
-    public function sampleTypeTests()
+    /** @return HasMany<SampleTypeTest, $this> */
+    public function sampleTypeTests(): HasMany
     {
         return $this->hasMany(SampleTypeTest::class);
     }
 
+    /** @return BelongsToMany<SampleType, $this> */
     public function sampleTypes(): BelongsToMany
     {
         return $this->belongsToMany(SampleType::class, "sample_type_tests")
             ->withPivot(["description", "defaultType"]);
     }
 
+    /** @return BelongsToMany<Method, $this> */
     public function methods(): BelongsToMany
     {
         return $this->belongsToMany(Method::class, "method_tests")
             ->withPivot(["is_default"]);
     }
 
-    public function methodTests()
+    /** @return HasMany<MethodTest, $this> */
+    public function methodTests(): HasMany
     {
         return $this->hasMany(MethodTest::class);
     }
 
+    /** @return BelongsToMany<Offer, $this> */
     public function offers(): BelongsToMany
     {
         return $this->belongsToMany(Offer::class, "offer_test");
     }
 
-    public function referrerTests()
+    /** @return HasMany<ReferrerTest, $this> */
+    public function referrerTests(): HasMany
     {
         return $this->hasMany(ReferrerTest::class);
     }
 
-    public function referrerTest()
+    /** @return HasOne<ReferrerTest, $this> */
+    public function referrerTest(): HasOne
     {
         return $this->hasOne(ReferrerTest::class);
     }
 
+    /** @return BelongsTo<RequestForm, $this> */
     public function requestForm(): BelongsTo
     {
         return $this->belongsTo(RequestForm::class);
     }
 
+    /** @return BelongsTo<ConsentForm, $this> */
     public function consentForm(): BelongsTo
     {
         return $this->belongsTo(ConsentForm::class);
     }
 
+    /** @return BelongsTo<Instruction, $this> */
     public function instruction(): BelongsTo
     {
         return $this->belongsTo(Instruction::class);

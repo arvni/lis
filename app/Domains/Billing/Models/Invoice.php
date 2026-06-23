@@ -11,6 +11,11 @@ use App\Traits\Searchable;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * Runtime-computed attributes (not DB columns): a formatted invoice number set by
@@ -46,47 +51,55 @@ class Invoice extends Model
     ];
 
 
-    public function user()
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function owner()
+    public function owner(): MorphTo
     {
         return $this->morphTo();
     }
 
-    public function acceptances()
+    /** @return HasMany<Acceptance, $this> */
+    public function acceptances(): HasMany
     {
         return $this->hasMany(Acceptance::class);
     }
 
-    public function acceptance()
+    /** @return HasOne<Acceptance, $this> */
+    public function acceptance(): HasOne
     {
         return $this->hasOne(Acceptance::class);
     }
 
-    public function acceptanceItems()
+    /** @return HasManyThrough<AcceptanceItem, Acceptance, $this> */
+    public function acceptanceItems(): HasManyThrough
     {
         return $this->hasManyThrough(AcceptanceItem::class, Acceptance::class);
     }
 
+    /** @return HasMany<InvoiceItem, $this> */
     public function invoiceItems(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
     }
 
-    public function payments()
+    /** @return HasMany<Payment, $this> */
+    public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }
 
-    public function patient()
+    /** @return HasOneThrough<Patient, Acceptance, $this> */
+    public function patient(): HasOneThrough
     {
         return $this->hasOneThrough(Patient::class, Acceptance::class, "invoice_id", "id", "id", "patient_id");
     }
 
-    public function referrer()
+    /** @return HasOneThrough<Referrer, Acceptance, $this> */
+    public function referrer(): HasOneThrough
     {
         return $this->hasOneThrough(Referrer::class, Acceptance::class, "invoice_id", "id", "id", "referrer_id");
     }
@@ -101,7 +114,8 @@ class Invoice extends Model
         return $this->Payments()->whereMorphedTo("payer", Referrer::class);
     }
 
-    public function statement()
+    /** @return BelongsTo<Statement, $this> */
+    public function statement(): BelongsTo
     {
         return $this->belongsTo(Statement::class);
     }

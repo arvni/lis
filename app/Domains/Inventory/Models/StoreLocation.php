@@ -17,11 +17,13 @@ class StoreLocation extends Model
         'is_active' => 'boolean',
     ];
 
+    /** @return BelongsTo<Store, $this> */
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
     }
 
+    /** @return HasMany<StockLot, $this> */
     public function lots(): HasMany
     {
         return $this->hasMany(StockLot::class);

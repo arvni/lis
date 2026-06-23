@@ -4,6 +4,8 @@ namespace App\Domains\Laboratory\Models;
 
 use App\Domains\Reception\Models\AcceptanceItem;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MethodTest extends Model
 {
@@ -20,17 +22,20 @@ class MethodTest extends Model
         "is_default" => "boolean"
     ];
 
-    public function method()
+    /** @return BelongsTo<Method, $this> */
+    public function method(): BelongsTo
     {
         return $this->belongsTo(Method::class);
     }
 
-    public function test()
+    /** @return BelongsTo<Test, $this> */
+    public function test(): BelongsTo
     {
         return $this->belongsTo(Test::class);
     }
 
-    public function acceptanceItems()
+    /** @return HasMany<AcceptanceItem, $this> */
+    public function acceptanceItems(): HasMany
     {
         return $this->hasMany(AcceptanceItem::class);
     }

@@ -21,21 +21,25 @@ class StockTransactionLine extends Model
         'expiry_date'         => 'date:Y-m-d',
     ];
 
+    /** @return BelongsTo<StockTransaction, $this> */
     public function transaction(): BelongsTo
     {
         return $this->belongsTo(StockTransaction::class);
     }
 
+    /** @return BelongsTo<Item, $this> */
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
     }
 
+    /** @return BelongsTo<Unit, $this> */
     public function unit(): BelongsTo
     {
         return $this->belongsTo(Unit::class);
     }
 
+    /** @return BelongsTo<StoreLocation, $this> */
     public function location(): BelongsTo
     {
         return $this->belongsTo(StoreLocation::class, 'store_location_id');

@@ -31,7 +31,7 @@ class TestGroupServiceTest extends TestCase
 
     private function groupWithTests(bool $hasTests): TestGroup
     {
-        $relation = Mockery::mock();
+        $relation = Mockery::mock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
         $relation->shouldReceive('exists')->andReturn($hasTests);
         $group = Mockery::mock(TestGroup::class)->makePartial();
         $group->shouldReceive('tests')->andReturn($relation);

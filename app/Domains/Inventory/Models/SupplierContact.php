@@ -16,6 +16,7 @@ class SupplierContact extends Model
         'is_primary' => 'boolean',
     ];
 
+    /** @return BelongsTo<Supplier, $this> */
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);

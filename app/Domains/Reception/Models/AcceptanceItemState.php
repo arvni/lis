@@ -45,31 +45,37 @@ class AcceptanceItemState extends Model
     ];
 
 
-    public function acceptanceItem()
+    /** @return BelongsTo<AcceptanceItem, $this> */
+    public function acceptanceItem(): BelongsTo
     {
         return $this->belongsTo(AcceptanceItem::class);
     }
 
+    /** @return BelongsTo<Section, $this> */
     public function section(): BelongsTo
     {
         return $this->belongsTo(Section::class);
     }
 
+    /** @return BelongsTo<Sample, $this> */
     public function sample(): BelongsTo
     {
         return $this->belongsTo(Sample::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function finishedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, "finished_by_id");
     }
 
+    /** @return BelongsTo<User, $this> */
     public function startedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, "started_by_id");
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

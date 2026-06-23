@@ -4,6 +4,7 @@ namespace App\Domains\Reception\Models;
 
 use App\Domains\Laboratory\Models\ReportTemplateParameter;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ReportParameter extends Model
 {
@@ -16,12 +17,14 @@ class ReportParameter extends Model
         "value"=>"json"
     ];
 
-    public function report()
+    /** @return BelongsTo<Report, $this> */
+    public function report(): BelongsTo
     {
         return $this->belongsTo(Report::class);
     }
 
-    public function parameter()
+    /** @return BelongsTo<ReportTemplateParameter, $this> */
+    public function parameter(): BelongsTo
     {
         return $this->belongsTo(ReportTemplateParameter::class);
     }

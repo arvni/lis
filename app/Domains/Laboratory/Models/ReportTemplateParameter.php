@@ -34,11 +34,13 @@ class ReportTemplateParameter extends Model
         return Str::slug($this->title,'_').'_'.$this->id;
     }
 
+    /** @return BelongsTo<ReportTemplate, $this> */
     public function reportTemplate(): BelongsTo
     {
         return $this->belongsTo(ReportTemplate::class);
     }
 
+    /** @return HasMany<ReportParameter, $this> */
     public function reportParameters(): HasMany
     {
         return $this->hasMany(ReportParameter::class);

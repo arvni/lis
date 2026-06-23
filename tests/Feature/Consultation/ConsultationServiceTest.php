@@ -12,7 +12,7 @@ use App\Domains\Consultation\Repositories\TimeRepository;
 use App\Domains\Consultation\Services\ConsultationService;
 use App\Domains\Consultation\Adapters\SettingAdapter;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Pagination\LengthAwarePaginator;
 use InvalidArgumentException;
 use Mockery;
@@ -78,7 +78,7 @@ class ConsultationServiceTest extends TestCase
 
     public function test_delete_clears_time_and_delegates(): void
     {
-        $timeRel = Mockery::mock(HasOne::class);
+        $timeRel = Mockery::mock(MorphOne::class);
         $timeRel->shouldReceive('delete')->once()->andReturn(1);
         $consultation = Mockery::mock(Consultation::class)->makePartial();
         $consultation->shouldReceive('time')->once()->andReturn($timeRel);

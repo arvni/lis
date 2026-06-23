@@ -6,6 +6,11 @@ use App\Domains\Laboratory\Enums\MethodPriceType;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Method extends Model
 {
@@ -37,34 +42,40 @@ class Method extends Model
         "referrer_price_type" => MethodPriceType::class,
     ];
 
-    public function acceptanceItems()
+    /** @return HasManyThrough<AcceptanceItem, MethodTest, $this> */
+    public function acceptanceItems(): HasManyThrough
     {
         return $this->hasManyThrough(AcceptanceItem::class,MethodTest::class,"method_id","method_test_id");
     }
 
-    public function tests()
+    /** @return BelongsToMany<Test, $this> */
+    public function tests(): BelongsToMany
     {
         return $this->belongsToMany(Test::class, "method_tests")
             ->withPivot(["is_default","status"]);
     }
 
-    public function test()
+    /** @return HasOneThrough<Test, MethodTest, $this> */
+    public function test(): HasOneThrough
     {
         return $this->hasOneThrough(Test::class, MethodTest::class, "method_id", "id", "id", "test_id")
             ->where("is_default", true);
     }
 
-    public function methodTests()
+    /** @return HasMany<MethodTest, $this> */
+    public function methodTests(): HasMany
     {
         return $this->hasMany(MethodTest::class);
     }
 
-    public function workflow()
+    /** @return BelongsTo<Workflow, $this> */
+    public function workflow(): BelongsTo
     {
         return $this->belongsTo(Workflow::class);
     }
 
-    public function barcodeGroup()
+    /** @return BelongsTo<BarcodeGroup, $this> */
+    public function barcodeGroup(): BelongsTo
     {
         return $this->belongsTo(BarcodeGroup::class);
     }

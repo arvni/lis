@@ -6,6 +6,8 @@ use App\Domains\Reception\Models\Sample;
 use App\Domains\Referrer\Models\Material;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SampleType extends Model
 {
@@ -23,18 +25,21 @@ class SampleType extends Model
         "required_barcode" => "boolean",
     ];
 
-    public function tests()
+    /** @return BelongsToMany<Test, $this> */
+    public function tests(): BelongsToMany
     {
         return $this->belongsToMany(Test::class, "sample_type_tests")
             ->withPivot(["description", "defaultType"]);
     }
 
-    public function samples()
+    /** @return HasMany<Sample, $this> */
+    public function samples(): HasMany
     {
         return $this->hasMany(Sample::class);
     }
 
-    public function materials()
+    /** @return HasMany<Material, $this> */
+    public function materials(): HasMany
     {
         return $this->hasMany(Material::class);
     }

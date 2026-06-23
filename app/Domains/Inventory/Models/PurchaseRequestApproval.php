@@ -21,21 +21,25 @@ class PurchaseRequestApproval extends Model
         'escalated' => 'boolean',
     ];
 
+    /** @return BelongsTo<PurchaseRequest, $this> */
     public function purchaseRequest(): BelongsTo
     {
         return $this->belongsTo(PurchaseRequest::class);
     }
 
+    /** @return BelongsTo<WorkflowStep, $this> */
     public function step(): BelongsTo
     {
         return $this->belongsTo(WorkflowStep::class, 'workflow_step_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function actedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'acted_by_user_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function delegatedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'delegated_to_user_id');

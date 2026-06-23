@@ -6,6 +6,8 @@ use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\User\Models\User;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Payment extends Model
 {
@@ -29,17 +31,19 @@ class Payment extends Model
         "paymentMethod" => PaymentMethod::class,
     ];
 
-    public function invoice()
+    /** @return BelongsTo<Invoice, $this> */
+    public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
     }
 
-    public function cashier()
+    /** @return BelongsTo<User, $this> */
+    public function cashier(): BelongsTo
     {
         return $this->belongsTo(User::class, "cashier_id");
     }
 
-    public function payer()
+    public function payer(): MorphTo
     {
         return $this->morphTo("payer");
     }

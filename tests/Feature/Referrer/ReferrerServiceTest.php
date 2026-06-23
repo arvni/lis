@@ -37,9 +37,9 @@ class ReferrerServiceTest extends TestCase
 
     private function referrerWith(bool $acc, bool $orders): Referrer
     {
-        $accRel = Mockery::mock();
+        $accRel = Mockery::mock(\Illuminate\Database\Eloquent\Relations\HasMany::class);
         $accRel->shouldReceive('exists')->andReturn($acc);
-        $ordersRel = Mockery::mock();
+        $ordersRel = Mockery::mock(\Illuminate\Database\Eloquent\Relations\HasMany::class);
         $ordersRel->shouldReceive('exists')->andReturn($orders);
         $referrer = Mockery::mock(Referrer::class)->makePartial();
         $referrer->shouldReceive('acceptances')->andReturn($accRel);

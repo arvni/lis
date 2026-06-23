@@ -26,12 +26,14 @@ class Offer extends Model
         "active" => "boolean"
     ];
 
+    /** @return BelongsToMany<Test, $this> */
     public function tests(): BelongsToMany
     {
         return $this->belongsToMany(Test::class, "offer_test");
     }
 
-    public function referrers()
+    /** @return BelongsToMany<Referrer, $this> */
+    public function referrers(): BelongsToMany
     {
         return $this->belongsToMany(Referrer::class, "offer_referrer");
     }

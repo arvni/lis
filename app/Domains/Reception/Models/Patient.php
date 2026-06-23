@@ -14,6 +14,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Notifications\Notification;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @property-read int $consultations_count
@@ -143,7 +148,8 @@ class Patient extends Model
         }
     }
 
-    public function acceptanceItems()
+    /** @return BelongsToMany<AcceptanceItem, $this> */
+    public function acceptanceItems(): BelongsToMany
     {
         return $this->belongsToMany(AcceptanceItem::class, "acceptance_item_patient")
             ->withPivot("order");
@@ -173,59 +179,70 @@ class Patient extends Model
         )->distinct();
     }
 
-    public function consultations()
+    /** @return HasMany<Consultation, $this> */
+    public function consultations(): HasMany
     {
         return $this->hasMany(Consultation::class);
     }
 
-    public function consultation()
+    /** @return HasOne<Consultation, $this> */
+    public function consultation(): HasOne
     {
         return $this->hasOne(Consultation::class)->latest();
     }
 
-    public function patientMeta()
+    /** @return HasOne<PatientMeta, $this> */
+    public function patientMeta(): HasOne
     {
         return $this->hasOne(PatientMeta::class);
     }
 
-    public function registrar()
+    /** @return BelongsTo<User, $this> */
+    public function registrar(): BelongsTo
     {
         return $this->belongsTo(User::class, 'registrar_id', 'id');
     }
 
-    public function patients()
+    /** @return BelongsToMany<Patient, $this> */
+    public function patients(): BelongsToMany
     {
         return $this->belongsToMany(Patient::class, 'relatives', 'patient_id',"relative_id")
             ->withPivot("relationship", "id");
     }
 
-    public function relatives()
+    /** @return BelongsToMany<Patient, $this> */
+    public function relatives(): BelongsToMany
     {
         return $this->belongsToMany(Patient::class, 'relatives', 'relative_id',"patient_id")
             ->withPivot("relationship", "id");
     }
 
-    public function invoices()
+    /** @return MorphMany<Invoice, $this> */
+    public function invoices(): MorphMany
     {
         return $this->morphMany(Invoice::class, 'owner');
     }
 
-    public function payments()
+    /** @return MorphMany<Payment, $this> */
+    public function payments(): MorphMany
     {
         return $this->morphMany(Payment::class, 'payer');
     }
 
-    public function ownedDocuments()
+    /** @return MorphMany<Document, $this> */
+    public function ownedDocuments(): MorphMany
     {
         return $this->morphMany(Document::class, "owner");
     }
 
-    public function relatedDocuments()
+    /** @return MorphMany<Document, $this> */
+    public function relatedDocuments(): MorphMany
     {
         return $this->morphMany(Document::class, "related");
     }
 
-    public function samples()
+    /** @return HasMany<Sample, $this> */
+    public function samples(): HasMany
     {
         return $this->hasMany(Sample::class);
     }

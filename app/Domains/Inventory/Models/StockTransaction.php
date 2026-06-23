@@ -27,36 +27,43 @@ class StockTransaction extends Model
         'transfer_received_at'  => 'datetime',
     ];
 
+    /** @return BelongsTo<Store, $this> */
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
     }
 
+    /** @return BelongsTo<Store, $this> */
     public function destinationStore(): BelongsTo
     {
         return $this->belongsTo(Store::class, 'destination_store_id');
     }
 
+    /** @return BelongsTo<Supplier, $this> */
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function requestedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'requested_by_user_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by_user_id');
     }
 
+    /** @return HasMany<StockTransactionLine, $this> */
     public function lines(): HasMany
     {
         return $this->hasMany(StockTransactionLine::class, 'transaction_id');
     }
 
+    /** @return HasMany<TransactionHistory, $this> */
     public function histories(): HasMany
     {
         return $this->hasMany(TransactionHistory::class, 'transaction_id')->orderBy('created_at');

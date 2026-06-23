@@ -16,11 +16,13 @@ class WorkflowTemplate extends Model
         'priority'   => 'integer',
     ];
 
+    /** @return HasMany<WorkflowStep, $this> */
     public function steps(): HasMany
     {
         return $this->hasMany(WorkflowStep::class)->orderBy('sort_order');
     }
 
+    /** @return HasMany<PurchaseRequest, $this> */
     public function purchaseRequests(): HasMany
     {
         return $this->hasMany(PurchaseRequest::class);

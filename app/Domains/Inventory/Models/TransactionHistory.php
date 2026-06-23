@@ -10,11 +10,13 @@ class TransactionHistory extends Model
 {
     protected $fillable = ['transaction_id', 'user_id', 'event', 'notes'];
 
+    /** @return BelongsTo<StockTransaction, $this> */
     public function transaction(): BelongsTo
     {
         return $this->belongsTo(StockTransaction::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

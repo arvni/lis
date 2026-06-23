@@ -4,6 +4,7 @@ namespace App\Domains\Consultation\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Time extends Model
 {
@@ -23,7 +24,8 @@ class Time extends Model
         "ended_at"=>"datetime"
     ];
 
-    public function consultant()
+    /** @return BelongsTo<Consultant, $this> */
+    public function consultant(): BelongsTo
     {
         return $this->belongsTo(Consultant::class);
     }

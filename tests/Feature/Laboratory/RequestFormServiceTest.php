@@ -35,7 +35,7 @@ class RequestFormServiceTest extends TestCase
 
     private function formWithTests(bool $hasTests): RequestForm
     {
-        $testsRel = Mockery::mock();
+        $testsRel = Mockery::mock(\Illuminate\Database\Eloquent\Relations\HasMany::class);
         $testsRel->shouldReceive('exists')->andReturn($hasTests);
         $form = Mockery::mock(RequestForm::class)->makePartial();
         $form->shouldReceive('tests')->andReturn($testsRel);

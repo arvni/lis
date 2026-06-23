@@ -4,6 +4,7 @@ namespace App\Domains\Laboratory\Models;
 
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class TestGroup extends Model
 {
@@ -14,7 +15,8 @@ class TestGroup extends Model
     protected $searchable = [
       "name"
     ];
-    public function tests()
+    /** @return BelongsToMany<Test, $this> */
+    public function tests(): BelongsToMany
     {
         return $this->belongsToMany(Test::class,"test_group_test");
     }

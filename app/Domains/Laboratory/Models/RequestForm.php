@@ -5,6 +5,8 @@ namespace App\Domains\Laboratory\Models;
 use App\Domains\Document\Models\Document;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class RequestForm extends Model
 {
@@ -25,12 +27,14 @@ class RequestForm extends Model
         "is_active" => "boolean"
     ];
 
-    public function tests()
+    /** @return HasMany<Test, $this> */
+    public function tests(): HasMany
     {
         return $this->hasMany(Test::class);
     }
 
-    public function document()
+    /** @return MorphOne<Document, $this> */
+    public function document(): MorphOne
     {
         return $this->morphOne(Document::class, 'owner');
     }

@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Notifications\Notification;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Referrer extends Model
 {
@@ -62,23 +64,27 @@ class Referrer extends Model
         return $this->email ?? null;
     }
 
-    public function acceptances()
+    /** @return HasMany<Acceptance, $this> */
+    public function acceptances(): HasMany
     {
         return $this->hasMany(Acceptance::class);
     }
 
-    public function invoices()
+    /** @return MorphMany<Invoice, $this> */
+    public function invoices(): MorphMany
     {
         return $this->morphMany(Invoice::class, 'owner');
     }
 
 
-    public function payments()
+    /** @return MorphMany<Payment, $this> */
+    public function payments(): MorphMany
     {
         return $this->morphMany(Payment::class, 'payer');
     }
 
-    public function tests()
+    /** @return BelongsToMany<ReferrerTest, $this> */
+    public function tests(): BelongsToMany
     {
         return $this->belongsToMany(ReferrerTest::class, "referrer_tests")
             ->withPivot([
@@ -87,27 +93,32 @@ class Referrer extends Model
             ]);
     }
 
+    /** @return HasMany<ReferrerTest, $this> */
     public function referrerTests(): HasMany
     {
         return $this->hasMany(ReferrerTest::class);
     }
 
-    public function referrerOrders()
+    /** @return HasMany<ReferrerOrder, $this> */
+    public function referrerOrders(): HasMany
     {
         return $this->hasMany(ReferrerOrder::class);
     }
 
-    public function collectRequests()
+    /** @return HasMany<CollectRequest, $this> */
+    public function collectRequests(): HasMany
     {
         return $this->hasMany(CollectRequest::class);
     }
 
-    public function orderMaterials()
+    /** @return HasMany<OrderMaterial, $this> */
+    public function orderMaterials(): HasMany
     {
         return $this->hasMany(OrderMaterial::class);
     }
 
-    public function offers()
+    /** @return BelongsToMany<Offer, $this> */
+    public function offers(): BelongsToMany
     {
         return $this->belongsToMany(Offer::class, 'offer_referrer');
     }

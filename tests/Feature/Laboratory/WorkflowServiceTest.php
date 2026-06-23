@@ -32,7 +32,7 @@ class WorkflowServiceTest extends TestCase
 
     private function workflowWithMethods(bool $has): Workflow
     {
-        $relation = Mockery::mock();
+        $relation = Mockery::mock(\Illuminate\Database\Eloquent\Relations\HasMany::class);
         $relation->shouldReceive('exists')->andReturn($has);
         $workflow = Mockery::mock(Workflow::class)->makePartial();
         $workflow->shouldReceive('methods')->andReturn($relation);
@@ -78,7 +78,7 @@ class WorkflowServiceTest extends TestCase
 
     public function test_sync_section_workflows_deletes_unlisted(): void
     {
-        $relation = Mockery::mock();
+        $relation = Mockery::mock(\Illuminate\Database\Eloquent\Relations\HasMany::class);
         $relation->shouldReceive('whereNotIn')->once()->with('section_workflows.id', [1, 2])->andReturnSelf();
         $relation->shouldReceive('delete')->once()->andReturn(1);
 
@@ -92,7 +92,7 @@ class WorkflowServiceTest extends TestCase
     public function test_get_prev_sections_filters_by_order(): void
     {
         $prev = new \Illuminate\Database\Eloquent\Collection(['PREV']);
-        $relation = Mockery::mock();
+        $relation = Mockery::mock(\Illuminate\Database\Eloquent\Relations\BelongsToMany::class);
         $relation->shouldReceive('wherePivot')->once()->with('order', '<', 3)->andReturnSelf();
         $relation->shouldReceive('get')->once()->andReturn($prev);
 

@@ -25,16 +25,19 @@ class Instruction extends Model
         "is_active" => "boolean"
     ];
 
+    /** @return MorphOne<Document, $this> */
     public function document(): MorphOne
     {
         return $this->morphOne(Document::class, "owner")->latest();
     }
+    /** @return MorphMany<Document, $this> */
     public function documents(): MorphMany
     {
         return $this->morphMany(Document::class, "owner");
     }
 
 
+    /** @return HasMany<Test, $this> */
     public function tests(): HasMany
     {
         return $this->hasMany(Test::class);

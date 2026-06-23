@@ -5,6 +5,7 @@ namespace App\Domains\Reception\Models;
 use App\Domains\Laboratory\Models\MethodTest;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AcceptanceItemConversion extends Model
 {
@@ -23,22 +24,26 @@ class AcceptanceItemConversion extends Model
         'converted_at' => 'datetime',
     ];
 
-    public function acceptanceItem()
+    /** @return BelongsTo<AcceptanceItem, $this> */
+    public function acceptanceItem(): BelongsTo
     {
         return $this->belongsTo(AcceptanceItem::class);
     }
 
-    public function fromMethodTest()
+    /** @return BelongsTo<MethodTest, $this> */
+    public function fromMethodTest(): BelongsTo
     {
         return $this->belongsTo(MethodTest::class, 'from_method_test_id');
     }
 
-    public function toMethodTest()
+    /** @return BelongsTo<MethodTest, $this> */
+    public function toMethodTest(): BelongsTo
     {
         return $this->belongsTo(MethodTest::class, 'to_method_test_id');
     }
 
-    public function convertedBy()
+    /** @return BelongsTo<User, $this> */
+    public function convertedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'converted_by');
     }

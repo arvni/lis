@@ -20,11 +20,13 @@ class ApprovalFlow extends Model
         "active" => "boolean",
     ];
 
+    /** @return HasMany<ApprovalFlowStep, $this> */
     public function steps(): HasMany
     {
         return $this->hasMany(ApprovalFlowStep::class)->orderBy("position");
     }
 
+    /** @return HasMany<ReportTemplate, $this> */
     public function reportTemplates(): HasMany
     {
         return $this->hasMany(ReportTemplate::class);

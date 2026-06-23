@@ -4,6 +4,7 @@ namespace App\Domains\Laboratory\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Parameter extends Model
 {
@@ -20,7 +21,8 @@ class Parameter extends Model
         "condition"=>"json"
     ];
 
-    public function Tests()
+    /** @return BelongsToMany<Test, $this> */
+    public function Tests(): BelongsToMany
     {
         return $this->belongsToMany(Test::class);
     }

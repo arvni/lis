@@ -6,6 +6,7 @@ use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\User\Services\UserService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Document extends Model
 {
@@ -75,7 +76,7 @@ class Document extends Model
     /**
      * Get the related model (polymorphic).
      */
-    public function related()
+    public function related(): MorphTo
     {
         return $this->morphTo();
     }
@@ -83,7 +84,7 @@ class Document extends Model
     /**
      * Get the owner model (polymorphic).
      */
-    public function owner()
+    public function owner(): MorphTo
     {
         return $this->morphTo();
     }

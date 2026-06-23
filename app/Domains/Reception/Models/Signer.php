@@ -4,6 +4,7 @@ namespace App\Domains\Reception\Models;
 
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Signer extends Model
 {
@@ -15,12 +16,14 @@ class Signer extends Model
         "stamp",
     ];
 
-    public function report()
+    /** @return BelongsTo<Report, $this> */
+    public function report(): BelongsTo
     {
         return $this->belongsTo(Report::class);
     }
 
-    public function user()
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
