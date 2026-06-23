@@ -2,6 +2,8 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\Doctor;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -45,7 +47,10 @@ class DoctorRepository
         $this->logDeleted($doctor);
     }
 
-    protected function applyFilters($query, array $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Laboratory\Models\Doctor>  $query
+     */
+    protected function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search($filters["search"]);

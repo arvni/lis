@@ -2,6 +2,10 @@
 
 namespace App\Domains\Billing\Repositories;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Models\Payment;
@@ -13,7 +17,7 @@ class PaymentRepository
     use LogsUserActivity;
 
 
-    public function listPayments($queryData)
+    public function listPayments(array $queryData): LengthAwarePaginator
     {
         $query = Payment::with(["cashier", "payer"]);
         $query = $this->applyFilters($query, $queryData["filters"] ?? []);
@@ -44,32 +48,32 @@ class PaymentRepository
         $this->logDeleted($payment);
     }
 
-    public function findPaymentById($id): ?Payment
+    public function findPaymentById(int|string $id): ?Payment
     {
         return Payment::find($id);
     }
 
-    public function getTotalPaymentsForDateRange($dateRange): float
+    public function getTotalPaymentsForDateRange(array $dateRange): float
     {
         return Payment::whereBetween("created_at", $dateRange)->sum("price");
     }
 
-    public function getTotalCashPaymentsForDateRange($dateRange): float
+    public function getTotalCashPaymentsForDateRange(array $dateRange): float
     {
         return $this->getTotalPaymentsForDateRangeOnPaymentMethod(PaymentMethod::CASH, $dateRange);
     }
 
-    public function getTotalCardPaymentsForDateRange($dateRange): float
+    public function getTotalCardPaymentsForDateRange(array $dateRange): float
     {
         return $this->getTotalPaymentsForDateRangeOnPaymentMethod(PaymentMethod::CARD, $dateRange);
     }
 
-    public function getTotalCreditPaymentsForDateRange($dateRange): float
+    public function getTotalCreditPaymentsForDateRange(array $dateRange): float
     {
         return $this->getTotalPaymentsForDateRangeOnPaymentMethod(PaymentMethod::CREDIT, $dateRange);
     }
 
-    public function getTotalTransferPaymentsForDateRange($dateRange): float
+    public function getTotalTransferPaymentsForDateRange(array $dateRange): float
     {
         return $this->getTotalPaymentsForDateRangeOnPaymentMethod(PaymentMethod::TRANSFER, $dateRange);
     }
@@ -81,7 +85,11 @@ class PaymentRepository
             ->sum("price");
     }
 
-    private function applyFilters($query, array $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Billing\Models\Payment>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<\App\Domains\Billing\Models\Payment>
+     */
+    private function applyFilters(Builder $query, array $filters): Builder
     {
         if (isset($filters["payer_type"])) {
             $query->where("payer_type", strtolower($filters["payer_type"]));
@@ -129,7 +137,11 @@ class PaymentRepository
         return $query;
     }
 
-    private function applyOrderBy($query, array $orderBy)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Billing\Models\Payment>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<\App\Domains\Billing\Models\Payment>
+     */
+    private function applyOrderBy(Builder $query, array $orderBy): Builder
     {
         $query->orderBy($orderBy["field"], $orderBy["sort"]);
         return $query;

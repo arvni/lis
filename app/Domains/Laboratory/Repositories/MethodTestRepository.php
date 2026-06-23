@@ -32,7 +32,7 @@ class MethodTestRepository
         $this->logDeleted($methodTest);
     }
 
-    public function findMethodTestById($id): ?MethodTest
+    public function findMethodTestById(int|string $id): ?MethodTest
     {
         return MethodTest::find($id);
     }

@@ -18,7 +18,7 @@ class InvoiceAcceptanceUpdateEvent
     /**
      * Create a new event instance.
      */
-    public function __construct($acceptanceId, $invoiceId)
+    public function __construct(int $acceptanceId, int $invoiceId)
     {
         $this->acceptanceId = $acceptanceId;
         $this->invoiceId = $invoiceId;

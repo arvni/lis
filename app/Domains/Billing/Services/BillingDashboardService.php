@@ -40,7 +40,7 @@ class BillingDashboardService
     //   '0'  → non-invoiced only
     //   ''   → both
 
-    private function invoicedItemsQuery(array $filters, Carbon $from, Carbon $to)
+    private function invoicedItemsQuery(array $filters, Carbon $from, Carbon $to): \Illuminate\Database\Query\Builder
     {
         $q = DB::table('invoice_items')
             ->join('invoices', 'invoices.id', '=', 'invoice_items.invoice_id')
@@ -73,7 +73,7 @@ class BillingDashboardService
         return $q;
     }
 
-    private function nonInvoicedItemsQuery(array $filters, Carbon $from, Carbon $to)
+    private function nonInvoicedItemsQuery(array $filters, Carbon $from, Carbon $to): \Illuminate\Database\Query\Builder
     {
         $q = DB::table('acceptance_items')
             ->join('acceptances', 'acceptances.id', '=', 'acceptance_items.acceptance_id')
@@ -99,7 +99,7 @@ class BillingDashboardService
     }
 
     // Acceptance/invoice counts still come from acceptances (not items).
-    private function acceptanceCountsQuery(array $filters, Carbon $from, Carbon $to)
+    private function acceptanceCountsQuery(array $filters, Carbon $from, Carbon $to): \Illuminate\Database\Query\Builder
     {
         $hasInvoice = $filters['has_invoice'] ?? '';
 
@@ -286,7 +286,7 @@ class BillingDashboardService
     // Invoiced income per test, sourced from invoice_items. Panel rows split
     // their (price − discount) equally across the distinct underlying tests in
     // the same invoice_item bucket.
-    private function invoicedIncomeByTest(array $filters, Carbon $from, Carbon $to)
+    private function invoicedIncomeByTest(array $filters, Carbon $from, Carbon $to): \Illuminate\Support\Collection
     {
         // Single (non-panel) invoice_items: attribute fully to invoice_items.test_id
         $singles = $this->invoicedItemsQuery($filters, $from, $to)
@@ -353,7 +353,7 @@ class BillingDashboardService
     // Non-invoiced income per test, sourced from acceptance_items. Panel rows
     // split their (price − discount) equally across the distinct tests in the
     // same panel within the same acceptance.
-    private function nonInvoicedIncomeByTest(array $filters, Carbon $from, Carbon $to)
+    private function nonInvoicedIncomeByTest(array $filters, Carbon $from, Carbon $to): \Illuminate\Support\Collection
     {
         $panelTotals = (clone $this->nonInvoicedItemsQuery($filters, $from, $to))
             ->whereNotNull('acceptance_items.panel_id')

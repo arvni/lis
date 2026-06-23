@@ -26,7 +26,7 @@ class ReportTemplateParameterRepository
         $reportTemplateParameter->delete();
     }
 
-    public function findById($id): ?ReportTemplateParameter
+    public function findById(int|string $id): ?ReportTemplateParameter
     {
         return ReportTemplateParameter::query()->find($id);
     }

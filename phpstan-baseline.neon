@@ -49,24 +49,6 @@ parameters:
 			path: app/Console/Commands/ValidateEnvCommand.php
 
 		-
-			message: '#^Method App\\Domains\\Billing\\Events\\InvoiceAcceptanceUpdateEvent\:\:__construct\(\) has parameter \$acceptanceId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Events/InvoiceAcceptanceUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Events\\InvoiceAcceptanceUpdateEvent\:\:__construct\(\) has parameter \$invoiceId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Events/InvoiceAcceptanceUpdateEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Events\\PaymentsAddedEvent\:\:__construct\(\) has parameter \$acceptanceId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Events/PaymentsAddedEvent.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$acceptanceItems\.$#'
 			identifier: property.notFound
 			count: 1
@@ -247,42 +229,6 @@ parameters:
 			path: app/Domains/Billing/Repositories/InvoiceRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:applyOrderBy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:applyOrderBy\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:applyPaginate\(\) has parameter \$pageSize with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:applyPaginate\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:applyQuery\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -295,124 +241,10 @@ parameters:
 			path: app/Domains/Billing/Repositories/InvoiceRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:countInvoicesBeforeInThisYear\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:countInvoicesBeforeInThisYear\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:findInvoiceById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:getInvoiceNo\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:listAllInvoices\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:listInvoices\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:listReferrerInvoicesForStatement\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:updateMany\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\PaymentRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/PaymentRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\PaymentRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/PaymentRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\PaymentRepository\:\:applyOrderBy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/PaymentRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\PaymentRepository\:\:applyOrderBy\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/PaymentRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\PaymentRepository\:\:findPaymentById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/PaymentRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\PaymentRepository\:\:getTotalCardPaymentsForDateRange\(\) has parameter \$dateRange with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/PaymentRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\PaymentRepository\:\:getTotalCashPaymentsForDateRange\(\) has parameter \$dateRange with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/PaymentRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\PaymentRepository\:\:getTotalCreditPaymentsForDateRange\(\) has parameter \$dateRange with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/PaymentRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\PaymentRepository\:\:getTotalPaymentsForDateRange\(\) has parameter \$dateRange with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/PaymentRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\PaymentRepository\:\:getTotalTransferPaymentsForDateRange\(\) has parameter \$dateRange with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/PaymentRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\PaymentRepository\:\:listPayments\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/PaymentRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\PaymentRepository\:\:listPayments\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/PaymentRepository.php
 
 		-
 			message: '#^Relation ''cashier'' is not found in App\\Domains\\Billing\\Models\\Payment model\.$#'
@@ -427,72 +259,6 @@ parameters:
 			path: app/Domains/Billing/Repositories/PaymentRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\StatementRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/StatementRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\StatementRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/StatementRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\StatementRepository\:\:applyOrderBy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/StatementRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\StatementRepository\:\:applyOrderBy\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/StatementRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\StatementRepository\:\:countStatementOfMonth\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/StatementRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\StatementRepository\:\:findStatementById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/StatementRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\StatementRepository\:\:generateStatementNumber\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/StatementRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\StatementRepository\:\:generateStatementNumber\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/StatementRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\StatementRepository\:\:getTotalStatementsForDateRange\(\) has parameter \$dateRange with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/StatementRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\StatementRepository\:\:listStatements\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Repositories/StatementRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Repositories\\StatementRepository\:\:listStatements\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Repositories/StatementRepository.php
-
-		-
 			message: '#^Relation ''referrer'' is not found in App\\Domains\\Billing\\Models\\Statement model\.$#'
 			identifier: larastan.relationExistence
 			count: 1
@@ -503,36 +269,6 @@ parameters:
 			identifier: property.nonObject
 			count: 1
 			path: app/Domains/Billing/Requests/UpdateInvoiceRequest.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Services\\BillingDashboardService\:\:acceptanceCountsQuery\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Services/BillingDashboardService.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Services\\BillingDashboardService\:\:invoicedIncomeByTest\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Services/BillingDashboardService.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Services\\BillingDashboardService\:\:invoicedItemsQuery\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Services/BillingDashboardService.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Services\\BillingDashboardService\:\:nonInvoicedIncomeByTest\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Services/BillingDashboardService.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Services\\BillingDashboardService\:\:nonInvoicedItemsQuery\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Services/BillingDashboardService.php
 
 		-
 			message: '#^Parameter \#1 \$array \(list\<array\{name\: mixed, invoiced_income\: float, non_invoiced_income\: float, count\: int\}\>\) of array_values is already a list, call has no effect\.$#'
@@ -625,12 +361,6 @@ parameters:
 			path: app/Domains/Billing/Services/InvoiceComposer.php
 
 		-
-			message: '#^Method App\\Domains\\Billing\\Services\\InvoiceComposer\:\:normalizeCustomParameters\(\) has parameter \$value with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceComposer.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$locked_at\.$#'
 			identifier: property.notFound
 			count: 2
@@ -691,44 +421,8 @@ parameters:
 			path: app/Domains/Billing/Services/InvoiceService.php
 
 		-
-			message: '#^Method App\\Domains\\Billing\\Services\\InvoiceService\:\:findInvoiceById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceService.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Services\\InvoiceService\:\:listAllInvoices\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceService.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Services\\InvoiceService\:\:listAllInvoices\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceService.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Services\\InvoiceService\:\:listInvoices\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceService.php
-
-		-
 			message: '#^Method App\\Domains\\Billing\\Services\\InvoiceService\:\:loadForShow\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceService.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Services\\InvoiceService\:\:updateInvoicesStatementID\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceService.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Services\\InvoiceService\:\:updateInvoicesStatementID\(\) has parameter \$invoices with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Billing/Services/InvoiceService.php
 
@@ -763,12 +457,6 @@ parameters:
 			path: app/Domains/Billing/Services/PaymentService.php
 
 		-
-			message: '#^Method App\\Domains\\Billing\\Services\\PaymentService\:\:listPayments\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Services/PaymentService.php
-
-		-
 			message: '#^Access to an undefined property App\\Domains\\Billing\\Models\\Statement\:\:\$invoices\.$#'
 			identifier: property.notFound
 			count: 3
@@ -799,19 +487,7 @@ parameters:
 			path: app/Domains/Billing/Services/StatementService.php
 
 		-
-			message: '#^Method App\\Domains\\Billing\\Services\\StatementService\:\:formatDate\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Services/StatementService.php
-
-		-
 			message: '#^Method App\\Domains\\Billing\\Services\\StatementService\:\:getReportedDate\(\) has parameter \$invoice with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Services/StatementService.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Services\\StatementService\:\:listStatements\(\) has parameter \$queryData with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Billing/Services/StatementService.php
@@ -877,24 +553,6 @@ parameters:
 			path: app/Domains/Consultation/Models/Time.php
 
 		-
-			message: '#^Method App\\Domains\\Consultation\\Repositories\\ConsultantRepository\:\:all\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Repositories/ConsultantRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Repositories\\ConsultantRepository\:\:apalyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Repositories/ConsultantRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Repositories\\ConsultantRepository\:\:apalyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Consultation/Repositories/ConsultantRepository.php
-
-		-
 			message: '#^Variable \$filters on left side of \?\? is never defined\.$#'
 			identifier: nullCoalesce.variable
 			count: 3
@@ -913,38 +571,8 @@ parameters:
 			path: app/Domains/Consultation/Repositories/ConsultationRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Consultation\\Repositories\\ConsultationRepository\:\:getQuery\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Repositories/ConsultationRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Repositories\\ConsultationRepository\:\:getTotalConsultationForDateRange\(\) has parameter \$dateRange with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Consultation/Repositories/ConsultationRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Repositories\\CustomerRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Repositories/CustomerRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Repositories\\CustomerRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Consultation/Repositories/CustomerRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Consultation\\Repositories\\CustomerRepository\:\:findById\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Repositories/CustomerRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Repositories\\CustomerRepository\:\:findById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Consultation/Repositories/CustomerRepository.php
 
@@ -953,18 +581,6 @@ parameters:
 			identifier: larastan.relationExistence
 			count: 1
 			path: app/Domains/Consultation/Repositories/CustomerRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Repositories\\TimeRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Repositories/TimeRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Repositories\\TimeRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Consultation/Repositories/TimeRepository.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ended_at\.$#'
@@ -979,32 +595,8 @@ parameters:
 			path: app/Domains/Consultation/Services/ConsultationService.php
 
 		-
-			message: '#^Method App\\Domains\\Consultation\\Services\\ConsultationService\:\:startConsultation\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Services/ConsultationService.php
-
-		-
 			message: '#^Method App\\Domains\\Consultation\\Services\\CustomerService\:\:findById\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Services/CustomerService.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Services\\CustomerService\:\:findById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Consultation/Services/CustomerService.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Services\\CustomerService\:\:listCustomers\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Services/CustomerService.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Services\\CustomerService\:\:listCustomers\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Consultation/Services/CustomerService.php
 
@@ -1013,18 +605,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Domains/Consultation/Services/CustomerService.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Services\\TimeService\:\:listTimes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Services/TimeService.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Services\\TimeService\:\:listTimes\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Consultation/Services/TimeService.php
 
 		-
 			message: '#^Method App\\Domains\\Consultation\\Services\\TimeService\:\:storeTime\(\) has no return type specified\.$#'
@@ -1077,18 +657,6 @@ parameters:
 		-
 			message: '#^Method App\\Domains\\Document\\Services\\DocumentService\:\:getDocument\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Document/Services/DocumentService.php
-
-		-
-			message: '#^Method App\\Domains\\Document\\Services\\DocumentService\:\:getDocument\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Document/Services/DocumentService.php
-
-		-
-			message: '#^Method App\\Domains\\Document\\Services\\DocumentService\:\:updateDocument\(\) has parameter \$newData with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Document/Services/DocumentService.php
 
@@ -1281,12 +849,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$qty_received\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Domains/Inventory/Services/PurchaseRequestService.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Services\\PurchaseRequestService\:\:scopeActiveApproverQuery\(\) has parameter \$q with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Inventory/Services/PurchaseRequestService.php
 
@@ -2071,30 +1633,6 @@ parameters:
 			path: app/Domains/Laboratory/Policies/SectionPolicy.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\ApprovalFlowRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/ApprovalFlowRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\ApprovalFlowRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/ApprovalFlowRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\BarcodeGroupRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/BarcodeGroupRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\BarcodeGroupRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/BarcodeGroupRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Repositories\\ConsentFormRepository\:\:applyFilters\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2105,18 +1643,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Laboratory/Repositories/ConsentFormRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\DoctorRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/DoctorRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\DoctorRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/DoctorRepository.php
 
 		-
 			message: '#^Method App\\Domains\\Laboratory\\Repositories\\InstructionRepository\:\:applyFilters\(\) has no return type specified\.$#'
@@ -2131,40 +1657,10 @@ parameters:
 			path: app/Domains/Laboratory/Repositories/InstructionRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\MethodRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/MethodRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\MethodRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/MethodRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\MethodRepository\:\:findMethodById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/MethodRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\MethodRepository\:\:findMethodByMethodTestId\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/MethodRepository.php
-
-		-
 			message: '#^Relation ''methodTests'' is not found in App\\Domains\\Laboratory\\Models\\Method model\.$#'
 			identifier: larastan.relationExistence
 			count: 1
 			path: app/Domains/Laboratory/Repositories/MethodRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\MethodTestRepository\:\:findMethodTestById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/MethodTestRepository.php
 
 		-
 			message: '#^Method App\\Domains\\Laboratory\\Repositories\\OfferRepository\:\:applyFilters\(\) has no return type specified\.$#'
@@ -2197,64 +1693,10 @@ parameters:
 			path: app/Domains/Laboratory/Repositories/ReportTemplateParameterRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\ReportTemplateParameterRepository\:\:findById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/ReportTemplateParameterRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\ReportTemplateRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/ReportTemplateRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\ReportTemplateRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/ReportTemplateRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\RequestFormRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/RequestFormRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\RequestFormRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/RequestFormRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\RequestFormRepository\:\:getRequestFormById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/RequestFormRepository.php
-
-		-
 			message: '#^Relation ''document'' is not found in App\\Domains\\Laboratory\\Models\\RequestForm model\.$#'
 			identifier: larastan.relationExistence
 			count: 1
 			path: app/Domains/Laboratory/Repositories/RequestFormRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SampleTypeRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/SampleTypeRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SampleTypeRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/SampleTypeRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SampleTypeRepository\:\:getSampleTypeById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/SampleTypeRepository.php
 
 		-
 			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SectionGroupRepository\:\:applyFilters\(\) has no return type specified\.$#'
@@ -2293,106 +1735,16 @@ parameters:
 			path: app/Domains/Laboratory/Repositories/SectionRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SectionWorkflowRepository\:\:findByOrderByMethodTestId\(\) has parameter \$methodId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/SectionWorkflowRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SectionWorkflowRepository\:\:findByOrderByMethodTestId\(\) has parameter \$order with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/SectionWorkflowRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SectionWorkflowRepository\:\:findBySectionByMethodTestId\(\) has parameter \$methodId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/SectionWorkflowRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SectionWorkflowRepository\:\:findBySectionByMethodTestId\(\) has parameter \$sectionId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/SectionWorkflowRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SectionWorkflowRepository\:\:findSectionWorkflowById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/SectionWorkflowRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SectionWorkflowRepository\:\:getPrevSections\(\) has parameter \$methodId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/SectionWorkflowRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SectionWorkflowRepository\:\:getPrevSections\(\) has parameter \$order with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/SectionWorkflowRepository.php
-
-		-
 			message: '#^Relation ''workflow'' is not found in App\\Domains\\Laboratory\\Models\\SectionWorkflow model\.$#'
 			identifier: larastan.relationExistence
 			count: 3
 			path: app/Domains/Laboratory/Repositories/SectionWorkflowRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\TestGroupRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/TestGroupRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\TestGroupRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/TestGroupRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\TestRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/TestRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\TestRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/TestRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\TestRepository\:\:findTestById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/TestRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\TestRepository\:\:findTestByMethodTestId\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/TestRepository.php
-
-		-
 			message: '#^Relation ''methodTests'' is not found in App\\Domains\\Laboratory\\Models\\Test model\.$#'
 			identifier: larastan.relationExistence
 			count: 1
 			path: app/Domains/Laboratory/Repositories/TestRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\WorkflowRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/WorkflowRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\WorkflowRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Repositories/WorkflowRepository.php
 
 		-
 			message: '#^Cannot access property \$id on object\|string\.$#'
@@ -2515,24 +1867,6 @@ parameters:
 			path: app/Domains/Laboratory/Services/ApprovalFlowService.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\ApprovalFlowService\:\:listApprovalFlows\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/ApprovalFlowService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\BarcodeGroupService\:\:listBarcodeGroups\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Services/BarcodeGroupService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\BarcodeGroupService\:\:listBarcodeGroups\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/BarcodeGroupService.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Services\\BarcodeGroupService\:\:storeBarcodeGroup\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2543,25 +1877,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: app/Domains/Laboratory/Services/ConsentFormService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\ConsentFormService\:\:listConsentForms\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/ConsentFormService.php
-
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\DoctorService\:\:listDoctors\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Services/DoctorService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\DoctorService\:\:listDoctors\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/DoctorService.php
 
 		-
 			message: '#^Method App\\Domains\\Laboratory\\Services\\DoctorService\:\:storeDoctor\(\) has no return type specified\.$#'
@@ -2576,64 +1891,10 @@ parameters:
 			path: app/Domains/Laboratory/Services/InstructionService.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\InstructionService\:\:listInstructions\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/InstructionService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\MethodService\:\:findMethodById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/MethodService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\MethodTestService\:\:findMethodTestById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/MethodTestService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\OfferService\:\:listOffers\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/OfferService.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Services\\ReportTemplateService\:\:getTemplate\(\) should return App\\Domains\\Document\\Models\\Document\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
 			identifier: return.type
 			count: 1
 			path: app/Domains/Laboratory/Services/ReportTemplateService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\ReportTemplateService\:\:listReportTemplates\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/ReportTemplateService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\RequestFormService\:\:getRequestFormById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/RequestFormService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\RequestFormService\:\:listRequestForms\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/RequestFormService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\SampleTypeService\:\:getSampleTypeById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/SampleTypeService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\SampleTypeService\:\:listSampleTypes\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/SampleTypeService.php
 
 		-
 			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Models\\SectionGroup\:\:\$children\.$#'
@@ -2686,18 +1947,6 @@ parameters:
 		-
 			message: '#^Method App\\Domains\\Laboratory\\Services\\SectionGroupService\:\:getSectionGroupWithChildrenAndSection\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Services/SectionGroupService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\SectionGroupService\:\:listSectionGroups\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Services/SectionGroupService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\SectionGroupService\:\:listSectionGroups\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Laboratory/Services/SectionGroupService.php
 
@@ -2786,64 +2035,10 @@ parameters:
 			path: app/Domains/Laboratory/Services/SectionService.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\SectionService\:\:listSections\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/SectionService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\SectionWorkflowService\:\:findSectionWorkflowById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/SectionWorkflowService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\TestGroupService\:\:listTestGroups\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Services/TestGroupService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\TestGroupService\:\:listTestGroups\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/TestGroupService.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Services\\TestGroupService\:\:storeTestGroup\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/Domains/Laboratory/Services/TestGroupService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\TestService\:\:allTests\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/TestService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\TestService\:\:listTests\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/TestService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\WorkflowService\:\:getPrevSections\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Services/WorkflowService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\WorkflowService\:\:getPrevSections\(\) has parameter \$order with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/WorkflowService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\WorkflowService\:\:listWorkflows\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Services/WorkflowService.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
@@ -3038,24 +2233,6 @@ parameters:
 			path: app/Domains/Notification/Models/WhatsappMessage.php
 
 		-
-			message: '#^Method App\\Domains\\Notification\\Repositories\\NotificationRepository\:\:getUnreadNotifications\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Notification/Repositories/NotificationRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Notification\\Repositories\\NotificationRepository\:\:listNotifications\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Notification/Repositories/NotificationRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Notification\\Repositories\\NotificationRepository\:\:makeQuery\(\) has parameter \$notifiableId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Notification/Repositories/NotificationRepository.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:search\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -3080,42 +2257,6 @@ parameters:
 			path: app/Domains/Notification/Repositories/WhatsappMessageRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Notification\\Services\\NotificationService\:\:getUnreadNotifications\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Notification/Services/NotificationService.php
-
-		-
-			message: '#^Method App\\Domains\\Notification\\Services\\NotificationService\:\:listNotifications\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Notification/Services/NotificationService.php
-
-		-
-			message: '#^Method App\\Domains\\Notification\\Services\\WhatsappMessageService\:\:listContacts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Notification/Services/WhatsappMessageService.php
-
-		-
-			message: '#^Method App\\Domains\\Notification\\Services\\WhatsappMessageService\:\:listContacts\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Notification/Services/WhatsappMessageService.php
-
-		-
-			message: '#^Method App\\Domains\\Notification\\Services\\WhatsappMessageService\:\:listMessages\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Notification/Services/WhatsappMessageService.php
-
-		-
-			message: '#^Method App\\Domains\\Notification\\Services\\WhatsappMessageService\:\:listMessages\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Notification/Services/WhatsappMessageService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$template\.$#'
 			identifier: property.notFound
 			count: 1
@@ -3138,36 +2279,6 @@ parameters:
 			identifier: booleanOr.rightAlwaysFalse
 			count: 1
 			path: app/Domains/Reception/DTOs/AcceptanceItemStateDTO.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Events\\AcceptanceDeletedEvent\:\:__construct\(\) has parameter \$invoiceId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Events/AcceptanceDeletedEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Events\\ReportPublishedEvent\:\:__construct\(\) has parameter \$silent with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Events/ReportPublishedEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Events\\SampleCollectedEvent\:\:__construct\(\) has parameter \$acceptanceItemId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Events/SampleCollectedEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Events\\SampleCollectedEvent\:\:__construct\(\) has parameter \$barcode with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Events/SampleCollectedEvent.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Events\\SampleCollectedEvent\:\:__construct\(\) has parameter \$sampleId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Events/SampleCollectedEvent.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$acceptance\.$#'
@@ -3992,18 +3103,6 @@ parameters:
 			path: app/Domains/Reception/Models/Tag.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Notifications\\PatientReportPublished\:\:toSms\(\) has parameter \$notifiable with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Notifications/PatientReportPublished.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Notifications\\PatientReportPublished\:\:toWhatsAppTemplate\(\) has parameter \$notifiable with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Notifications/PatientReportPublished.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$patients\.$#'
 			identifier: property.notFound
 			count: 1
@@ -4089,32 +3188,8 @@ parameters:
 			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:findAcceptanceItemById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:getPanelItems\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:getPanelItems\(\) has parameter \$acceptanceId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:getPanelItems\(\) has parameter \$panelId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:getTotalTestsForDateRange\(\) has parameter \$dateRange with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
 
@@ -4137,38 +3212,14 @@ parameters:
 			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:listAcceptanceItems\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:listAcceptanceItemsReadyReport\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:listAcceptanceItemsReadyReport\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:listAllAcceptanceItems\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:listAllAcceptanceItems\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:syncPatients\(\) has parameter \$patients with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
 
@@ -4197,37 +3248,7 @@ parameters:
 			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
 
 		-
-			message: '#^Unable to resolve the template type TKey in call to function collect$#'
-			identifier: argument.templateType
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Unable to resolve the template type TValue in call to function collect$#'
-			identifier: argument.templateType
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemStateRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemStateRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemStateRepository\:\:findAcceptanceItemStateByBarcode\(\) has parameter \$barcode with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemStateRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemStateRepository\:\:findAcceptanceItemStateById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemStateRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemStateRepository\:\:getAcceptanceItemStatesStats\(\) has parameter \$sectionId with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Repositories/AcceptanceItemStateRepository.php
@@ -4235,12 +3256,6 @@ parameters:
 		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemStateRepository\:\:listAcceptanceItemStates\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemStateRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemStateRepository\:\:listAcceptanceItemStates\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Repositories/AcceptanceItemStateRepository.php
 
@@ -4253,18 +3268,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:search\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceRepository\:\:getReported\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceRepository\:\:getReported\(\) has parameter \$referrerId with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Repositories/AcceptanceRepository.php
 
@@ -4287,26 +3290,8 @@ parameters:
 			path: app/Domains/Reception/Repositories/PatientRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\PatientRepository\:\:countPatients\(\) has parameter \$field with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/PatientRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\PatientRepository\:\:findPatientById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/PatientRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\PatientRepository\:\:findPatientByIdNo\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/PatientRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\PatientRepository\:\:findPatientByIdNo\(\) has parameter \$idNo with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Repositories/PatientRepository.php
 
@@ -4321,24 +3306,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Domains/Reception/Repositories/ReportApprovalRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportApprovalRepository\:\:create\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/ReportApprovalRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportParameterRepository\:\:create\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/ReportParameterRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportParameterRepository\:\:find\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/ReportParameterRepository.php
 
 		-
 			message: '#^PHPDoc tag @return with type mixed is not subtype of native type App\\Domains\\Reception\\Models\\ReportParameter\.$#'
@@ -4377,20 +3344,8 @@ parameters:
 			path: app/Domains/Reception/Repositories/ReportRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportRepository\:\:create\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/ReportRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportRepository\:\:list\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/ReportRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportRepository\:\:list\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Repositories/ReportRepository.php
 
@@ -4401,20 +3356,8 @@ parameters:
 			path: app/Domains/Reception/Repositories/ReportRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportRepository\:\:listWaitingForApproving\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/ReportRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportRepository\:\:listWaitingForPublish\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/ReportRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportRepository\:\:listWaitingForPublish\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Repositories/ReportRepository.php
 
@@ -4432,60 +3375,6 @@ parameters:
 
 		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\SampleRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/SampleRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\SampleRepository\:\:findActiveSample\(\) has parameter \$acceptanceItemIds with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/SampleRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\SampleRepository\:\:findActiveSample\(\) has parameter \$patientId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/SampleRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\SampleRepository\:\:findActiveSample\(\) has parameter \$sampleType with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/SampleRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\SampleRepository\:\:findDeactivatedSample\(\) has parameter \$acceptanceItemIds with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/SampleRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\SampleRepository\:\:findDeactivatedSample\(\) has parameter \$patientId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/SampleRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\SampleRepository\:\:findDeactivatedSample\(\) has parameter \$sampleType with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/SampleRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\SampleRepository\:\:findSampleByBarcode\(\) has parameter \$barcode with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/SampleRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\SampleRepository\:\:findSampleById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/SampleRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\SampleRepository\:\:listSampleBarcodes\(\) has parameter \$filters with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Repositories/SampleRepository.php
@@ -4517,12 +3406,6 @@ parameters:
 		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\SignerRepository\:\:create\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/SignerRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\SignerRepository\:\:create\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Repositories/SignerRepository.php
 
@@ -4707,12 +3590,6 @@ parameters:
 			path: app/Domains/Reception/Services/AcceptanceItemConversionService.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceItemConversionService\:\:inheritSamples\(\) has parameter \$activeSamples with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemConversionService.php
-
-		-
 			message: '#^Relation ''activeSamples'' is not found in App\\Domains\\Reception\\Models\\AcceptanceItem model\.$#'
 			identifier: larastan.relationExistence
 			count: 1
@@ -4737,50 +3614,8 @@ parameters:
 			path: app/Domains/Reception/Services/AcceptanceItemService.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceItemService\:\:exportAcceptanceItems\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceItemService\:\:findAcceptanceItemById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceItemService\:\:getReportHistory\(\) has parameter \$acceptanceItemId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemService.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceItemService\:\:listAcceptanceItems\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceItemService\:\:listAcceptanceItems\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceItemService\:\:listAcceptanceItemsReadyReport\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceItemService\:\:rejectSample\(\) has parameter \$sampleId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceItemService\:\:updateAcceptanceItemTimeline\(\) has parameter \$message with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Services/AcceptanceItemService.php
 
@@ -4793,18 +3628,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\AcceptanceItem\:\:\$method\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemStateService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceItemStateService\:\:findAcceptanceItemStateByBarcode\(\) has parameter \$barcode with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemStateService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceItemStateService\:\:getAcceptanceItemStatesStats\(\) has parameter \$sectionId with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Services/AcceptanceItemStateService.php
 
@@ -4887,12 +3710,6 @@ parameters:
 			path: app/Domains/Reception/Services/AcceptanceService.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:checkAcceptanceReport\(\) has parameter \$silent with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:convertAcceptanceItems\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4905,62 +3722,14 @@ parameters:
 			path: app/Domains/Reception/Services/AcceptanceService.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:getAcceptanceById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:getReferrerAcceptanceReported\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/Domains/Reception/Services/AcceptanceService.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:getReferrerAcceptanceReported\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:getReferrerAcceptanceReported\(\) has parameter \$referrer_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:listAcceptances\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:listBarcodes\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:listSampleCollections\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:listWaitingForFinancialCheck\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:listWaitingForPublish\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:updateAcceptanceInvoice\(\) has parameter \$invoiceId with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Services/AcceptanceService.php
 
@@ -5051,18 +3820,6 @@ parameters:
 		-
 			message: '#^Method App\\Domains\\Reception\\Services\\PatientService\:\:getPatientById\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\PatientService\:\:getPatientById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\PatientService\:\:getPatientByIdNo\(\) has parameter \$idNo with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Services/PatientService.php
 
@@ -5211,44 +3968,8 @@ parameters:
 			path: app/Domains/Reception/Services/ReportService.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:formatDocumentFiles\(\) has parameter \$documents with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/ReportService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:getSampleData\(\) has parameter \$samples with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/ReportService.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:listReports\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/ReportService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:listReports\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/ReportService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:listWaitingForApprovalReports\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/ReportService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:listWaitingForPublishReports\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/ReportService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:prepareParametersData\(\) has parameter \$parameters with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Services/ReportService.php
 
@@ -5266,18 +3987,6 @@ parameters:
 
 		-
 			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:prepareSigners\(\) has parameter \$signers with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/ReportService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:processDocument\(\) has parameter \$documentId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/ReportService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:processPublishedReport\(\) has parameter \$silentlyPublish with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Services/ReportService.php
@@ -5319,44 +4028,8 @@ parameters:
 			path: app/Domains/Reception/Services/SampleEntryService.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Services\\SampleService\:\:findSampleByBarcode\(\) has parameter \$barcode with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/SampleService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\SampleService\:\:findSampleById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/SampleService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\SampleService\:\:listSampleBarcodes\(\) has parameter \$filters with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/SampleService.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Services\\SampleService\:\:listSamples\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/SampleService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\SampleService\:\:listSamples\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/SampleService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\SampleService\:\:storeSample\(\) has parameter \$index with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/SampleService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\SampleService\:\:storeSample\(\) has parameter \$pooling with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Services/SampleService.php
 
@@ -6226,42 +4899,6 @@ parameters:
 			path: app/Domains/Referrer/Support/ReferrerOrderPayloadBuilder.php
 
 		-
-			message: '#^Method App\\Domains\\Setting\\Services\\SettingService\:\:getSettingByKey\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Setting/Services/SettingService.php
-
-		-
-			message: '#^Method App\\Domains\\Setting\\Services\\SettingService\:\:getSettingByKey\(\) has parameter \$class with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Setting/Services/SettingService.php
-
-		-
-			message: '#^Method App\\Domains\\Setting\\Services\\SettingService\:\:getSettingByKey\(\) has parameter \$key with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Setting/Services/SettingService.php
-
-		-
-			message: '#^Method App\\Domains\\Setting\\Services\\SettingService\:\:listSettings\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Setting/Services/SettingService.php
-
-		-
-			message: '#^Method App\\Domains\\Setting\\Services\\SettingService\:\:listSettings\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Setting/Services/SettingService.php
-
-		-
-			message: '#^Method App\\Domains\\Setting\\Services\\SettingService\:\:updateSetting\(\) has parameter \$settingData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Setting/Services/SettingService.php
-
-		-
 			message: '#^Access to an undefined property App\\Domains\\User\\DTOs\\RoleDTO\:\:\$prmissions\.$#'
 			identifier: property.notFound
 			count: 1
@@ -6292,34 +4929,10 @@ parameters:
 			path: app/Domains/User/Repositories/PermissionRepository.php
 
 		-
-			message: '#^Method App\\Domains\\User\\Repositories\\PermissionRepository\:\:getPermissionByName\(\) has parameter \$permissionName with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Repositories/PermissionRepository.php
-
-		-
 			message: '#^Method App\\Domains\\User\\Repositories\\PermissionRepository\:\:getPermissionByName\(\) should return Spatie\\Permission\\Models\\Permission\|null but returns Spatie\\Permission\\Contracts\\Permission\.$#'
 			identifier: return.type
 			count: 1
 			path: app/Domains/User/Repositories/PermissionRepository.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Repositories\\PermissionRepository\:\:getUserAllPermissions\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/User/Repositories/PermissionRepository.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Repositories\\RoleRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/User/Repositories/RoleRepository.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Repositories\\RoleRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Repositories/RoleRepository.php
 
 		-
 			message: '#^Method App\\Domains\\User\\Repositories\\RoleRepository\:\:create\(\) should return App\\Domains\\User\\Models\\Role but returns Spatie\\Permission\\Contracts\\Role\.$#'
@@ -6334,34 +4947,10 @@ parameters:
 			path: app/Domains/User/Repositories/RoleRepository.php
 
 		-
-			message: '#^Method App\\Domains\\User\\Repositories\\RoleRepository\:\:list\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/User/Repositories/RoleRepository.php
-
-		-
 			message: '#^Parameter \#1 \$model of method App\\Domains\\User\\Repositories\\RoleRepository\:\:logCreated\(\) expects Illuminate\\Database\\Eloquent\\Model, Spatie\\Permission\\Contracts\\Role given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Domains/User/Repositories/RoleRepository.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Repositories\\UserRepository\:\:all\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/User/Repositories/UserRepository.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Repositories\\UserRepository\:\:apalyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/User/Repositories/UserRepository.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Repositories\\UserRepository\:\:apalyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Repositories/UserRepository.php
 
 		-
 			message: '#^Variable \$filters on left side of \?\? is never defined\.$#'
@@ -6376,18 +4965,6 @@ parameters:
 			path: app/Domains/User/Requests/UpdateUserRequest.php
 
 		-
-			message: '#^Method App\\Domains\\User\\Services\\PermissionService\:\:createPermission\(\) has parameter \$permissionName with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Services/PermissionService.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Services\\PermissionService\:\:getPermissionByName\(\) has parameter \$permissionName with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Services/PermissionService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
@@ -6400,34 +4977,10 @@ parameters:
 			path: app/Domains/User/Services/RoleService.php
 
 		-
-			message: '#^Method App\\Domains\\User\\Services\\RoleService\:\:getName\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/User/Services/RoleService.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Services\\RoleService\:\:getName\(\) has parameter \$permissions with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/User/Services/RoleService.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Services\\RoleService\:\:preparePermissions\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/User/Services/RoleService.php
-
-		-
 			message: '#^Parameter \#1 \$permissions of method App\\Domains\\User\\Services\\RoleService\:\:getSectionAndGroupSections\(\) expects Illuminate\\Database\\Eloquent\\Collection, Illuminate\\Support\\Collection given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Domains/User/Services/RoleService.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Services\\UserService\:\:getAllowedDocumentTags\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/User/Services/UserService.php
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Api\\Billing\\GetInvoiceController\:\:__invoke\(\) has no return type specified\.$#'

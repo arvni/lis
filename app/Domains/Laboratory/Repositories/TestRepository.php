@@ -2,6 +2,8 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\Test;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -67,17 +69,20 @@ class TestRepository
         $this->logDeleted($test);
     }
 
-    public function findTestById($id): ?Test
+    public function findTestById(int|string $id): ?Test
     {
         return Test::find($id);
     }
 
-    public function findTestByMethodTestId($id): ?Test
+    public function findTestByMethodTestId(int|string $id): ?Test
     {
         return Test::whereHas("methodTests", fn($q) => $q->where("method_tests.id", $id))->first();
     }
 
-    protected function applyFilters($query, array $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Laboratory\Models\Test>  $query
+     */
+    protected function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search($filters["search"]);

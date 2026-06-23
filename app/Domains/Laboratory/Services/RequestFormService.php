@@ -17,7 +17,7 @@ readonly class RequestFormService
     {
     }
 
-    public function listRequestForms($queryData): LengthAwarePaginator
+    public function listRequestForms(array $queryData): LengthAwarePaginator
     {
         return $this->requestFormRepository->ListRequestForms($queryData);
     }
@@ -47,7 +47,7 @@ readonly class RequestFormService
             throw new Exception("This requestForm has some Tests");
     }
 
-    public function getRequestFormById($id): RequestForm
+    public function getRequestFormById(int|string $id): RequestForm
     {
         return $this->requestFormRepository->getRequestFormById($id);
     }

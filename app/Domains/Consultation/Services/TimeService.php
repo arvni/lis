@@ -18,7 +18,7 @@ class TimeService
     {
     }
 
-    public function listTimes($queryData)
+    public function listTimes(array $queryData): Collection
     {
         return $this->timeRepository->ListTimes($queryData);
     }

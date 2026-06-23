@@ -2,6 +2,8 @@
 
 namespace App\Domains\Inventory\Services;
 
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Document\Models\Document;
 use App\Domains\Document\Services\DocumentService;
@@ -78,7 +80,7 @@ readonly class PurchaseRequestService
      *  - it is the currently active step (lowest sort_order among pending steps)
      *  - the given user is the designated approver, a role-holder, or the delegatee
      */
-    private function scopeActiveApproverQuery($q, $user): void
+    private function scopeActiveApproverQuery(Builder $q, $user): void
     {
         $userRoles = $user->getRoleNames()->all();
 

@@ -24,7 +24,7 @@ class SectionWorkflowService
         return $this->sectionWorkflowRepository->updateSectionWorkflow($sectionWorkflow, $sectionWorkflowDTO->toArray());
     }
 
-    public function findSectionWorkflowById($id): ?SectionWorkflow
+    public function findSectionWorkflowById(int|string $id): ?SectionWorkflow
     {
         return $this->sectionWorkflowRepository->findSectionWorkflowById($id);
     }

@@ -2,6 +2,8 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Laboratory\Models\ApprovalFlow;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -44,7 +46,10 @@ class ApprovalFlowRepository
         $this->logDeleted($approvalFlow);
     }
 
-    protected function applyFilters($query, array $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Laboratory\Models\ApprovalFlow>  $query
+     */
+    protected function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search(["name"], $filters["search"]);

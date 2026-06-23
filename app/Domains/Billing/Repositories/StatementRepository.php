@@ -2,6 +2,10 @@
 
 namespace App\Domains\Billing\Repositories;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Billing\Models\Statement;
 use Carbon\Carbon;
@@ -14,7 +18,7 @@ class StatementRepository
     use LogsUserActivity;
 
 
-    public function listStatements($queryData)
+    public function listStatements(array $queryData): LengthAwarePaginator
     {
         $query = Statement::with(["referrer"]);
         $query = $this->applyFilters($query, $queryData["filters"] ?? []);
@@ -45,12 +49,12 @@ class StatementRepository
         $this->logDeleted($statement);
     }
 
-    public function findStatementById($id): ?Statement
+    public function findStatementById(int|string $id): ?Statement
     {
         return Statement::find($id);
     }
 
-    public function getTotalStatementsForDateRange($dateRange): int
+    public function getTotalStatementsForDateRange(array $dateRange): int
     {
         return Statement::whereBetween("created_at", $dateRange)->count();
     }
@@ -140,7 +144,11 @@ class StatementRepository
                 COALESCE((SELECT SUM(acceptance_items.discount) FROM acceptance_items WHERE acceptances.id = acceptance_items.acceptance_id), 0)';
     }
 
-    private function applyFilters($query, array $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Billing\Models\Statement>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<\App\Domains\Billing\Models\Statement>
+     */
+    private function applyFilters(Builder $query, array $filters): Builder
     {
         if (isset($filters["referrer_id"])) {
             $query->where("referrer_id", strtolower($filters["referrer_id"]));
@@ -156,19 +164,23 @@ class StatementRepository
         return $query;
     }
 
-    private function applyOrderBy($query, array $orderBy)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Billing\Models\Statement>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<\App\Domains\Billing\Models\Statement>
+     */
+    private function applyOrderBy(Builder $query, array $orderBy): Builder
     {
         $query->orderBy($orderBy["field"], $orderBy["sort"]);
         return $query;
     }
 
-    private function generateStatementNumber($date)
+    private function generateStatementNumber(mixed $date): string
     {
         $date = Carbon::parse($date);
         return 'B-' . $date->format('Ym') . '-' . $this->countStatementOfMonth($date);
     }
 
-    private function countStatementOfMonth(Carbon $date)
+    private function countStatementOfMonth(Carbon $date): int
     {
         $dateRange = [$date->startOfMonth(), $date->copy()->endOfMonth()];
         return Statement::whereBetween("issue_date", $dateRange)->count();

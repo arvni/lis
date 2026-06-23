@@ -3,6 +3,7 @@
 namespace App\Domains\Laboratory\Services;
 
 
+
 use App\Domains\Laboratory\DTOs\SectionGroupDTO;
 use App\Domains\Laboratory\Models\SectionGroup;
 use App\Domains\Laboratory\Repositories\SectionGroupRepository;
@@ -23,7 +24,7 @@ class SectionGroupService
     {
     }
 
-    public function listSectionGroups($queryData)
+    public function listSectionGroups(array $queryData): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         return $this->sectionGroupRepository->ListSectionGroups($queryData);
     }

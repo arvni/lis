@@ -2,6 +2,8 @@
 
 namespace App\Domains\Consultation\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Consultation\Models\Time;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -35,7 +37,10 @@ class TimeRepository
         $time->delete();
     }
 
-    private function applyFilters($query, array $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Consultation\Models\Time>  $query
+     */
+    private function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["consultant_id"]))
             $query->where("consultant_id", $filters["consultant_id"]);

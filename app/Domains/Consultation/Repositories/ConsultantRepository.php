@@ -2,6 +2,10 @@
 
 namespace App\Domains\Consultation\Repositories;
 
+use Illuminate\Pagination\LengthAwarePaginator;
+
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Consultation\Models\Consultant;
 use Illuminate\Database\Eloquent\Collection;
@@ -23,7 +27,7 @@ class ConsultantRepository
             ->get(['id', 'name', 'title']);
     }
 
-    public function all(array $queryData = [])
+    public function all(array $queryData = []): LengthAwarePaginator
     {
         $query = Consultant::query()->with('user');
         if (isset($queryData["filters"]))
@@ -60,7 +64,10 @@ class ConsultantRepository
         $this->logDeleted($consultant);
     }
 
-    public function apalyFilters($query, array $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Consultation\Models\Consultant>  $query
+     */
+    public function apalyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search(["name", "title"], $filters["search"]);

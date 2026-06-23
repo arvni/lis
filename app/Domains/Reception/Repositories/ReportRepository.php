@@ -14,7 +14,7 @@ class ReportRepository
     use LogsUserActivity;
 
 
-    public function list($queryData)
+    public function list(array $queryData)
     {
         $query = Report::query();
         $query->with([
@@ -44,7 +44,7 @@ class ReportRepository
         ];
     }
 
-    public function listWaitingForApproving($queryData)
+    public function listWaitingForApproving(array $queryData)
     {
         $query = Report::query()
             ->notApproved()
@@ -60,7 +60,7 @@ class ReportRepository
         return $query->paginate($queryData["pageSize"] ?? 10);
     }
 
-    public function listWaitingForPublish($queryData)
+    public function listWaitingForPublish(array $queryData)
     {
         $query = Report::query()
             ->whereNotNull("reports.approved_at")
@@ -77,7 +77,7 @@ class ReportRepository
         return $query->paginate($queryData["pageSize"] ?? 10);
     }
 
-    public function create($data)
+    public function create(array $data)
     {
         $report = Report::create($data);
         $this->logCreated($report);

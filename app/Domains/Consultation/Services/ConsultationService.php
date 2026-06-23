@@ -81,7 +81,7 @@ class ConsultationService
         return $this->generateAndCheckTimeSlots($date, $consultationSettings["consultationDuration"] ?? 30, $consultant);
     }
 
-    public function startConsultation(Consultation $consultation)
+    public function startConsultation(Consultation $consultation): void
     {
         $this->consultationRepository->updateConsultation($consultation, [
             "status" => ConsultationStatus::STARTED,

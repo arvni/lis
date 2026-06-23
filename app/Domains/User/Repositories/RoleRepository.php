@@ -2,6 +2,10 @@
 
 namespace App\Domains\User\Repositories;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\User\Models\Role;
 use Illuminate\Support\Arr;
@@ -12,7 +16,7 @@ class RoleRepository
 {
     use LogsUserActivity;
 
-    public function list(array $queryData)
+    public function list(array $queryData): LengthAwarePaginator
     {
         $query = Role::query()->withCount('users');
        if (isset($queryData["filters"]))
@@ -54,7 +58,10 @@ class RoleRepository
         return Permission::query()->orderBy('name')->get(['name', 'id']);
     }
 
-    public function applyFilters($query, array $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\User\Models\Role>  $query
+     */
+    public function applyFilters(Builder $query, array $filters): void
     {
         if (!empty($filters['search']))
             $query->search(['name'], $filters['search']);

@@ -2,6 +2,8 @@
 
 namespace App\Domains\Laboratory\Services;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
 
 use App\Domains\Laboratory\DTOs\BarcodeGroupDTO;
 use App\Domains\Laboratory\Models\BarcodeGroup;
@@ -14,7 +16,7 @@ class BarcodeGroupService
     {
     }
 
-    public function listBarcodeGroups($queryData)
+    public function listBarcodeGroups(array $queryData): LengthAwarePaginator
     {
         return $this->barcodeGroupRepository->ListBarcodeGroups($queryData);
     }

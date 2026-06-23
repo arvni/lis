@@ -2,6 +2,8 @@
 
 namespace App\Domains\Consultation\Services;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
 
 use App\Domains\Consultation\DTOs\CustomerDTO;
 use App\Domains\Consultation\Models\Customer;
@@ -14,7 +16,7 @@ class CustomerService
     {
     }
 
-    public function listCustomers($queryData)
+    public function listCustomers(array $queryData): LengthAwarePaginator
     {
         return $this->customerRepository->ListCustomers($queryData);
     }
@@ -29,7 +31,7 @@ class CustomerService
         return $this->customerRepository->updateCustomer($customer, $customerDTO->toArray());
     }
 
-    public function findById($id)
+    public function findById(int|string $id)
     {
         return $this->customerRepository->findById($id);
     }

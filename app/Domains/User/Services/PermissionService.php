@@ -14,7 +14,7 @@ class PermissionService
     }
 
 
-    public function createPermission($permissionName): Permission
+    public function createPermission(string $permissionName): Permission
     {
         return $this->permissionRepository->create($permissionName);
     }
@@ -29,7 +29,7 @@ class PermissionService
         $this->permissionRepository->delete($permission);
     }
 
-    public function getPermissionByName($permissionName): ?Permission
+    public function getPermissionByName(string $permissionName): ?Permission
     {
         return $this->permissionRepository->getPermissionByName($permissionName);
     }

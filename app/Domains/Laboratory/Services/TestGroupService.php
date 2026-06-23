@@ -2,6 +2,8 @@
 
 namespace App\Domains\Laboratory\Services;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
 
 use App\Domains\Laboratory\DTOs\TestGroupDTO;
 use App\Domains\Laboratory\Models\TestGroup;
@@ -14,7 +16,7 @@ class TestGroupService
     {
     }
 
-    public function listTestGroups($queryData)
+    public function listTestGroups(array $queryData): LengthAwarePaginator
     {
         return $this->testGroupRepository->ListTestGroups($queryData);
     }

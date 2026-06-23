@@ -2,6 +2,8 @@
 
 namespace App\Domains\Consultation\Repositories;
 
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Consultation\Models\Customer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -45,7 +47,10 @@ class CustomerRepository
         $this->logDeleted($customer);
     }
 
-    protected function applyFilters($query, array $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Consultation\Models\Customer>  $query
+     */
+    protected function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search($filters["search"]);
@@ -56,7 +61,7 @@ class CustomerRepository
         return Customer::query()->where("phone", $phone)->first();
     }
 
-    public function findById($id)
+    public function findById(int|string $id)
     {
         return Customer::find($id);
     }

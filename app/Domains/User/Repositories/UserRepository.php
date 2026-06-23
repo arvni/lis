@@ -2,12 +2,16 @@
 
 namespace App\Domains\User\Repositories;
 
+use Illuminate\Pagination\LengthAwarePaginator;
+
+use Illuminate\Database\Eloquent\Builder;
+
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
 class UserRepository
 {
-    public function all(array $queryData = [])
+    public function all(array $queryData = []): LengthAwarePaginator
     {
         $query = User::query()->with('roles');
         if (isset($queryData["filters"]))
@@ -48,7 +52,10 @@ class UserRepository
         $user->delete();
     }
 
-    public function apalyFilters($query, array $filters)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\User\Models\User>  $query
+     */
+    public function apalyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search(["name","username","email","mobile","title"],$filters["search"]);

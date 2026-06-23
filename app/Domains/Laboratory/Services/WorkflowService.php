@@ -2,6 +2,8 @@
 
 namespace App\Domains\Laboratory\Services;
 
+use Illuminate\Database\Eloquent\Collection;
+
 
 use App\Domains\Laboratory\DTOs\WorkflowDTO;
 use App\Domains\Laboratory\Models\Workflow;
@@ -15,7 +17,7 @@ class WorkflowService
     {
     }
 
-    public function listWorkflows($queryData): LengthAwarePaginator
+    public function listWorkflows(array $queryData): LengthAwarePaginator
     {
         return $this->workflowRepository->ListWorkflows($queryData);
     }
@@ -46,7 +48,7 @@ class WorkflowService
         $workflow->sectionWorkflows()->whereNotIn("section_workflows.id", $ids)->delete();
     }
 
-    public function getPrevSections(Workflow $workflow,$order)
+    public function getPrevSections(Workflow $workflow, int|string $order): Collection
     {
         return $workflow->sections()
             ->wherePivot("order","<",$order)

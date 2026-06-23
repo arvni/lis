@@ -49,13 +49,13 @@ class DocumentService
             "inline");
     }
 
-    public function getDocument($id)
+    public function getDocument(int|string $id)
     {
         return Document::find($id);
     }
 
 
-    public function updateDocument(Document $document, $newData): Document
+    public function updateDocument(Document $document, array $newData): Document
     {
         $src = $document->path;
         $document->fill([

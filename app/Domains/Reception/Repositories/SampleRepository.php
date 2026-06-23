@@ -72,7 +72,7 @@ class SampleRepository
         return $sample;
     }
 
-    public function listSampleBarcodes($filters): Collection
+    public function listSampleBarcodes(array $filters): Collection
     {
         $query = Sample::query()
             ->with([
@@ -123,7 +123,7 @@ class SampleRepository
 
     }
 
-    public function findSampleById($id): ?Sample
+    public function findSampleById(int|string $id): ?Sample
     {
         return Sample::find($id);
     }
@@ -136,7 +136,7 @@ class SampleRepository
         }
     }
 
-    public function findActiveSample($acceptanceItemIds, $patientId, $sampleType): ?Sample
+    public function findActiveSample(array $acceptanceItemIds, int|string $patientId, int|string $sampleType): ?Sample
     {
         return Sample::whereHas("acceptanceItems", fn($q) => $q->whereIn("acceptance_items.id", $acceptanceItemIds)
             ->where("active", true))
@@ -145,7 +145,7 @@ class SampleRepository
             ->first();
     }
 
-    public function findDeactivatedSample($acceptanceItemIds, $patientId, $sampleType): ?Sample
+    public function findDeactivatedSample(array $acceptanceItemIds, int|string $patientId, int|string $sampleType): ?Sample
     {
         return Sample::whereHas("acceptanceItems", fn($q) => $q->whereIn("acceptance_items.id", $acceptanceItemIds)
             ->where("active", false))
@@ -155,7 +155,7 @@ class SampleRepository
             ->first();
     }
 
-    public function findSampleByBarcode($barcode): ?Sample
+    public function findSampleByBarcode(string $barcode): ?Sample
     {
         return Sample::where("barcode", $barcode)->first();
     }

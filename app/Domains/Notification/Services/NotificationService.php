@@ -18,7 +18,7 @@ readonly class NotificationService
      * @param $queryData
      * @return Collection
      */
-    public function getUnreadNotifications($queryData): Collection
+    public function getUnreadNotifications(array $queryData): Collection
     {
         return $this->notificationRepository->getUnreadNotifications($queryData);
     }
@@ -27,7 +27,7 @@ readonly class NotificationService
      * @param $queryData
      * @return LengthAwarePaginator
      */
-    public function listNotifications($queryData): LengthAwarePaginator
+    public function listNotifications(array $queryData): LengthAwarePaginator
     {
         return $this->notificationRepository->listNotifications($queryData);
     }

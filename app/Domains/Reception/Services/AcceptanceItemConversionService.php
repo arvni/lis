@@ -414,7 +414,7 @@ class AcceptanceItemConversionService
      * Attach any of the original item's active samples whose sample_type matches
      * a sample type accepted by the new item's test.
      */
-    private function inheritSamples(AcceptanceItem $newItem, MethodTest $mt, $activeSamples): void
+    private function inheritSamples(AcceptanceItem $newItem, MethodTest $mt, \Illuminate\Support\Collection $activeSamples): void
     {
         if ($activeSamples->isEmpty()) {
             return;

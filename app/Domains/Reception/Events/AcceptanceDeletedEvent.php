@@ -18,7 +18,7 @@ class AcceptanceDeletedEvent
     /**
      * Create a new event instance.
      */
-    public function __construct($invoiceId)
+    public function __construct(int $invoiceId)
     {
         $this->invoiceId = $invoiceId;
     }

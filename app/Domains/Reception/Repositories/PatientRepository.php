@@ -66,12 +66,12 @@ class PatientRepository
         $this->logDeleted($patient);
     }
 
-    public function findPatientByIdNo($idNo)
+    public function findPatientByIdNo(string $idNo)
     {
         return Patient::where('idNo', $idNo)->first();
     }
 
-    public function findPatientById($id): ?Patient
+    public function findPatientById(int|string $id): ?Patient
     {
         return Patient::find($id);
     }
@@ -102,7 +102,7 @@ class PatientRepository
                 ->orWhereHas("patients", fn($q) => $q->where("relatives.relative_id", $filters["patient"]));
     }
 
-    public function countPatients($field = null): int|array
+    public function countPatients(?string $field = null): int|array
     {
         switch ($field) {
             case "nationality":

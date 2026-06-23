@@ -91,13 +91,14 @@ class WorkflowServiceTest extends TestCase
 
     public function test_get_prev_sections_filters_by_order(): void
     {
+        $prev = new \Illuminate\Database\Eloquent\Collection(['PREV']);
         $relation = Mockery::mock();
         $relation->shouldReceive('wherePivot')->once()->with('order', '<', 3)->andReturnSelf();
-        $relation->shouldReceive('get')->once()->andReturn('PREV');
+        $relation->shouldReceive('get')->once()->andReturn($prev);
 
         $wf = Mockery::mock(Workflow::class)->makePartial();
         $wf->shouldReceive('sections')->once()->andReturn($relation);
 
-        $this->assertSame('PREV', $this->service->getPrevSections($wf, 3));
+        $this->assertSame($prev, $this->service->getPrevSections($wf, 3));
     }
 }

@@ -16,7 +16,7 @@ class OfferService
     {
     }
 
-    public function listOffers($queryData): LengthAwarePaginator
+    public function listOffers(array $queryData): LengthAwarePaginator
     {
         return $this->offerRepository->ListOffers($queryData);
     }

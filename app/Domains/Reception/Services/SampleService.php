@@ -22,7 +22,7 @@ class SampleService
     ) {
     }
 
-    public function listSamples($queryData)
+    public function listSamples(array $queryData)
     {
         return $this->sampleRepository->listSamples($queryData);
     }
@@ -50,12 +50,12 @@ class SampleService
         return $this->sampleRepository->updateBarcode($sample, $barcode);
     }
 
-    public function listSampleBarcodes($filters): Collection
+    public function listSampleBarcodes(array $filters): Collection
     {
         return $this->sampleRepository->listSampleBarcodes($filters);
     }
 
-    public function storeSample(SampleDTO $sampleDTO, $index = 0, $pooling = false): Sample
+    public function storeSample(SampleDTO $sampleDTO, int $index = 0, bool $pooling = false): Sample
     {
         $itemIds = Arr::pluck($sampleDTO->acceptanceItems, "id");
         $sample = $this->sampleRepository->findActiveSample($itemIds, $sampleDTO->patientId, $sampleDTO->sampleTypeId);
@@ -95,12 +95,12 @@ class SampleService
         return $this->sampleRepository->updateSample($sample, $sampleDTO->toArray());
     }
 
-    public function findSampleById($id): ?Sample
+    public function findSampleById(int|string $id): ?Sample
     {
         return $this->sampleRepository->findSampleById($id);
     }
 
-    public function findSampleByBarcode($barcode): ?Sample
+    public function findSampleByBarcode(string $barcode): ?Sample
     {
         return $this->sampleRepository->findSampleByBarcode($barcode);
     }

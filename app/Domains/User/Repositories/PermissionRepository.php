@@ -23,7 +23,7 @@ class PermissionRepository
         $permission->delete();
     }
 
-    public function getPermissionByName($permissionName): ?Permission
+    public function getPermissionByName(string $permissionName): ?Permission
     {
         try {
             return Permission::findByName($permissionName);
@@ -32,7 +32,7 @@ class PermissionRepository
         }
     }
 
-    public function getUserAllPermissions()
+    public function getUserAllPermissions(): \Illuminate\Support\Collection
     {
         return auth()->user()->getAllPermissions();
     }
