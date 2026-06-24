@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -50,7 +51,11 @@ class ConsentForm extends Model
         return $this->hasMany(Test::class);
     }
 
-    public function scopeActive($query)
+    /**
+     * @param  Builder<ConsentForm>  $query
+     * @return Builder<ConsentForm>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }

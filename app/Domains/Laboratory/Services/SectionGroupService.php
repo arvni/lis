@@ -149,9 +149,9 @@ class SectionGroupService
     /**
      * Get all section groups in a nested structure
      *
-     * @return Collection
+     * @return Collection<int, SectionGroup>
      */
-    public function getAllNestedSectionGroups()
+    public function getAllNestedSectionGroups(): Collection
     {
 
         // Get all top-level section groups (without parent)
@@ -185,10 +185,10 @@ class SectionGroupService
     /**
      * Transform section groups recursively
      *
-     * @param Collection $groups
-     * @return array
+     * @param  Collection<int, SectionGroup>  $groups
+     * @return array<int, mixed>
      */
-    private function transformGroups($groups)
+    private function transformGroups(Collection $groups): array
     {
         $result = [];
 

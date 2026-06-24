@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property-read int $consultations_count
@@ -266,7 +267,11 @@ class Patient extends Model
         return $this->hasMany(Sample::class);
     }
 
-    public function scopeIsResearch($query, $isResearch)
+    /**
+     * @param  Builder<Patient>  $query
+     * @return Builder<Patient>
+     */
+    public function scopeIsResearch(Builder $query, bool $isResearch): Builder
     {
         return $query->where("research", $isResearch);
     }

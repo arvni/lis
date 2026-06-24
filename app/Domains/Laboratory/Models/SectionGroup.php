@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -66,22 +67,38 @@ class SectionGroup extends Model
         return $this->hasManyThrough(AcceptanceItemState::class, Section::class);
     }
 
-    public function scopeHaveChildren($query)
+    /**
+     * @param  Builder<SectionGroup>  $query
+     * @return Builder<SectionGroup>
+     */
+    public function scopeHaveChildren(Builder $query): Builder
     {
         return $query->has("sections")->orHas("Children");
     }
 
-    public function scopeActive($query)
+    /**
+     * @param  Builder<SectionGroup>  $query
+     * @return Builder<SectionGroup>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where("active", true);
     }
 
-    public function scopeWithoutParent($query)
+    /**
+     * @param  Builder<SectionGroup>  $query
+     * @return Builder<SectionGroup>
+     */
+    public function scopeWithoutParent(Builder $query): Builder
     {
         return $query->whereDoesntHave("parent");
     }
 
-    public function scopeWithoutChildren($query)
+    /**
+     * @param  Builder<SectionGroup>  $query
+     * @return Builder<SectionGroup>
+     */
+    public function scopeWithoutChildren(Builder $query): Builder
     {
         return $query->whereDoesntHave("children");
     }

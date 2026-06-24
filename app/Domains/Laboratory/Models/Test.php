@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Runtime flag set by TestController to signal referrer-default pricing during shaping
@@ -166,7 +167,11 @@ class Test extends Model
         return $this->belongsTo(Instruction::class);
     }
 
-    public function scopeActive($query)
+    /**
+     * @param  Builder<Test>  $query
+     * @return Builder<Test>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', true);
     }

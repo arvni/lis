@@ -4,6 +4,7 @@ namespace App\Domains\Inventory\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -39,7 +40,11 @@ class WorkflowTemplate extends Model
         return $this->hasMany(PurchaseRequest::class);
     }
 
-    public function scopeActive($query)
+    /**
+     * @param  Builder<WorkflowTemplate>  $query
+     * @return Builder<WorkflowTemplate>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }

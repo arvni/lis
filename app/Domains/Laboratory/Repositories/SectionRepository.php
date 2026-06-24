@@ -13,6 +13,9 @@ class SectionRepository
 {
     use LogsUserActivity;
 
+    /**
+     * @return Collection<int, Section>
+     */
     public function getAll(): Collection
     {
         return Section::all();

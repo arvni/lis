@@ -6,6 +6,8 @@ use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Reception\Models\Patient;
 use DB;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use function Laravel\Prompts\select;
 
@@ -13,7 +15,10 @@ class PatientRepository
 {
     use LogsUserActivity;
 
-    public function listPatient(array $queryData)
+    /**
+     * @return LengthAwarePaginator<int, Patient>
+     */
+    public function listPatient(array $queryData): LengthAwarePaginator
     {
         $query = Patient::withCount(["acceptances", "relatives", "payments", "consultations"])
             ->withSum("Payments", "price")
@@ -66,7 +71,7 @@ class PatientRepository
         $this->logDeleted($patient);
     }
 
-    public function findPatientByIdNo(string $idNo)
+    public function findPatientByIdNo(string $idNo): ?Patient
     {
         return Patient::where('idNo', $idNo)->first();
     }
@@ -76,7 +81,11 @@ class PatientRepository
         return Patient::find($id);
     }
 
-    public function applyFilters($query, array $filters)
+    /**
+     * @param  Builder<Patient>  $query
+     * @param  array<string, mixed>  $filters
+     */
+    public function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search($filters["search"]);

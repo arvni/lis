@@ -5,6 +5,7 @@ namespace App\Domains\Inventory\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -50,7 +51,11 @@ class StoreLocation extends Model
             ->implode('-');
     }
 
-    public function scopeActive($query)
+    /**
+     * @param  Builder<StoreLocation>  $query
+     * @return Builder<StoreLocation>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }

@@ -6,6 +6,7 @@ use App\Domains\Reception\Models\AcceptanceItem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -49,7 +50,11 @@ class MethodTest extends Model
         return $this->hasMany(AcceptanceItem::class);
     }
 
-    public function scopeActive($query)
+    /**
+     * @param  Builder<MethodTest>  $query
+     * @return Builder<MethodTest>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', true);
     }

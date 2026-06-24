@@ -271,18 +271,6 @@ parameters:
 			path: app/Domains/Document/Models/Document.php
 
 		-
-			message: '#^Method App\\Domains\\Document\\Models\\Document\:\:scopeAllowedTag\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Document/Models/Document.php
-
-		-
-			message: '#^Method App\\Domains\\Document\\Models\\Document\:\:scopeAllowedTag\(\) has parameter \$q with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Document/Models/Document.php
-
-		-
 			message: '#^Method App\\Domains\\Document\\Services\\DocumentService\:\:getDocument\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -295,118 +283,10 @@ parameters:
 			path: app/Domains/Inventory/Exports/TransactionHistoryExport.php
 
 		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\Item\:\:scopeActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Inventory/Models/Item.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\Item\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Inventory/Models/Item.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\Item\:\:scopeLowStock\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Inventory/Models/Item.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\Item\:\:scopeLowStock\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Inventory/Models/Item.php
-
-		-
 			message: '#^Property App\\Domains\\Inventory\\Models\\Item\:\:\$searchable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
 			path: app/Domains/Inventory/Models/Item.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\ReorderAlert\:\:scopeOpen\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Inventory/Models/ReorderAlert.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\ReorderAlert\:\:scopeOpen\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Inventory/Models/ReorderAlert.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\StockLot\:\:scopeActiveFifo\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Inventory/Models/StockLot.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\StockLot\:\:scopeActiveFifo\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Inventory/Models/StockLot.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\StockLot\:\:scopeExpiringSoon\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Inventory/Models/StockLot.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\StockLot\:\:scopeExpiringSoon\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Inventory/Models/StockLot.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\StockTransaction\:\:scopeApproved\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Inventory/Models/StockTransaction.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\StockTransaction\:\:scopeApproved\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Inventory/Models/StockTransaction.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\Store\:\:scopeActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Inventory/Models/Store.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\Store\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Inventory/Models/Store.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\StoreLocation\:\:scopeActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Inventory/Models/StoreLocation.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\StoreLocation\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Inventory/Models/StoreLocation.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\Supplier\:\:scopeActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Inventory/Models/Supplier.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\Supplier\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Inventory/Models/Supplier.php
 
 		-
 			message: '#^Property App\\Domains\\Inventory\\Models\\Supplier\:\:\$searchable has no type specified\.$#'
@@ -419,18 +299,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/Domains/Inventory/Models/Unit.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\WorkflowTemplate\:\:scopeActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Inventory/Models/WorkflowTemplate.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Models\\WorkflowTemplate\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Inventory/Models/WorkflowTemplate.php
 
 		-
 			message: '#^Parameter \#1 \$string of function str_pad expects string, int given\.$#'
@@ -455,48 +323,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Domains/Inventory/Services/ReferenceNumberService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$brand\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Inventory/Services/StockMutationService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$expiry_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Inventory/Services/StockMutationService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$item_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Inventory/Services/StockMutationService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$lot_number\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Inventory/Services/StockMutationService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity_base_units\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Domains/Inventory/Services/StockMutationService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price_base\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Domains/Inventory/Services/StockMutationService.php
-
-		-
-			message: '#^Method App\\Domains\\Inventory\\Services\\StockMutationService\:\:generateBarcode\(\) has parameter \$line with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Inventory/Services/StockMutationService.php
 
 		-
 			message: '#^Right side of \|\| is always false\.$#'
@@ -565,88 +391,16 @@ parameters:
 			path: app/Domains/Laboratory/Exports/TestExport.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\ApprovalFlow\:\:scopeIsActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/ApprovalFlow.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\ApprovalFlow\:\:scopeIsActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Models/ApprovalFlow.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\ConsentForm\:\:scopeActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/ConsentForm.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\ConsentForm\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Models/ConsentForm.php
-
-		-
 			message: '#^Property App\\Domains\\Laboratory\\Models\\Doctor\:\:\$searchable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
 			path: app/Domains/Laboratory/Models/Doctor.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\Instruction\:\:scopeActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/Instruction.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\Instruction\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Models/Instruction.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\Method\:\:scopeActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/Method.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\Method\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Models/Method.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\MethodTest\:\:scopeActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/MethodTest.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\MethodTest\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Models/MethodTest.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Models\\ReportTemplateParameter\:\:getElementAttribute\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/Domains/Laboratory/Models/ReportTemplateParameter.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\RequestForm\:\:scopeActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/RequestForm.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\RequestForm\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Models/RequestForm.php
 
 		-
 			message: '#^Property App\\Domains\\Laboratory\\Models\\RequestForm\:\:\$searchable has no type specified\.$#'
@@ -673,30 +427,6 @@ parameters:
 			path: app/Domains/Laboratory/Models/Section.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\Section\:\:scopeActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/Section.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\Section\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Models/Section.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\Section\:\:scopeIsActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/Section.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\Section\:\:scopeIsActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Models/Section.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Models\\Section\:\:waitingItems\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -715,70 +445,10 @@ parameters:
 			path: app/Domains/Laboratory/Models/SectionGroup.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\SectionGroup\:\:scopeActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/SectionGroup.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\SectionGroup\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Models/SectionGroup.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\SectionGroup\:\:scopeHaveChildren\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/SectionGroup.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\SectionGroup\:\:scopeHaveChildren\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Models/SectionGroup.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\SectionGroup\:\:scopeWithoutChildren\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/SectionGroup.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\SectionGroup\:\:scopeWithoutChildren\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Models/SectionGroup.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\SectionGroup\:\:scopeWithoutParent\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/SectionGroup.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\SectionGroup\:\:scopeWithoutParent\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Models/SectionGroup.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Models\\SectionGroup\:\:waitingItems\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/Domains/Laboratory/Models/SectionGroup.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\Test\:\:scopeActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/Test.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\Test\:\:scopeActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Laboratory/Models/Test.php
 
 		-
 			message: '#^Property App\\Domains\\Laboratory\\Models\\Test\:\:\$searchable has no type specified\.$#'
@@ -979,36 +649,6 @@ parameters:
 			path: app/Domains/Laboratory/Services/DoctorService.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$icon\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Services/SectionGroupService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Domains/Laboratory/Services/SectionGroupService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Services/SectionGroupService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$recursiveChildren\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Services/SectionGroupService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$sections\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Services/SectionGroupService.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Services\\SectionGroupService\:\:getSectionGroupWithChildrenAndSection\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1025,30 +665,6 @@ parameters:
 			identifier: method.unused
 			count: 1
 			path: app/Domains/Laboratory/Services/SectionGroupService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$icon\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Services/SectionService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Services/SectionService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Services/SectionService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$sectionGroup\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Laboratory/Services/SectionService.php
 
 		-
 			message: '#^Method App\\Domains\\Laboratory\\Services\\TestGroupService\:\:storeTestGroup\(\) has no return type specified\.$#'
@@ -1411,30 +1027,6 @@ parameters:
 			path: app/Domains/Reception/Models/AcceptanceItem.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Models\\AcceptanceItem\:\:scopeIsTest\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/AcceptanceItem.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\AcceptanceItem\:\:scopeIsTest\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Models/AcceptanceItem.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\AcceptanceItem\:\:scopeReportLess\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/AcceptanceItem.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\AcceptanceItem\:\:scopeReportLess\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Models/AcceptanceItem.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Models\\AcceptanceItem\:\:workflow\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1483,24 +1075,6 @@ parameters:
 			path: app/Domains/Reception/Models/Patient.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Patient\:\:scopeIsResearch\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/Patient.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Patient\:\:scopeIsResearch\(\) has parameter \$isResearch with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Models/Patient.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Patient\:\:scopeIsResearch\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Models/Patient.php
-
-		-
 			message: '#^Property App\\Domains\\Reception\\Models\\Patient\:\:\$searchable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -1529,54 +1103,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Models/Relative.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Report\:\:scopeApprovableBy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/Report.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Report\:\:scopeApprovableBy\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Models/Report.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Report\:\:scopeIsActive\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/Report.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Report\:\:scopeIsActive\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Models/Report.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Report\:\:scopeNotApproved\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/Report.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Report\:\:scopeNotApproved\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Models/Report.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Report\:\:scopePublished\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/Report.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Report\:\:scopePublished\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Models/Report.php
 
 		-
 			message: '#^Method App\\Domains\\Reception\\Models\\Report\:\:scopeSearch\(\) has no return type specified\.$#'
@@ -1715,30 +1241,6 @@ parameters:
 			identifier: argument.templateType
 			count: 1
 			path: app/Domains/Reception/Repositories/AcceptanceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\PatientRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/PatientRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\PatientRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/PatientRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\PatientRepository\:\:findPatientByIdNo\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/PatientRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\PatientRepository\:\:listPatient\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/PatientRepository.php
 
 		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportApprovalRepository\:\:create\(\) has no return type specified\.$#'
@@ -2677,30 +2179,6 @@ parameters:
 			path: app/Http/Controllers/ImportController.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$brand\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Inventory/Api/FifoPreviewController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$expiry_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Inventory/Api/FifoPreviewController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$lot_number\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Inventory/Api/FifoPreviewController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity_base_units\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Http/Controllers/Inventory/Api/FifoPreviewController.php
-
-		-
 			message: '#^Unable to resolve the template type TKey in call to function collect$#'
 			identifier: argument.templateType
 			count: 1
@@ -2999,4 +2477,3 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Notifications/ReferrerReportPublished.php
-
