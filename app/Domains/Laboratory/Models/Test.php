@@ -19,6 +19,25 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * (not a DB column).
  *
  * @property bool $withDefaultReferrerPrice
+ * @property int $id
+ * @property int|null $consent_form_id
+ * @property int|null $instruction_id
+ * @property int|null $request_form_id
+ * @property string $name
+ * @property string $code
+ * @property string $fullName
+ * @property string|null $description
+ * @property \App\Domains\Laboratory\Enums\TestType $type
+ * @property bool $status
+ * @property int $can_merge
+ * @property \App\Domains\Laboratory\Enums\MethodPriceType $price_type
+ * @property numeric|null $price
+ * @property array<array-key, mixed>|null $extra
+ * @property \App\Domains\Laboratory\Enums\MethodPriceType $referrer_price_type
+ * @property numeric|null $referrer_price
+ * @property array<array-key, mixed>|null $referrer_extra
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  */
 class Test extends Model
 {

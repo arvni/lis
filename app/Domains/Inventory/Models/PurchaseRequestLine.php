@@ -5,6 +5,22 @@ namespace App\Domains\Inventory\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $purchase_request_id
+ * @property int $item_id
+ * @property int $unit_id
+ * @property numeric $qty
+ * @property numeric|null $estimated_unit_price
+ * @property int|null $preferred_supplier_id
+ * @property string|null $notes
+ * @property string|null $cat_no
+ * @property string|null $brand
+ * @property numeric|null $unit_price
+ * @property numeric $qty_received
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class PurchaseRequestLine extends Model
 {
     protected $fillable = [

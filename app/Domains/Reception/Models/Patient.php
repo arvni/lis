@@ -24,6 +24,25 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read int $consultations_count
  * @property-read int $invoices_count
  * @property-read int $payments_count
+ * @property int $id
+ * @property int $registrar_id
+ * @property string $fullName
+ * @property string|null $firstName
+ * @property string|null $secondName
+ * @property string|null $thirdName
+ * @property string|null $lastName
+ * @property string|null $tribe
+ * @property string|null $idNo
+ * @property string $nationality
+ * @property string|null $wilayat
+ * @property string|null $governorate
+ * @property string|null $village
+ * @property \Illuminate\Support\Carbon $dateOfBirth
+ * @property string|null $gender
+ * @property string|null $phone
+ * @property string|null $avatar
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  */
 class Patient extends Model
 {

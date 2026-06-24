@@ -23,6 +23,30 @@ use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property int $id
+ * @property int $acceptor_id
+ * @property int|null $consultation_id
+ * @property int|null $doctor_id
+ * @property int|null $invoice_id
+ * @property int $patient_id
+ * @property int|null $referrer_id
+ * @property int|null $sampler_id
+ * @property string|null $referenceCode
+ * @property int|null $samplerGender
+ * @property array<array-key, mixed>|null $howReport
+ * @property \App\Domains\Reception\Enums\AcceptanceStatus $status
+ * @property \App\Domains\Reception\Enums\AcceptancePriority $priority
+ * @property string|null $how_found_us
+ * @property int $financial_approved
+ * @property bool $out_patient
+ * @property bool $waiting_for_pooling
+ * @property int $step
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int|null $financial_approved_by
+ * @property string|null $financial_approved_at
+ */
 class Acceptance extends Model
 {
     use Searchable, HasRelationships;

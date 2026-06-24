@@ -9,6 +9,25 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property \App\Domains\Inventory\Enums\TransactionType $transaction_type
+ * @property string $reference_number
+ * @property \Illuminate\Support\Carbon $transaction_date
+ * @property int $store_id
+ * @property int|null $destination_store_id
+ * @property int|null $supplier_id
+ * @property int $requested_by_user_id
+ * @property int|null $approved_by_user_id
+ * @property \App\Domains\Inventory\Enums\TransactionStatus $status
+ * @property string|null $notes
+ * @property string|null $attachment
+ * @property numeric $total_value
+ * @property \Illuminate\Support\Carbon|null $transfer_received_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int|null $transfer_received_by_user_id
+ */
 class StockTransaction extends Model
 {
     protected $fillable = [

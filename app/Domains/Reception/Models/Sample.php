@@ -15,6 +15,28 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
+/**
+ * @property int $id
+ * @property int|null $material_id
+ * @property int $patient_id
+ * @property int|null $collect_request_id
+ * @property int $sample_type_id
+ * @property int $sampler_id
+ * @property int|null $sample_id
+ * @property int|null $qc_by_id
+ * @property string $status
+ * @property string $barcode
+ * @property string|null $store_address
+ * @property string $sampleLocation
+ * @property string|null $collection_date
+ * @property string|null $received_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string $qc_status
+ * @property int|null $qc_approved_by_id
+ * @property \Illuminate\Support\Carbon|null $qc_approved_at
+ * @property string|null $rejection_reason
+ */
 class Sample extends Model
 {
     use HasFactory, Searchable;

@@ -16,6 +16,18 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
+/**
+ * @property int $id
+ * @property string $fullName
+ * @property string $email
+ * @property string $phoneNo
+ * @property array<array-key, mixed> $billingInfo
+ * @property array<array-key, mixed>|null $reportReceivers
+ * @property array<array-key, mixed>|null $logisticInfo
+ * @property bool $isActive
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class Referrer extends Model
 {
     use HasFactory, Notifiable, Searchable;

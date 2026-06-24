@@ -6,6 +6,14 @@ use App\Domains\Laboratory\Models\ReportTemplateParameter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $report_id
+ * @property int $parameter_id
+ * @property array<array-key, mixed>|null $value
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class ReportParameter extends Model
 {
     protected $fillable=[

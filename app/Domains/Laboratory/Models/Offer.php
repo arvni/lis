@@ -7,6 +7,18 @@ use App\Domains\Referrer\Models\Referrer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * @property int $id
+ * @property string $title
+ * @property string|null $description
+ * @property \App\Domains\Laboratory\Enums\OfferType $type
+ * @property numeric $amount
+ * @property \Illuminate\Support\Carbon|null $started_at
+ * @property \Illuminate\Support\Carbon|null $ended_at
+ * @property bool $active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class Offer extends Model
 {
     protected $fillable = [

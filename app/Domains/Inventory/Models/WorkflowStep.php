@@ -7,6 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $workflow_template_id
+ * @property string $name
+ * @property int $sort_order
+ * @property int|null $deadline_days
+ * @property int|null $approver_user_id
+ * @property string|null $approver_role
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class WorkflowStep extends Model
 {
     protected $fillable = [

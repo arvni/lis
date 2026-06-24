@@ -5,6 +5,20 @@ namespace App\Domains\Inventory\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $receipt_id
+ * @property int $pr_line_id
+ * @property numeric $qty_received
+ * @property numeric|null $unit_price
+ * @property string|null $lot_number
+ * @property string|null $brand
+ * @property string|null $cat_no
+ * @property \Illuminate\Support\Carbon|null $expiry_date
+ * @property int|null $store_location_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class PurchaseRequestReceiptLine extends Model
 {
     protected $fillable = [

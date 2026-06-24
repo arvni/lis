@@ -11,6 +11,25 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasPermissions;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string|null $username
+ * @property string $mobile
+ * @property string|null $title
+ * @property string $email
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property \Illuminate\Support\Carbon|null $mobile_verified_at
+ * @property string $password
+ * @property string|null $avatar
+ * @property string|null $signature
+ * @property string|null $stamp
+ * @property bool $is_active
+ * @property bool $qc_auto_approve
+ * @property string|null $remember_token
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */

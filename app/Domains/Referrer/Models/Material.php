@@ -9,6 +9,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
+/**
+ * @property int $id
+ * @property int $sample_type_id
+ * @property int|null $order_material_id
+ * @property string $packing_series
+ * @property string|null $tube_series
+ * @property string $barcode
+ * @property string|null $tube_barcode
+ * @property \Illuminate\Support\Carbon|null $expire_date
+ * @property \Illuminate\Support\Carbon|null $manufactured_date
+ * @property string|null $assigned_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class Material extends Model
 {
     use Searchable;

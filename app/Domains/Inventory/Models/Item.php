@@ -11,6 +11,30 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property string $item_code
+ * @property string $name
+ * @property string|null $scientific_name
+ * @property \App\Domains\Inventory\Enums\ItemDepartment $department
+ * @property \App\Domains\Inventory\Enums\ItemMaterialType $material_type
+ * @property string|null $description
+ * @property \App\Domains\Inventory\Enums\StorageCondition $storage_condition
+ * @property string|null $storage_condition_notes
+ * @property int $default_unit_id
+ * @property bool $is_active
+ * @property bool $is_hazardous
+ * @property bool $requires_lot_tracking
+ * @property numeric $minimum_stock_level
+ * @property numeric|null $maximum_stock_level
+ * @property int|null $lead_time_days
+ * @property string|null $image
+ * @property string|null $msds_file
+ * @property string|null $notes
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ */
 class Item extends Model
 {
     use SoftDeletes, Searchable;

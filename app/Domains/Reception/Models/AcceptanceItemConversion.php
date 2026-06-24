@@ -7,6 +7,15 @@ use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $acceptance_item_id
+ * @property int $from_method_test_id
+ * @property int $to_method_test_id
+ * @property string $conversion_type
+ * @property int $converted_by
+ * @property \Illuminate\Support\Carbon $converted_at
+ */
 class AcceptanceItemConversion extends Model
 {
     public $timestamps = false;

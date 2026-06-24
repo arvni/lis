@@ -9,6 +9,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int|null $sample_collector_id
+ * @property int $referrer_id
+ * @property \App\Domains\Referrer\Enums\CollectRequestStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $barcode
+ * @property array<array-key, mixed>|null $logistic_information
+ * @property \Illuminate\Support\Carbon|null $preferred_date
+ * @property string|null $note
+ */
 class CollectRequest extends Model
 {
     use HasFactory;

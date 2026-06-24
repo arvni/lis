@@ -9,6 +9,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 
+/**
+ * @property int $id
+ * @property int|null $patient_id
+ * @property string $name
+ * @property string|null $email
+ * @property string $phone
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class Customer extends Model
 {
     use Searchable;

@@ -5,6 +5,14 @@ namespace App\Domains\Inventory\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $item_id
+ * @property int $unit_id
+ * @property numeric $conversion_to_base
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class ItemUnitConversion extends Model
 {
     protected $fillable = ['item_id', 'unit_id', 'conversion_to_base'];

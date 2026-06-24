@@ -961,12 +961,6 @@ parameters:
 			path: app/Domains/Laboratory/Resources/SectionOptionResource.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Resources\\TestResource\:\:resolvePrice\(\) should return float\|null but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>fullName" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -2305,7 +2299,7 @@ parameters:
 			path: app/Domains/Referrer/Exports/ReferrerTestExport.php
 
 		-
-			message: '#^Using nullsafe method call on non\-nullable type Carbon\\Carbon\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Support\\Carbon\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 2
 			path: app/Domains/Referrer/Jobs/SendAcceptanceWebhook.php
@@ -2467,7 +2461,7 @@ parameters:
 			path: app/Domains/Referrer/Services/ReferrerOrderService.php
 
 		-
-			message: '#^Using nullsafe method call on non\-nullable type Carbon\\Carbon\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Support\\Carbon\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 2
 			path: app/Domains/Referrer/Services/ReferrerOrderService.php
@@ -2503,7 +2497,7 @@ parameters:
 			path: app/Domains/Referrer/Services/ReferrerTestService.php
 
 		-
-			message: '#^Using nullsafe method call on non\-nullable type Carbon\\Carbon\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Support\\Carbon\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 2
 			path: app/Domains/Referrer/Support/ReferrerOrderPayloadBuilder.php
@@ -2959,7 +2953,7 @@ parameters:
 			path: app/Http/Resources/OrderMaterialResource.php
 
 		-
-			message: '#^Using nullsafe method call on non\-nullable type Carbon\\Carbon\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Support\\Carbon\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Listeners/SendPatientToProviderWebhook.php

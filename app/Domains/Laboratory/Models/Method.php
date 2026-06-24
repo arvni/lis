@@ -12,6 +12,24 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
+/**
+ * @property int $id
+ * @property int|null $workflow_id
+ * @property int|null $barcode_group_id
+ * @property string $name
+ * @property int|null $turnaround_time
+ * @property float $price
+ * @property numeric $referrer_price
+ * @property \App\Domains\Laboratory\Enums\MethodPriceType $price_type
+ * @property \App\Domains\Laboratory\Enums\MethodPriceType $referrer_price_type
+ * @property array<array-key, mixed>|null $referrer_extra
+ * @property bool $status
+ * @property array<array-key, mixed>|null $extra
+ * @property int $no_patient
+ * @property int $no_sample
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class Method extends Model
 {
     use Searchable;

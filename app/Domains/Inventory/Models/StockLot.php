@@ -12,6 +12,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Store|null $store
  * @property-read StoreLocation|null $location
  * @property-read \Illuminate\Database\Eloquent\Collection<int, StockTransactionLine> $transactionLines
+ * @property int $id
+ * @property int $item_id
+ * @property string $lot_number
+ * @property string|null $brand
+ * @property string|null $barcode
+ * @property \Illuminate\Support\Carbon|null $expiry_date
+ * @property \Illuminate\Support\Carbon|null $manufacture_date
+ * @property \Illuminate\Support\Carbon $received_date
+ * @property numeric $quantity_base_units
+ * @property numeric $unit_price_base
+ * @property int $store_id
+ * @property int|null $store_location_id
+ * @property \App\Domains\Inventory\Enums\LotStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  */
 class StockLot extends Model
 {

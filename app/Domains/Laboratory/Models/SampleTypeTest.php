@@ -6,6 +6,12 @@ namespace App\Domains\Laboratory\Models;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $test_id
+ * @property int $sample_type_id
+ * @property string $description
+ * @property bool $defaultType
+ */
 class SampleTypeTest extends Pivot
 {
     protected $table="sample_type_tests";

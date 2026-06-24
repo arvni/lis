@@ -8,6 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
+/**
+ * @property int $id
+ * @property int $report_template_id
+ * @property string $title
+ * @property string $type
+ * @property bool $required
+ * @property bool $active
+ * @property array<array-key, mixed>|null $custom_props
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class ReportTemplateParameter extends Model
 {
     protected $fillable = [

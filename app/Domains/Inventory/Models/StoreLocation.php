@@ -6,6 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $store_id
+ * @property string|null $zone
+ * @property string|null $row
+ * @property string|null $column
+ * @property string|null $shelf
+ * @property string|null $bin
+ * @property string $label
+ * @property string|null $capacity_notes
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class StoreLocation extends Model
 {
     protected $fillable = [

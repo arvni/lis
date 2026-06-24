@@ -6,6 +6,14 @@ namespace App\Domains\Reception\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $patient_id
+ * @property int $relative_id
+ * @property string $relationship
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class Relative extends Model
 {
     protected $fillable = [
