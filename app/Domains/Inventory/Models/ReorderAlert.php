@@ -5,6 +5,7 @@ namespace App\Domains\Inventory\Models;
 use App\Domains\Inventory\Enums\ReorderAlertStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -43,7 +44,11 @@ class ReorderAlert extends Model
         return $this->belongsTo(Store::class);
     }
 
-    public function scopeOpen($query)
+    /**
+     * @param  Builder<ReorderAlert>  $query
+     * @return Builder<ReorderAlert>
+     */
+    public function scopeOpen(Builder $query): Builder
     {
         return $query->where('status', ReorderAlertStatus::OPEN->value);
     }

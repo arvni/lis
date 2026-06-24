@@ -46,6 +46,8 @@ class StockLotRepository
 
     /**
      * Returns active lots for an item in a store ordered FIFO (oldest first).
+     *
+     * @return Collection<int, StockLot>
      */
     public function activeFifoLots(int $itemId, int $storeId): Collection
     {

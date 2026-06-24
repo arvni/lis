@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -99,7 +100,11 @@ class Method extends Model
     }
 
 
-    public function scopeActive($query)
+    /**
+     * @param  Builder<Method>  $query
+     * @return Builder<Method>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where("status", true);
     }

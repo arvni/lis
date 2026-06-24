@@ -7,6 +7,7 @@ use App\Domains\User\Services\UserService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property string $hash
@@ -52,7 +53,11 @@ class Document extends Model
         'address'
     ];
 
-    public function scopeAllowedTag($q)
+    /**
+     * @param  Builder<Document>  $q
+     * @return Builder<Document>
+     */
+    public function scopeAllowedTag(Builder $q): Builder
     {
         $user = auth()->user();
         $tags=[];

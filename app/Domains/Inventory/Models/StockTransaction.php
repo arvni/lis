@@ -8,6 +8,7 @@ use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -88,7 +89,11 @@ class StockTransaction extends Model
         return $this->hasMany(TransactionHistory::class, 'transaction_id')->orderBy('created_at');
     }
 
-    public function scopeApproved($query)
+    /**
+     * @param  Builder<StockTransaction>  $query
+     * @return Builder<StockTransaction>
+     */
+    public function scopeApproved(Builder $query): Builder
     {
         return $query->where('status', TransactionStatus::APPROVED->value);
     }

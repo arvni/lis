@@ -61,6 +61,10 @@ class SectionService
         return $this->prepareAccessibleSections($sections);
     }
 
+    /**
+     * @param  Collection<int, Section>  $sections
+     * @return list<array<string, mixed>>
+     */
     protected function prepareAccessibleSections(Collection $sections): array
     {
         $tree = [];
@@ -73,7 +77,7 @@ class SectionService
             if (!isset($groups[$group->id])) {
                 $groups[$group->id] = [
                     'title' => $group->name,
-                    'parent_id' => $group->parent_id,
+                    'parent_id' => $group->section_group_id,
                     'child' => [],
                     'type' => 'group',
                     'icon' => $group->icon,

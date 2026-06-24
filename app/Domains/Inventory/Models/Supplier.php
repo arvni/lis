@@ -7,6 +7,7 @@ use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -62,7 +63,11 @@ class Supplier extends Model
         return $this->hasMany(StockTransaction::class);
     }
 
-    public function scopeActive($query)
+    /**
+     * @param  Builder<Supplier>  $query
+     * @return Builder<Supplier>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -160,7 +161,11 @@ class Report extends Model
             ->with(["user:id,name,signature,title,stamp"]);
     }
 
-    public function scopePublished($query)
+    /**
+     * @param  Builder<Report>  $query
+     * @return Builder<Report>
+     */
+    public function scopePublished(Builder $query): Builder
     {
         return $query->whereNotNull("published_at");
     }
@@ -232,7 +237,7 @@ class Report extends Model
      * or the report's current step matches the user's id/roles (or is
      * unbound) and the user hasn't already approved a step this cycle.
      */
-    public function scopeApprovableBy($query, User $user)
+    public function scopeApprovableBy(Builder $query, User $user): Builder
     {
         $roleIds = $user->roles()->pluck("id");
 
@@ -268,12 +273,20 @@ class Report extends Model
         });
     }
 
-    public function scopeNotApproved($query)
+    /**
+     * @param  Builder<Report>  $query
+     * @return Builder<Report>
+     */
+    public function scopeNotApproved(Builder $query): Builder
     {
         return $query->whereNull("approved_at")->whereNull("approver_id");
     }
 
-    public function scopeIsActive($query)
+    /**
+     * @param  Builder<Report>  $query
+     * @return Builder<Report>
+     */
+    public function scopeIsActive(Builder $query): Builder
     {
         return $query->where("status", true);
     }

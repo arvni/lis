@@ -54,11 +54,12 @@ class PatientServiceTest extends TestCase
 
     public function test_list_patients_delegates_to_repository(): void
     {
+        $page = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
         $repo = Mockery::mock(PatientRepository::class);
-        $repo->shouldReceive('listPatient')->once()->with(['x' => 1])->andReturn('PAGE');
+        $repo->shouldReceive('listPatient')->once()->with(['x' => 1])->andReturn($page);
         $service = new PatientService($repo);
 
-        $this->assertSame('PAGE', $service->listPatients(['x' => 1]));
+        $this->assertSame($page, $service->listPatients(['x' => 1]));
     }
 
     public function test_get_patient_by_id_no_delegates_to_repository(): void

@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -235,7 +236,10 @@ class AcceptanceItem extends Model
             ->where("status", true);
     }
 
-    public function scopeIsTest($query)
+    /**
+     * @param  Builder<AcceptanceItem>  $query
+     */
+    public function scopeIsTest(Builder $query): void
     {
         $query->whereHas("method", function ($q) {
             $q->whereHas("test", fn($q) => $q->where("tests.type", TestType::TEST));
@@ -243,7 +247,11 @@ class AcceptanceItem extends Model
     }
 
 
-    public function scopeReportLess($query)
+    /**
+     * @param  Builder<AcceptanceItem>  $query
+     * @return Builder<AcceptanceItem>
+     */
+    public function scopeReportLess(Builder $query): Builder
     {
         return $query
             ->where("reportless", false)

@@ -5,6 +5,7 @@ namespace App\Domains\Laboratory\Models;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -50,7 +51,11 @@ class ApprovalFlow extends Model
         return $this->steps()->where("position", ">", $position)->first();
     }
 
-    public function scopeIsActive($query)
+    /**
+     * @param  Builder<ApprovalFlow>  $query
+     * @return Builder<ApprovalFlow>
+     */
+    public function scopeIsActive(Builder $query): Builder
     {
         return $query->where("active", true);
     }

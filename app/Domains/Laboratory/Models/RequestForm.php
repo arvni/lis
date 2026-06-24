@@ -7,6 +7,7 @@ use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -47,7 +48,11 @@ class RequestForm extends Model
         return $this->morphOne(Document::class, 'owner');
     }
 
-    public function scopeActive($query)
+    /**
+     * @param  Builder<RequestForm>  $query
+     * @return Builder<RequestForm>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }

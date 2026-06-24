@@ -6,6 +6,7 @@ use App\Domains\Inventory\Enums\LotStatus;
 use App\Domains\Inventory\Enums\TransactionType;
 use App\Domains\Inventory\Models\StockLot;
 use App\Domains\Inventory\Models\StockTransaction;
+use App\Domains\Inventory\Models\StockTransactionLine;
 use App\Domains\Inventory\Repositories\StockLotRepository;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -64,7 +65,7 @@ class StockMutationService
         };
     }
 
-    private function generateBarcode($line, int $txId): string
+    private function generateBarcode(StockTransactionLine $line, int $txId): string
     {
         $itemCode = $line->item->item_code ?? "ITEM{$line->item_id}";
         $suffix   = $line->brand

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Aggregate counts populated by withCount([...]) in SectionGroupService (not DB columns).
@@ -72,7 +73,11 @@ class Section extends Model
         return $this->belongsTo(SectionGroup::class);
     }
 
-    public function scopeIsActive($query)
+    /**
+     * @param  Builder<Section>  $query
+     * @return Builder<Section>
+     */
+    public function scopeIsActive(Builder $query): Builder
     {
         return $query->where("active", true);
     }
@@ -94,7 +99,11 @@ class Section extends Model
         return $this->acceptanceItemStates()->where("status",AcceptanceItemStateStatus::REJECTED);
     }
 
-    public function scopeActive($query)
+    /**
+     * @param  Builder<Section>  $query
+     * @return Builder<Section>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where("active", true);
     }

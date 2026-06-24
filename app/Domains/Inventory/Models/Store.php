@@ -6,6 +6,7 @@ use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -54,7 +55,11 @@ class Store extends Model
         return $this->hasMany(StockTransaction::class);
     }
 
-    public function scopeActive($query)
+    /**
+     * @param  Builder<Store>  $query
+     * @return Builder<Store>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }

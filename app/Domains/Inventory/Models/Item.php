@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -102,12 +103,20 @@ class Item extends Model
         return $this->hasMany(ReorderAlert::class);
     }
 
-    public function scopeActive($query)
+    /**
+     * @param  Builder<Item>  $query
+     * @return Builder<Item>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }
 
-    public function scopeLowStock($query)
+    /**
+     * @param  Builder<Item>  $query
+     * @return Builder<Item>
+     */
+    public function scopeLowStock(Builder $query): Builder
     {
         return $query->whereRaw('minimum_stock_level > 0')
             ->whereHas('lots', function ($q) {

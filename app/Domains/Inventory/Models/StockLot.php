@@ -6,6 +6,7 @@ use App\Domains\Inventory\Enums\LotStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property-read Item|null $item
@@ -71,7 +72,7 @@ class StockLot extends Model
     }
 
     /** FIFO scope: oldest received lots first, active only */
-    public function scopeActiveFifo($query)
+    public function scopeActiveFifo(Builder $query): Builder
     {
         return $query->where('status', LotStatus::ACTIVE->value)
             ->where('quantity_base_units', '>', 0)
@@ -79,7 +80,11 @@ class StockLot extends Model
             ->orderBy('id', 'asc');
     }
 
-    public function scopeExpiringSoon($query, int $days = 30)
+    /**
+     * @param  Builder<StockLot>  $query
+     * @return Builder<StockLot>
+     */
+    public function scopeExpiringSoon(Builder $query, int $days = 30): Builder
     {
         return $query->where('status', LotStatus::ACTIVE->value)
             ->whereNotNull('expiry_date')
