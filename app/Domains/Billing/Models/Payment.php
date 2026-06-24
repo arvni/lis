@@ -9,6 +9,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property int $id
+ * @property int $invoice_id
+ * @property int $cashier_id
+ * @property string $payer_type
+ * @property int $payer_id
+ * @property float $price
+ * @property \App\Domains\Billing\Enums\PaymentMethod $paymentMethod
+ * @property array<array-key, mixed>|null $information
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class Payment extends Model
 {
     use Searchable;

@@ -5,6 +5,25 @@ namespace App\Domains\Inventory\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $transaction_id
+ * @property int $item_id
+ * @property int $unit_id
+ * @property numeric $quantity
+ * @property numeric $quantity_base_units
+ * @property string|null $lot_number
+ * @property string|null $brand
+ * @property string|null $barcode
+ * @property \Illuminate\Support\Carbon|null $expiry_date
+ * @property int|null $store_location_id
+ * @property numeric|null $unit_price
+ * @property numeric|null $total_price
+ * @property string|null $notes
+ * @property string|null $cat_no
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class StockTransactionLine extends Model
 {
     protected $fillable = [

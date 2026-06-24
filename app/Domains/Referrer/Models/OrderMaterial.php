@@ -8,6 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $referrer_id
+ * @property int $sample_type_id
+ * @property int $server_id
+ * @property int $amount
+ * @property \App\Domains\Referrer\Enums\OrderMaterialStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class OrderMaterial extends Model
 {
     protected $fillable = [

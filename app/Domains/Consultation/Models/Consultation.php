@@ -10,6 +10,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
+/**
+ * @property int $id
+ * @property int $patient_id
+ * @property int $consultant_id
+ * @property \Illuminate\Support\Carbon $dueDate
+ * @property array<array-key, mixed>|null $information
+ * @property \App\Domains\Consultation\Enums\ConsultationStatus $status
+ * @property string|null $image
+ * @property \Illuminate\Support\Carbon|null $started_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class Consultation extends Model
 {
     protected $fillable = [

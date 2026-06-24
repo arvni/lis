@@ -8,6 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property string $hash
+ * @property string $ext
+ * @property string|null $related_type
+ * @property int|null $related_id
+ * @property string|null $owner_type
+ * @property int|null $owner_id
+ * @property \App\Domains\Document\Enums\DocumentTag $tag
+ * @property string|null $originalName
+ * @property string|null $path
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ */
 class Document extends Model
 {
     use SoftDeletes;

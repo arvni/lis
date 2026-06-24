@@ -21,6 +21,24 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
+/**
+ * @property int $id
+ * @property int $acceptance_id
+ * @property int|null $method_test_id
+ * @property string|null $panel_id
+ * @property int|null $invoice_item_id
+ * @property numeric $price
+ * @property numeric $discount
+ * @property int $no_sample
+ * @property bool $reportless
+ * @property bool $sampleless
+ * @property bool $is_pooling
+ * @property array<array-key, mixed>|null $timeline
+ * @property array<array-key, mixed>|null $customParameters
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ */
 class AcceptanceItem extends Model
 {
     use HasRelationships, SoftDeletes;

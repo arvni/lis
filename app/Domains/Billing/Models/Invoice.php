@@ -23,6 +23,16 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  *
  * @property string|null $invoiceNo
  * @property bool $has_different_owner
+ * @property int $id
+ * @property string $owner_type
+ * @property int $owner_id
+ * @property int|null $statement_id
+ * @property int $user_id
+ * @property int $discount
+ * @property string $status
+ * @property array<array-key, mixed>|null $subject
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  */
 class Invoice extends Model
 {

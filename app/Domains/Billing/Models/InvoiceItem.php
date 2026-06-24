@@ -11,6 +11,26 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property int $invoice_id
+ * @property int|null $acceptance_id
+ * @property \App\Domains\Billing\Enums\InvoiceItemKind $kind
+ * @property int|null $test_id
+ * @property string|null $panel_id
+ * @property string $title
+ * @property string|null $code
+ * @property string|null $description
+ * @property numeric $unit_price
+ * @property int $qty
+ * @property numeric $price
+ * @property numeric $discount
+ * @property array<array-key, mixed>|null $customParameters
+ * @property \Illuminate\Support\Carbon|null $locked_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ */
 class InvoiceItem extends Model
 {
     use SoftDeletes;

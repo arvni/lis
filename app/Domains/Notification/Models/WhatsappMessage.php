@@ -8,6 +8,20 @@ use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property int $id
+ * @property int|null $replied_to_id
+ * @property string|null $messageable_type
+ * @property int|null $messageable_id
+ * @property string|null $sid
+ * @property string $waId
+ * @property \App\Domains\Notification\Enums\WhatsappMessageType $type
+ * @property \App\Domains\Notification\Enums\WhatsappMessageWritten $written
+ * @property array<array-key, mixed> $data
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class WhatsappMessage extends Model
 {
     use Searchable;

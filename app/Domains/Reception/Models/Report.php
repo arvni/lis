@@ -19,6 +19,27 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
+/**
+ * @property int $id
+ * @property string|null $value
+ * @property int $acceptance_item_id
+ * @property int $reporter_id
+ * @property int|null $approver_id
+ * @property int|null $publisher_id
+ * @property int|null $report_template_id
+ * @property \Illuminate\Support\Carbon|null $reported_at
+ * @property \Illuminate\Support\Carbon|null $approved_at
+ * @property \Illuminate\Support\Carbon|null $printed_at
+ * @property string|null $published_at
+ * @property bool $status
+ * @property \App\Domains\Reception\Enums\ReportApprovalStatus $approval_status
+ * @property int|null $current_step_position
+ * @property string|null $comment
+ * @property string|null $clinical_comment
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ */
 class Report extends Model
 {
     use HasFactory, SoftDeletes;

@@ -8,6 +8,27 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $requested_by_user_id
+ * @property int|null $approved_by_user_id
+ * @property int|null $supplier_id
+ * @property string|null $po_number
+ * @property string|null $po_file
+ * @property \Illuminate\Support\Carbon|null $payment_date
+ * @property string|null $payment_reference
+ * @property string|null $payment_file
+ * @property \Illuminate\Support\Carbon|null $shipment_date
+ * @property string|null $tracking_number
+ * @property \Illuminate\Support\Carbon|null $expected_delivery_date
+ * @property string|null $currency
+ * @property string $urgency
+ * @property string|null $notes
+ * @property \App\Domains\Inventory\Enums\PurchaseRequestStatus $status
+ * @property int|null $workflow_template_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class PurchaseRequest extends Model
 {
     protected $fillable = [

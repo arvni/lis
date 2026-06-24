@@ -8,6 +8,16 @@ use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $report_id
+ * @property int|null $approval_flow_step_id
+ * @property int $user_id
+ * @property \App\Domains\Reception\Enums\ReportApprovalAction $action
+ * @property string|null $comment
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class ReportApproval extends Model
 {
     protected $fillable = [

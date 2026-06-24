@@ -6,6 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property string $node_id
+ * @property \Illuminate\Support\Carbon $sampled_at
+ * @property numeric|null $temperature
+ * @property numeric|null $humidity
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class MonitoringSample extends Model
 {
     protected $fillable = ['node_id', 'sampled_at', 'temperature', 'humidity'];

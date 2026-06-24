@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $acceptance_item_id
+ * @property int $sample_id
+ * @property bool $active
+ */
 class AcceptanceItemSample extends Pivot
 {
     protected $table="acceptance_item_samples";

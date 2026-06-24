@@ -7,6 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property \App\Domains\User\Enums\ActivityType $activity_type
+ * @property string|null $ip_address
+ * @property string|null $related_type
+ * @property string|null $related_id
+ * @property array<array-key, mixed>|null $payload
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class UserActivity extends Model
 {
     protected $fillable = [

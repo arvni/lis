@@ -12,6 +12,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
+/**
+ * @property int $id
+ * @property int|null $acceptance_id
+ * @property int|null $patient_id
+ * @property int $referrer_id
+ * @property int|null $collect_request_id
+ * @property int|null $user_id
+ * @property string $order_id
+ * @property string $status
+ * @property bool $pooling
+ * @property bool $needs_add_sample
+ * @property array<array-key, mixed> $orderInformation
+ * @property array<array-key, mixed>|null $logisticInformation
+ * @property string|null $reference_no
+ * @property \Illuminate\Support\Carbon|null $received_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class ReferrerOrder extends Model
 {
     protected $fillable = [

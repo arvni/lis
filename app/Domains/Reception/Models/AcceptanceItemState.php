@@ -12,6 +12,25 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
+/**
+ * @property int $id
+ * @property int $acceptance_item_id
+ * @property int $section_id
+ * @property int|null $sample_id
+ * @property int $user_id
+ * @property int|null $started_by_id
+ * @property int|null $finished_by_id
+ * @property array<array-key, mixed> $parameters
+ * @property \App\Domains\Reception\Enums\AcceptanceItemStateStatus $status
+ * @property string|null $details
+ * @property bool $is_first_section
+ * @property \Illuminate\Support\Carbon|null $started_at
+ * @property \Illuminate\Support\Carbon|null $finished_at
+ * @property int|null $order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ */
 class AcceptanceItemState extends Model
 {
     use Searchable, HasRelationships, SoftDeletes;
@@ -41,7 +60,8 @@ class AcceptanceItemState extends Model
         "parameters" => "json",
         "finished_at" => "datetime",
         "started_at" => "datetime",
-        "status" => AcceptanceItemStateStatus::class
+        "status" => AcceptanceItemStateStatus::class,
+        "is_first_section" => "bool",
     ];
 
 

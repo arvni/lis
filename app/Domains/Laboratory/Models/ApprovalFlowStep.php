@@ -10,6 +10,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $approval_flow_id
+ * @property int $position
+ * @property string $name
+ * @property int|null $role_id
+ * @property int|null $user_id
+ * @property bool $allow_self_approval
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class ApprovalFlowStep extends Model
 {
     protected $fillable = [

@@ -6,6 +6,17 @@ use App\Domains\Inventory\Enums\ReorderAlertStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $item_id
+ * @property int $store_id
+ * @property numeric $current_qty_base
+ * @property numeric $minimum_stock_level
+ * @property \App\Domains\Inventory\Enums\ReorderAlertStatus $status
+ * @property \Illuminate\Support\Carbon|null $resolved_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class ReorderAlert extends Model
 {
     protected $fillable = [
