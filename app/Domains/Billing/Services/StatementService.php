@@ -114,8 +114,8 @@ class StatementService
     private function calculateTotalAmount(Collection $invoices): float
     {
         return $invoices->sum(fn($invoice) =>
-            ($invoice->acceptance_items_sum_price ?? 0)
-            - ($invoice->acceptance_items_sum_discount ?? 0)
+            ($invoice->invoice_items_sum_price ?? 0)
+            - ($invoice->invoice_items_sum_discount ?? 0)
             - ($invoice->discount ?? 0)
         );
     }
@@ -123,8 +123,8 @@ class StatementService
     private function prepareInvoicesData(Collection $invoices): array
     {
         return $invoices->map(function ($invoice) {
-            $grossAmount     = $invoice->acceptance_items_sum_price ?? 0;
-            $itemDiscounts   = $invoice->acceptance_items_sum_discount ?? 0;
+            $grossAmount     = $invoice->invoice_items_sum_price ?? 0;
+            $itemDiscounts   = $invoice->invoice_items_sum_discount ?? 0;
             $invoiceDiscount = $invoice->discount ?? 0;
             $netAmount       = $grossAmount - $itemDiscounts - $invoiceDiscount;
 

@@ -46,8 +46,8 @@ class ShowStatementController extends Controller
     private function prepareInvoicesData(Collection $invoices): array
     {
         return $invoices->map(function ($invoice) {
-            $grossAmount     = (float) ($invoice->acceptance_items_sum_price ?? 0);
-            $itemDiscounts   = (float) ($invoice->acceptance_items_sum_discount ?? 0);
+            $grossAmount     = (float) ($invoice->invoice_items_sum_price ?? 0);
+            $itemDiscounts   = (float) ($invoice->invoice_items_sum_discount ?? 0);
             $invoiceDiscount = (float) ($invoice->discount ?? 0);
             $netAmount       = $grossAmount - $itemDiscounts - $invoiceDiscount;
 

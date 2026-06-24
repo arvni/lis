@@ -76,8 +76,8 @@ class StatementRepository
                     'acceptanceItems.report:id,published_at,acceptance_item_id',
                 ])
                     ->withSum('payments', 'price')
-                    ->withSum('acceptanceItems', 'discount')
-                    ->withSum('acceptanceItems', 'price')
+                    ->withSum('invoiceItems', 'discount')
+                    ->withSum('invoiceItems', 'price')
                     ->addSelect($this->invoiceNoExpression());
             },
         ]);
@@ -140,8 +140,8 @@ class StatementRepository
 
     private function payableAmountSql(): string
     {
-        return 'COALESCE((SELECT SUM(acceptance_items.price) FROM acceptance_items WHERE acceptances.id = acceptance_items.acceptance_id), 0) -
-                COALESCE((SELECT SUM(acceptance_items.discount) FROM acceptance_items WHERE acceptances.id = acceptance_items.acceptance_id), 0)';
+        return 'COALESCE((SELECT SUM(invoice_items.price) FROM invoice_items WHERE acceptances.id = invoice_items.acceptance_id AND invoice_items.deleted_at IS NULL), 0) -
+                COALESCE((SELECT SUM(invoice_items.discount) FROM invoice_items WHERE acceptances.id = invoice_items.acceptance_id AND invoice_items.deleted_at IS NULL), 0)';
     }
 
     /**

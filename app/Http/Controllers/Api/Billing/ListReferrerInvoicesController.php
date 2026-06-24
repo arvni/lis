@@ -25,7 +25,7 @@ class ListReferrerInvoicesController extends Controller
             'invoice_no'     => $inv->invoiceNo,   // same field as Invoice Index
             'created_at'     => $inv->created_at,
             'patient_name'   => $inv->acceptance?->patient?->fullName ?? '—',
-            'payable_amount' => max(0, (float) $inv->acceptance_items_sum_price - (float) $inv->acceptance_items_sum_discount),
+            'payable_amount' => max(0, (float) $inv->invoice_items_sum_price - (float) $inv->invoice_items_sum_discount),
         ]);
 
         return response()->json(['data' => $data]);
