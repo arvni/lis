@@ -104,15 +104,18 @@ class SectionGroup extends Model
     }
 
 
-    public function waitingItems()
+    /** @return HasManyThrough<AcceptanceItemState, Section, $this> */
+    public function waitingItems(): HasManyThrough
     {
         return $this->acceptanceItemStates()->where("status",AcceptanceItemStateStatus::WAITING);
     }
-    public function processingItems()
+    /** @return HasManyThrough<AcceptanceItemState, Section, $this> */
+    public function processingItems(): HasManyThrough
     {
         return $this->acceptanceItemStates()->where("status",AcceptanceItemStateStatus::PROCESSING);
     }
-    public function finishedItems()
+    /** @return HasManyThrough<AcceptanceItemState, Section, $this> */
+    public function finishedItems(): HasManyThrough
     {
         return $this->acceptanceItemStates()->where("status",AcceptanceItemStateStatus::FINISHED);
     }

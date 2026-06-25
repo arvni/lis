@@ -96,8 +96,11 @@ class UpdateCustomerToPatientWithConsultationController extends Controller
                 $customer,
                 new CustomerDTO(
                     $patient->name,
-                    $patient->phone ?: $customer->phone, // Use null coalescing operator
-                    $patient->email,
+                    $patient->phone ?: $customer->phone,
+                    // Patient email lives on patientMeta (the patients table has no email
+                    // column); fall back to the customer's existing email so it is preserved
+                    // rather than wiped on conversion.
+                    $patient->patientMeta?->email ?: $customer->email,
                     $patient->id
                 )
             );

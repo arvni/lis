@@ -44,14 +44,16 @@ class AcceptanceItemServiceTest extends TestCase
 
     public function test_list_acceptance_items_delegates(): void
     {
-        $this->itemRepo->shouldReceive('listAcceptanceItems')->once()->with(['q' => 1])->andReturn('LIST');
-        $this->assertSame('LIST', $this->service->listAcceptanceItems(['q' => 1]));
+        $paginator = new LengthAwarePaginator([], 0, 10);
+        $this->itemRepo->shouldReceive('listAcceptanceItems')->once()->with(['q' => 1])->andReturn($paginator);
+        $this->assertSame($paginator, $this->service->listAcceptanceItems(['q' => 1]));
     }
 
     public function test_export_acceptance_items_delegates(): void
     {
-        $this->itemRepo->shouldReceive('listAllAcceptanceItems')->once()->andReturn('EXPORT');
-        $this->assertSame('EXPORT', $this->service->exportAcceptanceItems([]));
+        $collection = new Collection();
+        $this->itemRepo->shouldReceive('listAllAcceptanceItems')->once()->andReturn($collection);
+        $this->assertSame($collection, $this->service->exportAcceptanceItems([]));
     }
 
     public function test_list_ready_report_delegates(): void

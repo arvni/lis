@@ -10,7 +10,9 @@ use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Report;
 use App\Domains\Reception\Traits\ExtractsTagFilterIds;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 
@@ -19,7 +21,10 @@ class AcceptanceItemRepository
     use LogsUserActivity, ExtractsTagFilterIds;
 
 
-    public function listAcceptanceItems(array $queryData = [])
+    /**
+     * @return LengthAwarePaginator<int, AcceptanceItem>
+     */
+    public function listAcceptanceItems(array $queryData = []): LengthAwarePaginator
     {
         $query = AcceptanceItem::query()->with([
             "latestState" => function ($q) {
@@ -43,7 +48,10 @@ class AcceptanceItemRepository
         return $this->applyAll($query, $queryData);
     }
 
-    public function listAllAcceptanceItems(array $queryData = [])
+    /**
+     * @return Collection<int, AcceptanceItem>
+     */
+    public function listAllAcceptanceItems(array $queryData = []): Collection
     {
         $query = AcceptanceItem::query()->with([
             "invoice.owner",
@@ -72,7 +80,11 @@ class AcceptanceItemRepository
         return $query->get();
     }
 
-    private function applyAll($query, $queryData)
+    /**
+     * @param  Builder<AcceptanceItem>  $query
+     * @return LengthAwarePaginator<int, AcceptanceItem>
+     */
+    private function applyAll(Builder $query, array $queryData): LengthAwarePaginator
     {
         if (isset($queryData["filters"]))
             $this->applyFilters($query, $queryData["filters"]);
@@ -82,7 +94,10 @@ class AcceptanceItemRepository
     }
 
 
-    public function listAcceptanceItemsReadyReport(array $queryData)
+    /**
+     * @return LengthAwarePaginator<int, AcceptanceItem>
+     */
+    public function listAcceptanceItemsReadyReport(array $queryData): LengthAwarePaginator
     {
         $query = AcceptanceItem::query();
         $query->reportLess();
@@ -207,7 +222,10 @@ class AcceptanceItemRepository
         $acceptanceItem->patients()->sync($patientsList);
     }
 
-    private function limitAccess($query)
+    /**
+     * @param  Builder<AcceptanceItem>  $query
+     */
+    private function limitAccess(Builder $query): void
     {
         if (Gate::allows("accessAll", Report::class)) {
             return;
@@ -218,7 +236,10 @@ class AcceptanceItemRepository
         }
     }
 
-    public function applyFilters($query, $filters = [])
+    // $query is intentionally untyped: typing it Builder<AcceptanceItem> makes the
+    // whereHas(..., fn ($q) => $q->search(...)) closures resolve to Builder<Model>,
+    // on which Larastan can't see the Searchable trait's search() scope (false positive).
+    public function applyFilters($query, array $filters = []): void
     {
         if (isset($filters["search"])) {
             $query->where(function ($q) use ($filters) {
@@ -271,7 +292,10 @@ class AcceptanceItemRepository
             ->count();
     }
 
-    public function getPanelItems(int|string $panelId, int|string|null $acceptanceId = null)
+    /**
+     * @return Collection<int, AcceptanceItem>
+     */
+    public function getPanelItems(int|string $panelId, int|string|null $acceptanceId = null): Collection
     {
         $query = AcceptanceItem::query()
             ->where("panel_id", $panelId)

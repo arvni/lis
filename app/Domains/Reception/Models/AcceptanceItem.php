@@ -70,12 +70,12 @@ class AcceptanceItem extends Model
         "deleted"
     ];
 
-    public function getDeletedAttribute()
+    public function getDeletedAttribute(): bool
     {
         return (bool)$this->deleted_at;
     }
 
-    public function getStatusAttribute()
+    public function getStatusAttribute(): string
     {
         $this->loadMissing("report", "latestState.section:name,id");
         if ($this->report) {

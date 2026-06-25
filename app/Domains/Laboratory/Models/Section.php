@@ -82,19 +82,23 @@ class Section extends Model
         return $query->where("active", true);
     }
 
-    public function waitingItems()
+    /** @return HasMany<AcceptanceItemState, $this> */
+    public function waitingItems(): HasMany
     {
         return $this->acceptanceItemStates()->where("status",AcceptanceItemStateStatus::WAITING);
     }
-    public function processingItems()
+    /** @return HasMany<AcceptanceItemState, $this> */
+    public function processingItems(): HasMany
     {
         return $this->acceptanceItemStates()->where("status",AcceptanceItemStateStatus::PROCESSING);
     }
-    public function finishedItems()
+    /** @return HasMany<AcceptanceItemState, $this> */
+    public function finishedItems(): HasMany
     {
         return $this->acceptanceItemStates()->where("status",AcceptanceItemStateStatus::FINISHED);
     }
-    public function rejectedItems()
+    /** @return HasMany<AcceptanceItemState, $this> */
+    public function rejectedItems(): HasMany
     {
         return $this->acceptanceItemStates()->where("status",AcceptanceItemStateStatus::REJECTED);
     }

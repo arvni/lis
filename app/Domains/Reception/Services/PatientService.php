@@ -10,7 +10,7 @@ use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Repositories\PatientRepository;
 use Exception;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 readonly class PatientService
 {
@@ -20,7 +20,10 @@ readonly class PatientService
     {
     }
 
-    public function listPatients(array $filters)
+    /**
+     * @return LengthAwarePaginator<int, Patient>
+     */
+    public function listPatients(array $filters): LengthAwarePaginator
     {
         return $this->patientRepository->listPatient($filters);
     }
@@ -122,12 +125,15 @@ readonly class PatientService
         return $this->patientRepository->findPatientByIdNo($idNo);
     }
 
-    public function getPatientById(int|string $id)
+    public function getPatientById(int|string $id): ?Patient
     {
         return $this->patientRepository->findPatientById($id);
     }
 
-    public function getPatientStats()
+    /**
+     * @return array<string, int|array<string, int>>
+     */
+    public function getPatientStats(): array
     {
         return [
             "patients" => $this->patientRepository->countPatients(),
@@ -137,7 +143,10 @@ readonly class PatientService
         ];
     }
 
-    protected function getPatientRelatives(Patient $patient)
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getPatientRelatives(Patient $patient): array
     {
         $output = [];
         $all = $patient->relatives->merge($patient->patients);
@@ -155,7 +164,9 @@ readonly class PatientService
     }
 
 
-    protected function getRelation($patient, $relative)
+    // $relative is left untyped: it carries a dynamic BelongsToMany ->pivot whose
+    // columns Larastan can't see on the Patient model (would add property.notFound noise).
+    protected function getRelation(Patient $patient, $relative): string
     {
         switch ($relative->pivot->relationship) {
             case "father":
