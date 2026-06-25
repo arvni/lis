@@ -18,7 +18,9 @@ const AvatarSection = ({ data, editable, errors, hasError, onAvatarChange, onSwi
 
     const handleUnknownAvatarChange = (e, v) => {
         setUnknownAvatar(v);
-        onAvatarChange({ target: { name: 'avatar', value: e.target.src } });
+        // onAvatarChange mirrors the AvatarUpload response shape ({ data }); send the
+        // chosen placeholder as a relative path so it persists like an uploaded avatar.
+        onAvatarChange({ data: v ? `/images/${v}.png` : null });
     };
 
     return (
