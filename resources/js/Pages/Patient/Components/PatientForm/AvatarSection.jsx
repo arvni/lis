@@ -86,7 +86,7 @@ const AvatarSection = ({ data, editable, errors, hasError, onAvatarChange, onSwi
                         />
                     </FormGroup>
 
-                    <Collapse in={data.idCardInstAvailable}>
+                    <Collapse in={!data.idCardInstAvailable}>
                         <Card
                             variant="outlined"
                             sx={{
