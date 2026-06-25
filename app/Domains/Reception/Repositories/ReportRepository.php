@@ -7,14 +7,19 @@ use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Report;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ReportRepository
 {
     use LogsUserActivity;
 
 
-    public function list(array $queryData)
+    /**
+     * @return LengthAwarePaginator<int, Report>
+     */
+    public function list(array $queryData): LengthAwarePaginator
     {
         $query = Report::query();
         $query->with([
@@ -44,7 +49,10 @@ class ReportRepository
         ];
     }
 
-    public function listWaitingForApproving(array $queryData)
+    /**
+     * @return LengthAwarePaginator<int, Report>
+     */
+    public function listWaitingForApproving(array $queryData): LengthAwarePaginator
     {
         $query = Report::query()
             ->notApproved()
@@ -60,7 +68,10 @@ class ReportRepository
         return $query->paginate($queryData["pageSize"] ?? 10);
     }
 
-    public function listWaitingForPublish(array $queryData)
+    /**
+     * @return LengthAwarePaginator<int, Report>
+     */
+    public function listWaitingForPublish(array $queryData): LengthAwarePaginator
     {
         $query = Report::query()
             ->whereNotNull("reports.approved_at")
@@ -77,7 +88,7 @@ class ReportRepository
         return $query->paginate($queryData["pageSize"] ?? 10);
     }
 
-    public function create(array $data)
+    public function create(array $data): Report
     {
         $report = Report::create($data);
         $this->logCreated($report);
@@ -108,7 +119,10 @@ class ReportRepository
         return $report;
     }
 
-    public function applyFilters($query, array $filters): void
+    /**
+     * @param  Builder<Report>  $query
+     */
+    public function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["acceptance_item_id"]))
             $query->where("acceptance_item_id", $filters["acceptance_item_id"]);
@@ -134,7 +148,7 @@ class ReportRepository
      *
      * @throws \LogicException if $report is not a persisted Report instance
      */
-    public function loadWithAllRelations(Report $report)
+    public function loadWithAllRelations(Report $report): Report
     {
         assert($report instanceof Report, 'loadWithAllRelations expects a persisted Report model');
         $report->load([

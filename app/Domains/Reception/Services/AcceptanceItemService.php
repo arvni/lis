@@ -25,12 +25,18 @@ class AcceptanceItemService
     {
     }
 
-    public function listAcceptanceItems(array $queryData)
+    /**
+     * @return LengthAwarePaginator<int, AcceptanceItem>
+     */
+    public function listAcceptanceItems(array $queryData): LengthAwarePaginator
     {
         return $this->acceptanceItemRepository->listAcceptanceItems($queryData);
     }
 
-    public function exportAcceptanceItems(array $queryData)
+    /**
+     * @return Collection<int, AcceptanceItem>
+     */
+    public function exportAcceptanceItems(array $queryData): Collection
     {
         return $this->acceptanceItemRepository->listAllAcceptanceItems($queryData);
     }

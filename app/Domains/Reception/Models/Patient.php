@@ -77,6 +77,7 @@ class Patient extends Model
         "name"
     ];
 
+    /** @var list<string> */
     protected $searchable = [
         "fullName",
         "firstName",
@@ -150,12 +151,12 @@ class Patient extends Model
         $patient->lastName = $lastName;
     }
 
-    public function getNameAttribute()
+    public function getNameAttribute(): string
     {
-        return $this->attributes["fullName"];
+        return (string) $this->attributes["fullName"];
     }
 
-    public function getAgeAttribute()
+    public function getAgeAttribute(): string
     {
         $diff = Carbon::parse($this->dateOfBirth)->diff(Carbon::now());
 

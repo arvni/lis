@@ -64,7 +64,10 @@ class ReportService
 
     }
 
-    public function listReports(array $queryData)
+    /**
+     * @return LengthAwarePaginator<int, Report>
+     */
+    public function listReports(array $queryData): LengthAwarePaginator
     {
         return $this->reportRepository->list($queryData);
     }

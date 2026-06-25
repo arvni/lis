@@ -409,48 +409,6 @@ parameters:
 			path: app/Domains/Laboratory/Models/RequestForm.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\Section\:\:finishedItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/Section.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\Section\:\:processingItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/Section.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\Section\:\:rejectedItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/Section.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\Section\:\:waitingItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/Section.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\SectionGroup\:\:finishedItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/SectionGroup.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\SectionGroup\:\:processingItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/SectionGroup.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\SectionGroup\:\:waitingItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/SectionGroup.php
-
-		-
 			message: '#^Property App\\Domains\\Laboratory\\Models\\Test\:\:\$searchable has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -1015,18 +973,6 @@ parameters:
 			path: app/Domains/Reception/Models/Acceptance.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Models\\AcceptanceItem\:\:getDeletedAttribute\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/AcceptanceItem.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\AcceptanceItem\:\:getStatusAttribute\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/AcceptanceItem.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Models\\AcceptanceItem\:\:workflow\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1059,24 +1005,6 @@ parameters:
 		-
 			message: '#^Method App\\Domains\\Reception\\Models\\Patient\:\:acceptances\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/Patient.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Patient\:\:getAgeAttribute\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/Patient.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Patient\:\:getNameAttribute\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/Patient.php
-
-		-
-			message: '#^Property App\\Domains\\Reception\\Models\\Patient\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
 			count: 1
 			path: app/Domains/Reception/Models/Patient.php
 
@@ -1147,88 +1075,10 @@ parameters:
 			path: app/Domains/Reception/Models/Tag.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:applyAll\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:applyAll\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:applyAll\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:applyFilters\(\) has parameter \$filters with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:getPanelItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:limitAccess\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:limitAccess\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:listAcceptanceItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:listAcceptanceItemsReadyReport\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:listAllAcceptanceItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemStateRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemStateRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemStateRepository\:\:listAcceptanceItemStates\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/AcceptanceItemStateRepository.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:search\(\)\.$#'
@@ -1273,42 +1123,6 @@ parameters:
 			path: app/Domains/Reception/Repositories/ReportRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/ReportRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportRepository\:\:create\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/ReportRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportRepository\:\:list\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/ReportRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportRepository\:\:listWaitingForApproving\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/ReportRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportRepository\:\:listWaitingForPublish\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/ReportRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportRepository\:\:loadWithAllRelations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/ReportRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\SampleRepository\:\:applyFilters\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1337,18 +1151,6 @@ parameters:
 			identifier: argument.templateType
 			count: 1
 			path: app/Domains/Reception/Repositories/SampleRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\SignerRepository\:\:create\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/SignerRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\SignerRepository\:\:save\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/SignerRepository.php
 
 		-
 			message: '#^Cannot call method isOnFinalApprovalStep\(\) on object\|string\.$#'
@@ -1451,18 +1253,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Domains/Reception/Resources/AcceptanceItemStateResource.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceItemService\:\:exportAcceptanceItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceItemService\:\:listAcceptanceItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemService.php
 
 		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, null given\.$#'
@@ -1665,12 +1455,6 @@ parameters:
 		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
-			count: 1
-			path: app/Domains/Reception/Services/ReportService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:listReports\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/Domains/Reception/Services/ReportService.php
 

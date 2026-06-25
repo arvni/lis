@@ -6,7 +6,9 @@ use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Reception\Models\AcceptanceItemState;
 use App\Domains\Reception\Traits\ExtractsTagFilterIds;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class AcceptanceItemStateRepository
@@ -14,7 +16,10 @@ class AcceptanceItemStateRepository
     use LogsUserActivity, ExtractsTagFilterIds;
 
 
-    public function listAcceptanceItemStates(array $queryData)
+    /**
+     * @return LengthAwarePaginator<int, AcceptanceItemState>
+     */
+    public function listAcceptanceItemStates(array $queryData): LengthAwarePaginator
     {
         $query = AcceptanceItemState::with([
             "acceptanceItem.test",
@@ -75,7 +80,10 @@ class AcceptanceItemStateRepository
             ->get();
     }
 
-    private function applyFilters($query, array $filters): void
+    /**
+     * @param  Builder<AcceptanceItemState>  $query
+     */
+    private function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["section_id"]))
             $query->where("section_id", $filters["section_id"]);
