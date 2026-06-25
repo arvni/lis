@@ -1387,44 +1387,8 @@ parameters:
 			path: app/Domains/Reception/Services/PatientService.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Services\\PatientService\:\:getPatientById\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\PatientService\:\:getPatientRelatives\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\PatientService\:\:getPatientStats\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\PatientService\:\:getRelation\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\PatientService\:\:getRelation\(\) has parameter \$patient with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Services\\PatientService\:\:getRelation\(\) has parameter \$relative with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\PatientService\:\:listPatients\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/Domains/Reception/Services/PatientService.php
 
