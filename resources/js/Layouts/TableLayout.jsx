@@ -179,9 +179,16 @@ const TableLayout = ({
         }));
     }, [columns]);
 
+    // Depend on the primitive sort values, not the `sort` object itself: the
+    // server returns a fresh `requestInputs.sort` object on every paginated
+    // reload, so depending on the object would hand DataGrid a new sortModel
+    // reference each time, firing onSortModelChange -> reload(1) and snapping
+    // the grid back to the first page.
+    const sortField = defaultValues.sort?.field;
+    const sortDirection = defaultValues.sort?.sort;
     const sortModel = useMemo(
-        () => (defaultValues.sort?.field ? [defaultValues.sort] : []),
-        [defaultValues.sort],
+        () => (sortField ? [{ field: sortField, sort: sortDirection }] : []),
+        [sortField, sortDirection],
     );
 
     // Effect to handle success message
