@@ -19,7 +19,7 @@ class ConsultationRepository
 
     public function __construct()
     {
-        $this->durationStatement = match (env('DB_CONNECTION')) {
+        $this->durationStatement = match (config('database.default')) {
             'pgsql' => <<<SQL
             EXTRACT(EPOCH FROM NOW() - COALESCE(started_at, NOW())) / 60 AS waiting_time
         SQL,

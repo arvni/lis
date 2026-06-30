@@ -94,7 +94,7 @@ class InvoicesExport implements FromCollection
             $total = $acceptanceItem["price"] - $acceptanceItem["discount"];
             $discount=$acceptanceItem["discount"]??"0";
             $price=$acceptanceItem["price"]??"0";
-            $patient=(object)$acceptanceItem["patient"]??[];
+            $patient=(object)($acceptanceItem["patient"]??[]);
 
             // Base row data
             $row = [

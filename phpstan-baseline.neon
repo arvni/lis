@@ -19,12 +19,6 @@ parameters:
 			path: app/Domains/Billing/Exports/InvoicesExport.php
 
 		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 1
-			path: app/Domains/Billing/Exports/InvoicesExport.php
-
-		-
 			message: '#^Method App\\Domains\\Billing\\Exports\\InvoicesExport\:\:extractValueFromItem\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -211,18 +205,6 @@ parameters:
 			path: app/Domains/Consultation/Models/Customer.php
 
 		-
-			message: '#^Variable \$filters on left side of \?\? is never defined\.$#'
-			identifier: nullCoalesce.variable
-			count: 3
-			path: app/Domains/Consultation/Repositories/ConsultantRepository.php
-
-		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 1
-			path: app/Domains/Consultation/Repositories/ConsultationRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Consultation\\Repositories\\ConsultationRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -323,18 +305,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Domains/Inventory/Services/ReferenceNumberService.php
-
-		-
-			message: '#^Right side of \|\| is always false\.$#'
-			identifier: booleanOr.rightAlwaysFalse
-			count: 2
-			path: app/Domains/Laboratory/DTOs/OfferDTO.php
-
-		-
-			message: '#^Variable \$existingType on left side of \?\? is never defined\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: app/Domains/Laboratory/DTOs/TestDTO.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
@@ -719,18 +689,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Domains/Reception/Adapters/LaboratoryAdapter.php
-
-		-
-			message: '#^Parameter \#7 \$details of class App\\Domains\\Reception\\DTOs\\AcceptanceItemStateDTO constructor expects string\|null, bool given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Domains/Reception/DTOs/AcceptanceItemStateDTO.php
-
-		-
-			message: '#^Right side of \|\| is always false\.$#'
-			identifier: booleanOr.rightAlwaysFalse
-			count: 1
-			path: app/Domains/Reception/DTOs/AcceptanceItemStateDTO.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$acceptance\.$#'
@@ -1399,28 +1357,10 @@ parameters:
 			path: app/Domains/Reception/Services/PatientService.php
 
 		-
-			message: '#^Undefined variable\: \$data$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
-			message: '#^Variable \$data in isset\(\) is never defined\.$#'
-			identifier: isset.variable
-			count: 1
-			path: app/Domains/Reception/Services/PatientService.php
-
-		-
 			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:filter\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model, int\|string\)\: bool\)\|null, Closure\(App\\Domains\\User\\Models\\User\)\: bool given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Domains/Reception/Services/ReportApprovalService.php
-
-		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 1
-			path: app/Domains/Reception/Services/ReportService.php
 
 		-
 			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:preparePatientData\(\) has parameter \$patients with no type specified\.$#'
@@ -1805,12 +1745,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Domains/User/Repositories/RoleRepository.php
-
-		-
-			message: '#^Variable \$filters on left side of \?\? is never defined\.$#'
-			identifier: nullCoalesce.variable
-			count: 3
-			path: app/Domains/User/Repositories/UserRepository.php
 
 		-
 			message: '#^Cannot access property \$id on object\|string\.$#'

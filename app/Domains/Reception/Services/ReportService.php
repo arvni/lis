@@ -673,7 +673,9 @@ class ReportService
             $output["patient_{$key}_full_name"] = $patient->fullName ?? 'N/A';
             $output["patient_{$key}_no_id"] = $patient->idNo ?? 'N/A';
             $output["patient_{$key}_gender"] = $patient->gender ?? 'N/A';
-            $output["patient_{$key}_date_of_birth"] = Carbon::parse($patient->dateOfBirth)->format("d M Y") ?? 'N/A';
+            $output["patient_{$key}_date_of_birth"] = filled($patient->dateOfBirth)
+                ? Carbon::parse($patient->dateOfBirth)->format("d M Y")
+                : 'N/A';
             $output["patient_{$key}_nationality"] = $patient->nationality ?? 'N/A';
             $output["patient_{$key}_age"] = $patient->age ?? 'N/A';
         }
