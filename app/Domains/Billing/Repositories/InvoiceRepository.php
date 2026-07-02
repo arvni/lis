@@ -33,7 +33,7 @@ class InvoiceRepository
     public function listAllInvoices(array $queryData): Collection
     {
 
-        $query = $this->applyQuery(["owner", "patient", "payments", "acceptanceItems.method", "acceptanceItems.patient", "acceptanceItems.test", "statement"]);
+        $query = $this->applyQuery(["owner", "payments", "invoiceItems.acceptanceItems.patient", "invoiceItems.acceptanceItems.method", "statement"]);
         $query = $this->applyFilters($query, $queryData["filters"] ?? []);
         $query = $this->applyOrderBy($query, $queryData["sort"]);
         return $query->get();

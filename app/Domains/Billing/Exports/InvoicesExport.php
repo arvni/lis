@@ -2,26 +2,24 @@
 
 namespace App\Domains\Billing\Exports;
 
-use App\Domains\Laboratory\Enums\TestType;
+use App\Domains\Billing\Models\InvoiceItem;
+use App\Domains\Reception\Models\AcceptanceItem;
 use App\Utils\Constants;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Arr;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class InvoicesExport implements FromCollection
-    , WithMapping
-    , WithHeadings
-    , ShouldAutoSize
-    , WithStyles
+class InvoicesExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithStyles
 {
     protected Collection $invoices;
+
     protected array $dynamicColumns = [];
 
     public function __construct(Collection $invoices)
@@ -31,20 +29,18 @@ class InvoicesExport implements FromCollection
     }
 
     /**
-     * Extract all unique custom parameter keys from acceptance items
+     * Extract all unique custom parameter keys from invoice items.
      */
     private function extractDynamicColumns(): void
     {
         $customKeys = [];
 
         foreach ($this->invoices as $invoice) {
-            foreach ($invoice->acceptanceItems as $item) {
-                if ($item->customParameters && isset($item->customParameters['price'])) {
-                    $priceParams = $item->customParameters['price'];
-                    if (is_array($priceParams)) {
-                        foreach (array_keys($priceParams) as $key) {
-                            $customKeys[$key] = true;
-                        }
+            foreach ($invoice->invoiceItems as $item) {
+                $priceParams = $item->customParameters['price'] ?? null;
+                if (is_array($priceParams)) {
+                    foreach (array_keys($priceParams) as $key) {
+                        $customKeys[$key] = true;
                     }
                 }
             }
@@ -63,7 +59,7 @@ class InvoicesExport implements FromCollection
     {
         // Calculate the last column dynamically
         $totalColumns = 19 + count($this->dynamicColumns); // 19 base columns + dynamic columns
-        $lastColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($totalColumns);
+        $lastColumn = Coordinate::stringFromColumnIndex($totalColumns);
         $sheet->setAutoFilter("A1:{$lastColumn}1");
 
         return [
@@ -71,8 +67,8 @@ class InvoicesExport implements FromCollection
                 'font' => [
                     'bold' => true,
                     'color' => [
-                        "rgb" => "ffffff"
-                    ]
+                        'rgb' => 'ffffff',
+                    ],
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
@@ -80,7 +76,7 @@ class InvoicesExport implements FromCollection
                         'rgb' => '0361ac',
                     ],
                 ],
-            ]
+            ],
         ];
 
     }
@@ -89,112 +85,108 @@ class InvoicesExport implements FromCollection
     {
         $rows = [];
 
-        $acceptanceItems=$this->getAcceptanceItems($invoice);
-        foreach ($acceptanceItems as $acceptanceItem) {
-            $total = $acceptanceItem["price"] - $acceptanceItem["discount"];
-            $discount=$acceptanceItem["discount"]??"0";
-            $price=$acceptanceItem["price"]??"0";
-            $patient=(object)($acceptanceItem["patient"]??[]);
+        foreach ($invoice->invoiceItems as $item) {
+            // Line data comes from the invoice item; only patient information is
+            // resolved from the acceptance item(s) linked to this invoice item.
+            $patient = $this->patientFor($item);
+
+            $price = (float) $item->price;
+            $discount = (float) $item->discount;
+            $total = $price - $discount;
 
             // Base row data
             $row = [
                 Carbon::parse($invoice->created_at)->toDate(),
                 $invoice->invoiceNo,
-                $invoice->statement?->no ?? "",
-                (string)optional($patient)->fullName,
-                (string)optional($invoice->owner)->fullName,
-                $acceptanceItem["test"]["name"],
-                $acceptanceItem["method"]["name"]??"",
+                $invoice->statement?->no ?? '',
+                (string) optional($patient)->fullName,
+                (string) optional($invoice->owner)->fullName,
+                $item->title,
+                (string) optional($this->methodFor($item))->name,
                 "$price",
                 "$discount",
                 "$total",
-                "0",
-                "0",
+                '0',
+                '0',
                 "$total",
                 "$total",
                 $invoice->status,
-                optional($patient)->nationality ? Constants::countries(optional($patient)->nationality) : "",
-                ucfirst((string)optional($patient)->gender),
+                optional($patient)->nationality ? Constants::countries(optional($patient)->nationality) : '',
+                ucfirst((string) optional($patient)->gender),
                 optional($patient)->age,
-                ucfirst((string)optional(optional($invoice->payments)[0])->paymentMethod?->value)
+                ucfirst((string) optional(optional($invoice->payments)[0])->paymentMethod?->value),
             ];
 
-            // Add dynamic columns from customParameters
+            // Add dynamic columns from the invoice item's customParameters
             foreach ($this->dynamicColumns as $columnKey) {
-                $value = $this->getCustomParameterValue($acceptanceItem, $columnKey);
-                $row[] = $value;
+                $row[] = $this->getCustomParameterValue($item, $columnKey);
             }
 
             $rows[] = $row;
         }
+
         return $rows;
     }
 
     /**
-     * Get custom parameter value from acceptance item
-     * Returns 0 if not found
+     * Resolve the patient for an invoice item via its linked acceptance item(s).
+     * Manual fees / adjustments have no acceptance item, so this may be null.
      */
-    private function getCustomParameterValue($acceptanceItem, string $key)
+    private function patientFor(InvoiceItem $item): ?\App\Domains\Reception\Models\Patient
     {
-        // Handle collection items (from panels)
-        if ($acceptanceItem instanceof \Illuminate\Support\Collection) {
-            if (isset($acceptanceItem["items"])) {
-                // For panel items, sum up the values from all items
-                $sum = 0;
-                foreach ($acceptanceItem["items"] as $item) {
-                    $itemValue = $this->extractValueFromItem($item, $key);
-                    if (is_numeric($itemValue)) {
-                        $sum += (float)$itemValue;
-                    }
-                }
-                return $sum > 0 ? $sum : "0";
-            }
-        }
-
-        // Handle regular acceptance items
-        return $this->extractValueFromItem($acceptanceItem, $key);
+        return $this->firstAcceptanceItem($item)?->patient;
     }
 
     /**
-     * Extract value from a single acceptance item
+     * Resolve the test method for an invoice item via its linked acceptance item(s).
      */
-    private function extractValueFromItem($item, string $key)
+    private function methodFor(InvoiceItem $item): ?\App\Domains\Laboratory\Models\Method
     {
-        if (is_array($item)) {
-            $customParams = $item['customParameters'] ?? null;
-        } else {
-            $customParams = $item->customParameters ?? null;
+        return $this->firstAcceptanceItem($item)?->method;
+    }
+
+    private function firstAcceptanceItem(InvoiceItem $item): ?AcceptanceItem
+    {
+        return $item->acceptanceItems->first();
+    }
+
+    /**
+     * Get a custom parameter value from the invoice item.
+     * Returns "0" if not found.
+     */
+    private function getCustomParameterValue(InvoiceItem $item, string $key)
+    {
+        $priceParams = $item->customParameters['price'] ?? null;
+
+        if (is_array($priceParams) && isset($priceParams[$key])) {
+            return $priceParams[$key];
         }
 
-        if ($customParams && isset($customParams['price'][$key])) {
-            return $customParams['price'][$key];
-        }
-
-        return "0";
+        return '0';
     }
 
     public function headings(): array
     {
         $baseHeadings = [
-            "Date",
-            "Invoice No.",
-            "Statement",
-            "Patient Name",
-            "Client",
-            "Test",
-            "Method",
-            "Rate(incl. vat)",
-            "Discount",
-            "Taxable",
-            "VAT Amount",
-            "VAT %",
-            "Net Amount",
-            "Patient Amount",
-            "Status",
-            "Nationality",
-            "Gender",
-            "Age",
-            "Payment Method",
+            'Date',
+            'Invoice No.',
+            'Statement',
+            'Patient Name',
+            'Client',
+            'Test',
+            'Method',
+            'Rate(incl. vat)',
+            'Discount',
+            'Taxable',
+            'VAT Amount',
+            'VAT %',
+            'Net Amount',
+            'Patient Amount',
+            'Status',
+            'Nationality',
+            'Gender',
+            'Age',
+            'Payment Method',
         ];
 
         // Add dynamic column headings
@@ -223,33 +215,5 @@ class InvoicesExport implements FromCollection
         $heading = preg_replace('/^No\b/', 'No.', $heading);
 
         return $heading;
-    }
-    private function getAcceptanceItems($invoice){
-
-        return Arr::flatten(
-            array_values(
-                $invoice->acceptanceItems
-                    ->groupBy("test.type")
-                    ->map(function ($item,$key) {
-                        if ($key!==TestType::PANEL->value)
-                            return $item;
-                        else
-                            return array_values($item
-                                ->groupBy("panel_id")
-                                ->map(function ($item,$key) {
-                                    return collect([
-                                        "id"=>$key,
-                                        "price"=>$item->sum("price"),
-                                        "discount"=>$item->sum("discount"),
-                                        "test"=>$item->first()->test,
-                                        "patient"=>$item->first()->patient,
-                                        "items"=>$item
-                                    ]);
-                                })->toArray());
-                    })
-                    ->toArray()
-            )
-            ,1);
-
     }
 }
