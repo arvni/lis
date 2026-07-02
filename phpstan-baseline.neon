@@ -13,36 +13,6 @@ parameters:
 			path: app/Console/Commands/ValidateEnvCommand.php
 
 		-
-			message: '#^Method App\\Domains\\Billing\\Models\\Invoice\:\:patientPayments\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Models/Invoice.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Models\\Invoice\:\:sponsorPayments\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Models/Invoice.php
-
-		-
-			message: '#^Property App\\Domains\\Billing\\Models\\Invoice\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Billing/Models/Invoice.php
-
-		-
-			message: '#^Property App\\Domains\\Billing\\Models\\Payment\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Billing/Models/Payment.php
-
-		-
-			message: '#^Property App\\Domains\\Billing\\Models\\Statement\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Billing/Models/Statement.php
-
-		-
 			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:applyQuery\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -59,12 +29,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Domains/Billing/Repositories/InvoiceRepository.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Billing/Requests/UpdateInvoiceRequest.php
 
 		-
 			message: '#^Parameter \#1 \$array \(list\<array\{name\: mixed, invoiced_income\: float, non_invoiced_income\: float, count\: int\}\>\) of array_values is already a list, call has no effect\.$#'
@@ -85,24 +49,6 @@ parameters:
 			path: app/Domains/Billing/Services/DailyCashReportService.php
 
 		-
-			message: '#^Method App\\Domains\\Billing\\Services\\InvoiceComposer\:\:keyForAcceptanceItem\(\) has parameter \$test with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceComposer.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Services\\InvoiceComposer\:\:kindFor\(\) has parameter \$test with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceComposer.php
-
-		-
-			message: '#^Method App\\Domains\\Billing\\Services\\InvoiceService\:\:loadForShow\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceService.php
-
-		-
 			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Billing\\Enums\\InvoiceItemKind\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -115,46 +61,10 @@ parameters:
 			path: app/Domains/Billing/Services/InvoiceService.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$acceptance\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Billing/Services/StatementService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$acceptanceItems\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Domains/Billing/Services/StatementService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$invoice_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Billing/Services/StatementService.php
-
-		-
 			message: '#^Method App\\Domains\\Billing\\Services\\StatementService\:\:getReportedDate\(\) has parameter \$invoice with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Billing/Services/StatementService.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Domains/Billing/Services/StatementService.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: app/Domains/Billing/Services/StatementService.php
-
-		-
-			message: '#^Property App\\Domains\\Consultation\\Models\\Customer\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Consultation/Models/Customer.php
 
 		-
 			message: '#^Method App\\Domains\\Consultation\\Repositories\\ConsultationRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
@@ -163,76 +73,16 @@ parameters:
 			path: app/Domains/Consultation/Repositories/ConsultationRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Consultation\\Repositories\\CustomerRepository\:\:findById\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Repositories/CustomerRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Services\\CustomerService\:\:findById\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Services/CustomerService.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Services\\CustomerService\:\:storeCustomer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Services/CustomerService.php
-
-		-
-			message: '#^Method App\\Domains\\Consultation\\Services\\TimeService\:\:storeTime\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Consultation/Services/TimeService.php
-
-		-
 			message: '#^Match arm comparison between \$this\(App\\Domains\\Document\\Enums\\DocumentTag\)&App\\Domains\\Document\\Enums\\DocumentTag\:\:PAYMENT_RECEIPT and App\\Domains\\Document\\Enums\\DocumentTag\:\:PAYMENT_RECEIPT is always true\.$#'
 			identifier: match.alwaysTrue
 			count: 1
 			path: app/Domains/Document/Enums/DocumentTag.php
 
 		-
-			message: '#^Method App\\Domains\\Document\\Models\\Document\:\:getAddressAttribute\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Document/Models/Document.php
-
-		-
-			message: '#^Method App\\Domains\\Document\\Models\\Document\:\:getFileNameAttribute\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Document/Models/Document.php
-
-		-
-			message: '#^Method App\\Domains\\Document\\Services\\DocumentService\:\:getDocument\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Document/Services/DocumentService.php
-
-		-
 			message: '#^Anonymous function should return Illuminate\\Support\\Collection\<int, array\{tx\: App\\Domains\\Inventory\\Models\\StockTransaction, line\: mixed\}\> but returns Illuminate\\Support\\Collection\<int, array\{tx\: App\\Domains\\Inventory\\Models\\StockTransaction, line\: App\\Domains\\Inventory\\Models\\StockTransaction\}\>\.$#'
 			identifier: return.type
 			count: 1
 			path: app/Domains/Inventory/Exports/TransactionHistoryExport.php
-
-		-
-			message: '#^Property App\\Domains\\Inventory\\Models\\Item\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Inventory/Models/Item.php
-
-		-
-			message: '#^Property App\\Domains\\Inventory\\Models\\Supplier\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Inventory/Models/Supplier.php
-
-		-
-			message: '#^Property App\\Domains\\Inventory\\Models\\Unit\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Inventory/Models/Unit.php
 
 		-
 			message: '#^Parameter \#1 \$string of function str_pad expects string, int given\.$#'
@@ -313,36 +163,6 @@ parameters:
 			path: app/Domains/Laboratory/Exports/TestExport.php
 
 		-
-			message: '#^Property App\\Domains\\Laboratory\\Models\\Doctor\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Laboratory/Models/Doctor.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Models\\ReportTemplateParameter\:\:getElementAttribute\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Models/ReportTemplateParameter.php
-
-		-
-			message: '#^Property App\\Domains\\Laboratory\\Models\\RequestForm\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Laboratory/Models/RequestForm.php
-
-		-
-			message: '#^Property App\\Domains\\Laboratory\\Models\\Test\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Laboratory/Models/Test.php
-
-		-
-			message: '#^Property App\\Domains\\Laboratory\\Models\\TestGroup\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Laboratory/Models/TestGroup.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Policies\\SectionGroupPolicy\:\:getSectionGroupIds\(\) has parameter \$sectionGroup with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -355,22 +175,10 @@ parameters:
 			path: app/Domains/Laboratory/Policies/SectionPolicy.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\ConsentFormRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/ConsentFormRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Repositories\\ConsentFormRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Laboratory/Repositories/ConsentFormRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\InstructionRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/InstructionRepository.php
 
 		-
 			message: '#^Method App\\Domains\\Laboratory\\Repositories\\InstructionRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
@@ -379,22 +187,10 @@ parameters:
 			path: app/Domains/Laboratory/Repositories/InstructionRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\OfferRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/OfferRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Repositories\\OfferRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Laboratory/Repositories/OfferRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\ReportTemplateParameterRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/ReportTemplateParameterRepository.php
 
 		-
 			message: '#^Method App\\Domains\\Laboratory\\Repositories\\ReportTemplateParameterRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
@@ -403,100 +199,16 @@ parameters:
 			path: app/Domains/Laboratory/Repositories/ReportTemplateParameterRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SectionGroupRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/SectionGroupRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SectionGroupRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Laboratory/Repositories/SectionGroupRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SectionRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Repositories/SectionRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Repositories\\SectionRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Laboratory/Repositories/SectionRepository.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Domains/Laboratory/Requests/UpdateBarcodeGroupRequest.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Laboratory/Requests/UpdateConsentFormRequest.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Laboratory/Requests/UpdateDoctorRequest.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Laboratory/Requests/UpdateInstructionRequest.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Laboratory/Requests/UpdateReportTemplateRequest.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Laboratory/Requests/UpdateRequestFormRequest.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Laboratory/Requests/UpdateSampleTypeRequest.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Laboratory/Requests/UpdateSectionGroupRequest.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Laboratory/Requests/UpdateSectionRequest.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Laboratory/Requests/UpdateTestGroupRequest.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Domains/Laboratory/Requests/UpdateTestRequest.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Laboratory/Requests/UpdateWorkflowRequest.php
 
 		-
 			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Resources\\SectionOptionResource\:\:\$order\.$#'
@@ -517,40 +229,10 @@ parameters:
 			path: app/Domains/Laboratory/Resources/TestResource.php
 
 		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\BarcodeGroupService\:\:storeBarcodeGroup\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Services/BarcodeGroupService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\DoctorService\:\:storeDoctor\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Services/DoctorService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\SectionGroupService\:\:getSectionGroupWithChildrenAndSection\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Services/SectionGroupService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\SectionGroupService\:\:storeSectionGroup\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Services/SectionGroupService.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Services\\SectionGroupService\:\:transformSingleGroup\(\) is unused\.$#'
 			identifier: method.unused
 			count: 1
 			path: app/Domains/Laboratory/Services/SectionGroupService.php
-
-		-
-			message: '#^Method App\\Domains\\Laboratory\\Services\\TestGroupService\:\:storeTestGroup\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Laboratory/Services/TestGroupService.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>logisticInfo" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
@@ -607,12 +289,6 @@ parameters:
 			path: app/Domains/Notification/Jobs/SendSampleTypeUpdateWebhook.php
 
 		-
-			message: '#^Property App\\Domains\\Notification\\Models\\WhatsappMessage\:\:\$seachable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Notification/Models/WhatsappMessage.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:search\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -625,20 +301,8 @@ parameters:
 			path: app/Domains/Notification/Repositories/WhatsappMessageRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Notification\\Repositories\\WhatsappMessageRepository\:\:listMessages\(\) has parameter \$queryData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Notification/Repositories/WhatsappMessageRepository.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$template\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Adapters/LaboratoryAdapter.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Adapters\\LaboratoryAdapter\:\:getTestById\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/Domains/Reception/Adapters/LaboratoryAdapter.php
 
@@ -817,42 +481,6 @@ parameters:
 			path: app/Domains/Reception/Exports/AcceptancesExport.php
 
 		-
-			message: '#^Cannot access property \$patients on array\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Reception/Exports/DailyReceptionReportExport.php
-
-		-
-			message: '#^Cannot access property \$prepared_by on array\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Reception/Exports/DailyReceptionReportExport.php
-
-		-
-			message: '#^Cannot access property \$report_date on array\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Reception/Exports/DailyReceptionReportExport.php
-
-		-
-			message: '#^Cannot access property \$total_not_paid on array\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Reception/Exports/DailyReceptionReportExport.php
-
-		-
-			message: '#^Cannot access property \$total_paid on array\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Reception/Exports/DailyReceptionReportExport.php
-
-		-
-			message: '#^Cannot access property \$total_transfer on array\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Reception/Exports/DailyReceptionReportExport.php
-
-		-
 			message: '#^Unable to resolve the template type TKey in call to function collect$#'
 			identifier: argument.templateType
 			count: 1
@@ -875,12 +503,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Domains/Reception/Listeners/SampleCollectedListener.php
-
-		-
-			message: '#^Property App\\Domains\\Reception\\Models\\Acceptance\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Reception/Models/Acceptance.php
 
 		-
 			message: '#^Method App\\Domains\\Reception\\Models\\AcceptanceItem\:\:workflow\(\) has no return type specified\.$#'
@@ -907,40 +529,10 @@ parameters:
 			path: app/Domains/Reception/Models/AcceptanceItem.php
 
 		-
-			message: '#^Property App\\Domains\\Reception\\Models\\AcceptanceItemState\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Reception/Models/AcceptanceItemState.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Models\\Patient\:\:acceptances\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/Domains/Reception/Models/Patient.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Relative\:\:getRelationshipAttribute\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/Relative.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Relative\:\:getRelationshipAttribute\(\) has parameter \$value with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Models/Relative.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Relative\:\:setRelationshipAttribute\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/Relative.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Relative\:\:setRelationshipAttribute\(\) has parameter \$value with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Models/Relative.php
 
 		-
 			message: '#^Method App\\Domains\\Reception\\Models\\Report\:\:scopeSearch\(\) has no return type specified\.$#'
@@ -961,30 +553,6 @@ parameters:
 			path: app/Domains/Reception/Models/Report.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Sample\:\:activeAcceptanceItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/Sample.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Models\\Sample\:\:deactivateAcceptanceItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Models/Sample.php
-
-		-
-			message: '#^Property App\\Domains\\Reception\\Models\\Sample\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Reception/Models/Sample.php
-
-		-
-			message: '#^Property App\\Domains\\Reception\\Models\\Tag\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Reception/Models/Tag.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\AcceptanceItemRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -1001,12 +569,6 @@ parameters:
 			identifier: argument.templateType
 			count: 1
 			path: app/Domains/Reception/Repositories/AcceptanceRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\ReportApprovalRepository\:\:create\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/ReportApprovalRepository.php
 
 		-
 			message: '#^PHPDoc tag @return with type mixed is not subtype of native type App\\Domains\\Reception\\Models\\ReportParameter\.$#'
@@ -1033,20 +595,8 @@ parameters:
 			path: app/Domains/Reception/Repositories/ReportRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Repositories\\SampleRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Repositories/SampleRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Repositories\\SampleRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Repositories/SampleRepository.php
-
-		-
-			message: '#^Relation ''activeAcceptanceItems'' is not found in App\\Domains\\Reception\\Models\\Sample model\.$#'
-			identifier: larastan.relationExistence
 			count: 1
 			path: app/Domains/Reception/Repositories/SampleRepository.php
 
@@ -1093,12 +643,6 @@ parameters:
 			path: app/Domains/Reception/Requests/UpdateAcceptanceItemStateRequest.php
 
 		-
-			message: '#^Cannot access property \$status on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Reception/Requests/UpdateAcceptanceRequest.php
-
-		-
 			message: '#^Unable to resolve the template type TKey in call to function collect$#'
 			identifier: argument.templateType
 			count: 1
@@ -1111,160 +655,16 @@ parameters:
 			path: app/Domains/Reception/Requests/UpdateAcceptanceRequest.php
 
 		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Reception/Requests/UpdatePatientRequest.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Resources\\AcceptanceItemStateResource\:\:\$acceptanceItem\.$#'
-			identifier: property.notFound
-			count: 5
-			path: app/Domains/Reception/Resources/AcceptanceItemStateResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Resources\\AcceptanceItemStateResource\:\:\$details\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Resources/AcceptanceItemStateResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Resources\\AcceptanceItemStateResource\:\:\$finished_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Resources/AcceptanceItemStateResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Resources\\AcceptanceItemStateResource\:\:\$is_first_section\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Resources/AcceptanceItemStateResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Resources\\AcceptanceItemStateResource\:\:\$parameters\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Resources/AcceptanceItemStateResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Resources\\AcceptanceItemStateResource\:\:\$sample\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Resources/AcceptanceItemStateResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Resources\\AcceptanceItemStateResource\:\:\$started_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Resources/AcceptanceItemStateResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Resources\\AcceptanceItemStateResource\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Resources/AcceptanceItemStateResource.php
-
-		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Domains/Reception/Services/AcceptanceItemService.php
 
 		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Models\\Section\:\:\$section_workflows_order\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemStateService.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Laboratory\\Models\\Section\:\:\$section_workflows_parameters\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemStateService.php
-
-		-
 			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Reception\\Models\\AcceptanceItem\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Domains/Reception/Services/AcceptanceItemStateService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$_sampleTypeId\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
-			identifier: property.notFound
-			count: 6
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$customParameters\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 6
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$method\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$patient\.$#'
-			identifier: property.notFound
-			count: 5
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$patients\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:convertAcceptanceItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:exportAcceptances\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:getReferrerAcceptanceReported\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\AcceptanceService\:\:listBarcodes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
 
 		-
 			message: '#^Right side of \|\| is always true\.$#'
@@ -1315,19 +715,7 @@ parameters:
 			path: app/Domains/Reception/Services/ReportApprovalService.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:preparePatientData\(\) has parameter \$patients with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/ReportService.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:prepareReferrer\(\) has parameter \$referrer with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Reception/Services/ReportService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:prepareSigners\(\) has parameter \$signers with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Reception/Services/ReportService.php
@@ -1337,24 +725,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Domains/Reception/Services/ReportService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/Reception/Services/SampleEntryService.php
-
-		-
-			message: '#^Parameter \#1 \$acceptanceItemState of method App\\Domains\\Reception\\Services\\SampleEntryService\:\:processSingleSample\(\) expects App\\Domains\\Reception\\Models\\AcceptanceItemState, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Domains/Reception/Services/SampleEntryService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\SampleService\:\:listSamples\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/SampleService.php
 
 		-
 			message: '#^Parameter \#1 \$acceptance of method App\\Domains\\Reception\\Services\\TATService\:\:mapAcceptance\(\) expects App\\Domains\\Reception\\Models\\Acceptance, Illuminate\\Database\\Eloquent\\Model given\.$#'
@@ -1405,34 +775,10 @@ parameters:
 			path: app/Domains/Reception/Services/WorkflowProgressionService.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Services\\WorkflowProgressionService\:\:determineNextSection\(\) invoked with 3 parameters, 2 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/Domains/Reception/Services/WorkflowProgressionService.php
-
-		-
-			message: '#^Method App\\Domains\\Reception\\Services\\WorkflowProgressionService\:\:skipOnSample\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Reception/Services/WorkflowProgressionService.php
-
-		-
 			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Reception\\Models\\AcceptanceItem\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Domains/Reception/Services/WorkflowProgressionService.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Events\\CollectRequestEvent\:\:__construct\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Referrer/Events/CollectRequestEvent.php
-
-		-
-			message: '#^Property App\\Domains\\Referrer\\Events\\CollectRequestEvent\:\:\$id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Referrer/Events/CollectRequestEvent.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
@@ -1453,30 +799,6 @@ parameters:
 			path: app/Domains/Referrer/Jobs/SendAcceptanceWebhook.php
 
 		-
-			message: '#^Method App\\Domains\\Referrer\\Models\\Material\:\:sample\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Models/Material.php
-
-		-
-			message: '#^Property App\\Domains\\Referrer\\Models\\Material\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Referrer/Models/Material.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Models\\Referrer\:\:getNameAttribute\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Models/Referrer.php
-
-		-
-			message: '#^Property App\\Domains\\Referrer\\Models\\Referrer\:\:\$searchable has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/Domains/Referrer/Models/Referrer.php
-
-		-
 			message: '#^Method App\\Domains\\Referrer\\Models\\ReferrerOrder\:\:scopeSearch\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1495,28 +817,10 @@ parameters:
 			path: app/Domains/Referrer/Models/ReferrerOrder.php
 
 		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\CollectRequestRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Repositories/CollectRequestRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Referrer\\Repositories\\CollectRequestRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Referrer/Repositories/CollectRequestRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\MaterialRepository\:\:getByBarcode\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Repositories/MaterialRepository.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\OrderMaterialRepository\:\:applyFilters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Repositories/OrderMaterialRepository.php
 
 		-
 			message: '#^Method App\\Domains\\Referrer\\Repositories\\OrderMaterialRepository\:\:applyFilters\(\) has parameter \$query with no type specified\.$#'
@@ -1531,52 +835,16 @@ parameters:
 			path: app/Domains/Referrer/Repositories/ReferrerTestRepository.php
 
 		-
-			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerTestRepository\:\:applyFilter\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Repositories/ReferrerTestRepository.php
-
-		-
 			message: '#^Method App\\Domains\\Referrer\\Repositories\\ReferrerTestRepository\:\:applyFilter\(\) has parameter \$query with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/Domains/Referrer/Repositories/ReferrerTestRepository.php
 
 		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Referrer/Requests/UpdateMaterialRequest.php
-
-		-
-			message: '#^Cannot access property \$amount on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Referrer/Requests/UpdateOrderMaterialRequest.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Referrer/Requests/UpdateReferrerRequest.php
-
-		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Domains/Referrer/Requests/UpdateReferrerTestRequest.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 3
 			path: app/Domains/Referrer/Resources/PatientAcceptanceResource.php
-
-		-
-			message: '#^Method App\\Domains\\Referrer\\Services\\MaterialService\:\:getMaterialByBarcode\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Domains/Referrer/Services/MaterialService.php
 
 		-
 			message: '#^Method App\\Domains\\Referrer\\Services\\ReferrerOrderService\:\:buildBarcodeMaps\(\) has parameter \$patient with no type specified\.$#'
@@ -1657,12 +925,6 @@ parameters:
 			path: app/Domains/Referrer/Support/ReferrerOrderPayloadBuilder.php
 
 		-
-			message: '#^Access to an undefined property App\\Domains\\User\\DTOs\\RoleDTO\:\:\$prmissions\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/User/DTOs/RoleDTO.php
-
-		-
 			message: '#^PHPDoc type array\<int, string\> of property App\\Domains\\User\\Models\\User\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
 			identifier: property.phpDocType
 			count: 1
@@ -1699,20 +961,8 @@ parameters:
 			path: app/Domains/User/Repositories/RoleRepository.php
 
 		-
-			message: '#^Cannot access property \$id on object\|string\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Domains/User/Requests/UpdateUserRequest.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Domains/User/Services/RoleService.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Services\\RoleService\:\:getAdminRole\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/Domains/User/Services/RoleService.php
 
@@ -1735,54 +985,6 @@ parameters:
 			path: app/Http/Controllers/Auth/VerifyEmailController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\DailyCashReportController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/DailyCashReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\ExportInvoicesController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/ExportInvoicesController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Billing\\PaymentController\:\:show\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Billing/PaymentController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$acceptance\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Http/Controllers/Billing/ShowStatementController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$acceptanceItems\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Http/Controllers/Billing/ShowStatementController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$invoice_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Billing/ShowStatementController.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Http/Controllers/Billing/ShowStatementController.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: app/Http/Controllers/Billing/ShowStatementController.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
 			identifier: property.notFound
 			count: 1
@@ -1799,12 +1001,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/Consultation/UpdateCustomerToPatientWithConsultationController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Document\\DownloadReportController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Document/DownloadReportController.php
 
 		-
 			message: '#^Parameter \#1 \$import of static method Maatwebsite\\Excel\\Facades\\Excel\:\:toArray\(\) expects object, array given\.$#'
@@ -1831,18 +1027,6 @@ parameters:
 			path: app/Http/Controllers/Inventory/StockTransactionController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\ExportReportTemplateParametersController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/ExportReportTemplateParametersController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Laboratory\\ExportTestsController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Laboratory/ExportTestsController.php
-
-		-
 			message: '#^If condition is always false\.$#'
 			identifier: if.alwaysFalse
 			count: 1
@@ -1855,114 +1039,6 @@ parameters:
 			path: app/Http/Controllers/Laboratory/WorkflowController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Notification\\WhatsappMessageController\:\:index\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Notification/WhatsappMessageController.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Sample\:\:\$activeAcceptanceItems\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/QC/ApproveSampleQCController.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Sample\:\:\$activeAcceptanceItems\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/QC/RejectSampleQCController.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\AcceptanceItem\:\:\$report_date\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Http/Controllers/Reception/AcceptanceController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\AcceptanceItemStateController\:\:show\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/AcceptanceItemStateController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ExportAcceptanceItemsController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ExportAcceptanceItemsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ExportAcceptancesController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ExportAcceptancesController.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Reception\\Models\\Report\:\:\$files\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Reception/ReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ReportController\:\:convertParameters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\ReportController\:\:destroy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/ReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\SampleController\:\:destroy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/SampleController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Reception\\UnPublishReportController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Reception/UnPublishReportController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\Api\\StoreOrderMaterialsController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/Api/StoreOrderMaterialsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\ExportReferrerTestsController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/ExportReferrerTestsController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\ReferrerOrderController\:\:destroy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/ReferrerOrderController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\ReferrerOrderController\:\:edit\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/ReferrerOrderController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\ReferrerOrderController\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/ReferrerOrderController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\StoreReferrerOrderAcceptanceController\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Referrer/StoreReferrerOrderAcceptanceController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\Referrer\\StoreReferrerOrderAcceptanceController\:\:handlePoolingAcceptance\(\) has parameter \$user with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -1973,18 +1049,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Http/Controllers/Referrer/StoreReferrerOrderAcceptanceController.php
-
-		-
-			message: '#^Access to an undefined property App\\Domains\\Document\\Models\\Document\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Referrer/StoreReferrerOrderPatientController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\SettingController\:\:show\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/SettingController.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
@@ -2051,18 +1115,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/Http/Resources/ListResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Http\\Resources\\OrderMaterialResource\:\:\$referrer_fullname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Resources/OrderMaterialResource.php
-
-		-
-			message: '#^Access to an undefined property App\\Http\\Resources\\OrderMaterialResource\:\:\$sample_type_name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Resources/OrderMaterialResource.php
 
 		-
 			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Support\\Carbon\. Use \-\> instead\.$#'
