@@ -12,7 +12,7 @@ class CollectRequestEvent
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public string $action;
-    public $id;
+    public int|string $id;
 
     /**
      * Create a new event instance.
@@ -20,7 +20,7 @@ class CollectRequestEvent
      * @param string $action (create, update, delete)
      */
     public function __construct(
-        $id,
+        int|string $id,
         string $action = "update"
     )
     {

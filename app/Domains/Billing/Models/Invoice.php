@@ -33,6 +33,10 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property array<array-key, mixed>|null $subject
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read numeric|null $invoice_items_sum_price withSum alias
+ * @property-read numeric|null $invoice_items_sum_discount withSum alias
+ * @property-read numeric|null $payments_sum_price withSum alias
+ * @property-read string|null $invoice_no query-derived alias (statement report view)
  */
 class Invoice extends Model
 {
@@ -55,6 +59,7 @@ class Invoice extends Model
         'subject' => 'array',
     ];
 
+    /** @var list<string> */
     protected $searchable = [
         'patient.fullName',
         'patient.idNo',
@@ -114,12 +119,14 @@ class Invoice extends Model
         return $this->hasOneThrough(Referrer::class, Acceptance::class, "invoice_id", "id", "id", "referrer_id");
     }
 
-    public function patientPayments()
+    /** @return HasMany<Payment, $this> */
+    public function patientPayments(): HasMany
     {
         return $this->Payments()->whereMorphedTo("payer", Patient::class);
     }
 
-    public function sponsorPayments()
+    /** @return HasMany<Payment, $this> */
+    public function sponsorPayments(): HasMany
     {
         return $this->Payments()->whereMorphedTo("payer", Referrer::class);
     }

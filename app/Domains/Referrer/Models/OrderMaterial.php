@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property \App\Domains\Referrer\Enums\OrderMaterialStatus $status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read string|null $sample_type_name query-derived alias (joined sample type name)
+ * @property-read string|null $referrer_fullname query-derived alias (joined referrer full name)
  */
 class OrderMaterial extends Model
 {

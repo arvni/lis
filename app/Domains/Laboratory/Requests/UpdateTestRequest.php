@@ -16,7 +16,7 @@ class UpdateTestRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("test"));
+        return Gate::allows("update", $this->routeTestModel());
     }
 
     /**
@@ -33,10 +33,10 @@ class UpdateTestRequest extends FormRequest
         $baseRules = [
             "test_groups" => ["required", "array", "min:1"],
             "test_groups.*.id" => ["required", "exists:test_groups,id"],
-            "name" => ["required", "string", "max:255", "unique:tests,name," . $this->route()->parameter("test")->id],
+            "name" => ["required", "string", "max:255", "unique:tests,name," . $this->routeTestModel()->id],
             "description" => ["nullable", "string", "max:1000"],
             "fullName" => ["required", "string", "max:255"],
-            "code" => ["required", "string", "max:50", "unique:tests,code," . $this->route()->parameter("test")->id],
+            "code" => ["required", "string", "max:50", "unique:tests,code," . $this->routeTestModel()->id],
             "type" => ["required", Rule::enum(TestType::class)],
             "status" => ["nullable", "boolean"],
             "method_tests" => ["required", "array", "min:1"],
@@ -143,5 +143,13 @@ class UpdateTestRequest extends FormRequest
             $isTest ? $testRules : [],
             $isService ? $serviceRules : []
         );
+    }
+
+    private function routeTestModel(): \App\Domains\Laboratory\Models\Test
+    {
+        /** @var \App\Domains\Laboratory\Models\Test $model */
+        $model = $this->route('test');
+
+        return $model;
     }
 }

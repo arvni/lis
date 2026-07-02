@@ -20,6 +20,7 @@ class Doctor extends Model
 {
     use Searchable;
 
+    /** @var list<string> */
     protected $searchable = [
         "name",
         "expertise",

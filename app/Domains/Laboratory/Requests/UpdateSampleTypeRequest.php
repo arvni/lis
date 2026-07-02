@@ -13,7 +13,7 @@ class UpdateSampleTypeRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("sampleType"));
+        return Gate::allows("update", $this->routeSampleTypeModel());
     }
 
     /**
@@ -24,10 +24,18 @@ class UpdateSampleTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => ["string", "required", "unique:sample_types,name," . $this->route()->parameter("sampleType")->id],
+            "name" => ["string", "required", "unique:sample_types,name," . $this->routeSampleTypeModel()->id],
             "description" => ["nullable", "string"],
             "orderable" => ["nullable", "boolean"],
             "required_barcode" => ["nullable", "boolean"],
         ];
+    }
+
+    private function routeSampleTypeModel(): \App\Domains\Laboratory\Models\SampleType
+    {
+        /** @var \App\Domains\Laboratory\Models\SampleType $model */
+        $model = $this->route('sampleType');
+
+        return $model;
     }
 }

@@ -18,6 +18,7 @@ class TestGroup extends Model
     protected $fillable = [
         "name",
     ];
+    /** @var list<string> */
     protected $searchable = [
       "name"
     ];

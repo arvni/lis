@@ -14,7 +14,7 @@ class UpdatePatientRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("patient"));
+        return Gate::allows("update", $this->routePatientModel());
     }
 
     /**
@@ -62,7 +62,7 @@ class UpdatePatientRequest extends FormRequest
             "idNo" => [
                 "required",
                 "string",
-                "unique:patients,idNo,".$this->route()->parameter("patient")->id,
+                "unique:patients,idNo,".$this->routePatientModel()->id,
                 "max:255"
             ],
             "nationality" => [
@@ -106,5 +106,13 @@ class UpdatePatientRequest extends FormRequest
     {
         return $this->input("nationality.code") === "OM"
             || $this->input("nationality") === "OM";
+    }
+
+    private function routePatientModel(): \App\Domains\Reception\Models\Patient
+    {
+        /** @var \App\Domains\Reception\Models\Patient $model */
+        $model = $this->route('patient');
+
+        return $model;
     }
 }

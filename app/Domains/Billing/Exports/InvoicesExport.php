@@ -2,6 +2,7 @@
 
 namespace App\Domains\Billing\Exports;
 
+use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\InvoiceItem;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Utils\Constants;
@@ -18,10 +19,15 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class InvoicesExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithStyles
 {
+    /** @var Collection<int, Invoice> */
     protected Collection $invoices;
 
+    /** @var list<string> */
     protected array $dynamicColumns = [];
 
+    /**
+     * @param  Collection<int, Invoice>  $invoices
+     */
     public function __construct(Collection $invoices)
     {
         $this->invoices = $invoices;
@@ -98,7 +104,7 @@ class InvoicesExport implements FromCollection, ShouldAutoSize, WithHeadings, Wi
             $row = [
                 Carbon::parse($invoice->created_at)->toDate(),
                 $invoice->invoiceNo,
-                $invoice->statement?->no ?? '',
+                optional($invoice->statement)->no ?? '',
                 (string) optional($patient)->fullName,
                 (string) optional($invoice->owner)->fullName,
                 $item->title,
@@ -154,7 +160,7 @@ class InvoicesExport implements FromCollection, ShouldAutoSize, WithHeadings, Wi
      * Get a custom parameter value from the invoice item.
      * Returns "0" if not found.
      */
-    private function getCustomParameterValue(InvoiceItem $item, string $key)
+    private function getCustomParameterValue(InvoiceItem $item, string $key): mixed
     {
         $priceParams = $item->customParameters['price'] ?? null;
 

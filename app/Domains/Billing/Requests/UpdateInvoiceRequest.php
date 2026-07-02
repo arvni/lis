@@ -14,7 +14,7 @@ class UpdateInvoiceRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return Gate::allows('update', $this->route()->parameter('invoice'));
+        return Gate::allows('update', $this->routeInvoiceModel());
     }
 
     /**
@@ -22,7 +22,7 @@ class UpdateInvoiceRequest extends FormRequest
      */
     public function rules(): array
     {
-        $invoiceId = $this->route()->parameter('invoice')->id;
+        $invoiceId = $this->routeInvoiceModel()->id;
 
         return [
             "owner_id"   => "required",
@@ -61,5 +61,13 @@ class UpdateInvoiceRequest extends FormRequest
             "payments.*.paymentMethod"  => ["required", Rule::enum(PaymentMethod::class)],
             "payments.*.information"    => ["array", "nullable"],
         ];
+    }
+
+    private function routeInvoiceModel(): \App\Domains\Billing\Models\Invoice
+    {
+        /** @var \App\Domains\Billing\Models\Invoice $model */
+        $model = $this->route('invoice');
+
+        return $model;
     }
 }

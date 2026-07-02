@@ -12,7 +12,7 @@ class UpdateSectionGroupRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update",$this->route()->parameter("sectionGroup"));
+        return Gate::allows("update",$this->routeSectionGroupModel());
     }
 
     /**
@@ -23,10 +23,18 @@ class UpdateSectionGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => ["required", "unique:section_groups,name,".$this->route()->parameter("sectionGroup")->id],
+            "name" => ["required", "unique:section_groups,name,".$this->routeSectionGroupModel()->id],
             "active" => ["bool"],
             "parent" => ["nullable","array"],
             "parent.id" => ["nullable", "exists:section_groups,id"],
         ];
+    }
+
+    private function routeSectionGroupModel(): \App\Domains\Laboratory\Models\SectionGroup
+    {
+        /** @var \App\Domains\Laboratory\Models\SectionGroup $model */
+        $model = $this->route('sectionGroup');
+
+        return $model;
     }
 }

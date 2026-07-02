@@ -51,6 +51,7 @@ readonly class AcceptanceItemStateService
         return $this->acceptanceItemStateRepository->updateAcceptanceItemState($acceptanceItemState, $acceptanceItemStateDTO->toArray());
     }
 
+    /** @return Collection<int, AcceptanceItemState> */
     public function findAcceptanceItemStateByBarcode(string $barcode): Collection
     {
         return $this->acceptanceItemStateRepository->findAcceptanceItemStateByBarcode($barcode);

@@ -35,7 +35,7 @@ class UpdateReferrerTestRequest extends FormRequest
                 'integer',
                 'exists:tests,id', Rule::unique("referrer_tests", "test_id")
                     ->where('referrer_id', $this->input('referrer.id'))
-                    ->whereNot("id", $this->route()->parameter("referrer_test")->id)],
+                    ->whereNot("id", $this->routeReferrerTestModel()->id)],
             'methods.*.method_id' => [
                 'required',
                 'integer',
@@ -99,5 +99,13 @@ class UpdateReferrerTestRequest extends FormRequest
                 'string'
             ],
         ];
+    }
+
+    private function routeReferrerTestModel(): \App\Domains\Referrer\Models\ReferrerTest
+    {
+        /** @var \App\Domains\Referrer\Models\ReferrerTest $model */
+        $model = $this->route('referrer_test');
+
+        return $model;
     }
 }

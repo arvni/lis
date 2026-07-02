@@ -79,7 +79,7 @@ class CollectRequestRepository
             ->get(['id', 'preferred_date', 'note', 'status', 'logistic_information', 'sample_collector_id', 'referrer_id']);
     }
 
-    public function applyFilters($query, array $filters)
+    public function applyFilters($query, array $filters): void
     {
         if (isset($filters["search"])) {
             $query->whereHas('sampleCollector', function ($q) use ($filters) {

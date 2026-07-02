@@ -27,6 +27,7 @@ class Customer extends Model
         "phone",
         "email"
     ];
+    /** @var list<string> */
     protected $searchable = [
         "name",
         "phone"

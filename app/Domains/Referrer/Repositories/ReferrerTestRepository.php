@@ -74,7 +74,7 @@ class ReferrerTestRepository
         return $referrerTest->delete();
     }
 
-    private function applyFilter(array $filters, $query)
+    private function applyFilter(array $filters, $query): void
     {
         if (isset($filters['search']))
             $query->whereHas('test', function ($q) use ($filters) {

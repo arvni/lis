@@ -13,7 +13,7 @@ class UpdateMaterialRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("material"));
+        return Gate::allows("update", $this->routeMaterialModel());
     }
 
     /**
@@ -23,7 +23,7 @@ class UpdateMaterialRequest extends FormRequest
      */
     public function rules(): array
     {
-        $materialId = $this->route()->parameter("material")?->id;
+        $materialId = $this->routeMaterialModel()?->id;
 
         return [
             'sample_type' => ['required', 'array'],
@@ -48,5 +48,13 @@ class UpdateMaterialRequest extends FormRequest
             'barcode.unique' => 'This barcode is already in use.',
             'tube_barcode.unique' => 'This tube barcode is already in use.',
         ];
+    }
+
+    private function routeMaterialModel(): ?\App\Domains\Referrer\Models\Material
+    {
+        /** @var ?\App\Domains\Referrer\Models\Material $model */
+        $model = $this->route('material');
+
+        return $model;
     }
 }

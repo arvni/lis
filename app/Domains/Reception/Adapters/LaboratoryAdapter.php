@@ -81,7 +81,7 @@ class LaboratoryAdapter
         return $this->doctorService->createOrGetDoctor($data);
     }
 
-    public function getTestById(int $id)
+    public function getTestById(int $id): ?Test
     {
         $test = $this->testRepository->findTestById($id);
         $test?->load(["methodTests"]);

@@ -7,12 +7,14 @@ use App\Domains\Reception\Models\Sample;
 use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 /**
  * @property int $id
  * @property int $sample_type_id
  * @property int|null $order_material_id
+ * @property int|null $sample_id
  * @property string $packing_series
  * @property string|null $tube_series
  * @property string $barcode
@@ -27,6 +29,7 @@ class Material extends Model
 {
     use Searchable;
 
+    /** @var list<string> */
     protected $searchable = ['barcode', 'tube_barcode', 'packing_series', 'tube_series'];
     protected $fillable = [
         "sample_type_id",
@@ -64,9 +67,10 @@ class Material extends Model
         return $this->hasOneThrough(Referrer::class, OrderMaterial::class, "id", "id", "order_material_id", "referrer_id");
     }
 
-    public function sample()
+    /** @return HasOne<Sample, $this> */
+    public function sample(): HasOne
     {
-        $this->hasOne(Sample::class);
+        return $this->hasOne(Sample::class);
     }
 
 

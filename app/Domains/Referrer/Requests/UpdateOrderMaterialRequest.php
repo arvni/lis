@@ -14,7 +14,7 @@ class UpdateOrderMaterialRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("orderMaterial"));
+        return Gate::allows("update", $this->routeOrderMaterialModel());
     }
 
     /**
@@ -26,7 +26,7 @@ class UpdateOrderMaterialRequest extends FormRequest
     {
         return [
             "sample_type_id" => ["required", Rule::exists("sample_types", "id")->where("orderable", true)],
-            'materials' => ['required', 'array', 'min:' . $this->route()->parameter("orderMaterial")->amount],
+            'materials' => ['required', 'array', 'min:' . $this->routeOrderMaterialModel()->amount],
             'materials.*.id' => [
                 "required",
                 Rule::exists("materials", "id")
@@ -35,5 +35,13 @@ class UpdateOrderMaterialRequest extends FormRequest
                     ->whereNull("assigned_at")
             ],
         ];
+    }
+
+    private function routeOrderMaterialModel(): \App\Domains\Referrer\Models\OrderMaterial
+    {
+        /** @var \App\Domains\Referrer\Models\OrderMaterial $model */
+        $model = $this->route('orderMaterial');
+
+        return $model;
     }
 }

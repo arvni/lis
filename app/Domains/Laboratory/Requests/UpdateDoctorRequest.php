@@ -13,7 +13,7 @@ class UpdateDoctorRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("doctor"));
+        return Gate::allows("update", $this->routeDoctorModel());
     }
 
     /**
@@ -27,11 +27,19 @@ class UpdateDoctorRequest extends FormRequest
             "name" => [
                 "required",
                 "string",
-                "unique:doctors,name," . $this->route()->parameter("doctor")->id
+                "unique:doctors,name," . $this->routeDoctorModel()->id
             ],
             "expertise" => ["nullable"],
             "phone" => ["nullable"],
             "license_no" => ["nullable"]
         ];
+    }
+
+    private function routeDoctorModel(): \App\Domains\Laboratory\Models\Doctor
+    {
+        /** @var \App\Domains\Laboratory\Models\Doctor $model */
+        $model = $this->route('doctor');
+
+        return $model;
     }
 }

@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Builder;
 class RequestForm extends Model
 {
     use Searchable;
+    /** @var list<string> */
     protected $searchable = [
         "name"
     ];

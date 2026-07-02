@@ -22,16 +22,18 @@ class Relative extends Model
         "relationship",
     ];
 
-    public function setRelationshipAttribute($value)
+    /** @param  array<int, string>|string  $value */
+    public function setRelationshipAttribute(array|string $value): void
     {
         // If it's an array, convert it to a comma-separated string
         $this->attributes['relationship'] = is_array($value) ? implode(',', $value) : $value;
     }
 
-    public function getRelationshipAttribute($value)
+    /** @return list<string> */
+    public function getRelationshipAttribute(?string $value): array
     {
         // Return as an array
-        return explode(',', $value);
+        return explode(',', (string) $value);
     }
 
     /** @return BelongsTo<Patient, $this> */

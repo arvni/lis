@@ -23,7 +23,7 @@ class TimeService
         return $this->timeRepository->ListTimes($queryData);
     }
 
-    public function storeTime(TimeDTO $timeDTO)
+    public function storeTime(TimeDTO $timeDTO): Time
     {
         return $this->timeRepository->createTime($timeDTO->toArray());
     }

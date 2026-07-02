@@ -180,12 +180,16 @@ class ReportController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Report $report)
+    public function destroy(Report $report): void
     {
 
     }
 
-    private function convertParameters(Collection $parameters)
+    /**
+     * @param  Collection<int, \App\Domains\Reception\Models\ReportParameter>  $parameters
+     * @return array<string, mixed>
+     */
+    private function convertParameters(Collection $parameters): array
     {
         $output = [];
         foreach ($parameters->sortByDesc("created_at") as $parameter) {

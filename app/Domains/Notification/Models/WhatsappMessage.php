@@ -46,6 +46,7 @@ class WhatsappMessage extends Model
         'written' => WhatsappMessageWritten::class,
     ];
 
+    /** @var list<string> */
     protected $seachable = [
         "waId",
         "messageable.fullName",

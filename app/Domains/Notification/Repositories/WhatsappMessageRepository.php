@@ -14,7 +14,8 @@ class WhatsappMessageRepository
      * @param $queryData
      * @return LengthAwarePaginator
      */
-    public function listMessages($queryData): LengthAwarePaginator
+    /** @param  array<string, mixed>  $queryData */
+    public function listMessages(array $queryData): LengthAwarePaginator
     {
         $query = WhatsappMessage::query();
         if ($queryData["filters"] ?? null) {

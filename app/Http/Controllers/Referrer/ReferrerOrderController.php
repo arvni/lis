@@ -45,7 +45,7 @@ class ReferrerOrderController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ReferrerOrder $referrerOrder)
+    public function edit(ReferrerOrder $referrerOrder): void
     {
         //
     }
@@ -53,7 +53,7 @@ class ReferrerOrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateReferrerOrderRequest $request, ReferrerOrder $referrerOrder)
+    public function update(UpdateReferrerOrderRequest $request, ReferrerOrder $referrerOrder): void
     {
         //
     }
@@ -61,7 +61,7 @@ class ReferrerOrderController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ReferrerOrder $referrerOrder)
+    public function destroy(ReferrerOrder $referrerOrder): void
     {
         //
     }

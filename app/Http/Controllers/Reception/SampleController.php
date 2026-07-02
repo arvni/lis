@@ -99,7 +99,7 @@ class SampleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Sample $sample)
+    public function destroy(Sample $sample): void
     {
         //
     }

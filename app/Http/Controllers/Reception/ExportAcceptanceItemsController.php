@@ -16,7 +16,7 @@ class ExportAcceptanceItemsController extends Controller
         $this->middleware("indexProvider");
     }
 
-    public function __invoke(ExportAcceptanceItemsRequest $request)
+    public function __invoke(ExportAcceptanceItemsRequest $request): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
         $filters = $request->get("filters", []);
         if (empty($filters["date"]) && empty($filters["from_date"]) && empty($filters["to_date"])) {

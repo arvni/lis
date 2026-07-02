@@ -63,6 +63,7 @@ class Sample extends Model
         "qc_approved_at" => "datetime",
     ];
 
+    /** @var list<string> */
     protected $searchable = [
         "barcode",
         "patient.idNo",
@@ -107,13 +108,15 @@ class Sample extends Model
     }
 
 
-    public function activeAcceptanceItems()
+    /** @return BelongsToMany<AcceptanceItem, $this> */
+    public function activeAcceptanceItems(): BelongsToMany
     {
         return $this->acceptanceItems()
             ->wherePivot("active", true);
     }
 
-    public function deactivateAcceptanceItems()
+    /** @return BelongsToMany<AcceptanceItem, $this> */
+    public function deactivateAcceptanceItems(): BelongsToMany
     {
         return $this->acceptanceItems()
             ->wherePivot("active", false);

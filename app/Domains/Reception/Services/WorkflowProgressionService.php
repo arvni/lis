@@ -50,7 +50,7 @@ readonly class WorkflowProgressionService
 
 
             // Get next section in workflow
-            $nextSection = $this->determineNextSection($acceptanceItem, $currentState, $sample);
+            $nextSection = $this->determineNextSection($acceptanceItem, $currentState);
             // Create new state if next section exists
             if ($nextSection) {
                 $this->createNextWorkflowState($acceptanceItem, $nextSection, $sample);
@@ -92,7 +92,7 @@ readonly class WorkflowProgressionService
         return false;
     }
 
-    private function skipOnSample(AcceptanceItem $acceptanceItem, Sample $sample)
+    private function skipOnSample(AcceptanceItem $acceptanceItem, Sample $sample): bool
     {
 
 

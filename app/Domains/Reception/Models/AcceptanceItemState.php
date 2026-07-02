@@ -51,6 +51,7 @@ class AcceptanceItemState extends Model
         "sample_id"
     ];
 
+    /** @var list<string> */
     protected $searchable = [
         "patients.fullName",
         "sample.barcode",

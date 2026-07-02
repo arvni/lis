@@ -7,6 +7,7 @@ use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\InvoiceItem;
 use App\Domains\Laboratory\Enums\TestType;
+use App\Domains\Laboratory\Models\Test;
 use App\Domains\Reception\Models\AcceptanceItem;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -182,7 +183,7 @@ class InvoiceComposer
         ];
     }
 
-    private function kindFor(AcceptanceItem $ai, $test): InvoiceItemKind
+    private function kindFor(AcceptanceItem $ai, Test $test): InvoiceItemKind
     {
         if ($ai->panel_id && $test->type === TestType::PANEL) {
             return InvoiceItemKind::PANEL;
@@ -194,7 +195,7 @@ class InvoiceComposer
      * Key used both for new buckets and for matching existing invoice_items so updates
      * land on the same row instead of churning inserts.
      */
-    private function keyForAcceptanceItem(AcceptanceItem $ai, $test): string
+    private function keyForAcceptanceItem(AcceptanceItem $ai, Test $test): string
     {
         if ($ai->panel_id && $test->type === TestType::PANEL) {
             return "panel:{$ai->acceptance_id}:{$ai->panel_id}";

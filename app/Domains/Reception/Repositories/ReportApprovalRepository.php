@@ -9,7 +9,8 @@ class ReportApprovalRepository
 {
     use LogsUserActivity;
 
-    public function create(array $data)
+    /** @param  array<string, mixed>  $data */
+    public function create(array $data): ReportApproval
     {
         $approval = ReportApproval::create($data);
         $this->logCreated($approval);

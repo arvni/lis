@@ -29,7 +29,7 @@ class SectionGroupService
         return $this->sectionGroupRepository->ListSectionGroups($queryData);
     }
 
-    public function storeSectionGroup(SectionGroupDTO $sectionGroupDTO)
+    public function storeSectionGroup(SectionGroupDTO $sectionGroupDTO): SectionGroup
     {
         return $this->sectionGroupRepository->creatSectionGroup($sectionGroupDTO->toArray());
     }
@@ -50,7 +50,7 @@ class SectionGroupService
             throw new Exception("This section group has some Section or Section Group");
     }
 
-    public function getSectionGroupWithChildrenAndSection(SectionGroup $sectionGroup)
+    public function getSectionGroupWithChildrenAndSection(SectionGroup $sectionGroup): SectionGroup
     {
         list($permittedSectionGroups, $permittedSections) = $this->getPermittedIds();
         $sectionGroup->load([

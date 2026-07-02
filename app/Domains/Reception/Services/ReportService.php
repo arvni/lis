@@ -662,7 +662,7 @@ class ReportService
     /**
      * Prepare patient data for report
      */
-    public function preparePatientData($patients): array
+    public function preparePatientData(?\Illuminate\Support\Collection $patients): array
     {
         if (!$patients || $patients->isEmpty()) {
             return ["patient_0_full_name" => "No patient data available"];
@@ -724,7 +724,7 @@ class ReportService
     /**
      * Prepare signers data for report
      */
-    public function prepareSigners($signers): array
+    public function prepareSigners(?\Illuminate\Support\Collection $signers): array
     {
         $output = ["images" => []];
 

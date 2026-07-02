@@ -13,7 +13,7 @@ class UpdateReportTemplateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("reportTemplate"));
+        return Gate::allows("update", $this->routeReportTemplateModel());
     }
 
     /**
@@ -24,7 +24,7 @@ class UpdateReportTemplateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => ["required", "string", "max:255", "unique:report_templates,name," . $this->route()->parameter("reportTemplate")->id],
+            "name" => ["required", "string", "max:255", "unique:report_templates,name," . $this->routeReportTemplateModel()->id],
             "approval_flow_id" => ["nullable", "exists:approval_flows,id"],
             "template" => ["required", "array"],
             "template.id" => ["required", "exists:documents,hash"],
@@ -36,5 +36,13 @@ class UpdateReportTemplateRequest extends FormRequest
             'parameters.*.active'=> ['required', 'boolean'],
             'parameters.*.custom_props'=> ['nullable', 'string'],
         ];
+    }
+
+    private function routeReportTemplateModel(): \App\Domains\Laboratory\Models\ReportTemplate
+    {
+        /** @var \App\Domains\Laboratory\Models\ReportTemplate $model */
+        $model = $this->route('reportTemplate');
+
+        return $model;
     }
 }

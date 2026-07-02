@@ -15,7 +15,7 @@ class WhatsappMessageController extends Controller
         $this->middleware('can:notifications.manage-whatsapp');
     }
 
-    public function index(ListWhatsappMessageRequest $request)
+    public function index(ListWhatsappMessageRequest $request): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         return $this->whatsappMessageService->listMessages($request->all());
     }

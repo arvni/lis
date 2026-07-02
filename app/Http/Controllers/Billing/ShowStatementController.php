@@ -43,6 +43,7 @@ class ShowStatementController extends Controller
         ]);
     }
 
+    /** @param  Collection<int, \App\Domains\Billing\Models\Invoice>  $invoices */
     private function prepareInvoicesData(Collection $invoices): array
     {
         return $invoices->map(function ($invoice) {

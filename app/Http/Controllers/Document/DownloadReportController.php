@@ -22,7 +22,7 @@ class DownloadReportController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Report $report)
+    public function __invoke(Report $report): \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\RedirectResponse|null
     {
         $this->authorize("view", $report);
         abort_if(!$report->status, 400, "Report is Rejected");
@@ -38,5 +38,7 @@ class DownloadReportController extends Controller
         } catch (Exception $e) {
             return back()->with(["success" => false, "status" => $e->getMessage()]);
         }
+
+        return null;
     }
 }

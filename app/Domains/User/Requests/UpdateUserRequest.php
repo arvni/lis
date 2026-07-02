@@ -15,7 +15,7 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("user"));
+        return Gate::allows("update", $this->routeUserModel());
     }
 
     /**
@@ -27,8 +27,8 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             "name" => ["required", "string", "max:255"],
-            "username" => ["required", "string", "max:255", "unique:users,username," . $this->route()->parameter('user')->id],
-            "email" => ["required", "string", "email", "max:255", "unique:users,email," . $this->route()->parameter('user')->id],
+            "username" => ["required", "string", "max:255", "unique:users,username," . $this->routeUserModel()->id],
+            "email" => ["required", "string", "email", "max:255", "unique:users,email," . $this->routeUserModel()->id],
             "mobile" => ["required", "string", "max:255"],
             "title" => ["nullable", "string", "max:255"],
             'stamp' => ['nullable',],
@@ -37,5 +37,13 @@ class UpdateUserRequest extends FormRequest
             "roles.*.id" => ["required", "exists:roles,id"],
             "is_active"=>["required", "boolean"],
         ];
+    }
+
+    private function routeUserModel(): \App\Domains\User\Models\User
+    {
+        /** @var \App\Domains\User\Models\User $model */
+        $model = $this->route('user');
+
+        return $model;
     }
 }

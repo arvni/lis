@@ -64,6 +64,7 @@ class AcceptanceItemStateRepository
     }
 
 
+    /** @return Collection<int, AcceptanceItemState> */
     public function findAcceptanceItemStateByBarcode(string $barcode): Collection
     {
         return AcceptanceItemState::whereHas("sample", function ($q) use ($barcode) {

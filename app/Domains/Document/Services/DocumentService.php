@@ -49,7 +49,7 @@ class DocumentService
             "inline");
     }
 
-    public function getDocument(int|string $id)
+    public function getDocument(int|string $id): ?Document
     {
         return Document::find($id);
     }

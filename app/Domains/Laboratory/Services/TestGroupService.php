@@ -21,7 +21,7 @@ class TestGroupService
         return $this->testGroupRepository->ListTestGroups($queryData);
     }
 
-    public function storeTestGroup(TestGroupDTO $testGroupDTO)
+    public function storeTestGroup(TestGroupDTO $testGroupDTO): TestGroup
     {
         return $this->testGroupRepository->creatTestGroup($testGroupDTO->toArray());
     }

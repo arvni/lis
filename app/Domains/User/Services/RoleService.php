@@ -38,7 +38,7 @@ class RoleService
         $this->roleRepository->delete($role);
     }
 
-    public function getAdminRole()
+    public function getAdminRole(): ?Role
     {
         return $this->roleRepository->getAdminRole();
     }

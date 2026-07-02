@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read int|null $processing_items_count
  * @property-read int|null $finished_items_count
  * @property-read int|null $rejected_items_count
+ * @property-read int|null $section_workflows_order pivot-derived alias from the section_workflows relation
+ * @property-read array<array-key, mixed>|null $section_workflows_parameters pivot-derived alias from the section_workflows relation
  * @property int $id
  * @property int $section_group_id
  * @property string $name

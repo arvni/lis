@@ -15,7 +15,7 @@ class ExportReferrerTestsController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Referrer $referrer)
+    public function __invoke(Referrer $referrer): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
         $tests = $this->referrerTestService->getActiveTestsForReferrer($referrer->id);
 

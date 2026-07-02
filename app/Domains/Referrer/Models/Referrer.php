@@ -52,13 +52,14 @@ class Referrer extends Model
     protected $appends = [
         "name"
     ];
+    /** @var list<string> */
     protected $searchable = [
         "fullName",
         "email",
         "phoneNo",
     ];
 
-    public function getNameAttribute()
+    public function getNameAttribute(): ?string
     {
         return $this->attributes["fullName"] ?? null;
     }

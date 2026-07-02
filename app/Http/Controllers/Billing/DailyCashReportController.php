@@ -13,7 +13,7 @@ class DailyCashReportController extends Controller
 {
     public function __construct(private readonly DailyCashReportService $reportService) {}
 
-    public function __invoke(DailyCashReportRequest $request)
+    public function __invoke(DailyCashReportRequest $request): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
         $date = Carbon::parse($request->input('date'));
         $data = $this->reportService->buildReportData($date);
