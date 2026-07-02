@@ -662,7 +662,7 @@ class ReportService
     /**
      * Prepare patient data for report
      */
-    public function preparePatientData($patients): array
+    public function preparePatientData(?\Illuminate\Support\Collection $patients): array
     {
         if (!$patients || $patients->isEmpty()) {
             return ["patient_0_full_name" => "No patient data available"];
@@ -673,7 +673,9 @@ class ReportService
             $output["patient_{$key}_full_name"] = $patient->fullName ?? 'N/A';
             $output["patient_{$key}_no_id"] = $patient->idNo ?? 'N/A';
             $output["patient_{$key}_gender"] = $patient->gender ?? 'N/A';
-            $output["patient_{$key}_date_of_birth"] = Carbon::parse($patient->dateOfBirth)->format("d M Y") ?? 'N/A';
+            $output["patient_{$key}_date_of_birth"] = filled($patient->dateOfBirth)
+                ? Carbon::parse($patient->dateOfBirth)->format("d M Y")
+                : 'N/A';
             $output["patient_{$key}_nationality"] = $patient->nationality ?? 'N/A';
             $output["patient_{$key}_age"] = $patient->age ?? 'N/A';
         }
@@ -722,7 +724,7 @@ class ReportService
     /**
      * Prepare signers data for report
      */
-    public function prepareSigners($signers): array
+    public function prepareSigners(?\Illuminate\Support\Collection $signers): array
     {
         $output = ["images" => []];
 

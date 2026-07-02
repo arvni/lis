@@ -21,7 +21,7 @@ class BarcodeGroupService
         return $this->barcodeGroupRepository->ListBarcodeGroups($queryData);
     }
 
-    public function storeBarcodeGroup(BarcodeGroupDTO $barcodeGroupDTO)
+    public function storeBarcodeGroup(BarcodeGroupDTO $barcodeGroupDTO): BarcodeGroup
     {
         return $this->barcodeGroupRepository->creatBarcodeGroup($barcodeGroupDTO->toArray());
     }

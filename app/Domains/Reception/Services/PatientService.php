@@ -96,14 +96,7 @@ readonly class PatientService
             $newPatientDTO->avatar = RouteHelper::relativePath("documents.download", [$avatarId]);
             PatientDocumentUpdateEvent::dispatch($avatarId, $patient->id, DocumentTag::AVATAR->value);
         }
-        $updated = $this->patientRepository->updatePatient($patient, $newPatientDTO->toArray());
-        if (isset($data['documents'])) {
-            foreach ($data['documents'] as $doc) {
-                if (isset($doc['id']))
-                    PatientDocumentUpdateEvent::dispatch($doc['id'], $patient->id, DocumentTag::DOCUMENT->value);
-            }
-        }
-        return $updated;
+        return $this->patientRepository->updatePatient($patient, $newPatientDTO->toArray());
     }
 
     /**

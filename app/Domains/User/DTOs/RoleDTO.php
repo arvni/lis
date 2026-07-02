@@ -12,7 +12,7 @@ class RoleDTO
     {
         return [
             'name' => $this->name,
-            "permissions"=>$this->prmissions
+            "permissions"=>$this->permissions
         ];
     }
 }

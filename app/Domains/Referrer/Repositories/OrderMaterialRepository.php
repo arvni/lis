@@ -50,7 +50,7 @@ class OrderMaterialRepository
         $orderMaterial->delete();
     }
 
-    protected function applyFilters($query, array $filters)
+    protected function applyFilters($query, array $filters): void
     {
         // Define filter mappings for cleaner code
         $simpleFilters = [
@@ -80,7 +80,6 @@ class OrderMaterialRepository
         if (!empty($filters['search'])) {
             $query->search($filters['search']);
         }
-        return $query;
     }
 
     /**

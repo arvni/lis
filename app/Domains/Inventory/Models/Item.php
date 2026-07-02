@@ -40,6 +40,7 @@ class Item extends Model
 {
     use SoftDeletes, Searchable;
 
+    /** @var list<string> */
     protected $searchable = ['item_code', 'name', 'scientific_name'];
 
     protected $fillable = [

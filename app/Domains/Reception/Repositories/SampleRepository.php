@@ -160,7 +160,7 @@ class SampleRepository
         return Sample::where("barcode", $barcode)->first();
     }
 
-    private function applyFilters($query, array $filters)
+    private function applyFilters($query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search($filters["search"]);

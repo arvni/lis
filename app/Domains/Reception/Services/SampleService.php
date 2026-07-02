@@ -22,7 +22,7 @@ class SampleService
     ) {
     }
 
-    public function listSamples(array $queryData)
+    public function listSamples(array $queryData): LengthAwarePaginator
     {
         return $this->sampleRepository->listSamples($queryData);
     }

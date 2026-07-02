@@ -14,7 +14,7 @@ class UnPublishReportController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Report $report)
+    public function __invoke(Report $report): ?\Illuminate\Http\RedirectResponse
     {
         if (!$report->status)
             return back()->withErrors("this report has been rejected before");
@@ -26,5 +26,7 @@ class UnPublishReportController extends Controller
         $user = auth()->user();
 
         $this->reportService->unPublishReport($report);
+
+        return null;
     }
 }

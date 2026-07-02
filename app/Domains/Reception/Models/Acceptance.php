@@ -46,6 +46,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property int|null $financial_approved_by
  * @property string|null $financial_approved_at
+ * @property-read string|null $report_date query-derived alias (report-date subquery)
  */
 class Acceptance extends Model
 {
@@ -81,6 +82,7 @@ class Acceptance extends Model
         "priority" => AcceptancePriority::class,
     ];
 
+    /** @var list<string> */
     protected $searchable = [
         "referenceCode",
         "patient.fullName",

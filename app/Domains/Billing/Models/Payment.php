@@ -33,6 +33,7 @@ class Payment extends Model
         "paymentMethod",
         "information",
     ];
+    /** @var list<string> */
     protected $searchable=[
         "payer.fullName",
     ];

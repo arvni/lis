@@ -13,7 +13,7 @@ class UpdateRequestFormRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update",$this->route()->parameter("requestForm"));
+        return Gate::allows("update",$this->routeRequestFormModel());
     }
 
     /**
@@ -31,9 +31,17 @@ class UpdateRequestFormRequest extends FormRequest
             "form_data.*.options" => "nullable|array",
             "form_data.*.required" => "nullable|boolean",
             "form_data.*.type" => ["required", Rule::in(["text", "number", "checkbox", "select", "date", "description"])],
-            "name" => "required|unique:request_forms,name,".$this->route()->parameter("requestForm")->id,
+            "name" => "required|unique:request_forms,name,".$this->routeRequestFormModel()->id,
             "document" => ["nullable", "array"],
             "document.id" => ["nullable", "exists:documents,hash"],
         ];
+    }
+
+    private function routeRequestFormModel(): \App\Domains\Laboratory\Models\RequestForm
+    {
+        /** @var \App\Domains\Laboratory\Models\RequestForm $model */
+        $model = $this->route('requestForm');
+
+        return $model;
     }
 }

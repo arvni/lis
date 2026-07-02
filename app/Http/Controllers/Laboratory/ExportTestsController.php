@@ -20,7 +20,7 @@ class ExportTestsController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
         $request->merge([
             "filters" => [

@@ -13,7 +13,7 @@ class UpdateBarcodeGroupRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("barcodeGroup"));
+        return Gate::allows("update", $this->routeBarcodeGroupModel());
     }
 
     /**
@@ -28,14 +28,22 @@ class UpdateBarcodeGroupRequest extends FormRequest
             "name" => [
                 "required",
                 "string",
-                "unique:barcode_groups,name," . $this->route()->parameter("barcodeGroup")->id
+                "unique:barcode_groups,name," . $this->routeBarcodeGroupModel()->id
             ],
             "abbr" => [
                 "required",
                 "string",
                 "max:4",
-                "unique:barcode_groups,abbr," . $this->route()->parameter("barcodeGroup")->id
+                "unique:barcode_groups,abbr," . $this->routeBarcodeGroupModel()->id
             ],
         ];
+    }
+
+    private function routeBarcodeGroupModel(): \App\Domains\Laboratory\Models\BarcodeGroup
+    {
+        /** @var \App\Domains\Laboratory\Models\BarcodeGroup $model */
+        $model = $this->route('barcodeGroup');
+
+        return $model;
     }
 }

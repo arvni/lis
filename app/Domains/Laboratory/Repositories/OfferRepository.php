@@ -45,7 +45,7 @@ class OfferRepository
         $this->logDeleted($offer);
     }
 
-    protected function applyFilters($query, array $filters)
+    protected function applyFilters($query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search(["name"], $filters["search"]);

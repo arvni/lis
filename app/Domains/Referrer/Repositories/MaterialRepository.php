@@ -200,7 +200,7 @@ class MaterialRepository
             ->exists();
     }
 
-    public function getByBarcode(string $barcode)
+    public function getByBarcode(string $barcode): ?Material
     {
         return Material::query()->where("barcode", $barcode)->first();
     }

@@ -17,10 +17,10 @@ class UpdateAcceptanceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("acceptance")) ||
+        return Gate::allows("update", $this->routeAcceptanceModel()) ||
             (
-            Gate::allows("create", $this->route()->parameter("acceptance") &&
-                $this->route()->parameter("acceptance")->status == AcceptanceStatus::PENDING)
+                Gate::allows("create", $this->routeAcceptanceModel()) &&
+                $this->routeAcceptanceModel()->status == AcceptanceStatus::PENDING
             );
     }
 
@@ -495,5 +495,13 @@ class UpdateAcceptanceRequest extends FormRequest
                 collect($this->input("acceptanceItems.tests", []))->filter(fn($item) => $item["method_test"]["test"]["type"] == TestType::TEST->value)->count()
             ) < 1 ||
             $this->input("out_patient");
+    }
+
+    private function routeAcceptanceModel(): \App\Domains\Reception\Models\Acceptance
+    {
+        /** @var \App\Domains\Reception\Models\Acceptance $model */
+        $model = $this->route('acceptance');
+
+        return $model;
     }
 }

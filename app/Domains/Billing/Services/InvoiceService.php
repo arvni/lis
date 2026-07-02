@@ -39,7 +39,8 @@ readonly class InvoiceService
         return $this->invoiceRepository->creatInvoice($invoiceDTO->toArray());
     }
 
-    public function loadForShow(Invoice $invoice)
+    /** @return array<string, mixed> */
+    public function loadForShow(Invoice $invoice): array
     {
         $this->invoiceComposer->recompose($invoice);
 

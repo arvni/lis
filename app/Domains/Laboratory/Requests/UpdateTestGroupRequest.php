@@ -13,7 +13,7 @@ class UpdateTestGroupRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("testGroup"));
+        return Gate::allows("update", $this->routeTestGroupModel());
     }
 
     /**
@@ -24,7 +24,15 @@ class UpdateTestGroupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => ["required", "string", "max:255", "unique:test_groups,name," . $this->route()->parameter("testGroup")->id],
+            "name" => ["required", "string", "max:255", "unique:test_groups,name," . $this->routeTestGroupModel()->id],
         ];
+    }
+
+    private function routeTestGroupModel(): \App\Domains\Laboratory\Models\TestGroup
+    {
+        /** @var \App\Domains\Laboratory\Models\TestGroup $model */
+        $model = $this->route('testGroup');
+
+        return $model;
     }
 }

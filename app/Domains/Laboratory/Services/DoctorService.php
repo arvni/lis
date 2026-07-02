@@ -21,7 +21,7 @@ class DoctorService
         return $this->doctorRepository->ListDoctors($queryData);
     }
 
-    public function storeDoctor(DoctorDTO $doctorDTO)
+    public function storeDoctor(DoctorDTO $doctorDTO): Doctor
     {
         return $this->doctorRepository->creatDoctor($doctorDTO->toArray());
     }

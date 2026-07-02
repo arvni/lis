@@ -87,18 +87,18 @@ class DailyReceptionReportExport implements FromCollection, WithHeadings, WithTi
         // Add title and date
         $sheet->setCellValue('B2', 'Daily Cash Report');
 
-        $formattedDate = Carbon::parse($this->report->report_date)->format('d/M/Y');
+        $formattedDate = Carbon::parse($this->report["report_date"])->format('d/M/Y');
         $sheet->setCellValue('B4', 'Date: ' . $formattedDate);
 
         // Add summary statistics
         $summaryRow = $lastRow + 2;
-        $sheet->setCellValue('B' . $summaryRow, 'PAID(' . $this->report->total_paid . ' RO) , NOT PAID (' . $this->report->total_not_paid . 'RO), TRANSFER (' . $this->report->total_transfer . 'RO)');
+        $sheet->setCellValue('B' . $summaryRow, 'PAID(' . $this->report["total_paid"] . ' RO) , NOT PAID (' . $this->report["total_not_paid"] . 'RO), TRANSFER (' . $this->report["total_transfer"] . 'RO)');
 
         // Add number of patients
-        $sheet->setCellValue('B' . ($summaryRow + 2), 'Number of Patients: ' . $this->report->patients->count());
+        $sheet->setCellValue('B' . ($summaryRow + 2), 'Number of Patients: ' . $this->report["patients"]->count());
 
         // Add prepared by
-        $sheet->setCellValue('B' . ($summaryRow + 5), 'Done By: ' . $this->report->prepared_by);
+        $sheet->setCellValue('B' . ($summaryRow + 5), 'Done By: ' . $this->report["prepared_by"]);
 
         return [
             // Set additional styles as needed

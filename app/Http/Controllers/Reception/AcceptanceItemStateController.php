@@ -24,7 +24,7 @@ class AcceptanceItemStateController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(AcceptanceItemState $acceptanceItemState)
+    public function show(AcceptanceItemState $acceptanceItemState): \Illuminate\Http\Resources\Json\JsonResource
     {
         $acceptanceItemState = $this->acceptanceItemStateService->showAcceptanceItemState($acceptanceItemState);
         return AcceptanceItemStateResource::make($acceptanceItemState);

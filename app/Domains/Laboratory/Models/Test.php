@@ -63,6 +63,7 @@ class Test extends Model
         "can_merge"
     ];
 
+    /** @var list<string> */
     protected $searchable = [
         "name",
         "code",

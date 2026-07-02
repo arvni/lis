@@ -40,7 +40,7 @@ class ReportTemplateParameter extends Model
         "element"
     ];
 
-    public function getElementAttribute()
+    public function getElementAttribute(): string
     {
         return Str::slug($this->title,'_').'_'.$this->id;
     }

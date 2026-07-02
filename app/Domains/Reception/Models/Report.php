@@ -40,6 +40,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property \Illuminate\Support\Collection<int, mixed>|array<array-key, mixed>|null $files runtime-only: report document files set during editing, not a DB column
  */
 class Report extends Model
 {

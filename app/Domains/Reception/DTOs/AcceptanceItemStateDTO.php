@@ -34,7 +34,7 @@ class AcceptanceItemStateDTO
             $acceptanceItemState->status,
             $acceptanceItemState->order ?? ($acceptanceItemState->is_first_section ? 0 : null),
             $acceptanceItemState->is_first_section,
-            $acceptanceItemState->details || "",
+            $acceptanceItemState->details ?? "",
             $acceptanceItemState->user_id,
             $acceptanceItemState->started_by_id,
             $acceptanceItemState->finished_by_id,

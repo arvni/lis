@@ -126,7 +126,7 @@ readonly class MaterialService
         return $this->materialRepository->isBarcodeAvailableToAssign($barcode,$sampleId);
     }
 
-    public function getMaterialByBarcode(string $barcode)
+    public function getMaterialByBarcode(string $barcode): ?Material
     {
         return $this->materialRepository->getByBarcode($barcode);
     }

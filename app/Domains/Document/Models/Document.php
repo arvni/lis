@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
+ * @property int $id
  * @property string $hash
  * @property string $ext
  * @property string|null $related_type
@@ -69,12 +70,12 @@ class Document extends Model
     }
 
 
-    public function getFileNameAttribute()
+    public function getFileNameAttribute(): string
     {
         return $this->attributes['hash'] . '.' . $this->attributes['ext'];
     }
 
-    public function getAddressAttribute()
+    public function getAddressAttribute(): string
     {
         $related = "";
         $relatedId = $this->attributes['owner_id'] . '/';

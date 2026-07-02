@@ -21,7 +21,7 @@ class CustomerService
         return $this->customerRepository->ListCustomers($queryData);
     }
 
-    public function storeCustomer(CustomerDTO $customerDTO)
+    public function storeCustomer(CustomerDTO $customerDTO): Customer
     {
         return $this->customerRepository->creatCustomer($customerDTO->toArray());
     }
@@ -31,7 +31,7 @@ class CustomerService
         return $this->customerRepository->updateCustomer($customer, $customerDTO->toArray());
     }
 
-    public function findById(int|string $id)
+    public function findById(int|string $id): ?Customer
     {
         return $this->customerRepository->findById($id);
     }

@@ -20,6 +20,7 @@ class Unit extends Model
 {
     use SoftDeletes, Searchable;
 
+    /** @var list<string> */
     protected $searchable = ['name', 'abbreviation'];
 
     protected $fillable = ['name', 'abbreviation', 'description'];

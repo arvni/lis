@@ -13,7 +13,7 @@ class UpdateReferrerRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("referrer"));
+        return Gate::allows("update", $this->routeReferrerModel());
     }
 
     /**
@@ -25,7 +25,7 @@ class UpdateReferrerRequest extends FormRequest
     {
         return [
             "fullName" => ["required", "string", "max:255"],
-            "email" => ["required", "string", "email", "max:255", "unique:referrers,email," . $this->route()->parameter("referrer")->id],
+            "email" => ["required", "string", "email", "max:255", "unique:referrers,email," . $this->routeReferrerModel()->id],
             "phoneNo" => ["required", "string", "max:255"],
             "billingInfo.name" => ["nullable", "string", "max:255"],
             "billingInfo.address" => ["nullable", "string", "max:255"],
@@ -41,5 +41,13 @@ class UpdateReferrerRequest extends FormRequest
             'logisticInfo.latitude' => 'nullable|numeric|between:-90,90',
             'logisticInfo.longitude' => 'nullable|numeric|between:-180,180',
         ];
+    }
+
+    private function routeReferrerModel(): \App\Domains\Referrer\Models\Referrer
+    {
+        /** @var \App\Domains\Referrer\Models\Referrer $model */
+        $model = $this->route('referrer');
+
+        return $model;
     }
 }

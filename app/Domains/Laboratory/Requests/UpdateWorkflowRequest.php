@@ -13,7 +13,7 @@ class UpdateWorkflowRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("workflow"));
+        return Gate::allows("update", $this->routeWorkflowModel());
     }
 
     /**
@@ -24,7 +24,7 @@ class UpdateWorkflowRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => ["required", "string", "unique:workflows,name," . $this->route()->parameter("workflow")->id],
+            "name" => ["required", "string", "unique:workflows,name," . $this->routeWorkflowModel()->id],
             "description" => ["nullable", "string"],
             "status" => ["boolean"],
             "section_workflows" => ["required", "array", "min:1"],
@@ -34,5 +34,13 @@ class UpdateWorkflowRequest extends FormRequest
             "section_workflows.*.parameters.*.name" => ["required", "string"],
             "section_workflows.*.parameters.*.type" => ["required", "in:text,date,time,number,options,file"],
         ];
+    }
+
+    private function routeWorkflowModel(): \App\Domains\Laboratory\Models\Workflow
+    {
+        /** @var \App\Domains\Laboratory\Models\Workflow $model */
+        $model = $this->route('workflow');
+
+        return $model;
     }
 }

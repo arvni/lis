@@ -34,7 +34,7 @@ class TestDTO
     {
         return new self(
             $data["name"],
-            $existingType ?? TestType::from($data["type"]),
+            TestType::from($data["type"]),
             $data["code"],
             $data["fullName"],
             $data["description"],

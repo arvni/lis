@@ -33,6 +33,7 @@ class Tag extends Model
         });
     }
 
+    /** @var list<string> */
     protected $searchable = [
         'name',
     ];

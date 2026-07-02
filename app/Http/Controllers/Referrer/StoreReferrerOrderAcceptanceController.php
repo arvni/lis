@@ -38,7 +38,7 @@ class StoreReferrerOrderAcceptanceController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(ReferrerOrder $referrerOrder, StoreReferrerOrderAcceptanceRequest $request)
+    public function __invoke(ReferrerOrder $referrerOrder, StoreReferrerOrderAcceptanceRequest $request): \Illuminate\Http\RedirectResponse
     {
         if ($referrerOrder->acceptance_id)
             return back()->withErrors("it has Acceptance Currently");

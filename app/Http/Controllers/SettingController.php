@@ -33,7 +33,7 @@ class SettingController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Setting $setting)
+    public function show(Setting $setting): void
     {
         //
     }

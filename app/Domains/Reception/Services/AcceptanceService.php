@@ -50,12 +50,12 @@ class AcceptanceService
         return $this->acceptanceRepository->ListAcceptances($queryData);
     }
 
-    public function exportAcceptances(array $queryData)
+    public function exportAcceptances(array $queryData): \Illuminate\Support\Collection
     {
         return $this->acceptanceRepository->exportAcceptances($queryData);
     }
 
-    public function getReferrerAcceptanceReported(int|string $referrer_id, mixed $date)
+    public function getReferrerAcceptanceReported(int|string $referrer_id, mixed $date): \Illuminate\Support\Collection
     {
         return $this->acceptanceRepository->getReported($referrer_id, $date);
     }
@@ -423,7 +423,8 @@ class AcceptanceService
         }
     }
 
-    public function listBarcodes(Acceptance $acceptance)
+    /** @return array<string, mixed> */
+    public function listBarcodes(Acceptance $acceptance): array
     {
         $acceptance->load([
             "acceptanceItems" => function ($query) {
@@ -714,7 +715,8 @@ class AcceptanceService
         return $output;
     }
 
-    private function convertAcceptanceItems(Collection $acceptanceItems)
+    /** @param  Collection<int, \App\Domains\Reception\Models\AcceptanceItem>  $acceptanceItems */
+    private function convertAcceptanceItems(Collection $acceptanceItems): \Illuminate\Support\Collection
     {
         return $acceptanceItems
             ->flatMap(function ($item) {
@@ -724,7 +726,7 @@ class AcceptanceService
                     $newModel = $item->replicate();
                     $newModel->id = $item->id;
                     $newModel->created_at = $item->created_at;
-                    $newModel->patient = $item->patients->first();
+                    $newModel->setRelation('patient', $item->patients->first());
                     $newModel->_sampleTypeId = $item->customParameters['sampleType'] ?? null;
                     return collect([$newModel]);
                 }
@@ -741,7 +743,7 @@ class AcceptanceService
                                     $newModel->id = $item->id;
                                     $newModel->created_at = $item->created_at;
                                     $patient = $item->patients->where('id', $patientData['id'])->first();
-                                    $newModel->patient = $patient;
+                                    $newModel->setRelation('patient', $patient);
                                     $newModel->_sampleTypeId = $sampleTypeId;
                                     return $newModel;
                                 });
@@ -750,7 +752,7 @@ class AcceptanceService
                             $newModel->id = $item->id;
                             $newModel->created_at = $item->created_at;
                             $patient = $item->patients->where('id', $sample['id'])->first();
-                            $newModel->patient = $patient;
+                            $newModel->setRelation('patient', $patient);
                             $newModel->_sampleTypeId = $sampleTypeId;
                             return $newModel;
                         }

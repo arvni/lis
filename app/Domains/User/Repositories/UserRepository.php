@@ -17,9 +17,9 @@ class UserRepository
         if (isset($queryData["filters"]))
             $this->apalyFilters($query, $queryData["filters"]);
 
-        $query->orderBy($filters['sort']['field'] ?? 'id', $filters['sort']['sort'] ?? 'asc');
+        $query->orderBy($queryData['sort']['field'] ?? 'id', $queryData['sort']['sort'] ?? 'asc');
 
-        return $query->paginate($filters["pageSize"] ?? 10);
+        return $query->paginate($queryData["pageSize"] ?? 10);
     }
 
     public function find(int $id): ?User

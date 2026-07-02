@@ -32,6 +32,7 @@ class Supplier extends Model
 {
     use SoftDeletes, Searchable;
 
+    /** @var list<string> */
     protected $searchable = ['name', 'code', 'tax_number'];
 
     protected $fillable = [

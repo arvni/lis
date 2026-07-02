@@ -28,6 +28,7 @@ class Statement extends Model
         "referrer_id"
     ];
 
+    /** @var list<string> */
     protected $searchable = [
         "referrer.fullName"
     ];

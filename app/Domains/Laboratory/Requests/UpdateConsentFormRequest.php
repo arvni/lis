@@ -13,7 +13,7 @@ class UpdateConsentFormRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->route()->parameter("consentForm"));
+        return Gate::allows("update", $this->routeConsentFormModel());
     }
 
     /**
@@ -24,9 +24,17 @@ class UpdateConsentFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => ["required", "string", "max:255", "unique:consent_forms,name," . $this->route()->parameter("consentForm")->id],
+            "name" => ["required", "string", "max:255", "unique:consent_forms,name," . $this->routeConsentFormModel()->id],
             "document" => ["required", "array"],
             "document.id" => ["required", "exists:documents,hash"],
         ];
+    }
+
+    private function routeConsentFormModel(): \App\Domains\Laboratory\Models\ConsentForm
+    {
+        /** @var \App\Domains\Laboratory\Models\ConsentForm $model */
+        $model = $this->route('consentForm');
+
+        return $model;
     }
 }

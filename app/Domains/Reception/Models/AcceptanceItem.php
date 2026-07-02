@@ -36,6 +36,8 @@ use Illuminate\Database\Eloquent\Builder;
  * @property bool $is_pooling
  * @property array<array-key, mixed>|null $timeline
  * @property array<array-key, mixed>|null $customParameters
+ * @property int|string|null $_sampleTypeId runtime-only: set during barcode conversion, not a DB column
+ * @property-read string|null $report_date query-derived alias (via the reportDate relation's report-date subquery)
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at

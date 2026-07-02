@@ -61,7 +61,7 @@ class CustomerRepository
         return Customer::query()->where("phone", $phone)->first();
     }
 
-    public function findById(int|string $id)
+    public function findById(int|string $id): ?Customer
     {
         return Customer::find($id);
     }

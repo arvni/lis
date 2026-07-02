@@ -13,7 +13,7 @@ class ExportAcceptancesController extends Controller
 {
     public function __construct(private readonly AcceptanceService $acceptanceService) {}
 
-    public function __invoke(ExportAcceptancesRequest $request)
+    public function __invoke(ExportAcceptancesRequest $request): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
         $queryData = $request->all();
         $filters   = $queryData['filters'] ?? [];

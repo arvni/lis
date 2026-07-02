@@ -17,7 +17,7 @@ class ExportReportTemplateParametersController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(ReportTemplate $reportTemplate)
+    public function __invoke(ReportTemplate $reportTemplate): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
         $parameters = $this->reportTemplateService->getParameters($reportTemplate);
         return Excel::download(new ReportTemplateParameterExport($parameters), "$reportTemplate->name parameters.xlsx");
