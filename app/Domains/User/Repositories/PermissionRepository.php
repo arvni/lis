@@ -9,7 +9,9 @@ class PermissionRepository
 {
     public function create(string $name): Permission
     {
-        return Permission::findOrCreate($name);
+        /** @var Permission $permission */
+        $permission = Permission::findOrCreate($name);
+        return $permission;
     }
 
     public function edit(Permission $permission, array $data): Permission
@@ -26,7 +28,9 @@ class PermissionRepository
     public function getPermissionByName(string $permissionName): ?Permission
     {
         try {
-            return Permission::findByName($permissionName);
+            /** @var Permission $permission */
+            $permission = Permission::findByName($permissionName);
+            return $permission;
         } catch (Exception $e) {
             return null;
         }

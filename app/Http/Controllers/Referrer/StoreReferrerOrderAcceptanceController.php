@@ -19,6 +19,7 @@ use App\Domains\Referrer\DTOs\ReferrerOrderDTO;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Referrer\Requests\StoreReferrerOrderAcceptanceRequest;
 use App\Domains\Referrer\Services\ReferrerOrderService;
+use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
@@ -79,7 +80,7 @@ class StoreReferrerOrderAcceptanceController extends Controller
     /**
      * Handle pooling mode - add tests to existing acceptance
      */
-    private function handlePoolingAcceptance(ReferrerOrder $referrerOrder, array $validated, $user): \Illuminate\Http\RedirectResponse
+    private function handlePoolingAcceptance(ReferrerOrder $referrerOrder, array $validated, User $user): \Illuminate\Http\RedirectResponse
     {
         $existingAcceptance = $this->receptionAdapter->findAcceptance((int) $validated['existing_acceptance_id']);
 

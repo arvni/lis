@@ -79,7 +79,7 @@ readonly class PurchaseRequestService
      *  - it is the currently active step (lowest sort_order among pending steps)
      *  - the given user is the designated approver, a role-holder, or the delegatee
      */
-    private function scopeActiveApproverQuery(Builder $q, $user): void
+    private function scopeActiveApproverQuery(Builder $q, User $user): void
     {
         $userRoles = $user->getRoleNames()->all();
 

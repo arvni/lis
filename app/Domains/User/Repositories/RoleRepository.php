@@ -28,6 +28,7 @@ class RoleRepository
 
     public function create(array $data): Role
     {
+        /** @var Role $role */
         $role = Role::create($data);
         $role->syncPermissions($data['permissions'] ?? []);
         $this->logCreated($role);
@@ -50,7 +51,9 @@ class RoleRepository
 
     public function getAdminRole():?Role
     {
-        return Role::findByName("Admin");
+        /** @var Role $role */
+        $role = Role::findByName("Admin");
+        return $role;
     }
 
     public function getPermissions(): Collection
