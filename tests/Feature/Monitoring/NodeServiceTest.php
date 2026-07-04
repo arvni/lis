@@ -4,6 +4,7 @@ namespace Tests\Feature\Monitoring;
 
 use App\Domains\Laboratory\Models\Section;
 use App\Domains\Laboratory\Models\SectionGroup;
+use App\Domains\Monitoring\Adapters\LaboratoryAdapter;
 use App\Domains\Monitoring\Models\MonitoringNode;
 use App\Domains\Monitoring\Models\MonitoringSample;
 use App\Domains\Monitoring\Services\MocreoService;
@@ -23,7 +24,10 @@ class NodeServiceTest extends TestCase
     {
         parent::setUp();
         // MocreoService is unused by the local-data methods under test.
-        $this->service = new NodeService(Mockery::mock(MocreoService::class));
+        $this->service = new NodeService(
+            Mockery::mock(MocreoService::class),
+            app(LaboratoryAdapter::class),
+        );
     }
 
     public function test_get_nodes_maps_local_nodes(): void

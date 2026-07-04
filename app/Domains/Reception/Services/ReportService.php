@@ -3,8 +3,6 @@
 namespace App\Domains\Reception\Services;
 
 use App\Domains\Document\Enums\DocumentTag;
-use App\Domains\Laboratory\Models\Method;
-use App\Domains\Laboratory\Models\Test;
 use App\Domains\Reception\Adapters\DocumentAdapter;
 use App\Domains\Reception\Adapters\LaboratoryAdapter;
 use App\Domains\Reception\Enums\ReportApprovalStatus;
@@ -236,28 +234,6 @@ class ReportService
     {
         $acceptanceItem->load("method.test.reportTemplates");
         return $this->laboratoryService->getTemplateUrl($acceptanceItem->method->test->reportTemplates);
-    }
-
-    /**
-     * Get method from laboratory domain via adapter
-     *
-     * @param AcceptanceItem $acceptanceItem
-     * @return Method
-     */
-    public function getMethod(AcceptanceItem $acceptanceItem): Method
-    {
-        return $this->laboratoryService->getMethodForAcceptanceItem($acceptanceItem);
-    }
-
-    /**
-     * Get test from laboratory domain via adapter
-     *
-     * @param AcceptanceItem $acceptanceItem
-     * @return Test
-     */
-    public function getTest(AcceptanceItem $acceptanceItem): Test
-    {
-        return $this->laboratoryService->getTestForAcceptanceItem($acceptanceItem);
     }
 
     /**

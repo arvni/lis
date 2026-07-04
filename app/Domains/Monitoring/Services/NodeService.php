@@ -2,7 +2,7 @@
 
 namespace App\Domains\Monitoring\Services;
 
-use App\Domains\Laboratory\Models\Section;
+use App\Domains\Monitoring\Adapters\LaboratoryAdapter;
 use App\Domains\Monitoring\Jobs\FetchNodeSamplesJob;
 use App\Domains\Monitoring\Models\MonitoringNode;
 use App\Domains\Monitoring\Models\MonitoringSample;
@@ -11,7 +11,10 @@ use Illuminate\Support\Collection;
 
 class NodeService
 {
-    public function __construct(private MocreoService $mocreoService) {}
+    public function __construct(
+        private MocreoService $mocreoService,
+        private LaboratoryAdapter $laboratoryAdapter,
+    ) {}
 
     /**
      * Active lab sections as lightweight {id, name} options for the node form.
@@ -20,10 +23,7 @@ class NodeService
      */
     public function getSectionsForSelect(): Collection
     {
-        return Section::without('sectionGroup')->active()->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn (Section $s) => ['id' => $s->id, 'name' => $s->name])
-            ->values();
+        return $this->laboratoryAdapter->activeSectionsForSelect();
     }
 
     /**

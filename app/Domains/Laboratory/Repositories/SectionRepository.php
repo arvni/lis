@@ -21,6 +21,16 @@ class SectionRepository
         return Section::all();
     }
 
+    /**
+     * Active sections (id + name only), ordered by name — for lightweight selects.
+     *
+     * @return Collection<int, Section>
+     */
+    public function getActiveOrdered(): Collection
+    {
+        return Section::without('sectionGroup')->active()->orderBy('name')->get(['id', 'name']);
+    }
+
     public function listSections(array $queryData): LengthAwarePaginator
     {
         $query = Section::withCount(["workflows", "acceptanceItemStates"])

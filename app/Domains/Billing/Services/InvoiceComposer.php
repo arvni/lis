@@ -2,6 +2,7 @@
 
 namespace App\Domains\Billing\Services;
 
+use App\Domains\Billing\Adapters\ReceptionAdapter;
 use App\Domains\Billing\Enums\InvoiceItemKind;
 use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Models\Invoice;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\DB;
 
 class InvoiceComposer
 {
+    public function __construct(private ReceptionAdapter $receptionAdapter) {}
+
     /**
      * Rebuild invoice_items for the given invoice from its current acceptance_items.
      * Returns the number of invoice_items now active on the invoice.
@@ -61,8 +64,7 @@ class InvoiceComposer
                 // Locked items are user-managed: don't touch their fields.
                 // Their bucket's acceptance_items still link to them so the totals make sense.
                 if ($item && $item->isLocked()) {
-                    AcceptanceItem::whereIn('id', $bucket['acceptance_item_ids'])
-                        ->update(['invoice_item_id' => $item->id]);
+                    $this->receptionAdapter->linkAcceptanceItemsToInvoiceItem($bucket['acceptance_item_ids'], $item->id);
                     $keptIds[] = $item->id;
                     continue;
                 }
@@ -74,8 +76,7 @@ class InvoiceComposer
                     $item = $invoice->invoiceItems()->create($payload);
                 }
 
-                AcceptanceItem::whereIn('id', $bucket['acceptance_item_ids'])
-                    ->update(['invoice_item_id' => $item->id]);
+                $this->receptionAdapter->linkAcceptanceItemsToInvoiceItem($bucket['acceptance_item_ids'], $item->id);
 
                 $keptIds[] = $item->id;
             }

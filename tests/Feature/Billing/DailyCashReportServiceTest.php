@@ -27,7 +27,7 @@ class DailyCashReportServiceTest extends TestCase
     {
         parent::setUp();
         $this->actingAs(User::factory()->create());
-        $this->service = new DailyCashReportService();
+        $this->service = app(DailyCashReportService::class);
 
         $this->patient = Patient::create([
             'fullName'     => 'Cash Patient',
