@@ -48,13 +48,13 @@ class OfferRepository
     protected function applyFilters($query, array $filters): void
     {
         if (isset($filters["search"]))
-            $query->search(["name"], $filters["search"]);
+            $query->search(["title"], $filters["search"]);
         if (isset($filters["test_id"]))
             $query->whereHas("tests", function ($query) use ($filters) {
                 $query->where("tests.id", $filters["test_id"]);
             });
         if (isset($filters["referrer_id"]))
-            $query->whereHas("referrer_id", function ($query) use ($filters) {
+            $query->whereHas("referrers", function ($query) use ($filters) {
                 $query->where("referrers.id", $filters["referrer_id"]);
             });
         if (isset($filters["date"]))
