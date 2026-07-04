@@ -38,6 +38,12 @@ use Illuminate\Database\Eloquent\Builder;
  * @property array<array-key, mixed>|null $customParameters
  * @property int|string|null $_sampleTypeId runtime-only: set during barcode conversion, not a DB column
  * @property-read string|null $report_date query-derived alias (via the reportDate relation's report-date subquery)
+ * @property-read string|null $patient_fullname withAggregate alias (AcceptanceItemRepository::listAllAcceptanceItems)
+ * @property-read string|null $patient_idno withAggregate alias (AcceptanceItemRepository::listAllAcceptanceItems)
+ * @property-read string|null $patient_dateofbirth withAggregate alias (AcceptanceItemRepository::listAllAcceptanceItems)
+ * @property-read string|null $test_testsname withAggregate alias (AcceptanceItemRepository::listAllAcceptanceItems)
+ * @property-read string|null $method_name withAggregate alias (AcceptanceItemRepository::listAllAcceptanceItems)
+ * @property-read int|string|null $method_turnaround_time withAggregate alias (AcceptanceItemRepository::listAllAcceptanceItems)
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at

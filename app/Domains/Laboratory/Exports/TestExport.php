@@ -3,6 +3,8 @@
 namespace App\Domains\Laboratory\Exports;
 
 use App\Domains\Laboratory\Enums\MethodPriceType;
+use App\Domains\Laboratory\Models\Method;
+use App\Domains\Laboratory\Models\MethodTest;
 use App\Domains\Laboratory\Models\Test;
 use App\Domains\Laboratory\Enums\TestType;
 use Illuminate\Support\Collection;
@@ -101,7 +103,7 @@ class TestExport implements
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $this->configureSheet($event->sheet);
+                $this->configureSheet($event->sheet->getDelegate());
             },
         ];
     }
@@ -116,7 +118,7 @@ class TestExport implements
         ];
     }
 
-    private function configureSheet($sheet): void
+    private function configureSheet(Worksheet $sheet): void
     {
         $lastColumn = $sheet->getHighestColumn();
         $lastRow = $sheet->getHighestRow();
@@ -259,7 +261,7 @@ class TestExport implements
         return $this->formatMultipleMethodReferrerPrices($activeMethods);
     }
 
-    private function formatSingleMethodPrice($method): string
+    private function formatSingleMethodPrice(Method $method): string
     {
         return match ($method->price_type) {
             MethodPriceType::FIX => "{$method->price}\n",
@@ -269,7 +271,7 @@ class TestExport implements
         };
     }
 
-    private function formatSingleMethodReferrerPrice($method): string
+    private function formatSingleMethodReferrerPrice(Method $method): string
     {
         return match ($method->referrer_price_type) {
             MethodPriceType::FIX => "{$method->referrer_price}\n",
@@ -279,6 +281,9 @@ class TestExport implements
         };
     }
 
+    /**
+     * @param  Collection<int, MethodTest>  $methods
+     */
     private function formatMultipleMethodPrices(Collection $methods): string
     {
         $formatted = [];
@@ -296,6 +301,9 @@ class TestExport implements
         return implode("\n", $formatted) ?: '-';
     }
 
+    /**
+     * @param  Collection<int, MethodTest>  $methods
+     */
     private function formatMultipleMethodReferrerPrices(Collection $methods): string
     {
         $formatted = [];
@@ -325,7 +333,7 @@ class TestExport implements
         return $formatted . "}\n";
     }
 
-    private function formatMethodConditionalPrice($method): string
+    private function formatMethodConditionalPrice(Method $method): string
     {
         $formatted = "{$method->name} Conditional Pricing:\n{\n";
 
@@ -337,7 +345,7 @@ class TestExport implements
         return $formatted . "}\n";
     }
 
-    private function formatMethodConditionalReferrerPrice($method): string
+    private function formatMethodConditionalReferrerPrice(Method $method): string
     {
         $formatted = "{$method->name} Conditional Pricing:\n{\n";
 

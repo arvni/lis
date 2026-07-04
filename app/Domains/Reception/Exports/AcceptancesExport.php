@@ -2,6 +2,7 @@
 
 namespace App\Domains\Reception\Exports;
 
+use App\Domains\Reception\Models\Acceptance;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -97,7 +98,7 @@ class AcceptancesExport implements
         ];
     }
 
-    private function formatTests($row): string
+    private function formatTests(Acceptance $row): string
     {
         $items = $row->acceptanceItems ?? collect();
 
