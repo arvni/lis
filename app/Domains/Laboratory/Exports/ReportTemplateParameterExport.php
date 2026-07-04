@@ -2,6 +2,7 @@
 
 namespace App\Domains\Laboratory\Exports;
 
+use App\Domains\Laboratory\Models\ReportTemplateParameter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\FromArray;
@@ -27,10 +28,15 @@ class ReportTemplateParameterExport implements
     private const PRIMARY_COLOR = '0361ac';
     private const TEXT_COLOR = 'ffffff';
 
+    /** @var array<int, string> */
     private array $headers;
+    /** @var array<int, string> */
     private array $parameters;
     private string $worksheetTitle;
 
+    /**
+     * @param  Collection<int, ReportTemplateParameter>  $parameters
+     */
     public function __construct(Collection $parameters, string $worksheetTitle = 'Parameters')
     {
         $this->worksheetTitle = $worksheetTitle;

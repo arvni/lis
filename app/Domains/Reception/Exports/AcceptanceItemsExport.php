@@ -3,6 +3,8 @@
 namespace App\Domains\Reception\Exports;
 
 use App\Domains\Reception\Adapters\BillingAdapter;
+use App\Domains\Reception\DTOs\AcceptanceItemExportRow;
+use App\Domains\Reception\Models\AcceptanceItem;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
@@ -25,9 +27,13 @@ class AcceptanceItemsExport implements
     private const HEADER_COLOR = '0361ac';
     private const HEADER_TEXT_COLOR = 'ffffff';
 
+    /** @var Collection<int, AcceptanceItem> */
     private Collection $acceptanceItems;
     private BillingAdapter $billingAdapter;
 
+    /**
+     * @param  Collection<int, AcceptanceItem>  $acceptanceItems
+     */
     public function __construct(Collection $acceptanceItems)
     {
         $this->acceptanceItems = $acceptanceItems;
@@ -37,6 +43,8 @@ class AcceptanceItemsExport implements
     /**
      * Returns the collection of acceptance items for export
      * Merges items with same panel_id and acceptance_id
+     *
+     * @return SupportCollection<int, AcceptanceItemExportRow>
      */
     public function collection(): SupportCollection
     {
@@ -44,14 +52,19 @@ class AcceptanceItemsExport implements
     }
 
     /**
-     * Merge acceptance items that have the same panel_id and acceptance_id
+     * Merge acceptance items that have the same panel_id and acceptance_id into
+     * typed export rows.
+     *
+     * @param  Collection<int, AcceptanceItem>  $items
+     * @return SupportCollection<int, AcceptanceItemExportRow>
      */
     private function mergeAcceptanceItems(Collection $items): SupportCollection
     {
+        /** @var SupportCollection<int, AcceptanceItemExportRow> $merged */
         $merged = new SupportCollection();
 
         // Group by acceptance_id and panel_id
-        $grouped = $items->groupBy(function ($item) {
+        $grouped = $items->groupBy(function (AcceptanceItem $item) {
             // Items without panel_id will be grouped individually by their own id
             if (!$item->panel_id) {
                 return "no_panel_{$item->id}";
@@ -59,38 +72,15 @@ class AcceptanceItemsExport implements
             return "acceptance_{$item->acceptance_id}_panel_{$item->panel_id}";
         });
 
-        foreach ($grouped as $key => $group) {
+        foreach ($grouped as $group) {
             if ($group->count() === 1) {
                 // Single item, no merging needed
-                $merged->push($group->first());
+                /** @var AcceptanceItem $single */
+                $single = $group->first();
+                $merged->push(AcceptanceItemExportRow::fromAcceptanceItem($single));
             } else {
                 // Multiple items with same panel_id and acceptance_id - merge them
-                $first = $group->first();
-
-                // Create a merged item object
-                $mergedItem = (object) [
-                    'id' => $first->id,
-                    'acceptance_id' => $first->acceptance_id,
-                    'panel_id' => $first->panel_id,
-                    'price' => $group->sum('price'),
-                    'discount' => $group->sum('discount'),
-                    'patient_fullname' => $first->patient_fullname,
-                    'patient_idno' => $first->patient_idno,
-                    'patient_dateofbirth' => $first->patient_dateofbirth,
-                    'test_testsname' => $first->test_testsname,
-                    'method_name' => $first->method_name,
-                    'method_turnaround_time' => $first->method_turnaround_time,
-                    'activeSamples' => $first->activeSamples,
-                    'tags' => $group->flatMap(fn($item) => $item->tags ?? [])->unique('id')->values(),
-                    'status' => $first->status,
-                    'created_at' => $first->created_at,
-                    'updated_at' => $first->updated_at,
-                    'invoice' => $first->invoice,
-                    'acceptance' => $first->acceptance,
-                    'is_merged' => true,
-                ];
-
-                $merged->push($mergedItem);
+                $merged->push(AcceptanceItemExportRow::fromMergedGroup($group));
             }
         }
 
@@ -126,17 +116,20 @@ class AcceptanceItemsExport implements
 
     /**
      * Maps each row of data to the appropriate format
+     *
+     * @param  AcceptanceItemExportRow  $row
+     * @return array<int, string|int|null>
      */
     public function map($row): array
     {
         return [
             $row->id,
             $this->getClientName($row),
-            $row->patient_fullname,
-            $row->patient_idno,
-            $row->patient_dateofbirth,
-            $row->test_testsname,
-            $row->method_name,
+            $row->patientFullname,
+            $row->patientIdno,
+            $row->patientDateofbirth,
+            $row->testTestsname,
+            $row->methodName,
             $this->formatTags($row),
             $this->formatPrice($row->price),
             $this->formatDiscount($row->discount),
@@ -145,8 +138,8 @@ class AcceptanceItemsExport implements
             $this->formatStatus($row->status),
             $this->getInvoiceNo($row),
             $this->getInvoiceDate($row),
-            $this->formatDateTime($row->created_at),
-            $this->formatDateTime($row->updated_at),
+            $this->formatDateTime($row->createdAt),
+            $this->formatDateTime($row->updatedAt),
             $this->formatEstimatedReportDate($row),
         ];
     }
@@ -179,7 +172,7 @@ class AcceptanceItemsExport implements
     /**
      * Safely retrieves the client name from the row
      */
-    private function getClientName($row): ?string
+    private function getClientName(AcceptanceItemExportRow $row): ?string
     {
         $acceptance = $row->acceptance ?? null;
         if ($acceptance && $acceptance->referrer) {
@@ -207,9 +200,9 @@ class AcceptanceItemsExport implements
     /**
      * Formats assigned tags as a comma-separated list.
      */
-    private function formatTags($row): string
+    private function formatTags(AcceptanceItemExportRow $row): string
     {
-        return collect($row->tags ?? [])->pluck('name')->filter()->join(', ');
+        return collect($row->tags)->pluck('name')->filter()->join(', ');
     }
 
     /**
@@ -247,7 +240,7 @@ class AcceptanceItemsExport implements
     /**
      * Gets the invoice number for the acceptance item
      */
-    private function getInvoiceNo($row): string
+    private function getInvoiceNo(AcceptanceItemExportRow $row): string
     {
         $invoice = $this->getInvoice($row);
 
@@ -261,7 +254,7 @@ class AcceptanceItemsExport implements
     /**
      * Gets the invoice date for the acceptance item
      */
-    private function getInvoiceDate($row): string
+    private function getInvoiceDate(AcceptanceItemExportRow $row): string
     {
         $invoice = $this->getInvoice($row);
 
@@ -276,14 +269,14 @@ class AcceptanceItemsExport implements
      * Computes the estimated report date by adding turnaround_time working days
      * (skipping Friday and Saturday) to the acceptance item's created_at date.
      */
-    private function formatEstimatedReportDate($row): string
+    private function formatEstimatedReportDate(AcceptanceItemExportRow $row): string
     {
-        $turnaroundTime = $row->method_turnaround_time ?? null;
-        if (!$turnaroundTime || !$row->created_at) {
+        $turnaroundTime = $row->methodTurnaroundTime ?? null;
+        if (!$turnaroundTime || !$row->createdAt) {
             return '';
         }
 
-        $date = Carbon::parse($row->created_at, self::TIMEZONE);
+        $date = Carbon::parse($row->createdAt, self::TIMEZONE);
         $remaining = (int) $turnaroundTime;
 
         while ($remaining > 0) {
@@ -297,15 +290,11 @@ class AcceptanceItemsExport implements
     }
 
     /**
-     * Safely retrieves the invoice from the row
+     * Safely retrieves the invoice (a Billing model, kept loosely typed so the
+     * Reception layer does not import it) from the row.
      */
-    private function getInvoice($row)
+    private function getInvoice(AcceptanceItemExportRow $row): mixed
     {
-        // Handle both model instances and merged objects
-        if (is_object($row) && isset($row->invoice)) {
-            return $row->invoice;
-        }
-
-        return null;
+        return $row->invoice;
     }
 }
