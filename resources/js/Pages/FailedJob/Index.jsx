@@ -1,219 +1,21 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
-import {
-    Box,
-    Button,
-    Chip,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Stack,
-    Tooltip,
-    Typography,
-    Divider,
-    LinearProgress,
-    TextField,
-    MenuItem,
-    Select,
-    FormControl,
-    InputLabel,
-    Grid as Grid,
-    Card,
-    CardContent,
-} from '@mui/material';
-import { GridActionsCellItem } from '@mui/x-data-grid';
+import { Box, Button, Chip, Stack } from '@mui/material';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import TableLayout from '@/Layouts/TableLayout';
 import PageHeader from '@/Components/PageHeader';
 import DeleteForm from '@/Components/DeleteForm';
-import ReplayIcon from '@mui/icons-material/Replay';
-import DeleteIcon from '@mui/icons-material/Delete';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import ReplayCircleFilledIcon from '@mui/icons-material/ReplayCircleFilled';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlined';
-import { formatDate } from '@/Services/helper.js';
 
-// ─── Exception detail dialog ──────────────────────────────────────────────────
-function ExceptionDialog({ open, onClose, job }) {
-    if (!job) return null;
-    return (
-        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-            <DialogTitle>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <ErrorOutlineIcon color="error" />
-                    <Box>
-                        <Typography variant="h6" component="span">
-                            {job.display_name?.split('\\').pop()}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                            {job.display_name}
-                        </Typography>
-                    </Box>
-                </Box>
-            </DialogTitle>
-            <DialogContent dividers>
-                <Stack spacing={2}>
-                    <Box>
-                        <Typography variant="subtitle2" gutterBottom>
-                            Job Details
-                        </Typography>
-                        <Grid container spacing={1}>
-                            {[
-                                ['UUID', job.uuid],
-                                ['Queue', job.queue],
-                                ['Connection', job.connection],
-                                ['Max Tries', job.max_tries ?? '—'],
-                                ['Backoff', job.backoff ?? '—'],
-                                ['Failed At', job.failed_at],
-                            ].map(([label, value]) => (
-                                <React.Fragment key={label}>
-                                    <Grid size={3}>
-                                        <Typography variant="caption" color="text.secondary">
-                                            {label}
-                                        </Typography>
-                                    </Grid>
-                                    <Grid size={9}>
-                                        <Typography variant="caption">{value}</Typography>
-                                    </Grid>
-                                </React.Fragment>
-                            ))}
-                        </Grid>
-                    </Box>
-                    <Divider />
-                    <Box>
-                        <Typography variant="subtitle2" gutterBottom>
-                            Full Exception
-                        </Typography>
-                        <Box
-                            component="pre"
-                            sx={{
-                                fontSize: '0.72rem',
-                                bgcolor: 'grey.900',
-                                color: 'grey.100',
-                                p: 2,
-                                borderRadius: 1,
-                                overflow: 'auto',
-                                maxHeight: 400,
-                                whiteSpace: 'pre-wrap',
-                                wordBreak: 'break-word',
-                            }}
-                        >
-                            {job.full_exception}
-                        </Box>
-                    </Box>
-                </Stack>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose}>Close</Button>
-            </DialogActions>
-        </Dialog>
-    );
-}
+import ExceptionDialog from './Index/ExceptionDialog';
+import TypeSummaryBar from './Index/TypeSummaryBar';
+import BulkConfirmDialog from './Index/BulkConfirmDialog';
+import { FailedJobFilter } from './Index/FailedJobFilter';
+import { buildColumns } from './Index/columns';
 
-// ─── Type summary cards ───────────────────────────────────────────────────────
-const TYPE_COLORS = ['error', 'warning', 'info', 'secondary'];
-function TypeSummaryBar({ typeSummary }) {
-    if (!typeSummary?.length) return null;
-    return (
-        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 2 }}>
-            {typeSummary.map((t, i) => {
-                const shortName = t.job_type?.split('\\').pop() ?? t.job_type;
-                return (
-                    <Card key={t.job_type} variant="outlined" sx={{ minWidth: 140 }}>
-                        <CardContent sx={{ p: '10px 14px!important' }}>
-                            <Typography
-                                variant="caption"
-                                color="text.secondary"
-                                noWrap
-                                title={t.job_type}
-                            >
-                                {shortName}
-                            </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                                <ErrorOutlineIcon
-                                    fontSize="small"
-                                    color={TYPE_COLORS[i % TYPE_COLORS.length]}
-                                />
-                                <Typography
-                                    variant="h6"
-                                    fontWeight="bold"
-                                    color={`${TYPE_COLORS[i % TYPE_COLORS.length]}.main`}
-                                >
-                                    {t.count}
-                                </Typography>
-                            </Box>
-                        </CardContent>
-                    </Card>
-                );
-            })}
-        </Box>
-    );
-}
-
-// ─── Bulk-action confirm dialog ───────────────────────────────────────────────
-function BulkConfirmDialog({
-    open,
-    onClose,
-    onConfirm,
-    title,
-    message,
-    confirmColor = 'error',
-    processing,
-}) {
-    return (
-        <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-            <DialogTitle>{title}</DialogTitle>
-            <DialogContent>
-                <Typography>{message}</Typography>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose} disabled={processing}>
-                    Cancel
-                </Button>
-                <Button
-                    onClick={onConfirm}
-                    color={confirmColor}
-                    variant="contained"
-                    disabled={processing}
-                >
-                    {processing ? <LinearProgress size={16} /> : 'Confirm'}
-                </Button>
-            </DialogActions>
-        </Dialog>
-    );
-}
-
-// ─── Filter component ─────────────────────────────────────────────────────────
-export function FailedJobFilter({ filters, setFilters, queues }) {
-    return (
-        <Stack direction="row" spacing={2} sx={{ p: 2, flexWrap: 'wrap' }}>
-            <TextField
-                size="small"
-                label="Search"
-                value={filters.search ?? ''}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                sx={{ minWidth: 200 }}
-            />
-            <FormControl size="small" sx={{ minWidth: 180 }}>
-                <InputLabel>Queue</InputLabel>
-                <Select
-                    value={filters.queue ?? ''}
-                    label="Queue"
-                    onChange={(e) => setFilters({ ...filters, queue: e.target.value })}
-                >
-                    <MenuItem value="">All Queues</MenuItem>
-                    {(queues || []).map((q) => (
-                        <MenuItem key={q} value={q}>
-                            {q}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
-        </Stack>
-    );
-}
+// Re-exported for backward compatibility (named export).
+export { FailedJobFilter };
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 const FailedJobsIndex = () => {
@@ -290,97 +92,14 @@ const FailedJobsIndex = () => {
     }, [selectedUuids]);
 
     const columns = useMemo(
-        () => [
-            {
-                field: 'id',
-                headerName: 'ID',
-                width: 70,
-                type: 'number',
-            },
-            {
-                field: 'display_name',
-                headerName: 'Job Type',
-                width: 280,
-                renderCell: ({ value }) => {
-                    const short = value?.split('\\').pop() ?? value;
-                    return (
-                        <Tooltip title={value} arrow>
-                            <Chip
-                                label={short}
-                                size="small"
-                                color="error"
-                                variant="outlined"
-                                sx={{ maxWidth: 260 }}
-                            />
-                        </Tooltip>
-                    );
-                },
-            },
-            {
-                field: 'queue',
-                headerName: 'Queue',
-                width: 110,
-                renderCell: ({ value }) => <Chip label={value} size="small" variant="outlined" />,
-            },
-            {
-                field: 'exception',
-                headerName: 'Error',
-                flex: 1,
-                minWidth: 260,
-                renderCell: ({ value }) => (
-                    <Typography variant="caption" color="error.main" noWrap title={value}>
-                        {value}
-                    </Typography>
-                ),
-            },
-            {
-                field: 'failed_at',
-                headerName: 'Failed At',
-                width: 165,
-                renderCell: ({ value }) => formatDate(value),
-            },
-            {
-                field: 'actions',
-                headerName: 'Actions',
-                type: 'actions',
-                width: 110,
-                sortable: false,
-                getActions: (params) => {
-                    const actions = [
-                        <GridActionsCellItem
-                            key="detail"
-                            icon={<InfoOutlinedIcon />}
-                            label="View Details"
-                            onClick={() => setDetailJob(params.row)}
-                            showInMenu={false}
-                        />,
-                    ];
-                    if (canRetry) {
-                        actions.push(
-                            <GridActionsCellItem
-                                key="retry"
-                                icon={<ReplayIcon color="primary" />}
-                                label="Retry"
-                                onClick={handleRetry(params.row.uuid)}
-                                showInMenu={false}
-                            />,
-                        );
-                    }
-                    if (canDelete) {
-                        actions.push(
-                            <GridActionsCellItem
-                                key="delete"
-                                icon={<DeleteIcon color="error" />}
-                                label="Delete"
-                                onClick={() => setDeleteJob(params.row)}
-                                showInMenu={false}
-                            />,
-                        );
-                    }
-                    return actions;
-                },
-            },
-        ],
+        () =>
+            buildColumns({
+                canRetry,
+                canDelete,
+                handleRetry,
+                onDetail: setDetailJob,
+                onDelete: setDeleteJob,
+            }),
         [canRetry, canDelete, handleRetry],
     );
 
