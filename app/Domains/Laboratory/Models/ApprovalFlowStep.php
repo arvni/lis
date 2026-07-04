@@ -86,6 +86,8 @@ class ApprovalFlowStep extends Model
      * bound role, or - for unbound steps - everyone with the base approve
      * permission. Per-report rules (self-approval, one step per user) are
      * the policy's job, not this method's.
+     *
+     * @return Collection<int, User>
      */
     public function eligibleUsers(): Collection
     {

@@ -85,12 +85,6 @@ parameters:
 			path: app/Domains/Inventory/Services/ItemCodeService.php
 
 		-
-			message: '#^Method App\\Domains\\Inventory\\Services\\PurchaseRequestService\:\:scopeActiveApproverQuery\(\) has parameter \$user with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Domains/Inventory/Services/PurchaseRequestService.php
-
-		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
 			count: 1
@@ -703,12 +697,6 @@ parameters:
 			path: app/Domains/Reception/Services/PatientService.php
 
 		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:filter\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model, int\|string\)\: bool\)\|null, Closure\(App\\Domains\\User\\Models\\User\)\: bool given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Domains/Reception/Services/ReportApprovalService.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:prepareReferrer\(\) has parameter \$referrer with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -919,54 +907,6 @@ parameters:
 			path: app/Domains/Referrer/Support/ReferrerOrderPayloadBuilder.php
 
 		-
-			message: '#^PHPDoc type array\<int, string\> of property App\\Domains\\User\\Models\\User\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: app/Domains/User/Models/User.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Repositories\\PermissionRepository\:\:create\(\) should return Spatie\\Permission\\Models\\Permission but returns Spatie\\Permission\\Contracts\\Permission\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Domains/User/Repositories/PermissionRepository.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Repositories\\PermissionRepository\:\:getPermissionByName\(\) should return Spatie\\Permission\\Models\\Permission\|null but returns Spatie\\Permission\\Contracts\\Permission\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Domains/User/Repositories/PermissionRepository.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Repositories\\RoleRepository\:\:create\(\) should return App\\Domains\\User\\Models\\Role but returns Spatie\\Permission\\Contracts\\Role\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Domains/User/Repositories/RoleRepository.php
-
-		-
-			message: '#^Method App\\Domains\\User\\Repositories\\RoleRepository\:\:getAdminRole\(\) should return App\\Domains\\User\\Models\\Role\|null but returns Spatie\\Permission\\Contracts\\Role\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Domains/User/Repositories/RoleRepository.php
-
-		-
-			message: '#^Parameter \#1 \$model of method App\\Domains\\User\\Repositories\\RoleRepository\:\:logCreated\(\) expects Illuminate\\Database\\Eloquent\\Model, Spatie\\Permission\\Contracts\\Role given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Domains/User/Repositories/RoleRepository.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Domains/User/Services/RoleService.php
-
-		-
-			message: '#^Parameter \#1 \$permissions of method App\\Domains\\User\\Services\\RoleService\:\:getSectionAndGroupSections\(\) expects Illuminate\\Database\\Eloquent\\Collection, Illuminate\\Support\\Collection given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Domains/User/Services/RoleService.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>fullName" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -1031,12 +971,6 @@ parameters:
 			identifier: isset.offset
 			count: 1
 			path: app/Http/Controllers/Laboratory/WorkflowController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Referrer\\StoreReferrerOrderAcceptanceController\:\:handlePoolingAcceptance\(\) has parameter \$user with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Http/Controllers/Referrer/StoreReferrerOrderAcceptanceController.php
 
 		-
 			message: '#^Parameter \#9 \$samplerGender of class App\\Domains\\Reception\\DTOs\\AcceptanceDTO constructor expects string\|null, int given\.$#'
