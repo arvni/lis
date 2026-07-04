@@ -2,16 +2,17 @@
 
 namespace App\Domains\Billing\Services;
 
+use App\Domains\Billing\Adapters\ReceptionAdapter;
 use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Models\Payment;
-use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Models\Acceptance;
-use App\Domains\Reception\Models\AcceptanceItem;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class DailyCashReportService
 {
+    public function __construct(private ReceptionAdapter $receptionAdapter) {}
+
     public function buildReportData(Carbon $date): array
     {
         $dateRange = [$date->copy()->startOfDay(), $date->copy()->endOfDay()];
@@ -27,10 +28,7 @@ class DailyCashReportService
 
     private function processAcceptanceItems(array $dateRange, array &$data, array &$processedIds): void
     {
-        $acceptanceItems = AcceptanceItem::whereBetween('created_at', $dateRange)
-            ->whereHas('test', fn($q) => $q->whereNot('type', TestType::SERVICE))
-            ->with('test', 'patients', 'acceptance.patient', 'acceptance.payments', 'acceptance.referrer')
-            ->get();
+        $acceptanceItems = $this->receptionAdapter->acceptanceItemsForCashReport($dateRange);
 
         foreach ($acceptanceItems->groupBy('acceptance_id') as $acceptanceId => $items) {
             $acceptance = $items->first()->acceptance;

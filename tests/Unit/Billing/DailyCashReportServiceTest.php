@@ -27,7 +27,7 @@ class DailyCashReportServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new DailyCashReportService;
+        $this->service = app(DailyCashReportService::class);
     }
 
     /** @param mixed ...$args */

@@ -4,10 +4,11 @@ namespace App\Domains\Inventory\Notifications;
 
 use App\Domains\Inventory\Models\PurchaseRequest;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class PurchaseRequestApprovedNotification extends Notification
+class PurchaseRequestApprovedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

@@ -5,10 +5,11 @@ namespace App\Domains\Inventory\Notifications;
 use App\Domains\Inventory\Models\PurchaseRequest;
 use App\Domains\Inventory\Models\WorkflowStep;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class PurchaseRequestOverdueNotification extends Notification
+class PurchaseRequestOverdueNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

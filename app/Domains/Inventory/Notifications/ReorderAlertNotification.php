@@ -5,10 +5,11 @@ namespace App\Domains\Inventory\Notifications;
 use App\Domains\Inventory\Models\Item;
 use App\Domains\Inventory\Models\Store;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ReorderAlertNotification extends Notification
+class ReorderAlertNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

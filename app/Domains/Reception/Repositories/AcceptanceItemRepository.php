@@ -293,6 +293,32 @@ class AcceptanceItemRepository
     }
 
     /**
+     * Non-service acceptance items in the date range, eager-loaded for the daily cash report.
+     *
+     * @return Collection<int, AcceptanceItem>
+     */
+    public function getForCashReport(array $dateRange): Collection
+    {
+        return AcceptanceItem::query()
+            ->whereBetween("created_at", $dateRange)
+            ->whereHas("test", function ($q) {
+                $q->whereNot("type", TestType::SERVICE);
+            })
+            ->with("test", "patients", "acceptance.patient", "acceptance.payments", "acceptance.referrer")
+            ->get();
+    }
+
+    /**
+     * Point the given acceptance items at an invoice item (used when composing invoices).
+     */
+    public function linkToInvoiceItem(array $ids, int $invoiceItemId): void
+    {
+        AcceptanceItem::query()
+            ->whereIn("id", $ids)
+            ->update(["invoice_item_id" => $invoiceItemId]);
+    }
+
+    /**
      * @return Collection<int, AcceptanceItem>
      */
     public function getPanelItems(int|string $panelId, int|string|null $acceptanceId = null): Collection

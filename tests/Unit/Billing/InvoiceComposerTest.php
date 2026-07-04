@@ -29,7 +29,7 @@ class InvoiceComposerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->composer = new InvoiceComposer;
+        $this->composer = app(InvoiceComposer::class);
     }
 
     /** @param mixed ...$args */

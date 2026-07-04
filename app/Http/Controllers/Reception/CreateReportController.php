@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Reception;
 
+use App\Domains\Reception\Adapters\LaboratoryAdapter;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Report;
 use App\Domains\Reception\Repositories\AcceptanceItemRepository;
@@ -16,15 +17,18 @@ class CreateReportController extends Controller
     private ReportService $reportService;
     private AcceptanceItemRepository $acceptanceItemRepository;
     private ReportRepository $reportRepository;
+    private LaboratoryAdapter $laboratoryAdapter;
 
     public function __construct(
         ReportService $reportService,
         AcceptanceItemRepository $acceptanceItemRepository,
-        ReportRepository $reportRepository
+        ReportRepository $reportRepository,
+        LaboratoryAdapter $laboratoryAdapter
     ) {
         $this->reportService = $reportService;
         $this->acceptanceItemRepository = $acceptanceItemRepository;
         $this->reportRepository = $reportRepository;
+        $this->laboratoryAdapter = $laboratoryAdapter;
     }
 
     public function __invoke(AcceptanceItem $acceptanceItem): \Illuminate\Http\RedirectResponse|\Inertia\Response
@@ -41,9 +45,9 @@ class CreateReportController extends Controller
         // Load all required data using repository
         $acceptanceItemData = $this->acceptanceItemRepository->getWithReportingDetails($acceptanceItem);
 
-        // Get laboratory data through the domain service with adapter
-        $method = $this->reportService->getMethod($acceptanceItem);
-        $test = $this->reportService->getTest($acceptanceItem);
+        // Get laboratory data through the cross-domain adapter
+        $method = $this->laboratoryAdapter->getMethodForAcceptanceItem($acceptanceItem);
+        $test = $this->laboratoryAdapter->getTestForAcceptanceItem($acceptanceItem);
 
         // Get template URL through adapter
         $templates = $this->reportService->getTemplates($acceptanceItem);
