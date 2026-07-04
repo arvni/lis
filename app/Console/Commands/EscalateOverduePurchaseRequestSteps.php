@@ -35,7 +35,11 @@ class EscalateOverduePurchaseRequestSteps extends Command
                 if ($step->approver_user_id) {
                     optional(User::find($step->approver_user_id))->notify($notification);
                 } elseif ($step->approver_role) {
-                    $role = Role::findByName($step->approver_role, 'web');
+                    // Query (not Role::findByName, which throws) so an unknown role
+                    // name skips this step instead of aborting the whole batch.
+                    $role = Role::where('name', $step->approver_role)
+                        ->where('guard_name', 'web')
+                        ->first();
                     if ($role) {
                         User::role($role)->get()->each->notify($notification);
                     }
@@ -43,7 +47,11 @@ class EscalateOverduePurchaseRequestSteps extends Command
 
                 if (!$approval->escalated) {
                     $storeManagers->each->notify($notification);
-                    $approval->update(['escalated' => true]);
+                    // Direct assignment (not update([...])) — 'escalated' is not
+                    // mass-assignable, so update() would silently drop it and the
+                    // store managers would be re-notified on every run.
+                    $approval->escalated = true;
+                    $approval->save();
                 }
 
                 $this->line("Escalated PR #{$pr->id} step \"{$step->name}\" ({$daysOverdue}d overdue)");

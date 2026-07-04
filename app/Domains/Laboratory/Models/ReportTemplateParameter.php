@@ -3,6 +3,7 @@
 namespace App\Domains\Laboratory\Models;
 
 use App\Domains\Reception\Models\ReportParameter;
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,6 +22,8 @@ use Illuminate\Support\Str;
  */
 class ReportTemplateParameter extends Model
 {
+    use Searchable;
+
     protected $fillable = [
         "report_template_id",
         "type",

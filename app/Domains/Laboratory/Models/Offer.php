@@ -4,6 +4,7 @@ namespace App\Domains\Laboratory\Models;
 
 use App\Domains\Laboratory\Enums\OfferType;
 use App\Domains\Referrer\Models\Referrer;
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -21,6 +22,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class Offer extends Model
 {
+    use Searchable;
+
     protected $fillable = [
         "title",
         "description",
