@@ -5,8 +5,7 @@ import {
     Button,
     Stack,
     Paper,
-    Typography,
-    Grid as Grid,
+    Grid,
     IconButton,
     InputAdornment,
     Chip,
@@ -15,25 +14,17 @@ import {
     Select,
     MenuItem,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PaymentIcon from '@mui/icons-material/Payment';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import AmountRange from './Filter/AmountRange.jsx';
+import DateRangeSection from './Filter/DateRangeSection.jsx';
+import { getPresetRange, formatDateForServer, parseDateFromServer } from './Filter/constants.js';
 
 const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
-    // Helper to parse date string to Date object in local timezone
-    const parseDateFromServer = (dateString) => {
-        if (!dateString) return null;
-        // Parse YYYY-MM-DD as local date, not UTC
-        const [year, month, day] = dateString.split('-').map(Number);
-        return new Date(year, month - 1, day);
-    };
-
     const [filters, setFilters] = useState({
         search: defaultValues.search || '',
         paymentMethod: defaultValues.paymentMethod || '',
@@ -138,15 +129,6 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
         setFilters((prevState) => ({ ...prevState, search: '' }));
     }, []);
 
-    const formatDateForServer = (date) => {
-        if (!date) return null;
-        // Format date as YYYY-MM-DD in local timezone
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
     const handleApplyFilters = useCallback(() => {
         if (dateError || amountError) {
             return;
@@ -201,55 +183,12 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
     );
 
     const handleQuickDatePreset = useCallback((preset) => {
-        const today = new Date();
-        let fromDate = new Date();
-        let toDate = new Date();
-
-        switch (preset) {
-            case 'today':
-                fromDate = new Date(today);
-                toDate = new Date(today);
-                break;
-            case 'yesterday':
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() - 1);
-                toDate = new Date(fromDate);
-                break;
-            case 'thisWeek':
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() - fromDate.getDay());
-                toDate = new Date(today);
-                break;
-            case 'lastWeek':
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() - fromDate.getDay() - 7);
-                toDate = new Date(fromDate);
-                toDate.setDate(toDate.getDate() + 6);
-                break;
-            case 'thisMonth':
-                fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                toDate = new Date(today);
-                break;
-            case 'lastMonth':
-                fromDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-                toDate = new Date(today.getFullYear(), today.getMonth(), 0);
-                break;
-            case 'thisYear':
-                fromDate = new Date(today.getFullYear(), 0, 1);
-                toDate = new Date(today);
-                break;
-            case 'lastYear':
-                fromDate = new Date(today.getFullYear() - 1, 0, 1);
-                toDate = new Date(today.getFullYear() - 1, 11, 31);
-                break;
-            default:
-                return;
-        }
-
+        const range = getPresetRange(preset);
+        if (!range) return;
         setFilters((prev) => ({
             ...prev,
-            dateFrom: fromDate,
-            dateTo: toDate,
+            dateFrom: range.fromDate,
+            dateTo: range.toDate,
         }));
     }, []);
 
@@ -330,163 +269,21 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
                             </FormControl>
                         </Grid>
 
-                        {/* Amount Range Section */}
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                    <AttachMoneyIcon color="action" fontSize="small" />
-                                    <Typography variant="subtitle2" color="text.secondary">
-                                        Amount Range
-                                    </Typography>
-                                </Box>
-                                <Stack direction="row" spacing={1}>
-                                    <TextField
-                                        fullWidth
-                                        label="From"
-                                        placeholder="Min"
-                                        value={filters.amountFrom}
-                                        onChange={handleAmountChange('amountFrom')}
-                                        onKeyDown={handleKeyPress}
-                                        error={!!amountError && filters.amountFrom}
-                                        type="text"
-                                        slotProps={{
-                                            htmlInput: {
-                                                inputMode: 'decimal',
-                                            },
-                                        }}
-                                    />
-                                    <TextField
-                                        fullWidth
-                                        label="To"
-                                        placeholder="Max"
-                                        value={filters.amountTo}
-                                        onChange={handleAmountChange('amountTo')}
-                                        onKeyDown={handleKeyPress}
-                                        error={!!amountError}
-                                        helperText={amountError}
-                                        type="text"
-                                        slotProps={{
-                                            htmlInput: {
-                                                inputMode: 'decimal',
-                                            },
-                                        }}
-                                    />
-                                </Stack>
-                            </Box>
-                        </Grid>
+                        <AmountRange
+                            amountFrom={filters.amountFrom}
+                            amountTo={filters.amountTo}
+                            amountError={amountError}
+                            onAmountChange={handleAmountChange}
+                            onKeyDown={handleKeyPress}
+                        />
 
-                        {/* Date Range Section */}
-                        <Grid size={{ xs: 12 }}>
-                            <Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                                    <CalendarTodayIcon color="action" fontSize="small" />
-                                    <Typography variant="subtitle2" color="text.secondary">
-                                        Date Range
-                                    </Typography>
-                                </Box>
-
-                                {/* Quick Date Presets */}
-                                <Stack
-                                    direction="row"
-                                    spacing={1}
-                                    sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}
-                                >
-                                    <Chip
-                                        label="Today"
-                                        onClick={() => handleQuickDatePreset('today')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                    <Chip
-                                        label="Yesterday"
-                                        onClick={() => handleQuickDatePreset('yesterday')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                    <Chip
-                                        label="This Week"
-                                        onClick={() => handleQuickDatePreset('thisWeek')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                    <Chip
-                                        label="Last Week"
-                                        onClick={() => handleQuickDatePreset('lastWeek')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                    <Chip
-                                        label="This Month"
-                                        onClick={() => handleQuickDatePreset('thisMonth')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                    <Chip
-                                        label="Last Month"
-                                        onClick={() => handleQuickDatePreset('lastMonth')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                    <Chip
-                                        label="This Year"
-                                        onClick={() => handleQuickDatePreset('thisYear')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                    <Chip
-                                        label="Last Year"
-                                        onClick={() => handleQuickDatePreset('lastYear')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                </Stack>
-
-                                {/* Date Pickers */}
-                                <Grid container spacing={2}>
-                                    <Grid size={{ xs: 12, sm: 6 }}>
-                                        <DatePicker
-                                            label="From Date"
-                                            value={filters.dateFrom}
-                                            onChange={(value) =>
-                                                handleFilterChange('dateFrom', value)
-                                            }
-                                            clearable
-                                            slotProps={{
-                                                textField: {
-                                                    fullWidth: true,
-                                                    error: !!dateError,
-                                                },
-                                            }}
-                                        />
-                                    </Grid>
-                                    <Grid size={{ xs: 12, sm: 6 }}>
-                                        <DatePicker
-                                            label="To Date"
-                                            value={filters.dateTo}
-                                            onChange={(value) =>
-                                                handleFilterChange('dateTo', value)
-                                            }
-                                            clearable
-                                            slotProps={{
-                                                textField: {
-                                                    fullWidth: true,
-                                                    error: !!dateError,
-                                                    helperText: dateError,
-                                                },
-                                            }}
-                                        />
-                                    </Grid>
-                                </Grid>
-                            </Box>
-                        </Grid>
+                        <DateRangeSection
+                            dateFrom={filters.dateFrom}
+                            dateTo={filters.dateTo}
+                            dateError={dateError}
+                            onPreset={handleQuickDatePreset}
+                            onChange={handleFilterChange}
+                        />
 
                         {/* Action Buttons */}
                         <Grid size={{ xs: 12 }}>
