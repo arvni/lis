@@ -1,29 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import {
-    Box,
-    TextField,
-    Button,
-    Stack,
-    Paper,
-    Typography,
-    Grid as Grid,
-    IconButton,
-    InputAdornment,
-    Chip,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-} from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { Box, Button, Stack, Paper, Grid, Chip } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
-import SearchIcon from '@mui/icons-material/Search';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import PersonIcon from '@mui/icons-material/Person';
-import SelectSearch from '@/Components/SelectSearch.jsx';
+import SearchFields from './Filter/SearchFields.jsx';
+import OwnerFilter from './Filter/OwnerFilter.jsx';
+import DateRangeSection from './Filter/DateRangeSection.jsx';
+import { getPresetRange, formatDateForBackend } from './Filter/constants.js';
 
 const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
     const [filters, setFilters] = useState({
@@ -122,16 +106,6 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
         setFilters((prevState) => ({ ...prevState, invoice_no: '' }));
     }, []);
 
-    const formatDateForBackend = (date) => {
-        if (!date) return null;
-        // Format date as YYYY-MM-DD to avoid timezone issues
-        const d = new Date(date);
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
     const handleApplyFilters = useCallback(() => {
         if (dateError) {
             return;
@@ -186,55 +160,12 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
     );
 
     const handleQuickDatePreset = useCallback((preset) => {
-        const today = new Date();
-        let fromDate = new Date();
-        let toDate = new Date();
-
-        switch (preset) {
-            case 'today':
-                fromDate = new Date(today);
-                toDate = new Date(today);
-                break;
-            case 'yesterday':
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() - 1);
-                toDate = new Date(fromDate);
-                break;
-            case 'thisWeek':
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() - fromDate.getDay());
-                toDate = new Date(today);
-                break;
-            case 'lastWeek':
-                fromDate = new Date(today);
-                fromDate.setDate(fromDate.getDate() - fromDate.getDay() - 7);
-                toDate = new Date(fromDate);
-                toDate.setDate(toDate.getDate() + 6);
-                break;
-            case 'thisMonth':
-                fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                toDate = new Date(today);
-                break;
-            case 'lastMonth':
-                fromDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-                toDate = new Date(today.getFullYear(), today.getMonth(), 0);
-                break;
-            case 'thisYear':
-                fromDate = new Date(today.getFullYear(), 0, 1);
-                toDate = new Date(today);
-                break;
-            case 'lastYear':
-                fromDate = new Date(today.getFullYear() - 1, 0, 1);
-                toDate = new Date(today.getFullYear() - 1, 11, 31);
-                break;
-            default:
-                return;
-        }
-
+        const range = getPresetRange(preset);
+        if (!range) return;
         setFilters((prev) => ({
             ...prev,
-            from_date: fromDate,
-            to_date: toDate,
+            from_date: range.fromDate,
+            to_date: range.toDate,
         }));
     }, []);
 
@@ -255,240 +186,30 @@ const Filter = ({ onFilter, defaultFilter: defaultValues = {} }) => {
                     </Box>
 
                     <Grid container spacing={2}>
-                        {/* Patient Search Field */}
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField
-                                fullWidth
-                                name="search"
-                                label="Search Patient"
-                                placeholder="Search by patient name or ID..."
-                                value={filters.search}
-                                onChange={handleSearchChange}
-                                onKeyDown={handleKeyPress}
-                                slotProps={{
-                                    input: {
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <SearchIcon color="action" />
-                                            </InputAdornment>
-                                        ),
-                                        endAdornment: filters.search && (
-                                            <InputAdornment position="end">
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={handleClearSearch}
-                                                    edge="end"
-                                                >
-                                                    <ClearIcon fontSize="small" />
-                                                </IconButton>
-                                            </InputAdornment>
-                                        ),
-                                    },
-                                }}
-                            />
-                        </Grid>
+                        <SearchFields
+                            search={filters.search}
+                            invoiceNo={filters.invoice_no}
+                            onSearchChange={handleSearchChange}
+                            onClearSearch={handleClearSearch}
+                            onInvoiceNoChange={handleInvoiceNoChange}
+                            onClearInvoiceNo={handleClearInvoiceNo}
+                            onKeyDown={handleKeyPress}
+                        />
 
-                        {/* Invoice No Filter */}
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField
-                                fullWidth
-                                name="invoice_no"
-                                label="Invoice No"
-                                placeholder="e.g. 2026-5/3"
-                                value={filters.invoice_no}
-                                onChange={handleInvoiceNoChange}
-                                onKeyDown={handleKeyPress}
-                                slotProps={{
-                                    input: {
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <SearchIcon color="action" />
-                                            </InputAdornment>
-                                        ),
-                                        endAdornment: filters.invoice_no && (
-                                            <InputAdornment position="end">
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={handleClearInvoiceNo}
-                                                    edge="end"
-                                                >
-                                                    <ClearIcon fontSize="small" />
-                                                </IconButton>
-                                            </InputAdornment>
-                                        ),
-                                    },
-                                }}
-                            />
-                        </Grid>
+                        <OwnerFilter
+                            ownerType={filters.owner_type}
+                            ownerObject={filters.owner_object}
+                            onOwnerTypeChange={handleOwnerTypeChange}
+                            onOwnerChange={handleOwnerChange}
+                        />
 
-                        {/* Owner Type Selector */}
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <FormControl fullWidth>
-                                <InputLabel id="owner-type-label">Owner Type</InputLabel>
-                                <Select
-                                    labelId="owner-type-label"
-                                    id="owner-type-select"
-                                    value={filters.owner_type}
-                                    label="Owner Type"
-                                    onChange={handleOwnerTypeChange}
-                                    startAdornment={
-                                        <InputAdornment position="start">
-                                            <PersonIcon color="action" />
-                                        </InputAdornment>
-                                    }
-                                >
-                                    <MenuItem value="">
-                                        <em>None</em>
-                                    </MenuItem>
-                                    <MenuItem value="referrer">Referrer</MenuItem>
-                                    <MenuItem value="patient">Patient</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Grid>
-
-                        {/* Owner (Referrer/Patient) Filter */}
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            {filters.owner_type ? (
-                                <SelectSearch
-                                    key={filters.owner_type}
-                                    fullWidth
-                                    label={
-                                        filters.owner_type === 'referrer'
-                                            ? 'Select Referrer'
-                                            : 'Select Patient'
-                                    }
-                                    url={
-                                        filters.owner_type === 'referrer'
-                                            ? route('api.referrers.list')
-                                            : route('api.patients.list')
-                                    }
-                                    value={filters.owner_object}
-                                    name="owner_id"
-                                    onChange={handleOwnerChange}
-                                />
-                            ) : (
-                                <TextField
-                                    fullWidth
-                                    label="Select Owner"
-                                    disabled
-                                    placeholder="Select owner type first"
-                                    helperText="Please select an owner type first"
-                                />
-                            )}
-                        </Grid>
-
-                        {/* Date Range Section */}
-                        <Grid size={{ xs: 12 }}>
-                            <Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                                    <CalendarTodayIcon color="action" fontSize="small" />
-                                    <Typography variant="subtitle2" color="text.secondary">
-                                        Date Range
-                                    </Typography>
-                                </Box>
-
-                                {/* Quick Date Presets */}
-                                <Stack
-                                    direction="row"
-                                    spacing={1}
-                                    sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}
-                                >
-                                    <Chip
-                                        label="Today"
-                                        onClick={() => handleQuickDatePreset('today')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                    <Chip
-                                        label="Yesterday"
-                                        onClick={() => handleQuickDatePreset('yesterday')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                    <Chip
-                                        label="This Week"
-                                        onClick={() => handleQuickDatePreset('thisWeek')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                    <Chip
-                                        label="Last Week"
-                                        onClick={() => handleQuickDatePreset('lastWeek')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                    <Chip
-                                        label="This Month"
-                                        onClick={() => handleQuickDatePreset('thisMonth')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                    <Chip
-                                        label="Last Month"
-                                        onClick={() => handleQuickDatePreset('lastMonth')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                    <Chip
-                                        label="This Year"
-                                        onClick={() => handleQuickDatePreset('thisYear')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                    <Chip
-                                        label="Last Year"
-                                        onClick={() => handleQuickDatePreset('lastYear')}
-                                        size="small"
-                                        variant="outlined"
-                                        clickable
-                                    />
-                                </Stack>
-
-                                {/* Date Pickers */}
-                                <Grid container spacing={2}>
-                                    <Grid size={{ xs: 12, sm: 6 }}>
-                                        <DatePicker
-                                            label="From Date"
-                                            value={filters.from_date}
-                                            onChange={(value) =>
-                                                handleFilterChange('from_date', value)
-                                            }
-                                            clearable
-                                            slotProps={{
-                                                textField: {
-                                                    fullWidth: true,
-                                                    error: !!dateError,
-                                                },
-                                            }}
-                                        />
-                                    </Grid>
-                                    <Grid size={{ xs: 12, sm: 6 }}>
-                                        <DatePicker
-                                            label="To Date"
-                                            value={filters.to_date}
-                                            onChange={(value) =>
-                                                handleFilterChange('to_date', value)
-                                            }
-                                            clearable
-                                            slotProps={{
-                                                textField: {
-                                                    fullWidth: true,
-                                                    error: !!dateError,
-                                                    helperText: dateError,
-                                                },
-                                            }}
-                                        />
-                                    </Grid>
-                                </Grid>
-                            </Box>
-                        </Grid>
+                        <DateRangeSection
+                            fromDate={filters.from_date}
+                            toDate={filters.to_date}
+                            dateError={dateError}
+                            onPreset={handleQuickDatePreset}
+                            onChange={handleFilterChange}
+                        />
 
                         {/* Action Buttons */}
                         <Grid size={{ xs: 12 }}>

@@ -3,143 +3,21 @@ import {
     alpha,
     Box,
     Button,
-    Chip,
-    FormControlLabel,
     FormHelperText,
     Grid,
     IconButton,
     Paper,
-    Switch,
-    TextField,
-    Tooltip,
     Typography,
     useTheme,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutlined';
 import HubOutlinedIcon from '@mui/icons-material/HubOutlined';
 import TuneIcon from '@mui/icons-material/Tune';
 import SelectSearch from '@/Components/SelectSearch';
-
-const PARAM_TYPES = [
-    { value: 'text', label: 'Text' },
-    { value: 'number', label: 'Number' },
-    { value: 'date', label: 'Date' },
-    { value: 'time', label: 'Time' },
-    { value: 'options', label: 'Options' },
-    { value: 'file', label: 'File' },
-];
-
-const TYPE_COLOR = {
-    text: 'default',
-    number: 'primary',
-    date: 'info',
-    time: 'secondary',
-    options: 'warning',
-    file: 'success',
-};
-
-const EMPTY_PARAM = { name: '', type: '', index: null, required: true };
-
-/* ── Small helpers ─────────────────────────────────────────────────── */
-
-const StepLabel = ({ icon: _Icon, number, children }) => (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-        <Box
-            sx={{
-                width: 22,
-                height: 22,
-                borderRadius: '50%',
-                bgcolor: 'primary.main',
-                color: 'primary.contrastText',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 11,
-                fontWeight: 800,
-                flexShrink: 0,
-            }}
-        >
-            {number}
-        </Box>
-        <Typography
-            variant="caption"
-            fontWeight={700}
-            color="text.secondary"
-            sx={{ letterSpacing: '0.1em', textTransform: 'uppercase' }}
-        >
-            {children}
-        </Typography>
-    </Box>
-);
-
-const ParameterRow = ({ param, index, isEditing, onEdit, onDelete }) => {
-    const theme = useTheme();
-    return (
-        <Box
-            sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                px: 1.5,
-                py: 1,
-                borderRadius: 1,
-                bgcolor: isEditing
-                    ? alpha(theme.palette.primary.main, 0.06)
-                    : alpha(theme.palette.action.hover, 0.4),
-                border: '1px solid',
-                borderColor: isEditing ? 'primary.main' : 'transparent',
-                transition: 'all 0.15s ease',
-            }}
-        >
-            <Chip
-                label={param.type}
-                size="small"
-                color={TYPE_COLOR[param.type] ?? 'default'}
-                sx={{ fontSize: '0.65rem', height: 20, flexShrink: 0 }}
-            />
-            <Typography variant="body2" fontWeight={500} sx={{ flex: 1, minWidth: 0 }} noWrap>
-                {param.name}
-            </Typography>
-            {param.required && (
-                <Chip
-                    label="req"
-                    size="small"
-                    variant="outlined"
-                    sx={{
-                        fontSize: '0.6rem',
-                        height: 18,
-                        color: 'text.disabled',
-                        borderColor: 'divider',
-                    }}
-                />
-            )}
-            <Tooltip title="Edit">
-                <IconButton
-                    size="small"
-                    onClick={() => onEdit(index)}
-                    sx={{ color: isEditing ? 'primary.main' : 'text.disabled' }}
-                >
-                    <EditIcon sx={{ fontSize: 15 }} />
-                </IconButton>
-            </Tooltip>
-            <Tooltip title="Remove">
-                <IconButton
-                    size="small"
-                    onClick={() => onDelete(index)}
-                    sx={{ '&:hover': { color: 'error.main' }, color: 'text.disabled' }}
-                >
-                    <DeleteIcon sx={{ fontSize: 15 }} />
-                </IconButton>
-            </Tooltip>
-        </Box>
-    );
-};
-
-/* ── Main component ─────────────────────────────────────────────────── */
+import { EMPTY_PARAM } from './SectionForm/constants.js';
+import StepLabel from './SectionForm/StepLabel.jsx';
+import ParameterRow from './SectionForm/ParameterRow.jsx';
+import ParameterEditor from './SectionForm/ParameterEditor.jsx';
 
 const SectionForm = ({ sectionWorkflow, setSectionWorkflow, onSubmit, onClose }) => {
     const theme = useTheme();
@@ -310,12 +188,7 @@ const SectionForm = ({ sectionWorkflow, setSectionWorkflow, onSubmit, onClose })
                 )}
 
                 {/* ── Divider ── */}
-                <Box
-                    sx={{
-                        my: 2.5,
-                        borderTop: `1px dashed ${theme.palette.divider}`,
-                    }}
-                />
+                <Box sx={{ my: 2.5, borderTop: `1px dashed ${theme.palette.divider}` }} />
 
                 {/* ── Step 2: Parameters ── */}
                 <StepLabel number={2}>Define Parameters</StepLabel>
@@ -364,139 +237,17 @@ const SectionForm = ({ sectionWorkflow, setSectionWorkflow, onSubmit, onClose })
                 )}
 
                 {/* ── Parameter editor ── */}
-                <Box
-                    sx={{
-                        p: 2,
-                        borderRadius: 1.5,
-                        bgcolor: isEditingParam
-                            ? alpha(theme.palette.primary.main, 0.04)
-                            : alpha(theme.palette.action.hover, 0.4),
-                        border: '1px solid',
-                        borderColor: isEditingParam ? 'primary.light' : 'divider',
-                        transition: 'all 0.2s ease',
-                    }}
-                >
-                    <Typography
-                        variant="caption"
-                        fontWeight={600}
-                        color="text.secondary"
-                        display="block"
-                        sx={{ mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.08em' }}
-                    >
-                        {isEditingParam
-                            ? `Editing: ${sectionWorkflow.parameters[parameter.index]?.name}`
-                            : 'New Parameter'}
-                    </Typography>
-
-                    <Grid container spacing={1.5} sx={{ mb: 1.5 }}>
-                        <Grid size={{ xs: 12, sm: 'auto' }} sx={{ flex: '1 1 180px' }}>
-                            <TextField
-                                label="Parameter name"
-                                fullWidth
-                                size="small"
-                                name="name"
-                                value={parameter.name}
-                                onChange={changeParam}
-                                error={!!parameterErrors.name}
-                                helperText={parameterErrors.name}
-                                placeholder="e.g. blood_pressure"
-                            />
-                        </Grid>
-                        {parameter.type === 'options' && (
-                            <Grid size={{ xs: 12, sm: 'auto' }} sx={{ flex: '1 1 200px' }}>
-                                <TextField
-                                    label="Options"
-                                    fullWidth
-                                    size="small"
-                                    name="options"
-                                    value={parameter.options ?? ''}
-                                    onChange={changeParam}
-                                    error={!!parameterErrors.options}
-                                    helperText={parameterErrors.options ?? "separate with ';'"}
-                                    placeholder="Low;Normal;High"
-                                />
-                            </Grid>
-                        )}
-                    </Grid>
-
-                    {/* Type chips */}
-                    <Box sx={{ mb: 1.5 }}>
-                        <Typography
-                            variant="caption"
-                            color={parameterErrors.type ? 'error' : 'text.disabled'}
-                            sx={{ display: 'block', mb: 0.75, fontWeight: 600 }}
-                        >
-                            Type {parameterErrors.type ? `— ${parameterErrors.type}` : ''}
-                        </Typography>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
-                            {PARAM_TYPES.map((t) => (
-                                <Chip
-                                    key={t.value}
-                                    label={t.label}
-                                    size="small"
-                                    clickable
-                                    onClick={() => setParamType(t.value)}
-                                    color={
-                                        parameter.type === t.value ? TYPE_COLOR[t.value] : 'default'
-                                    }
-                                    variant={parameter.type === t.value ? 'filled' : 'outlined'}
-                                    sx={{
-                                        fontWeight: parameter.type === t.value ? 700 : 400,
-                                        transition: 'all 0.15s ease',
-                                    }}
-                                />
-                            ))}
-                        </Box>
-                    </Box>
-
-                    {/* Required + actions */}
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            flexWrap: 'wrap',
-                            gap: 1,
-                        }}
-                    >
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    size="small"
-                                    checked={parameter.required}
-                                    onChange={toggleRequired}
-                                />
-                            }
-                            label={
-                                <Typography variant="caption" fontWeight={500}>
-                                    Required
-                                </Typography>
-                            }
-                        />
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                            {isEditingParam && (
-                                <Button
-                                    size="small"
-                                    onClick={cancelEditParam}
-                                    startIcon={<CloseIcon />}
-                                >
-                                    Cancel edit
-                                </Button>
-                            )}
-                            <Button
-                                size="small"
-                                variant="contained"
-                                disableElevation
-                                onClick={saveParameter}
-                                startIcon={
-                                    isEditingParam ? <CheckIcon /> : <AddCircleOutlineIcon />
-                                }
-                            >
-                                {isEditingParam ? 'Update' : 'Add parameter'}
-                            </Button>
-                        </Box>
-                    </Box>
-                </Box>
+                <ParameterEditor
+                    parameter={parameter}
+                    parameterErrors={parameterErrors}
+                    isEditingParam={isEditingParam}
+                    editingName={sectionWorkflow.parameters[parameter.index]?.name}
+                    onChangeParam={changeParam}
+                    onSetParamType={setParamType}
+                    onToggleRequired={toggleRequired}
+                    onSave={saveParameter}
+                    onCancelEdit={cancelEditParam}
+                />
 
                 {/* ── Footer ── */}
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2.5 }}>
