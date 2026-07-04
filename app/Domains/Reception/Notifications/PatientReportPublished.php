@@ -6,9 +6,10 @@ use App\Domains\Reception\Models\Acceptance;
 use App\Notifications\Channels\OmantelIsmartSmsChannel;
 use App\Notifications\Channels\TwilioWhatsAppTemplateChannel;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class PatientReportPublished extends Notification
+class PatientReportPublished extends Notification implements ShouldQueue
 {
     use Queueable;
 
