@@ -3,97 +3,11 @@ import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { SnackbarProvider } from 'notistack';
 import AlertComponent from '@/Components/AlertComponent';
 import AddButton from '@/Components/AddButton';
-import {
-    Box,
-    Paper,
-    Typography,
-    LinearProgress,
-    useTheme,
-    Stack,
-    IconButton,
-    Tooltip,
-    Button,
-    alpha,
-    Skeleton,
-    Fade,
-} from '@mui/material';
-import {
-    TableRows as TableRowsIcon,
-    Refresh as RefreshIcon,
-    FilterList as FilterListIcon,
-    Download as DownloadIcon,
-    FilterListOff as FilterListOffIcon,
-} from '@mui/icons-material';
-
-/**
- * Enhanced empty data overlay with better visuals and clearer messaging
- */
-const CustomNoRowsOverlay = () => {
-    return (
-        <Stack sx={{ height: '100%', alignItems: 'center', justifyContent: 'center', py: 5 }}>
-            <TableRowsIcon sx={{ fontSize: 48, color: 'text.secondary', opacity: 0.4, mb: 2 }} />
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-                No Records Found
-            </Typography>
-            <Typography
-                variant="body2"
-                color="text.disabled"
-                align="center"
-                sx={{ maxWidth: 300, mx: 'auto' }}
-            >
-                Try adjusting your search or filter criteria to find what you&apos;re looking for
-            </Typography>
-        </Stack>
-    );
-};
-
-/**
- * Improved loading overlay with better visual feedback
- */
-const CustomLoadingOverlay = () => {
-    return (
-        <Box
-            sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                bgcolor: alpha('#fff', 0.7),
-                zIndex: 2,
-            }}
-        >
-            <Box sx={{ position: 'sticky', top: 0, width: '100%' }}>
-                <LinearProgress color="primary" />
-            </Box>
-            <Box
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '100%',
-                }}
-            >
-                <Box
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        p: 3,
-                        borderRadius: 2,
-                        minWidth: 200,
-                    }}
-                >
-                    <Box sx={{ mb: 2 }}>
-                        <Skeleton variant="circular" width={40} height={40} />
-                    </Box>
-                    <Skeleton variant="text" width={120} height={24} />
-                    <Skeleton variant="text" width={160} height={18} />
-                </Box>
-            </Box>
-        </Box>
-    );
-};
+import { Box, Paper, useTheme, Fade } from '@mui/material';
+import { CustomNoRowsOverlay, CustomLoadingOverlay } from './TableLayout/Overlays';
+import { buildDataGridSx } from './TableLayout/dataGridStyles';
+import FilterPanel from './TableLayout/FilterPanel';
+import TableHeader from './TableLayout/TableHeader';
 
 /**
  * Enhanced TableLayout Component with improved visuals and functionality
@@ -264,12 +178,6 @@ const TableLayout = ({
         }
     };
 
-    const handleExport = () => {
-        if (onExport) {
-            onExport();
-        }
-    };
-
     const toggleFilter = () => {
         setFilterOpen(!filterOpen);
     };
@@ -291,44 +199,12 @@ const TableLayout = ({
             <Box sx={{ position: 'relative' }}>
                 {/* Filter Area - Only rendered when open */}
                 {filterOpen && Filter && (
-                    <Fade in={true} timeout={300}>
-                        <Paper
-                            elevation={0}
-                            variant="outlined"
-                            sx={{
-                                p: 2,
-                                mb: 2,
-                                borderRadius: 2,
-                                borderColor: theme.palette.divider,
-                                bgcolor: alpha(theme.palette.primary.main, 0.03),
-                            }}
-                        >
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    mb: 2,
-                                }}
-                            >
-                                <Typography variant="subtitle1" fontWeight={500}>
-                                    <FilterListIcon
-                                        fontSize="small"
-                                        sx={{ mr: 1, verticalAlign: 'middle' }}
-                                    />
-                                    Filter Records
-                                </Typography>
-                                <IconButton size="small" onClick={toggleFilter}>
-                                    <FilterListIcon fontSize="small" />
-                                </IconButton>
-                            </Box>
-
-                            <Filter
-                                defaultFilter={defaultValues.filters}
-                                onFilter={handleFilterChange}
-                            />
-                        </Paper>
-                    </Fade>
+                    <FilterPanel
+                        Filter={Filter}
+                        defaultFilter={defaultValues.filters}
+                        onFilter={handleFilterChange}
+                        onToggle={toggleFilter}
+                    />
                 )}
 
                 {/* Main Table Container */}
@@ -343,97 +219,22 @@ const TableLayout = ({
                         ...customProps.containerSx,
                     }}
                 >
-                    {/* Table Header */}
-                    <Box
-                        sx={{
-                            px: 2,
-                            py: 1.5,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            borderBottom: '1px solid',
-                            borderColor: 'divider',
-                            bgcolor:
-                                theme.palette.mode === 'light'
-                                    ? 'grey.50'
-                                    : alpha(theme.palette.background.default, 0.5),
-                            flexWrap: { xs: 'wrap', md: 'nowrap' },
-                            gap: 1,
-                        }}
-                    >
-                        {/* Left: record count */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-                            <TableRowsIcon
-                                sx={{ color: 'text.disabled', fontSize: 18, flexShrink: 0 }}
-                            />
-                            <Typography variant="body2" color="text.secondary" noWrap>
-                                Showing <strong>{recordRange}</strong> of{' '}
-                                <strong>{formattedTotal}</strong> records
-                            </Typography>
-                        </Box>
-
-                        {/* Right: actions */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
-                            {Filter && (
-                                <Button
-                                    size="small"
-                                    variant={
-                                        filterOpen
-                                            ? 'contained'
-                                            : activeFilterCount > 0
-                                              ? 'outlined'
-                                              : 'text'
-                                    }
-                                    color={activeFilterCount > 0 ? 'primary' : 'inherit'}
-                                    onClick={toggleFilter}
-                                    startIcon={
-                                        filterOpen ? (
-                                            <FilterListOffIcon fontSize="small" />
-                                        ) : (
-                                            <FilterListIcon fontSize="small" />
-                                        )
-                                    }
-                                    sx={{ textTransform: 'none', fontWeight: 500, minWidth: 90 }}
-                                >
-                                    {filterOpen
-                                        ? 'Hide'
-                                        : activeFilterCount > 0
-                                          ? `Filters (${activeFilterCount})`
-                                          : 'Filters'}
-                                </Button>
-                            )}
-
-                            {headerActions}
-                            <Tooltip title="Refresh">
-                                <IconButton size="small" onClick={handleRefresh} disabled={loading}>
-                                    <RefreshIcon fontSize="small" />
-                                </IconButton>
-                            </Tooltip>
-
-                            {onExport && (
-                                <Tooltip title="Export">
-                                    <IconButton
-                                        size="small"
-                                        onClick={handleExport}
-                                        disabled={loading || !data.total}
-                                    >
-                                        <DownloadIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
-                            )}
-
-                            {addNew && (
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    size="small"
-                                    onClick={onClickAddNew}
-                                >
-                                    {addNewTitle}
-                                </Button>
-                            )}
-                        </Box>
-                    </Box>
+                    <TableHeader
+                        Filter={Filter}
+                        filterOpen={filterOpen}
+                        activeFilterCount={activeFilterCount}
+                        onToggleFilter={toggleFilter}
+                        recordRange={recordRange}
+                        formattedTotal={formattedTotal}
+                        headerActions={headerActions}
+                        onRefresh={handleRefresh}
+                        loading={loading}
+                        onExport={onExport}
+                        dataTotal={data.total}
+                        addNew={addNew}
+                        onClickAddNew={onClickAddNew}
+                        addNewTitle={addNewTitle}
+                    />
 
                     {/* DataGrid */}
                     <DataGrid
@@ -460,80 +261,7 @@ const TableLayout = ({
                         getRowClassName={(params) =>
                             params.indexRelativeToCurrentPage % 2 === 0 ? 'even-row' : 'odd-row'
                         }
-                        sx={{
-                            border: 'none',
-                            '.MuiDataGrid-columnSeparator': {
-                                display: 'none',
-                            },
-                            '.MuiDataGrid-columnHeader': {
-                                backgroundColor:
-                                    theme.palette.mode === 'light'
-                                        ? theme.palette.grey[50]
-                                        : alpha(theme.palette.background.default, 0.5),
-                                fontWeight: 600,
-                                fontSize: '0.875rem',
-                                lineHeight: '1.5',
-                                color: theme.palette.text.primary,
-                            },
-                            '.MuiDataGrid-cell': {
-                                borderBottom: `1px solid ${theme.palette.divider}`,
-                                fontSize: '0.875rem',
-                                padding: '10px 16px',
-                            },
-                            '.MuiDataGrid-row': {
-                                transition: 'background-color 0.2s ease',
-                            },
-                            '.MuiDataGrid-row.even-row': {
-                                backgroundColor:
-                                    theme.palette.mode === 'light'
-                                        ? alpha(theme.palette.background.default, 0.4)
-                                        : alpha(theme.palette.background.paper, 0.2),
-                            },
-                            '.MuiDataGrid-row.odd-row': {
-                                backgroundColor:
-                                    theme.palette.mode === 'light'
-                                        ? theme.palette.background.paper
-                                        : theme.palette.background.paper,
-                            },
-                            '.MuiDataGrid-row:hover': {
-                                backgroundColor:
-                                    theme.palette.mode === 'light'
-                                        ? alpha(theme.palette.primary.main, 0.04)
-                                        : alpha(theme.palette.primary.main, 0.12),
-                            },
-                            '.MuiDataGrid-row.Mui-selected': {
-                                backgroundColor:
-                                    theme.palette.mode === 'light'
-                                        ? alpha(theme.palette.primary.main, 0.08)
-                                        : alpha(theme.palette.primary.main, 0.16),
-                                '&:hover': {
-                                    backgroundColor:
-                                        theme.palette.mode === 'light'
-                                            ? alpha(theme.palette.primary.main, 0.12)
-                                            : alpha(theme.palette.primary.main, 0.24),
-                                },
-                            },
-                            '.MuiDataGrid-footerContainer': {
-                                borderTop: `1px solid ${theme.palette.divider}`,
-                                backgroundColor:
-                                    theme.palette.mode === 'light'
-                                        ? theme.palette.grey[50]
-                                        : alpha(theme.palette.background.default, 0.5),
-                            },
-                            '.MuiTablePagination-root': {
-                                color: theme.palette.text.secondary,
-                            },
-                            '.MuiDataGrid-virtualScroller': {
-                                bgcolor: 'background.paper',
-                                minHeight: '300px', // Set minimum height so empty states look better
-                            },
-                            '.table-header-cell': {
-                                textTransform: 'uppercase',
-                                fontSize: '0.75rem',
-                                letterSpacing: '0.5px',
-                            },
-                            ...customProps.sx,
-                        }}
+                        sx={buildDataGridSx(theme, customProps.sx)}
                         {...props}
                     />
                 </Paper>
