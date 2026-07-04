@@ -3,7 +3,6 @@ import {
     Box,
     Button,
     Paper,
-    Typography,
     Accordion,
     AccordionSummary,
     AccordionDetails,
@@ -11,31 +10,16 @@ import {
     Step,
     StepLabel,
     Alert,
-    Tooltip,
-    Chip,
     useTheme,
-    Tabs,
-    Tab,
     CircularProgress,
-    Badge,
-    Select,
-    MenuItem,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import {
-    ExpandMore as ExpandMoreIcon,
-    FileDownload as FileDownloadIcon,
-    Check as CheckIcon,
-    Article as ArticleIcon,
-    Tune as TuneIcon,
-    Assignment as AssignmentIcon,
-} from '@mui/icons-material';
+import { ExpandMore as ExpandMoreIcon, Check as CheckIcon } from '@mui/icons-material';
 
-import ParameterSection from './Form/ParameterSection';
-import DocumentUploadSection from './Form/DocumentUploadSection';
-import { TabContext, TabPanel } from '@mui/lab';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
+import ReportFormHeader from './Form/ReportFormHeader';
+import TemplateSelector from './Form/TemplateSelector';
+import ReportFormTabs from './Form/ReportFormTabs';
+import { getActiveStep, computeParameterErrors } from './Form/helpers';
 
 /**
  * Tabbed Report Form Component with separated Document and Parameter sections
@@ -62,19 +46,6 @@ const TabbedReportForm = ({
     const [activeTab, setActiveTab] = useState(0);
     const [parameterErrors, setParameterErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // Tab labels for document and parameter sections
-    const tabs = [
-        { label: 'Documents', icon: <ArticleIcon /> },
-        { label: 'Parameters', icon: <TuneIcon /> },
-    ];
-
-    // Determine active step based on available documents
-    const getActiveStep = () => {
-        if (data.published_document) return 2;
-        if (data.approveded_document) return 1;
-        return 0;
-    };
 
     // Handle template selection
     const handleTemplateChange = (e) => {
@@ -115,31 +86,9 @@ const TabbedReportForm = ({
         setActiveTab(newValue);
     };
 
-    // Validate parameters
+    // Validate parameters (updates error state, returns validity)
     const validateParameters = () => {
-        if (!data.report_template?.parameters?.length) return true;
-
-        const newErrors = {};
-        let isValid = true;
-
-        const activeParameters = data.report_template.parameters.filter((param) => param.active);
-
-        activeParameters.forEach((param) => {
-            const { title, required, type } = param;
-            const fieldId = `${title.toLowerCase().replace(/\s+/g, '_')}_${param?.id}`;
-            const value = data.parameters?.[fieldId];
-
-            if (required) {
-                if (value === undefined || value === null || value === '') {
-                    newErrors[fieldId] = 'This field is required';
-                    isValid = false;
-                } else if (type === 'checkbox' && Array.isArray(value) && value.length === 0) {
-                    newErrors[fieldId] = 'Please select at least one option';
-                    isValid = false;
-                }
-            }
-        });
-
+        const { errors: newErrors, isValid } = computeParameterErrors(data);
         setParameterErrors(newErrors);
         return isValid;
     };
@@ -195,6 +144,7 @@ const TabbedReportForm = ({
     const activeParameters =
         data.report_template?.parameters?.filter((param) => param.active) || [];
     const hasParameters = activeParameters.length > 0;
+    const activeStep = getActiveStep(data);
 
     return (
         <Paper
@@ -238,40 +188,13 @@ const TabbedReportForm = ({
                         },
                     }}
                 >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <ArticleIcon />
-                        <Typography variant="h6" fontWeight="500">
-                            Report Documentation
-                        </Typography>
-                        <Chip
-                            size="small"
-                            label={
-                                getActiveStep() === 0
-                                    ? 'Draft'
-                                    : getActiveStep() === 1
-                                      ? 'Approved'
-                                      : 'Published'
-                            }
-                            color={
-                                getActiveStep() === 0
-                                    ? 'warning'
-                                    : getActiveStep() === 1
-                                      ? 'info'
-                                      : 'success'
-                            }
-                            sx={{ ml: 2 }}
-                        />
-                    </Box>
+                    <ReportFormHeader activeStep={activeStep} />
                 </AccordionSummary>
 
                 <AccordionDetails sx={{ p: 0 }}>
                     <Box sx={{ p: { xs: 2, sm: 3 } }}>
                         {/* Document Progress Stepper */}
-                        <Stepper
-                            activeStep={getActiveStep()}
-                            alternativeLabel
-                            sx={{ mb: 4, mt: 1 }}
-                        >
+                        <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4, mt: 1 }}>
                             <Step>
                                 <StepLabel>Reported Document</StepLabel>
                             </Step>
@@ -284,91 +207,14 @@ const TabbedReportForm = ({
                         </Stepper>
 
                         {/* Template Selection */}
-                        <Box sx={{ mb: 4 }}>
-                            {data?.report_template?.template && (
-                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                                    <Tooltip title="Download document template for this report">
-                                        <Button
-                                            href={route(
-                                                'documents.download',
-                                                data.report_template?.template?.id ||
-                                                    data.report_template?.template?.hash,
-                                            )}
-                                            target="_blank"
-                                            variant="outlined"
-                                            startIcon={<FileDownloadIcon />}
-                                            size="medium"
-                                            color="secondary"
-                                            sx={{ borderRadius: 6 }}
-                                        >
-                                            Download Template
-                                        </Button>
-                                    </Tooltip>
-                                </Box>
-                            )}
-
-                            {hasParameters && data?.report_template?.id && (
-                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                                    <Tooltip title="Download the Excel parameters template">
-                                        <Button
-                                            href={route(
-                                                'reportTemplates.export-parameters',
-                                                data.report_template.id,
-                                            )}
-                                            target="_blank"
-                                            variant="outlined"
-                                            startIcon={<TuneIcon />}
-                                            size="medium"
-                                            color="info"
-                                            sx={{ borderRadius: 6 }}
-                                        >
-                                            Download Parameters
-                                        </Button>
-                                    </Tooltip>
-                                </Box>
-                            )}
-
-                            <Alert severity="info" icon={<AssignmentIcon />} sx={{ mb: 2 }}>
-                                <Typography variant="subtitle2">
-                                    Selected Template: {data?.report_template?.name || 'None'}
-                                </Typography>
-                                <Typography variant="body2">
-                                    {data?.report_template
-                                        ? `This template has ${activeParameters.length} parameters to fill.`
-                                        : 'Please select a template to proceed.'}
-                                </Typography>
-                            </Alert>
-
-                            {/* Template Selection (always visible) */}
-                            <FormControl
-                                fullWidth
-                                required
-                                error={errors.report_template}
-                                variant="outlined"
-                                size="medium"
-                                margin="normal"
-                            >
-                                <InputLabel id="report-template-label">Template</InputLabel>
-                                <Select
-                                    labelId="report-template-label"
-                                    id="report-template"
-                                    value={data?.report_template?.id || ''}
-                                    label="Template"
-                                    onChange={handleTemplateChange}
-                                >
-                                    {templates.map((template) => (
-                                        <MenuItem key={template?.id} value={template?.id}>
-                                            {template?.name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                                {errors.report_template && (
-                                    <Typography variant="caption" color="error">
-                                        {errors.report_template}
-                                    </Typography>
-                                )}
-                            </FormControl>
-                        </Box>
+                        <TemplateSelector
+                            data={data}
+                            templates={templates}
+                            errors={errors}
+                            activeParameters={activeParameters}
+                            hasParameters={hasParameters}
+                            onTemplateChange={handleTemplateChange}
+                        />
 
                         {/* Error Messages */}
                         {(Object.keys(errors).length > 0 ||
@@ -379,97 +225,22 @@ const TabbedReportForm = ({
                         )}
 
                         {/* Tabs for Documents and Parameters */}
-                        <Box sx={{ width: '100%', mb: 3 }}>
-                            <TabContext value={activeTab}>
-                                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                                    <Tabs
-                                        value={activeTab}
-                                        onChange={handleTabChange}
-                                        aria-label="report form tabs"
-                                        indicatorColor="primary"
-                                        textColor="primary"
-                                    >
-                                        {tabs.map((tab, index) => (
-                                            <Tab
-                                                key={index}
-                                                label={
-                                                    <Box
-                                                        sx={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                        }}
-                                                    >
-                                                        {countErrors(index) > 0 ? (
-                                                            <Badge
-                                                                badgeContent={countErrors(index)}
-                                                                color="error"
-                                                            >
-                                                                <Box
-                                                                    sx={{
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                    }}
-                                                                >
-                                                                    {tab.icon}
-                                                                    <Typography sx={{ ml: 1 }}>
-                                                                        {tab.label}
-                                                                    </Typography>
-                                                                </Box>
-                                                            </Badge>
-                                                        ) : (
-                                                            <Box
-                                                                sx={{
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                }}
-                                                            >
-                                                                {tab.icon}
-                                                                <Typography sx={{ ml: 1 }}>
-                                                                    {tab.label}
-                                                                </Typography>
-                                                            </Box>
-                                                        )}
-                                                    </Box>
-                                                }
-                                                id={`report-tab-${index}`}
-                                                aria-controls={`report-tabpanel-${index}`}
-                                            />
-                                        ))}
-                                    </Tabs>
-                                </Box>
-
-                                {/* Document Upload Tab */}
-                                <TabPanel value={0}>
-                                    <DocumentUploadSection
-                                        data={data}
-                                        setData={setData}
-                                        errors={errors}
-                                        handleFileChange={handleFileChange}
-                                        patientID={patientID}
-                                        isSubmitting={isSubmitting}
-                                    />
-                                </TabPanel>
-
-                                {/* Parameters Tab */}
-                                <TabPanel value={1}>
-                                    {hasParameters ? (
-                                        <ParameterSection
-                                            data={data}
-                                            setData={setData}
-                                            activeParameters={activeParameters}
-                                            parameterErrors={parameterErrors}
-                                            handleParameterChange={handleParameterChange}
-                                            theme={theme}
-                                            isSubmitting={isSubmitting}
-                                        />
-                                    ) : (
-                                        <Alert severity="info" sx={{ my: 2 }}>
-                                            This template doesn&apos;t have any parameters to fill.
-                                        </Alert>
-                                    )}
-                                </TabPanel>
-                            </TabContext>
-                        </Box>
+                        <ReportFormTabs
+                            activeTab={activeTab}
+                            onTabChange={handleTabChange}
+                            countErrors={countErrors}
+                            data={data}
+                            setData={setData}
+                            errors={errors}
+                            handleFileChange={handleFileChange}
+                            patientID={patientID}
+                            isSubmitting={isSubmitting}
+                            hasParameters={hasParameters}
+                            activeParameters={activeParameters}
+                            parameterErrors={parameterErrors}
+                            handleParameterChange={handleParameterChange}
+                            theme={theme}
+                        />
 
                         {/* Submit Button */}
                         <Grid container sx={{ justifyContent: 'flex-end' }}>
