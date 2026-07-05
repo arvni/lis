@@ -5,7 +5,6 @@ namespace App\Domains\Inventory\Notifications;
 use App\Domains\Inventory\Models\PurchaseRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class PurchaseRequestApprovedNotification extends Notification implements ShouldQueue
@@ -16,16 +15,7 @@ class PurchaseRequestApprovedNotification extends Notification implements Should
 
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
-    }
-
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->subject("Purchase Request #{$this->pr->id} Approved")
-            ->line("Your purchase request **#{$this->pr->id}** has been fully approved.")
-            ->line("All workflow steps have been completed. It is now ready to proceed to ordering.")
-            ->action("View Purchase Request #{$this->pr->id}", url(route('inventory.purchase-requests.show', $this->pr->id)));
+        return ['database'];
     }
 
     public function toArray(object $notifiable): array
