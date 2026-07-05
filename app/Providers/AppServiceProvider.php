@@ -74,12 +74,15 @@ use App\Domains\Inventory\Models\Supplier;
 use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\StockTransaction;
 use App\Domains\Inventory\Models\PurchaseRequest;
+use App\Domains\Inventory\Models\Unit;
 use App\Domains\Inventory\Models\WorkflowTemplate;
 use App\Domains\Inventory\Policies\ItemPolicy;
 use App\Domains\Inventory\Policies\SupplierPolicy;
 use App\Domains\Inventory\Policies\StorePolicy;
 use App\Domains\Inventory\Policies\StockTransactionPolicy;
+use App\Domains\Inventory\Policies\PurchaseRequestApprovalPolicy;
 use App\Domains\Inventory\Policies\PurchaseRequestPolicy;
+use App\Domains\Inventory\Policies\UnitPolicy;
 use App\Domains\Inventory\Policies\WorkflowTemplatePolicy;
 use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
@@ -202,6 +205,18 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Store::class, StorePolicy::class);
         Gate::policy(StockTransaction::class, StockTransactionPolicy::class);
         Gate::policy(PurchaseRequest::class, PurchaseRequestPolicy::class);
+        Gate::policy(Unit::class, UnitPolicy::class);
         Gate::policy(WorkflowTemplate::class, WorkflowTemplatePolicy::class);
+
+        // Workflow-approver abilities: PurchaseRequest already has PurchaseRequestPolicy
+        // (Laravel allows one Gate::policy per model), so the approver-identity checks are
+        // registered as gate abilities backed by PurchaseRequestApprovalPolicy. The string
+        // "Class@method" form is container-resolved, so the policy's workflow-service
+        // dependency is injected.
+        Gate::define('purchase-requests.approve-step', PurchaseRequestApprovalPolicy::class . '@approveStep');
+        Gate::define('purchase-requests.reject-step', PurchaseRequestApprovalPolicy::class . '@rejectStep');
+        Gate::define('purchase-requests.delegate-step', PurchaseRequestApprovalPolicy::class . '@delegateStep');
+        Gate::define('purchase-requests.recall', PurchaseRequestApprovalPolicy::class . '@recall');
+        Gate::define('purchase-requests.bulk-approve', PurchaseRequestApprovalPolicy::class . '@bulkApprove');
     }
 }
