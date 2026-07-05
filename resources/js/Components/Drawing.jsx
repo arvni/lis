@@ -31,6 +31,7 @@ import ElementEditor from './Pedigree/ElementEditor';
 import EdgeSettingsModal from './Pedigree/EdgeSettingsModal';
 import LegendModal from './Pedigree/LegendModal';
 import HelpModal from './Pedigree/HelpModal';
+import ErrorBoundary from './ErrorBoundary';
 
 // --- Main Application Component ---
 let idCounter = 0; // Use a local counter within the component instance
@@ -866,9 +867,15 @@ PedigreeChart.propTypes = {
 // --- Wrapper Component to provide ReactFlowProvider ---
 // This is necessary because PedigreeChart uses useReactFlow hook internally
 const PedigreeChartWrapper = (props) => (
-    <ReactFlowProvider>
-        <PedigreeChart {...props} />
-    </ReactFlowProvider>
+    <ErrorBoundary
+        variant="widget"
+        title="The pedigree chart couldn't be displayed"
+        description="An unexpected error occurred while rendering the pedigree editor."
+    >
+        <ReactFlowProvider>
+            <PedigreeChart {...props} />
+        </ReactFlowProvider>
+    </ErrorBoundary>
 );
 
 PedigreeChartWrapper.propTypes = {

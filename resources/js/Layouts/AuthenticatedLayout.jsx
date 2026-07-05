@@ -29,6 +29,7 @@ import ChangePassword from '@/Pages/User/Components/ChangePassword';
 import Drawer from './Components/Drawer';
 import Copyright from './Components/Copyright';
 import ConnectionCheck from './Components/ConnectionCheck';
+import ErrorBoundary from '@/Components/ErrorBoundary';
 import createAppTheme from './Components/createAppTheme';
 import DrawerContent from './Components/DrawerContent';
 import TopAppBar from './Components/TopAppBar';
@@ -250,7 +251,12 @@ const Authenticated = ({ auth, breadcrumbs, children, title }) => {
                                         overflow: 'hidden', // Prevent content overflow
                                     }}
                                 >
-                                    {children}
+                                    {/* Isolate page render errors to the content region so an
+                                        uncaught throw in one page doesn't white-screen the whole
+                                        app; resetKeys={[currentRoute]} recovers on navigation. */}
+                                    <ErrorBoundary variant="inline" resetKeys={[currentRoute]}>
+                                        {children}
+                                    </ErrorBoundary>
                                 </Paper>
                             </Fade>
                         </Container>
