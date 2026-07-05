@@ -39,6 +39,17 @@ class InventoryPermissionSeeder extends Seeder
             "Inventory.PurchaseRequests.View All Purchase Requests",
             "Inventory.PurchaseRequests.Create Purchase Request",
             "Inventory.PurchaseRequests.Approve Purchase Request",
+            // Granular financial-lifecycle abilities (separation of duties) — previously all
+            // gated on "Create Purchase Request"; keyword filters below grant them to the same
+            // roles that hold Create, so this seeds without changing existing effective access.
+            "Inventory.PurchaseRequests.Order Purchase Request",
+            "Inventory.PurchaseRequests.Pay Purchase Request",
+            "Inventory.PurchaseRequests.Ship Purchase Request",
+
+            "Inventory.Units.List Units",
+            "Inventory.Units.Create Unit",
+            "Inventory.Units.Edit Unit",
+            "Inventory.Units.Delete Unit",
 
             "Inventory.Stock.View Stock",
             "Inventory.ReorderAlerts.View Reorder Alerts",

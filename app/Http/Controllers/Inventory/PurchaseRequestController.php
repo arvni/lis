@@ -117,7 +117,7 @@ class PurchaseRequestController extends Controller
 
     public function order(OrderPurchaseRequestRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
-        $this->authorize('create', PurchaseRequest::class);
+        $this->authorize('order', $purchaseRequest);
         $data = $request->validated();
         $this->prService->order($purchaseRequest, $data['po_number'], $data['supplier_id'] ?? null, $request->file('po_file'));
         return back()->with(['success' => true, 'status' => 'Order confirmed. PO number saved.']);
@@ -125,14 +125,14 @@ class PurchaseRequestController extends Controller
 
     public function pay(PayPurchaseRequestRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
-        $this->authorize('create', PurchaseRequest::class);
+        $this->authorize('pay', $purchaseRequest);
         $this->prService->recordPayment($purchaseRequest, $request->validated(), $request->file('payment_file'));
         return back()->with(['success' => true, 'status' => 'Payment recorded.']);
     }
 
     public function ship(ShipPurchaseRequestRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
-        $this->authorize('create', PurchaseRequest::class);
+        $this->authorize('ship', $purchaseRequest);
         $this->prService->markShipped($purchaseRequest, $request->validated());
         return back()->with(['success' => true, 'status' => 'Marked as shipped.']);
     }
@@ -170,7 +170,7 @@ class PurchaseRequestController extends Controller
 
     public function bulkApprove(BulkApprovePurchaseRequestRequest $request): RedirectResponse
     {
-        $this->authorize('viewAny', PurchaseRequest::class);
+        $this->authorize('purchase-requests.bulk-approve');
         $ids = $request->validated()['ids'];
 
         ['approved' => $approved, 'skipped' => $skipped] = $this->prService->bulkApproveSteps($ids, auth()->user());
@@ -189,7 +189,7 @@ class PurchaseRequestController extends Controller
 
     public function recall(PurchaseRequest $purchaseRequest): RedirectResponse
     {
-        $this->authorize('viewAny', PurchaseRequest::class);
+        $this->authorize('purchase-requests.recall', $purchaseRequest);
         try {
             $this->workflowService->recall($purchaseRequest, auth()->user());
         } catch (\Throwable $e) {
@@ -200,7 +200,7 @@ class PurchaseRequestController extends Controller
 
     public function delegateStep(DelegateStepRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
-        $this->authorize('viewAny', PurchaseRequest::class);
+        $this->authorize('purchase-requests.delegate-step', $purchaseRequest);
         try {
             $this->workflowService->delegate($purchaseRequest, auth()->user(), $request->validated()['delegate_to_user_id']);
         } catch (\Throwable $e) {
@@ -211,7 +211,7 @@ class PurchaseRequestController extends Controller
 
     public function approveStep(ApproveStepRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
-        $this->authorize('viewAny', PurchaseRequest::class);
+        $this->authorize('purchase-requests.approve-step', $purchaseRequest);
         $notes = $request->validated('notes');
         try {
             $this->workflowService->approveStep($purchaseRequest, auth()->user(), $notes);
@@ -223,7 +223,7 @@ class PurchaseRequestController extends Controller
 
     public function rejectStep(RejectStepRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
-        $this->authorize('viewAny', PurchaseRequest::class);
+        $this->authorize('purchase-requests.reject-step', $purchaseRequest);
         try {
             $this->workflowService->rejectStep($purchaseRequest, auth()->user(), $request->validated()['notes']);
         } catch (\Throwable $e) {

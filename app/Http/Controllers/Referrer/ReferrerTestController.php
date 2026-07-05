@@ -21,6 +21,8 @@ class ReferrerTestController extends Controller
     public function __construct(private readonly ReferrerTestService $referrerTestService)
     {
         $this->middleware("indexProvider")->only("index");
+        // Managing a referrer's test list/pricing is editing referrer config.
+        $this->middleware("permission:Referrer.Edit Referrer")->only(["store", "update", "destroy"]);
     }
 
     /**

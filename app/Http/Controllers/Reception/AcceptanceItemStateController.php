@@ -26,6 +26,10 @@ class AcceptanceItemStateController extends Controller
      */
     public function show(AcceptanceItemState $acceptanceItemState): \Illuminate\Http\Resources\Json\JsonResource
     {
+        // authz: result-entry detail exposes parameter values (PHI). Gate on the section-scoped
+        // `view` ability — the same section a user can open the worklist for — mirroring how the
+        // mutations (update/bulkUpdate) gate on the section-scoped "action" gate. See docs/authz-matrix.md.
+        $this->authorize('view', $acceptanceItemState->load('section')->section);
         $acceptanceItemState = $this->acceptanceItemStateService->showAcceptanceItemState($acceptanceItemState);
         return AcceptanceItemStateResource::make($acceptanceItemState);
     }

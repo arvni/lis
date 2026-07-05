@@ -13,6 +13,8 @@ class GetUserDetailsController extends Controller
      */
     public function __invoke(User $user): \Illuminate\Http\Resources\Json\JsonResource
     {
+        $this->authorize("viewAny", User::class);
+
         return new UserResource($user);
     }
 }

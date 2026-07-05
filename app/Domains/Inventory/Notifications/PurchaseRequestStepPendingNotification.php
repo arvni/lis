@@ -6,7 +6,6 @@ use App\Domains\Inventory\Models\PurchaseRequest;
 use App\Domains\Inventory\Models\WorkflowStep;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class PurchaseRequestStepPendingNotification extends Notification implements ShouldQueue
@@ -20,17 +19,7 @@ class PurchaseRequestStepPendingNotification extends Notification implements Sho
 
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
-    }
-
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->subject("Action Required: Purchase Request #{$this->pr->id} — {$this->step->name}")
-            ->line("A purchase request requires your approval at step: **{$this->step->name}**.")
-            ->line("Requested by: **{$this->pr->requestedBy->name}** | Urgency: **{$this->pr->urgency}**")
-            ->action("Review Purchase Request #{$this->pr->id}", url(route('inventory.purchase-requests.show', $this->pr->id)))
-            ->line('Please log in to approve or reject this step.');
+        return ['database'];
     }
 
     public function toArray(object $notifiable): array

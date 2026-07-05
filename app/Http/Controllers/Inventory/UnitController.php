@@ -20,6 +20,7 @@ class UnitController extends Controller
 
     public function index(Request $request): Response
     {
+        $this->authorize('viewAny', Unit::class);
         $requestInputs = $request->all();
         $units = $this->unitService->listUnits($requestInputs);
         return Inertia::render('Inventory/Units/Index', compact('units', 'requestInputs'));
@@ -27,6 +28,7 @@ class UnitController extends Controller
 
     public function store(StoreUnitRequest $request): RedirectResponse
     {
+        $this->authorize('create', Unit::class);
         $data = $request->validated();
         $this->unitService->createUnit($data);
         return back()->with(['success' => true, 'status' => "Unit {$data['name']} created."]);
@@ -34,6 +36,7 @@ class UnitController extends Controller
 
     public function update(StoreUnitRequest $request, Unit $unit): RedirectResponse
     {
+        $this->authorize('update', $unit);
         $data = $request->validated();
         $this->unitService->updateUnit($unit, $data);
         return back()->with(['success' => true, 'status' => "Unit updated."]);
@@ -41,6 +44,7 @@ class UnitController extends Controller
 
     public function destroy(Unit $unit): RedirectResponse
     {
+        $this->authorize('delete', $unit);
         $name = $unit->name;
         $this->unitService->deleteUnit($unit);
         return back()->with(['success' => true, 'status' => "{$name} deleted."]);

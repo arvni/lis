@@ -4,6 +4,7 @@ import IncomeByTestSection from './BillingCharts/IncomeByTestSection';
 import IncomeByReferrerSection from './BillingCharts/IncomeByReferrerSection';
 import PaymentMethodSection from './BillingCharts/PaymentMethodSection';
 import IncomeTrendSection from './BillingCharts/IncomeTrendSection';
+import ErrorBoundary from '@/Components/ErrorBoundary';
 
 const BillingCharts = ({
     byTest,
@@ -19,7 +20,11 @@ const BillingCharts = ({
     trendTestObjs,
     setTrendTestObjs,
 }) => (
-    <>
+    <ErrorBoundary
+        variant="widget"
+        title="The billing charts couldn't be displayed"
+        description="An unexpected error occurred while rendering the analytics charts."
+    >
         <Divider sx={{ mb: 3 }} />
 
         <IncomeByTestSection byTest={byTest} loading={chartsLoading} />
@@ -37,7 +42,7 @@ const BillingCharts = ({
             trendTestObjs={trendTestObjs}
             setTrendTestObjs={setTrendTestObjs}
         />
-    </>
+    </ErrorBoundary>
 );
 
 export default BillingCharts;

@@ -3,12 +3,14 @@
 namespace App\Domains\Reception\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 
 class AddPoolingRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        // Pooling rewrites the acceptance's items — gate on editing the acceptance.
+        return Gate::allows("update", $this->route("acceptance"));
     }
 
     public function rules(): array

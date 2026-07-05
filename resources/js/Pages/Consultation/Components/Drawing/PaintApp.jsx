@@ -12,6 +12,7 @@ import {
 } from './PaintApp/canvasHelpers';
 import PaintToolbar from './PaintApp/PaintToolbar';
 import NumberToolbox from './PaintApp/NumberToolbox';
+import ErrorBoundary from '@/Components/ErrorBoundary';
 
 const ReactPaintMUI = ({ defaultImage = null, onChange = () => {} }) => {
     const canvasRef = useRef(null);
@@ -554,4 +555,15 @@ const ReactPaintMUI = ({ defaultImage = null, onChange = () => {} }) => {
         </ThemeProvider>
     );
 };
-export default ReactPaintMUI;
+
+const ReactPaintMUIWithBoundary = (props) => (
+    <ErrorBoundary
+        variant="widget"
+        title="The drawing tool couldn't be displayed"
+        description="An unexpected error occurred while rendering the canvas editor."
+    >
+        <ReactPaintMUI {...props} />
+    </ErrorBoundary>
+);
+
+export default ReactPaintMUIWithBoundary;

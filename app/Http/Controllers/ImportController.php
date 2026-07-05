@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Services\PatientImportService;
 use Exception;
 use Illuminate\Http\Request;
@@ -18,6 +19,9 @@ class ImportController extends Controller
      */
     public function create(): \Inertia\Response
     {
+        // Bulk-imports patients + acceptances (PHI) — gate on acceptance creation.
+        $this->authorize('create', Acceptance::class);
+
         return Inertia::render('Import/Create', [
             'patientFields' => $this->importService->patientFields(),
         ]);
@@ -28,6 +32,8 @@ class ImportController extends Controller
      */
     public function store(Request $request): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|\Illuminate\Http\Response
     {
+        $this->authorize('create', Acceptance::class);
+
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv|max:10240',
             'has_header' => 'boolean',

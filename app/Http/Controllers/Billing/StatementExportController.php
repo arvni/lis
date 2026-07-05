@@ -16,6 +16,8 @@ class StatementExportController extends Controller
 
     public function __invoke(Statement $statement): BinaryFileResponse
     {
+        $this->authorize("viewAny", Statement::class);
+
         try {
             $data   = $this->statementService->prepareExportData($statement);
             $export = MonthlyStatementExport::createFromArray($data->invoicesData, $data->exportOptions);

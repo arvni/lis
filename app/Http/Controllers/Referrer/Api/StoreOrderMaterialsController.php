@@ -12,6 +12,7 @@ class StoreOrderMaterialsController extends Controller
      */
     public function __invoke(Request $request): void
     {
-        //
+        // authz: unimplemented stub — no-op, exposes/mutates nothing. If this is ever
+        // implemented, gate it on OrderMaterialPolicy@create. See docs/authz-matrix.md.
     }
 }

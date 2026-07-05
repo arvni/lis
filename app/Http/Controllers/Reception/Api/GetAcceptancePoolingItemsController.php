@@ -13,6 +13,8 @@ class GetAcceptancePoolingItemsController extends Controller
 
     public function __invoke(Acceptance $acceptance): JsonResponse
     {
+        $this->authorize("view", $acceptance);
+
         return response()->json([
             'items' => $this->acceptanceItemService->buildPoolingItems($acceptance),
         ]);

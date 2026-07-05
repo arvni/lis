@@ -13,7 +13,7 @@ class AcceptancePolicy
          */
         public function viewAny(User $authUser): bool
     {
-        return $authUser->can("Reception.Acceptances.List Acceptances");
+        return $authUser->can("Reception.Acceptances.List Acceptance");
     }
 
         /**

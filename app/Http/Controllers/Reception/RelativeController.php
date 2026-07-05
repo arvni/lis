@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Reception;
 use App\Domains\Reception\Adapters\ReferrerAdapter;
 use App\Domains\Reception\DTOs\PatientDTO;
 use App\Domains\Reception\DTOs\RelativeDTO;
+use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Models\Relative;
 use App\Domains\Reception\Requests\RelativeRequest;
 use App\Domains\Reception\Requests\UpdateRelativeRequest;
@@ -70,6 +71,8 @@ class RelativeController extends Controller
 
     public function destroy(Relative $relative): \Illuminate\Http\RedirectResponse
     {
+        // Relatives are patient records — mirror store/update gating.
+        $this->authorize("create", Patient::class);
         $this->relativeService->deleteRelation($relative);
         return back()->with(["success" => true, "status" => "Relative deleted successfully"]);
     }
