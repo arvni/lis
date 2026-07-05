@@ -126,7 +126,10 @@ class AppServiceProvider extends ServiceProvider
 
         Vite::prefetch(concurrency: 3);
 
-        Model::preventLazyLoading();
+        // Fail loud on N+1 (lazy-loading violations) in dev/staging so they surface during
+        // development; in production degrade gracefully — a missing eager-load lazy-loads
+        // (an N+1) instead of throwing LazyLoadingViolationException and 500-ing the request.
+        Model::preventLazyLoading(! $this->app->isProduction());
 
         Relation::morphMap([
             'user' => User::class,

@@ -27,6 +27,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Throwable;
@@ -757,7 +758,14 @@ class AcceptanceService
                             return $newModel;
                         }
                     } catch (Exception $exception) {
-                        dd($exception, $sampleIndex, $sample, $item->customParameters["samples"]);
+                        // Do not dump/leak the sample payload (PHI) to the response — log safe
+                        // context and rethrow so the failure is observable, not a silent `dd`.
+                        Log::error('Failed to convert acceptance item sample for barcode grouping', [
+                            'acceptance_item_id' => $item->id,
+                            'sample_index'       => $sampleIndex,
+                            'exception'          => $exception->getMessage(),
+                        ]);
+                        throw $exception;
                     }
                 });
             })
