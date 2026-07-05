@@ -16,6 +16,8 @@ class UnPublishReportController extends Controller
      */
     public function __invoke(Report $report): ?\Illuminate\Http\RedirectResponse
     {
+        $this->authorize("unpublish", $report);
+
         if (!$report->status)
             return back()->withErrors("this report has been rejected before");
         if (!$report->approver_id)

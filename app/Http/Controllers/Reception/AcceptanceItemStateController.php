@@ -26,6 +26,9 @@ class AcceptanceItemStateController extends Controller
      */
     public function show(AcceptanceItemState $acceptanceItemState): \Illuminate\Http\Resources\Json\JsonResource
     {
+        // authz: result-entry detail for the section worklist. No dedicated read ability exists;
+        // mutations (update/bulkUpdate) are gated by the section-scoped "action" gate. See
+        // docs/authz-matrix.md — flagged as a residual for the #18 section-policy pass.
         $acceptanceItemState = $this->acceptanceItemStateService->showAcceptanceItemState($acceptanceItemState);
         return AcceptanceItemStateResource::make($acceptanceItemState);
     }

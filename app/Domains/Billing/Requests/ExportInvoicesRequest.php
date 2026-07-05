@@ -2,13 +2,15 @@
 
 namespace App\Domains\Billing\Requests;
 
+use App\Domains\Billing\Models\Invoice;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ExportInvoicesRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        // Financial export — gate on invoice listing.
+        return $this->user()->can("viewAny", Invoice::class);
     }
 
     public function rules(): array

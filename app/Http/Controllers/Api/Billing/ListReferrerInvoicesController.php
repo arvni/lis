@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Billing;
 
+use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Repositories\InvoiceRepository;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -12,6 +13,8 @@ class ListReferrerInvoicesController extends Controller
 
     public function __invoke(Request $request): \Illuminate\Http\JsonResponse
     {
+        $this->authorize("viewAny", Invoice::class);
+
         $referrerId = (int) $request->input('referrer_id');
         if (!$referrerId) {
             return response()->json(['data' => []]);

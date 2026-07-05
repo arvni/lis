@@ -2,13 +2,15 @@
 
 namespace App\Domains\Reception\Requests;
 
+use App\Domains\Reception\Models\Acceptance;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ExportAcceptanceItemsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        // PHI export — mirror ExportAcceptancesRequest: require acceptance listing.
+        return $this->user()->can("viewAny", Acceptance::class);
     }
 
     public function rules(): array

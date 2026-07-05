@@ -2,13 +2,15 @@
 
 namespace App\Domains\Document\Requests;
 
+use App\Domains\Document\Models\Document;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UploadPublicDocumentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        // Authenticated document upload — gate on document creation.
+        return $this->user()->can("create", Document::class);
     }
 
     public function rules(): array

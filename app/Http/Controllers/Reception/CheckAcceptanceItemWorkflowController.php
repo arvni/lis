@@ -18,6 +18,9 @@ class CheckAcceptanceItemWorkflowController extends Controller
      */
     public function __invoke(AcceptanceItem $acceptanceItem): RedirectResponse
     {
+        // Per-item status progression — mirror CheckAcceptanceStatusController's gate.
+        $this->authorize("checkStatus", $acceptanceItem->acceptance);
+
         $this->workflowProgressionService->progressWorkflow($acceptanceItem);
         return back()->with(["success"=>true,"status"=> "Workflow progress checked"]);
     }

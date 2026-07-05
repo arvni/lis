@@ -17,6 +17,8 @@ class ListBarcodesController extends Controller
      */
     public function __invoke(Acceptance $acceptance): \Illuminate\Http\JsonResponse
     {
+        $this->authorize("view", $acceptance);
+
         $barcodes=$this->acceptanceService->listBarcodes($acceptance);
         return response()->json($barcodes);
     }

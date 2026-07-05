@@ -16,6 +16,9 @@ class EjectPanelController extends Controller
 
     public function __invoke(Acceptance $acceptance, AcceptanceItem $acceptanceItem): RedirectResponse
     {
+        // Rewrites the acceptance's items — gate on editing the acceptance.
+        $this->authorize("update", $acceptance);
+
         if (!$acceptanceItem->panel_id) {
             return back()->withErrors(['message' => 'This acceptance item is not part of a panel.']);
         }

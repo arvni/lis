@@ -2,6 +2,7 @@
 
 namespace App\Domains\Document\Requests;
 
+use App\Domains\Document\Models\Document;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -9,7 +10,8 @@ class UpdateDocumentBatchUpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        // Batch document metadata edit — gate on document editing.
+        return $this->user()->can("update", Document::class);
     }
 
     public function rules(): array

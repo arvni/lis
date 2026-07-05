@@ -21,6 +21,9 @@ class CopyReferrerTestsFromOtherReferrerController extends Controller
      */
     public function __invoke(Referrer $referrer, Request $request): \Illuminate\Http\RedirectResponse
     {
+        // Rewrites the target referrer's test/pricing config — gate on editing that referrer.
+        $this->authorize("update", $referrer);
+
         if ($request->has("source.id")) {
             $sourceReferrer = $this->referrerService->getReferrerById($request->input("source.id"));
             if ($sourceReferrer) {

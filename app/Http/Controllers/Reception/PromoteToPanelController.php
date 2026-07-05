@@ -16,6 +16,9 @@ class PromoteToPanelController extends Controller
 
     public function __invoke(Request $request, Acceptance $acceptance): RedirectResponse
     {
+        // Rewrites the acceptance's items — gate on editing the acceptance.
+        $this->authorize("update", $acceptance);
+
         $request->validate([
             'acceptance_item_ids'   => ['required', 'array', 'min:1'],
             'acceptance_item_ids.*' => ['required', 'integer', 'exists:acceptance_items,id'],
