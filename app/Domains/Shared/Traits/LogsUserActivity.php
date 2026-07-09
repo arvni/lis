@@ -2,24 +2,24 @@
 
 namespace App\Domains\Shared\Traits;
 
-use App\Domains\User\Enums\ActivityType;
-use App\Domains\User\Services\UserActivityService;
+use App\Domains\Shared\Enums\ActionType;
+use App\Domains\Shared\Events\ActivityLogged;
 use Illuminate\Database\Eloquent\Model;
 
 trait LogsUserActivity
 {
     protected function logCreated(Model $model): void
     {
-        UserActivityService::createUserActivity($model, ActivityType::CREATE);
+        ActivityLogged::dispatch($model, ActionType::CREATE);
     }
 
     protected function logUpdated(Model $model): void
     {
-        UserActivityService::createUserActivity($model, ActivityType::UPDATE);
+        ActivityLogged::dispatch($model, ActionType::UPDATE);
     }
 
     protected function logDeleted(Model $model): void
     {
-        UserActivityService::createUserActivity($model, ActivityType::DELETE);
+        ActivityLogged::dispatch($model, ActionType::DELETE);
     }
 }

@@ -1453,7 +1453,14 @@ domain (inverted dependency); it's also the last Service/Repo-level cross-domain
 Per the house convention (domain side effects are event-driven), fix by dispatching an `ActivityLogged` event
 from the trait, handled by a User-domain listener that calls `UserActivityService`. Behavior identical;
 add/adjust a listener unit test.
-- [ ]
+- [x] ✅ 2026-07-09 — trait now dispatches `Shared/Events/ActivityLogged($model, ActionType)` (reused the
+      existing `Shared\Enums\ActionType` CREATE/UPDATE/DELETE — no new enum, no User import left in Shared);
+      new `User/Listeners/LogUserActivityListener` maps ActionType→ActivityType (exhaustive `match`, fails
+      loud on unknown) and calls `UserActivityService::createUserActivity`. Registered sync in
+      EventServiceProvider (same-request semantics preserved — activity still saves in the caller's
+      transaction context). New tests/Feature/User/LogUserActivityListenerTest.php (3 tests): event→row,
+      UPDATE/DELETE mapping, and an anonymous-class trait consumer pinning the full trait→event→listener→DB
+      wiring. `composer analyse` green; full suite 676/1626 green. Shared now depends on no domain.
 
 ### 30. Silent-catch triage — finish the open tail of #15 (High / Low)
 Four truly-empty catch blocks swallow failures with zero logging:

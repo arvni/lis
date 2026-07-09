@@ -41,7 +41,9 @@ use App\Domains\Referrer\Events\ReferrerOrderCreated;
 use App\Domains\Referrer\Events\ReferrerOrderUpdated;
 use App\Domains\Referrer\Listeners\SendReferrerOrderUpdateWebhook;
 use App\Domains\Referrer\Listeners\SendReferrerOrderWebhook;
+use App\Domains\Shared\Events\ActivityLogged;
 use App\Domains\User\Events\UserDocumentUpdateEvent;
+use App\Domains\User\Listeners\LogUserActivityListener;
 use App\Events\ReferrerOrderPatientCreated;
 use App\Listeners\SendPatientToProviderWebhook;
 use App\Domains\User\Listeners\SectionPermissionsListener;
@@ -119,5 +121,6 @@ class EventServiceProvider extends ServiceProvider
         Event::listen(ReferrerOrderPatientCreated::class, [SendPatientToProviderWebhook::class, 'handle']);
         Event::listen(ReferrerOrderCreated::class, [SendReferrerOrderWebhook::class, 'handle']);
         Event::listen(ReferrerOrderUpdated::class, [SendReferrerOrderUpdateWebhook::class, 'handle']);
+        Event::listen(ActivityLogged::class, [LogUserActivityListener::class, 'handle']);
     }
 }
