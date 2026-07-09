@@ -10,7 +10,6 @@ use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Traits\ExtractsTagFilterIds;
-use App\Domains\Setting\Services\SettingService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -32,10 +31,6 @@ class AcceptanceRepository
 
     private const SORT_FIELD = 'field';
     private const SORT_DIRECTION = 'sort'; // 'sort' seems to be the key used in the original code for direction
-
-    public function __construct(private readonly SettingService $settingService)
-    {
-    }
 
     /**
      * Eager-load the acceptance's reportable (non-reportless) items together with
@@ -209,10 +204,8 @@ class AcceptanceRepository
         $this->logDeleted($acceptance);
     }
 
-    public function listSampleCollection(array $queryData): LengthAwarePaginator
+    public function listSampleCollection(array $queryData, float $minAllowablePaymentPercentage): LengthAwarePaginator
     {
-        $minAllowablePaymentPercentage = (float)$this->settingService->getSettingByKey('Payment', 'minPayment');
-
         // Disable ONLY_FULL_GROUP_BY for this query
         DB::statement('SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,"ONLY_FULL_GROUP_BY",""))');
 

@@ -63,7 +63,9 @@ class AcceptanceService
 
     public function listSampleCollections(array $queryData): LengthAwarePaginator
     {
-        return $this->acceptanceRepository->listSampleCollection($queryData);
+        $minAllowablePaymentPercentage = (float)$this->settingAdapter->getSettingByClassAndKey('Payment', 'minPayment');
+
+        return $this->acceptanceRepository->listSampleCollection($queryData, $minAllowablePaymentPercentage);
     }
 
     public function listWaitingForPublish(array $queryData): LengthAwarePaginator

@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Reception\Listeners;
 
 use App\Domains\Billing\Events\AcceptanceItemPricingEvent;
-use App\Domains\Billing\Services\InvoiceComposer;
+use App\Domains\Reception\Adapters\BillingAdapter;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Repositories\AcceptanceItemRepository;
 
@@ -11,10 +13,8 @@ class AcceptanceItemPricingListener
 {
     public function __construct(
         private AcceptanceItemRepository $acceptanceItemRepository,
-        private InvoiceComposer $invoiceComposer,
-    )
-    {
-    }
+        private BillingAdapter $billingAdapter,
+    ) {}
 
     public function handle(AcceptanceItemPricingEvent $event): void
     {
@@ -43,7 +43,7 @@ class AcceptanceItemPricingListener
             ->filter()
             ->unique('id');
         foreach ($invoices as $invoice) {
-            $this->invoiceComposer->recompose($invoice);
+            $this->billingAdapter->recomposeInvoice($invoice);
         }
     }
 
@@ -57,8 +57,8 @@ class AcceptanceItemPricingListener
             );
             foreach ($acceptanceItems as $acceptanceItem) {
                 $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, [
-                    'price'            => $acceptanceItemData['price'] / count($acceptanceItems),
-                    'discount'         => $acceptanceItemData['discount'] / count($acceptanceItems),
+                    'price' => $acceptanceItemData['price'] / count($acceptanceItems),
+                    'discount' => $acceptanceItemData['discount'] / count($acceptanceItems),
                     'customParameters' => [
                         ...($acceptanceItem->customParameters ?? []),
                         ...($acceptanceItemData['customParameters'] ?? []),
@@ -70,8 +70,8 @@ class AcceptanceItemPricingListener
             $acceptanceItem = $this->acceptanceItemRepository->findAcceptanceItemById($acceptanceItemData['id']);
             if ($acceptanceItem) {
                 $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, [
-                    'price'            => $acceptanceItemData['price'],
-                    'discount'         => $acceptanceItemData['discount'],
+                    'price' => $acceptanceItemData['price'],
+                    'discount' => $acceptanceItemData['discount'],
                     'customParameters' => [
                         ...($acceptanceItem->customParameters ?? []),
                         ...($acceptanceItemData['customParameters'] ?? []),
@@ -80,6 +80,7 @@ class AcceptanceItemPricingListener
                 $touched[] = $acceptanceItem->id;
             }
         }
+
         return $touched;
     }
 }
