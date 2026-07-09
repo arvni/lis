@@ -193,42 +193,6 @@ parameters:
 			path: app/Domains/Notification/Jobs/SendCollectRequestWebhook.php
 
 		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Laboratory\\Models\\ConsentForm\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Notification/Jobs/SendConsentFormUpdateWebhook.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Laboratory\\Models\\Instruction\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Notification/Jobs/SendInstructionUpdateWebhook.php
-
-		-
-			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Database\\Eloquent\\Collection\<int, App\\Domains\\Referrer\\Models\\Material\>\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Notification/Jobs/SendOrderMaterialUpdateWebhook.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Referrer\\Models\\OrderMaterial\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 2
-			path: app/Domains/Notification/Jobs/SendOrderMaterialUpdateWebhook.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Laboratory\\Models\\RequestForm\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Notification/Jobs/SendRequestFormUpdateWebhook.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Laboratory\\Models\\SampleType\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Notification/Jobs/SendSampleTypeUpdateWebhook.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:search\(\)\.$#'
 			identifier: method.notFound
 			count: 1

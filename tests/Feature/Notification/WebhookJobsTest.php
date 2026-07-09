@@ -9,6 +9,7 @@ use App\Domains\Laboratory\Models\SampleType;
 use App\Domains\Notification\Jobs\SendCollectRequestWebhook;
 use App\Domains\Notification\Jobs\SendConsentFormUpdateWebhook;
 use App\Domains\Notification\Jobs\SendInstructionUpdateWebhook;
+use App\Domains\Notification\Jobs\SendOrderMaterialCreatedWebhook;
 use App\Domains\Notification\Jobs\SendOrderMaterialUpdateWebhook;
 use App\Domains\Notification\Jobs\SendRequestFormUpdateWebhook;
 use App\Domains\Notification\Jobs\SendSampleTypeUpdateWebhook;
@@ -315,5 +316,85 @@ class WebhookJobsTest extends TestCase
 
             return true;
         });
+    }
+
+    // -------------------------------------------------------------------------
+    // N-12: entity-update jobs keep single-try queue semantics
+    // -------------------------------------------------------------------------
+
+    public function test_entity_update_webhook_jobs_have_single_try_semantics(): void
+    {
+        $jobs = [
+            new SendConsentFormUpdateWebhook(ConsentForm::make(['name' => 'CF']), 'update'),
+            new SendInstructionUpdateWebhook(Instruction::make(['name' => 'IN']), 'update'),
+            new SendRequestFormUpdateWebhook(RequestForm::make(['name' => 'RF']), 'update'),
+            new SendSampleTypeUpdateWebhook(SampleType::make(['name' => 'ST']), 'update'),
+        ];
+
+        foreach ($jobs as $job) {
+            $this->assertSame(1, $job->tries, get_class($job));
+            $this->assertSame([10], $job->backoff, get_class($job));
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // N-13: SendOrderMaterialCreatedWebhook posts order_material payload and signs
+    // -------------------------------------------------------------------------
+
+    public function test_send_order_material_created_webhook_posts_payload_and_signs(): void
+    {
+        Http::fake(['*' => Http::response('', 200)]);
+
+        config([
+            'services.provider_app.webhook_domain'             => 'https://provider.example.com',
+            'services.provider_app.order_material_webhook_url' => '/api/webhook/order-material/',
+            'services.provider_app.webhook_secret'             => 'test-secret',
+        ]);
+
+        $referrer = $this->makeReferrer();
+        $orderMaterial = OrderMaterial::create([
+            'server_id'      => 43,
+            'referrer_id'    => $referrer->id,
+            'sample_type_id' => SampleType::create(['name' => 'ST-created'])->id,
+            'amount'         => 3,
+            'status'         => OrderMaterialStatus::ORDERED,
+        ]);
+
+        $job = new SendOrderMaterialCreatedWebhook($orderMaterial->id);
+        $job->handle();
+
+        Http::assertSent(function ($request) use ($orderMaterial, $referrer) {
+            $this->assertStringContainsString('provider.example.com', $request->url());
+            $this->assertNotEmpty($request->header('X-Webhook-Signature'));
+
+            $body = $request->data();
+            $this->assertArrayHasKey('order_material', $body);
+            $this->assertSame($orderMaterial->id, $body['order_material']['id']);
+            $this->assertSame(3, $body['order_material']['amount']);
+            $this->assertSame($referrer->id, $body['order_material']['referrer']['id']);
+            $this->assertSame([], $body['order_material']['materials']);
+
+            return true;
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // N-14: SendOrderMaterialCreatedWebhook skips sending when model is missing
+    // -------------------------------------------------------------------------
+
+    public function test_send_order_material_created_webhook_skips_when_model_missing(): void
+    {
+        Http::fake(['*' => Http::response('', 200)]);
+
+        config([
+            'services.provider_app.webhook_domain'             => 'https://provider.example.com',
+            'services.provider_app.order_material_webhook_url' => '/api/webhook/order-material/',
+            'services.provider_app.webhook_secret'             => 'test-secret',
+        ]);
+
+        $job = new SendOrderMaterialCreatedWebhook(999999);
+        $job->handle();
+
+        Http::assertNothingSent();
     }
 }

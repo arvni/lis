@@ -1494,7 +1494,29 @@ byte-identical 88-line files modulo the entity name; `SendSampleTypeUpdateWebhoo
 in payload shaping. Collapse to one parameterized job (entity type + payload builder/DTO) or an abstract base
 with per-entity payload methods — ~500 LOC saved and one place to fix webhook behavior. Keep queue/retry
 semantics identical; unit-test payload building per entity.
-- [ ]
+- [x] ✅ 2026-07-10 (`composer analyse` green; full suite **676/1639** green, Notification suite 29 tests).
+  Took the abstract-base route: **`AbstractSendWebhook`** owns the whole send pipeline (HMAC-SHA256 signing,
+  domain+path URL joining, `Http::timeout(30)` POST, success/failure logging, rethrow-for-retry), with
+  overridable `payload()/webhookUrl()/logContext()/serviceConfig()/headers()/send()`; a `null` payload skips
+  the send (used by `SendOrderMaterialCreatedWebhook` when the row is gone). A second tier,
+  **`AbstractSendEntityUpdateWebhook`**, captures the provider-app multipart family (payload
+  `{key}_id/updated_at/{key}/action` in the original key order so HMAC signatures are byte-identical —
+  pinned by the N-01 signature-recompute test — plus optional `document` file attach + `data.json` part).
+  The 7 concrete jobs are now 31–72-line declarative subclasses (630 → 326 LOC of per-entity code; 553 total
+  incl. both abstracts). Dispatch signatures unchanged, listeners untouched. Queue semantics preserved
+  exactly: 3 tries/[10,30,60] for order-material + collect-request, 1 try/[10] for the entity-update family
+  (new test N-12 pins this since the base defaults to 3). New tests N-13/N-14 cover the previously untested
+  `SendOrderMaterialCreatedWebhook` (payload shape + skip-when-missing). Bonus fixes: the copy-pasted
+  `"Order webhook sent successfully", ['order_id' => …]` log lines in the instruction/consent/request-form
+  jobs (wrong entity key) are gone — logs now use `class_basename` + per-entity context; `CollectRequest`
+  lookup switched `first()` → `firstOrFail()` (missing row previously fataled on a null property access;
+  still fails+retries, now with a real exception). Removed the 7 now-stale `nullsafe.neverNull` baseline
+  entries for these files (**147 → 140**).
+  GOTCHAS: the entity-update payload builds `updated_at` via `getAttribute('updated_at')` +
+  `instanceof CarbonInterface` because the base sees only `Model` (direct `->updated_at` is
+  `property.notFound` at lvl 6); the document relation is loaded in `document()` *before* `toArray()` so the
+  `document` key stays in the entity payload exactly as before; `order_materials` fixtures need `server_id`
+  (NOT NULL, no default).
 
 ### 32. Deduplicate Store/Update FormRequest `rules()` pairs (Low–Medium / Low)
 Block-hash scan found 39 cross-file duplicate clusters; the biggest family is Store/Update FormRequest pairs
