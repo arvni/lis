@@ -23,6 +23,6 @@ yarn-error.log
 /.zed
 /docs
 .claude/
-*.jsx~
+*~
 .env.docker
 .DS_Store
