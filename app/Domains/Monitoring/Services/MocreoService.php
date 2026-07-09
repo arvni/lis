@@ -7,6 +7,7 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class MocreoService
 {
@@ -22,7 +23,11 @@ class MocreoService
         if (Cache::has(self::REFRESH_KEY)) {
             try {
                 return $this->doRefresh(Cache::get(self::REFRESH_KEY));
-            } catch (\Throwable) {}
+            } catch (\Throwable $e) {
+                Log::warning('Mocreo token refresh failed; falling back to full authentication', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
         return $this->doAuthenticate();
     }

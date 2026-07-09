@@ -101,6 +101,8 @@ class ItemTemplateExport
         try {
             $spreadsheet->removeNamedRange('UnitsList');
         } catch (\Throwable) {
+            // The base workbook may not contain the range yet; absence is
+            // fine — it is (re-)added just below.
         }
         if ($unitCount > 0) {
             $spreadsheet->addNamedRange(new NamedRange(

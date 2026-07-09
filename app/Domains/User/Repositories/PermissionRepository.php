@@ -2,7 +2,7 @@
 
 namespace App\Domains\User\Repositories;
 
-use Exception;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Models\Permission;
 
 class PermissionRepository
@@ -31,7 +31,9 @@ class PermissionRepository
             /** @var Permission $permission */
             $permission = Permission::findByName($permissionName);
             return $permission;
-        } catch (Exception $e) {
+        } catch (PermissionDoesNotExist) {
+            // Absence is the expected miss for a lookup by name; anything
+            // else (e.g. a DB error) propagates instead of returning null.
             return null;
         }
     }

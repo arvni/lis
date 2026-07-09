@@ -32,7 +32,10 @@ class MonitoringSample extends Model
         if (is_string($value) && !$this->isStandardDateFormat($value)) {
             try {
                 return Carbon::createFromFormat($this->getDateFormat(), $value, 'UTC');
-            } catch (\InvalidArgumentException) {}
+            } catch (\InvalidArgumentException) {
+                // Not in the model's date format — fall through to Laravel's
+                // default parsing below.
+            }
         }
         return parent::asDateTime($value);
     }
