@@ -17,18 +17,13 @@ use App\Domains\Reception\Events\AcceptanceDeletedEvent;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Models\Report;
-use App\Domains\Reception\Notifications\PatientReportPublished;
 use App\Domains\Reception\Repositories\AcceptanceRepository;
 use App\Domains\User\Models\User;
-use App\Notifications\ReferrerReportPublished;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -36,14 +31,26 @@ class AcceptanceService
 {
     protected string $phonePattern = "/^((\+|00)?968)?[279]\d{7}$/i";
 
+    private readonly AcceptanceStatusService $statusService;
+    private readonly AcceptanceBarcodeService $barcodeService;
+
     public function __construct(
         private readonly AcceptanceRepository  $acceptanceRepository,
         private readonly AcceptanceItemService $acceptanceItemService,
         private readonly LaboratoryAdapter     $laboratoryAdapter,
         private readonly SettingAdapter        $settingAdapter,
         private readonly ReferrerAdapter       $referrerAdapter,
+        ?AcceptanceStatusService               $statusService = null,
+        ?AcceptanceBarcodeService              $barcodeService = null,
     )
     {
+        // Status decisions and barcode grouping were split out of this service
+        // (improvement-plan #26). They reuse this service's own dependencies so
+        // existing callers — including tests that build the service with the five
+        // original mocks — keep working unchanged; the container injects the real
+        // collaborators in production.
+        $this->statusService = $statusService ?? new AcceptanceStatusService($acceptanceRepository, $referrerAdapter);
+        $this->barcodeService = $barcodeService ?? new AcceptanceBarcodeService();
     }
 
     public function listAcceptances(array $queryData): LengthAwarePaginator
@@ -412,44 +419,13 @@ class AcceptanceService
 
     public function updateAcceptanceStatus(Acceptance $acceptance, AcceptanceStatus $status): void
     {
-        $this->acceptanceRepository->updateAcceptance($acceptance, ["status" => $status]);
-
-        // Mirror the acceptance status onto every linked referrer order so the
-        // provider stays in sync on any status change. The webhook payload
-        // collapses the acceptance status to processing/reported, so we map to
-        // the same two values here. updateReferrerOrderStatus only dispatches a
-        // webhook when the order's status actually changes.
-        $referrerOrderStatus = $status === AcceptanceStatus::REPORTED ? 'reported' : 'processing';
-        $acceptance->load("referrerOrders");
-        foreach ($acceptance->referrerOrders as $referrerOrder) {
-            $this->referrerAdapter->updateOrderStatus($referrerOrder, $referrerOrderStatus);
-        }
+        $this->statusService->updateAcceptanceStatus($acceptance, $status);
     }
 
     /** @return array<string, mixed> */
     public function listBarcodes(Acceptance $acceptance): array
     {
-        $acceptance->load([
-            "acceptanceItems" => function ($query) {
-                $query->where("sampleless", false);
-                $query->whereRaw("(select count(*) from `samples`
-                    inner join `acceptance_item_samples` on `samples`.`id` = `acceptance_item_samples`.`sample_id`
-                    where `acceptance_items`.`id` = `acceptance_item_samples`.`acceptance_item_id`
-                    and `acceptance_item_samples`.`active` = 1
-                ) < IF(
-                    (SELECT `tests`.`type` FROM `tests`
-                     INNER JOIN `method_tests` ON `method_tests`.`test_id` = `tests`.`id`
-                     WHERE `method_tests`.`id` = `acceptance_items`.`method_test_id`) = 'service',
-                    0,
-                    `acceptance_items`.`no_sample`
-                )");
-                $query->with(["method.barcodeGroup", "method.test.sampleTypes", "test", "patients"]);
-            },
-            "patient",
-            "referrer"
-        ]);
-        $barcodes = $this->convertAcceptanceItems($acceptance->acceptanceItems);
-        return ["barcodes" => $barcodes, "patient" => $acceptance->patient, "referrer" => $acceptance->referrer, "out_patient" => $acceptance->out_patient];
+        return $this->barcodeService->listBarcodes($acceptance);
     }
 
     /**
@@ -505,147 +481,14 @@ class AcceptanceService
         }
     }
 
-    /**
-     * Check and update acceptance status based on report states
-     * Called after report creation or approval
-     *
-     * @param Acceptance $acceptance
-     * @return void
-     */
-    /**
-     * Set the acceptance status only when it actually differs, so we avoid
-     * redundant updates and referrer-order webhook dispatches.
-     */
-    private function setStatusIfChanged(Acceptance $acceptance, AcceptanceStatus $status): void
-    {
-        if ($acceptance->status !== $status) {
-            $this->updateAcceptanceStatus($acceptance, $status);
-        }
-    }
-
-    /**
-     * Pooling takes priority: while the acceptance is flagged as waiting for
-     * pooling, its status must be POOLING regardless of the rest of the
-     * workflow. The flag is cleared manually once pooling is complete, after
-     * which a subsequent check recomputes the real downstream status.
-     *
-     * @return bool True when pooling handled the status (caller should stop).
-     */
-    private function applyPoolingPriority(Acceptance $acceptance): bool
-    {
-        if (!$acceptance->waiting_for_pooling) {
-            return false;
-        }
-
-        $this->setStatusIfChanged($acceptance, AcceptanceStatus::POOLING);
-        return true;
-    }
-
-    /**
-     * SERVICE type items never carry a sample or a report, so normalise them
-     * before computing the acceptance status.
-     */
-    private function markServiceItemsAsReportless(Acceptance $acceptance): void
-    {
-        $acceptance->load(['acceptanceItems.test']);
-        foreach ($acceptance->acceptanceItems as $item) {
-            if ($item->test && $item->test->type === TestType::SERVICE) {
-                if (!$item->reportless || !$item->sampleless) {
-                    $item->update(['reportless' => true, 'sampleless' => true]);
-                }
-            }
-        }
-    }
-
-    /**
-     * Terminal step shared by the status checks: REPORTED once finance has
-     * approved, otherwise hold at WAITING_FOR_PUBLISHING.
-     */
-    private function finalizeReportedOrWaiting(Acceptance $acceptance): void
-    {
-        $this->setStatusIfChanged(
-            $acceptance,
-            $acceptance->financial_approved
-                ? AcceptanceStatus::REPORTED
-                : AcceptanceStatus::WAITING_FOR_PUBLISHING
-        );
-    }
-
     public function checkAndUpdateAcceptanceStatus(Acceptance $acceptance): void
     {
-        if ($this->applyPoolingPriority($acceptance)) {
-            return;
-        }
-
-        $this->markServiceItemsAsReportless($acceptance);
-
-        // Load acceptance items with reports
-        $acceptance->load([
-            'acceptanceItems' => function ($q) {
-                $q->where('reportless', false)
-                    ->with('report');
-            }
-        ]);
-
-        $reportableItems = $acceptance->acceptanceItems;
-
-        // If no reportable items, finance approval decides REPORTED vs waiting
-        if ($reportableItems->isEmpty()) {
-            $this->finalizeReportedOrWaiting($acceptance);
-            return;
-        }
-
-        // Check if all reportable items have reports
-        $allHaveReports = $reportableItems->every(function ($item) {
-            return $item->report !== null;
-        });
-        if (!$allHaveReports) {
-            // Not all items have reports yet; if any item has started processing,
-            // move to PROCESSING. (Pooling is handled by the early return above.)
-            $startedItems = $this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
-            if ($startedItems) {
-                $this->setStatusIfChanged($acceptance, AcceptanceStatus::PROCESSING);
-            }
-            return;
-        }
-
-        // Check if all reports are approved
-        $allApproved = $reportableItems->every(function ($item) {
-            return $item->report && $item->report->approved_at !== null;
-        });
-        if (!$allApproved) {
-            return;
-        }
-
-        // Check if all are published
-        $allPublished = $reportableItems->every(function ($item) {
-            return $item->report && $item->report->published_at !== null;
-        });
-
-        if ($allPublished) {
-            // All published, finance approval decides REPORTED vs waiting
-            $this->finalizeReportedOrWaiting($acceptance);
-        } else {
-            // All approved but not all published
-            $this->setStatusIfChanged($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
-        }
+        $this->statusService->checkAndUpdateAcceptanceStatus($acceptance);
     }
 
     public function checkAcceptanceReport(Acceptance $acceptance, bool $silent = false): void
     {
-        // Check if all tests are published and financial is approved
-        if ($this->areAllTestsPublished($acceptance)) {
-            if ($acceptance->financial_approved) {
-                $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
-                // Send notifications
-                $this->sendPublishedNotifications($acceptance, $silent);
-            } else {
-                // Stay at WAITING_FOR_PUBLISHING until financial is approved
-                if ($acceptance->status !== AcceptanceStatus::WAITING_FOR_PUBLISHING) {
-                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
-                }
-            }
-        }
+        $this->statusService->checkAcceptanceReport($acceptance, $silent);
     }
 
     /**
@@ -718,156 +561,6 @@ class AcceptanceService
         return $output;
     }
 
-    /** @param  Collection<int, \App\Domains\Reception\Models\AcceptanceItem>  $acceptanceItems */
-    private function convertAcceptanceItems(Collection $acceptanceItems): \Illuminate\Support\Collection
-    {
-        return $acceptanceItems
-            ->flatMap(function ($item) {
-                $samples = $item->customParameters['samples'] ?? [];
-
-                if (empty($samples)) {
-                    $newModel = $item->replicate();
-                    $newModel->id = $item->id;
-                    $newModel->created_at = $item->created_at;
-                    $newModel->setRelation('patient', $item->patients->first());
-                    $newModel->_sampleTypeId = $item->customParameters['sampleType'] ?? null;
-                    return collect([$newModel]);
-                }
-
-                return collect($samples)->flatMap(function ($sample, $sampleIndex) use ($item) {
-                    try {
-                        // Per-sample sampleType takes precedence over item-level sampleType
-                        $sampleTypeId = $sample['sampleType'] ?? $item->customParameters['sampleType'] ?? null;
-
-                        if (is_array($sample["patients"])) {
-                            return collect($sample["patients"])
-                                ->map(function ($patientData) use ($item, $sampleTypeId) {
-                                    $newModel = $item->replicate();
-                                    $newModel->id = $item->id;
-                                    $newModel->created_at = $item->created_at;
-                                    $patient = $item->patients->where('id', $patientData['id'])->first();
-                                    $newModel->setRelation('patient', $patient);
-                                    $newModel->_sampleTypeId = $sampleTypeId;
-                                    return $newModel;
-                                });
-                        } else {
-                            $newModel = $item->replicate();
-                            $newModel->id = $item->id;
-                            $newModel->created_at = $item->created_at;
-                            $patient = $item->patients->where('id', $sample['id'])->first();
-                            $newModel->setRelation('patient', $patient);
-                            $newModel->_sampleTypeId = $sampleTypeId;
-                            return $newModel;
-                        }
-                    } catch (Exception $exception) {
-                        // Do not dump/leak the sample payload (PHI) to the response — log safe
-                        // context and rethrow so the failure is observable, not a silent `dd`.
-                        Log::error('Failed to convert acceptance item sample for barcode grouping', [
-                            'acceptance_item_id' => $item->id,
-                            'sample_index'       => $sampleIndex,
-                            'exception'          => $exception->getMessage(),
-                        ]);
-                        throw $exception;
-                    }
-                });
-            })
-            ->groupBy(function ($item) {
-                $barcodeGroupId = $item->method->barcode_group_id ?? 'no_barcode_group';
-                $sampleTypeId   = $item->_sampleTypeId ?? 'no_sample_type';
-                return $barcodeGroupId . '_' . $item->patient->id . '_' . $sampleTypeId;
-            })
-            ->map(function ($item, $key) {
-                $sampleTypeId = $item->first()->_sampleTypeId;
-                $sampleTypes  = $item->first()->method->test->sampleTypes;
-                return [
-                    "id"             => $key,
-                    "barcodeGroup"   => $item->first()->method->barcodeGroup,
-                    "patient"        => $item->first()->patient,
-                    "items"          => $item,
-                    "sampleType"     => $sampleTypes->where('id', $sampleTypeId)->first()
-                                        ?? $sampleTypes->first(),
-                    "collection_date" => Carbon::now("Asia/Muscat")->format("Y-m-d H:i:s"),
-                    "sampleLocation"  => "In Lab"
-                ];
-            })
-            ->values();
-    }
-
-
-    /**
-     * Check if all tests for this acceptance are published
-     *
-     * @param Acceptance $acceptance
-     * @return bool
-     */
-    private function areAllTestsPublished(Acceptance $acceptance): bool
-    {
-        $publishedTestsCount = $this->countPublishedTests($acceptance);
-        $reportableTestsCount = $this->countReportableTests($acceptance);
-
-        return $publishedTestsCount == $reportableTestsCount;
-    }
-
-    /**
-     * Count published tests for an acceptance
-     *
-     * @param Acceptance $acceptance
-     * @return int
-     */
-    private function countPublishedTests(Acceptance $acceptance): int
-    {
-        return $this->acceptanceRepository->countPublishedTests($acceptance);
-    }
-
-    /**
-     * Count reportable tests for an acceptance
-     *
-     * @param Acceptance $acceptance
-     * @return int
-     */
-    private function countReportableTests(Acceptance $acceptance): int
-    {
-        return $this->acceptanceRepository->countReportableTests($acceptance);
-    }
-
-
-    /**
-     * Send notifications about published report
-     *
-     * @param Acceptance $acceptance
-     * @param bool $silent
-     * @return void
-     */
-    private function sendPublishedNotifications(Acceptance $acceptance, bool $silent = false): void
-    {
-        $acceptance->load([
-            "patient",
-            "referrer",
-            "acceptanceItems" => fn($q) => $q->where("reportless", false)
-                ->with("report.publishedDocument", "report.clinicalCommentDocument", "test")
-        ]);
-        $patient = $acceptance->patient;
-        $referrer = $acceptance->referrer;
-        if (count($acceptance->acceptanceItems)) {
-            $howReport = $acceptance->howReport ?? [];
-            // Send notification to patient (SMS always; WhatsApp text notification if checked)
-            if (!$silent) {
-                Notification::send($patient, new PatientReportPublished($acceptance));
-            }
-
-            if (!$silent && $referrer) {
-                if ($howReport["sendToReferrer"] ?? false) {
-                    $referrer->notify(new ReferrerReportPublished($acceptance));
-                    $acceptance->load("referrerOrders");
-                    // Update referrer order status across all linked referrer orders (pooling + non-pooling)
-                    foreach ($acceptance->referrerOrders as $referrerOrder) {
-                        $this->referrerAdapter->updateOrderStatus($referrerOrder, 'reported');
-                    }
-                }
-            }
-        }
-    }
-
     public function getPendingAcceptance(Patient $patient): ?Acceptance
     {
         return $this->acceptanceRepository->getPendingAcceptance($patient);
@@ -929,37 +622,6 @@ class AcceptanceService
 
     public function checkAcceptanceStatus(Acceptance $acceptance): void
     {
-        if ($acceptance->status == AcceptanceStatus::REPORTED)
-            return;
-
-        if ($this->applyPoolingPriority($acceptance)) {
-            return;
-        }
-
-        $this->markServiceItemsAsReportless($acceptance);
-
-        $reportableTest = $this->acceptanceRepository->countReportableTests($acceptance);
-
-        // No reportable tests, finance approval decides REPORTED vs waiting
-        if (!$reportableTest) {
-            $this->finalizeReportedOrWaiting($acceptance);
-            return;
-        }
-
-        // All tests published, finance approval decides REPORTED vs waiting
-        $publishedTest = $this->acceptanceRepository->countPublishedTests($acceptance);
-        if ($publishedTest == $reportableTest) {
-            $this->finalizeReportedOrWaiting($acceptance);
-            return;
-        }
-
-        // Some tests still in progress; if any started, move to PROCESSING.
-        // (Pooling is handled by the early return above.)
-        $startedItems = $this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
-        if ($startedItems) {
-            $this->setStatusIfChanged($acceptance, AcceptanceStatus::PROCESSING);
-        }
+        $this->statusService->checkAcceptanceStatus($acceptance);
     }
-
-
 }

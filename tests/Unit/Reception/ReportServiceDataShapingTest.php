@@ -2,26 +2,27 @@
 
 namespace Tests\Unit\Reception;
 
-use App\Domains\Reception\Services\ReportService;
+use App\Domains\Reception\Services\ReportDataService;
 use Tests\TestCase;
 
 /**
- * Pure-transform coverage for ReportService's report-data shaping helpers —
- * the placeholder-key builders that feed the Word/PDF report templates. These
- * are the parts of the 804-LOC service that the approval-flow Feature test
- * (ReportApprovalFlowTest) never exercises. No DB is touched: the helpers
- * operate on plain collections/objects, so lightweight stand-ins are passed in.
+ * Pure-transform coverage for the report-data shaping helpers — the
+ * placeholder-key builders that feed the Word/PDF report templates. These were
+ * extracted from ReportService into ReportDataService (improvement-plan #26);
+ * the approval-flow Feature test (ReportApprovalFlowTest) never exercises them.
+ * No DB is touched: the helpers operate on plain collections/objects, so
+ * lightweight stand-ins are passed in.
  */
 class ReportServiceDataShapingTest extends TestCase
 {
-    private ReportService $service;
+    private ReportDataService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
-        // The container autowires the service's dependencies; none are invoked
-        // by the pure shaping helpers under test, so no mocking is required.
-        $this->service = app(ReportService::class);
+        // ReportDataService has no injected dependencies; the pure shaping
+        // helpers under test touch no collaborators, so no mocking is required.
+        $this->service = app(ReportDataService::class);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
