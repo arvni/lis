@@ -1,20 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Reception\Listeners;
 
-use App\Domains\Billing\Services\InvoiceComposer;
-use App\Domains\Billing\Services\InvoiceService;
+use App\Domains\Reception\Adapters\BillingAdapter;
 use App\Domains\Reception\Services\AcceptanceService;
 
 class AcceptanceInvoiceListener
 {
     public function __construct(
         protected AcceptanceService $acceptanceService,
-        protected InvoiceService $invoiceService,
-        protected InvoiceComposer $invoiceComposer,
-    )
-    {
-    }
+        protected BillingAdapter $billingAdapter,
+    ) {}
 
     public function handle(object $event): void
     {
@@ -24,9 +22,9 @@ class AcceptanceInvoiceListener
         }
         $this->acceptanceService->updateAcceptanceInvoice($acceptance, $event->invoiceId);
 
-        $invoice = $this->invoiceService->findInvoiceById($event->invoiceId);
+        $invoice = $this->billingAdapter->findInvoiceById($event->invoiceId);
         if ($invoice) {
-            $this->invoiceComposer->recompose($invoice);
+            $this->billingAdapter->recomposeInvoice($invoice);
         }
     }
 }

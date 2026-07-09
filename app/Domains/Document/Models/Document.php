@@ -2,8 +2,8 @@
 
 namespace App\Domains\Document\Models;
 
+use App\Domains\Document\Adapters\UserAdapter;
 use App\Domains\Document\Enums\DocumentTag;
-use App\Domains\User\Services\UserService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -63,7 +63,7 @@ class Document extends Model
         $user = auth()->user();
         $tags=[];
         if ($user)
-            $tags = UserService::getAllowedDocumentTags($user);
+            $tags = app(UserAdapter::class)->getAllowedDocumentTags($user);
         else
             $tags = DocumentTag::values();
         return $q->whereIn('tag', $tags);

@@ -454,13 +454,13 @@ parameters:
 			message: '#^Unable to resolve the template type TKey in call to function collect$#'
 			identifier: argument.templateType
 			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
+			path: app/Domains/Reception/Services/AcceptanceBarcodeService.php
 
 		-
 			message: '#^Unable to resolve the template type TValue in call to function collect$#'
 			identifier: argument.templateType
 			count: 1
-			path: app/Domains/Reception/Services/AcceptanceService.php
+			path: app/Domains/Reception/Services/AcceptanceBarcodeService.php
 
 		-
 			message: '#^Parameter \#2 \$associative of function get_headers expects bool, int given\.$#'
@@ -487,10 +487,10 @@ parameters:
 			path: app/Domains/Reception/Services/PatientService.php
 
 		-
-			message: '#^Method App\\Domains\\Reception\\Services\\ReportService\:\:prepareReferrer\(\) has parameter \$referrer with no type specified\.$#'
+			message: '#^Method App\\Domains\\Reception\\Services\\ReportDataService\:\:prepareReferrer\(\) has parameter \$referrer with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
-			path: app/Domains/Reception/Services/ReportService.php
+			path: app/Domains/Reception/Services/ReportDataService.php
 
 		-
 			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Reception\\Models\\Report\. Use \-\> instead\.$#'
