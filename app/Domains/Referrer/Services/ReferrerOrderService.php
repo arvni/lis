@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Referrer\Services;
 
 use App\Domains\Reception\Enums\AcceptanceStatus;
@@ -15,6 +17,7 @@ use App\Domains\Referrer\Support\ReferrerOrderPayloadBuilder;
 use App\Events\ReferrerOrderPatientCreated;
 use Exception;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ReferrerOrderService
@@ -205,18 +208,23 @@ class ReferrerOrderService
             return null;
         }
 
-        if ($collectRequestId && $order->collect_request_id !== $collectRequestId) {
-            $this->referrerRepository->updateReferrerOrder($order, [
-                'collect_request_id' => $collectRequestId,
-            ]);
-            $order = $order->fresh();
-        }
+        $order = DB::transaction(function () use ($acceptance, $order, $collectRequestId): ReferrerOrder {
+            if ($collectRequestId && $order->collect_request_id !== $collectRequestId) {
+                $this->referrerRepository->updateReferrerOrder($order, [
+                    'collect_request_id' => $collectRequestId,
+                ]);
+                $order = $order->fresh();
+            }
 
-        // Pooling items have served their purpose for this batch.
-        AcceptanceItem::where('acceptance_id', $acceptance->id)
-            ->where('is_pooling', true)
-            ->update(['is_pooling' => false]);
+            // Pooling items have served their purpose for this batch.
+            AcceptanceItem::where('acceptance_id', $acceptance->id)
+                ->where('is_pooling', true)
+                ->update(['is_pooling' => false]);
 
+            return $order;
+        });
+
+        // Webhook listener — dispatch only after the writes have committed.
         ReferrerOrderUpdated::dispatch($order);
 
         return $order;
