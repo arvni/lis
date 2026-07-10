@@ -3,11 +3,13 @@
 namespace Tests\Feature\Document;
 
 use App\Domains\Document\Models\Document;
+use App\Domains\Document\Repositories\DocumentRepository;
 use App\Domains\Document\Services\DocumentService;
 use App\Domains\User\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\TestCase;
 
@@ -22,7 +24,7 @@ class DocumentServiceTest extends TestCase
         parent::setUp();
         Storage::fake('local');
         $this->actingAs(User::factory()->create());
-        $this->service = new DocumentService();
+        $this->service = new DocumentService(new DocumentRepository);
     }
 
     private function store(): Document
@@ -75,13 +77,13 @@ class DocumentServiceTest extends TestCase
     public function test_show_document_aborts_when_file_missing(): void
     {
         $document = Document::create([
-            'owner_type'   => 'user',
-            'owner_id'     => 1,
-            'hash'         => \Illuminate\Support\Str::uuid(),
-            'ext'          => 'pdf',
-            'tag'          => 'DOCUMENT',
+            'owner_type' => 'user',
+            'owner_id' => 1,
+            'hash' => Str::uuid(),
+            'ext' => 'pdf',
+            'tag' => 'DOCUMENT',
             'originalName' => 'missing.pdf',
-            'path'         => 'nonexistent/missing.pdf',
+            'path' => 'nonexistent/missing.pdf',
         ]);
 
         $this->expectException(NotFoundHttpException::class);

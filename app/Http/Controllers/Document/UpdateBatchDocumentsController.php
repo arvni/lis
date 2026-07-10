@@ -1,34 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Document;
 
-use App\Domains\Document\Enums\DocumentTag;
-use App\Domains\Document\Services\DocumentService;
 use App\Domains\Document\Requests\UpdateDocumentBatchUpdateRequest;
+use App\Domains\Document\Services\DocumentService;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 
 class UpdateBatchDocumentsController extends Controller
 {
-    public function __construct(private DocumentService $documentService)
-    {
-    }
+    public function __construct(private readonly DocumentService $documentService) {}
 
     /**
      * Handle the incoming request.
      */
-    public function __invoke(UpdateDocumentBatchUpdateRequest $request): \Illuminate\Http\RedirectResponse
+    public function __invoke(UpdateDocumentBatchUpdateRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        foreach ($validated['documents'] as $documentData) {
-            $document = $this->documentService->getDocument($documentData['id']);
-            $this->documentService->updateDocument($document, [
-                'owner_id' => $validated['ownerId'],
-                'owner_type' => $validated['ownerClass'],
-                'related_type' => $validated['relatedClass'] ?? null,
-                'related_id' => $validated['relatedId'] ?? null,
-                'tag' => ($documentData['tag'] == DocumentTag::TEMP->value || !isset($documentData["tag"])) ? $validated['tag'] : DocumentTag::find($documentData["tag"]),
-            ]);
-        }
+        $this->documentService->batchUpdate(
+            $validated['documents'],
+            (int) $validated['ownerId'],
+            $validated['ownerClass'],
+            $validated['relatedClass'] ?? null,
+            isset($validated['relatedId']) ? (int) $validated['relatedId'] : null,
+            $validated['tag'] ?? null,
+        );
+
         return back()->with(['success' => true, 'status' => 'Documents updated successfully']);
     }
 }

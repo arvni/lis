@@ -85,11 +85,9 @@ app/Domains/Document/Listeners/DocumentUpdateListener.php
 app/Domains/Document/Models/Document.php
 app/Domains/Document/Policies/DocumentPolicy.php
 app/Domains/Document/Requests/StoreDocumentRequest.php
-app/Domains/Document/Requests/UpdateDocumentBatchUpdateRequest.php
 app/Domains/Document/Requests/UpdateDocumentRequest.php
 app/Domains/Document/Requests/UploadPublicDocumentRequest.php
 app/Domains/Document/Resources/DocumentResource.php
-app/Domains/Document/Services/DocumentService.php
 app/Domains/Inventory/Enums/AdjustReason.php
 app/Domains/Inventory/Enums/ApprovalStatus.php
 app/Domains/Inventory/Enums/ItemDepartment.php
@@ -628,7 +626,6 @@ app/Http/Controllers/Controller.php
 app/Http/Controllers/DashboardController.php
 app/Http/Controllers/Document/DocumentController.php
 app/Http/Controllers/Document/DownloadReportController.php
-app/Http/Controllers/Document/UpdateBatchDocumentsController.php
 app/Http/Controllers/Document/UploadPublicDocumentController.php
 app/Http/Controllers/GetUserDetailsController.php
 app/Http/Controllers/ImportController.php
