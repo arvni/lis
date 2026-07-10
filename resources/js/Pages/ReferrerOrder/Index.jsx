@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { GridActionsCellItem } from '@mui/x-data-grid';
-import Filter from './Components/Filter';
+import Filter from '@/Components/SearchFilter.jsx';
 import TableLayout from '@/Layouts/TableLayout';
 import { useState, useEffect } from 'react';
 import { RemoveRedEye, Assignment, MergeType } from '@mui/icons-material';

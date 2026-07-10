@@ -1604,4 +1604,42 @@ After #27's top three, the next tier: `Pages/Acceptance/Components/Filter.jsx` 5
 shared filter abstraction (field-config-driven `<FilterForm>`) instead of 33 hand-rolled variants. Frontend
 test density is still thin (16 test files / 66 tests). Same rules as #5/#27: JS only, extract hooks +
 subcomponents, eslint/prettier/vite build/vitest green.
-- [ ]
+- [x] ✅ 2026-07-10 (eslint clean, prettier clean, `vite build` green, vitest **107/107** — was 66, +41 new
+      across 6 new test files). Three parts:
+      • FILTER CLONES: 13 of the 33 `Filter.jsx` were the same ~47-line search-accordion (9 byte-identical
+        "Search title", 3 identical mod import order, ApprovalFlow = same mod label "Search name") → new shared
+        `Components/SearchFilter.jsx` (adds a `label` prop + PropTypes, otherwise verbatim); the 12 pages now
+        import it directly (local Filter.jsx deleted), ApprovalFlow keeps a 5-line label wrapper. Covered by
+        `SearchFilter.test.jsx` (3 tests; GOTCHA: the AccordionSummary is ALSO a `<button>` named "Filter" via
+        ButtonBase — target the submit by `MuiButton-root` class after expanding). NOT unified (audited,
+        genuinely divergent): Setting (tabs+search coupled in one state), Sample/Test/User/etc. (already on the
+        `FilterWraper` form-paper template — a different visual pattern), and the big per-domain filters.
+        A field-config-driven `<FilterForm>` was judged NOT worth it: the survivors differ in behavior
+        (SelectSearch urls, date logic), not just fields.
+      • DECOMPOSED the five next-tier components (same template: container keeps state/handlers, parts in a
+        sibling folder, public API unchanged; Σ 2,510 → 1,205 container LOC):
+        - Acceptance/Filter.jsx **544 → 361** → Filter/{validation (pure dateRangeError/countActiveFilters —
+          replaced 3 useEffect+state error pairs with derived values, render-equivalent), SearchField,
+          ChipMultiSelect (dedups the Status + How-Found-Us checkbox-chip selects), DateRangeSection (dedups
+          the 3× preset-row + from/to ClearableDateField blocks)}.
+        - Section/DoneForm.jsx **495 → 232** → DoneForm/{constants (ACTION_TYPES, still re-exported from
+          DoneForm for the 2 consumers), validation (pure validateWorkflowAction), ParameterField (the
+          file/options/text renderItem switch), CaseInfoPanel, RejectionFields}.
+        - AddTestOrPanel/PanelConfigStep.jsx **495 → 113** → PanelConfigStep/{helpers (8 pure item-array
+          shapers: applySampleless/applyReportless/updateItemSample/addSampleToItem/removeSampleFromItem/
+          spreadPanelPrice/spreadPanelDiscount/computePanelTotals), PanelInfoBar, PanelOptionsCard,
+          TestSampleAccordion, PanelPricingSection, PanelNotesSection}.
+        - Report/Signers.jsx **492 → 269** → Signers/{helpers (pure moveSignerUp/Down, removeSigner
+          w/ row renumber, updateSignerTitle, rowCompare — return null for no-ops), SignerRow (owns its
+          hover state; SignerImage dedups the signature/stamp cells)}.
+        - SectionsInfo/SampleTimeline.jsx **484 → 230** → SampleTimeline/{helpers (parseParameters),
+          SectionCard, TimelineUserStamp (dedups started-by/finished-by blocks), ParametersList (the file
+          Document-viewer state is now per-parameter instead of one shared selectedDoc — visually identical,
+          previously N stacked dialogs), ProcessingActions}.
+      • TESTS: +41 vitest (16 → 22 files, 66 → 107 tests) pinning the extracted pure logic: date-range/
+        active-count validation, workflow-action validation (incl. next='' = Sample Collection passes),
+        panel item-shapers (sampleless cascade, no_sample cap, price/discount spread), signer list ops
+        (swap+renumber, no-op nulls, input not mutated), parseParameters, SearchFilter behavior.
+      Also deleted dead `Section/Components/RejectForm.jsx` (208 LOC; exported a `DoneForm` nobody imported —
+      superseded by the unified WorkflowActionForm; Report's RejectForm is a different file, still live).
+      Remaining next tier (all under 480): the ~450-LOC band + the 21 `AddForm.jsx` (not audited this pass).

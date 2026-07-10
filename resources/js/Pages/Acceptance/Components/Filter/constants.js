@@ -33,6 +33,8 @@ export const STATUSES = [
     'Canceled',
 ];
 
+export const STATUS_OPTIONS = STATUSES.map((name) => ({ value: name, label: name }));
+
 export const REGISTERED_PRESETS = [
     { key: 'today', label: 'Today' },
     { key: 'yesterday', label: 'Yesterday' },

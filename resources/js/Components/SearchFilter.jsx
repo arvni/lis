@@ -3,16 +3,16 @@ import TextField from '@mui/material/TextField';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
+import React, { useState } from 'react';
 import FilterIcon from '@mui/icons-material/FilterAlt';
 import Button from '@mui/material/Button';
-import { useState } from 'react';
+import PropTypes from 'prop-types';
 
-const Filter = ({ defaultFilter, onFilter }) => {
+const SearchFilter = ({ defaultFilter, onFilter, label = 'Search title' }) => {
     const [filter, setFilter] = useState(defaultFilter);
     const handleChange = (e) => {
         setFilter((prevState) => ({ ...prevState, search: e.target.value }));
     };
-
     return (
         <Accordion>
             <AccordionSummary>
@@ -27,7 +27,7 @@ const Filter = ({ defaultFilter, onFilter }) => {
                             name={'search'}
                             value={filter?.search}
                             onChange={handleChange}
-                            label={'Search title'}
+                            label={label}
                         />
                     </Grid>
                     <Grid
@@ -45,4 +45,10 @@ const Filter = ({ defaultFilter, onFilter }) => {
     );
 };
 
-export default Filter;
+SearchFilter.propTypes = {
+    defaultFilter: PropTypes.object,
+    onFilter: PropTypes.func.isRequired,
+    label: PropTypes.string,
+};
+
+export default SearchFilter;
