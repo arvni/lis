@@ -167,7 +167,10 @@ class BuildWordFileService
                 }
             }
         } catch (Exception $e) {
-            // Ignore header reading errors
+            Log::warning('Could not read image headers to determine extension; defaulting to jpg', [
+                'url' => $url,
+                'error' => $e->getMessage(),
+            ]);
         }
 
         // Default to jpg if we can't determine the type

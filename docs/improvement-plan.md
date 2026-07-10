@@ -1098,6 +1098,7 @@ domain exception), never `dd`.
   `catch` blocks — the true swallowers (`MocreoService:25`, `ReferrerTestService:111/122`,
   `PermissionRepository:34`) should log-or-rethrow; the `back()->with('error', …)` ones are legit user
   feedback and stay. Tracked as a follow-up under this item.
+- ✅ 2026-07-09 — the open tail (silent-catch triage) completed under item #30; #15 is fully closed.
 
 ### 16. Guard `Model::preventLazyLoading()` for production (High / Low)
 `app/Providers/AppServiceProvider.php:129` calls `Model::preventLazyLoading()` **unconditionally**. In
@@ -1472,7 +1473,18 @@ Plus the known swallowers flagged in #15: `User/Repositories/PermissionRepositor
 `Referrer/Services/ReferrerTestService.php:111/122`. Audit each: log-or-rethrow the genuine swallows
 (`Log::warning` with safe context minimum); keep only deliberate ignores with a comment saying *why* ignoring
 is correct. Closes #15 fully.
-- [ ]
+- ✅ 2026-07-09 (`composer analyse` green; Referrer/User/Monitoring/Inventory + code-quality suites 29/29
+  green). Triage outcome per site: **ReferrerTestService:111/122** — the real fix: widened `catch (Exception)`
+  → `catch (\Throwable)` (eval parse failures throw `ParseError`, an `Error` the old catch *missed* — a
+  malformed admin-configured condition fataled instead of being swallowed) + `Log::warning` with the
+  condition/expression string (admin config, no PHI). **PermissionRepository:34** — narrowed bare `Exception`
+  to spatie's `PermissionDoesNotExist` (null-on-missing is the method's contract; DB errors now propagate
+  instead of masquerading as "permission not found"). **MocreoService:25** — refresh-failure fallback to full
+  re-auth now `Log::warning`s (repeated refresh failures were invisible). **BuildWordFileService:169** —
+  header-read failure now `Log::warning`s (url + message) before the jpg fallback, since a wrong extension can
+  break the generated Word doc. **ItemTemplateExport:103** and **MonitoringSample:35** — kept as deliberate
+  ignores with why-comments (idempotent named-range removal; fall-through to Laravel's default date parsing).
+  #15 is now fully closed.
 
 ### 31. Consolidate the webhook job family (Medium / Low)
 `app/Domains/Notification/Jobs/` has 7 `Send*Webhook` jobs (630 LOC total).

@@ -108,7 +108,13 @@ class ReferrerTestService
 
             try {
                 return eval("return {$condition['condition']};");
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
+                // \Throwable: eval() parse failures throw ParseError, which
+                // is an Error, not an Exception.
+                Log::warning('Referrer price condition failed to evaluate; skipping it', [
+                    'condition' => $condition['condition'],
+                    'error' => $e->getMessage(),
+                ]);
                 return false;
             }
         });
@@ -119,7 +125,13 @@ class ReferrerTestService
                 $p1 = $parameters['A7Wmfw'] ?? 0;
                 $p2 = $parameters['HZIcwd'] ?? 0;
                 return (float)eval("return {$matchedCondition['value']};");
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
+                // \Throwable: eval() parse failures throw ParseError, which
+                // is an Error, not an Exception.
+                Log::warning('Referrer price expression failed to evaluate; pricing at 0', [
+                    'value' => $matchedCondition['value'],
+                    'error' => $e->getMessage(),
+                ]);
                 return 0;
             }
         }
