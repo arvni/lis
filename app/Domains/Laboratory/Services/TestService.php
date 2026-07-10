@@ -9,7 +9,6 @@ use App\Domains\Laboratory\Enums\MethodPriceType;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Laboratory\Models\Test;
 use App\Domains\Laboratory\Repositories\TestRepository;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -86,8 +85,8 @@ readonly class TestService
             "reportTemplates",
             "testGroups",
             "offers" => function ($q) use ($referrer) {
-                $q->where("started_at", "<=", Carbon::now("Asia/Muscat"))
-                    ->where("ended_at", ">=", Carbon::now("Asia/Muscat"))
+                $q->where("started_at", "<=", now())
+                    ->where("ended_at", ">=", now())
                     ->where("active", true);
                 if ($referrer)
                     $q->where(function ($q) use ($referrer) {

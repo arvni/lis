@@ -40,7 +40,7 @@ class TimeSlotAvailable implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $dateTime = Carbon::createFromFormat("Y-m-d H:i", $this->dueDate . " " . $value, "Asia/Muscat");
+        $dateTime = Carbon::createFromFormat("Y-m-d H:i", $this->dueDate . " " . $value);
 
         // Check if time slot is available (return true if NO overlapping appointments exist)
         $exists = DB::table("times")

@@ -31,8 +31,8 @@ class StoreTimeRequest extends FormRequest
                 "required",
                 "date_format:H:i",
                 function ($attribute, $value, $fail) {
-                    $dateTime = Carbon::createFromFormat("Y-m-d H:i", $this->input('date') . " " . $value,"Asia/Muscat");
-                    $endDateTime = Carbon::createFromFormat("Y-m-d H:i", $this->input('date') . " " . $this->input("endTime"),"Asia/Muscat");
+                    $dateTime = Carbon::createFromFormat("Y-m-d H:i", $this->input('date') . " " . $value);
+                    $endDateTime = Carbon::createFromFormat("Y-m-d H:i", $this->input('date') . " " . $this->input("endTime"));
 
                     // Check for time slot availability
                     $exists = DB::table("times")
@@ -53,8 +53,8 @@ class StoreTimeRequest extends FormRequest
                 "required",
                 "date_format:H:i",
                 function ($attribute, $value, $fail) {
-                    $dateTime = Carbon::createFromFormat("Y-m-d H:i", $this->input('date') . " " . $value,"Asia/Muscat");
-                    $startDateTime = Carbon::createFromFormat("Y-m-d H:i", $this->input('date') . " " . $this->input("startTime"),"Asia/Muscat");
+                    $dateTime = Carbon::createFromFormat("Y-m-d H:i", $this->input('date') . " " . $value);
+                    $startDateTime = Carbon::createFromFormat("Y-m-d H:i", $this->input('date') . " " . $this->input("startTime"));
 
                     // Check for time slot availability
                     $exists = DB::table("times")

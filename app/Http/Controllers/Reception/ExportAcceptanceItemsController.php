@@ -6,7 +6,6 @@ use App\Domains\Reception\Exports\AcceptanceItemsExport;
 use App\Domains\Reception\Requests\ExportAcceptanceItemsRequest;
 use App\Domains\Reception\Services\AcceptanceItemService;
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ExportAcceptanceItemsController extends Controller
@@ -22,8 +21,8 @@ class ExportAcceptanceItemsController extends Controller
         if (empty($filters["date"]) && empty($filters["from_date"]) && empty($filters["to_date"])) {
             $request->merge([
                 "filters" => array_merge($filters, [
-                    "from_date" => Carbon::now("Asia/Muscat")->subMonths(3)->startOfDay()->toDateString(),
-                    "to_date" => Carbon::now("Asia/Muscat")->toDateString(),
+                    "from_date" => now()->subMonths(3)->startOfDay()->toDateString(),
+                    "to_date" => now()->toDateString(),
                 ])
             ]);
         }

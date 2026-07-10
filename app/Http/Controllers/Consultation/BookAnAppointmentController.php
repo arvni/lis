@@ -24,7 +24,7 @@ class BookAnAppointmentController extends Controller
         if (!$customerID) {
             $customerID = $this->customerService->createOrGetCustomer($validated["customer"])->id;
         }
-        $dueDate = Carbon::createFromFormat("Y-m-d H:i", $validated["dueDate"] . " " . $validated["time"], "Asia/Muscat");
+        $dueDate = Carbon::createFromFormat("Y-m-d H:i", $validated["dueDate"] . " " . $validated["time"]);
         $this->timeRepository->createTime([
             "consultant_id" => $validated["consultant"]["id"],
             "reservable_type" => "customer",

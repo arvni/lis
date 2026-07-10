@@ -53,8 +53,8 @@ class TimeController extends Controller
     public function store(StoreTimeRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
-        $startTime = Carbon::createFromFormat("Y-m-d H:i", $validated["date"] . " " . $validated["startTime"], "Asia/Muscat");
-        $endTime = Carbon::createFromFormat("Y-m-d H:i", $validated["date"] . " " . $validated["endTime"], "Asia/Muscat");
+        $startTime = Carbon::createFromFormat("Y-m-d H:i", $validated["date"] . " " . $validated["startTime"]);
+        $endTime = Carbon::createFromFormat("Y-m-d H:i", $validated["date"] . " " . $validated["endTime"]);
         $this->timeService->storeTime(new TimeDTO(
             "Reserved Disabled Time By Doctor",
             $validated["consultant_id"],
@@ -71,7 +71,7 @@ class TimeController extends Controller
     public function update(UpdateTimeRequest $request, Time $time): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
-        $dueDate = Carbon::createFromFormat("Y-m-d H:i", $validated["dueDate"] . " " . $validated["time"], "Asia/Muscat");
+        $dueDate = Carbon::createFromFormat("Y-m-d H:i", $validated["dueDate"] . " " . $validated["time"]);
 
         if ($time->reservable_type === 'customer') {
             $customerID = $request->input("customer.id");

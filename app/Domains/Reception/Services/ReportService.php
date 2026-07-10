@@ -16,7 +16,6 @@ use App\Domains\Reception\Repositories\ReportParameterRepository;
 use App\Domains\Reception\Repositories\ReportRepository;
 use App\Domains\Reception\Repositories\SignerRepository;
 use App\Domains\User\Models\User;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\UploadedFile;
@@ -98,7 +97,7 @@ class ReportService
 
         // Create report
         $report = $this->reportRepository->create([
-            'reported_at' => Carbon::now("Asia/Muscat"),
+            'reported_at' => now(),
             'reporter_id' => $user->id,
             'acceptance_item_id' => $acceptanceItemId,
             'report_template_id' => $reportTemplateId,
@@ -157,7 +156,7 @@ class ReportService
         // Create report
         $report = $this->reportRepository->update($report,
             [
-                'reported_at' => Carbon::now("Asia/Muscat"),
+                'reported_at' => now(),
                 'reporter_id' => $user->id,
                 'acceptance_item_id' => $acceptanceItemId,
                 'report_template_id' => $reportTemplateId,
@@ -377,7 +376,7 @@ class ReportService
     {
 
         return $this->reportRepository->update($report, [
-            "approved_at" => Carbon::now("Asia/Muscat"),
+            "approved_at" => now(),
             "approver_id" => $approver->id
         ]);
     }
@@ -492,7 +491,7 @@ class ReportService
         return $this->reportRepository->update(
             $report,
             [
-                "published_at" => Carbon::now("Asia/Muscat"),
+                "published_at" => now(),
                 "publisher_id" => $publisher->id
             ]);
     }
@@ -527,7 +526,7 @@ class ReportService
         return $this->reportRepository->update(
             $report,
             [
-                "approved_at" => Carbon::now("Asia/Muscat"),
+                "approved_at" => now(),
                 "approver_id" => $rejecter->id,
                 "status" => false,
                 "comment" => $comment

@@ -61,7 +61,7 @@ readonly class MaterialService
             $data['order_material_id'] = $orderMaterial->id;
             $data['assigned_at'] = $materialDTO->assignedAt
                 ? Carbon::parse($materialDTO->assignedAt)
-                : ($material->assigned_at ?? Carbon::now('Asia/Muscat'));
+                : ($material->assigned_at ?? now());
         } else {
             // No referrer: material is unassigned.
             $data['order_material_id'] = null;

@@ -6,7 +6,6 @@ use App\Domains\Reception\Exports\AcceptancesExport;
 use App\Domains\Reception\Requests\ExportAcceptancesRequest;
 use App\Domains\Reception\Services\AcceptanceService;
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ExportAcceptancesController extends Controller
@@ -21,14 +20,14 @@ class ExportAcceptancesController extends Controller
         // Default to last 3 months when no date filter is set
         if (empty($filters['date']) && empty($filters['from_date']) && empty($filters['to_date'])) {
             $queryData['filters'] = array_merge($filters, [
-                'from_date' => Carbon::now('Asia/Muscat')->subMonths(3)->startOfDay()->toDateString(),
-                'to_date'   => Carbon::now('Asia/Muscat')->toDateString(),
+                'from_date' => now()->subMonths(3)->startOfDay()->toDateString(),
+                'to_date'   => now()->toDateString(),
             ]);
         }
 
         $acceptances = $this->acceptanceService->exportAcceptances($queryData);
 
-        $filename = 'acceptances-' . Carbon::now('Asia/Muscat')->format('Y-m-d') . '.xlsx';
+        $filename = 'acceptances-' . now()->format('Y-m-d') . '.xlsx';
 
         return Excel::download(new AcceptancesExport($acceptances), $filename);
     }
