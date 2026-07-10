@@ -441,8 +441,12 @@ class ReportService
             return;
         }
 
+        $signerUsers = User::whereIn('id', array_column($signers, 'user_id'))
+            ->get()
+            ->keyBy('id');
+
         foreach (array_values($signers) as $index => $signerData) {
-            $signerUser = User::find($signerData['user_id']);
+            $signerUser = $signerUsers->get($signerData['user_id']);
             if (!$signerUser) {
                 continue;
             }

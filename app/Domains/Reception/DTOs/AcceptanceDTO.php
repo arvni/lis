@@ -47,7 +47,7 @@ class AcceptanceDTO
 
         // These may not be in the request data but required by DTO
         $invoiceId = $data["invoice_id"] ?? null;
-        $acceptorId = $data["acceptor_id"] ?? auth()->user()->id;
+        $acceptorId = $data["acceptor_id"] ?? auth()->id();
 
         // Extract referrer information
         $referrerId = $data['referrer']['id'] ?? $data["referrer_id"] ?? null;

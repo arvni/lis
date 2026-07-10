@@ -34,7 +34,7 @@ class PatientRepository
     public function createPatient(array $data): Patient
     {
         $patient = new Patient($data);
-        $patient->registrar()->associate(auth()->user()->id);
+        $patient->registrar()->associate(auth()->id());
         $patient->save();
         $this->logCreated($patient);
         return $patient;

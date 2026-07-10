@@ -1545,7 +1545,11 @@ Small-N but free wins:
 - `Billing/Services/PaymentService.php:114` — `updatePayments` runs `findPaymentById` per row; prefetch the
   invoice's payments and look up in-memory. (`PaymentMethod::find` at :123 is the enum helper, not a query.)
 Also fold in the trivial nit: 12 uses of `auth()->user()->id` → `auth()->id()`.
-- [ ]
+- [x] ✅ 2026-07-10 (`composer analyse` green; full suite **679/1643** green). `syncSigners` now prefetches
+  signer users once via `whereIn(...)->get()->keyBy('id')`; `updatePayments` prefetches the invoice's
+  payments (`loadMissing('payments')->keyBy('id')`) and looks up in-memory — this also scopes updates to
+  the invoice's own payments instead of any payment id. Swept all **13** remaining `auth()->user()->id`
+  → `auth()->id()` (12 files across Billing/Reception + 3 controllers).
 
 ### 34. Baseline final tail — audit `nullsafe.neverNull` for lying types (Medium / Medium)
 Baseline is down to **147** entries. Top identifiers: **37 `nullsafe.neverNull`** (code does `?->` on
