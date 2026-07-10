@@ -2,44 +2,36 @@
 
 namespace App\Domains\Laboratory\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Domains\Laboratory\Models\RequestForm;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\Rule;
 
-class UpdateRequestFormRequest extends FormRequest
+class UpdateRequestFormRequest extends StoreRequestFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return Gate::allows("update",$this->routeRequestFormModel());
+        return Gate::allows('update', $this->routeRequestFormModel());
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
-        return [
-            "form_data" => "required|array|min:1",
-            "form_data.*.id" => "required",
-            "form_data.*.label" => "required",
-            "form_data.*.placeholder" => "nullable",
-            "form_data.*.options" => "nullable|array",
-            "form_data.*.required" => "nullable|boolean",
-            "form_data.*.type" => ["required", Rule::in(["text", "number", "checkbox", "select", "date", "description"])],
-            "name" => "required|unique:request_forms,name,".$this->routeRequestFormModel()->id,
-            "document" => ["nullable", "array"],
-            "document.id" => ["nullable", "exists:documents,hash"],
-        ];
+        $rules = parent::rules();
+        $rules['name'] = 'required|unique:request_forms,name,'.$this->routeRequestFormModel()->id;
+
+        return $rules;
     }
 
-    private function routeRequestFormModel(): \App\Domains\Laboratory\Models\RequestForm
+    private function routeRequestFormModel(): RequestForm
     {
-        /** @var \App\Domains\Laboratory\Models\RequestForm $model */
+        /** @var RequestForm $model */
         $model = $this->route('requestForm');
 
         return $model;

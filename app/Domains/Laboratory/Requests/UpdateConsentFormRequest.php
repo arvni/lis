@@ -2,18 +2,18 @@
 
 namespace App\Domains\Laboratory\Requests;
 
+use App\Domains\Laboratory\Models\ConsentForm;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
-class UpdateConsentFormRequest extends FormRequest
+class UpdateConsentFormRequest extends StoreConsentFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->routeConsentFormModel());
+        return Gate::allows('update', $this->routeConsentFormModel());
     }
 
     /**
@@ -23,16 +23,15 @@ class UpdateConsentFormRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            "name" => ["required", "string", "max:255", "unique:consent_forms,name," . $this->routeConsentFormModel()->id],
-            "document" => ["required", "array"],
-            "document.id" => ["required", "exists:documents,hash"],
-        ];
+        $rules = parent::rules();
+        $rules['name'] = ['required', 'string', 'max:255', 'unique:consent_forms,name,'.$this->routeConsentFormModel()->id];
+
+        return $rules;
     }
 
-    private function routeConsentFormModel(): \App\Domains\Laboratory\Models\ConsentForm
+    private function routeConsentFormModel(): ConsentForm
     {
-        /** @var \App\Domains\Laboratory\Models\ConsentForm $model */
+        /** @var ConsentForm $model */
         $model = $this->route('consentForm');
 
         return $model;
