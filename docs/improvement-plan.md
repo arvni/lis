@@ -1583,7 +1583,18 @@ boundaries and can surface runtime `TypeError`s that only appear on real traffic
 code-quality test like `NoDebugFunctionsTest`, scoped to files created after a cutoff date/allowlist).
 Recommendation: (b) first — it stops the bleeding for free; revisit (a) per-domain when test density (#9/#21)
 is higher.
-- [ ]
+- [x] ✅ 2026-07-10 — went with **(b), the ratchet**. The 804 legacy files (count had drifted 811→804 as
+  other items added the declare) are frozen in `tests/Unit/CodeQuality/strict-types-legacy-allowlist.txt`;
+  new `tests/Unit/CodeQuality/StrictTypesTest.php` (mirrors the NoDebugFunctionsTest pattern, 2 tests)
+  enforces both directions: (1) every `app/` PHP file NOT on the allowlist must match
+  `declare(strict_types=1)` (tolerant-whitespace regex; only the canonical form exists in the codebase),
+  and (2) the allowlist may only shrink — an entry whose file was deleted OR now declares strict_types
+  fails the suite until its line is removed, so progress is permanent and the list can't rot. Both failure
+  directions probe-verified. CLAUDE.md rule amended from the aspirational blanket mandate to: required in
+  every NEW file; when meaningfully touching a legacy file add the declare + drop its allowlist line in the
+  same commit; no blind bulk-adds (scalar-coercion risk at call boundaries). `composer analyse` green;
+  full suite **681/1647** green (+2 = the new guard); Pint clean on the new test. Option (a) — per-domain mechanical slices with the suite green per slice —
+  remains the follow-up once test density (#9/#21) is higher; the allowlist doubles as its worklist.
 
 ### 36. Frontend next tier — components, Filter clones, test density (Low / Medium)
 After #27's top three, the next tier: `Pages/Acceptance/Components/Filter.jsx` 544,
