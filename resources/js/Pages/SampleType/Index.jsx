@@ -10,7 +10,7 @@ import TableLayout from '@/Layouts/TableLayout';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import DeleteForm from '@/Components/DeleteForm';
 import PageHeader from '@/Components/PageHeader.jsx';
-import Filter from '@/Pages/SampleType/Components/Filter';
+import Filter from '@/Components/SearchFilter.jsx';
 import AddForm from '@/Pages/SampleType/Components/AddForm';
 
 const SampleTypesIndex = () => {

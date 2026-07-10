@@ -92,7 +92,7 @@ class TestResource extends JsonResource
             $output[] = [
                 'id' => $methodTest->id,
                 'method_id' => $methodTest->method_id,
-                'test_name' => $sourceTest?->fullName ?? $sourceTest?->name,
+                'test_name' => $sourceTest->fullName ?? $sourceTest?->name,
                 "method" => [
                     ...$methodTest->method->toArray(),
                     'price' => $this->resolvePrice($methodTest),

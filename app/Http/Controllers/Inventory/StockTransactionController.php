@@ -43,7 +43,7 @@ class StockTransactionController extends Controller
         return Inertia::render('Inventory/Transactions/Add', [
             'transactionTypes' => TransactionType::toOptions(),
             'stores'           => Store::active()->get(['id', 'name']),
-            'defaultType'      => $defaults?->transaction_type ?? $request->input('type', TransactionType::ENTRY->value),
+            'defaultType'      => $defaults->transaction_type ?? $request->input('type', TransactionType::ENTRY->value),
             'defaults'         => $defaults,
         ]);
     }

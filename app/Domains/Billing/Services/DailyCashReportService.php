@@ -100,7 +100,7 @@ class DailyCashReportService
                 ->filter()
                 ->unique()
                 ->implode(', '),
-            'referrer'       => $acceptance->referrer?->fullName ?? '',
+            'referrer'       => $acceptance->referrer->fullName ?? '',
         ];
     }
 

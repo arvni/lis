@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { GridActionsCellItem } from '@mui/x-data-grid';
-import Filter from './Components/Filter';
+import Filter from '@/Components/SearchFilter.jsx';
 import TableLayout from '@/Layouts/TableLayout';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';

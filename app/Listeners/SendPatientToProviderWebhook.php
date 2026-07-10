@@ -44,7 +44,7 @@ class SendPatientToProviderWebhook implements ShouldQueue
                 'fullName' => $patient->fullName,
                 'idNo' => $patient->idNo,
                 'nationality' => $patient->nationality,
-                'dateOfBirth' => $patient->dateOfBirth?->format('Y-m-d'),
+                'dateOfBirth' => $patient->dateOfBirth->format('Y-m-d'),
                 'gender' => $patient->gender,
                 'phone' => $patient->phone,
                 'is_main' => $event->isMainPatient

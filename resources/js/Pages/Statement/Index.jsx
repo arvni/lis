@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import Filter from './Components/Filter';
+import Filter from '@/Components/SearchFilter.jsx';
 import TableLayout from '@/Layouts/TableLayout';
 import {
     Stack,

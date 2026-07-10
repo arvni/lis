@@ -27,7 +27,7 @@ class ListReferrerInvoicesController extends Controller
             'id'             => $inv->id,
             'invoice_no'     => $inv->invoiceNo,   // same field as Invoice Index
             'created_at'     => $inv->created_at,
-            'patient_name'   => $inv->acceptance?->patient?->fullName ?? '—',
+            'patient_name'   => $inv->acceptance?->patient->fullName ?? '—',
             'payable_amount' => max(0, (float) $inv->invoice_items_sum_price - (float) $inv->invoice_items_sum_discount),
         ]);
 

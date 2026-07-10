@@ -10,7 +10,7 @@ import { Head, router, usePage } from '@inertiajs/react';
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader.jsx';
-import Filter from './Components/Filter';
+import Filter from '@/Components/SearchFilter.jsx';
 import AddForm from './Components/AddForm';
 import { DownloadIcon } from 'lucide-react';
 

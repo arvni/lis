@@ -73,7 +73,7 @@ class ReferrerOrderPayloadBuilder
                     'sample_type_id'     => $sample->sample_type_id,
                     'sampleType'     => [
                         'id'   => $sample->sampleType?->id,
-                        'name' => $sample->sampleType?->name ?? 'Unknown',
+                        'name' => $sample->sampleType->name ?? 'Unknown',
                     ],
                 ];
             }
@@ -128,7 +128,7 @@ class ReferrerOrderPayloadBuilder
                     'id'           => $mainPatient->id,
                     'fullName'     => $mainPatient->fullName,
                     'nationality'  => $mainPatient->nationality ?? 'Unknown',
-                    'dateOfBirth'  => $mainPatient->dateOfBirth?->format('Y-m-d'),
+                    'dateOfBirth'  => $mainPatient->dateOfBirth->format('Y-m-d'),
                     'gender'       => self::GENDER_MAP[$mainPatient->gender] ?? -1,
                     'reference_id' => $acceptance->referenceCode,
                     'id_no'        => $mainPatient->idNo,
@@ -138,7 +138,7 @@ class ReferrerOrderPayloadBuilder
                     'fullName'    => $p->fullName,
                     'id_no'       => $p->idNo,
                     'nationality' => $p->nationality,
-                    'dateOfBirth' => $p->dateOfBirth?->format('Y-m-d'),
+                    'dateOfBirth' => $p->dateOfBirth->format('Y-m-d'),
                     'gender'      => self::GENDER_MAP[$p->gender] ?? -1,
                 ])->toArray(),
                 'orderItems' => $orderItems,
@@ -161,7 +161,7 @@ class ReferrerOrderPayloadBuilder
             'id'                   => $cr->id,
             'barcode'              => $cr->barcode,
             'preferred_date'       => $cr->preferred_date?->toIso8601String(),
-            'status'               => $cr->status?->value ?? $cr->status,
+            'status'               => $cr->status->value,
             'logistic_information' => $cr->logistic_information,
             'sample_collector'     => $cr->sampleCollector ? [
                 'id'   => $cr->sampleCollector->id,

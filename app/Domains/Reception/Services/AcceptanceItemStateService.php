@@ -74,7 +74,7 @@ readonly class AcceptanceItemStateService
         if ($hasState) return;
 
         $acceptanceItem->load('method.workflow.firstSection');
-        $firstSection = $acceptanceItem?->method?->workflow?->firstSection;
+        $firstSection = $acceptanceItem->method?->workflow?->firstSection;
 
         if ($firstSection) {
             $this->storeAcceptanceItemState(new AcceptanceItemStateDTO(

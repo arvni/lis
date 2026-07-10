@@ -27,6 +27,7 @@ class ValidateEnvCommand extends Command
 
     public function handle(): int
     {
+        // @phpstan-ignore larastan.noEnvCallsOutsideOfConfig (this command exists to validate raw env values, so it must bypass config)
         $missing = array_filter(self::REQUIRED_KEYS, fn (string $key) => blank(env($key)));
 
         if ($missing) {

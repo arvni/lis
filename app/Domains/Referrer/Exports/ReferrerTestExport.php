@@ -92,7 +92,7 @@ class ReferrerTestExport implements
             $referrerTest->test->code,
             $referrerTest->test->name,
             $referrerTest->test->fullName,
-            $referrerTest->test->testGroup?->name ?? '',
+            $referrerTest->test->testGroup->name ?? '',
             $referrerTest->test->type->value ?? '',
             $this->getPrice($referrerTest),
         ];

@@ -34,7 +34,11 @@ Controller → Service → Repository → Model. Cross-domain only via Adapter.
 - No business logic in controllers, models, or blade/jsx.
 
 ## Coding standards (PHP)
-- `declare(strict_types=1);` and full type hints (params, returns, properties).
+- `declare(strict_types=1);` in every NEW file, and full type hints (params, returns, properties).
+  Legacy files without it are frozen in `tests/Unit/CodeQuality/strict-types-legacy-allowlist.txt`
+  (enforced by `StrictTypesTest`, ratchet — the list only shrinks). When you meaningfully touch a
+  legacy file, add the declare + remove its allowlist line in the same commit; do NOT bulk-add it
+  blindly (strict types change scalar coercion at call boundaries — verify the file's callers/tests).
 - Must pass `composer analyse` (PHPStan lvl 6) with no NEW baseline entries — fix, don't append to baseline.
 - Format with Pint before commit (`./vendor/bin/pint`).
 - No N+1: eager-load in repositories. No queries in loops.

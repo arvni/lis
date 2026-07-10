@@ -4,47 +4,27 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    FormControlLabel,
-    FormLabel,
-    Radio,
-    RadioGroup,
     Stack,
-    TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    FormHelperText,
     Button,
     Divider,
     Box,
     Typography,
-    Chip,
-    Paper,
     useTheme,
     Alert,
     IconButton,
     Tooltip,
-    Grid as Grid,
-    MenuItem,
 } from '@mui/material';
 import {
     Close as CloseIcon,
     CheckCircle,
     ErrorOutlined as ErrorOutline,
-    MedicalServices,
-    LocalHospital,
-    Science,
-    ArrowBack,
     Warning,
 } from '@mui/icons-material';
-import Upload from '@/Components/Upload';
-
-// Define the action types
-const ACTION_TYPES = {
-    COMPLETE: 'finished',
-    REJECT: 'rejected',
-    UPDATE: 'Update',
-};
+import { ACTION_TYPES } from './DoneForm/constants';
+import { validateWorkflowAction } from './DoneForm/validation';
+import ParameterField from './DoneForm/ParameterField';
+import CaseInfoPanel from './DoneForm/CaseInfoPanel';
+import RejectionFields from './DoneForm/RejectionFields';
 
 /**
  * WorkflowActionForm - A unified component for handling both completion and rejection actions
@@ -106,129 +86,9 @@ const WorkflowActionForm = ({
     const handleChange = (e) => onChange(e.target.name, e.target.value);
 
     const handleSubmit = () => {
-        if (check()) onSubmit();
-    };
-
-    const check = () => {
-        let tmp = {};
-
-        // Common validation
-        acceptanceItemState?.parameters?.forEach((item) => {
-            if (!item.value && item.required)
-                tmp = { ...tmp, [item.name]: `Please enter ${item.name} value` };
-        });
-
-        // Rejection-specific validation
-        if (isReject) {
-            if (!acceptanceItemState.details)
-                tmp = { ...tmp, details: `Please provide rejection details` };
-
-            if (acceptanceItemState.next == null)
-                tmp = { ...tmp, next: `Please select a section to return to` };
-        }
-
-        setErrors(tmp);
-        return Object.keys(tmp).length < 1;
-    };
-
-    const renderItem = (item) => {
-        switch (item.type) {
-            case 'file':
-                return (
-                    <Box sx={{ mb: 2 }}>
-                        <Upload
-                            value={item?.value}
-                            label={item.name}
-                            name={item.name}
-                            url={route('documents.store', {
-                                ownerClass: 'Patient',
-                                id: acceptanceItemState?.patient?.id,
-                            })}
-                            onChange={handleFileParameter}
-                            error={Object.prototype.hasOwnProperty.call(errors, item.name)}
-                            helperText={errors[item.name] ?? null}
-                            required={item.required}
-                        />
-                    </Box>
-                );
-            case 'options':
-                return (
-                    <FormControl
-                        required={item.required}
-                        fullWidth
-                        sx={{
-                            mb: 2,
-                            p: 2,
-                            backgroundColor: theme.palette.background.paper,
-                            borderRadius: 1,
-                            border: `1px solid ${theme.palette.divider}`,
-                        }}
-                    >
-                        <FormLabel
-                            sx={{
-                                fontWeight: 'medium',
-                                color: theme.palette.primary.main,
-                                mb: 1,
-                            }}
-                        >
-                            {item.name}
-                            {item.required && (
-                                <span style={{ color: theme.palette.error.main }}> *</span>
-                            )}
-                        </FormLabel>
-                        <RadioGroup
-                            row
-                            name={item.name}
-                            value={item.value}
-                            onChange={handleParametersChange}
-                            required={item.required}
-                        >
-                            {Array.from(
-                                new Set(item.options.split(';').map((op) => op.trim())),
-                            ).map((op, idx) => (
-                                <FormControlLabel
-                                    key={idx}
-                                    value={op}
-                                    control={
-                                        <Radio
-                                            color="primary"
-                                            sx={{ '& .MuiSvgIcon-root': { fontSize: 20 } }}
-                                        />
-                                    }
-                                    label={op}
-                                    sx={{ mr: 3 }}
-                                />
-                            ))}
-                        </RadioGroup>
-                    </FormControl>
-                );
-            default:
-                return (
-                    <TextField
-                        rows={4}
-                        fullWidth
-                        multiline={item.type === 'text'}
-                        name={item.name}
-                        label={item.name}
-                        type={item.type}
-                        value={item?.value ?? ''}
-                        onChange={handleParametersChange}
-                        error={Object.prototype.hasOwnProperty.call(errors, item.name)}
-                        helperText={errors[item.name] ?? null}
-                        required={item.required}
-                        variant="outlined"
-                        sx={{
-                            mb: 2,
-                            '& .MuiOutlinedInput-root': {
-                                '&:hover fieldset': {
-                                    borderColor: theme.palette.primary.main,
-                                },
-                                borderRadius: 1,
-                            },
-                        }}
-                    />
-                );
-        }
+        const validationErrors = validateWorkflowAction(acceptanceItemState, isReject);
+        setErrors(validationErrors);
+        if (Object.keys(validationErrors).length < 1) onSubmit();
     };
 
     const hasErrors = Object.keys(errors).length > 0;
@@ -285,69 +145,7 @@ const WorkflowActionForm = ({
             </DialogTitle>
 
             <DialogContent sx={{ p: 3, mt: 2 }}>
-                <Paper
-                    elevation={0}
-                    sx={{
-                        p: 2,
-                        mb: 3,
-                        bgcolor: theme.palette.background.default,
-                        borderRadius: 1,
-                    }}
-                >
-                    <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
-                        {acceptanceItemState?.ids?.length > 1
-                            ? `Batch Processing (${acceptanceItemState.ids.length} items)`
-                            : 'Case Information'}
-                    </Typography>
-
-                    <Grid container spacing={2}>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                <LocalHospital color="primary" sx={{ mr: 1 }} />
-                                <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                                    Patients ID/Age/Gender:
-                                </Typography>
-                                {acceptanceItemState?.patients?.map((patient) => (
-                                    <Typography
-                                        key={patient.id}
-                                        variant="body1"
-                                        fontWeight="medium"
-                                    >
-                                        {`${patient?.id || '-'} / ${patient?.age || '-'} / ${patient?.gender || '-'}`}
-                                    </Typography>
-                                ))}
-                            </Box>
-                        </Grid>
-
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                <Science color="primary" sx={{ mr: 1 }} />
-                                <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                                    Sample Type/Date:
-                                </Typography>
-                                <Typography variant="body1" fontWeight="medium">
-                                    {`${acceptanceItemState?.sample?.sampleType || '-'} / ${acceptanceItemState?.sample?.created_at || '-'}`}
-                                </Typography>
-                            </Box>
-                        </Grid>
-
-                        <Grid size={{ xs: 12 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <MedicalServices color="primary" sx={{ mr: 1 }} />
-                                <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                                    Test Name:
-                                </Typography>
-                                <Chip
-                                    label={acceptanceItemState?.test?.name || '-'}
-                                    color="primary"
-                                    size="small"
-                                    variant="outlined"
-                                    sx={{ fontWeight: 'medium' }}
-                                />
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </Paper>
+                <CaseInfoPanel acceptanceItemState={acceptanceItemState} />
 
                 {isReject && (
                     <Alert
@@ -382,87 +180,26 @@ const WorkflowActionForm = ({
 
                 <Box sx={{ mb: 3 }}>
                     {acceptanceItemState?.parameters?.map((item, index) => (
-                        <Box key={index}>{renderItem(item)}</Box>
+                        <Box key={index}>
+                            <ParameterField
+                                item={item}
+                                errors={errors}
+                                patientId={acceptanceItemState?.patient?.id}
+                                onParameterChange={handleParametersChange}
+                                onFileParameter={handleFileParameter}
+                            />
+                        </Box>
                     ))}
                 </Box>
 
                 {/* Rejection-specific fields */}
                 {isReject && (
-                    <Box sx={{ mb: 3 }}>
-                        <FormControl
-                            fullWidth
-                            error={Object.prototype.hasOwnProperty.call(errors, 'next')}
-                            sx={{
-                                mb: 3,
-                                '& .MuiOutlinedInput-root': {
-                                    borderRadius: 1,
-                                    '&:hover fieldset': {
-                                        borderColor: theme.palette.primary.main,
-                                    },
-                                },
-                            }}
-                        >
-                            <InputLabel
-                                error={Object.prototype.hasOwnProperty.call(errors, 'next')}
-                                id="next-section-label"
-                                sx={{
-                                    fontWeight: 'medium',
-                                }}
-                            >
-                                Return to Section *
-                            </InputLabel>
-                            <Select
-                                error={Object.prototype.hasOwnProperty.call(errors, 'next')}
-                                onChange={handleChange}
-                                name="next"
-                                value={acceptanceItemState.next}
-                                labelId="next-section-label"
-                                label="Return to Section *"
-                                startAdornment={
-                                    <ArrowBack
-                                        fontSize="small"
-                                        sx={{ ml: 1, mr: 0.5, color: theme.palette.action.active }}
-                                    />
-                                }
-                            >
-                                <MenuItem value={''}>Sample Collection</MenuItem>
-                                {options.map((item, index) => (
-                                    <MenuItem key={index} value={item.id}>
-                                        {`${item.order + 1}- ${item.name}`}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                            {Object.prototype.hasOwnProperty.call(errors, 'next') && (
-                                <FormHelperText error>{errors.next}</FormHelperText>
-                            )}
-                        </FormControl>
-
-                        <TextField
-                            multiline
-                            name="details"
-                            fullWidth
-                            onChange={handleChange}
-                            label="Rejection Details *"
-                            rows={4}
-                            required
-                            error={Object.prototype.hasOwnProperty.call(errors, 'details')}
-                            value={acceptanceItemState.details || ''}
-                            helperText={
-                                Object.prototype.hasOwnProperty.call(errors, 'details')
-                                    ? errors.details
-                                    : 'Please provide detailed reasons for rejecting this section'
-                            }
-                            variant="outlined"
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    borderRadius: 1,
-                                    '&:hover fieldset': {
-                                        borderColor: theme.palette.primary.main,
-                                    },
-                                },
-                            }}
-                        />
-                    </Box>
+                    <RejectionFields
+                        acceptanceItemState={acceptanceItemState}
+                        options={options}
+                        errors={errors}
+                        onChange={handleChange}
+                    />
                 )}
             </DialogContent>
 

@@ -4,7 +4,7 @@ import { GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useCallback, useMemo, useState } from 'react';
-import Filter from './Components/Filter';
+import Filter from '@/Components/SearchFilter.jsx';
 import AddForm from './Components/AddForm';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, usePage } from '@inertiajs/react';

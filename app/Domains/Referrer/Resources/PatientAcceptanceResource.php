@@ -27,9 +27,9 @@ class PatientAcceptanceResource extends JsonResource
             'referenceCode' => $this->referenceCode,
             'acceptance_items' => $this->acceptanceItems->map(fn ($item) => [
                 'id' => $item->id,
-                'test_name' => $item->methodTest?->method?->test?->name ?? 'Unknown',
-                'method_name' => $item->methodTest?->method?->name ?? 'Unknown',
-                'barcode_group' => $item->methodTest?->method?->barcodeGroup?->name ?? 'Default',
+                'test_name' => $item->methodTest?->method?->test->name ?? 'Unknown',
+                'method_name' => $item->methodTest?->method->name ?? 'Unknown',
+                'barcode_group' => $item->methodTest?->method?->barcodeGroup->name ?? 'Default',
             ]),
         ];
     }

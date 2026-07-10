@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 1
-			path: app/Console/Commands/ValidateEnvCommand.php
-
-		-
 			message: '#^Method App\\Domains\\Billing\\Repositories\\InvoiceRepository\:\:applyQuery\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -29,30 +23,6 @@ parameters:
 			identifier: arrayValues.list
 			count: 1
 			path: app/Domains/Billing/Services/BillingDashboardService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>income" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 2
-			path: app/Domains/Billing/Services/BillingDashboardService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>fullName" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Billing/Services/DailyCashReportService.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Billing\\Enums\\InvoiceItemKind\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceService.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Laboratory\\Enums\\TestType\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Billing/Services/InvoiceService.php
 
 		-
 			message: '#^Method App\\Domains\\Billing\\Services\\StatementService\:\:getReportedDate\(\) has parameter \$invoice with no type specified\.$#'
@@ -163,34 +133,10 @@ parameters:
 			path: app/Domains/Laboratory/Resources/SectionOptionResource.php
 
 		-
-			message: '#^Using nullsafe property access "\?\-\>fullName" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Laboratory/Resources/TestResource.php
-
-		-
 			message: '#^Method App\\Domains\\Laboratory\\Services\\SectionGroupService\:\:transformSingleGroup\(\) is unused\.$#'
 			identifier: method.unused
 			count: 1
 			path: app/Domains/Laboratory/Services/SectionGroupService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>logisticInfo" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Notification/Jobs/SendCollectRequestWebhook.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Notification/Jobs/SendCollectRequestWebhook.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Referrer\\Enums\\CollectRequestStatus\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Notification/Jobs/SendCollectRequestWebhook.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:search\(\)\.$#'
@@ -235,18 +181,6 @@ parameters:
 			path: app/Domains/Reception/Exports/DailyReceptionReportExport.php
 
 		-
-			message: '#^Using nullsafe property access "\?\-\>qc_auto_approve" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Reception/Listeners/SampleCollectedListener.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>sampler" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Reception/Listeners/SampleCollectedListener.php
-
-		-
 			message: '#^Method App\\Domains\\Reception\\Models\\AcceptanceItem\:\:workflow\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -256,18 +190,6 @@ parameters:
 			message: '#^Property ''deleted'' does not exist in model\.$#'
 			identifier: rules.modelAppends
 			count: 1
-			path: app/Domains/Reception/Models/AcceptanceItem.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Reception\\Enums\\AcceptanceItemStateStatus\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Reception/Models/AcceptanceItem.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Reception\\Models\\AcceptanceItemState\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 3
 			path: app/Domains/Reception/Models/AcceptanceItem.php
 
 		-
@@ -397,24 +319,6 @@ parameters:
 			path: app/Domains/Reception/Requests/UpdateAcceptanceRequest.php
 
 		-
-			message: '#^Parameter \#1 \$json of function json_decode expects string, null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemService.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Reception\\Models\\AcceptanceItem\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Reception/Services/AcceptanceItemStateService.php
-
-		-
-			message: '#^Right side of \|\| is always true\.$#'
-			identifier: booleanOr.rightAlwaysTrue
-			count: 2
-			path: app/Domains/Reception/Services/AcceptanceService.php
-
-		-
 			message: '#^Unable to resolve the template type TKey in call to function collect$#'
 			identifier: argument.templateType
 			count: 1
@@ -425,6 +329,18 @@ parameters:
 			identifier: argument.templateType
 			count: 1
 			path: app/Domains/Reception/Services/AcceptanceBarcodeService.php
+
+		-
+			message: '#^Parameter \#1 \$json of function json_decode expects string, null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Domains/Reception/Services/AcceptanceItemService.php
+
+		-
+			message: '#^Right side of \|\| is always true\.$#'
+			identifier: booleanOr.rightAlwaysTrue
+			count: 2
+			path: app/Domains/Reception/Services/AcceptanceService.php
 
 		-
 			message: '#^Parameter \#2 \$associative of function get_headers expects bool, int given\.$#'
@@ -457,12 +373,6 @@ parameters:
 			path: app/Domains/Reception/Services/ReportDataService.php
 
 		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Reception\\Models\\Report\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Reception/Services/ReportService.php
-
-		-
 			message: '#^Parameter \#1 \$acceptance of method App\\Domains\\Reception\\Services\\TATService\:\:mapAcceptance\(\) expects App\\Domains\\Reception\\Models\\Acceptance, Illuminate\\Database\\Eloquent\\Model given\.$#'
 			identifier: argument.type
 			count: 2
@@ -477,18 +387,6 @@ parameters:
 		-
 			message: '#^Unable to resolve the template type TValue in call to function collect$#'
 			identifier: argument.templateType
-			count: 1
-			path: app/Domains/Reception/Services/TATService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>turnaround_time" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 2
-			path: app/Domains/Reception/Services/TATService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Domains/Reception/Services/TATService.php
 
@@ -509,30 +407,6 @@ parameters:
 			identifier: property.notFound
 			count: 2
 			path: app/Domains/Reception/Services/WorkflowProgressionService.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Reception\\Models\\AcceptanceItem\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Reception/Services/WorkflowProgressionService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Referrer/Exports/ReferrerTestExport.php
-
-		-
-			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Support\\Carbon\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 2
-			path: app/Domains/Referrer/Jobs/SendAcceptanceWebhook.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Referrer/Jobs/SendAcceptanceWebhook.php
 
 		-
 			message: '#^Method App\\Domains\\Referrer\\Models\\ReferrerOrder\:\:scopeSearch\(\) has no return type specified\.$#'
@@ -577,12 +451,6 @@ parameters:
 			path: app/Domains/Referrer/Repositories/ReferrerTestRepository.php
 
 		-
-			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 3
-			path: app/Domains/Referrer/Resources/PatientAcceptanceResource.php
-
-		-
 			message: '#^Method App\\Domains\\Referrer\\Services\\ReferrerOrderService\:\:buildBarcodeMaps\(\) has parameter \$patient with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -607,24 +475,6 @@ parameters:
 			path: app/Domains/Referrer/Services/ReferrerOrderService.php
 
 		-
-			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Support\\Carbon\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 2
-			path: app/Domains/Referrer/Services/ReferrerOrderService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>code" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 4
-			path: app/Domains/Referrer/Services/ReferrerOrderService.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Domains\\Reception\\Models\\Acceptance\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 3
-			path: app/Domains/Referrer/Services/ReferrerOrderService.php
-
-		-
 			message: '#^Method App\\Domains\\Referrer\\Services\\ReferrerTestService\:\:index\(\) should return Illuminate\\Pagination\\LengthAwarePaginator but returns Illuminate\\Contracts\\Pagination\\LengthAwarePaginator\.$#'
 			identifier: return.type
 			count: 1
@@ -641,30 +491,6 @@ parameters:
 			identifier: argument.templateType
 			count: 2
 			path: app/Domains/Referrer/Services/ReferrerTestService.php
-
-		-
-			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Support\\Carbon\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 2
-			path: app/Domains/Referrer/Support/ReferrerOrderPayloadBuilder.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Referrer/Support/ReferrerOrderPayloadBuilder.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Domains/Referrer/Support/ReferrerOrderPayloadBuilder.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>fullName" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Http/Controllers/Api/Billing/ListReferrerInvoicesController.php
 
 		-
 			message: '#^Parameter \#1 \$user of class Illuminate\\Auth\\Events\\Verified constructor expects Illuminate\\Contracts\\Auth\\MustVerifyEmail, App\\Domains\\User\\Models\\User\|null given\.$#'
@@ -707,12 +533,6 @@ parameters:
 			identifier: argument.templateType
 			count: 1
 			path: app/Http/Controllers/Inventory/ItemImportController.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>transaction_type" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Http/Controllers/Inventory/StockTransactionController.php
 
 		-
 			message: '#^If condition is always false\.$#'
@@ -799,12 +619,6 @@ parameters:
 			path: app/Http/Resources/ListResource.php
 
 		-
-			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Support\\Carbon\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Listeners/SendPatientToProviderWebhook.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Notifications\\Notification\:\:toSms\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -839,9 +653,3 @@ parameters:
 			identifier: method.notFound
 			count: 2
 			path: app/Notifications/Channels/TwilioWhatsAppTemplateChannel.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>fullName" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Notifications/ReferrerReportPublished.php

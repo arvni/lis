@@ -396,7 +396,7 @@ class ReportService
         // Associate main document
         PatientDocumentUpdateEvent::dispatch(
             $documentId,
-            $report?->acceptanceItem?->patient?->id,
+            $report->acceptanceItem?->patient?->id,
             $documentTag->value,
             'report',
             $report->id
