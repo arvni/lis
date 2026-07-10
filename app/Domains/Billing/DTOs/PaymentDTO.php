@@ -23,7 +23,7 @@ class PaymentDTO
     {
         return new self(
             invoiceId: $request['invoice_id'],
-            cashierId: auth()->user()->id,
+            cashierId: auth()->id(),
             payerType: $request['payer']['type'],
             payerId: $request['payer']['id'],
             price: $request['price'],

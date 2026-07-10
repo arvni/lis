@@ -53,7 +53,7 @@ class InvoiceController extends Controller
             ->storeInvoice(new InvoiceDTO(
                 $request->validated("owner_type"),
                 $request->validated("owner_id"),
-                auth()->user()->id,
+                auth()->id(),
                 InvoiceStatus::WAITING_FOR_PAYMENT,
                 $request->validated("discount") ?? 0
             ));

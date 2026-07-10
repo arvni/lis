@@ -231,7 +231,7 @@ class AcceptanceItemRepository
             return;
         } else {
             $query->whereHas("AcceptanceItemStates", function ($q) {
-                $q->where("finished_by_id", auth()->user()->id);
+                $q->where("finished_by_id", auth()->id());
             });
         }
     }

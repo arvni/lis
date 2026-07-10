@@ -137,7 +137,7 @@ class PatientImportService
                 'patient_id' => $patients[0]->id,
                 'out_patient' => true,
                 'referrer_id' => $referrerId,
-                'acceptor_id' => auth()->user()->id,
+                'acceptor_id' => auth()->id(),
                 'howReport' => ['sendToReferrer' => true],
                 'status' => AcceptanceStatus::WAITING_FOR_PAYMENT,
             ]);

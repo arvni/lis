@@ -108,15 +108,18 @@ readonly class PaymentService
 
     public function updatePayments(Invoice $invoice, array $paymentsData): void
     {
+        $invoice->loadMissing('payments');
+        $existingPayments = $invoice->payments->keyBy('id');
+
         $ids = [];
         foreach ($paymentsData as $paymentData) {
             if (isset($paymentData['id']) && $paymentData['id']) {
-                $payment = $this->findPaymentById($paymentData['id']);
+                $payment = $existingPayments->get($paymentData['id']);
                 $this->paymentRepository->updatePayment($payment,$paymentData);
             } else {
                 $payment = $this->storePayment(new PaymentDTO(
                     $invoice->id,
-                    auth()->user()->id,
+                    auth()->id(),
                     $paymentData["payer_type"],
                     $paymentData["payer_id"],
                     $paymentData["price"],

@@ -95,7 +95,7 @@ class SampleRepository
             "sample_type_id" => $sampleData["sample_type_id"],
             "status" => "sampled",
             "collection_date" => isset($sampleData["collection_date"]) ? Carbon::parse($sampleData["collection_date"]) : Carbon::now(),
-            "sampler_id" => auth()->user()->id,
+            "sampler_id" => auth()->id(),
             "patient_id" => $sampleData["patient_id"],
             "received_at" => isset($sampleData["received_at"]) ? Carbon::parse($sampleData["received_at"]) : Carbon::now(),
             "collect_request_id" => $sampleData["collect_request_id"] ?? null,

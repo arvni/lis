@@ -49,7 +49,7 @@ class AcceptanceItemStateDTO
         $data = [
             "acceptance_item_id" => $this->acceptanceItemId,
             "section_id" => $this->sectionId,
-            "user_id" => $this->userId ?? auth()->user()->id,
+            "user_id" => $this->userId ?? auth()->id(),
             "parameters" => $this->parameters,
             "details" => $this->details,
             "status" => $this->status,
