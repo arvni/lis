@@ -2,11 +2,10 @@
 
 namespace App\Domains\Referrer\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
-class UpdateSampleCollectorRequest extends FormRequest
+class UpdateSampleCollectorRequest extends StoreSampleCollectorRequest
 {
     public function authorize(): bool
     {
@@ -15,12 +14,12 @@ class UpdateSampleCollectorRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
-            'name'  => 'required|string|max:255',
-            'email' => [
-                'required', 'email', 'max:255',
-                Rule::unique('sample_collectors', 'email')->ignore($this->route('sample_collector')),
-            ],
+        $rules = parent::rules();
+        $rules['email'] = [
+            'required', 'email', 'max:255',
+            Rule::unique('sample_collectors', 'email')->ignore($this->route('sample_collector')),
         ];
+
+        return $rules;
     }
 }

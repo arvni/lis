@@ -2,18 +2,18 @@
 
 namespace App\Domains\Laboratory\Requests;
 
+use App\Domains\Laboratory\Models\ReportTemplate;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
-class UpdateReportTemplateRequest extends FormRequest
+class UpdateReportTemplateRequest extends StoreReportTemplateRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->routeReportTemplateModel());
+        return Gate::allows('update', $this->routeReportTemplateModel());
     }
 
     /**
@@ -23,24 +23,16 @@ class UpdateReportTemplateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            "name" => ["required", "string", "max:255", "unique:report_templates,name," . $this->routeReportTemplateModel()->id],
-            "approval_flow_id" => ["nullable", "exists:approval_flows,id"],
-            "template" => ["required", "array"],
-            "template.id" => ["required", "exists:documents,hash"],
-            'parameters' => ['required', 'array', 'min:1'],
-            'parameters.*.id'=> ['nullable'],
-            'parameters.*.type'=> ['required', 'string', 'max:255'],
-            'parameters.*.title'=> ['required', 'string', 'max:255'],
-            'parameters.*.required'=> ['required', 'boolean'],
-            'parameters.*.active'=> ['required', 'boolean'],
-            'parameters.*.custom_props'=> ['nullable', 'string'],
-        ];
+        $rules = parent::rules();
+        $rules['name'] = ['required', 'string', 'max:255', 'unique:report_templates,name,'.$this->routeReportTemplateModel()->id];
+        $rules['parameters.*.id'] = ['nullable'];
+
+        return $rules;
     }
 
-    private function routeReportTemplateModel(): \App\Domains\Laboratory\Models\ReportTemplate
+    private function routeReportTemplateModel(): ReportTemplate
     {
-        /** @var \App\Domains\Laboratory\Models\ReportTemplate $model */
+        /** @var ReportTemplate $model */
         $model = $this->route('reportTemplate');
 
         return $model;

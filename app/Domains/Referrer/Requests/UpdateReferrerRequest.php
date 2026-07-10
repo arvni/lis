@@ -2,18 +2,18 @@
 
 namespace App\Domains\Referrer\Requests;
 
+use App\Domains\Referrer\Models\Referrer;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
-class UpdateReferrerRequest extends FormRequest
+class UpdateReferrerRequest extends StoreReferrerRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->routeReferrerModel());
+        return Gate::allows('update', $this->routeReferrerModel());
     }
 
     /**
@@ -23,29 +23,15 @@ class UpdateReferrerRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            "fullName" => ["required", "string", "max:255"],
-            "email" => ["required", "string", "email", "max:255", "unique:referrers,email," . $this->routeReferrerModel()->id],
-            "phoneNo" => ["required", "string", "max:255"],
-            "billingInfo.name" => ["nullable", "string", "max:255"],
-            "billingInfo.address" => ["nullable", "string", "max:255"],
-            "billingInfo.vatIn" => ["nullable", "string", "max:255"],
-            "billingInfo.phone" => ["nullable", "string", "max:255"],
-            "billingInfo.email" => ["nullable", "string", "email", "max:255"],
-            "billingInfo.city" => ["nullable", "string", "max:255"],
-            "billingInfo.country" => ["nullable", "string", "max:255"],
-            "isActive" => ["nullable", "boolean"],
-            "reportReceivers" => ["nullable", "array"],
-            "logisticInfo"=>["nullable", "array"],
-            "logisticInfo.address" => ["nullable", "string", "max:255"],
-            'logisticInfo.latitude' => 'nullable|numeric|between:-90,90',
-            'logisticInfo.longitude' => 'nullable|numeric|between:-180,180',
-        ];
+        $rules = parent::rules();
+        $rules['email'] = ['required', 'string', 'email', 'max:255', 'unique:referrers,email,'.$this->routeReferrerModel()->id];
+
+        return $rules;
     }
 
-    private function routeReferrerModel(): \App\Domains\Referrer\Models\Referrer
+    private function routeReferrerModel(): Referrer
     {
-        /** @var \App\Domains\Referrer\Models\Referrer $model */
+        /** @var Referrer $model */
         $model = $this->route('referrer');
 
         return $model;

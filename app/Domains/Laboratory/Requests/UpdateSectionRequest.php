@@ -2,18 +2,18 @@
 
 namespace App\Domains\Laboratory\Requests;
 
+use App\Domains\Laboratory\Models\Section;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
-class UpdateSectionRequest extends FormRequest
+class UpdateSectionRequest extends StoreSectionRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->routeSectionModel());
+        return Gate::allows('update', $this->routeSectionModel());
     }
 
     /**
@@ -23,19 +23,16 @@ class UpdateSectionRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            "name" => ["required", "unique:sections,name,".$this->routeSectionModel()->id],
-            "active" => ["bool"],
-            "description" => ["nullable", "string"],
-            "section_group" => ["required","array"],
-            "section_group.id" => ["required", "exists:section_groups,id"],
-            "icon"=>["nullable","string"]
-        ];
+        $rules = parent::rules();
+        $rules['name'] = ['required', 'unique:sections,name,'.$this->routeSectionModel()->id];
+        $rules['section_group'] = ['required', 'array'];
+
+        return $rules;
     }
 
-    private function routeSectionModel(): \App\Domains\Laboratory\Models\Section
+    private function routeSectionModel(): Section
     {
-        /** @var \App\Domains\Laboratory\Models\Section $model */
+        /** @var Section $model */
         $model = $this->route('section');
 
         return $model;

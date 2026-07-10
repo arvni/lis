@@ -2,37 +2,36 @@
 
 namespace App\Domains\Laboratory\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Domains\Laboratory\Models\SectionGroup;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Gate;
 
-class UpdateSectionGroupRequest extends FormRequest
+class UpdateSectionGroupRequest extends StoreSectionGroupRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return Gate::allows("update",$this->routeSectionGroupModel());
+        return Gate::allows('update', $this->routeSectionGroupModel());
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
-        return [
-            "name" => ["required", "unique:section_groups,name,".$this->routeSectionGroupModel()->id],
-            "active" => ["bool"],
-            "parent" => ["nullable","array"],
-            "parent.id" => ["nullable", "exists:section_groups,id"],
-        ];
+        $rules = parent::rules();
+        $rules['name'] = ['required', 'unique:section_groups,name,'.$this->routeSectionGroupModel()->id];
+
+        return $rules;
     }
 
-    private function routeSectionGroupModel(): \App\Domains\Laboratory\Models\SectionGroup
+    private function routeSectionGroupModel(): SectionGroup
     {
-        /** @var \App\Domains\Laboratory\Models\SectionGroup $model */
+        /** @var SectionGroup $model */
         $model = $this->route('sectionGroup');
 
         return $model;

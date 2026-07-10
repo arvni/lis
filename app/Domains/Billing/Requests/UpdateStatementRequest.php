@@ -3,11 +3,10 @@
 namespace App\Domains\Billing\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
-class UpdateStatementRequest extends FormRequest
+class UpdateStatementRequest extends StoreStatementRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,16 +23,17 @@ class UpdateStatementRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            "invoices" => ["required", "array", "min:1"],
-            "invoices.*.id" => [
-                "required",
-                Rule::exists('invoices', 'id')
-                    ->where(function ($query) {
-                        $query->whereNull('statement_id')
-                            ->orWhere('statement_id', '=', $this->route('statement')->id);
-                    })
-            ],
+        $rules = parent::rules();
+        $rules['invoices.*.id'] = [
+            'required',
+            Rule::exists('invoices', 'id')
+                ->where(function ($query) {
+                    $query->whereNull('statement_id')
+                        ->orWhere('statement_id', '=', $this->route('statement')->id);
+                }),
         ];
+        unset($rules['referrer.id']);
+
+        return $rules;
     }
 }

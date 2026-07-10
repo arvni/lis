@@ -2,18 +2,18 @@
 
 namespace App\Domains\Laboratory\Requests;
 
+use App\Domains\Laboratory\Models\Doctor;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
-class UpdateDoctorRequest extends FormRequest
+class UpdateDoctorRequest extends StoreDoctorRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->routeDoctorModel());
+        return Gate::allows('update', $this->routeDoctorModel());
     }
 
     /**
@@ -23,21 +23,15 @@ class UpdateDoctorRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            "name" => [
-                "required",
-                "string",
-                "unique:doctors,name," . $this->routeDoctorModel()->id
-            ],
-            "expertise" => ["nullable"],
-            "phone" => ["nullable"],
-            "license_no" => ["nullable"]
-        ];
+        $rules = parent::rules();
+        $rules['name'] = ['required', 'string', 'unique:doctors,name,'.$this->routeDoctorModel()->id];
+
+        return $rules;
     }
 
-    private function routeDoctorModel(): \App\Domains\Laboratory\Models\Doctor
+    private function routeDoctorModel(): Doctor
     {
-        /** @var \App\Domains\Laboratory\Models\Doctor $model */
+        /** @var Doctor $model */
         $model = $this->route('doctor');
 
         return $model;

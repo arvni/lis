@@ -2,12 +2,10 @@
 
 namespace App\Domains\Referrer\Requests;
 
-use App\Domains\Referrer\Enums\CollectRequestStatus;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
-class UpdateCollectRequestRequest extends FormRequest
+class UpdateCollectRequestRequest extends StoreCollectRequestRequest
 {
     public function authorize(): bool
     {
@@ -16,17 +14,12 @@ class UpdateCollectRequestRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
-            'sample_collector_id'  => 'required|exists:sample_collectors,id',
-            'referrer_id'          => 'required|exists:referrers,id',
-            'preferred_date'       => 'nullable|date',
-            'note'                 => 'nullable|string',
-            'logistic_information' => 'nullable|array',
-            'status'               => ['nullable', 'string', Rule::in(CollectRequestStatus::values())],
-            'barcode'              => [
-                'nullable', 'string',
-                Rule::unique('collect_requests', 'barcode')->ignore($this->route('collect_request')),
-            ],
+        $rules = parent::rules();
+        $rules['barcode'] = [
+            'nullable', 'string',
+            Rule::unique('collect_requests', 'barcode')->ignore($this->route('collect_request')),
         ];
+
+        return $rules;
     }
 }

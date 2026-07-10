@@ -2,18 +2,18 @@
 
 namespace App\Domains\Laboratory\Requests;
 
+use App\Domains\Laboratory\Models\Workflow;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
-class UpdateWorkflowRequest extends FormRequest
+class UpdateWorkflowRequest extends StoreWorkflowRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->routeWorkflowModel());
+        return Gate::allows('update', $this->routeWorkflowModel());
     }
 
     /**
@@ -23,22 +23,17 @@ class UpdateWorkflowRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            "name" => ["required", "string", "unique:workflows,name," . $this->routeWorkflowModel()->id],
-            "description" => ["nullable", "string"],
-            "status" => ["boolean"],
-            "section_workflows" => ["required", "array", "min:1"],
-            "section_workflows.*.id" => ["required"],
-            "section_workflows.*.section.id" => ["required", "exists:sections,id"],
-            "section_workflows.*.parameters" => ["required", "array", "min:1"],
-            "section_workflows.*.parameters.*.name" => ["required", "string"],
-            "section_workflows.*.parameters.*.type" => ["required", "in:text,date,time,number,options,file"],
-        ];
+        $rules = parent::rules();
+        $rules['name'] = ['required', 'string', 'unique:workflows,name,'.$this->routeWorkflowModel()->id];
+        $rules['status'] = ['boolean'];
+        $rules['section_workflows.*.id'] = ['required'];
+
+        return $rules;
     }
 
-    private function routeWorkflowModel(): \App\Domains\Laboratory\Models\Workflow
+    private function routeWorkflowModel(): Workflow
     {
-        /** @var \App\Domains\Laboratory\Models\Workflow $model */
+        /** @var Workflow $model */
         $model = $this->route('workflow');
 
         return $model;

@@ -1525,7 +1525,17 @@ Store/UpdateOfferRequest, Store/UpdateRequestFormRequest, Consultation Store/Upd
 more. A validation change can silently drift between create and update. Fix pattern: Update extends Store and
 overrides only the differing rules, or a shared `rules()` helper/trait per entity. Mechanical; no behavior
 change intended — cover with existing endpoint tests.
-- [ ]
+- [x] ✅ 2026-07-10 (`composer analyse` green; full suite **679/1643** green). Collapsed **25** Update
+  requests to `extends Store*Request` overriding only authorize + the differing rules (unique-ignore,
+  create-only/update-only fields): Laboratory ×13 (Test, Offer, RequestForm, ConsentForm, Instruction,
+  SampleType, TestGroup, SectionGroup, Workflow, ReportTemplate, Doctor, Section, BarcodeGroup),
+  Inventory ×5 (StockTransaction, Item, Store, Supplier, PurchaseRequest), Referrer ×3 (CollectRequest,
+  SampleCollector, Referrer), User ×2 (Role, User), Consultant, Statement — −566 net LOC. Preserved two
+  pre-existing behavioral drifts as explicit overrides rather than silently unifying: UpdateConsultant's
+  `getDayName()` week starts Saturday (Store: Sunday), UpdatePurchaseRequest's `urgency` is loosened to
+  `required|string` (Store: `in:LOW,NORMAL,HIGH,URGENT`). Left as genuinely-divergent (not duplicates):
+  Document, AcceptanceItemState, Invoice, Payment, Patient, Acceptance, Report, Sample, Consultation,
+  Material, OrderMaterial, ReferrerTest, ApprovalFlow.
 
 ### 33. Queries inside loops on request paths (Low / Low)
 Small-N but free wins:

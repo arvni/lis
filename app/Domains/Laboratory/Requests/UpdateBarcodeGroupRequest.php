@@ -2,18 +2,18 @@
 
 namespace App\Domains\Laboratory\Requests;
 
+use App\Domains\Laboratory\Models\BarcodeGroup;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
-class UpdateBarcodeGroupRequest extends FormRequest
+class UpdateBarcodeGroupRequest extends StoreBarcodeGroupRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->routeBarcodeGroupModel());
+        return Gate::allows('update', $this->routeBarcodeGroupModel());
     }
 
     /**
@@ -23,25 +23,16 @@ class UpdateBarcodeGroupRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = parent::rules();
+        $rules['name'] = ['required', 'string', 'unique:barcode_groups,name,'.$this->routeBarcodeGroupModel()->id];
+        $rules['abbr'] = ['required', 'string', 'max:4', 'unique:barcode_groups,abbr,'.$this->routeBarcodeGroupModel()->id];
 
-            "name" => [
-                "required",
-                "string",
-                "unique:barcode_groups,name," . $this->routeBarcodeGroupModel()->id
-            ],
-            "abbr" => [
-                "required",
-                "string",
-                "max:4",
-                "unique:barcode_groups,abbr," . $this->routeBarcodeGroupModel()->id
-            ],
-        ];
+        return $rules;
     }
 
-    private function routeBarcodeGroupModel(): \App\Domains\Laboratory\Models\BarcodeGroup
+    private function routeBarcodeGroupModel(): BarcodeGroup
     {
-        /** @var \App\Domains\Laboratory\Models\BarcodeGroup $model */
+        /** @var BarcodeGroup $model */
         $model = $this->route('barcodeGroup');
 
         return $model;

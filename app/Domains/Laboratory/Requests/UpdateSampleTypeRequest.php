@@ -2,18 +2,18 @@
 
 namespace App\Domains\Laboratory\Requests;
 
+use App\Domains\Laboratory\Models\SampleType;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
-class UpdateSampleTypeRequest extends FormRequest
+class UpdateSampleTypeRequest extends StoreSampleTypeRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->routeSampleTypeModel());
+        return Gate::allows('update', $this->routeSampleTypeModel());
     }
 
     /**
@@ -23,17 +23,15 @@ class UpdateSampleTypeRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            "name" => ["string", "required", "unique:sample_types,name," . $this->routeSampleTypeModel()->id],
-            "description" => ["nullable", "string"],
-            "orderable" => ["nullable", "boolean"],
-            "required_barcode" => ["nullable", "boolean"],
-        ];
+        $rules = parent::rules();
+        $rules['name'] = ['required', 'string', 'unique:sample_types,name,'.$this->routeSampleTypeModel()->id];
+
+        return $rules;
     }
 
-    private function routeSampleTypeModel(): \App\Domains\Laboratory\Models\SampleType
+    private function routeSampleTypeModel(): SampleType
     {
-        /** @var \App\Domains\Laboratory\Models\SampleType $model */
+        /** @var SampleType $model */
         $model = $this->route('sampleType');
 
         return $model;
