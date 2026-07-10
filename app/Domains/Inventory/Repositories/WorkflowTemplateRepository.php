@@ -21,6 +21,19 @@ class WorkflowTemplateRepository
     }
 
     /**
+     * All templates with their steps, in matcher evaluation order (priority, then id).
+     *
+     * @return Collection<int, WorkflowTemplate>
+     */
+    public function listWithStepsByPriority(): Collection
+    {
+        return WorkflowTemplate::with('steps')
+            ->orderBy('priority')
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
      * Clear the default flag on every template (used before marking a new one).
      */
     public function clearDefaultFlag(): void

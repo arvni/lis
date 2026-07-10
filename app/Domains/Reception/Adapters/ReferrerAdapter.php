@@ -7,7 +7,9 @@ namespace App\Domains\Reception\Adapters;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Referrer\Models\ReferrerOrder;
+use App\Domains\Referrer\Models\ReferrerTest;
 use App\Domains\Referrer\Repositories\ReferrerOrderRepository;
+use App\Domains\Referrer\Repositories\ReferrerTestRepository;
 use App\Domains\Referrer\Services\ReferrerOrderService;
 
 /**
@@ -19,7 +21,17 @@ class ReferrerAdapter
     public function __construct(
         private readonly ReferrerOrderRepository $referrerOrderRepository,
         private readonly ReferrerOrderService $referrerOrderService,
+        private readonly ReferrerTestRepository $referrerTestRepository,
     ) {}
+
+    /**
+     * A referrer's price entry for a test, or null when none exists
+     * (used by the acceptance-item pricing cascade).
+     */
+    public function findReferrerTest(int $referrerId, int $testId): ?ReferrerTest
+    {
+        return $this->referrerTestRepository->findByReferrerIdAndTestId($referrerId, $testId);
+    }
 
     /**
      * Attach a patient to a referrer order (matching by reference_id / id_no).
