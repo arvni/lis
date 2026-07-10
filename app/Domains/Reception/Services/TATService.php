@@ -161,7 +161,7 @@ class TATService
         $startTime  = $lastItemAt ? Carbon::parse($lastItemAt) : Carbon::parse($acceptance->created_at);
 
         // TAT = max turnaround_time across all active items
-        $maxTat = (int) $items->max(fn($i) => $i->method?->turnaround_time ?? 0);
+        $maxTat = (int) $items->max(fn($i) => $i->method->turnaround_time ?? 0);
 
         $deadline    = $maxTat > 0 ? $this->addWorkingDays($startTime, $maxTat) : null;
         $elapsed     = $this->elapsedWorkingDays($startTime, $now);
@@ -184,7 +184,7 @@ class TATService
             'tests'                => $testNames,
             'sections'             => $sections,
             'statuses'             => $statuses,
-            'priority'             => $acceptance->priority?->value ?? 'routine',
+            'priority'             => $acceptance->priority->value ?? 'routine',
             'max_tat'              => $maxTat,
             'start_time'           => $startTime->toDateTimeString(),
             'deadline'             => $deadline?->toDateTimeString(),
@@ -321,7 +321,7 @@ class TATService
         if ($total === 0) return null;
 
         $onTime = $items->filter(function (AcceptanceItem $item) {
-            $tat = (int) ($item->method?->turnaround_time ?? 0);
+            $tat = (int) ($item->method->turnaround_time ?? 0);
             if ($tat === 0) return true;
             $deadline    = $this->addWorkingDays(Carbon::parse($item->created_at), $tat);
             $publishedAt = $item->report?->published_at ? Carbon::parse($item->report->published_at) : null;

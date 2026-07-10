@@ -86,7 +86,7 @@ readonly class WorkflowProgressionService
         }
 
         // Skip if no workflow is defined
-        if (!$acceptanceItem?->workflow) {
+        if (!$acceptanceItem->workflow) {
             return true;
         }
         return false;

@@ -27,7 +27,7 @@ class ReferrerReportPublished extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $patientName = $this->acceptance->patient?->fullName ?? 'Patient';
+        $patientName = $this->acceptance->patient->fullName ?? 'Patient';
         $providerLink = config('services.provider_app.webhook_domain');
 
         return (new MailMessage)

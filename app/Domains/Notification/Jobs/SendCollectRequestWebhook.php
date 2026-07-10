@@ -23,7 +23,7 @@ class SendCollectRequestWebhook extends AbstractSendWebhook
         return [
             'id' => $collectRequest->id,
             'action' => $this->action,
-            'status' => $collectRequest->status?->value,
+            'status' => $collectRequest->status->value,
             'sample_collector' => [
                 'id' => $collectRequest->sampleCollector?->id,
                 'name' => $collectRequest->sampleCollector?->name,
@@ -32,10 +32,10 @@ class SendCollectRequestWebhook extends AbstractSendWebhook
             'preferred_date' => $collectRequest->preferred_date,
             'referrer' => [
                 'id' => $collectRequest->referrer?->id,
-                'name' => $collectRequest->referrer?->name ?? $collectRequest->referrer?->fullName,
+                'name' => $collectRequest->referrer->name ?? $collectRequest->referrer?->fullName,
                 'email' => $collectRequest->referrer?->email,
                 'phone' => $collectRequest->referrer?->phoneNo,
-                ...($collectRequest->referrer?->logisticInfo ?? []),
+                ...($collectRequest->referrer->logisticInfo ?? []),
             ],
             'logistic_information' => $collectRequest->logistic_information,
             'created_at' => $collectRequest->created_at?->toISOString(),

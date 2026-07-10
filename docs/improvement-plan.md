@@ -1560,7 +1560,19 @@ GOTCHAs), 13 `property.notFound`, 11 `method.notFound` (re-audited in #1, false 
 `larastan.noEnvCallsOutsideOfConfig` (`ValidateEnvCommand` — legit by design, but worth an inline ignore with
 reason instead of a baseline entry). Scope this item to the 37 `nullsafe.neverNull` + the singletons; use the
 established `/tmp/sync_baseline.php` JSON method for removal.
-- [ ]
+- [x] ✅ 2026-07-10 (`composer analyse` green; full suite **679/1643** green; baseline **190 → 144** errors,
+  −46: all 45 `nullsafe.neverNull` — count had drifted 37→45 — + the `larastan.noEnvCallsOutsideOfConfig`
+  singleton, now an inline `@phpstan-ignore` with reason in `ValidateEnvCommand`). Audit verdict: **no lying
+  types** — every flagged non-nullable claim is schema-backed (`patients.dateOfBirth`, `invoice_items.kind`,
+  `tests.type`, `acceptance_item_states.status`, `collect_requests.status` are all NOT NULL with defaults) or
+  guard/param-narrowed, so all 45 were dead null-checks → `?->` → `->` at exactly the flagged links across
+  21 files (Billing/Laboratory/Notification/Reception/Referrer/Inventory + root listeners/notifications).
+  The `?->x ?? y` variants are behavior-identical rewrites (`??` isset-guards property chains); the Carbon
+  `?->format()` method calls were verified against the migrations before dropping the `?->`. Method: ran
+  phpstan minus baseline as JSON to locate all sites, verified only `ignore.unmatched` remained after the
+  edits, then `--generate-baseline`. GOTCHA: a fresh no-baseline run is the reliable inventory — the baseline
+  entry counts had drifted (37 baselined vs 45 actual). Deferred per scope: `argument.templateType` (46),
+  `missingType.parameter` (24), `property.notFound` (16), `method.notFound` (14, re-audited false positives).
 
 ### 35. Decide the `declare(strict_types=1)` policy (Medium / Medium–High)
 CLAUDE.md mandates `declare(strict_types=1);`, but **811 of ~880** `app/` PHP files lack it (~8% adoption —

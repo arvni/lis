@@ -137,7 +137,7 @@ class SendAcceptanceWebhook implements ShouldQueue
                     'sample_type_id' => $sample->sample_type_id,
                     'sampleType' => [
                         'id' => $sample->sampleType?->id,
-                        'name' => $sample->sampleType?->name ?? 'Unknown'
+                        'name' => $sample->sampleType->name ?? 'Unknown'
                     ]
                 ];
             }
@@ -205,7 +205,7 @@ class SendAcceptanceWebhook implements ShouldQueue
                     'id' => $mainPatient->id,
                     'fullName' => $mainPatient->fullName,
                     'nationality' => $mainPatient->nationality ?? 'Unknown',
-                    'dateOfBirth' => $mainPatient->dateOfBirth?->format('Y-m-d'),
+                    'dateOfBirth' => $mainPatient->dateOfBirth->format('Y-m-d'),
                     'gender' => $this->genderMap[$mainPatient->gender] ?? -1,
                     'reference_id' => $acceptance->referenceCode,
                     'id_no' => $mainPatient->idNo
@@ -217,7 +217,7 @@ class SendAcceptanceWebhook implements ShouldQueue
                     'fullName' => $patient->fullName,
                     'id_no' => $patient->idNo,
                     'nationality' => $patient->nationality,
-                    'dateOfBirth' => $patient->dateOfBirth?->format('Y-m-d'),
+                    'dateOfBirth' => $patient->dateOfBirth->format('Y-m-d'),
                     'gender' => $this->genderMap[$patient->gender] ?? -1,
                 ])->toArray(),
 

@@ -79,14 +79,14 @@ readonly class InvoiceService
         $test = $item->test;
         return [
             "id"               => $item->id,
-            "kind"             => $item->kind?->value,
+            "kind"             => $item->kind->value,
             "test"             => $test ? [
                 "id"        => $test->id,
                 "name"      => $test->name,
                 "fullName"  => $test->fullName,
                 "code"      => $test->code,
                 "can_merge" => (bool) $test->can_merge,
-                "type"      => $test->type?->value,
+                "type"      => $test->type->value,
             ] : null,
             "title"            => $item->title,
             "code"             => $item->code,

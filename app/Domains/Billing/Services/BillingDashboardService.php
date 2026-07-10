@@ -233,8 +233,8 @@ class BillingDashboardService
             $result[] = [
                 'period'              => $key,
                 'label'               => $cursor->format('M Y'),
-                'invoiced_income'     => (float) ($invoicedMap->get($key)?->income ?? 0),
-                'non_invoiced_income' => (float) ($nonInvoicedMap->get($key)?->income ?? 0),
+                'invoiced_income'     => (float) ($invoicedMap->get($key)->income ?? 0),
+                'non_invoiced_income' => (float) ($nonInvoicedMap->get($key)->income ?? 0),
             ];
             $cursor->addMonth();
         }

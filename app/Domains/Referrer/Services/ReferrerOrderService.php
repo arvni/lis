@@ -123,7 +123,7 @@ class ReferrerOrderService
             'fullName'    => $patient->fullName,
             'id_no'       => $patient->idNo,
             'gender'      => $patient->gender,
-            'dateOfBirth' => $patient->dateOfBirth?->format('Y-m-d'),
+            'dateOfBirth' => $patient->dateOfBirth->format('Y-m-d'),
             'is_main'     => true,
         ];
 
@@ -282,7 +282,7 @@ class ReferrerOrderService
             'fullName'    => $patient->fullName,
             'id_no'       => $patient->idNo,
             'gender'      => $patient->gender,
-            'dateOfBirth' => $patient->dateOfBirth?->format('Y-m-d'),
+            'dateOfBirth' => $patient->dateOfBirth->format('Y-m-d'),
             'is_main'     => true,
         ];
 
@@ -334,8 +334,8 @@ class ReferrerOrderService
                 $orderItems[] = [
                     'id'       => $groupId,
                     'test'     => $item->panel_id
-                        ? ['id' => $item->panelTest?->id, 'name' => $item->panelTest?->name, 'code' => $item->panelTest?->code ?? null]
-                        : ['id' => $item->test?->id,      'name' => $item->test?->name,      'code' => $item->test?->code ?? null],
+                        ? ['id' => $item->panelTest?->id, 'name' => $item->panelTest?->name, 'code' => $item->panelTest->code ?? null]
+                        : ['id' => $item->test?->id,      'name' => $item->test?->name,      'code' => $item->test->code ?? null],
                     'patients' => $itemPatients,
                     'samples'  => $itemSamples,
                 ];
@@ -380,8 +380,8 @@ class ReferrerOrderService
     public function checkStatus(ReferrerOrder $referrerOrder): void
     {
         $referrerOrder->load("acceptance");
-        if ($referrerOrder->acceptance && ($referrerOrder->acceptance?->status == AcceptanceStatus::PROCESSING || $referrerOrder->acceptance?->status == AcceptanceStatus::REPORTED)) {
-            $this->updateReferrerOrderStatus($referrerOrder, $referrerOrder->acceptance?->status->value);
+        if ($referrerOrder->acceptance && ($referrerOrder->acceptance->status == AcceptanceStatus::PROCESSING || $referrerOrder->acceptance->status == AcceptanceStatus::REPORTED)) {
+            $this->updateReferrerOrderStatus($referrerOrder, $referrerOrder->acceptance->status->value);
         }
     }
 
@@ -453,8 +453,8 @@ class ReferrerOrderService
             $entry   = [
                 'id'       => $groupId,
                 'test'     => $item->panel_id
-                    ? ['id' => $item->panelTest?->id, 'name' => $item->panelTest?->name, 'code' => $item->panelTest?->code ?? null]
-                    : ['id' => $item->test?->id,      'name' => $item->test?->name,      'code' => $item->test?->code ?? null],
+                    ? ['id' => $item->panelTest?->id, 'name' => $item->panelTest?->name, 'code' => $item->panelTest->code ?? null]
+                    : ['id' => $item->test?->id,      'name' => $item->test?->name,      'code' => $item->test->code ?? null],
                 'patients' => $itemPatients[$item->id] ?? [$patientData],
                 'samples'  => $itemSamplesMap[$item->id] ?? [],
             ];

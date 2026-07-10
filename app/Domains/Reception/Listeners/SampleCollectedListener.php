@@ -38,8 +38,8 @@ readonly class SampleCollectedListener
         }
 
         // Check if the sampler is trusted for auto-QC approval
-        $sampler     = $sample?->sampler ?? $user;
-        $autoApprove = (bool) ($sampler?->qc_auto_approve ?? false);
+        $sampler     = $sample->sampler ?? $user;
+        $autoApprove = (bool) ($sampler->qc_auto_approve ?? false);
 
         if ($autoApprove) {
             // Auto-approve: stamp the sample and proceed immediately
