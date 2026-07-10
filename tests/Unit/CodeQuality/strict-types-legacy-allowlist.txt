@@ -468,7 +468,6 @@ app/Domains/Reception/Services/PatientService.php
 app/Domains/Reception/Services/RelativeService.php
 app/Domains/Reception/Services/ReportApprovalService.php
 app/Domains/Reception/Services/ReportDataService.php
-app/Domains/Reception/Services/ReportService.php
 app/Domains/Reception/Services/SampleEntryService.php
 app/Domains/Reception/Services/SampleService.php
 app/Domains/Reception/Services/TATService.php

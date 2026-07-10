@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Reception\Services;
 
 use App\Domains\Document\Enums\DocumentTag;
@@ -93,46 +95,48 @@ class ReportService
                                  array  $parameters = [],
                                  ?array $additionalFiles = []): Report
     {
-        // Get acceptance item
-        $acceptanceItem = $this->acceptanceItemRepository->findAcceptanceItemById($acceptanceItemId);
+        return DB::transaction(function () use ($user, $acceptanceItemId, $reportTemplateId, $reportedDocument, $parameters, $additionalFiles) {
+            // Get acceptance item
+            $acceptanceItem = $this->acceptanceItemRepository->findAcceptanceItemById($acceptanceItemId);
 
-        // Create report
-        $report = $this->reportRepository->create([
-            'reported_at' => Carbon::now("Asia/Muscat"),
-            'reporter_id' => $user->id,
-            'acceptance_item_id' => $acceptanceItemId,
-            'report_template_id' => $reportTemplateId,
-        ]);
-        // Create signer
-        $signer = $this->signerFactory->createFromUser($user, $report);
-        $this->signerRepository->save($signer);
-        $report->load("reportTemplate.template", "acceptanceItem.patient");
+            // Create report
+            $report = $this->reportRepository->create([
+                'reported_at' => Carbon::now("Asia/Muscat"),
+                'reporter_id' => $user->id,
+                'acceptance_item_id' => $acceptanceItemId,
+                'report_template_id' => $reportTemplateId,
+            ]);
+            // Create signer
+            $signer = $this->signerFactory->createFromUser($user, $report);
+            $this->signerRepository->save($signer);
+            $report->load("reportTemplate.template", "acceptanceItem.patient");
 
-        // Associate additional files
-        if (count($additionalFiles)) {
-            foreach ($additionalFiles as $file) {
-                $this->processDocument($file['id'], $report, DocumentTag::ADDITIONAL);
+            // Associate additional files
+            if (count($additionalFiles)) {
+                foreach ($additionalFiles as $file) {
+                    $this->processDocument($file['id'], $report, DocumentTag::ADDITIONAL);
+                }
             }
-        }
-        if (count($parameters))
-            $this->createOrUpdateReportParameters($report, $parameters);
-        $this->acceptanceItemService->updateAcceptanceItemTimeline($acceptanceItem, "Report Created By $user->name");
+            if (count($parameters))
+                $this->createOrUpdateReportParameters($report, $parameters);
+            $this->acceptanceItemService->updateAcceptanceItemTimeline($acceptanceItem, "Report Created By $user->name");
 
-        if (isset($reportedDocument['id']))
-            $this->processDocument($reportedDocument['id'], $report, DocumentTag::REPORTED);
-        elseif (count($parameters) > 0) {
-            $data = $this->getReportData($report);
-            $docAddr = $this->buildWordFileService->build($report->reportTemplate->template->path, $data);
-            $this->documentAdapter->storeDocument(
-                "patient",
-                $report->acceptanceItem->patient->id,
-                new UploadedFile($docAddr, "Report.docx"),
-                DocumentTag::REPORTED->value,
-                "report",
-                $report->id);
-        }
+            if (isset($reportedDocument['id']))
+                $this->processDocument($reportedDocument['id'], $report, DocumentTag::REPORTED);
+            elseif (count($parameters) > 0) {
+                $data = $this->getReportData($report);
+                $docAddr = $this->buildWordFileService->build($report->reportTemplate->template->path, $data);
+                $this->documentAdapter->storeDocument(
+                    "patient",
+                    $report->acceptanceItem->patient->id,
+                    new UploadedFile($docAddr, "Report.docx"),
+                    DocumentTag::REPORTED->value,
+                    "report",
+                    $report->id);
+            }
 
-        return $report;
+            return $report;
+        });
     }
 
     /**
@@ -148,53 +152,55 @@ class ReportService
                                  ?array $additionalFiles = [],
                                  array  $signers = []): Report
     {
-        // Get acceptance item
-        $acceptanceItem = $this->acceptanceItemRepository->findAcceptanceItemById($acceptanceItemId);
+        return DB::transaction(function () use ($report, $user, $acceptanceItemId, $reportTemplateId, $reportedDocument, $parameters, $additionalFiles, $signers) {
+            // Get acceptance item
+            $acceptanceItem = $this->acceptanceItemRepository->findAcceptanceItemById($acceptanceItemId);
 
-        // Editing invalidates any approvals collected so far: the flow restarts.
-        $report->approvals()->delete();
+            // Editing invalidates any approvals collected so far: the flow restarts.
+            $report->approvals()->delete();
 
-        // Create report
-        $report = $this->reportRepository->update($report,
-            [
-                'reported_at' => Carbon::now("Asia/Muscat"),
-                'reporter_id' => $user->id,
-                'acceptance_item_id' => $acceptanceItemId,
-                'report_template_id' => $reportTemplateId,
-                'approver_id' => null,
-                'approved_at' => null,
-                'approval_status' => ReportApprovalStatus::PENDING,
-                'current_step_position' => null,
-            ]);
-        // Persist signers
-        $this->syncSigners($report, $user, $signers);
-        $report->load("reportTemplate.template", "acceptanceItem.patient");
+            // Create report
+            $report = $this->reportRepository->update($report,
+                [
+                    'reported_at' => Carbon::now("Asia/Muscat"),
+                    'reporter_id' => $user->id,
+                    'acceptance_item_id' => $acceptanceItemId,
+                    'report_template_id' => $reportTemplateId,
+                    'approver_id' => null,
+                    'approved_at' => null,
+                    'approval_status' => ReportApprovalStatus::PENDING,
+                    'current_step_position' => null,
+                ]);
+            // Persist signers
+            $this->syncSigners($report, $user, $signers);
+            $report->load("reportTemplate.template", "acceptanceItem.patient");
 
-        // Associate additional files
-        if (count($additionalFiles)) {
-            foreach ($additionalFiles as $file) {
-                $this->processDocument($file['id'], $report, DocumentTag::ADDITIONAL);
+            // Associate additional files
+            if (count($additionalFiles)) {
+                foreach ($additionalFiles as $file) {
+                    $this->processDocument($file['id'], $report, DocumentTag::ADDITIONAL);
+                }
             }
-        }
-        if (count($parameters))
-            $this->createOrUpdateReportParameters($report, $parameters);
-        $this->acceptanceItemService->updateAcceptanceItemTimeline($acceptanceItem, "Report Updated By $user->name");
+            if (count($parameters))
+                $this->createOrUpdateReportParameters($report, $parameters);
+            $this->acceptanceItemService->updateAcceptanceItemTimeline($acceptanceItem, "Report Updated By $user->name");
 
-        if (isset($reportedDocument['id']) || isset($reportedDocument['hash']))
-            $this->processDocument($reportedDocument['id'] ?? $reportedDocument['hash'], $report, DocumentTag::REPORTED);
-        elseif (count($parameters) > 0 && !$report->reportedDocument()->exists()) {
-            $data = $this->getReportData($report);
-            $docAddr = $this->buildWordFileService->build($report->reportTemplate->template->path, $data);
-            $this->documentAdapter->storeDocument(
-                "patient",
-                $report->acceptanceItem->patient->id,
-                new UploadedFile($docAddr, "Report.docx"),
-                DocumentTag::REPORTED->value,
-                "report",
-                $report->id);
-        }
+            if (isset($reportedDocument['id']) || isset($reportedDocument['hash']))
+                $this->processDocument($reportedDocument['id'] ?? $reportedDocument['hash'], $report, DocumentTag::REPORTED);
+            elseif (count($parameters) > 0 && !$report->reportedDocument()->exists()) {
+                $data = $this->getReportData($report);
+                $docAddr = $this->buildWordFileService->build($report->reportTemplate->template->path, $data);
+                $this->documentAdapter->storeDocument(
+                    "patient",
+                    $report->acceptanceItem->patient->id,
+                    new UploadedFile($docAddr, "Report.docx"),
+                    DocumentTag::REPORTED->value,
+                    "report",
+                    $report->id);
+            }
 
-        return $report;
+            return $report;
+        });
     }
 
     /**
@@ -283,23 +289,25 @@ class ReportService
         ?array $clinicalCommentDocument = null
     ): Report
     {
-        // Update report with approval information
-        $report = $this->markReportAsApproved($report, $approver);
+        return DB::transaction(function () use ($report, $approver, $publishedReportDocument, $clinicalCommentDocument) {
+            // Update report with approval information
+            $report = $this->markReportAsApproved($report, $approver);
 
-        $this->processDocument($publishedReportDocument['id'] ?? $publishedReportDocument['hash'], $report, DocumentTag::PUBLISHED);
+            $this->processDocument($publishedReportDocument['id'] ?? $publishedReportDocument['hash'], $report, DocumentTag::PUBLISHED);
 
-        // Process clinical comment document if provided
-        if ($clinicalCommentDocument && (isset($clinicalCommentDocument['id']) || isset($clinicalCommentDocument['hash']))) {
-            $this->processDocument($clinicalCommentDocument['id'] ?? $clinicalCommentDocument['hash'], $report, DocumentTag::CLINICAL_COMMENT);
-        }
+            // Process clinical comment document if provided
+            if ($clinicalCommentDocument && (isset($clinicalCommentDocument['id']) || isset($clinicalCommentDocument['hash']))) {
+                $this->processDocument($clinicalCommentDocument['id'] ?? $clinicalCommentDocument['hash'], $report, DocumentTag::CLINICAL_COMMENT);
+            }
 
-        // Create approver signer record
-        $this->createApproverSignerRecord($report, $approver);
+            // Create approver signer record
+            $this->createApproverSignerRecord($report, $approver);
 
-        // Update acceptance item timeline
-        $report->loadMissing("acceptanceItem");
-        $this->acceptanceItemService->updateAcceptanceItemTimeline($report->acceptanceItem, "Report Approved By $approver->name");
-        return $report;
+            // Update acceptance item timeline
+            $report->loadMissing("acceptanceItem");
+            $this->acceptanceItemService->updateAcceptanceItemTimeline($report->acceptanceItem, "Report Approved By $approver->name");
+            return $report;
+        });
     }
 
     /**
@@ -584,7 +592,6 @@ class ReportService
     protected function createOrUpdateReportParameters(Report $report, array $parameters): void
     {
         $report->load("reportTemplate.parameters", "parameters");
-        DB::beginTransaction();
         foreach ($parameters as $parameter => $value) {
             $reportTemplateParameter = $report->reportTemplate->parameters->find(last(explode("_", $parameter)));
             if ($reportTemplateParameter) {
@@ -606,7 +613,6 @@ class ReportService
                 }
             }
         }
-        DB::commit();
     }
 
 }
