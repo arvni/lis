@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Reception\Services;
 
 
@@ -103,34 +105,35 @@ class AcceptanceService
 
     public function storeAcceptance(AcceptanceDTO $acceptanceDTO): Acceptance
     {
-        $acceptance = $this->acceptanceRepository
-            ->createAcceptance(Arr::except($acceptanceDTO->toArray(), ["acceptance_items"]));
+        return DB::transaction(function () use ($acceptanceDTO): Acceptance {
+            $acceptance = $this->acceptanceRepository
+                ->createAcceptance(Arr::except($acceptanceDTO->toArray(), ["acceptance_items"]));
 
-        if ($acceptanceDTO->consultationId) {
-            $test = $this->settingAdapter->getSettingByClassAndKey("Acceptance", "defaultConsultationMethod");
-            if ($test && isset($test["id"])) {
-                $test = $this->laboratoryAdapter->getTestById($test["id"]);
-                if ($test) {
-                    $methodTest = $test->methodTests->first();
-                    $acceptanceDTO->acceptanceItems["tests"][] = [
-                        'method_test' => $methodTest,
-                        "price" => $methodTest->method->price,
-                        'discount' => 0,
-                        [],
-                        "samples" => [["patients" => [["id" => $acceptanceDTO->patientId]]]],
-                        "customParameters" => []
-                    ];
+            if ($acceptanceDTO->consultationId) {
+                $test = $this->settingAdapter->getSettingByClassAndKey("Acceptance", "defaultConsultationMethod");
+                if ($test && isset($test["id"])) {
+                    $test = $this->laboratoryAdapter->getTestById((int)$test["id"]);
+                    if ($test) {
+                        $methodTest = $test->methodTests->first();
+                        $acceptanceDTO->acceptanceItems["tests"][] = [
+                            'method_test' => $methodTest,
+                            "price" => $methodTest->method->price,
+                            'discount' => 0,
+                            [],
+                            "samples" => [["patients" => [["id" => $acceptanceDTO->patientId]]]],
+                            "customParameters" => []
+                        ];
+                    }
                 }
             }
-        }
 
-
-        $acceptanceItems = $this->prepareAcceptanceItems($acceptance, $acceptanceDTO->acceptanceItems);
-        foreach ($acceptanceItems as $acceptanceItem) {
-            if (!$acceptanceItem->deleted)
-                $this->acceptanceItemService->storeAcceptanceItem($acceptanceItem);
-        }
-        return $acceptance;
+            $acceptanceItems = $this->prepareAcceptanceItems($acceptance, $acceptanceDTO->acceptanceItems);
+            foreach ($acceptanceItems as $acceptanceItem) {
+                if (!$acceptanceItem->deleted)
+                    $this->acceptanceItemService->storeAcceptanceItem($acceptanceItem);
+            }
+            return $acceptance;
+        });
     }
 
     /**
@@ -196,9 +199,7 @@ class AcceptanceService
         // Process based on current step
         $step = $data['step'] ?? 5;
 
-        try {
-            DB::beginTransaction();
-
+        return DB::transaction(function () use ($acceptance, $acceptanceDTO, $step): Acceptance {
             switch ($step) {
                 case 0: // Patient Information
                     // Update only step information
@@ -246,13 +247,8 @@ class AcceptanceService
                     break;
             }
 
-            DB::commit();
             return $acceptance;
-
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
 
     /**
@@ -340,8 +336,7 @@ class AcceptanceService
      */
     public function updateAcceptanceItemsFromEditor(Acceptance $acceptance, array $acceptanceItems): void
     {
-        DB::beginTransaction();
-        try {
+        DB::transaction(function () use ($acceptance, $acceptanceItems): void {
             $prepared = $this->prepareAcceptanceItems($acceptance, $acceptanceItems);
             foreach ($prepared as $dto) {
                 if ($dto->deleted || !$dto->id) {
@@ -353,11 +348,7 @@ class AcceptanceService
                 }
             }
             $this->referrerAdapter->syncOrdersForAcceptance($acceptance);
-            DB::commit();
-        } catch (Throwable $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
 
     /**
@@ -438,8 +429,7 @@ class AcceptanceService
      */
     public function publishAcceptance(Acceptance $acceptance, int $publisherId, bool $silentlyPublish = false): Acceptance
     {
-        DB::beginTransaction();
-        try {
+        DB::transaction(function () use ($acceptance, $publisherId): void {
             // Load acceptance items with reports
             $acceptance->load([
                 'acceptanceItems' => function ($q) {
@@ -449,36 +439,32 @@ class AcceptanceService
             ]);
 
             $publishedAt = Carbon::now("Asia/Muscat");
+            $publisher = User::find($publisherId);
 
             // Publish all unpublished reports
             foreach ($acceptance->acceptanceItems as $acceptanceItem) {
                 if (!$acceptanceItem->reportless && $acceptanceItem->report && !$acceptanceItem->report->published_at) {
-                    $report=$acceptanceItem->report;
-                    Report::where("id",$report->id)
+                    $report = $acceptanceItem->report;
+                    Report::where("id", $report->id)
                         ->update([
-                        'published_at' => $publishedAt,
-                        'publisher_id' => $publisherId
-                    ]);
+                            'published_at' => $publishedAt,
+                            'publisher_id' => $publisherId
+                        ]);
 
                     // Update timeline
-                    $publisher = User::find($publisherId);
                     $this->acceptanceItemService->updateAcceptanceItemTimeline(
                         $acceptanceItem,
                         "Report Published By {$publisher->name}"
                     );
                 }
             }
+        });
 
-            DB::commit();
+        // Check if all tests are published and send notifications — the
+        // listeners notify externally, so this stays outside the transaction.
+        $this->checkAcceptanceReport($acceptance, $silentlyPublish);
 
-            // Check if all tests are published and send notifications
-            $this->checkAcceptanceReport($acceptance, $silentlyPublish);
-
-            return $acceptance->fresh();
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        return $acceptance->fresh();
     }
 
     public function checkAndUpdateAcceptanceStatus(Acceptance $acceptance): void
@@ -507,9 +493,9 @@ class AcceptanceService
                 $isService = ($acceptance_item['method_test']['test']['type'] ?? null) === TestType::SERVICE->value;
                 $output[] = new AcceptanceItemDTO(
                     $acceptance->id,
-                    $acceptance_item['method_test']['id'],
-                    $acceptance_item["price"],
-                    $acceptance_item['discount'],
+                    (int)$acceptance_item['method_test']['id'],
+                    (float)$acceptance_item["price"],
+                    (float)$acceptance_item['discount'],
                     array_merge(($acceptance_item["customParameters"] ?? []), Arr::except($acceptance_item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters", "sampleless"])),
                     !($acceptance_item['timeLine'] ?? null) ? [
                         Carbon::now()->format("Y-m-d H:i:s") => "Created By " . auth()->user()->name,
@@ -517,7 +503,7 @@ class AcceptanceService
                         ...$acceptance_item['timeLine'],
                         Carbon::now()->format("Y-m-d H:i:s") => "Edited By " . auth()->user()->name,
                     ],
-                    $isService ? 0 : ($acceptance_item["no_sample"] ?? (count($acceptance_item["samples"] ?? [1]) || 1)),
+                    $isService ? 0 : (int)($acceptance_item["no_sample"] ?? (count($acceptance_item["samples"] ?? [1]) || 1)),
                     $acceptance_item["id"] ?? null,
                     null,
                     $acceptance_item["deleted"] ?? false,
@@ -529,7 +515,7 @@ class AcceptanceService
         if (isset($acceptanceItems['panels']) && is_array($acceptanceItems['panels'])) {
             foreach ($acceptanceItems['panels'] as $panelData) {
                 if (isset($panelData["acceptanceItems"]) && is_array($panelData["acceptanceItems"])) {
-                    $panelID = Str::uuid();
+                    $panelID = Str::uuid()->toString();
                     $panelSampleless = $panelData["sampleless"] ?? false;
                     $panelReportless = $panelData["reportless"] ?? false;
                     foreach ($panelData["acceptanceItems"] as $item) {
@@ -537,9 +523,9 @@ class AcceptanceService
                         $isService = ($item['method_test']['test']['type'] ?? null) === TestType::SERVICE->value;
                         $output[] = new AcceptanceItemDTO(
                             $acceptance->id,
-                            $item['method_test']['id'],
-                            $panelData['price'] / count($panelData['acceptanceItems']), // Distribute price among items
-                            $panelData['discount'] / count($panelData['acceptanceItems']), // Distribute discount among items
+                            (int)$item['method_test']['id'],
+                            (float)($panelData['price'] / count($panelData['acceptanceItems'])), // Distribute price among items
+                            (float)($panelData['discount'] / count($panelData['acceptanceItems'])), // Distribute discount among items
                             array_merge(($item["customParameters"] ?? []), Arr::except($item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters", "sampleless"])),
                             !($item['timeLine'] ?? null) ? [
                                 Carbon::now()->format("Y-m-d H:i:s") => "Created By " . auth()->user()->name,
@@ -547,7 +533,7 @@ class AcceptanceService
                                 ...$item['timeLine'],
                                 Carbon::now()->format("Y-m-d H:i:s") => "Edited By " . auth()->user()->name,
                             ],
-                            $isService ? 0 : ($item["no_sample"] ?? (count($item["samples"] ?? [1]) || 1)),
+                            $isService ? 0 : (int)($item["no_sample"] ?? (count($item["samples"] ?? [1]) || 1)),
                             $item["id"] ?? null,
                             $panelID,
                             $panelData["deleted"] ?? false,
@@ -568,13 +554,17 @@ class AcceptanceService
 
     public function cancelAcceptance(Acceptance $acceptance): void
     {
-        $this->acceptanceRepository->updateAcceptance($acceptance, [
-            "status" => AcceptanceStatus::CANCELLED
-        ]);
-        $acceptance->acceptanceItemStates()->update(["status" => AcceptanceItemStateStatus::REJECTED]);
-        if ($acceptance->invoice_id) {
-            AcceptanceCancelledEvent::dispatch($acceptance->invoice_id);
-        }
+        // The AcceptanceCancelledEvent listener cancels the invoice with a
+        // synchronous DB write, so the dispatch belongs inside the transaction.
+        DB::transaction(function () use ($acceptance): void {
+            $this->acceptanceRepository->updateAcceptance($acceptance, [
+                "status" => AcceptanceStatus::CANCELLED
+            ]);
+            $acceptance->acceptanceItemStates()->update(["status" => AcceptanceItemStateStatus::REJECTED]);
+            if ($acceptance->invoice_id) {
+                AcceptanceCancelledEvent::dispatch($acceptance->invoice_id);
+            }
+        });
     }
 
     /**
