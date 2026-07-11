@@ -122,7 +122,7 @@ class UpdateCustomerToPatientWithConsultationController extends Controller
             new ConsultationDTO(
                 $patient->id,
                 $time->consultant_id,
-                Carbon::parse($time->started_at, 'Asia/Muscat'),
+                Carbon::parse($time->started_at),
                 ConsultationStatus::WAITING,
                 null,
                 null,

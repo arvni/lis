@@ -35,9 +35,9 @@ class ConsultationDTO
     public static function fromRequest(array $request): self
     {
         if ($request["time"] ?? null)
-            $dueDate = Carbon::createFromFormat("Y-m-d H:i", $request['dueDate'] . " " . $request['time'], "Asia/Muscat");
+            $dueDate = Carbon::createFromFormat("Y-m-d H:i", $request['dueDate'] . " " . $request['time']);
         else
-            $dueDate = Carbon::now("Asia/Muscat");
+            $dueDate = now();
         return new self(
             $request['patient_id'],
             $request['consultant']["id"],

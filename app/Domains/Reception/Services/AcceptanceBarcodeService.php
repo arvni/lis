@@ -4,7 +4,6 @@ namespace App\Domains\Reception\Services;
 
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
@@ -118,7 +117,7 @@ class AcceptanceBarcodeService
                     'items' => $item,
                     'sampleType' => $sampleTypes->where('id', $sampleTypeId)->first()
                                         ?? $sampleTypes->first(),
-                    'collection_date' => Carbon::now('Asia/Muscat')->format('Y-m-d H:i:s'),
+                    'collection_date' => now()->format('Y-m-d H:i:s'),
                     'sampleLocation' => 'In Lab',
                 ];
             })

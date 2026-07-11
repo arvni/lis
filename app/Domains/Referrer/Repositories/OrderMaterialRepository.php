@@ -98,7 +98,7 @@ class OrderMaterialRepository
      */
     private function applyDateRangeFilter(Builder $query, string $field, array $dateFilter): void
     {
-        $timezone = config('app.timezone', 'Asia/Muscat');
+        $timezone = config('app.timezone');
 
         $hasFrom = !empty($dateFilter['from']);
         $hasTo = !empty($dateFilter['to']);

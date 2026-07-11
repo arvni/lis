@@ -308,7 +308,7 @@ class AcceptanceItemService
             if (!is_array($timeline)) {
                 $timeline = json_decode($timeline ?? "[]", true) ?? [];
             }
-            $timeline[Carbon::now("Asia/Muscat")->format("Y-m-d H:i:s")] =
+            $timeline[now()->format("Y-m-d H:i:s")] =
                 "Price set to $price and discount to $discount by $editor";
 
             $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, [
@@ -324,7 +324,7 @@ class AcceptanceItemService
         $timeline = $acceptanceItem->timeline;
         if (!is_array($timeline))
             $timeline = json_decode($timeline ?? "[]", true) ?? [];
-        $timeline[Carbon::now("Asia/Muscat")->format("Y-m-d H:i:s")] = $message;
+        $timeline[now()->format("Y-m-d H:i:s")] = $message;
         return $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, ["timeline" => $timeline]);
     }
 

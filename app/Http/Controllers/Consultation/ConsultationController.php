@@ -62,7 +62,7 @@ class ConsultationController extends Controller
         $validated = $request->validated();
         $consultation = $this->consultationService->createConsultation(ConsultationDTO::fromRequest($validated));
         if ($request->has("time")) {
-            $dueDate = Carbon::parse($consultation->dueDate, "Asia/Muscat");
+            $dueDate = Carbon::parse($consultation->dueDate);
             $this->timeService->storeTime(
                 new TimeDTO(
                     $dueDate->format("H:i"),

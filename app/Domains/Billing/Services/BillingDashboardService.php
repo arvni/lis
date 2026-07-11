@@ -11,8 +11,7 @@ class BillingDashboardService
 
     public function resolveDates(array $filters): array
     {
-        $tz  = 'Asia/Muscat';
-        $now = Carbon::now($tz);
+        $now = now();
 
         return match ($filters['preset'] ?? null) {
             'today'         => [$now->copy()->startOfDay(),              $now->copy()->endOfDay()],
@@ -25,8 +24,8 @@ class BillingDashboardService
             'last_3_months' => [$now->copy()->subMonths(3),              $now],
             'this_year'     => [$now->copy()->startOfYear(),             $now->copy()->endOfYear()],
             default         => [
-                !empty($filters['from']) ? Carbon::parse($filters['from'], $tz)->startOfDay() : $now->copy()->subDays(30),
-                !empty($filters['to'])   ? Carbon::parse($filters['to'],   $tz)->endOfDay()   : $now,
+                !empty($filters['from']) ? Carbon::parse($filters['from'])->startOfDay() : $now->copy()->subDays(30),
+                !empty($filters['to'])   ? Carbon::parse($filters['to'])->endOfDay()   : $now,
             ],
         };
     }
@@ -199,10 +198,9 @@ class BillingDashboardService
 
     public function getByMonth(array $filters): array
     {
-        $tz    = 'Asia/Muscat';
         $months = max(1, min(36, (int) ($filters['t_months'] ?? 12)));
-        $from  = Carbon::now($tz)->subMonths($months)->startOfMonth();
-        $to    = Carbon::now($tz)->endOfMonth();
+        $from  = now()->subMonths($months)->startOfMonth();
+        $to    = now()->endOfMonth();
 
         $trendFilters = [
             'referrer_id' => $filters['t_referrer_id'] ?? null,

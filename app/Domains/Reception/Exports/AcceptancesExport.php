@@ -20,7 +20,6 @@ class AcceptancesExport implements
     ShouldAutoSize,
     WithStyles
 {
-    private const TIMEZONE     = 'Asia/Muscat';
     private const HEADER_COLOR = '0361ac';
     private const HEADER_TEXT  = 'ffffff';
 
@@ -57,7 +56,7 @@ class AcceptancesExport implements
         $remaining = ($row->payable_amount ?? 0) - ($row->payments_sum_price ?? 0);
 
         $reportDate = $row->report_date
-            ? Carbon::parse($row->report_date, self::TIMEZONE)->toDateString()
+            ? Carbon::parse($row->report_date)->toDateString()
             : null;
 
         $barcodes = collect($row->samples ?? [])->pluck('barcode')->filter()->join(', ');
@@ -131,6 +130,6 @@ class AcceptancesExport implements
     private function formatDateTime(mixed $value): string
     {
         if (!$value) return '';
-        return Carbon::parse($value, self::TIMEZONE)->format('Y-m-d H:i');
+        return Carbon::parse($value)->format('Y-m-d H:i');
     }
 }

@@ -135,8 +135,8 @@ class ReportDataService
             if ($key == 0) {
 
                 $data['barcode'] = $barcodeValue;
-                $data['sample_created_at'] = Carbon::parse($sample->created_at, 'Asia/Muscat')->format('d M Y');
-                $data['sample_collection_date'] = Carbon::parse($sample->collection_date, 'Asia/Muscat')->format('d M Y');
+                $data['sample_created_at'] = Carbon::parse($sample->created_at)->format('d M Y');
+                $data['sample_collection_date'] = Carbon::parse($sample->collection_date)->format('d M Y');
                 $data['sample_type_name'] = $sample->sample_type_name ?? 'N/A';
                 $data['images'] = [
                     ...$data['images'],
@@ -144,8 +144,8 @@ class ReportDataService
                 ];
             } else {
                 $data["barcode_{$key}"] = $barcodeValue;
-                $data["sample_{$key}_created_at"] = Carbon::parse($sample->created_at, 'Asia/Muscat')->format('d M Y');
-                $data["sample_{$key}_collection_date"] = Carbon::parse($sample->collection_date, 'Asia/Muscat')->format('d M Y');
+                $data["sample_{$key}_created_at"] = Carbon::parse($sample->created_at)->format('d M Y');
+                $data["sample_{$key}_collection_date"] = Carbon::parse($sample->collection_date)->format('d M Y');
                 $data["sample_{$key}_type_name"] = $sample->sample_type_name ?? 'N/A';
                 $data['images'] = [
                     ...$data['images'],

@@ -17,7 +17,7 @@ class DashboardController extends Controller
 
     public function __invoke(Request $request): \Inertia\Response
     {
-        $date = Carbon::parse($request->get('date'), "Asia/Muscat");
+        $date = Carbon::parse($request->get('date'));
         return Inertia::render('Dashboard/Index', [
             "data"               => $this->dashboardService->getDashboardData($date)->toArray(),
             "date"               => $date->format('Y-m-d'),

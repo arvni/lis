@@ -289,8 +289,7 @@ class TATService
 
     public function resolveAnalyticsDates(array $filters): array
     {
-        $tz  = 'Asia/Muscat';
-        $now = Carbon::now($tz);
+        $now = now();
 
         return match ($filters['a_preset'] ?? null) {
             'today'         => [$now->copy()->startOfDay(), $now->copy()->endOfDay()],
@@ -302,8 +301,8 @@ class TATService
             'last_30_days'  => [$now->copy()->subDays(30), $now],
             'last_3_months' => [$now->copy()->subMonths(3), $now],
             default         => [
-                !empty($filters['a_from']) ? Carbon::parse($filters['a_from'], $tz)->startOfDay() : $now->copy()->subDays(30),
-                !empty($filters['a_to'])   ? Carbon::parse($filters['a_to'], $tz)->endOfDay()     : $now,
+                !empty($filters['a_from']) ? Carbon::parse($filters['a_from'])->startOfDay() : $now->copy()->subDays(30),
+                !empty($filters['a_to'])   ? Carbon::parse($filters['a_to'])->endOfDay()     : $now,
             ],
         };
     }

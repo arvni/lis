@@ -85,7 +85,7 @@ class ConsultationService
     {
         $this->consultationRepository->updateConsultation($consultation, [
             "status" => ConsultationStatus::STARTED,
-            "started_at" => Carbon::now("Asia/Muscat")
+            "started_at" => now()
         ]);
     }
 
@@ -113,8 +113,6 @@ class ConsultationService
             return [];
         }
 
-        $timezone = 'Asia/Muscat';
-
         // Get the day of week and adjust to app's convention (0=Saturday, 6=Friday)
         $adjustedDayOfWeek = ($dateCarbon->dayOfWeek + 1) % 7;
 
@@ -128,9 +126,9 @@ class ConsultationService
 
         // Eager load consultant's booked times for the given date
         $consultant->load([
-            "times" => function ($query) use ($date, $timezone) {
-                $query->where("started_at", ">=", Carbon::parse($date, $timezone)->startOfDay())
-                    ->where("ended_at", "<=", Carbon::parse($date, $timezone)->endOfDay());
+            "times" => function ($query) use ($date) {
+                $query->where("started_at", ">=", Carbon::parse($date)->startOfDay())
+                    ->where("ended_at", "<=", Carbon::parse($date)->endOfDay());
             },
         ]);
 
@@ -138,16 +136,16 @@ class ConsultationService
         $bookedTimes = $consultant->times;
 
         // Create a closure for checking if a time slot is booked
-        $isTimeBooked = function (Carbon $startTime,) use ($bookedTimes, $timezone) {
-            return $bookedTimes->contains(function ($booking) use ($startTime, $timezone) {
-                $startedDate = Carbon::parse($booking->started_at, $timezone);
-                $endedDate = Carbon::parse($booking->ended_at, $timezone);
+        $isTimeBooked = function (Carbon $startTime,) use ($bookedTimes) {
+            return $bookedTimes->contains(function ($booking) use ($startTime) {
+                $startedDate = Carbon::parse($booking->started_at);
+                $endedDate = Carbon::parse($booking->ended_at);
                 return $startTime->gte($startedDate) && $startTime->lt($endedDate);
             });
         };
 
         $timeSlots = [];
-        $now = Carbon::now($timezone);
+        $now = now();
         $minimumStartTime = $now->copy()->addMinutes($advanceBookingMinutes);
 
         // Generate time slots for each time range
@@ -160,8 +158,8 @@ class ConsultationService
 
             try {
                 // Create Carbon instances for start and end times
-                $startTime = Carbon::createFromFormat('Y-m-d H:i', $date . ' ' . $timeRange['started_at'], $timezone);
-                $endTime = Carbon::createFromFormat('Y-m-d H:i', $date . ' ' . $timeRange['ended_at'], $timezone);
+                $startTime = Carbon::createFromFormat('Y-m-d H:i', $date . ' ' . $timeRange['started_at']);
+                $endTime = Carbon::createFromFormat('Y-m-d H:i', $date . ' ' . $timeRange['ended_at']);
 
                 // Ensure time range is valid
                 if ($startTime->gte($endTime)) {
