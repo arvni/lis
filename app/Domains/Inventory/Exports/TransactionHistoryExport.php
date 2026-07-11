@@ -3,6 +3,7 @@
 namespace App\Domains\Inventory\Exports;
 
 use App\Domains\Inventory\Models\StockTransaction;
+use App\Domains\Inventory\Models\StockTransactionLine;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -30,10 +31,10 @@ class TransactionHistoryExport implements FromCollection, WithHeadings, WithMapp
             ->orderByDesc('transaction_date')
             ->get()
             ->flatMap(function (StockTransaction $tx) {
-                return $tx->lines->map(fn($line) => [
+                return $tx->lines->map(fn(StockTransactionLine $line) => [
                     'tx'   => $tx,
                     'line' => $line,
-                ]);
+                ])->all();
             });
     }
 

@@ -5,6 +5,10 @@ namespace App\Domains\Laboratory\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property int $order
+ * @property string $section_name
+ */
 class SectionOptionResource extends JsonResource
 {
     /**

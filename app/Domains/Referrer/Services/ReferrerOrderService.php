@@ -111,7 +111,7 @@ class ReferrerOrderService
         if (!$patient) return null;
 
         $itemIds = collect($barcodes)
-            ->flatMap(fn($b) => collect($b['items'] ?? [])->pluck('id'))
+            ->flatMap(fn($b) => collect((array) ($b['items'] ?? []))->pluck('id'))
             ->unique()
             ->values();
 
@@ -407,7 +407,7 @@ class ReferrerOrderService
             ?? $query->latest('id')->first();
     }
 
-    private function buildBarcodeMaps(array $barcodes, $patient, ?int $collectRequestId = null): array
+    private function buildBarcodeMaps(array $barcodes, Patient $patient, ?int $collectRequestId = null): array
     {
         $itemPatients   = [];
         $itemSamplesMap = [];
@@ -443,7 +443,7 @@ class ReferrerOrderService
                 'receivedAt'         => $barcode['received_at'] ?? null,
                 'sampleLocation'     => $barcode['sampleLocation'] ?? null,
                 'patientId'          => $patient->id,
-                'itemIds'            => collect($barcode['items'] ?? [])->pluck('id')->values()->toArray(),
+                'itemIds'            => collect((array) ($barcode['items'] ?? []))->pluck('id')->values()->toArray(),
                 'sampleId'           => $material['barcode'] ?? null,
                 'collect_request_id' => $barcode['collect_request_id'] ?? $collectRequestId,
                 'materialId'         => $material['id'] ?? null,
@@ -480,18 +480,18 @@ class ReferrerOrderService
                 continue;
             }
 
-            $orderItems[$existingIdx]['patients'] = collect($orderItems[$existingIdx]['patients'])
+            $orderItems[$existingIdx]['patients'] = collect((array) $orderItems[$existingIdx]['patients'])
                 ->merge($entry['patients'])
                 ->unique(fn($p) => $p['server_id'] ?? $p['id'] ?? null)
                 ->values()->all();
 
-            $orderItems[$existingIdx]['samples'] = collect($orderItems[$existingIdx]['samples'])
+            $orderItems[$existingIdx]['samples'] = collect((array) $orderItems[$existingIdx]['samples'])
                 ->merge($entry['samples'])
                 ->unique(fn($s) => $s['materialId'] ?? $s['sampleId'] ?? null)
                 ->values()->all();
         }
 
-        return array_values($orderItems);
+        return $orderItems;
     }
 
     private function mergeOrderInformation(array $existing, array $incoming): array
@@ -500,12 +500,12 @@ class ReferrerOrderService
 
         $merged['status']   = $merged['status']   ?? $incoming['status'];
         $merged['patient']  = $merged['patient']  ?? $incoming['patient'];
-        $merged['patients'] = collect($merged['patients'] ?? [])
+        $merged['patients'] = collect((array) ($merged['patients'] ?? []))
             ->merge($incoming['patients'] ?? [])
             ->unique(fn($p) => $p['server_id'] ?? $p['id'] ?? null)
             ->values()->all();
 
-        $existingItems = collect($merged['orderItems'] ?? []);
+        $existingItems = collect((array) ($merged['orderItems'] ?? []));
         foreach ($incoming['orderItems'] ?? [] as $newItem) {
             $idx = $existingItems->search(fn($e) => ($e['id'] ?? null) === ($newItem['id'] ?? null));
             if ($idx === false) {
@@ -513,11 +513,11 @@ class ReferrerOrderService
                 continue;
             }
             $current = $existingItems[$idx];
-            $current['patients'] = collect($current['patients'] ?? [])
+            $current['patients'] = collect((array) ($current['patients'] ?? []))
                 ->merge($newItem['patients'] ?? [])
                 ->unique(fn($p) => $p['server_id'] ?? $p['id'] ?? null)
                 ->values()->all();
-            $current['samples'] = collect($current['samples'] ?? [])
+            $current['samples'] = collect((array) ($current['samples'] ?? []))
                 ->merge($newItem['samples'] ?? [])
                 ->unique(fn($s) => $s['materialId'] ?? $s['sampleId'] ?? null)
                 ->values()->all();
@@ -525,7 +525,7 @@ class ReferrerOrderService
         }
         $merged['orderItems'] = $existingItems->values()->all();
 
-        $merged['samples'] = collect($merged['samples'] ?? [])
+        $merged['samples'] = collect((array) ($merged['samples'] ?? []))
             ->merge($incoming['samples'] ?? [])
             ->unique(fn($s) => $s['materialId'] ?? $s['sampleId'] ?? null)
             ->values()->all();

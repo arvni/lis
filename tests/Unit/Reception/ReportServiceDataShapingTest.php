@@ -3,6 +3,7 @@
 namespace Tests\Unit\Reception;
 
 use App\Domains\Reception\Services\ReportDataService;
+use App\Domains\Referrer\Models\Referrer;
 use Tests\TestCase;
 
 /**
@@ -31,7 +32,7 @@ class ReportServiceDataShapingTest extends TestCase
 
     public function test_prepare_referrer_prefers_billing_info(): void
     {
-        $referrer = (object) [
+        $referrer = (new Referrer)->forceFill([
             'billingInfo' => [
                 'name' => 'Billing Co',
                 'address' => '1 Lab St',
@@ -44,7 +45,7 @@ class ReportServiceDataShapingTest extends TestCase
             'fullName' => 'Fallback Name',
             'phoneNo' => '111',
             'email' => 'fallback@example.com',
-        ];
+        ]);
 
         $result = $this->service->prepareReferrer($referrer);
 
@@ -61,12 +62,12 @@ class ReportServiceDataShapingTest extends TestCase
     {
         // billingInfo missing the keys → name/phone/email fall back to the
         // referrer's own columns; address/vatIn/city/country default to N/A.
-        $referrer = (object) [
+        $referrer = (new Referrer)->forceFill([
             'billingInfo' => [],
             'fullName' => 'Dr Fallback',
             'phoneNo' => '111',
             'email' => 'fallback@example.com',
-        ];
+        ]);
 
         $result = $this->service->prepareReferrer($referrer);
 

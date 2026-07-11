@@ -5,6 +5,7 @@ namespace App\Domains\Consultation\Models;
 use App\Domains\Consultation\Enums\ConsultationStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -24,6 +25,14 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  */
 class Consultation extends Model
 {
+    use Searchable;
+
+    /** @var list<string> */
+    protected $searchable = [
+        "patient.fullName",
+        "patient.phone",
+    ];
+
     protected $fillable = [
         'patient_id',
         'consultant_id',

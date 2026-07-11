@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Consultation;
 use App\Domains\Consultation\DTOs\CustomerDTO;
 use App\Domains\Consultation\DTOs\TimeDTO;
 use App\Domains\Consultation\Enums\ConsultationStatus;
+use App\Domains\Consultation\Models\Consultation;
 use App\Domains\Consultation\Models\Time;
 use App\Domains\Consultation\Repositories\TimeRepository;
 use App\Domains\Consultation\Services\ConsultationService;
@@ -115,8 +116,9 @@ class TimeController extends Controller
     {
         $this->authorize("delete", $time);
         $time->load("reservable");
-        if ($time->reservable_type == "consultation" && $time->reservable->status == ConsultationStatus::BOOKED) {
-            $this->consultationService->deleteConsultation($time->reservable);
+        $reservable = $time->reservable;
+        if ($reservable instanceof Consultation && $reservable->status == ConsultationStatus::BOOKED) {
+            $this->consultationService->deleteConsultation($reservable);
             $this->timeService->deleteTime($time);
         } elseif ($time->reservable_type == "customer")
             $this->timeService->deleteTime($time);

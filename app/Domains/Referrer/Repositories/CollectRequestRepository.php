@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Referrer\Repositories;
 
 use App\Domains\Shared\Traits\LogsUserActivity;
@@ -79,14 +81,18 @@ class CollectRequestRepository
             ->get(['id', 'preferred_date', 'note', 'status', 'logistic_information', 'sample_collector_id', 'referrer_id']);
     }
 
-    public function applyFilters($query, array $filters): void
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Referrer\Models\CollectRequest>  $query
+     */
+    public function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"])) {
             $query->whereHas('sampleCollector', function ($q) use ($filters) {
                 $q->where('name', 'like', "%{$filters['search']}%")
                   ->orWhere('email', 'like', "%{$filters['search']}%");
             })
-            ->orWhereHas('referrer', function ($q) use ($filters) {
+            ->orWhereHas('referrer', function (Builder $q) use ($filters) {
+                /** @var Builder<\App\Domains\Referrer\Models\Referrer> $q */
                 $q->search($filters['search']);
             });
         }

@@ -51,6 +51,9 @@ class TATService
     //   • not in reported / cancelled status
     //   • has at least one unreported non-SERVICE item
 
+    /**
+     * @return Builder<Acceptance>
+     */
     private function buildBaseQuery(array $filters): Builder
     {
         $query = Acceptance::query()

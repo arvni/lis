@@ -61,7 +61,7 @@ class AcceptanceBarcodeService
                     return collect([$newModel]);
                 }
 
-                return collect($samples)->flatMap(function ($sample, $sampleIndex) use ($item) {
+                return collect((array) $samples)->flatMap(function ($sample, $sampleIndex) use ($item) {
                     try {
                         // Per-sample sampleType takes precedence over item-level sampleType
                         $sampleTypeId = $sample['sampleType'] ?? $item->customParameters['sampleType'] ?? null;

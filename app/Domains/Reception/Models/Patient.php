@@ -189,7 +189,7 @@ class Patient extends Model
         return $this->email ?? null;
     }
 
-    public function acceptances()
+    public function acceptances(): \Staudenmeir\EloquentHasManyDeep\HasManyDeep
     {
         // Use a pivot-free base so hasManyDeepFromRelations doesn't SELECT acceptance_item_patient.order,
         // which would make DISTINCT operate on the full row and let the same acceptance.id appear twice.

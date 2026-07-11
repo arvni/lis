@@ -492,7 +492,7 @@ class UpdateAcceptanceRequest extends FormRequest
     private function checkIstThereAnyTestOnRequest(): bool
     {
         return (count($this->input("acceptanceItems.panels", [])) +
-                collect($this->input("acceptanceItems.tests", []))->filter(fn($item) => $item["method_test"]["test"]["type"] == TestType::TEST->value)->count()
+                collect((array) $this->input("acceptanceItems.tests", []))->filter(fn($item) => $item["method_test"]["test"]["type"] == TestType::TEST->value)->count()
             ) < 1 ||
             $this->input("out_patient");
     }

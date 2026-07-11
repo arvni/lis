@@ -6,10 +6,6 @@ use App\Domains\Reception\Models\ReportParameter;
 
 class ReportParameterRepository
 {
-    /**
-     * @param $data
-     * @return mixed
-     */
     public function create(array $data): ReportParameter
     {
         return ReportParameter::create($data);

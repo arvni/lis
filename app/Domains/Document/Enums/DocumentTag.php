@@ -57,8 +57,6 @@ enum DocumentTag: string
             self::APPROVED => 'Approved',
             self::PURCHASE_ORDER => 'Purchase Order',
             self::PAYMENT_RECEIPT => 'Payment Receipt',
-
-            default => 'Unknown',
         };
     }
 

@@ -149,7 +149,7 @@ readonly class WorkflowProgressionService
             }
 
             return $workflow->sections
-                ->where("pivot.order", $currentSection->pivot->order + 1)
+                ->where("pivot.order", $currentSection->pivot["order"] + 1)
                 ->first();
         } else
             return $workflow->sections()

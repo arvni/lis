@@ -106,14 +106,14 @@ class WorkflowController extends Controller
                 $sectionWorkflow["parameters"],
                 $key,
             );
-            $sectionWorkflow = null;
-            if (isset($sectionWorkflow["id"]))
-                $sectionWorkflow = $this->sectionWorkflowService->findSectionWorkflowById($sectionWorkflow["id"]);
-            if ($sectionWorkflow)
-                $this->sectionWorkflowService->updateSectionWorkflow($sectionWorkflow, $sectionWorkflowDto);
+            $existing = isset($sectionWorkflow["id"])
+                ? $this->sectionWorkflowService->findSectionWorkflowById($sectionWorkflow["id"])
+                : null;
+            if ($existing)
+                $this->sectionWorkflowService->updateSectionWorkflow($existing, $sectionWorkflowDto);
             else
-                $sectionWorkflow=$this->sectionWorkflowService->storeSectionWorkflow($sectionWorkflowDto);
-            $ids[]=$sectionWorkflow->id;
+                $existing = $this->sectionWorkflowService->storeSectionWorkflow($sectionWorkflowDto);
+            $ids[] = $existing->id;
         }
         $this->workflowService->syncSectionWorkflows($workflow,$ids);
 

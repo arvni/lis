@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Laboratory\Policies;
 
 use App\Domains\Laboratory\Models\Section;
@@ -67,7 +69,7 @@ class SectionPolicy
         return $prefix;
     }
 
-    private function getSectionGroupIds($sectionGroup): array
+    private function getSectionGroupIds(SectionGroup $sectionGroup): array
     {
         if (isset($sectionGroup->parent) && $sectionGroup->section_group_id) {
             return [... $this->getSectionGroupIds($sectionGroup->parent), $sectionGroup->id];

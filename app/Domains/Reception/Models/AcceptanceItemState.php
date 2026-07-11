@@ -30,6 +30,7 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read int|null $total query-derived aggregate alias (status stats query)
  */
 class AcceptanceItemState extends Model
 {

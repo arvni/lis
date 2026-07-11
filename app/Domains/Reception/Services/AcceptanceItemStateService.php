@@ -140,6 +140,9 @@ readonly class AcceptanceItemStateService
         return $state;
     }
 
+    /**
+     * @return Collection<int, \App\Domains\Reception\Models\AcceptanceItemState>
+     */
     public function getAcceptanceItemStatesStats(int|string $sectionId): Collection
     {
         return $this->acceptanceItemStateRepository->getAcceptanceItemStatesStats($sectionId);

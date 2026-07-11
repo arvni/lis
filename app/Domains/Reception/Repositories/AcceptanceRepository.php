@@ -285,7 +285,10 @@ class AcceptanceRepository
             ->count();
     }
 
-    protected function applyFilters(Builder $query, array $filters): void // Changed $query type to Builder
+    /**
+     * @param  Builder<\App\Domains\Reception\Models\Acceptance>  $query
+     */
+    protected function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters[self::FILTER_SEARCH])) {
             // Assuming Acceptance model has a 'scopeSearch'
@@ -459,12 +462,12 @@ class AcceptanceRepository
                 }
                 return $item;
             })
-            ->groupBy(function ($item) {
+            ->groupBy(function ($item): string {
                 // Accessing nested properties. Ensure 'method_test' and 'test' are loaded if $item is a model,
                 // or that the array structure is as expected.
                 return $item['method_test']['test']['type'] instanceof TestType
                     ? $item['method_test']['test']['type']->value
-                    : $item['method_test']['test']['type'];
+                    : (string) $item['method_test']['test']['type'];
             })
             ->map(function (Collection $items, string $type) { // Type hint $items as Collection
                 if ($type === TestType::TEST->value || $type === TestType::SERVICE->value) {

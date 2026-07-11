@@ -61,7 +61,7 @@ class StoreReferrerOrderAcceptanceController extends Controller
             $referrerOrder->referrer_id,
             $user->id,
             $referrerOrder->orderInformation["reference_id"] ?? null,
-            0,
+            "0",
             $validated["howReport"] ?? null,
             null,
             $validated["acceptanceItems"],

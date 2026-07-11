@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Referrer\Repositories;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -50,7 +52,10 @@ class OrderMaterialRepository
         $orderMaterial->delete();
     }
 
-    protected function applyFilters($query, array $filters): void
+    /**
+     * @param  Builder<OrderMaterial>  $query
+     */
+    protected function applyFilters(Builder $query, array $filters): void
     {
         // Define filter mappings for cleaner code
         $simpleFilters = [
@@ -74,11 +79,6 @@ class OrderMaterialRepository
             if (!empty($filters[$filterKey])) {
                 $this->applyDateRangeFilter($query, $columnName, $filters[$filterKey]);
             }
-        }
-
-        // Apply search filter
-        if (!empty($filters['search'])) {
-            $query->search($filters['search']);
         }
     }
 

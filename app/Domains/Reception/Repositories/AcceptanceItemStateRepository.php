@@ -73,6 +73,9 @@ class AcceptanceItemStateRepository
             ->get();
     }
 
+    /**
+     * @return Collection<int, AcceptanceItemState>
+     */
     public function getAcceptanceItemStatesStats(int|string $sectionId): Collection
     {
         return AcceptanceItemState::where("section_id", $sectionId)

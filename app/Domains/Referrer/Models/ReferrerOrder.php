@@ -7,6 +7,7 @@ use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\User\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
@@ -99,15 +100,20 @@ class ReferrerOrder extends Model
         return $this->hasManyThrough(AcceptanceItem::class, Acceptance::class);
     }
 
-    public function scopeSearch($query, $search)
+    /**
+     * @param  Builder<ReferrerOrder>  $query
+     * @return Builder<ReferrerOrder>
+     */
+    public function scopeSearch(Builder $query, mixed $search): Builder
     {
-        return $query->where(function ($q) use ($search) {
+        return $query->where(function (Builder $q) use ($search) {
             $q->where("order_id", "like", "%$search%")
-                ->orwhereHas("patient", function ($qu) use ($search) {
+                ->orWhereHas("patient", function (Builder $qu) use ($search) {
+                    /** @var Builder<Patient> $qu */
                     $qu->search($search);
                 })
-                ->orWhereHas("patient", function ($qu) use ($search) {
-                    $qu->whereHas("samples", function ($que) use ($search) {
+                ->orWhereHas("patient", function (Builder $qu) use ($search) {
+                    $qu->whereHas("samples", function (Builder $que) use ($search) {
                         $que->where("barcode", "like", "%$search%");
                     });
                 });

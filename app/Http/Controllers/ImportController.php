@@ -48,8 +48,8 @@ class ImportController extends Controller
             $defaultValues  = $request->input('default_values', []);
             $tests          = $request->input('tests', []);
 
-            // Read the Excel file
-            $data = Excel::toArray([], $request->file('file'));
+            // Read the Excel file (dummy import object = no import concerns, plain array conversion)
+            $data = Excel::toArray(new \stdClass(), $request->file('file'));
 
             if (empty($data) || empty($data[0])) {
                 return back()->with('error', 'The Excel file is empty');

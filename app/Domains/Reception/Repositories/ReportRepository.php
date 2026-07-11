@@ -145,12 +145,9 @@ class ReportRepository
     /**
      * Load the full relation tree for displaying a single report.
      * Only call with a persisted Report model; never use in list queries.
-     *
-     * @throws \LogicException if $report is not a persisted Report instance
      */
     public function loadWithAllRelations(Report $report): Report
     {
-        assert($report instanceof Report, 'loadWithAllRelations expects a persisted Report model');
         $report->load([
             "Documents" => function ($q) {
                 $q->where("tag", DocumentTag::ADDITIONAL);
@@ -190,12 +187,9 @@ class ReportRepository
     /**
      * Load relations needed to edit a single report.
      * Only call with a persisted Report model; never use in list queries.
-     *
-     * @throws \LogicException if $report is not a persisted Report instance
      */
     public function loadForEditing(Report $report): Report
     {
-        assert($report instanceof Report, 'loadForEditing expects a persisted Report model');
         $report->load([
             "documents",
             "acceptanceItem" => function ($q) {

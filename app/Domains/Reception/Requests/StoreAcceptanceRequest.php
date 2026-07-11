@@ -436,7 +436,7 @@ class StoreAcceptanceRequest extends FormRequest
             }
 
             // Verify correct number of patients per test based on method requirements
-            if ($tests && isArray($tests) && count($tests))
+            if ($tests && is_array($tests))
                 foreach ($tests as $index => $test) {
                     if (isset($test['method_test']['method']['no_patient'])) {
                         $requiredPatients = $test['method_test']['method']['no_patient'];
@@ -452,7 +452,7 @@ class StoreAcceptanceRequest extends FormRequest
                 }
 
             // Also check panel items
-            if ($panels && isArray($panels) && count($panels))
+            if ($panels && is_array($panels))
                 foreach ($panels as $panelIndex => $panel) {
                     if (isset($panel['acceptanceItems'])) {
                         foreach ($panel['acceptanceItems'] as $itemIndex => $item) {

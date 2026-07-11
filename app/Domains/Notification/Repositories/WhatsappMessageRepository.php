@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Notification\Repositories;
 
 use App\Domains\Notification\Models\WhatsappMessage;
@@ -10,10 +12,6 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class WhatsappMessageRepository
 {
 
-    /**
-     * @param $queryData
-     * @return LengthAwarePaginator
-     */
     /** @param  array<string, mixed>  $queryData */
     public function listMessages(array $queryData): LengthAwarePaginator
     {
@@ -26,7 +24,8 @@ class WhatsappMessageRepository
 
     }
 
-    public function listContacts($queryData): LengthAwarePaginator
+    /** @param  array<string, mixed>  $queryData */
+    public function listContacts(array $queryData): LengthAwarePaginator
     {
         $query = WhatsappMessage::query()
             ->select([
@@ -41,7 +40,8 @@ class WhatsappMessageRepository
             $query->where(function (Builder $query) use ($queryData) {
                 $query->where("waId", "like", "%" . $queryData["filters"]["search"] . "%")
                     ->orWhereHas("messageable", function (Builder $query) use ($queryData) {
-                        $queryData->search($queryData["filters"]["search"]);
+                        // @phpstan-ignore method.notFound (morphTo target models all use the Searchable trait)
+                        $query->search($queryData["filters"]["search"]);
                     });
             });
         }
@@ -50,6 +50,10 @@ class WhatsappMessageRepository
 
     }
 
+    /**
+     * @param  Builder<WhatsappMessage>  $query
+     * @return Builder<WhatsappMessage>
+     */
     private function applyFilters(Builder $query, array $filters): Builder
     {
         foreach ($filters as $field => $value) {
