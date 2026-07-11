@@ -167,7 +167,7 @@ class TwilioWhatsAppChannel
      */
     protected function createPublicMediaUrl($mediaPath): string
     {
-        // Option 1: Copy to public directory
+        // Copy to public directory
         $publicPath = 'temp-media/' . basename($mediaPath);
         $fullPublicPath = public_path($publicPath);
 
@@ -181,9 +181,6 @@ class TwilioWhatsAppChannel
 
         // Return public URL
         return url($publicPath);
-
-        // Option 2: Use a controller route to serve the file
-        // return route('serve.media', ['file' => encrypt($mediaPath)]);
     }
 
     /**

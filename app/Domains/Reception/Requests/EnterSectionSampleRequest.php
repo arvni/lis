@@ -12,7 +12,6 @@ class EnterSectionSampleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-//        return Gate::allows("enter",$this->route()->parameter("section"));
         return true;
     }
 
