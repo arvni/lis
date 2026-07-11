@@ -176,8 +176,6 @@ app/Domains/Inventory/Requests/UpdateStoreRequest.php
 app/Domains/Inventory/Requests/UpdateSupplierRequest.php
 app/Domains/Inventory/Services/ItemCodeService.php
 app/Domains/Inventory/Services/ItemService.php
-app/Domains/Inventory/Services/PurchaseRequestService.php
-app/Domains/Inventory/Services/PurchaseRequestWorkflowService.php
 app/Domains/Inventory/Services/ReferenceNumberService.php
 app/Domains/Inventory/Services/ReorderAlertService.php
 app/Domains/Inventory/Services/StockCardService.php
@@ -453,7 +451,6 @@ app/Domains/Reception/Requests/WaitingForPublishRequest.php
 app/Domains/Reception/Resources/AcceptanceItemStateResource.php
 app/Domains/Reception/Resources/PatientResource.php
 app/Domains/Reception/Services/AcceptanceBarcodeService.php
-app/Domains/Reception/Services/AcceptanceItemConversionService.php
 app/Domains/Reception/Services/AcceptanceItemService.php
 app/Domains/Reception/Services/AcceptanceItemStateService.php
 app/Domains/Reception/Services/AcceptanceStatusService.php

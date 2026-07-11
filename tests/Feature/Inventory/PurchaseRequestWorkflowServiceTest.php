@@ -29,7 +29,7 @@ class PurchaseRequestWorkflowServiceTest extends TestCase
     {
         parent::setUp();
         Notification::fake();
-        $this->service = new PurchaseRequestWorkflowService();
+        $this->service = app(PurchaseRequestWorkflowService::class);
         $this->requester = User::factory()->create(['name' => 'Requester']);
         $this->approver = User::factory()->create(['name' => 'Approver']);
         $this->actingAs($this->approver);

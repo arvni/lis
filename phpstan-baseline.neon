@@ -55,12 +55,6 @@ parameters:
 			path: app/Domains/Inventory/Services/ItemCodeService.php
 
 		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
-			count: 1
-			path: app/Domains/Inventory/Services/PurchaseRequestWorkflowService.php
-
-		-
 			message: '#^Parameter \#1 \$string of function str_pad expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
