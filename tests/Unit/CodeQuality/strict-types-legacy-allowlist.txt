@@ -621,7 +621,6 @@ app/Http/Controllers/Inventory/CurrentStockController.php
 app/Http/Controllers/Inventory/InventoryReportController.php
 app/Http/Controllers/Inventory/ItemController.php
 app/Http/Controllers/Inventory/ItemImportController.php
-app/Http/Controllers/Inventory/PurchaseRequestController.php
 app/Http/Controllers/Inventory/ReorderAlertController.php
 app/Http/Controllers/Inventory/ReturnToRequesterController.php
 app/Http/Controllers/Inventory/RevertTransactionController.php
