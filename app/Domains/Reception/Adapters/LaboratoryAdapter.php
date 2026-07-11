@@ -5,9 +5,11 @@ namespace App\Domains\Reception\Adapters;
 
 use App\Domains\Laboratory\Models\Doctor;
 use App\Domains\Laboratory\Models\Method;
+use App\Domains\Laboratory\Models\MethodTest;
 use App\Domains\Laboratory\Models\ReportTemplate;
 use App\Domains\Laboratory\Models\Test;
 use App\Domains\Laboratory\Repositories\MethodRepository;
+use App\Domains\Laboratory\Repositories\MethodTestRepository;
 use App\Domains\Laboratory\Repositories\TestRepository;
 use App\Domains\Laboratory\Services\DoctorService;
 use App\Domains\Reception\Models\AcceptanceItem;
@@ -20,16 +22,19 @@ class LaboratoryAdapter
 {
     private MethodRepository $methodRepository;
     private TestRepository $testRepository;
+    private MethodTestRepository $methodTestRepository;
     private DoctorService $doctorService;
 
     public function __construct(
-        MethodRepository $methodRepository,
-        TestRepository   $testRepository,
-        DoctorService    $doctorService
+        MethodRepository     $methodRepository,
+        TestRepository       $testRepository,
+        MethodTestRepository $methodTestRepository,
+        DoctorService        $doctorService
     )
     {
         $this->methodRepository = $methodRepository;
         $this->testRepository = $testRepository;
+        $this->methodTestRepository = $methodTestRepository;
         $this->doctorService = $doctorService;
     }
 
@@ -86,6 +91,41 @@ class LaboratoryAdapter
         $test = $this->testRepository->findTestById($id);
         $test?->load(["methodTests"]);
         return $test;
+    }
+
+    /**
+     * Plain test lookup (no eager loads, unlike getTestById) — used by the pricing cascade.
+     */
+    public function findTest(int|string $id): ?Test
+    {
+        return $this->testRepository->findTestById($id);
+    }
+
+    /**
+     * Plain method lookup — used by the pricing cascade.
+     */
+    public function findMethod(int|string $id): ?Method
+    {
+        return $this->methodRepository->findMethodById($id);
+    }
+
+    /**
+     * A method's default individual MethodTest (target when ejecting items from a panel).
+     */
+    public function findDefaultMethodTestForMethod(int|string $methodId): ?MethodTest
+    {
+        return $this->methodTestRepository->findDefaultMethodTestForMethod($methodId);
+    }
+
+    /**
+     * The MethodTests forming a panel, with test (+ sample types) and method loaded.
+     *
+     * @param  array<int, int|string>  $ids
+     * @return Collection<int, MethodTest>
+     */
+    public function getPanelMethodTests(array $ids): Collection
+    {
+        return $this->methodTestRepository->getMethodTestsByIdsWithPanelRelations($ids);
     }
 
 }

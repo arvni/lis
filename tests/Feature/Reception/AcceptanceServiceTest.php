@@ -26,9 +26,11 @@ use App\Domains\Referrer\Models\Referrer;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Reception\Adapters\ReferrerAdapter;
 use App\Domains\Reception\Adapters\SettingAdapter;
+use App\Domains\Reception\Events\AcceptanceCancelledEvent;
 use App\Notifications\ReferrerReportPublished;
 use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Mockery;
 use Mockery\MockInterface;
@@ -766,6 +768,108 @@ class AcceptanceServiceTest extends TestCase
 
         $invoice->refresh();
         $this->assertSame(InvoiceStatus::CANCELED->value, $invoice->status);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Transaction guarantees (quality-audit item 2): a failure part-way through
+    // storeAcceptance/cancelAcceptance must leave no partial writes.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_store_acceptance_rolls_back_acceptance_when_an_item_write_fails(): void
+    {
+        $this->setUpDatabase();
+        $methodTestId = $this->getMethodTestId();
+
+        Event::listen('eloquent.created: ' . AcceptanceItem::class, function (): void {
+            throw new \RuntimeException('item write failed');
+        });
+
+        $dto = $this->makeAcceptanceDTO([
+            'patientId'       => $this->patient->id,
+            'acceptorId'      => auth()->id(),
+            'step'            => 5,
+            'status'          => AcceptanceStatus::PENDING,
+            'acceptanceItems' => [
+                'tests'  => [$this->makeTestItem([
+                    'method_test' => ['id' => $methodTestId, 'test' => ['type' => 'TEST']],
+                ])],
+                'panels' => [],
+            ],
+        ]);
+
+        $acceptancesBefore = Acceptance::count();
+
+        /** @var AcceptanceService $service */
+        $service = app(AcceptanceService::class);
+
+        try {
+            $service->storeAcceptance($dto);
+            $this->fail('storeAcceptance should have thrown');
+        } catch (\RuntimeException) {
+            // expected
+        }
+
+        $this->assertSame($acceptancesBefore, Acceptance::count());
+        $this->assertSame(0, AcceptanceItem::count());
+    }
+
+    public function test_cancel_acceptance_rolls_back_when_a_cancel_listener_fails(): void
+    {
+        $this->setUpDatabase();
+
+        $invoice = Invoice::create([
+            'owner_type' => 'patient',
+            'owner_id'   => $this->patient->id,
+            'user_id'    => auth()->id(),
+            'status'     => InvoiceStatus::WAITING_FOR_PAYMENT,
+            'discount'   => 0,
+        ]);
+
+        $acceptance = $this->createAcceptance([
+            'status'     => AcceptanceStatus::WAITING_FOR_PAYMENT,
+            'invoice_id' => $invoice->id,
+        ]);
+
+        $item = AcceptanceItem::create([
+            'acceptance_id'    => $acceptance->id,
+            'method_test_id'   => $this->getMethodTestId(),
+            'price'            => 100,
+            'discount'         => 0,
+            'reportless'       => false,
+            'sampleless'       => false,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]);
+
+        AcceptanceItemState::create([
+            'acceptance_item_id' => $item->id,
+            'section_id'         => $this->section->id,
+            'user_id'            => auth()->id(),
+            'parameters'         => [],
+            'status'             => AcceptanceItemStateStatus::PROCESSING,
+        ]);
+
+        // Runs after the invoice-cancelling listener — the whole cancellation
+        // (status, item states, invoice) must roll back together.
+        Event::listen(AcceptanceCancelledEvent::class, function (): void {
+            throw new \RuntimeException('cancel side effect failed');
+        });
+
+        /** @var AcceptanceService $service */
+        $service = app(AcceptanceService::class);
+
+        try {
+            $service->cancelAcceptance($acceptance);
+            $this->fail('cancelAcceptance should have thrown');
+        } catch (\RuntimeException) {
+            // expected
+        }
+
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_PAYMENT, $acceptance->fresh()->status);
+        $itemState = AcceptanceItemState::where('acceptance_item_id', $item->id)->first();
+        $this->assertSame(AcceptanceItemStateStatus::PROCESSING, $itemState->status);
+        $this->assertSame(InvoiceStatus::WAITING_FOR_PAYMENT->value, $invoice->fresh()->status);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

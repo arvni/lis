@@ -85,11 +85,9 @@ app/Domains/Document/Listeners/DocumentUpdateListener.php
 app/Domains/Document/Models/Document.php
 app/Domains/Document/Policies/DocumentPolicy.php
 app/Domains/Document/Requests/StoreDocumentRequest.php
-app/Domains/Document/Requests/UpdateDocumentBatchUpdateRequest.php
 app/Domains/Document/Requests/UpdateDocumentRequest.php
 app/Domains/Document/Requests/UploadPublicDocumentRequest.php
 app/Domains/Document/Resources/DocumentResource.php
-app/Domains/Document/Services/DocumentService.php
 app/Domains/Inventory/Enums/AdjustReason.php
 app/Domains/Inventory/Enums/ApprovalStatus.php
 app/Domains/Inventory/Enums/ItemDepartment.php
@@ -178,8 +176,6 @@ app/Domains/Inventory/Requests/UpdateStoreRequest.php
 app/Domains/Inventory/Requests/UpdateSupplierRequest.php
 app/Domains/Inventory/Services/ItemCodeService.php
 app/Domains/Inventory/Services/ItemService.php
-app/Domains/Inventory/Services/PurchaseRequestService.php
-app/Domains/Inventory/Services/PurchaseRequestWorkflowService.php
 app/Domains/Inventory/Services/ReferenceNumberService.php
 app/Domains/Inventory/Services/ReorderAlertService.php
 app/Domains/Inventory/Services/StockCardService.php
@@ -455,10 +451,8 @@ app/Domains/Reception/Requests/WaitingForPublishRequest.php
 app/Domains/Reception/Resources/AcceptanceItemStateResource.php
 app/Domains/Reception/Resources/PatientResource.php
 app/Domains/Reception/Services/AcceptanceBarcodeService.php
-app/Domains/Reception/Services/AcceptanceItemConversionService.php
 app/Domains/Reception/Services/AcceptanceItemService.php
 app/Domains/Reception/Services/AcceptanceItemStateService.php
-app/Domains/Reception/Services/AcceptanceService.php
 app/Domains/Reception/Services/AcceptanceStatusService.php
 app/Domains/Reception/Services/BuildWordFileService.php
 app/Domains/Reception/Services/PatientImportService.php
@@ -468,7 +462,6 @@ app/Domains/Reception/Services/PatientService.php
 app/Domains/Reception/Services/RelativeService.php
 app/Domains/Reception/Services/ReportApprovalService.php
 app/Domains/Reception/Services/ReportDataService.php
-app/Domains/Reception/Services/ReportService.php
 app/Domains/Reception/Services/SampleEntryService.php
 app/Domains/Reception/Services/SampleService.php
 app/Domains/Reception/Services/TATService.php
@@ -533,7 +526,6 @@ app/Domains/Referrer/Resources/ReferrerTestResource.php
 app/Domains/Referrer/Services/CollectRequestService.php
 app/Domains/Referrer/Services/MaterialService.php
 app/Domains/Referrer/Services/OrderMaterialService.php
-app/Domains/Referrer/Services/ReferrerOrderService.php
 app/Domains/Referrer/Services/ReferrerService.php
 app/Domains/Referrer/Services/ReferrerTestService.php
 app/Domains/Referrer/Services/SampleCollectorService.php
@@ -628,7 +620,6 @@ app/Http/Controllers/Controller.php
 app/Http/Controllers/DashboardController.php
 app/Http/Controllers/Document/DocumentController.php
 app/Http/Controllers/Document/DownloadReportController.php
-app/Http/Controllers/Document/UpdateBatchDocumentsController.php
 app/Http/Controllers/Document/UploadPublicDocumentController.php
 app/Http/Controllers/GetUserDetailsController.php
 app/Http/Controllers/ImportController.php

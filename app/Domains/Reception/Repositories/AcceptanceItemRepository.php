@@ -319,6 +319,43 @@ class AcceptanceItemRepository
     }
 
     /**
+     * All items of a panel within an acceptance, loaded for panel ejection
+     * (any test type, with method and acceptance context).
+     *
+     * @return Collection<int, AcceptanceItem>
+     */
+    public function getPanelItemsForConversion(int|string $panelId, int|string|null $acceptanceId): Collection
+    {
+        return AcceptanceItem::query()
+            ->where("panel_id", $panelId)
+            ->where("acceptance_id", $acceptanceId)
+            ->with(["methodTest.method", "acceptance"])
+            ->get();
+    }
+
+    /**
+     * The given items with the relations needed for panel promotion.
+     *
+     * @param  array<int, int|string>  $ids
+     * @return Collection<int, AcceptanceItem>
+     */
+    public function getByIdsWithConversionRelations(array $ids): Collection
+    {
+        return AcceptanceItem::whereIn("id", $ids)
+            ->with(["methodTest", "acceptance", "activeSamples.sampleType"])
+            ->get();
+    }
+
+    /**
+     * Plain create for panel-promotion items — unlike creatAcceptanceItem this
+     * applies no SERVICE-type defaults, patient sync, or activity logging.
+     */
+    public function createPanelItem(array $fields): AcceptanceItem
+    {
+        return AcceptanceItem::create($fields);
+    }
+
+    /**
      * @return Collection<int, AcceptanceItem>
      */
     public function getPanelItems(int|string $panelId, int|string|null $acceptanceId = null): Collection
