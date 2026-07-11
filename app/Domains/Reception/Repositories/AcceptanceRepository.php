@@ -333,11 +333,11 @@ class AcceptanceRepository
                 ->toSql() . ')';
 
             if (!empty($filters['report_date_from'])) {
-                $from = Carbon::parse($filters['report_date_from'], 'Asia/Muscat')->startOfDay();
+                $from = Carbon::parse($filters['report_date_from'])->startOfDay();
                 $query->whereRaw("$subSql >= ?", [$from]);
             }
             if (!empty($filters['report_date_to'])) {
-                $to = Carbon::parse($filters['report_date_to'], 'Asia/Muscat')->endOfDay();
+                $to = Carbon::parse($filters['report_date_to'])->endOfDay();
                 $query->whereRaw("$subSql <= ?", [$to]);
             }
         }
@@ -351,11 +351,11 @@ class AcceptanceRepository
                 ->toSql() . ')';
 
             if (!empty($filters['published_at_from'])) {
-                $from = Carbon::parse($filters['published_at_from'], 'Asia/Muscat')->startOfDay();
+                $from = Carbon::parse($filters['published_at_from'])->startOfDay();
                 $query->whereRaw("$publishedSubSql >= ?", [$from]);
             }
             if (!empty($filters['published_at_to'])) {
-                $to = Carbon::parse($filters['published_at_to'], 'Asia/Muscat')->endOfDay();
+                $to = Carbon::parse($filters['published_at_to'])->endOfDay();
                 $query->whereRaw("$publishedSubSql <= ?", [$to]);
             }
         }

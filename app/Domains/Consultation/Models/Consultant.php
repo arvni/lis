@@ -61,14 +61,14 @@ class Consultant extends Model
     public function upcomingTimes(): HasMany
     {
         return $this->hasMany(Time::class)
-            ->whereDate('started_at', '>=', now("Asia/Muscat"))
+            ->whereDate('started_at', '>=', now())
             ->where("active", true);
     }
 
     /** @return HasMany<Consultation, $this> */
     public function upcomingConsultations(): HasMany
     {
-        return $this->hasMany(Consultation::class)->whereDate('started_at', '>=', now("Asia/Muscat"));
+        return $this->hasMany(Consultation::class)->whereDate('started_at', '>=', now());
     }
 
 }

@@ -23,7 +23,6 @@ class AcceptanceItemsExport implements
     ShouldAutoSize,
     WithStyles
 {
-    private const TIMEZONE = 'Asia/Muscat';
     private const HEADER_COLOR = '0361ac';
     private const HEADER_TEXT_COLOR = 'ffffff';
 
@@ -214,7 +213,7 @@ class AcceptanceItemsExport implements
             return '';
         }
 
-        return Carbon::parse($date, self::TIMEZONE)->format('Y-m-d');
+        return Carbon::parse($date)->format('Y-m-d');
     }
 
     /**
@@ -226,7 +225,7 @@ class AcceptanceItemsExport implements
             return '';
         }
 
-        return Carbon::parse($datetime, self::TIMEZONE)->format('Y-m-d H:i');
+        return Carbon::parse($datetime)->format('Y-m-d H:i');
     }
 
     /**
@@ -276,7 +275,7 @@ class AcceptanceItemsExport implements
             return '';
         }
 
-        $date = Carbon::parse($row->createdAt, self::TIMEZONE);
+        $date = Carbon::parse($row->createdAt);
         $remaining = (int) $turnaroundTime;
 
         while ($remaining > 0) {

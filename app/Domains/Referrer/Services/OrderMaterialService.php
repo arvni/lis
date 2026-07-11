@@ -7,7 +7,6 @@ use App\Domains\Referrer\Events\OrderMaterialCreated;
 use App\Domains\Referrer\Models\OrderMaterial;
 use App\Domains\Referrer\Repositories\MaterialRepository;
 use App\Domains\Referrer\Repositories\OrderMaterialRepository;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
@@ -38,7 +37,7 @@ readonly class OrderMaterialService
                     $material = $this->materialRepository->getById($materialData['id']);
                     $this->materialRepository->updateMaterial($material, [
                         'order_material_id' => $orderMaterial->id,
-                        'assigned_at'       => Carbon::now('Asia/Muscat'),
+                        'assigned_at'       => now(),
                     ]);
                 }
             });
@@ -57,7 +56,7 @@ readonly class OrderMaterialService
                 $material = $this->materialRepository->getById($materialData["id"]);
                 $this->materialRepository->updateMaterial($material, [
                     "order_material_id" => $updatedOrderMaterial->id,
-                    "assigned_at" => Carbon::now("Asia/Muscat")
+                    "assigned_at" => now()
                 ]);
             }
         });

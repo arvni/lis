@@ -99,7 +99,7 @@ class AcceptanceService
         return $this->acceptanceRepository->updateAcceptance($acceptance, [
             'financial_approved' => true,
             'financial_approved_by' => $userId,
-            'financial_approved_at' => Carbon::now("Asia/Muscat")
+            'financial_approved_at' => now()
         ]);
     }
 
@@ -438,7 +438,7 @@ class AcceptanceService
                 }
             ]);
 
-            $publishedAt = Carbon::now("Asia/Muscat");
+            $publishedAt = now();
             $publisher = User::find($publisherId);
 
             // Publish all unpublished reports
