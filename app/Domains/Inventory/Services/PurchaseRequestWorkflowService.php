@@ -204,10 +204,9 @@ class PurchaseRequestWorkflowService
         }
 
         if ($step->approver_role) {
+            // findByName throws RoleDoesNotExist rather than returning null
             $role = Role::findByName($step->approver_role, 'web');
-            if ($role) {
-                User::role($role)->get()->each->notify($notification);
-            }
+            User::role($role)->get()->each->notify($notification);
         }
     }
 

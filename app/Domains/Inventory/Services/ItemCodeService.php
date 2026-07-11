@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Inventory\Services;
 
 use App\Domains\Inventory\Models\Item;
@@ -23,6 +25,6 @@ readonly class ItemCodeService
 
         $next = $last ? ((int) substr($last, strlen($prefix))) + 1 : 1;
 
-        return $prefix . str_pad($next, 6, '0', STR_PAD_LEFT);
+        return $prefix . str_pad((string) $next, 6, '0', STR_PAD_LEFT);
     }
 }

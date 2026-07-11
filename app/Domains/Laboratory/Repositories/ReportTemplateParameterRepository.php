@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Laboratory\Repositories;
 
 use App\Domains\Laboratory\Models\ReportTemplateParameter;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 class ReportTemplateParameterRepository
 {
@@ -31,7 +34,10 @@ class ReportTemplateParameterRepository
         return ReportTemplateParameter::query()->find($id);
     }
 
-    protected function applyFilters($query, array $filters): void
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Laboratory\Models\ReportTemplateParameter>  $query
+     */
+    protected function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search(["title"], $filters["search"]);

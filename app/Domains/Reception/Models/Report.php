@@ -292,17 +292,24 @@ class Report extends Model
         return $query->where("status", true);
     }
 
-    public function scopeSearch($query, $search)
+    /**
+     * @param  Builder<Report>  $query
+     * @return Builder<Report>
+     */
+    public function scopeSearch(Builder $query, mixed $search): Builder
     {
-        return $query->whereHas("acceptanceItem", function ($query) use ($search) {
+        return $query->whereHas("acceptanceItem", function (Builder $query) use ($search) {
             $query
-                ->whereHas("samples", function ($query) use ($search) {
+                ->whereHas("samples", function (Builder $query) use ($search) {
+                    /** @var Builder<\App\Domains\Reception\Models\Sample> $query */
                     $query->search($search);
                 })
-                ->orWhereHas("patient", function ($query) use ($search) {
+                ->orWhereHas("patient", function (Builder $query) use ($search) {
+                    /** @var Builder<\App\Domains\Reception\Models\Patient> $query */
                     $query->search($search);
                 })
-                ->orWhereHas("test", function ($query) use ($search) {
+                ->orWhereHas("test", function (Builder $query) use ($search) {
+                    /** @var Builder<\App\Domains\Laboratory\Models\Test> $query */
                     $query->search($search);
                 });
         });

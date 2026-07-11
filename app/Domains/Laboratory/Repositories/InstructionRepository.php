@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Laboratory\Repositories;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -46,12 +48,16 @@ class InstructionRepository
         $this->logDeleted($instruction);
     }
 
-    protected function applyFilters($query, array $filters): void
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Laboratory\Models\Instruction>  $query
+     */
+    protected function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search(["name"], $filters["search"]);
+        // scopeActive ignores arguments (always filters is_active = true)
         if (isset($filters["active"]))
-            $query->active($filters["active"]);
+            $query->active();
     }
 
 }

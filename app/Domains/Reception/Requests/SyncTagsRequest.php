@@ -13,7 +13,7 @@ class SyncTagsRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $tags = collect($this->input('tags', []))
+        $tags = collect((array) $this->input('tags', []))
             ->map(fn($tag) => is_array($tag) ? ($tag['name'] ?? '') : $tag)
             ->values()
             ->all();

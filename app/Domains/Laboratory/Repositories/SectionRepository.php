@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Laboratory\Repositories;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -70,12 +72,15 @@ class SectionRepository
         $this->logDeleted($section);
     }
 
-    protected function applyFilters($query, array $filters): void
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Laboratory\Models\Section>  $query
+     */
+    protected function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search(["name"], $filters["search"]);
         if (isset($filters["section_group"]["id"]))
-            $query->whereHas("parent", fn($q) => $q->where("section_groups.id", $filters["section_group"]["id"]));
+            $query->whereHas("sectionGroup", fn($q) => $q->where("section_groups.id", $filters["section_group"]["id"]));
         if (isset($filters["section_group_id"]))
             $query->where("section_group_id", $filters["section_group_id"]);
         if (isset($filters["active"]))

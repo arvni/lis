@@ -47,6 +47,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int|null $financial_approved_by
  * @property string|null $financial_approved_at
  * @property-read string|null $report_date query-derived alias (report-date subquery)
+ * @property-read string|null $patient_fullname withAggregate alias (export/list queries)
+ * @property-read string|null $patient_idno withAggregate alias (export/list queries)
+ * @property-read string|null $referrer_fullname withAggregate alias (export/list queries)
+ * @property-read string|null $published_at withAggregate alias (export/list queries)
+ * @property-read numeric|null $payable_amount query-derived aggregate alias
+ * @property-read numeric|null $payments_sum_price withSum alias
  */
 class Acceptance extends Model
 {

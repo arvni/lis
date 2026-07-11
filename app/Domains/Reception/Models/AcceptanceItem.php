@@ -47,6 +47,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read bool $deleted appended accessor (getDeletedAttribute)
  */
 class AcceptanceItem extends Model
 {
@@ -159,8 +160,10 @@ class AcceptanceItem extends Model
             ->where("main", true);
     }
 
-    public function workflow()
+    /** @return \Staudenmeir\EloquentHasManyDeep\HasOneDeep<\App\Domains\Laboratory\Models\Workflow, $this> */
+    public function workflow(): \Staudenmeir\EloquentHasManyDeep\HasOneDeep
     {
+        // @phpstan-ignore return.type (hasOneDeepFromRelations cannot infer the related model from variadic relations)
         return $this->hasOneDeepFromRelations(
             $this->methodTest(),        // AcceptanceItem → MethodTest
             (new MethodTest)->method(), // MethodTest → Method

@@ -65,7 +65,7 @@ class ItemImportController extends Controller
         $this->authorize('create', Item::class);
 
         $import = new ItemsImport($this->itemCodeService);
-        $import->collection(collect($request->input('rows')));
+        $import->collection(collect((array) $request->input('rows')));
 
         $msg = "Imported {$import->imported} item(s).";
         if ($import->skipped > 0) {

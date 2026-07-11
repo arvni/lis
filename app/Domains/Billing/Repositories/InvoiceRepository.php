@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Billing\Repositories;
 
 use Illuminate\Database\Eloquent\Collection;
@@ -27,7 +29,7 @@ class InvoiceRepository
         $query = $this->applyQuery(["owner", "acceptance", "patient", "statement"]);
         $query = $this->applyFilters($query, $queryData["filters"] ?? []);
         $query = $this->applyOrderBy($query, $queryData["sort"]);
-        return $this->applyPaginate($query, $queryData["pageSize"] ?? 10);
+        return $this->applyPaginate($query, (int) ($queryData["pageSize"] ?? 10));
     }
 
     public function listAllInvoices(array $queryData): Collection
@@ -82,7 +84,10 @@ class InvoiceRepository
         });
     }
 
-    public function listReferrerInvoicesForStatement(int $referrerId, ?string $month = null)
+    /**
+     * @return Collection<int, Invoice>
+     */
+    public function listReferrerInvoicesForStatement(int $referrerId, ?string $month = null): Collection
     {
         $query = $this->applyQuery(['acceptance.patient'])
             ->whereNull('invoices.statement_id')
@@ -97,7 +102,10 @@ class InvoiceRepository
         return $query->orderBy('invoices.id', 'desc')->get();
     }
 
-    private function applyQuery($with = [])
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder<\App\Domains\Billing\Models\Invoice>
+     */
+    private function applyQuery(array $with = []): Builder
     {
         $numberedInvoices = DB::table('invoices')
             ->select(

@@ -188,7 +188,7 @@ class ReportDataService
         return $output;
     }
 
-    public function prepareReferrer($referrer): array
+    public function prepareReferrer(\App\Domains\Referrer\Models\Referrer $referrer): array
     {
         return [
             'referrer_name' => $referrer->billingInfo['name'] ?? $referrer->fullName,

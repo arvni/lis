@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Reception\Repositories;
 
 use App\Domains\Shared\Traits\LogsUserActivity;
@@ -7,6 +9,7 @@ use App\Domains\Reception\Events\SampleCollectedEvent;
 use App\Domains\Reception\Models\Sample;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 
@@ -100,7 +103,7 @@ class SampleRepository
             "received_at" => isset($sampleData["received_at"]) ? Carbon::parse($sampleData["received_at"]) : Carbon::now(),
             "collect_request_id" => $sampleData["collect_request_id"] ?? null,
         ]);
-        $this->syncAcceptanceItems($sample, collect($sampleData["acceptance_items"])->pluck("id")->unique()->toArray());
+        $this->syncAcceptanceItems($sample, collect((array) $sampleData["acceptance_items"])->pluck("id")->unique()->toArray());
         $this->logCreated($sample);
         return $sample;
     }
@@ -160,7 +163,10 @@ class SampleRepository
         return Sample::where("barcode", $barcode)->first();
     }
 
-    private function applyFilters($query, array $filters): void
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Reception\Models\Sample>  $query
+     */
+    private function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search($filters["search"]);

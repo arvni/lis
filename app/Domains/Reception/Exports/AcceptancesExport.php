@@ -51,6 +51,7 @@ class AcceptancesExport implements
         ];
     }
 
+    /** @param  Acceptance  $row */
     public function map($row): array
     {
         $remaining = ($row->payable_amount ?? 0) - ($row->payments_sum_price ?? 0);

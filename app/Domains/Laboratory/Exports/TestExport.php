@@ -225,7 +225,6 @@ class TestExport implements
             MethodPriceType::FIX => "{$test->price}\n",
             MethodPriceType::FORMULATE => "{$test->extra['formula']}\n",
             MethodPriceType::CONDITIONAL => $this->formatConditionalPrice($test->extra['conditions']),
-            default => '-',
         };
     }
 
@@ -235,7 +234,6 @@ class TestExport implements
             MethodPriceType::FIX => "{$test->referrer_price}\n",
             MethodPriceType::FORMULATE => "{$test->referrer_extra['formula']}\n",
             MethodPriceType::CONDITIONAL => $this->formatConditionalPrice($test->referrer_extra['conditions']),
-            default => '-',
         };
     }
 
@@ -267,7 +265,6 @@ class TestExport implements
             MethodPriceType::FIX => "{$method->price}\n",
             MethodPriceType::FORMULATE => "{$method->extra['formula']}\n",
             MethodPriceType::CONDITIONAL => $this->formatConditionalPrice($method->extra['conditions']),
-            default => '-',
         };
     }
 
@@ -277,7 +274,6 @@ class TestExport implements
             MethodPriceType::FIX => "{$method->referrer_price}\n",
             MethodPriceType::FORMULATE => "{$method->referrer_extra['formula']}\n",
             MethodPriceType::CONDITIONAL => $this->formatConditionalPrice($method->referrer_extra['conditions']),
-            default => '-',
         };
     }
 
@@ -294,7 +290,6 @@ class TestExport implements
                 MethodPriceType::FIX => "• {$method->name}: {$method->price}",
                 MethodPriceType::FORMULATE => "• {$method->name}: {$method->extra['formula']}",
                 MethodPriceType::CONDITIONAL => $this->formatMethodConditionalPrice($method),
-                default => "• {$method->name}: -",
             };
         }
 
@@ -314,7 +309,6 @@ class TestExport implements
                 MethodPriceType::FIX => "• {$method->name}: {$method->referrer_price}",
                 MethodPriceType::FORMULATE => "• {$method->name}: {$method->referrer_extra['formula']}",
                 MethodPriceType::CONDITIONAL => $this->formatMethodConditionalReferrerPrice($method),
-                default => "• {$method->name}: -",
             };
         }
 

@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Billing\Services;
 
 use App\Domains\Billing\DTOs\StatementDTO;
 use App\Domains\Billing\DTOs\StatementExportDTO;
+use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\Statement;
 use App\Domains\Billing\Repositories\StatementRepository;
 use App\Domains\Reception\Enums\AcceptanceStatus;
@@ -120,7 +123,7 @@ class StatementService
         );
     }
 
-    /** @param  Collection<int, \App\Domains\Billing\Models\Invoice>  $invoices */
+    /** @param  Collection<int, Invoice>  $invoices */
     private function prepareInvoicesData(Collection $invoices): array
     {
         return $invoices->map(function ($invoice) {
@@ -156,7 +159,7 @@ class StatementService
         return $acceptanceItems->pluck('test.fullName')->filter()->unique()->sort()->join(', ') ?: 'N/A';
     }
 
-    private function getReportedDate($invoice): string
+    private function getReportedDate(Invoice $invoice): string
     {
         $acceptance = $invoice->acceptance;
 

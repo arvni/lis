@@ -7,8 +7,8 @@ use App\Domains\Referrer\Models\Referrer;
 use App\Domains\Referrer\Models\ReferrerTest;
 use App\Domains\Referrer\Repositories\ReferrerTestRepository;
 use Exception;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -94,11 +94,11 @@ class ReferrerTestService
     // Additional business logic methods can be added here
     public function calculateConditionalPrice(array $extra): float
     {
-        $parameters = collect($extra['parameters'])
+        $parameters = collect((array) $extra['parameters'])
             ->keyBy('id')
             ->map(fn($param) => $param['value']);
 
-        $conditions = collect($extra['conditions']);
+        $conditions = collect((array) $extra['conditions']);
 
         // Find the first matching condition
         $matchedCondition = $conditions->first(function ($condition) use ($parameters) {

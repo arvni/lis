@@ -280,7 +280,7 @@ class BillingDashboardService
             <=> ($a['invoiced_income'] + $a['non_invoiced_income'])
         );
 
-        return array_slice(array_values($merged), 0, 25);
+        return array_slice($merged, 0, 25);
     }
 
     // Invoiced income per test, sourced from invoice_items. Panel rows split

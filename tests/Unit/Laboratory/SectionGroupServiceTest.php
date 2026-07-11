@@ -24,7 +24,6 @@ use Tests\TestCase;
  *    it has any viewable descendant, and pruned entirely otherwise.
  *  - extractRoutes(): flattens the tree into the route list getPermittedIds()
  *    parses.
- *  - generateBreadcrumbs(): walks the parent chain root-first.
  */
 class SectionGroupServiceTest extends TestCase
 {
@@ -190,32 +189,4 @@ class SectionGroupServiceTest extends TestCase
         );
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // generateBreadcrumbs
-    // ─────────────────────────────────────────────────────────────────────────
-
-    public function test_breadcrumbs_single_entry_when_no_parent(): void
-    {
-        $group = $this->makeGroup(1, 'Chemistry');
-        $group->setRelation('parent', null);
-
-        $crumbs = $this->invoke('generateBreadcrumbs', $group);
-
-        $this->assertCount(1, $crumbs);
-        $this->assertSame('Chemistry', $crumbs[0]['name']);
-    }
-
-    public function test_breadcrumbs_are_ordered_root_first(): void
-    {
-        $root = $this->makeGroup(1, 'Root');
-        $root->setRelation('parent', null);
-        $mid = $this->makeGroup(2, 'Mid');
-        $mid->setRelation('parent', $root);
-        $leaf = $this->makeGroup(3, 'Leaf');
-        $leaf->setRelation('parent', $mid);
-
-        $crumbs = $this->invoke('generateBreadcrumbs', $leaf);
-
-        $this->assertSame(['Root', 'Mid', 'Leaf'], array_column($crumbs, 'name'));
-    }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Consultation\Repositories;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -87,7 +89,10 @@ class ConsultationRepository
         $this->logDeleted($consultation);
     }
 
-    private function applyFilters($query, array $filters): void
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Domains\Consultation\Models\Consultation>  $query
+     */
+    private function applyFilters(Builder $query, array $filters): void
     {
         if (isset($filters["search"]))
             $query->search($filters["search"]);

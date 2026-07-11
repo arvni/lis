@@ -323,7 +323,7 @@ class AcceptanceItemService
     {
         $timeline = $acceptanceItem->timeline;
         if (!is_array($timeline))
-            $timeline = json_decode($timeline, true);
+            $timeline = json_decode($timeline ?? "[]", true) ?? [];
         $timeline[Carbon::now("Asia/Muscat")->format("Y-m-d H:i:s")] = $message;
         return $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, ["timeline" => $timeline]);
     }

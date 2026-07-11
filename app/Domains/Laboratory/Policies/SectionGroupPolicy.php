@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Laboratory\Policies;
 
 use App\Domains\Laboratory\Models\SectionGroup;
@@ -48,11 +50,11 @@ class SectionGroupPolicy
         return $user->can("Advance Settings.Section Groups.Delete Section Group");
     }
 
-    private function getSectionGroupIds($sectionGroup): array
+    private function getSectionGroupIds(SectionGroup $sectionGroup): array
     {
-        if (isset($sectionGroup["parent"]) && $sectionGroup["section_group_id"]) {
-            return [... $this->getSectionGroupIds($sectionGroup["parent"]), $sectionGroup["id"]];
+        if (isset($sectionGroup->parent) && $sectionGroup->section_group_id) {
+            return [... $this->getSectionGroupIds($sectionGroup->parent), $sectionGroup->id];
         }
-        return [$sectionGroup["id"]];
+        return [$sectionGroup->id];
     }
 }

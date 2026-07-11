@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Reception\Requests;
 
+use App\Domains\Reception\Models\Report;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
@@ -27,7 +30,8 @@ class ApproveReportRequest extends FormRequest
      */
     public function rules(): array
     {
-        $report = $this->route()->parameter("report");
+        /** @var Report $report */
+        $report = $this->route("report");
 
         return [
             "clinical_comment_document.id" => "exists:documents,hash",

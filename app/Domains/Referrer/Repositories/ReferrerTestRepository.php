@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Referrer\Repositories;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -42,7 +44,8 @@ class ReferrerTestRepository
     {
         return ReferrerTest::query()
             ->with(["test.testGroup", "test.methodTests.method"])
-            ->whereHas("test", function ($query) {
+            ->whereHas("test", function (Builder $query) {
+                /** @var Builder<\App\Domains\Laboratory\Models\Test> $query */
                 $query->active();
             })
             ->where("referrer_id", $referrerId)
@@ -74,10 +77,14 @@ class ReferrerTestRepository
         return $referrerTest->delete();
     }
 
-    private function applyFilter(array $filters, $query): void
+    /**
+     * @param  Builder<ReferrerTest>  $query
+     */
+    private function applyFilter(array $filters, Builder $query): void
     {
         if (isset($filters['search']))
-            $query->whereHas('test', function ($q) use ($filters) {
+            $query->whereHas('test', function (Builder $q) use ($filters) {
+                /** @var Builder<\App\Domains\Laboratory\Models\Test> $q */
                 $q->search($filters['search']);
             });
         if (isset($filters['referrer_id']))

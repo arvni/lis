@@ -2,9 +2,10 @@
 
 namespace App\Domains\Reception\Services;
 
+use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Tag;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -25,7 +26,7 @@ class TagService
             ->get();
     }
 
-    public function syncTags(Model $taggable, array $tagNames): Collection
+    public function syncTags(Acceptance|AcceptanceItem $taggable, array $tagNames): Collection
     {
         $tagIds = collect($tagNames)
             ->map(fn($name) => $this->findOrCreateByName($name)->id)

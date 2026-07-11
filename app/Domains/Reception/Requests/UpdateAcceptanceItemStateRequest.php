@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Reception\Requests;
 
+use App\Domains\Reception\Models\AcceptanceItemState;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
@@ -13,7 +16,9 @@ class UpdateAcceptanceItemStateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $section = $this->route()->parameter("acceptanceItemState")->load("section")->section;
+        /** @var AcceptanceItemState $state */
+        $state = $this->route("acceptanceItemState");
+        $section = $state->load("section")->section;
         return Gate::allows("action", [$section,$this->get("actionType")]);
     }
 

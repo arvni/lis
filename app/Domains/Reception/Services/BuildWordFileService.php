@@ -147,7 +147,7 @@ class BuildWordFileService
 
         // If no valid extension in URL, try to get content type
         try {
-            $headers = get_headers($url, 1);
+            $headers = get_headers($url, true);
             if (isset($headers['Content-Type'])) {
                 $contentType = is_array($headers['Content-Type'])
                     ? $headers['Content-Type'][0]
