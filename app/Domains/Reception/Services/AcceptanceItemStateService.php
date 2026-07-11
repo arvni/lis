@@ -164,8 +164,6 @@ readonly class AcceptanceItemStateService
                 $this->createNextState($acceptanceItem->id, $section,$state->sample_id);
             }
         } else {
-            // Trigger rejection event
-//            AcceptanceItemSampleRejectedEvent::dispatch($acceptanceItem);
             $this->acceptanceItemService->rejectSample($acceptanceItem,$state->sample_id);
         }
     }

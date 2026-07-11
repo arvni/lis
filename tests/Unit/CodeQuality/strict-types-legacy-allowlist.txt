@@ -352,7 +352,6 @@ app/Domains/Reception/Enums/ReportApprovalAction.php
 app/Domains/Reception/Enums/ReportApprovalStatus.php
 app/Domains/Reception/Events/AcceptanceCancelledEvent.php
 app/Domains/Reception/Events/AcceptanceDeletedEvent.php
-app/Domains/Reception/Events/AcceptanceItemSampleRejectedEvent.php
 app/Domains/Reception/Events/PatientDocumentUpdateEvent.php
 app/Domains/Reception/Events/ReportPublishedEvent.php
 app/Domains/Reception/Events/SampleCollectedEvent.php

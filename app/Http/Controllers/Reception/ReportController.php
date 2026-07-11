@@ -80,8 +80,6 @@ class ReportController extends Controller
      */
     public function show(Report $report): \Inertia\Response
     {
-//        $this->authorize("view", $report);
-
         // Load report with all related data
         $loadedReport = $this->reportService->loadReportWithAllRelations($report);
 
