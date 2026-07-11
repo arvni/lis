@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Domains\Inventory\Enums\PurchaseRequestStatus;
@@ -107,8 +109,10 @@ class PurchaseRequestController extends Controller
                 ->with(['success' => true, 'status' => 'Purchase request updated.']);
         }
 
+        // change_notes is unvalidated on action requests (rules() returns []) — cast for strict types
+        $changeNotes = $request->input('change_notes');
         match ($action) {
-            'submit'  => $this->prService->submit($purchaseRequest, $request->input('change_notes')),
+            'submit'  => $this->prService->submit($purchaseRequest, $changeNotes === null ? null : (string) $changeNotes),
             'approve' => $this->prService->approve($purchaseRequest),
             default   => abort(400, "Unknown action: {$action}"),
         };
@@ -119,7 +123,7 @@ class PurchaseRequestController extends Controller
     {
         $this->authorize('order', $purchaseRequest);
         $data = $request->validated();
-        $this->prService->order($purchaseRequest, $data['po_number'], $data['supplier_id'] ?? null, $request->file('po_file'));
+        $this->prService->order($purchaseRequest, $data['po_number'], isset($data['supplier_id']) ? (int) $data['supplier_id'] : null, $request->file('po_file'));
         return back()->with(['success' => true, 'status' => 'Order confirmed. PO number saved.']);
     }
 
@@ -176,7 +180,10 @@ class PurchaseRequestController extends Controller
         ['approved' => $approved, 'skipped' => $skipped] = $this->prService->bulkApproveSteps($ids, auth()->user());
 
         $msg = "Approved {$approved} step(s).";
-        if ($skipped) $msg .= " {$skipped} skipped (already acted or not authorised).";
+        if ($skipped) {
+            $reasons = collect($skipped)->map(fn (string $reason, int $id) => "#{$id}: {$reason}")->implode(' ');
+            $msg .= ' '.count($skipped)." skipped — {$reasons}";
+        }
         return back()->with(['success' => true, 'status' => $msg]);
     }
 
@@ -202,7 +209,7 @@ class PurchaseRequestController extends Controller
     {
         $this->authorize('purchase-requests.delegate-step', $purchaseRequest);
         try {
-            $this->workflowService->delegate($purchaseRequest, auth()->user(), $request->validated()['delegate_to_user_id']);
+            $this->workflowService->delegate($purchaseRequest, auth()->user(), (int) $request->validated()['delegate_to_user_id']);
         } catch (\Throwable $e) {
             return back()->with(['success' => false, 'status' => $e->getMessage()]);
         }

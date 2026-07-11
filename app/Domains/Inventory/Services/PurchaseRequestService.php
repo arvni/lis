@@ -54,27 +54,34 @@ readonly class PurchaseRequestService
 
     /**
      * Approve the active workflow step for each of the given purchase requests on
-     * behalf of $user, skipping any that can't be acted on. Returns counts.
+     * behalf of $user, skipping any that can't be acted on. Returns the approved
+     * count plus a per-id skip reason for every request that wasn't approved.
      *
      * @param  array<int, int>  $ids
-     * @return array{approved: int, skipped: int}
+     * @return array{approved: int, skipped: array<int, string>}
      */
     public function bulkApproveSteps(array $ids, User $user): array
     {
         $prs = $this->purchaseRequestRepository->getByIdsWithWorkflowContext($ids);
 
         $approved = 0;
-        $skipped = 0;
+        $skipped = [];
         foreach ($ids as $id) {
             $pr = $prs->get($id);
             if (! $pr) {
+                $skipped[$id] = 'Purchase request not found.';
+
                 continue;
             }
             try {
                 $this->workflowService->approveStep($pr, $user);
                 $approved++;
-            } catch (\Throwable) {
-                $skipped++;
+            } catch (RuntimeException $e) {
+                // Expected workflow refusals (no pending step, not authorised, …)
+                $skipped[$id] = $e->getMessage();
+            } catch (\Throwable $e) {
+                report($e);
+                $skipped[$id] = 'Unexpected error.';
             }
         }
 
