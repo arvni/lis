@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Spatie\Permission\Models\Role;
 
 class UserRepository
 {
@@ -25,6 +26,38 @@ class UserRepository
     public function find(int $id): ?User
     {
         return User::with('roles')->find($id);
+    }
+
+    public function findById(int $id): ?User
+    {
+        return User::find($id);
+    }
+
+    public function findOrFail(int $id): User
+    {
+        return User::findOrFail($id);
+    }
+
+    /**
+     * Active users as id/name pairs, ordered by name (for select lists).
+     *
+     * @return Collection<int, User>
+     */
+    public function getActiveForSelect(): Collection
+    {
+        return User::where('is_active', true)->orderBy('name')->get(['id', 'name']);
+    }
+
+    /**
+     * Users holding the given role (web guard). Throws when the role does not exist.
+     *
+     * @return Collection<int, User>
+     */
+    public function getUsersByRoleName(string $roleName): Collection
+    {
+        $role = Role::findByName($roleName, 'web');
+
+        return User::role($role)->get();
     }
 
     public function create(array $data): User

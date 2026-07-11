@@ -23,7 +23,7 @@ class AcceptanceItemConversionServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new AcceptanceItemConversionService;
+        $this->service = app(AcceptanceItemConversionService::class);
     }
 
     /** @param mixed ...$args */

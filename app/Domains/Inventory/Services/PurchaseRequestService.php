@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Domains\Inventory\Services;
+declare(strict_types=1);
 
-use Illuminate\Database\Eloquent\Builder;
+namespace App\Domains\Inventory\Services;
 
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Inventory\Adapters\DocumentAdapter;
+use App\Domains\Inventory\Adapters\UserAdapter;
 use App\Domains\Inventory\Enums\PurchaseRequestStatus;
 use App\Domains\Inventory\Models\PurchaseRequest;
-use App\Domains\Inventory\Models\PurchaseRequestApproval;
-use App\Domains\Inventory\Models\PurchaseRequestHistory;
-use App\Domains\Inventory\Models\PurchaseRequestLine;
-use App\Domains\Inventory\Models\PurchaseRequestReceipt;
-use App\Domains\Inventory\Models\PurchaseRequestReceiptLine;
 use App\Domains\Inventory\Models\WorkflowTemplate;
+use App\Domains\Inventory\Repositories\PurchaseRequestApprovalRepository;
+use App\Domains\Inventory\Repositories\PurchaseRequestRepository;
+use App\Domains\Inventory\Repositories\WorkflowTemplateRepository;
 use App\Domains\User\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -27,78 +27,20 @@ readonly class PurchaseRequestService
         private DocumentAdapter $documentAdapter,
         private PurchaseRequestWorkflowService $workflowService,
         private WorkflowTemplateMatcher $templateMatcher,
+        private PurchaseRequestRepository $purchaseRequestRepository,
+        private PurchaseRequestApprovalRepository $approvalRepository,
+        private WorkflowTemplateRepository $templateRepository,
+        private UserAdapter $userAdapter,
     ) {}
 
     public function listRequests(array $filters): LengthAwarePaginator
     {
-        $user = auth()->user();
-        $view = $filters['filters']['view'] ?? 'mine';
-        $status  = $filters['filters']['status']  ?? '';
-        $urgency = $filters['filters']['urgency'] ?? '';
-
-        $query = PurchaseRequest::with(['requestedBy', 'lines.item', 'lines.unit'])
-            ->withCount('lines')
-            ->orderBy('created_at', 'desc');
-
-        if ($view === 'approval') {
-            // Only workflow-based PRs where this user is explicitly the active step approver or delegatee
-            $query->where('status', PurchaseRequestStatus::SUBMITTED)
-                ->whereHas('approvals', fn($sub) => $this->scopeActiveApproverQuery($sub, $user));
-        } elseif ($view === 'all') {
-            // Union: PRs the user created OR workflow PRs awaiting their action
-            $query->where(function ($q) use ($user) {
-                $q->where('requested_by_user_id', $user->id)
-                  ->orWhere(function ($sub) use ($user) {
-                      $sub->where('status', PurchaseRequestStatus::SUBMITTED)
-                          ->whereHas('approvals', fn($s) => $this->scopeActiveApproverQuery($s, $user));
-                  });
-            });
-        } else {
-            // 'mine' — PRs the user created (default)
-            $query->where('requested_by_user_id', $user->id);
-        }
-
-        if ($status  !== '') $query->where('status',  $status);
-        if ($urgency !== '') $query->where('urgency', $urgency);
-
-        return $query->paginate($filters['pageSize'] ?? 15);
+        return $this->purchaseRequestRepository->listForUser(auth()->user(), $filters);
     }
 
     public function pendingApprovalCount(): int
     {
-        $user = auth()->user();
-
-        return PurchaseRequest::where('status', PurchaseRequestStatus::SUBMITTED)
-            ->whereHas('approvals', fn($q) => $this->scopeActiveApproverQuery($q, $user))
-            ->count();
-    }
-
-    /**
-     * Constrains a purchase_request_approvals subquery to rows where:
-     *  - the approval is PENDING
-     *  - it is the currently active step (lowest sort_order among pending steps)
-     *  - the given user is the designated approver, a role-holder, or the delegatee
-     */
-    private function scopeActiveApproverQuery(Builder $q, User $user): void
-    {
-        $userRoles = $user->getRoleNames()->all();
-
-        $q->where('purchase_request_approvals.status', 'PENDING')
-            ->join('workflow_steps as ws', 'ws.id', '=', 'purchase_request_approvals.workflow_step_id')
-            ->whereRaw('ws.sort_order = (
-                SELECT MIN(ws2.sort_order)
-                FROM purchase_request_approvals pra2
-                JOIN workflow_steps ws2 ON ws2.id = pra2.workflow_step_id
-                WHERE pra2.purchase_request_id = purchase_request_approvals.purchase_request_id
-                AND pra2.status = ?
-            )', ['PENDING'])
-            ->where(function ($q2) use ($user, $userRoles) {
-                $q2->where('ws.approver_user_id', $user->id)
-                   ->orWhere('purchase_request_approvals.delegated_to_user_id', $user->id);
-                if (!empty($userRoles)) {
-                    $q2->orWhereIn('ws.approver_role', $userRoles);
-                }
-            });
+        return $this->purchaseRequestRepository->countPendingApprovalFor(auth()->user());
     }
 
     /**
@@ -107,8 +49,7 @@ readonly class PurchaseRequestService
      */
     public function findForRepeat(int $purchaseRequestId): ?PurchaseRequest
     {
-        return PurchaseRequest::with(['lines.item.defaultUnit', 'lines.unit', 'lines.preferredSupplier'])
-            ->find($purchaseRequestId);
+        return $this->purchaseRequestRepository->findForRepeat($purchaseRequestId);
     }
 
     /**
@@ -120,16 +61,15 @@ readonly class PurchaseRequestService
      */
     public function bulkApproveSteps(array $ids, User $user): array
     {
-        $prs = PurchaseRequest::whereIn('id', $ids)
-            ->with(['workflowTemplate', 'requestedBy'])
-            ->get()
-            ->keyBy('id');
+        $prs = $this->purchaseRequestRepository->getByIdsWithWorkflowContext($ids);
 
         $approved = 0;
-        $skipped  = 0;
+        $skipped = 0;
         foreach ($ids as $id) {
             $pr = $prs->get($id);
-            if (!$pr) continue;
+            if (! $pr) {
+                continue;
+            }
             try {
                 $this->workflowService->approveStep($pr, $user);
                 $approved++;
@@ -148,7 +88,7 @@ readonly class PurchaseRequestService
     {
         $pr->comments()->create([
             'user_id' => auth()->id(),
-            'body'    => $body,
+            'body' => $body,
         ]);
     }
 
@@ -162,58 +102,55 @@ readonly class PurchaseRequestService
     public function evaluateTemplates(PurchaseRequest $pr): array
     {
         $pr->load('lines', 'requestedBy');
-        $urgency        = $pr->urgency;
+        $urgency = $pr->urgency;
         $estimatedTotal = $pr->estimatedTotal();
         $requesterRoles = $pr->requestedBy?->getRoleNames()->all() ?? [];
 
-        $templates = WorkflowTemplate::with('steps')
-            ->orderBy('priority')
-            ->orderBy('id')
-            ->get();
+        $templates = $this->templateRepository->listWithStepsByPriority();
 
         $evaluated = $templates->map(function (WorkflowTemplate $t) use ($urgency, $requesterRoles, $estimatedTotal) {
-            $conditions    = $t->conditions ?? [];
-            $urgencies     = $conditions['urgencies']       ?? [];
+            $conditions = $t->conditions ?? [];
+            $urgencies = $conditions['urgencies'] ?? [];
             $requiredRoles = $conditions['requester_roles'] ?? [];
-            $minTotal      = isset($conditions['min_total']) ? (float) $conditions['min_total'] : null;
+            $minTotal = isset($conditions['min_total']) ? (float) $conditions['min_total'] : null;
 
             $reasons = [];
 
             if ($t->is_default) {
                 $result = 'default_fallback';
             } elseif (empty($urgencies) && empty($requiredRoles) && $minTotal === null) {
-                $result    = 'skip';
+                $result = 'skip';
                 $reasons[] = 'No conditions defined on a non-default template — never matches';
             } else {
                 $result = 'match';
-                if (!empty($urgencies) && !in_array($urgency, $urgencies, true)) {
-                    $result    = 'no_match';
-                    $reasons[] = 'Urgency "' . $urgency . '" not in [' . implode(', ', $urgencies) . ']';
+                if (! empty($urgencies) && ! in_array($urgency, $urgencies, true)) {
+                    $result = 'no_match';
+                    $reasons[] = 'Urgency "'.$urgency.'" not in ['.implode(', ', $urgencies).']';
                 }
-                if (!empty($requiredRoles) && empty(array_intersect($requiredRoles, $requesterRoles))) {
-                    $result    = 'no_match';
-                    $reasons[] = 'Requester roles [' . implode(', ', $requesterRoles) . '] don\'t intersect required [' . implode(', ', $requiredRoles) . ']';
+                if (! empty($requiredRoles) && empty(array_intersect($requiredRoles, $requesterRoles))) {
+                    $result = 'no_match';
+                    $reasons[] = 'Requester roles ['.implode(', ', $requesterRoles).'] don\'t intersect required ['.implode(', ', $requiredRoles).']';
                 }
                 if ($minTotal !== null && $estimatedTotal < $minTotal) {
-                    $result    = 'no_match';
+                    $result = 'no_match';
                     $reasons[] = "Estimated total {$estimatedTotal} < min_total {$minTotal}";
                 }
             }
 
             return [
-                'id'         => $t->id,
-                'name'       => $t->name,
-                'is_active'  => $t->is_active,
+                'id' => $t->id,
+                'name' => $t->name,
+                'is_active' => $t->is_active,
                 'is_default' => $t->is_default,
-                'priority'   => $t->priority,
-                'steps'      => $t->steps->count(),
+                'priority' => $t->priority,
+                'steps' => $t->steps->count(),
                 'conditions' => [
-                    'urgencies'       => $urgencies,
+                    'urgencies' => $urgencies,
                     'requester_roles' => $requiredRoles,
-                    'min_total'       => $minTotal,
+                    'min_total' => $minTotal,
                 ],
-                'result'     => $result,   // match | no_match | skip | default_fallback
-                'reasons'    => $reasons,
+                'result' => $result,   // match | no_match | skip | default_fallback
+                'reasons' => $reasons,
             ];
         });
 
@@ -221,12 +158,12 @@ readonly class PurchaseRequestService
 
         return [
             'pr' => [
-                'urgency'         => $urgency,
+                'urgency' => $urgency,
                 'estimated_total' => $estimatedTotal,
                 'requester_roles' => $requesterRoles,
             ],
             'matched_template' => $matched ? ['id' => $matched->id, 'name' => $matched->name] : null,
-            'evaluated'        => $evaluated,
+            'evaluated' => $evaluated,
         ];
     }
 
@@ -238,9 +175,10 @@ readonly class PurchaseRequestService
             $requester = auth()->user();
             $data['requested_by_user_id'] = $requester->id;
             unset($data['workflow_template_id']); // determined after lines are saved
-            $pr = PurchaseRequest::create($data);
-            foreach ($lines as $line)
+            $pr = $this->purchaseRequestRepository->create($data);
+            foreach ($lines as $line) {
                 $pr->lines()->create($line);
+            }
 
             // Match template after lines are persisted so estimated total is available
             $pr->load('lines');
@@ -250,6 +188,7 @@ readonly class PurchaseRequestService
             $pr->update(['workflow_template_id' => $templateId]);
 
             $this->log($pr, 'CREATED');
+
             return $pr->load('lines.item', 'lines.unit');
         });
     }
@@ -261,8 +200,9 @@ readonly class PurchaseRequestService
             unset($data['lines']);
             $pr->update($data);
             $pr->lines()->delete();
-            foreach ($lines as $line)
+            foreach ($lines as $line) {
                 $pr->lines()->create($line);
+            }
 
             // Re-match template in case urgency or estimated totals changed
             $pr->load('lines', 'requestedBy');
@@ -278,7 +218,7 @@ readonly class PurchaseRequestService
 
     public function submit(PurchaseRequest $pr, ?string $changeNotes = null): PurchaseRequest
     {
-        $isResubmission = $pr->histories()->where('event', 'REJECTED')->exists();
+        $isResubmission = $this->purchaseRequestRepository->hasRejectedHistory($pr);
 
         // Re-match template on every submission so late-created templates are picked up
         $pr->load('lines', 'requestedBy');
@@ -292,24 +232,26 @@ readonly class PurchaseRequestService
             $pr->load('workflowTemplate.steps');
             $this->workflowService->initiate($pr);
         }
+
         return $pr;
     }
 
     public function approve(PurchaseRequest $pr): PurchaseRequest
     {
         $pr->update([
-            'status'              => PurchaseRequestStatus::APPROVED->value,
+            'status' => PurchaseRequestStatus::APPROVED->value,
             'approved_by_user_id' => auth()->id(),
         ]);
         $this->log($pr, 'APPROVED');
+
         return $pr;
     }
 
     public function order(PurchaseRequest $pr, string $poNumber, ?int $supplierId, ?UploadedFile $file): PurchaseRequest
     {
         $updates = [
-            'status'      => PurchaseRequestStatus::ORDERED->value,
-            'po_number'   => $poNumber,
+            'status' => PurchaseRequestStatus::ORDERED->value,
+            'po_number' => $poNumber,
             'supplier_id' => $supplierId,
         ];
         if ($file) {
@@ -321,15 +263,16 @@ readonly class PurchaseRequestService
 
         $pr->update($updates);
         $this->log($pr, 'ORDERED', "PO: {$poNumber}");
+
         return $pr;
     }
 
     public function recordPayment(PurchaseRequest $pr, array $data, ?UploadedFile $file): PurchaseRequest
     {
         $updates = [
-            'status'             => PurchaseRequestStatus::PAID->value,
-            'payment_date'       => $data['payment_date'],
-            'payment_reference'  => $data['payment_reference'] ?? null,
+            'status' => PurchaseRequestStatus::PAID->value,
+            'payment_date' => $data['payment_date'],
+            'payment_reference' => $data['payment_reference'] ?? null,
         ];
         if ($file) {
             $doc = $this->documentAdapter->storeDocument(
@@ -340,18 +283,20 @@ readonly class PurchaseRequestService
 
         $pr->update($updates);
         $this->log($pr, 'PAID', $data['payment_reference'] ?? null);
+
         return $pr;
     }
 
     public function markShipped(PurchaseRequest $pr, array $data): PurchaseRequest
     {
         $pr->update([
-            'status'                => PurchaseRequestStatus::SHIPPED->value,
-            'shipment_date'         => $data['shipment_date'] ?? null,
-            'tracking_number'       => $data['tracking_number'] ?? null,
-            'expected_delivery_date'=> $data['expected_delivery_date'] ?? null,
+            'status' => PurchaseRequestStatus::SHIPPED->value,
+            'shipment_date' => $data['shipment_date'] ?? null,
+            'tracking_number' => $data['tracking_number'] ?? null,
+            'expected_delivery_date' => $data['expected_delivery_date'] ?? null,
         ]);
         $this->log($pr, 'SHIPPED', $data['tracking_number'] ?? null);
+
         return $pr;
     }
 
@@ -359,27 +304,28 @@ readonly class PurchaseRequestService
     {
         return DB::transaction(function () use ($pr, $data) {
             $storeId = $data['store_id'];
-            $lines   = $data['lines'];
+            $lines = $data['lines'];
 
             $txLines = [];
             foreach ($lines as $ld) {
-                $prLine = PurchaseRequestLine::findOrFail($ld['pr_line_id']);
+                $prLine = $this->purchaseRequestRepository->findLineOrFail($ld['pr_line_id']);
                 $remaining = (float) $prLine->qty - (float) $prLine->qty_received;
-                if ((float) $ld['qty'] > $remaining)
+                if ((float) $ld['qty'] > $remaining) {
                     throw new RuntimeException("Qty received exceeds remaining for item {$prLine->item->name}.");
+                }
 
                 $txLines[] = [
-                    'item_id'          => $prLine->item_id,
-                    'unit_id'          => $prLine->unit_id,
-                    'quantity'         => $ld['qty'],
-                    'lot_number'       => $ld['lot_number'] ?? null,
-                    'brand'            => $ld['brand'] ?? null,
-                    'cat_no'           => $ld['cat_no'] ?? null,
-                    'barcode'          => $ld['barcode'] ?? null,
-                    'expiry_date'      => $ld['expiry_date'] ?? null,
-                    'store_location_id'=> $ld['store_location_id'] ?? null,
-                    'unit_price'       => $ld['unit_price'] ?? null,
-                    'notes'            => null,
+                    'item_id' => $prLine->item_id,
+                    'unit_id' => $prLine->unit_id,
+                    'quantity' => $ld['qty'],
+                    'lot_number' => $ld['lot_number'] ?? null,
+                    'brand' => $ld['brand'] ?? null,
+                    'cat_no' => $ld['cat_no'] ?? null,
+                    'barcode' => $ld['barcode'] ?? null,
+                    'expiry_date' => $ld['expiry_date'] ?? null,
+                    'store_location_id' => $ld['store_location_id'] ?? null,
+                    'unit_price' => $ld['unit_price'] ?? null,
+                    'notes' => null,
                 ];
             }
 
@@ -387,41 +333,41 @@ readonly class PurchaseRequestService
             $tx = $this->transactionService->createTransaction([
                 'transaction_type' => 'ENTRY',
                 'transaction_date' => now()->toDateString(),
-                'store_id'         => $storeId,
-                'supplier_id'      => $pr->supplier_id,
-                'notes'            => "Auto-created from PR #{$pr->id} ({$pr->po_number})",
-                'lines'            => $txLines,
+                'store_id' => $storeId,
+                'supplier_id' => $pr->supplier_id,
+                'notes' => "Auto-created from PR #{$pr->id} ({$pr->po_number})",
+                'lines' => $txLines,
             ]);
             $this->transactionService->submitForApproval($tx);
             $this->transactionService->approve($tx);
 
             // Create receipt
-            $receipt = PurchaseRequestReceipt::create([
+            $receipt = $this->purchaseRequestRepository->createReceipt([
                 'purchase_request_id' => $pr->id,
-                'transaction_id'      => $tx->id,
-                'notes'               => $data['notes'] ?? null,
+                'transaction_id' => $tx->id,
+                'notes' => $data['notes'] ?? null,
             ]);
 
             // Create receipt lines and update qty_received
             foreach ($lines as $ld) {
-                $prLine = PurchaseRequestLine::findOrFail($ld['pr_line_id']);
-                PurchaseRequestReceiptLine::create([
-                    'receipt_id'       => $receipt->id,
-                    'pr_line_id'       => $prLine->id,
-                    'qty_received'     => $ld['qty'],
-                    'unit_price'       => $ld['unit_price'] ?? null,
-                    'lot_number'       => $ld['lot_number'] ?? null,
-                    'brand'            => $ld['brand'] ?? null,
-                    'cat_no'           => $ld['cat_no'] ?? null,
-                    'expiry_date'      => $ld['expiry_date'] ?? null,
-                    'store_location_id'=> $ld['store_location_id'] ?? null,
+                $prLine = $this->purchaseRequestRepository->findLineOrFail($ld['pr_line_id']);
+                $this->purchaseRequestRepository->createReceiptLine([
+                    'receipt_id' => $receipt->id,
+                    'pr_line_id' => $prLine->id,
+                    'qty_received' => $ld['qty'],
+                    'unit_price' => $ld['unit_price'] ?? null,
+                    'lot_number' => $ld['lot_number'] ?? null,
+                    'brand' => $ld['brand'] ?? null,
+                    'cat_no' => $ld['cat_no'] ?? null,
+                    'expiry_date' => $ld['expiry_date'] ?? null,
+                    'store_location_id' => $ld['store_location_id'] ?? null,
                 ]);
-                $prLine->increment('qty_received', $ld['qty']);
+                $this->purchaseRequestRepository->incrementLineQtyReceived($prLine, (float) $ld['qty']);
             }
 
             // Determine new status
             $pr->refresh()->load('lines');
-            $allDone = $pr->lines->every(fn($l) => (float) $l->qty_received >= (float) $l->qty);
+            $allDone = $pr->lines->every(fn ($l) => (float) $l->qty_received >= (float) $l->qty);
             $newStatus = $allDone ? PurchaseRequestStatus::RECEIVED : PurchaseRequestStatus::PARTIALLY_RECEIVED;
             $pr->update(['status' => $newStatus->value]);
             $this->log($pr, $allDone ? 'RECEIVED' : 'RECEIVED_PARTIAL',
@@ -434,18 +380,21 @@ readonly class PurchaseRequestService
     public function setBrands(PurchaseRequest $pr, array $lines): PurchaseRequest
     {
         foreach ($lines as $lineData) {
-            $pr->lines()->where('id', $lineData['id'])->update(['brand' => $lineData['brand'] ?? null]);
+            $this->purchaseRequestRepository->updateLineBrand($pr, $lineData['id'], $lineData['brand'] ?? null);
         }
+
         return $pr;
     }
 
     public function cancel(PurchaseRequest $pr, ?string $notes = null): PurchaseRequest
     {
-        if ($pr->status === PurchaseRequestStatus::RECEIVED)
+        if ($pr->status === PurchaseRequestStatus::RECEIVED) {
             throw new RuntimeException('Fully received purchase requests cannot be cancelled.');
+        }
 
         $pr->update(['status' => PurchaseRequestStatus::CANCELLED->value]);
         $this->log($pr, 'CANCELLED', $notes);
+
         return $pr;
     }
 
@@ -453,6 +402,7 @@ readonly class PurchaseRequestService
     {
         $pr->update(['status' => PurchaseRequestStatus::ORDERED->value]);
         $this->log($pr, 'ORDERED');
+
         return $pr;
     }
 
@@ -467,53 +417,48 @@ readonly class PurchaseRequestService
             'receipts.transaction', 'receipts.lines.prLine.item', 'receipts.lines.location',
         ]);
 
-        $approvals       = $this->getOrderedApprovals($pr);
-        $poDocument      = $pr->po_file      ? $this->documentAdapter->findDocument($pr->po_file)      : null;
-        $paymentDocument = $pr->payment_file  ? $this->documentAdapter->findDocument($pr->payment_file)  : null;
+        $approvals = $this->getOrderedApprovals($pr);
+        $poDocument = $pr->po_file ? $this->documentAdapter->findDocument($pr->po_file) : null;
+        $paymentDocument = $pr->payment_file ? $this->documentAdapter->findDocument($pr->payment_file) : null;
 
-        $isRequester      = $pr->requested_by_user_id === $user->id;
+        $isRequester = $pr->requested_by_user_id === $user->id;
         $canActOnWorkflow = $pr->workflow_template_id
             && $pr->status->value === 'SUBMITTED'
             && $this->workflowService->canAct($pr, $user);
-        $canDirectApprove = !$pr->workflow_template_id
+        $canDirectApprove = ! $pr->workflow_template_id
             && $user->can('Inventory.PurchaseRequests.Approve Purchase Request')
-            && !$isRequester;
-        $wasRejected = $pr->histories()->where('event', 'REJECTED')->exists()
+            && ! $isRequester;
+        $wasRejected = $this->purchaseRequestRepository->hasRejectedHistory($pr)
             && $pr->status->value === 'DRAFT';
 
         return [
-            'purchaseRequest'  => $pr,
-            'approvals'        => $approvals,
+            'purchaseRequest' => $pr,
+            'approvals' => $approvals,
             'canActOnWorkflow' => $canActOnWorkflow,
             'canDirectApprove' => $canDirectApprove,
-            'isRequester'      => $isRequester,
-            'wasRejected'      => $wasRejected,
-            'users'            => $canActOnWorkflow
-                ? User::where('is_active', true)->orderBy('name')->get(['id', 'name'])
+            'isRequester' => $isRequester,
+            'wasRejected' => $wasRejected,
+            'users' => $canActOnWorkflow
+                ? $this->userAdapter->getActiveUsersForSelect()
                 : [],
-            'poDocument'       => $poDocument,
-            'paymentDocument'  => $paymentDocument,
+            'poDocument' => $poDocument,
+            'paymentDocument' => $paymentDocument,
         ];
     }
 
-    public function getOrderedApprovals(PurchaseRequest $pr): \Illuminate\Support\Collection
+    public function getOrderedApprovals(PurchaseRequest $pr): Collection
     {
-        return PurchaseRequestApproval::where('purchase_request_id', $pr->id)
-            ->join('workflow_steps', 'workflow_steps.id', '=', 'purchase_request_approvals.workflow_step_id')
-            ->orderBy('workflow_steps.sort_order')
-            ->select('purchase_request_approvals.*')
-            ->with(['step', 'step.approverUser', 'actedBy'])
-            ->get();
+        return $this->approvalRepository->getOrderedForRequest($pr);
     }
 
     private function log(PurchaseRequest $pr, string $event, ?string $notes = null, ?string $changeNotes = null): void
     {
-        PurchaseRequestHistory::create([
+        $this->purchaseRequestRepository->createHistory([
             'purchase_request_id' => $pr->id,
-            'user_id'             => auth()->id(),
-            'event'               => $event,
-            'notes'               => $notes,
-            'change_notes'        => $changeNotes,
+            'user_id' => auth()->id(),
+            'event' => $event,
+            'notes' => $notes,
+            'change_notes' => $changeNotes,
         ]);
     }
 }

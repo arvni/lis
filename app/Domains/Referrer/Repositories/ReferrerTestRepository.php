@@ -57,6 +57,11 @@ class ReferrerTestRepository
         return ReferrerTest::where('method_id', $methodId)->where('referrer_id', $referrerId)->first();
     }
 
+    public function findByReferrerIdAndTestId(int $referrerId, int $testId): ?ReferrerTest
+    {
+        return ReferrerTest::where('referrer_id', $referrerId)->where('test_id', $testId)->first();
+    }
+
     public function store(array $data): ReferrerTest
     {
         $referrerTest = ReferrerTest::create($data);
