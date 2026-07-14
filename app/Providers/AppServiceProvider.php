@@ -90,7 +90,6 @@ use App\Domains\User\Policies\RolePolicy;
 use App\Domains\User\Policies\UserPolicy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -112,12 +111,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if ($this->app->environment('production') && ! $this->app->runningInConsole()) {
-            if (Artisan::call('env:validate') !== 0) {
-                abort(500, 'Environment validation failed. Check server logs.');
-            }
-        }
-
         DB::listen(function ($query) {
             if ($query->time > 1000) {
                 Log::warning('🚨 Slow Query Detected: ' . $query->sql, [
