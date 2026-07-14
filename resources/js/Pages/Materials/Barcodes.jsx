@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import {
     Box,
@@ -19,47 +19,96 @@ import {
 } from '@mui/icons-material';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import { FONT_SCALES, loadPrefs, savePrefs } from './Barcodes/constants';
+import { loadPrefs, savePrefs } from './Barcodes/constants';
 import { BarcodeContainer, PrintButton, BackButton, HeaderBar } from './Barcodes/styled';
 import GlobalStyles from './Barcodes/GlobalStyles';
 import PrintControls from './Barcodes/PrintControls';
+import SelectionControls from './Barcodes/SelectionControls';
 import BarcodeLabel from './Barcodes/BarcodeLabel';
 
 const BarcodeComponent = ({ materials }) => {
     const [showSnackbar, setShowSnackbar] = useState(false);
     const [printOnlyBarcode, setPrintOnlyBarcode] = useState(false);
     const [fields, setFields] = useState(() => loadPrefs().fields);
-    const [fontSize, setFontSize] = useState(() => loadPrefs().fontSize);
-    const scale = FONT_SCALES[fontSize] ?? 1;
+
+    // Per-material selection & copy count. Default: every material selected, one copy each.
+    const [selection, setSelection] = useState(() =>
+        Object.fromEntries(materials.map((m) => [m.id, { selected: true, copies: 1 }])),
+    );
 
     const handleChange = (e) => setPrintOnlyBarcode(e.target.checked);
-    const toggleField = (key) => setFields((prev) => ({ ...prev, [key]: !prev[key] }));
+    const toggleField = (key) =>
+        setFields((prev) => ({ ...prev, [key]: { ...prev[key], show: !prev[key].show } }));
+    const setFieldRepeat = (key, repeat) =>
+        setFields((prev) => ({ ...prev, [key]: { ...prev[key], repeat } }));
+    const setFieldSize = (key, size) =>
+        setFields((prev) => ({ ...prev, [key]: { ...prev[key], size } }));
+
+    const toggleMaterial = (id) =>
+        setSelection((prev) => ({
+            ...prev,
+            [id]: { ...prev[id], selected: !prev[id].selected },
+        }));
+    const setCopies = (id, copies) =>
+        setSelection((prev) => ({ ...prev, [id]: { ...prev[id], copies } }));
+    const selectAll = (selected) =>
+        setSelection((prev) =>
+            Object.fromEntries(
+                Object.entries(prev).map(([id, entry]) => [id, { ...entry, selected }]),
+            ),
+        );
+    const setAllCopies = (copies) =>
+        setSelection((prev) =>
+            Object.fromEntries(
+                Object.entries(prev).map(([id, entry]) => [id, { ...entry, copies }]),
+            ),
+        );
+
+    const selectedCount = materials.filter((m) => selection[m.id]?.selected).length;
+
+    // Expand each selected material into one print item per requested copy.
+    const printItems = useMemo(
+        () =>
+            materials
+                .filter((m) => selection[m.id]?.selected)
+                .flatMap((material) => {
+                    const copies = selection[material.id]?.copies ?? 1;
+                    return Array.from({ length: copies }, (_, copyIndex) => ({
+                        material,
+                        key: `${material.id}-${copyIndex}`,
+                    }));
+                }),
+        [materials, selection],
+    );
 
     useEffect(() => {
-        savePrefs({ fields, fontSize });
-    }, [fields, fontSize]);
+        savePrefs({ fields });
+    }, [fields]);
 
+    // (Re)draw every rendered barcode SVG whenever the visible labels or field settings change.
+    // The barcode image can repeat, so we target elements directly rather than by unique id.
     useEffect(() => {
-        // Initialize barcodes after component mounts (barcode view only).
-        if (!printOnlyBarcode && fields.barcodeImage) {
-            materials.forEach((material) => {
-                JsBarcode(`#barcode-${material.barcode}`, material.barcode, {
-                    format: 'CODE128',
-                    width: 1,
-                    height: 35,
-                    displayValue: false,
-                    background: '#ffffff',
-                    lineColor: '#000000',
-                });
+        if (printOnlyBarcode) return;
+        document.querySelectorAll('svg.barcode-svg').forEach((el) => {
+            JsBarcode(el, el.dataset.barcodeValue, {
+                format: 'CODE128',
+                width: 1,
+                height: 35,
+                displayValue: false,
+                background: '#ffffff',
+                lineColor: '#000000',
             });
-        }
-        // Trigger print when component is loaded
+        });
+    }, [printItems, printOnlyBarcode, fields]);
+
+    // Auto-print once shortly after the page loads (unchanged behavior).
+    useEffect(() => {
         const printTimeout = setTimeout(() => {
             window.print();
         }, 500);
 
         return () => clearTimeout(printTimeout);
-    }, [materials, printOnlyBarcode, fields.barcodeImage]);
+    }, []);
 
     const handlePrint = () => {
         window.print();
@@ -107,20 +156,30 @@ const BarcodeComponent = ({ materials }) => {
             <PrintControls
                 fields={fields}
                 onToggleField={toggleField}
+                onSetFieldRepeat={setFieldRepeat}
+                onSetFieldSize={setFieldSize}
                 printOnlyBarcode={printOnlyBarcode}
-                fontSize={fontSize}
-                onFontSizeChange={setFontSize}
             />
 
-            <BarcodeContainer>
+            <SelectionControls
+                materials={materials}
+                selection={selection}
+                onToggle={toggleMaterial}
+                onSetCopies={setCopies}
+                onSelectAll={selectAll}
+                onSetAllCopies={setAllCopies}
+                totalLabels={printItems.length}
+                selectedCount={selectedCount}
+            />
+
+            <BarcodeContainer data-testid="barcode-labels">
                 <Grid container spacing={0} sx={{ justifyContent: 'center', gap: 0 }}>
-                    {materials.map((material) => (
+                    {printItems.map(({ material, key }) => (
                         <BarcodeLabel
-                            key={material.id}
+                            key={key}
                             material={material}
                             printOnlyBarcode={printOnlyBarcode}
                             fields={fields}
-                            scale={scale}
                         />
                     ))}
                 </Grid>

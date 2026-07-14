@@ -27,11 +27,12 @@ const DEPARTMENTS = ['LAB', 'ADM', 'MNT', 'CLN', 'IT', 'FAC'];
 const MATERIAL_TYPES = ['CHM', 'SLD', 'LQD', 'ELC', 'CSM', 'BIO', 'GLS', 'PPE', 'RGT', 'OTH'];
 
 const StockIndex = () => {
-    const { stock, stores, storeId, filters = {} } = usePage().props;
+    const { stock, stores, storeId, locations = [], filters = {} } = usePage().props;
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [department, setDepartment] = useState(filters.department ?? '');
     const [materialType, setMaterialType] = useState(filters.material_type ?? '');
+    const [locationId, setLocationId] = useState(filters.location_id ?? '');
     const [lowStockOnly, setLowStockOnly] = useState(!!filters.low_stock_only);
 
     const applyFilters = (overrides = {}) => {
@@ -40,6 +41,7 @@ const StockIndex = () => {
             search: search || undefined,
             department: department || undefined,
             material_type: materialType || undefined,
+            location_id: locationId || undefined,
             low_stock_only: lowStockOnly || undefined,
             ...overrides,
         };
@@ -51,6 +53,7 @@ const StockIndex = () => {
         setSearch('');
         setDepartment('');
         setMaterialType('');
+        setLocationId('');
         setLowStockOnly(false);
         router.visit(route('inventory.stock.index'), { data: {} });
     };
@@ -62,21 +65,45 @@ const StockIndex = () => {
             <Card sx={{ mb: 3 }}>
                 <CardContent>
                     <Grid container spacing={2} sx={{ alignItems: 'center' }}>
-                        <Grid size={{ xs: 12, md: 3 }}>
+                        <Grid size={{ xs: 12, md: 2 }}>
                             <TextField
                                 select
                                 fullWidth
                                 label="Store"
                                 size="small"
                                 value={storeId || ''}
-                                onChange={(e) =>
-                                    applyFilters({ store_id: e.target.value || undefined })
-                                }
+                                onChange={(e) => {
+                                    // Locations are store-specific, so drop it when the store changes.
+                                    setLocationId('');
+                                    applyFilters({
+                                        store_id: e.target.value || undefined,
+                                        location_id: undefined,
+                                    });
+                                }}
                             >
                                 <MenuItem value="">All Stores</MenuItem>
                                 {stores.map((s) => (
                                     <MenuItem key={s.id} value={s.id}>
                                         {s.name}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 2 }}>
+                            <TextField
+                                select
+                                fullWidth
+                                label="Location"
+                                size="small"
+                                value={locationId || ''}
+                                disabled={!storeId}
+                                helperText={!storeId ? 'Select a store first' : undefined}
+                                onChange={(e) => setLocationId(e.target.value)}
+                            >
+                                <MenuItem value="">All Locations</MenuItem>
+                                {locations.map((l) => (
+                                    <MenuItem key={l.id} value={l.id}>
+                                        {l.label}
                                     </MenuItem>
                                 ))}
                             </TextField>

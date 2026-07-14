@@ -2,9 +2,12 @@ import React from 'react';
 import { Box, Stack, Divider } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { BarcodeItem, BarcodeText } from './styled';
-import { formatDate } from './constants';
+import { formatDate, FONT_SCALES, TEXT_FIELDS } from './constants';
 
-const BarcodeLabel = ({ material, printOnlyBarcode, fields, scale }) => (
+// Render `count` copies of `node`, keyed by index. Used for the per-field stacked repeats.
+const repeatNode = (count, render) => Array.from({ length: count }, (_, i) => render(i));
+
+const BarcodeLabel = ({ material, printOnlyBarcode, fields }) => (
     <Grid
         size={12}
         sx={{
@@ -27,55 +30,36 @@ const BarcodeLabel = ({ material, printOnlyBarcode, fields, scale }) => (
                 </Stack>
             ) : (
                 <>
-                    {fields.barcodeImage && (
-                        <Box
-                            sx={{
-                                width: '100%',
-                                pt: '0mm',
-                                display: 'flex',
-                                '& svg ': { width: '100% !important' },
-                            }}
-                        >
-                            <svg
-                                id={`barcode-${material.barcode}`}
-                                style={{ width: '100% !important' }}
-                            ></svg>
-                        </Box>
-                    )}
+                    {fields.barcodeImage.show &&
+                        repeatNode(fields.barcodeImage.repeat, (i) => (
+                            <Box
+                                key={i}
+                                sx={{
+                                    width: '100%',
+                                    pt: '0mm',
+                                    display: 'flex',
+                                    '& svg ': { width: '100% !important' },
+                                }}
+                            >
+                                <svg
+                                    className="barcode-svg"
+                                    data-barcode-value={material.barcode}
+                                    style={{ width: '100% !important' }}
+                                ></svg>
+                            </Box>
+                        ))}
                     <Stack spacing={0.5} sx={{ mt: '-3mm', zIndex: 1 }}>
-                        {fields.barcodeNumber && (
-                            <BarcodeText scale={scale}>{material.barcode}</BarcodeText>
-                        )}
-                        {fields.expireDate && (
-                            <BarcodeText scale={scale}>
-                                <Box
-                                    component="span"
-                                    sx={{
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        mr: 0.5,
-                                    }}
-                                >
-                                    {formatDate(material.expire_date || material.created_at)}
-                                </Box>
-                            </BarcodeText>
-                        )}
-                        {fields.sampleType && (
-                            <BarcodeText scale={scale} title={material.sample_type_name}>
-                                {material.sample_type_name}
-                            </BarcodeText>
-                        )}
-                        {fields.manufacturedDate && (
-                            <BarcodeText scale={scale}>
-                                {formatDate(material.manufactured_date)}
-                            </BarcodeText>
-                        )}
-                        {fields.tubeSeries && (
-                            <BarcodeText scale={scale}>{material.tube_series}</BarcodeText>
-                        )}
-                        {fields.packingSeries && (
-                            <BarcodeText scale={scale}>{material.packing_series}</BarcodeText>
-                        )}
+                        {TEXT_FIELDS.map(({ key, getValue }) => {
+                            const cfg = fields[key];
+                            if (!cfg?.show) return null;
+                            const scale = FONT_SCALES[cfg.size] ?? 1;
+                            const value = getValue(material);
+                            return repeatNode(cfg.repeat, (i) => (
+                                <BarcodeText key={`${key}-${i}`} scale={scale} title={value}>
+                                    {value}
+                                </BarcodeText>
+                            ));
+                        })}
                     </Stack>
                 </>
             )}
