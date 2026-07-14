@@ -92,6 +92,19 @@ const FormContent = () => {
         setData((prev) => ({ ...prev, number_of_tubes: newValue }));
     };
 
+    const applyFirstTubeDatesToAll = () => {
+        const firstTube = tubesList[0];
+        if (!firstTube) return;
+
+        const newTubes = tubesList.map((tube) => ({
+            ...tube,
+            manufactured_date: firstTube.manufactured_date,
+            expire_date: firstTube.expire_date,
+        }));
+        setTubesList(newTubes);
+        setData((prev) => ({ ...prev, tubes: newTubes }));
+    };
+
     return (
         <Grid size={12}>
             <SampleTypeSection
@@ -108,6 +121,7 @@ const FormContent = () => {
                     errors={errors}
                     onTubeChange={handleTubeChange}
                     onDeleteTube={handleDeleteTube}
+                    onApplyDatesToAll={applyFirstTubeDatesToAll}
                 />
             )}
 
