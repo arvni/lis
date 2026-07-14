@@ -9,6 +9,7 @@ use App\Domains\Laboratory\Models\SectionGroup;
 use App\Domains\Laboratory\Repositories\SectionGroupRepository;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Traits\ExtractsTagFilterIds;
+use App\Domains\Reception\Traits\ExtractsTestFilterIds;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -18,7 +19,7 @@ use Carbon\Carbon;
 
 class SectionGroupService
 {
-    use ExtractsTagFilterIds;
+    use ExtractsTagFilterIds, ExtractsTestFilterIds;
 
     public function __construct(private SectionGroupRepository $sectionGroupRepository)
     {
@@ -117,6 +118,11 @@ class SectionGroupService
         $tagIds = $this->extractTagFilterIds($filters);
         if ($tagIds) {
             $query->whereHas('tags', fn($tagQuery) => $tagQuery->whereIn('tags.id', $tagIds));
+        }
+
+        $testIds = $this->extractTestFilterIds($filters);
+        if ($testIds) {
+            $query->whereHas('methodTest', fn($methodTestQuery) => $methodTestQuery->whereIn('test_id', $testIds));
         }
 
         if (!empty($filters["status"])) {
