@@ -5,6 +5,7 @@ namespace App\Domains\Reception\Repositories;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Reception\Models\AcceptanceItemState;
 use App\Domains\Reception\Traits\ExtractsTagFilterIds;
+use App\Domains\Reception\Traits\ExtractsTestFilterIds;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class AcceptanceItemStateRepository
 {
-    use LogsUserActivity, ExtractsTagFilterIds;
+    use LogsUserActivity, ExtractsTagFilterIds, ExtractsTestFilterIds;
 
 
     /**
@@ -99,6 +100,11 @@ class AcceptanceItemStateRepository
         $tagIds = $this->extractTagFilterIds($filters);
         if ($tagIds) {
             $query->whereHas('acceptanceItem.tags', fn($tagQuery) => $tagQuery->whereIn('tags.id', $tagIds));
+        }
+
+        $testIds = $this->extractTestFilterIds($filters);
+        if ($testIds) {
+            $query->whereHas('acceptanceItem.methodTest', fn($methodTestQuery) => $methodTestQuery->whereIn('test_id', $testIds));
         }
 
         // Apply date range filtering on started_at field using Carbon

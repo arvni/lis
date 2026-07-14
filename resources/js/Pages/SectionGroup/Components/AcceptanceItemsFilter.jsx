@@ -85,6 +85,7 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
             search: '',
             status: '',
             tags: [],
+            tests: [],
             from_date: '',
             to_date: '',
         });
@@ -100,6 +101,7 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
         filter?.search ||
         filter?.status ||
         (Array.isArray(filter?.tags) && filter.tags.length > 0) ||
+        (Array.isArray(filter?.tests) && filter.tests.length > 0) ||
         filter?.from_date ||
         filter?.to_date;
 
@@ -149,6 +151,18 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 4 }}>
+                    <SelectSearch
+                        multiple
+                        value={filter?.tests || []}
+                        onChange={handleChange}
+                        label="Tests"
+                        fullWidth
+                        name="tests"
+                        url={route('api.tests.list')}
+                    />
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 4 }}>
                     <FormControl fullWidth>
                         <InputLabel id="section-group-acceptance-status-label">Status</InputLabel>
                         <Select
@@ -173,6 +187,17 @@ const AcceptanceItemsFilter = memo(({ defaultFilter, onFilter }) => {
                         <Chip
                             label={`Tags: ${filter.tags.length} selected`}
                             onDelete={() => setFilter((prevState) => ({ ...prevState, tags: [] }))}
+                            size="small"
+                            variant="outlined"
+                        />
+                    </Grid>
+                )}
+
+                {filter?.tests && filter.tests.length > 0 && (
+                    <Grid size={{ xs: 12 }}>
+                        <Chip
+                            label={`Tests: ${filter.tests.length} selected`}
+                            onDelete={() => setFilter((prevState) => ({ ...prevState, tests: [] }))}
                             size="small"
                             variant="outlined"
                         />

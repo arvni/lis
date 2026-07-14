@@ -105,6 +105,7 @@ const ShowFilter = memo(
                 search: '',
                 status: null,
                 tags: [],
+                tests: [],
                 from_date: '',
                 to_date: '',
             });
@@ -114,6 +115,7 @@ const ShowFilter = memo(
             filter?.search ||
             filter?.status ||
             (Array.isArray(filter?.tags) && filter.tags.length > 0) ||
+            (Array.isArray(filter?.tests) && filter.tests.length > 0) ||
             filter?.from_date ||
             filter?.to_date;
 
@@ -194,6 +196,18 @@ const ShowFilter = memo(
                             />
                         </Grid>
 
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                            <SelectSearch
+                                multiple
+                                value={filter?.tests || []}
+                                onChange={handleChange}
+                                label="Tests"
+                                fullWidth
+                                name="tests"
+                                url={route('api.tests.list')}
+                            />
+                        </Grid>
+
                         {filter?.tags && filter.tags.length > 0 && (
                             <Grid size={{ xs: 12 }}>
                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -201,6 +215,21 @@ const ShowFilter = memo(
                                         label={`Tags: ${filter.tags.length} selected`}
                                         onDelete={() =>
                                             setFilter((prevState) => ({ ...prevState, tags: [] }))
+                                        }
+                                        size="small"
+                                        variant="outlined"
+                                    />
+                                </Box>
+                            </Grid>
+                        )}
+
+                        {filter?.tests && filter.tests.length > 0 && (
+                            <Grid size={{ xs: 12 }}>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                    <Chip
+                                        label={`Tests: ${filter.tests.length} selected`}
+                                        onDelete={() =>
+                                            setFilter((prevState) => ({ ...prevState, tests: [] }))
                                         }
                                         size="small"
                                         variant="outlined"
