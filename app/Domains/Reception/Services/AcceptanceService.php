@@ -241,7 +241,7 @@ class AcceptanceService
                 default:
                     $acceptance = $this->acceptanceRepository->updateAcceptance($acceptance, [
                         "step" => 5,
-                        "status" => $acceptance->status === AcceptanceStatus::PENDING ? AcceptanceStatus::WAITING_FOR_PAYMENT : $acceptance->status,
+                        "status" => $this->resolveFinalizedStatus($acceptance),
                         "waiting_for_pooling" => $acceptanceDTO->waitingForPooling,
                     ]);
                     break;
@@ -404,8 +404,40 @@ class AcceptanceService
     {
         $this->acceptanceRepository->updateAcceptance($acceptance, [
             "invoice_id" => $invoiceId,
-            "status" => $acceptance->status == AcceptanceStatus::PENDING ? AcceptanceStatus::WAITING_FOR_PAYMENT : $acceptance->status
+            "status" => $this->resolveFinalizedStatus($acceptance)
         ]);
+    }
+
+    /**
+     * Status an acceptance takes when it is finalized out of PENDING.
+     *
+     * - Non-PENDING statuses are preserved untouched: once an acceptance has
+     *   moved past PENDING (e.g. sampling already passed), re-finalizing on an
+     *   edit must never drag it backwards.
+     * - Walk-in acceptances still wait for payment.
+     * - Referred acceptances are billed to the referrer, so they bypass the
+     *   patient payment gate. They only go to SAMPLING when something actually
+     *   needs a sample; a fully sampleless acceptance (all items are therefore
+     *   reportless too) has nothing to collect, so it waits for publishing —
+     *   or is reported outright once finance has approved.
+     */
+    private function resolveFinalizedStatus(Acceptance $acceptance): AcceptanceStatus
+    {
+        if ($acceptance->status !== AcceptanceStatus::PENDING) {
+            return $acceptance->status;
+        }
+
+        if (!$acceptance->referred) {
+            return AcceptanceStatus::WAITING_FOR_PAYMENT;
+        }
+
+        if ($this->acceptanceRepository->countSamplableItems($acceptance) > 0) {
+            return AcceptanceStatus::SAMPLING;
+        }
+
+        return $acceptance->financial_approved
+            ? AcceptanceStatus::REPORTED
+            : AcceptanceStatus::WAITING_FOR_PUBLISHING;
     }
 
     public function updateAcceptanceStatus(Acceptance $acceptance, AcceptanceStatus $status): void

@@ -286,6 +286,19 @@ class AcceptanceRepository
     }
 
     /**
+     * Count items on the acceptance that still require a sample to be collected.
+     * Sampleless items (services, shared-sample items) need none — and because
+     * sampleless implies reportless, an acceptance with zero samplable items has
+     * nothing to collect or report.
+     */
+    public function countSamplableItems(Acceptance $acceptance): int
+    {
+        return $acceptance->acceptanceItems()
+            ->where('sampleless', false)
+            ->count();
+    }
+
+    /**
      * @param  Builder<\App\Domains\Reception\Models\Acceptance>  $query
      */
     protected function applyFilters(Builder $query, array $filters): void
