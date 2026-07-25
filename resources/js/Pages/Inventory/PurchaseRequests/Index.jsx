@@ -292,8 +292,10 @@ const PurchaseRequestsIndex = () => {
                 data={requests}
                 errors={errors}
                 checkboxSelection={currentView === 'approval' || currentView === 'all'}
-                onRowSelectionModelChange={(ids) => setSelected(ids)}
-                rowSelectionModel={selected}
+                onRowSelectionModelChange={(model) =>
+                    setSelected(Array.from(model?.ids ?? []))
+                }
+                rowSelectionModel={{ type: 'include', ids: new Set(selected) }}
             />
         </>
     );
