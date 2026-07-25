@@ -139,7 +139,11 @@ class PatientImportService
                 'referrer_id' => $referrerId,
                 'acceptor_id' => auth()->id(),
                 'howReport' => ['sendToReferrer' => true],
-                'status' => AcceptanceStatus::WAITING_FOR_PAYMENT,
+                // Referred acceptances are billed to the referrer, so they skip
+                // the patient payment gate and go straight to sampling.
+                'status' => $referrerId
+                    ? AcceptanceStatus::SAMPLING
+                    : AcceptanceStatus::WAITING_FOR_PAYMENT,
             ]);
 
             foreach ($patients as $patient) {

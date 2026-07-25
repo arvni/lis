@@ -415,6 +415,92 @@ class AcceptanceServiceTest extends TestCase
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // R-05b: referred acceptance step=5 bypasses payment → SAMPLING
+    // (Unit test)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_update_acceptance_step5_referred_bypasses_payment_to_sampling(): void
+    {
+        [$service, $acceptanceRepo] = $this->makeServiceWithMocks();
+
+        $acceptance         = new Acceptance();
+        $acceptance->id     = 1;
+        // referrer_id set → the `referred` accessor is true
+        $acceptance->setRawAttributes([
+            'step'        => 5,
+            'status'      => AcceptanceStatus::PENDING->value,
+            'id'          => 1,
+            'referrer_id' => 7,
+        ]);
+
+        $updatedAcceptance         = new Acceptance();
+        $updatedAcceptance->id     = 1;
+        $updatedAcceptance->status = AcceptanceStatus::SAMPLING;
+
+        // Has at least one item that needs a sample → route to SAMPLING.
+        $acceptanceRepo
+            ->shouldReceive('countSamplableItems')
+            ->once()
+            ->andReturn(1);
+
+        $acceptanceRepo
+            ->shouldReceive('updateAcceptance')
+            ->once()
+            ->withArgs(function ($acc, $data) {
+                return isset($data['status'])
+                    && $data['status'] === AcceptanceStatus::SAMPLING;
+            })
+            ->andReturn($updatedAcceptance);
+
+        $result = $service->updateAcceptance($acceptance, ['step' => 5]);
+
+        $this->assertSame(AcceptanceStatus::SAMPLING, $result->status);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // R-05c: referred acceptance with nothing to sample bypasses SAMPLING and
+    // waits for publishing (all sampleless items are reportless too). (Unit test)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_update_acceptance_step5_referred_without_samplable_items_waits_for_publishing(): void
+    {
+        [$service, $acceptanceRepo] = $this->makeServiceWithMocks();
+
+        $acceptance         = new Acceptance();
+        $acceptance->id     = 1;
+        $acceptance->setRawAttributes([
+            'step'               => 5,
+            'status'             => AcceptanceStatus::PENDING->value,
+            'id'                 => 1,
+            'referrer_id'        => 7,
+            'financial_approved' => false,
+        ]);
+
+        $updatedAcceptance         = new Acceptance();
+        $updatedAcceptance->id     = 1;
+        $updatedAcceptance->status = AcceptanceStatus::WAITING_FOR_PUBLISHING;
+
+        // Nothing needs a sample → skip SAMPLING.
+        $acceptanceRepo
+            ->shouldReceive('countSamplableItems')
+            ->once()
+            ->andReturn(0);
+
+        $acceptanceRepo
+            ->shouldReceive('updateAcceptance')
+            ->once()
+            ->withArgs(function ($acc, $data) {
+                return isset($data['status'])
+                    && $data['status'] === AcceptanceStatus::WAITING_FOR_PUBLISHING;
+            })
+            ->andReturn($updatedAcceptance);
+
+        $result = $service->updateAcceptance($acceptance, ['step' => 5]);
+
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_PUBLISHING, $result->status);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // R-06 to R-16: feature tests that hit a real database
     // ─────────────────────────────────────────────────────────────────────────
 
