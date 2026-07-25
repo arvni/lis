@@ -67,6 +67,17 @@ class StockTransactionService
         return $this->transactionRepository->listTransactions($filters);
     }
 
+    /**
+     * All transactions matching the list filters, hydrated with lines for export.
+     *
+     * @param array<string, mixed> $filters
+     * @return \Illuminate\Database\Eloquent\Collection<int, StockTransaction>
+     */
+    public function listAllTransactions(array $filters): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->transactionRepository->listAllTransactions($filters);
+    }
+
     public function createTransaction(array $data): StockTransaction
     {
         return DB::transaction(function () use ($data) {

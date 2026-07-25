@@ -74,18 +74,45 @@ class StockTransactionRepository
     {
         $query = StockTransaction::with(['store', 'supplier', 'requestedBy'])
             ->withCount('lines');
-        if (isset($queryData['filters']['transaction_type']))
-            $query->where('transaction_type', $queryData['filters']['transaction_type']);
-        if (isset($queryData['filters']['status']))
-            $query->where('status', $queryData['filters']['status']);
-        if (isset($queryData['filters']['store_id']))
-            $query->where('store_id', $queryData['filters']['store_id']);
-        if (isset($queryData['filters']['date_from']))
-            $query->whereDate('transaction_date', '>=', $queryData['filters']['date_from']);
-        if (isset($queryData['filters']['date_to']))
-            $query->whereDate('transaction_date', '<=', $queryData['filters']['date_to']);
+        $this->applyTransactionFilters($query, $queryData['filters'] ?? []);
         $query->orderBy('transaction_date', 'desc')->orderBy('id', 'desc');
         return $query->paginate($queryData['pageSize'] ?? 20);
+    }
+
+    /**
+     * All transactions matching the list filters, with lines eager-loaded for
+     * export. Mirrors listTransactions filtering without pagination.
+     *
+     * @param array<string, mixed> $queryData
+     * @return EloquentCollection<int, StockTransaction>
+     */
+    public function listAllTransactions(array $queryData): EloquentCollection
+    {
+        $query = StockTransaction::with([
+            'store', 'supplier', 'requestedBy',
+            'lines.item', 'lines.unit', 'lines.location',
+        ]);
+        $this->applyTransactionFilters($query, $queryData['filters'] ?? []);
+        $query->orderBy('transaction_date', 'desc')->orderBy('id', 'desc');
+        return $query->get();
+    }
+
+    /**
+     * @param Builder<StockTransaction> $query
+     * @param array<string, mixed> $filters
+     */
+    private function applyTransactionFilters(Builder $query, array $filters): void
+    {
+        if (isset($filters['transaction_type']))
+            $query->where('transaction_type', $filters['transaction_type']);
+        if (isset($filters['status']))
+            $query->where('status', $filters['status']);
+        if (isset($filters['store_id']))
+            $query->where('store_id', $filters['store_id']);
+        if (isset($filters['date_from']))
+            $query->whereDate('transaction_date', '>=', $filters['date_from']);
+        if (isset($filters['date_to']))
+            $query->whereDate('transaction_date', '<=', $filters['date_to']);
     }
 
     public function createTransaction(array $data): StockTransaction

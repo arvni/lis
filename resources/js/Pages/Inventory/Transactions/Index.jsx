@@ -1,8 +1,9 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
-import { Box, Button, Chip, Grid, MenuItem, TextField } from '@mui/material';
+import { Box, Button, Chip, Grid, MenuItem, Stack, TextField } from '@mui/material';
 import { GridActionsCellItem } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
+import DownloadIcon from '@mui/icons-material/Download';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import TableLayout from '@/Layouts/TableLayout';
@@ -193,14 +194,25 @@ const TransactionsIndex = () => {
             <PageHeader
                 title="Stock Transactions"
                 actions={
-                    <Button
-                        startIcon={<AddIcon />}
-                        variant="contained"
-                        color="success"
-                        onClick={() => router.visit(route('inventory.transactions.create'))}
-                    >
-                        New Transaction
-                    </Button>
+                    <Stack direction="row" spacing={1}>
+                        <Button
+                            startIcon={<DownloadIcon />}
+                            variant="outlined"
+                            color="success"
+                            component="a"
+                            href={route('inventory.transactions.export', requestInputs)}
+                        >
+                            Export
+                        </Button>
+                        <Button
+                            startIcon={<AddIcon />}
+                            variant="contained"
+                            color="success"
+                            onClick={() => router.visit(route('inventory.transactions.create'))}
+                        >
+                            New Transaction
+                        </Button>
+                    </Stack>
                 }
             />
             <TableLayout
