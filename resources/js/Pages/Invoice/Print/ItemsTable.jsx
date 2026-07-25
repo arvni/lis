@@ -35,8 +35,8 @@ const ItemsTable = ({ invoice }) => (
                 <TableBody sx={{ '& td': { paddingY: '1mm' } }}>
                     {invoice?.acceptance_items?.map((item) => (
                         <TableRow key={item.id}>
-                            <TableCell>{item.test?.code ?? item.code ?? ''}</TableCell>
-                            <TableCell>{item.test?.name ?? item.title ?? ''} </TableCell>
+                            <TableCell>{item.code || item.test?.code || ''}</TableCell>
+                            <TableCell>{item.title || item.test?.name || ''} </TableCell>
                             <TableCell sx={{ textAlign: 'center' }}>{item.qty}</TableCell>
                             <TableCell sx={{ textAlign: 'center' }}>{item.unit_price}</TableCell>
                             <TableCell sx={{ textAlign: 'center' }}>
