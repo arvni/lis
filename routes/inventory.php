@@ -16,6 +16,7 @@ use App\Http\Controllers\Inventory\CancelTransactionController;
 use App\Http\Controllers\Inventory\ConfirmTransferReceiptController;
 use App\Http\Controllers\Inventory\CurrentStockController;
 use App\Http\Controllers\Inventory\ExpiryDashboardController;
+use App\Http\Controllers\Inventory\ExportStockTransactionsController;
 use App\Http\Controllers\Inventory\InventoryReportController;
 use App\Http\Controllers\Inventory\ItemController as InventoryItemController;
 use App\Http\Controllers\Inventory\ItemImportController;
@@ -47,6 +48,7 @@ Route::group(["prefix" => "inventory", "as" => "inventory."], function () {
     Route::delete("stores/{store}/locations/{location}", [StoreLocationController::class, 'destroy'])->name("stores.locations.destroy");
     Route::post("stores/{store}/locations/{location}/toggle", [StoreLocationController::class, 'toggle'])->name("stores.locations.toggle");
     Route::resource("units", InventoryUnitController::class)->except("create", "show", "edit");
+    Route::get("transactions/export", ExportStockTransactionsController::class)->name("transactions.export");
     Route::resource("transactions", StockTransactionController::class);
     Route::post("transactions/{transaction}/submit", SubmitTransactionController::class)->name("transactions.submit");
     Route::post("transactions/{transaction}/approve", ApproveTransactionController::class)->name("transactions.approve");
