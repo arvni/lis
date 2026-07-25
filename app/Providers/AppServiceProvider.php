@@ -74,6 +74,7 @@ use App\Domains\Inventory\Models\Supplier;
 use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\StockTransaction;
 use App\Domains\Inventory\Models\PurchaseRequest;
+use App\Domains\Inventory\Models\StockExportRequest;
 use App\Domains\Inventory\Models\Unit;
 use App\Domains\Inventory\Models\WorkflowTemplate;
 use App\Domains\Inventory\Policies\ItemPolicy;
@@ -82,6 +83,8 @@ use App\Domains\Inventory\Policies\StorePolicy;
 use App\Domains\Inventory\Policies\StockTransactionPolicy;
 use App\Domains\Inventory\Policies\PurchaseRequestApprovalPolicy;
 use App\Domains\Inventory\Policies\PurchaseRequestPolicy;
+use App\Domains\Inventory\Policies\StockExportRequestApprovalPolicy;
+use App\Domains\Inventory\Policies\StockExportRequestPolicy;
 use App\Domains\Inventory\Policies\UnitPolicy;
 use App\Domains\Inventory\Policies\WorkflowTemplatePolicy;
 use App\Domains\User\Models\Role;
@@ -201,6 +204,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Store::class, StorePolicy::class);
         Gate::policy(StockTransaction::class, StockTransactionPolicy::class);
         Gate::policy(PurchaseRequest::class, PurchaseRequestPolicy::class);
+        Gate::policy(StockExportRequest::class, StockExportRequestPolicy::class);
         Gate::policy(Unit::class, UnitPolicy::class);
         Gate::policy(WorkflowTemplate::class, WorkflowTemplatePolicy::class);
 
@@ -214,5 +218,12 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('purchase-requests.delegate-step', PurchaseRequestApprovalPolicy::class . '@delegateStep');
         Gate::define('purchase-requests.recall', PurchaseRequestApprovalPolicy::class . '@recall');
         Gate::define('purchase-requests.bulk-approve', PurchaseRequestApprovalPolicy::class . '@bulkApprove');
+
+        // Export request workflow-approver abilities (mirrors the purchase-request setup).
+        Gate::define('export-requests.approve-step', StockExportRequestApprovalPolicy::class . '@approveStep');
+        Gate::define('export-requests.reject-step', StockExportRequestApprovalPolicy::class . '@rejectStep');
+        Gate::define('export-requests.delegate-step', StockExportRequestApprovalPolicy::class . '@delegateStep');
+        Gate::define('export-requests.recall', StockExportRequestApprovalPolicy::class . '@recall');
+        Gate::define('export-requests.bulk-approve', StockExportRequestApprovalPolicy::class . '@bulkApprove');
     }
 }

@@ -46,6 +46,12 @@ class InventoryPermissionSeeder extends Seeder
             "Inventory.PurchaseRequests.Pay Purchase Request",
             "Inventory.PurchaseRequests.Ship Purchase Request",
 
+            "Inventory.ExportRequests.List Export Requests",
+            "Inventory.ExportRequests.View All Export Requests",
+            "Inventory.ExportRequests.Create Export Request",
+            "Inventory.ExportRequests.Approve Export Request",
+            "Inventory.ExportRequests.Fulfill Export Request",
+
             "Inventory.Units.List Units",
             "Inventory.Units.Create Unit",
             "Inventory.Units.Edit Unit",

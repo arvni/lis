@@ -265,6 +265,12 @@ const routes = (sections = []) => {
                     icon: <AddShoppingCartIcon fontSize="small" />,
                 },
                 {
+                    title: 'Export Requests',
+                    route: 'inventory.export-requests.index',
+                    permission: 'Inventory.ExportRequests.List Export Requests',
+                    icon: <LocalShippingIcon fontSize="small" />,
+                },
+                {
                     title: 'Workflow Templates',
                     route: 'inventory.workflow-templates.index',
                     permission: 'Inventory.WorkflowTemplates.List Workflow Templates',
