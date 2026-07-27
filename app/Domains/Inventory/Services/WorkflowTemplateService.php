@@ -2,6 +2,7 @@
 
 namespace App\Domains\Inventory\Services;
 
+use App\Domains\Inventory\Enums\WorkflowRequestType;
 use App\Domains\Inventory\Models\WorkflowTemplate;
 use App\Domains\Inventory\Repositories\WorkflowTemplateRepository;
 use App\Domains\User\Models\User;
@@ -33,6 +34,10 @@ class WorkflowTemplateService
             'users' => User::orderBy('name')->get(['id', 'name']),
             'roles' => Role::orderBy('name')->pluck('name'),
             'urgencies' => self::URGENCIES,
+            'requestTypes' => array_map(
+                fn (WorkflowRequestType $type): array => ['value' => $type->value, 'label' => $type->label()],
+                WorkflowRequestType::cases(),
+            ),
         ];
     }
 
@@ -50,6 +55,7 @@ class WorkflowTemplateService
             'description' => $data['description'] ?? null,
             'is_active' => $data['is_active'] ?? true,
             'is_default' => $data['is_default'] ?? false,
+            'request_type' => $data['request_type'] ?? null,
             'priority' => $data['priority'] ?? 0,
             'conditions' => [
                 'urgencies' => $data['conditions']['urgencies'] ?? [],

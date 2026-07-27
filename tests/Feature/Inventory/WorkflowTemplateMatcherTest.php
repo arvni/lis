@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Inventory;
 
+use App\Domains\Inventory\Enums\WorkflowRequestType;
 use App\Domains\Inventory\Models\WorkflowTemplate;
 use App\Domains\Inventory\Services\WorkflowTemplateMatcher;
 use App\Domains\User\Models\User;
@@ -13,23 +14,24 @@ class WorkflowTemplateMatcherTest extends TestCase
     use RefreshDatabase;
 
     private WorkflowTemplateMatcher $service;
+
     private User $requester;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new WorkflowTemplateMatcher();
+        $this->service = new WorkflowTemplateMatcher;
         $this->requester = User::factory()->create();
     }
 
     private function template(array $attrs): WorkflowTemplate
     {
         return WorkflowTemplate::create(array_merge([
-            'name'       => 'T' . uniqid(),
-            'is_active'  => true,
+            'name' => 'T'.uniqid(),
+            'is_active' => true,
             'is_default' => false,
             'conditions' => [],
-            'priority'   => 100,
+            'priority' => 100,
         ], $attrs));
     }
 
@@ -88,5 +90,56 @@ class WorkflowTemplateMatcherTest extends TestCase
         $first = $this->template(['conditions' => ['urgencies' => ['urgent']], 'priority' => 1]);
 
         $this->assertSame($first->id, $this->service->find($this->requester, 'urgent')->id);
+    }
+
+    public function test_request_type_scoped_template_only_matches_its_type(): void
+    {
+        $purchase = $this->template([
+            'request_type' => WorkflowRequestType::PURCHASE,
+            'conditions' => ['urgencies' => ['urgent']],
+            'priority' => 1,
+        ]);
+
+        // Matches for a purchase request...
+        $this->assertSame(
+            $purchase->id,
+            $this->service->find($this->requester, 'urgent', 0, WorkflowRequestType::PURCHASE)->id,
+        );
+        // ...but not for an export request.
+        $this->assertNull(
+            $this->service->find($this->requester, 'urgent', 0, WorkflowRequestType::EXPORT),
+        );
+    }
+
+    public function test_null_request_type_template_matches_any_type(): void
+    {
+        $shared = $this->template([
+            'request_type' => null,
+            'conditions' => ['urgencies' => ['urgent']],
+            'priority' => 1,
+        ]);
+
+        $this->assertSame(
+            $shared->id,
+            $this->service->find($this->requester, 'urgent', 0, WorkflowRequestType::PURCHASE)->id,
+        );
+        $this->assertSame(
+            $shared->id,
+            $this->service->find($this->requester, 'urgent', 0, WorkflowRequestType::EXPORT)->id,
+        );
+    }
+
+    public function test_default_fallback_respects_request_type(): void
+    {
+        $purchaseDefault = $this->template(['is_default' => true, 'request_type' => WorkflowRequestType::PURCHASE]);
+
+        // Default is scoped to purchase → no fallback for export.
+        $this->assertSame(
+            $purchaseDefault->id,
+            $this->service->find($this->requester, 'normal', 0, WorkflowRequestType::PURCHASE)->id,
+        );
+        $this->assertNull(
+            $this->service->find($this->requester, 'normal', 0, WorkflowRequestType::EXPORT),
+        );
     }
 }

@@ -6,6 +6,7 @@ namespace App\Domains\Inventory\Services;
 
 use App\Domains\Inventory\Adapters\UserAdapter;
 use App\Domains\Inventory\Enums\StockExportRequestStatus;
+use App\Domains\Inventory\Enums\WorkflowRequestType;
 use App\Domains\Inventory\Models\StockExportRequest;
 use App\Domains\Inventory\Repositories\StockExportRequestApprovalRepository;
 use App\Domains\Inventory\Repositories\StockExportRequestRepository;
@@ -106,7 +107,7 @@ readonly class StockExportRequestService
             }
 
             $templateId = $this->templateMatcher
-                ->find($requester, $data['urgency'], $request->estimatedValue())
+                ->find($requester, $data['urgency'], $request->estimatedValue(), WorkflowRequestType::EXPORT)
                 ?->id;
             $request->update(['workflow_template_id' => $templateId]);
 
@@ -131,7 +132,7 @@ readonly class StockExportRequestService
             $request->load('lines', 'requestedBy');
             $request->update([
                 'workflow_template_id' => $this->templateMatcher
-                    ->find($request->requestedBy, $request->urgency, $request->estimatedValue())
+                    ->find($request->requestedBy, $request->urgency, $request->estimatedValue(), WorkflowRequestType::EXPORT)
                     ?->id,
             ]);
 
@@ -146,7 +147,7 @@ readonly class StockExportRequestService
         // Re-match template on every submission so late-created templates are picked up
         $request->load('lines', 'requestedBy');
         $templateId = $this->templateMatcher
-            ->find($request->requestedBy, $request->urgency, $request->estimatedValue())
+            ->find($request->requestedBy, $request->urgency, $request->estimatedValue(), WorkflowRequestType::EXPORT)
             ?->id;
         $request->update(['status' => StockExportRequestStatus::SUBMITTED->value, 'workflow_template_id' => $templateId]);
 

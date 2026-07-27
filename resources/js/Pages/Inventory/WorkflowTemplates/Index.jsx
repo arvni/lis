@@ -23,6 +23,11 @@ import StarIcon from '@mui/icons-material/Star';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
 
+const REQUEST_TYPE_LABELS = {
+    PURCHASE: 'Purchase Requests',
+    EXPORT: 'Export Requests',
+};
+
 const WorkflowTemplatesIndex = () => {
     const { templates, success, status } = usePage().props;
 
@@ -68,6 +73,7 @@ const WorkflowTemplatesIndex = () => {
                         <TableHead>
                             <TableRow>
                                 <TableCell>Name</TableCell>
+                                <TableCell>Applies To</TableCell>
                                 <TableCell>Conditions</TableCell>
                                 <TableCell>Steps</TableCell>
                                 <TableCell>Priority</TableCell>
@@ -100,6 +106,14 @@ const WorkflowTemplatesIndex = () => {
                                                 )}
                                             </Box>
                                         </Box>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={REQUEST_TYPE_LABELS[tpl.request_type] ?? 'All'}
+                                            size="small"
+                                            color={tpl.request_type ? 'info' : 'default'}
+                                            variant={tpl.request_type ? 'filled' : 'outlined'}
+                                        />
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 200 }}>
                                         {!tpl.conditions?.urgencies?.length &&
