@@ -2,9 +2,11 @@
 
 namespace App\Domains\Inventory\Models;
 
+use App\Domains\Inventory\Enums\WorkflowRequestType;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -12,20 +14,22 @@ use Illuminate\Database\Eloquent\Builder;
  * @property string|null $description
  * @property bool $is_active
  * @property bool $is_default
+ * @property WorkflowRequestType|null $request_type
  * @property array<array-key, mixed>|null $conditions
  * @property int $priority
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class WorkflowTemplate extends Model
 {
-    protected $fillable = ['name', 'description', 'is_active', 'is_default', 'conditions', 'priority'];
+    protected $fillable = ['name', 'description', 'is_active', 'is_default', 'request_type', 'conditions', 'priority'];
 
     protected $casts = [
-        'is_active'  => 'boolean',
+        'is_active' => 'boolean',
         'is_default' => 'boolean',
+        'request_type' => WorkflowRequestType::class,
         'conditions' => 'array',
-        'priority'   => 'integer',
+        'priority' => 'integer',
     ];
 
     /** @return HasMany<WorkflowStep, $this> */

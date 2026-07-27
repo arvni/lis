@@ -4,12 +4,13 @@ import {
     CardContent,
     CardHeader,
     FormControlLabel,
+    MenuItem,
     Switch,
     TextField,
     Typography,
 } from '@mui/material';
 
-const TemplateInfoCard = ({ data, setData, errors }) => (
+const TemplateInfoCard = ({ data, setData, errors, requestTypes = [] }) => (
     <Card>
         <CardHeader title="Template Info" />
         <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -32,6 +33,23 @@ const TemplateInfoCard = ({ data, setData, errors }) => (
                 value={data.description}
                 onChange={(e) => setData('description', e.target.value)}
             />
+            <TextField
+                select
+                fullWidth
+                size="small"
+                label="Applies to"
+                value={data.request_type}
+                onChange={(e) => setData('request_type', e.target.value)}
+                error={!!errors.request_type}
+                helperText={errors.request_type ?? 'Which request type this workflow governs'}
+            >
+                <MenuItem value="">All request types</MenuItem>
+                {requestTypes.map((t) => (
+                    <MenuItem key={t.value} value={t.value}>
+                        {t.label}
+                    </MenuItem>
+                ))}
+            </TextField>
             <FormControlLabel
                 control={
                     <Switch

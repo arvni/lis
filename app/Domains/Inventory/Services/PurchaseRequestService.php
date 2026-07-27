@@ -8,6 +8,7 @@ use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Inventory\Adapters\DocumentAdapter;
 use App\Domains\Inventory\Adapters\UserAdapter;
 use App\Domains\Inventory\Enums\PurchaseRequestStatus;
+use App\Domains\Inventory\Enums\WorkflowRequestType;
 use App\Domains\Inventory\Models\PurchaseRequest;
 use App\Domains\Inventory\Models\WorkflowTemplate;
 use App\Domains\Inventory\Repositories\PurchaseRequestApprovalRepository;
@@ -161,7 +162,7 @@ readonly class PurchaseRequestService
             ];
         });
 
-        $matched = $this->templateMatcher->find($pr->requestedBy, $urgency, $estimatedTotal);
+        $matched = $this->templateMatcher->find($pr->requestedBy, $urgency, $estimatedTotal, WorkflowRequestType::PURCHASE);
 
         return [
             'pr' => [
@@ -190,7 +191,7 @@ readonly class PurchaseRequestService
             // Match template after lines are persisted so estimated total is available
             $pr->load('lines');
             $templateId = $this->templateMatcher
-                ->find($requester, $data['urgency'], $pr->estimatedTotal())
+                ->find($requester, $data['urgency'], $pr->estimatedTotal(), WorkflowRequestType::PURCHASE)
                 ?->id;
             $pr->update(['workflow_template_id' => $templateId]);
 
@@ -215,7 +216,7 @@ readonly class PurchaseRequestService
             $pr->load('lines', 'requestedBy');
             $pr->update([
                 'workflow_template_id' => $this->templateMatcher
-                    ->find($pr->requestedBy, $pr->urgency, $pr->estimatedTotal())
+                    ->find($pr->requestedBy, $pr->urgency, $pr->estimatedTotal(), WorkflowRequestType::PURCHASE)
                     ?->id,
             ]);
 
@@ -230,7 +231,7 @@ readonly class PurchaseRequestService
         // Re-match template on every submission so late-created templates are picked up
         $pr->load('lines', 'requestedBy');
         $templateId = $this->templateMatcher
-            ->find($pr->requestedBy, $pr->urgency, $pr->estimatedTotal())
+            ->find($pr->requestedBy, $pr->urgency, $pr->estimatedTotal(), WorkflowRequestType::PURCHASE)
             ?->id;
         $pr->update(['status' => PurchaseRequestStatus::SUBMITTED->value, 'workflow_template_id' => $templateId]);
 

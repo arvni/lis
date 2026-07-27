@@ -11,7 +11,7 @@ import MatchingConditionsCard from './Form/MatchingConditionsCard';
 import ApprovalStepsCard from './Form/ApprovalStepsCard';
 
 const WorkflowTemplateForm = () => {
-    const { template, users, roles, urgencies, success, status } = usePage().props;
+    const { template, users, roles, urgencies, requestTypes, success, status } = usePage().props;
     const isEdit = !!template;
 
     const buildSteps = () => {
@@ -33,6 +33,7 @@ const WorkflowTemplateForm = () => {
         description: template?.description ?? '',
         is_active: template?.is_active ?? true,
         is_default: template?.is_default ?? false,
+        request_type: template?.request_type ?? '',
         priority: template?.priority ?? 0,
         conditions: {
             urgencies: template?.conditions?.urgencies ?? [],
@@ -139,7 +140,12 @@ const WorkflowTemplateForm = () => {
             <Grid container spacing={3}>
                 {/* Template info */}
                 <Grid size={{ xs: 12, md: 4 }}>
-                    <TemplateInfoCard data={data} setData={setData} errors={errors} />
+                    <TemplateInfoCard
+                        data={data}
+                        setData={setData}
+                        errors={errors}
+                        requestTypes={requestTypes}
+                    />
                     <MatchingConditionsCard
                         data={data}
                         setData={setData}
