@@ -637,7 +637,7 @@ class AcceptanceRepository
             ->where('status', AcceptanceStatus::WAITING_FOR_PUBLISHING)
             ->where('financial_approved', true)
             ->with([
-                'patient:id,fullName,idNo',
+                'patient:id,fullName,idNo,phone',
                 'referrer:id,fullName,email,reportReceivers',
                 'acceptanceItems' => function ($q) {
                     $q->where('reportless', false)
