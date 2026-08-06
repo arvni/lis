@@ -275,6 +275,20 @@ class AcceptanceRepository
     }
 
     /**
+     * Count items whose sample has been collected — i.e. that already carry at
+     * least one workflow state, regardless of how far it has progressed. The
+     * first state is only ever created once a sample exists (at collection for
+     * auto-approved samplers and pooling, at QC approval otherwise), so this is
+     * the marker for "collected but the lab has not picked it up yet".
+     */
+    public function countCollectedAcceptanceItems(Acceptance $acceptance): int
+    {
+        return $acceptance->acceptanceItems()
+            ->whereHas('acceptanceItemStates')
+            ->count();
+    }
+
+    /**
      * Count reportable tests for an acceptance.
      * A test is reportable if it's not marked as reportless.
      */

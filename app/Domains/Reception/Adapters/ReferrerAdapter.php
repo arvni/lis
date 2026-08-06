@@ -64,4 +64,14 @@ class ReferrerAdapter
     {
         $this->referrerOrderService->updateReferrerOrderStatus($referrerOrder, $status);
     }
+
+    /**
+     * A reported acceptance is handed to its referrer through the provider
+     * panel: make sure a referrer order exists, mark it reported, and push it.
+     * No-op for acceptances without a referrer.
+     */
+    public function syncReportedAcceptance(Acceptance $acceptance): void
+    {
+        $this->referrerOrderService->syncReportedAcceptance($acceptance);
+    }
 }

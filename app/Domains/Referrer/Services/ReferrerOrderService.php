@@ -246,6 +246,38 @@ class ReferrerOrderService
     }
 
     /**
+     * Deliver a reported acceptance to its referrer through the provider panel
+     * (instead of a report email).
+     *
+     * Ensures the acceptance has at least one ReferrerOrder (creating one from
+     * the acceptance when the referrer never placed an order), marks every
+     * linked order as reported, and makes sure the provider is pushed either
+     * way — the status change dispatches ReferrerOrderUpdated itself, and orders
+     * already carrying the reported status get an explicit refresh.
+     */
+    public function syncReportedAcceptance(Acceptance $acceptance): void
+    {
+        if (!$acceptance->referrer_id) return;
+
+        $acceptance->load('referrerOrders');
+
+        if ($acceptance->referrerOrders->isEmpty()) {
+            $this->syncOrCreateForAcceptance($acceptance);
+            $acceptance->load('referrerOrders');
+        }
+
+        $reported = AcceptanceStatus::REPORTED->value;
+        foreach ($acceptance->referrerOrders as $referrerOrder) {
+            $alreadyReported = (string) $referrerOrder->status === $reported;
+            $this->updateReferrerOrderStatus($referrerOrder, $reported);
+
+            if ($alreadyReported) {
+                ReferrerOrderUpdated::dispatch($referrerOrder);
+            }
+        }
+    }
+
+    /**
      * Reconcile an acceptance with its referrer orders.
      *
      * If one or more ROs exist → dispatch ReferrerOrderUpdated for each (provider receives a refresh).

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Reception\Services;
 
 use App\Domains\Laboratory\Enums\TestType;
@@ -8,7 +10,6 @@ use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Notifications\PatientReportPublished;
 use App\Domains\Reception\Repositories\AcceptanceRepository;
-use App\Notifications\ReferrerReportPublished;
 use Illuminate\Support\Facades\Notification;
 
 /**
@@ -102,6 +103,31 @@ class AcceptanceStatusService
         );
     }
 
+    /**
+     * Status for an acceptance that still has unfinished work: PROCESSING once a
+     * section has actually picked an item up, otherwise WAITING_FOR_ENTERING when
+     * samples are collected and merely waiting to be entered.
+     *
+     * The WAITING_FOR_ENTERING case matters for acceptances that came through
+     * pooling: SampleCollectedListener parks them at POOLING and returns before
+     * the normal collection transition, so once the pooling flag is cleared this
+     * is the only thing that releases them from POOLING. Collected-but-not-started
+     * is exactly the state the non-pooling flows already label WAITING_FOR_ENTERING,
+     * so applying it here keeps the two paths consistent.
+     */
+    private function applyInProgressStatus(Acceptance $acceptance): void
+    {
+        if ($this->acceptanceRepository->countStartedAcceptanceItems($acceptance)) {
+            $this->setStatusIfChanged($acceptance, AcceptanceStatus::PROCESSING);
+
+            return;
+        }
+
+        if ($this->acceptanceRepository->countCollectedAcceptanceItems($acceptance)) {
+            $this->setStatusIfChanged($acceptance, AcceptanceStatus::WAITING_FOR_ENTERING);
+        }
+    }
+
     public function checkAndUpdateAcceptanceStatus(Acceptance $acceptance): void
     {
         if ($this->applyPoolingPriority($acceptance)) {
@@ -132,12 +158,9 @@ class AcceptanceStatusService
             return $item->report !== null;
         });
         if (! $allHaveReports) {
-            // Not all items have reports yet; if any item has started processing,
-            // move to PROCESSING. (Pooling is handled by the early return above.)
-            $startedItems = $this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
-            if ($startedItems) {
-                $this->setStatusIfChanged($acceptance, AcceptanceStatus::PROCESSING);
-            }
+            // Not all items have reports yet — settle on PROCESSING or
+            // WAITING_FOR_ENTERING. (Pooling is handled by the early return above.)
+            $this->applyInProgressStatus($acceptance);
 
             return;
         }
@@ -170,6 +193,9 @@ class AcceptanceStatusService
         if ($this->areAllTestsPublished($acceptance)) {
             if ($acceptance->financial_approved) {
                 $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+                // Referrer acceptances are delivered through the provider panel:
+                // sync the acceptance onto its referrer orders and push them out.
+                $this->referrerAdapter->syncReportedAcceptance($acceptance);
                 // Send notifications
                 $this->sendPublishedNotifications($acceptance, $silent);
             } else {
@@ -209,34 +235,24 @@ class AcceptanceStatusService
     }
 
     /**
-     * Send notifications about published report
+     * Send notifications about published report.
+     *
+     * Referrers are not notified here: a referrer acceptance is delivered by
+     * syncing its referrer orders to the provider panel (see
+     * ReferrerAdapter::syncReportedAcceptance), so no report email is sent.
      */
     private function sendPublishedNotifications(Acceptance $acceptance, bool $silent = false): void
     {
         $acceptance->load([
             'patient',
-            'referrer',
             'acceptanceItems' => fn ($q) => $q->where('reportless', false)
                 ->with('report.publishedDocument', 'report.clinicalCommentDocument', 'test'),
         ]);
         $patient = $acceptance->patient;
-        $referrer = $acceptance->referrer;
         if (count($acceptance->acceptanceItems)) {
-            $howReport = $acceptance->howReport ?? [];
             // Send notification to patient (SMS always; WhatsApp text notification if checked)
             if (! $silent) {
                 Notification::send($patient, new PatientReportPublished($acceptance));
-            }
-
-            if (! $silent && $referrer) {
-                if ($howReport['sendToReferrer'] ?? false) {
-                    $referrer->notify(new ReferrerReportPublished($acceptance));
-                    $acceptance->load('referrerOrders');
-                    // Update referrer order status across all linked referrer orders (pooling + non-pooling)
-                    foreach ($acceptance->referrerOrders as $referrerOrder) {
-                        $this->referrerAdapter->updateOrderStatus($referrerOrder, 'reported');
-                    }
-                }
             }
         }
     }
@@ -270,11 +286,8 @@ class AcceptanceStatusService
             return;
         }
 
-        // Some tests still in progress; if any started, move to PROCESSING.
-        // (Pooling is handled by the early return above.)
-        $startedItems = $this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
-        if ($startedItems) {
-            $this->setStatusIfChanged($acceptance, AcceptanceStatus::PROCESSING);
-        }
+        // Some tests still in progress; settle on PROCESSING or
+        // WAITING_FOR_ENTERING. (Pooling is handled by the early return above.)
+        $this->applyInProgressStatus($acceptance);
     }
 }
