@@ -199,7 +199,12 @@ class AcceptanceService
         // Process based on current step
         $step = $data['step'] ?? 5;
 
-        return DB::transaction(function () use ($acceptance, $acceptanceDTO, $step): Acceptance {
+        // Clearing the pooling flag ends pooling, and the acceptance is parked at
+        // POOLING while it is set. Remember the previous value so we can recompute
+        // the real status once the update lands (see below).
+        $wasWaitingForPooling = (bool) $acceptance->waiting_for_pooling;
+
+        return DB::transaction(function () use ($acceptance, $acceptanceDTO, $step, $wasWaitingForPooling): Acceptance {
             switch ($step) {
                 case 0: // Patient Information
                     // Update only step information
@@ -245,6 +250,17 @@ class AcceptanceService
                         "waiting_for_pooling" => $acceptanceDTO->waitingForPooling,
                     ]);
                     break;
+            }
+
+            // Pooling just ended: nothing else recomputes the status, so the
+            // acceptance would stay at POOLING forever. Re-run the status check
+            // now that applyPoolingPriority no longer short-circuits it.
+            if ($wasWaitingForPooling) {
+                $acceptance->refresh();
+                if (! $acceptance->waiting_for_pooling) {
+                    $this->statusService->checkAndUpdateAcceptanceStatus($acceptance);
+                    $acceptance->refresh();
+                }
             }
 
             return $acceptance;

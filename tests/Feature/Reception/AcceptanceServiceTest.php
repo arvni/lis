@@ -509,6 +509,150 @@ class AcceptanceServiceTest extends TestCase
     // ─────────────────────────────────────────────────────────────────────────
 
     // ─────────────────────────────────────────────────────────────────────────
+    // Pooling exit: an acceptance parked at POOLING must be released once the
+    // waiting_for_pooling flag is cleared. SampleCollectedListener returns early
+    // for pooling, so the collected sample only ever leaves a WAITING state.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_check_status_moves_collected_pooling_acceptance_to_waiting_for_entering(): void
+    {
+        $this->setUpDatabase();
+
+        $acceptance = $this->createAcceptance([
+            'status'              => AcceptanceStatus::POOLING,
+            'waiting_for_pooling' => false, // pooling already ended
+        ]);
+
+        $item = AcceptanceItem::create([
+            'acceptance_id'    => $acceptance->id,
+            'method_test_id'   => $this->getMethodTestId(),
+            'price'            => 100,
+            'discount'         => 0,
+            'reportless'       => false,
+            'sampleless'       => false,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]);
+
+        // Collection during pooling creates the first state as WAITING.
+        AcceptanceItemState::create([
+            'acceptance_item_id' => $item->id,
+            'section_id'         => $this->section->id,
+            'user_id'            => auth()->id(),
+            'parameters'         => [],
+            'status'             => AcceptanceItemStateStatus::WAITING,
+        ]);
+
+        app(AcceptanceService::class)->checkAndUpdateAcceptanceStatus($acceptance);
+
+        $acceptance->refresh();
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_ENTERING, $acceptance->status);
+    }
+
+    public function test_check_status_keeps_pooling_while_flag_is_still_set(): void
+    {
+        $this->setUpDatabase();
+
+        $acceptance = $this->createAcceptance([
+            'status'              => AcceptanceStatus::POOLING,
+            'waiting_for_pooling' => true,
+        ]);
+
+        $item = AcceptanceItem::create([
+            'acceptance_id'    => $acceptance->id,
+            'method_test_id'   => $this->getMethodTestId(),
+            'price'            => 100,
+            'discount'         => 0,
+            'reportless'       => false,
+            'sampleless'       => false,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]);
+
+        AcceptanceItemState::create([
+            'acceptance_item_id' => $item->id,
+            'section_id'         => $this->section->id,
+            'user_id'            => auth()->id(),
+            'parameters'         => [],
+            'status'             => AcceptanceItemStateStatus::WAITING,
+        ]);
+
+        app(AcceptanceService::class)->checkAndUpdateAcceptanceStatus($acceptance);
+
+        $acceptance->refresh();
+        $this->assertSame(AcceptanceStatus::POOLING, $acceptance->status);
+    }
+
+    public function test_check_status_leaves_uncollected_acceptance_untouched(): void
+    {
+        $this->setUpDatabase();
+
+        $acceptance = $this->createAcceptance([
+            'status'              => AcceptanceStatus::SAMPLING,
+            'waiting_for_pooling' => false,
+        ]);
+
+        // Reportable item with no state at all: nothing collected yet.
+        AcceptanceItem::create([
+            'acceptance_id'    => $acceptance->id,
+            'method_test_id'   => $this->getMethodTestId(),
+            'price'            => 100,
+            'discount'         => 0,
+            'reportless'       => false,
+            'sampleless'       => false,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]);
+
+        app(AcceptanceService::class)->checkAndUpdateAcceptanceStatus($acceptance);
+
+        $acceptance->refresh();
+        $this->assertSame(AcceptanceStatus::SAMPLING, $acceptance->status);
+    }
+
+    public function test_clearing_pooling_flag_on_update_releases_acceptance_from_pooling(): void
+    {
+        $this->setUpDatabase();
+
+        $acceptance = $this->createAcceptance([
+            'status'              => AcceptanceStatus::POOLING,
+            'waiting_for_pooling' => true,
+        ]);
+
+        $item = AcceptanceItem::create([
+            'acceptance_id'    => $acceptance->id,
+            'method_test_id'   => $this->getMethodTestId(),
+            'price'            => 100,
+            'discount'         => 0,
+            'reportless'       => false,
+            'sampleless'       => false,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]);
+
+        AcceptanceItemState::create([
+            'acceptance_item_id' => $item->id,
+            'section_id'         => $this->section->id,
+            'user_id'            => auth()->id(),
+            'parameters'         => [],
+            'status'             => AcceptanceItemStateStatus::WAITING,
+        ]);
+
+        app(AcceptanceService::class)->updateAcceptance($acceptance, [
+            'step'                => 5,
+            'waiting_for_pooling' => false,
+        ]);
+
+        $acceptance->refresh();
+        $this->assertFalse((bool) $acceptance->waiting_for_pooling);
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_ENTERING, $acceptance->status);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // R-06: checkAndUpdateAcceptanceStatus → PROCESSING when some items started
     // ─────────────────────────────────────────────────────────────────────────
 

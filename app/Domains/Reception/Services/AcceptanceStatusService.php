@@ -103,6 +103,31 @@ class AcceptanceStatusService
         );
     }
 
+    /**
+     * Status for an acceptance that still has unfinished work: PROCESSING once a
+     * section has actually picked an item up, otherwise WAITING_FOR_ENTERING when
+     * samples are collected and merely waiting to be entered.
+     *
+     * The WAITING_FOR_ENTERING case matters for acceptances that came through
+     * pooling: SampleCollectedListener parks them at POOLING and returns before
+     * the normal collection transition, so once the pooling flag is cleared this
+     * is the only thing that releases them from POOLING. Collected-but-not-started
+     * is exactly the state the non-pooling flows already label WAITING_FOR_ENTERING,
+     * so applying it here keeps the two paths consistent.
+     */
+    private function applyInProgressStatus(Acceptance $acceptance): void
+    {
+        if ($this->acceptanceRepository->countStartedAcceptanceItems($acceptance)) {
+            $this->setStatusIfChanged($acceptance, AcceptanceStatus::PROCESSING);
+
+            return;
+        }
+
+        if ($this->acceptanceRepository->countCollectedAcceptanceItems($acceptance)) {
+            $this->setStatusIfChanged($acceptance, AcceptanceStatus::WAITING_FOR_ENTERING);
+        }
+    }
+
     public function checkAndUpdateAcceptanceStatus(Acceptance $acceptance): void
     {
         if ($this->applyPoolingPriority($acceptance)) {
@@ -133,12 +158,9 @@ class AcceptanceStatusService
             return $item->report !== null;
         });
         if (! $allHaveReports) {
-            // Not all items have reports yet; if any item has started processing,
-            // move to PROCESSING. (Pooling is handled by the early return above.)
-            $startedItems = $this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
-            if ($startedItems) {
-                $this->setStatusIfChanged($acceptance, AcceptanceStatus::PROCESSING);
-            }
+            // Not all items have reports yet — settle on PROCESSING or
+            // WAITING_FOR_ENTERING. (Pooling is handled by the early return above.)
+            $this->applyInProgressStatus($acceptance);
 
             return;
         }
@@ -264,11 +286,8 @@ class AcceptanceStatusService
             return;
         }
 
-        // Some tests still in progress; if any started, move to PROCESSING.
-        // (Pooling is handled by the early return above.)
-        $startedItems = $this->acceptanceRepository->countStartedAcceptanceItems($acceptance);
-        if ($startedItems) {
-            $this->setStatusIfChanged($acceptance, AcceptanceStatus::PROCESSING);
-        }
+        // Some tests still in progress; settle on PROCESSING or
+        // WAITING_FOR_ENTERING. (Pooling is handled by the early return above.)
+        $this->applyInProgressStatus($acceptance);
     }
 }
