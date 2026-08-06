@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import { GridActionsCellItem } from '@mui/x-data-grid';
-import { RemoveRedEye, Publish, Person, Science, WhatsApp, Email } from '@mui/icons-material';
+import { RemoveRedEye, Publish, Person, Science, WhatsApp, Email, Sms } from '@mui/icons-material';
 import TableLayout from '@/Layouts/TableLayout';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Filter from './Components/Filter';
@@ -22,6 +22,17 @@ const BREADCRUMBS = [
         icon: <Publish />,
     },
 ];
+
+/**
+ * Whether publishing this acceptance will actually deliver it to someone.
+ *
+ * Patient delivery is SMS/WhatsApp — those are the only channels
+ * PatientReportPublished::via() returns. `email` is kept here because
+ * acceptances configured that way have always counted as deliverable on this
+ * screen, even though report publishing has no mail channel.
+ */
+export const hasDeliveryMethods = (howReport) =>
+    Boolean(howReport?.sms || howReport?.whatsapp || howReport?.email || howReport?.sendToReferrer);
 
 // Helper function to get report status
 const PublishingQueue = () => {
@@ -159,6 +170,14 @@ const PublishingQueue = () => {
                     const howReport = row.howReport;
 
                     const methods = [];
+                    if (howReport?.sms) {
+                        methods.push({
+                            type: 'sms',
+                            icon: <Sms />,
+                            color: '#0288d1',
+                            value: row.patient?.phone || 'SMS',
+                        });
+                    }
                     if (howReport?.whatsapp) {
                         methods.push({
                             type: 'whatsapp',
@@ -220,9 +239,7 @@ const PublishingQueue = () => {
                 getActions: (params) => {
                     const actions = [];
                     const isPublishing = publishingAcceptances.has(params.row.id);
-                    const howReport = params.row.howReport;
-                    const hasDeliveryMethods =
-                        howReport?.whatsapp || howReport?.email || howReport?.sendToReferrer;
+                    const canQuickPublish = hasDeliveryMethods(params.row.howReport);
 
                     // View/Configure action
                     actions.push(
@@ -236,7 +253,7 @@ const PublishingQueue = () => {
                     );
 
                     // Quick publish action (only if delivery methods exist and user can edit)
-                    if (canEdit && hasDeliveryMethods) {
+                    if (canEdit && canQuickPublish) {
                         actions.push(
                             <GridActionsCellItem
                                 key={`publish-${params.row.id}`}
@@ -269,9 +286,7 @@ const PublishingQueue = () => {
     const summaryStats = useMemo(() => {
         const totalAcceptances = acceptances?.data?.length || 0;
         const withDeliveryMethods =
-            acceptances?.data?.filter(
-                (a) => a.howReport?.whatsapp || a.howReport?.email || a.howReport?.sendToReferrer,
-            ).length || 0;
+            acceptances?.data?.filter((a) => hasDeliveryMethods(a.howReport)).length || 0;
 
         return {
             total: totalAcceptances,
