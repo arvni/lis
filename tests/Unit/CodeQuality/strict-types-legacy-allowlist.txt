@@ -435,7 +435,6 @@ app/Domains/Reception/Resources/PatientResource.php
 app/Domains/Reception/Services/AcceptanceBarcodeService.php
 app/Domains/Reception/Services/AcceptanceItemService.php
 app/Domains/Reception/Services/AcceptanceItemStateService.php
-app/Domains/Reception/Services/AcceptanceStatusService.php
 app/Domains/Reception/Services/BuildWordFileService.php
 app/Domains/Reception/Services/PatientImportService.php
 app/Domains/Reception/Services/PatientMergeService.php

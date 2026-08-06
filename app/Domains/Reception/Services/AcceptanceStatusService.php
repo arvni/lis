@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Reception\Services;
 
 use App\Domains\Laboratory\Enums\TestType;
@@ -8,7 +10,6 @@ use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Notifications\PatientReportPublished;
 use App\Domains\Reception\Repositories\AcceptanceRepository;
-use App\Notifications\ReferrerReportPublished;
 use Illuminate\Support\Facades\Notification;
 
 /**
@@ -170,6 +171,9 @@ class AcceptanceStatusService
         if ($this->areAllTestsPublished($acceptance)) {
             if ($acceptance->financial_approved) {
                 $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+                // Referrer acceptances are delivered through the provider panel:
+                // sync the acceptance onto its referrer orders and push them out.
+                $this->referrerAdapter->syncReportedAcceptance($acceptance);
                 // Send notifications
                 $this->sendPublishedNotifications($acceptance, $silent);
             } else {
@@ -209,34 +213,24 @@ class AcceptanceStatusService
     }
 
     /**
-     * Send notifications about published report
+     * Send notifications about published report.
+     *
+     * Referrers are not notified here: a referrer acceptance is delivered by
+     * syncing its referrer orders to the provider panel (see
+     * ReferrerAdapter::syncReportedAcceptance), so no report email is sent.
      */
     private function sendPublishedNotifications(Acceptance $acceptance, bool $silent = false): void
     {
         $acceptance->load([
             'patient',
-            'referrer',
             'acceptanceItems' => fn ($q) => $q->where('reportless', false)
                 ->with('report.publishedDocument', 'report.clinicalCommentDocument', 'test'),
         ]);
         $patient = $acceptance->patient;
-        $referrer = $acceptance->referrer;
         if (count($acceptance->acceptanceItems)) {
-            $howReport = $acceptance->howReport ?? [];
             // Send notification to patient (SMS always; WhatsApp text notification if checked)
             if (! $silent) {
                 Notification::send($patient, new PatientReportPublished($acceptance));
-            }
-
-            if (! $silent && $referrer) {
-                if ($howReport['sendToReferrer'] ?? false) {
-                    $referrer->notify(new ReferrerReportPublished($acceptance));
-                    $acceptance->load('referrerOrders');
-                    // Update referrer order status across all linked referrer orders (pooling + non-pooling)
-                    foreach ($acceptance->referrerOrders as $referrerOrder) {
-                        $this->referrerAdapter->updateOrderStatus($referrerOrder, 'reported');
-                    }
-                }
             }
         }
     }

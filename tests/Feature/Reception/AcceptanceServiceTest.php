@@ -8,6 +8,7 @@ use App\Domains\Notification\Models\WhatsappMessage;
 use App\Domains\Reception\Adapters\LaboratoryAdapter;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Laboratory\Models\Method;
+use App\Domains\Laboratory\Models\SampleType;
 use App\Domains\Laboratory\Models\MethodTest;
 use App\Domains\Laboratory\Models\Test;
 use App\Domains\Reception\DTOs\AcceptanceDTO;
@@ -18,10 +19,12 @@ use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\AcceptanceItemState;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Models\Report;
+use App\Domains\Reception\Models\Sample;
 use App\Domains\Reception\Notifications\PatientReportPublished;
 use App\Domains\Reception\Repositories\AcceptanceRepository;
 use App\Domains\Reception\Services\AcceptanceItemService;
 use App\Domains\Reception\Services\AcceptanceService;
+use App\Domains\Referrer\Events\ReferrerOrderUpdated;
 use App\Domains\Referrer\Models\Referrer;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Reception\Adapters\ReferrerAdapter;
@@ -31,6 +34,7 @@ use App\Notifications\ReferrerReportPublished;
 use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Mockery;
 use Mockery\MockInterface;
@@ -1056,13 +1060,14 @@ class AcceptanceServiceTest extends TestCase
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // R-15: sendToReferrer=true → ReferrerReportPublished + referrer order updated
+    // R-15: referrer acceptance reported → order synced + pushed, no referrer email
     // ─────────────────────────────────────────────────────────────────────────
 
-    public function test_send_notifications_updates_referrer_order_when_send_to_referrer_enabled(): void
+    public function test_reported_referrer_acceptance_syncs_order_without_notifying_referrer(): void
     {
         $this->setUpDatabase();
         Notification::fake();
+        Event::fake([ReferrerOrderUpdated::class]);
 
         $patient = Patient::create([
             'fullName'    => 'Patient R15',
@@ -1125,9 +1130,95 @@ class AcceptanceServiceTest extends TestCase
         $service = app(AcceptanceService::class);
         $service->checkAcceptanceReport($acceptance);
 
-        Notification::assertSentTo($referrer, ReferrerReportPublished::class);
+        Notification::assertNotSentTo($referrer, ReferrerReportPublished::class);
 
         $referrerOrder->refresh();
+        $this->assertEquals('reported', $referrerOrder->status);
+
+        // The order is pushed to the provider panel instead of emailing the referrer.
+        Event::assertDispatched(
+            ReferrerOrderUpdated::class,
+            fn (ReferrerOrderUpdated $event) => $event->referrerOrder->id === $referrerOrder->id
+        );
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // R-15b: referrer acceptance without an order → one is created and pushed
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_reported_referrer_acceptance_without_order_creates_and_syncs_one(): void
+    {
+        $this->setUpDatabase();
+        Notification::fake();
+        Http::fake(); // the provider-panel webhooks fire for real otherwise
+
+        $patient = Patient::create([
+            'fullName'     => 'Patient R15b',
+            'idNo'         => 'R15BIDN',
+            'registrar_id' => auth()->id(),
+            'nationality'  => 'OM',
+            'dateOfBirth'  => '1985-02-02',
+            'gender'       => 'male',
+        ]);
+
+        $referrer = Referrer::create([
+            'fullName'        => 'Referrer R15b',
+            'phoneNo'         => '90000001',
+            'billingInfo'     => [],
+            'email'           => 'r15b@example.com',
+            'reportReceivers' => [],
+        ]);
+
+        $acceptance = $this->createAcceptance([
+            'patient_id'         => $patient->id,
+            'referrer_id'        => $referrer->id,
+            'status'             => AcceptanceStatus::WAITING_FOR_PUBLISHING,
+            'financial_approved' => true,
+            'howReport'          => [],
+        ]);
+
+        $item = AcceptanceItem::create([
+            'acceptance_id'    => $acceptance->id,
+            'method_test_id'   => $this->getMethodTestId(),
+            'price'            => 70,
+            'discount'         => 0,
+            'reportless'       => false,
+            'sampleless'       => false,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]);
+
+        // Only sampled items are sendable to the provider, so the item needs a sample
+        // for an order to be worth creating.
+        $sampleType = SampleType::create([
+            'name'             => 'Blood R15b',
+            'orderable'        => true,
+            'required_barcode' => false,
+        ]);
+        $sample = Sample::create([
+            'barcode'        => 'BC-R15B',
+            'patient_id'     => $patient->id,
+            'sample_type_id' => $sampleType->id,
+            'sampler_id'     => auth()->id(),
+        ]);
+        $item->samples()->attach($sample->id, ['active' => true]);
+
+        Report::create([
+            'reporter_id'        => auth()->id(),
+            'acceptance_item_id' => $item->id,
+            'status'             => true,
+            'published_at'       => now(),
+        ]);
+
+        /** @var AcceptanceService $service */
+        $service = app(AcceptanceService::class);
+        $service->checkAcceptanceReport($acceptance);
+
+        Notification::assertNotSentTo($referrer, ReferrerReportPublished::class);
+
+        $referrerOrder = ReferrerOrder::where('acceptance_id', $acceptance->id)->first();
+        $this->assertNotNull($referrerOrder, 'A referrer order should be created for a reported referrer acceptance');
         $this->assertEquals('reported', $referrerOrder->status);
     }
 
