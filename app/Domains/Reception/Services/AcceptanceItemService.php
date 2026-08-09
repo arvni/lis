@@ -9,6 +9,7 @@ use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Repositories\AcceptanceItemRepository;
 use App\Domains\Reception\Repositories\ReportRepository;
+use App\Domains\Shared\Helpers\AmountDistributor;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -103,15 +104,25 @@ class AcceptanceItemService
 
             $panelId    = Str::uuid();
             $itemCount  = count($panelData['acceptanceItems']);
-            $panelPrice = ($panelData['price'] ?? 0) / ($itemCount ?: 1);
-            $panelDisc  = ($panelData['discount'] ?? 0) / ($itemCount ?: 1);
+            // Split the panel totals so the item shares add back up to the panel
+            // price/discount even when they do not divide evenly.
+            $panelPrices = AmountDistributor::distribute(
+                (float) ($panelData['price'] ?? 0),
+                $itemCount,
+                AmountDistributor::PRICE_DECIMALS
+            );
+            $panelDiscounts = AmountDistributor::distribute(
+                (float) ($panelData['discount'] ?? 0),
+                $itemCount,
+                AmountDistributor::DISCOUNT_DECIMALS
+            );
 
-            foreach ($panelData['acceptanceItems'] as $item) {
+            foreach (array_values($panelData['acceptanceItems']) as $itemIndex => $item) {
                 $dto = new AcceptanceItemDTO(
                     acceptanceId:     $acceptance->id,
                     methodTestId:     $item['method_test']['id'],
-                    price:            $panelPrice,
-                    discount:         $panelDisc,
+                    price:            $panelPrices[$itemIndex],
+                    discount:         $panelDiscounts[$itemIndex],
                     customParameters: array_merge(
                         $item['customParameters'] ?? [],
                         Arr::except($item, ['method_test', 'price', 'discount', 'timeLine', 'id', 'customParameters', 'sampleless', 'reportless'])
@@ -191,17 +202,21 @@ class AcceptanceItemService
                     continue;
                 }
 
+                $panelItems = $items->where('panel_id', $panelId);
+
                 $panels[$panelId] = [
                     'type'      => 'panel',
                     'id'        => $panelId,
                     'name'      => $test->name,
                     'panelData' => [
                         'panel'    => $test->toArray(),
-                        'price'    => (float) $item->price * $items->where('panel_id', $panelId)->count(),
-                        'discount' => (float) $item->discount * $items->where('panel_id', $panelId)->count(),
+                        // Sum the shares instead of scaling the first one: an
+                        // unevenly split panel does not carry the same price on
+                        // every item.
+                        'price'    => (float) $panelItems->sum('price'),
+                        'discount' => (float) $panelItems->sum('discount'),
                         'id'       => $panelId,
-                        'acceptanceItems' => $items
-                            ->where('panel_id', $panelId)
+                        'acceptanceItems' => $panelItems
                             ->values()
                             ->map(fn ($sub) => [
                                 'id'              => $sub->id,
@@ -282,41 +297,82 @@ class AcceptanceItemService
      * Only items belonging to the given acceptance are touched, and each
      * change is recorded on the item timeline.
      *
+     * An entry is either a single item (["id" => int, ...]) or a whole panel
+     * (["panel_id" => string, ...]); a panel's price/discount is the total for
+     * the panel and is split across its items so the shares sum back exactly.
+     *
      * @param Acceptance $acceptance
-     * @param array $items list of ["id" => int, "price" => float, "discount" => float]
+     * @param array $items list of ["id" => int|null, "panel_id" => string|null, "price" => float, "discount" => float]
      * @return void
      */
     public function updateItemPrices(Acceptance $acceptance, array $items): void
     {
-        /** @var Collection<int, AcceptanceItem> $existingItems */
-        $existingItems = $acceptance->acceptanceItems()->get()->keyBy("id");
+        /** @var Collection<int, AcceptanceItem> $acceptanceItems */
+        $acceptanceItems = $acceptance->acceptanceItems()->get();
+        $itemsById = $acceptanceItems->keyBy("id");
+        $itemsByPanel = $acceptanceItems->whereNotNull("panel_id")->groupBy("panel_id");
         $editor = auth()->user()?->name;
 
         foreach ($items as $item) {
-            $acceptanceItem = $existingItems->get($item["id"]);
-            if (!$acceptanceItem) {
-                continue;
-            }
-
             $price = (float)$item["price"];
             $discount = (float)$item["discount"];
-            if ((float)$acceptanceItem->price === $price && (float)$acceptanceItem->discount === $discount) {
+            $panelId = $item["panel_id"] ?? null;
+
+            if ($panelId !== null && $panelId !== "") {
+                $this->applyPanelPrice($itemsByPanel->get((string)$panelId), $price, $discount, $editor);
                 continue;
             }
 
-            $timeline = $acceptanceItem->timeline;
-            if (!is_array($timeline)) {
-                $timeline = json_decode($timeline ?? "[]", true) ?? [];
+            $acceptanceItem = $itemsById->get($item["id"] ?? null);
+            if ($acceptanceItem) {
+                $this->applyItemPrice($acceptanceItem, $price, $discount, $editor);
             }
-            $timeline[now()->format("Y-m-d H:i:s")] =
-                "Price set to $price and discount to $discount by $editor";
-
-            $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, [
-                "price" => $price,
-                "discount" => $discount,
-                "timeline" => $timeline,
-            ]);
         }
+    }
+
+    /**
+     * Split a panel total across its items and apply each share.
+     *
+     * @param SupportCollection<int, AcceptanceItem>|null $panelItems
+     */
+    private function applyPanelPrice(?SupportCollection $panelItems, float $price, float $discount, ?string $editor): void
+    {
+        if (!$panelItems || $panelItems->isEmpty()) {
+            return;
+        }
+
+        $count = $panelItems->count();
+        $prices = AmountDistributor::distribute($price, $count, AmountDistributor::PRICE_DECIMALS);
+        $discounts = AmountDistributor::distribute($discount, $count, AmountDistributor::DISCOUNT_DECIMALS);
+        $note = " (share of panel price $price and discount $discount over $count items)";
+
+        foreach ($panelItems->values() as $index => $panelItem) {
+            $this->applyItemPrice($panelItem, $prices[$index], $discounts[$index], $editor, $note);
+        }
+    }
+
+    /**
+     * Write a single item's price/discount, skipping unchanged items and
+     * recording the change on the item timeline.
+     */
+    private function applyItemPrice(AcceptanceItem $acceptanceItem, float $price, float $discount, ?string $editor, string $note = ""): void
+    {
+        if ((float)$acceptanceItem->price === $price && (float)$acceptanceItem->discount === $discount) {
+            return;
+        }
+
+        $timeline = $acceptanceItem->timeline;
+        if (!is_array($timeline)) {
+            $timeline = json_decode($timeline ?? "[]", true) ?? [];
+        }
+        $timeline[now()->format("Y-m-d H:i:s")] =
+            "Price set to $price and discount to $discount by $editor" . $note;
+
+        $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, [
+            "price" => $price,
+            "discount" => $discount,
+            "timeline" => $timeline,
+        ]);
     }
 
     public function updateAcceptanceItemTimeline(AcceptanceItem $acceptanceItem, string $message): AcceptanceItem

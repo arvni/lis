@@ -20,6 +20,7 @@ use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Models\Report;
 use App\Domains\Reception\Repositories\AcceptanceRepository;
+use App\Domains\Shared\Helpers\AmountDistributor;
 use App\Domains\User\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -566,14 +567,27 @@ class AcceptanceService
                     $panelID = Str::uuid()->toString();
                     $panelSampleless = $panelData["sampleless"] ?? false;
                     $panelReportless = $panelData["reportless"] ?? false;
-                    foreach ($panelData["acceptanceItems"] as $item) {
+                    // Split the panel totals so the item shares add back up to the
+                    // panel price/discount even when they do not divide evenly.
+                    $panelItemCount = count($panelData["acceptanceItems"]);
+                    $panelPrices = AmountDistributor::distribute(
+                        (float)$panelData['price'],
+                        $panelItemCount,
+                        AmountDistributor::PRICE_DECIMALS
+                    );
+                    $panelDiscounts = AmountDistributor::distribute(
+                        (float)$panelData['discount'],
+                        $panelItemCount,
+                        AmountDistributor::DISCOUNT_DECIMALS
+                    );
+                    foreach (array_values($panelData["acceptanceItems"]) as $itemIndex => $item) {
                         $itemSampleless = $panelSampleless || ($item["sampleless"] ?? false);
                         $isService = ($item['method_test']['test']['type'] ?? null) === TestType::SERVICE->value;
                         $output[] = new AcceptanceItemDTO(
                             $acceptance->id,
                             (int)$item['method_test']['id'],
-                            (float)($panelData['price'] / count($panelData['acceptanceItems'])), // Distribute price among items
-                            (float)($panelData['discount'] / count($panelData['acceptanceItems'])), // Distribute discount among items
+                            $panelPrices[$itemIndex],
+                            $panelDiscounts[$itemIndex],
                             array_merge(($item["customParameters"] ?? []), Arr::except($item, ["method_test", "price", "discount", "patients", "timeLine", "id", "customParameters", "sampleless"])),
                             !($item['timeLine'] ?? null) ? [
                                 Carbon::now()->format("Y-m-d H:i:s") => "Created By " . auth()->user()->name,

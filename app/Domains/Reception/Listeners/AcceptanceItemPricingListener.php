@@ -8,6 +8,7 @@ use App\Domains\Billing\Events\AcceptanceItemPricingEvent;
 use App\Domains\Reception\Adapters\BillingAdapter;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Repositories\AcceptanceItemRepository;
+use App\Domains\Shared\Helpers\AmountDistributor;
 
 class AcceptanceItemPricingListener
 {
@@ -55,10 +56,23 @@ class AcceptanceItemPricingListener
                 $acceptanceItemData['id'],
                 $acceptanceItemData['acceptance_items'][0]['acceptance_id']
             );
-            foreach ($acceptanceItems as $acceptanceItem) {
+            // Split the panel totals so the item shares add back up to the panel
+            // price/discount even when they do not divide evenly.
+            $prices = AmountDistributor::distribute(
+                (float) $acceptanceItemData['price'],
+                count($acceptanceItems),
+                AmountDistributor::PRICE_DECIMALS
+            );
+            $discounts = AmountDistributor::distribute(
+                (float) $acceptanceItemData['discount'],
+                count($acceptanceItems),
+                AmountDistributor::DISCOUNT_DECIMALS
+            );
+
+            foreach ($acceptanceItems->values() as $index => $acceptanceItem) {
                 $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, [
-                    'price' => $acceptanceItemData['price'] / count($acceptanceItems),
-                    'discount' => $acceptanceItemData['discount'] / count($acceptanceItems),
+                    'price' => $prices[$index],
+                    'discount' => $discounts[$index],
                     'customParameters' => [
                         ...($acceptanceItem->customParameters ?? []),
                         ...($acceptanceItemData['customParameters'] ?? []),
