@@ -34,7 +34,7 @@ const checkCoverage = (panelMethodTests, selectedMethodIds) => {
     return { matched, missing };
 };
 
-const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [] }) => {
+const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [], referrer = null }) => {
     const [panels, setPanels] = useState([]);
     const [loadingPanels, setLoadingPanels] = useState(false);
     const [selectedPanel, setSelectedPanel] = useState(null);
@@ -84,11 +84,15 @@ const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [] }) => {
         setError(null);
 
         axios
-            .get(route('api.tests.show', selectedPanel.id))
+            .get(route('api.tests.show', selectedPanel.id), {
+                // A referred acceptance resolves the panel against the referrer's
+                // tariff, so the details must be fetched for that referrer.
+                params: referrer?.id ? { referrer: { id: referrer.id } } : {},
+            })
             .then((res) => setPanelDetails(res.data.data ?? res.data))
             .catch(() => setError('Failed to load panel details.'))
             .finally(() => setLoadingPanel(false));
-    }, [selectedPanel]);
+    }, [selectedPanel, referrer?.id]);
 
     const panelMethodTests = panelDetails?.method_tests ?? [];
     const { matched, missing } = checkCoverage(panelMethodTests, selectedMethodIds);
