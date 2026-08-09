@@ -2,8 +2,11 @@
 
 namespace Tests\Unit\Reception;
 
+use App\Domains\Reception\Models\Report;
 use App\Domains\Reception\Services\ReportDataService;
 use App\Domains\Referrer\Models\Referrer;
+use Carbon\CarbonInterface;
+use InvalidArgumentException;
 use Tests\TestCase;
 
 /**
@@ -211,5 +214,102 @@ class ReportServiceDataShapingTest extends TestCase
                 'created_at' => '2026-06-01',
             ],
         ], $result);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // getReportData — the ${...} placeholders resolved from the report itself
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_get_report_data_exposes_report_timestamp_placeholders(): void
+    {
+        $report = $this->makeReportDouble(
+            createdAt: '2026-08-09 14:32:11',
+            approvedAt: '2026-08-11 09:05:00',
+        );
+
+        $result = $this->service->getReportData($report);
+
+        $this->assertArrayHasKey('report_created_at', $result);
+        $this->assertArrayHasKey('report_approved_at', $result);
+        $this->assertInstanceOf(CarbonInterface::class, $result['report_created_at']);
+        $this->assertInstanceOf(CarbonInterface::class, $result['report_approved_at']);
+        $this->assertSame('2026-08-09 14:32:11', $result['report_created_at']->format('Y-m-d H:i:s'));
+        $this->assertSame('2026-08-11 09:05:00', $result['report_approved_at']->format('Y-m-d H:i:s'));
+
+        // The test name travels in the same $other block.
+        $this->assertSame('Whole Exome Sequencing', $result['test']);
+    }
+
+    public function test_get_report_data_timestamps_render_as_template_strings(): void
+    {
+        // BuildWordFileService::build() writes every non-image value into the
+        // .docx as htmlspecialchars((string) $value) — assert the string cast
+        // these placeholders actually produce for ${report_created_at}.
+        $report = $this->makeReportDouble(
+            createdAt: '2026-08-09 14:32:11',
+            approvedAt: '2026-08-11 09:05:00',
+        );
+
+        $result = $this->service->getReportData($report);
+
+        $this->assertSame('2026-08-09 14:32:11', (string) $result['report_created_at']);
+        $this->assertSame('2026-08-11 09:05:00', (string) $result['report_approved_at']);
+    }
+
+    public function test_get_report_data_keeps_created_at_when_report_is_unapproved(): void
+    {
+        $report = $this->makeReportDouble(
+            createdAt: '2026-08-09 14:32:11',
+            approvedAt: null,
+        );
+
+        $result = $this->service->getReportData($report);
+
+        $this->assertSame('2026-08-09 14:32:11', (string) $result['report_created_at']);
+        // Unapproved → the placeholder still resolves, to an empty string.
+        $this->assertNull($result['report_approved_at']);
+        $this->assertSame('', (string) $result['report_approved_at']);
+    }
+
+    public function test_get_report_data_rejects_an_unpersisted_report(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->service->getReportData(new Report);
+    }
+
+    /**
+     * A Report that never touches the DB: load() is a no-op and every relation
+     * getReportData() walks is pre-seeded. Patients/samples/signers/parameters
+     * are left empty on purpose — their shaping is covered by the tests above,
+     * so this keeps the assertions on the $other block.
+     */
+    private function makeReportDouble(string $createdAt, ?string $approvedAt): Report
+    {
+        $report = new class extends Report
+        {
+            /** @param  mixed  $relations */
+            public function load($relations)
+            {
+                return $this;
+            }
+        };
+
+        $report->exists = true;
+        $report->forceFill([
+            'created_at' => $createdAt,
+            'approved_at' => $approvedAt,
+        ]);
+
+        $report->setRelation('acceptanceItem', (object) [
+            'patients' => collect([]),
+            'activeSamples' => collect([]),
+            'test' => (object) ['name' => 'Whole Exome Sequencing'],
+            'acceptance' => (object) ['referrer' => null],
+        ]);
+        $report->setRelation('signers', collect([]));
+        $report->setRelation('parameters', collect([]));
+
+        return $report;
     }
 }

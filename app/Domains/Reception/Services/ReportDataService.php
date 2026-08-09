@@ -81,6 +81,7 @@ class ReportDataService
         $other = [
             'test' => $report->acceptanceItem->test->name,
             'report_approved_at' => $report->approved_at,
+            'report_created_at' => $report->created_at,
         ];
 
         return Arr::undot(array_merge(
