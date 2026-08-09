@@ -77,6 +77,89 @@ class AcceptanceItemServiceTest extends TestCase
         $this->assertSame(1, $captured['acceptance_id']);
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // addItemsToExistingAcceptance (referrer-order pooling into an existing acceptance)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Record every payload the repository is asked to persist.
+     *
+     * @param  array<int, array<string, mixed>>  $captured
+     */
+    private function captureCreatedItems(int $times, array &$captured): void
+    {
+        $this->itemRepo->shouldReceive('creatAcceptanceItem')
+            ->times($times)
+            ->andReturnUsing(function ($data) use (&$captured) {
+                $captured[] = $data;
+
+                return new AcceptanceItem();
+            });
+    }
+
+    private function bareAcceptance(int $id = 7): Acceptance
+    {
+        $acceptance = new Acceptance();
+        $acceptance->setRawAttributes(['id' => $id]);
+
+        return $acceptance;
+    }
+
+    public function test_add_items_to_existing_acceptance_keeps_submitted_test_flags(): void
+    {
+        $this->actingAs(User::factory()->make(['name' => 'Receptionist']));
+        $captured = [];
+        $this->captureCreatedItems(1, $captured);
+
+        $this->service->addItemsToExistingAcceptance($this->bareAcceptance(), [
+            'tests' => [
+                ['method_test' => ['id' => 3], 'price' => 120, 'discount' => 20, 'sampleless' => true],
+                ['method_test' => ['id' => 4], 'price' => 50, 'deleted' => true],
+            ],
+        ]);
+
+        $this->assertCount(1, $captured, 'a deleted item is skipped');
+        $this->assertSame(7, $captured[0]['acceptance_id']);
+        $this->assertSame(120.0, $captured[0]['price']);
+        $this->assertSame(20.0, $captured[0]['discount']);
+        $this->assertTrue($captured[0]['sampleless']);
+        $this->assertStringContainsString(
+            'Created By Receptionist (Pooling)',
+            implode(' ', $captured[0]['timeline'])
+        );
+    }
+
+    public function test_add_items_to_existing_acceptance_splits_panel_totals_and_shares_a_panel_id(): void
+    {
+        $this->actingAs(User::factory()->make(['name' => 'Receptionist']));
+        $captured = [];
+        $this->captureCreatedItems(3, $captured);
+
+        $this->service->addItemsToExistingAcceptance($this->bareAcceptance(), [
+            'panels' => [[
+                'price' => 100,
+                'discount' => 10,
+                'reportless' => true,
+                'acceptanceItems' => [
+                    ['method_test' => ['id' => 1]],
+                    ['method_test' => ['id' => 2]],
+                    ['method_test' => ['id' => 3]],
+                ],
+            ]],
+        ]);
+
+        $this->assertCount(3, $captured);
+        // 100 over three items does not divide evenly, but the shares must still
+        // add back up to the panel total.
+        $this->assertEqualsWithDelta(100.0, array_sum(array_column($captured, 'price')), 0.001);
+        $this->assertEqualsWithDelta(10.0, array_sum(array_column($captured, 'discount')), 0.001);
+        $this->assertCount(1, array_unique(array_map(
+            fn (array $item) => (string) $item['panel_id'],
+            $captured
+        )), 'all panel items share one panel_id');
+        $this->assertTrue($captured[0]['reportless'], 'the panel-level reportless flag reaches its items');
+    }
+
     public function test_update_acceptance_item_delegates(): void
     {
         $item = new AcceptanceItem();

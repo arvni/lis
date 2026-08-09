@@ -9,9 +9,7 @@ use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Services\InvoiceService;
 use App\Domains\Billing\Services\PaymentService;
 use App\Domains\Reception\DTOs\AcceptanceDTO;
-use App\Domains\Reception\DTOs\AcceptanceItemDTO;
 use App\Domains\Reception\Enums\AcceptanceStatus;
-use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Services\AcceptanceService;
 use App\Domains\Reception\Services\AcceptanceItemService;
 use App\Domains\Referrer\Adapters\ReceptionAdapter;
@@ -21,9 +19,6 @@ use App\Domains\Referrer\Requests\StoreReferrerOrderAcceptanceRequest;
 use App\Domains\Referrer\Services\ReferrerOrderService;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 
 class StoreReferrerOrderAcceptanceController extends Controller
 {
@@ -98,7 +93,10 @@ class StoreReferrerOrderAcceptanceController extends Controller
         }
 
         // Add new acceptance items directly to existing acceptance
-        $this->addAcceptanceItems($existingAcceptance, $validated['acceptanceItems']);
+        $this->acceptanceItemService->addItemsToExistingAcceptance(
+            $existingAcceptance,
+            $validated['acceptanceItems']
+        );
 
         // Link referrer order to existing acceptance
         $referrerOrderDto = ReferrerOrderDTO::fromArray($referrerOrder->toArray());
@@ -106,73 +104,5 @@ class StoreReferrerOrderAcceptanceController extends Controller
         $this->referrerOrderService->updateReferrerOrder($referrerOrder, $referrerOrderDto);
 
         return back()->with("success", "Tests added to existing acceptance");
-    }
-
-    /**
-     * Add new acceptance items to an existing acceptance
-     */
-    private function addAcceptanceItems(Acceptance $acceptance, array $acceptanceItems): void
-    {
-        $user = auth()->user();
-
-        // Process tests
-        if (isset($acceptanceItems['tests']) && is_array($acceptanceItems['tests'])) {
-            foreach ($acceptanceItems['tests'] as $item) {
-                if (!isset($item['deleted']) || !$item['deleted']) {
-                    $dto = new AcceptanceItemDTO(
-                        $acceptance->id,
-                        $item['method_test']['id'],
-                        $item['price'],
-                        $item['discount'] ?? 0,
-                        array_merge(
-                            ($item['customParameters'] ?? []),
-                            Arr::except($item, ['method_test', 'price', 'discount', 'patients', 'timeLine', 'id', 'customParameters', 'sampleless'])
-                        ),
-                        [Carbon::now()->format("Y-m-d H:i:s") => "Created By " . $user->name . " (Pooling)"],
-                        $item['no_sample'] ?? 1,
-                        null,
-                        null,
-                        false,
-                        $item['sampleless'] ?? false
-                    );
-                    $this->acceptanceItemService->storeAcceptanceItem($dto);
-                }
-            }
-        }
-
-        // Process panels
-        if (isset($acceptanceItems['panels']) && is_array($acceptanceItems['panels'])) {
-            foreach ($acceptanceItems['panels'] as $panelData) {
-                if (isset($panelData['acceptanceItems']) && is_array($panelData['acceptanceItems'])) {
-                    if (isset($panelData['deleted']) && $panelData['deleted']) {
-                        continue;
-                    }
-                    $panelID = Str::uuid();
-                    $panelSampleless = $panelData['sampleless'] ?? false;
-                    $panelReportless = $panelData['reportless'] ?? false;
-                    foreach ($panelData['acceptanceItems'] as $item) {
-                        $itemSampleless = $panelSampleless || ($item['sampleless'] ?? false);
-                        $dto = new AcceptanceItemDTO(
-                            $acceptance->id,
-                            $item['method_test']['id'],
-                            $panelData['price'] / count($panelData['acceptanceItems']),
-                            ($panelData['discount'] ?? 0) / count($panelData['acceptanceItems']),
-                            array_merge(
-                                ($item['customParameters'] ?? []),
-                                Arr::except($item, ['method_test', 'price', 'discount', 'patients', 'timeLine', 'id', 'customParameters', 'sampleless'])
-                            ),
-                            [Carbon::now()->format("Y-m-d H:i:s") => "Created By " . $user->name . " (Pooling)"],
-                            $item['no_sample'] ?? 1,
-                            null,
-                            $panelID,
-                            false,
-                            $itemSampleless,
-                            $panelReportless || ($item['reportless'] ?? false),
-                        );
-                        $this->acceptanceItemService->storeAcceptanceItem($dto);
-                    }
-                }
-            }
-        }
     }
 }
