@@ -19,11 +19,70 @@ import {
     TextField,
     Paper,
     Alert,
+    Chip,
     alpha,
     useTheme,
 } from '@mui/material';
-import { Close, Save, RequestQuote } from '@mui/icons-material';
+import { Close, Save, RequestQuote, PlaylistAddCheck } from '@mui/icons-material';
 import { router } from '@inertiajs/react';
+
+const round = (value, decimals) => {
+    const factor = 10 ** decimals;
+    return Math.round((parseFloat(value) || 0) * factor) / factor;
+};
+
+const itemName = (item) => item?.method_test?.test?.name ?? item?.test?.name ?? `Item #${item.id}`;
+
+/**
+ * Turn the flat acceptance items into editable rows: standalone items get one
+ * row each, and the items of a panel are merged into a single row carrying the
+ * panel totals (the server splits an edited panel total back over its items).
+ */
+export const buildPriceRows = (acceptanceItems = []) => {
+    const rows = [];
+    const panelRows = new Map();
+
+    acceptanceItems.forEach((item) => {
+        const price = parseFloat(item.price) || 0;
+        const discount = parseFloat(item.discount) || 0;
+        const panelId = item.panel_id ?? null;
+
+        if (!panelId) {
+            rows.push({
+                key: `item-${item.id}`,
+                type: 'item',
+                id: item.id,
+                name: itemName(item),
+                methods: [],
+                price,
+                discount,
+            });
+            return;
+        }
+
+        const existing = panelRows.get(panelId);
+        if (existing) {
+            existing.price = round(existing.price + price, 3);
+            existing.discount = round(existing.discount + discount, 3);
+            existing.methods.push(item?.method_test?.method?.name);
+            return;
+        }
+
+        const row = {
+            key: `panel-${panelId}`,
+            type: 'panel',
+            panelId,
+            name: itemName(item),
+            methods: [item?.method_test?.method?.name],
+            price,
+            discount,
+        };
+        panelRows.set(panelId, row);
+        rows.push(row);
+    });
+
+    return rows;
+};
 
 /**
  * Dialog for editing the price and discount of each acceptance item before an
@@ -31,45 +90,38 @@ import { router } from '@inertiajs/react';
  *
  * @param {boolean} open
  * @param {Object} acceptance - acceptance with id
- * @param {Array} acceptanceItems - flat list of acceptance items (id, price, discount, method_test...)
+ * @param {Array} acceptanceItems - flat list of acceptance items (id, panel_id, price, discount, method_test...)
  * @param {Function} onClose
  */
 const EditItemPricesForm = ({ open, acceptance, acceptanceItems = [], onClose }) => {
     const theme = useTheme();
 
-    const [items, setItems] = useState(() =>
-        acceptanceItems.map((item) => ({
-            id: item.id,
-            name: item?.method_test?.test?.name ?? item?.test?.name ?? `Item #${item.id}`,
-            price: item.price ?? 0,
-            discount: item.discount ?? 0,
-        })),
-    );
+    const [rows, setRows] = useState(() => buildPriceRows(acceptanceItems));
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
-    const handleField = (id, field) => (e) => {
+    const hasPanels = rows.some((row) => row.type === 'panel');
+
+    const handleField = (key, field) => (e) => {
         const value = e.target.value;
-        setItems((prev) =>
-            prev.map((item) => (item.id === id ? { ...item, [field]: value } : item)),
-        );
+        setRows((prev) => prev.map((row) => (row.key === key ? { ...row, [field]: value } : row)));
     };
 
     const totals = useMemo(() => {
-        const price = items.reduce((acc, i) => acc + (parseFloat(i.price) || 0), 0);
-        const discount = items.reduce((acc, i) => acc + (parseFloat(i.discount) || 0), 0);
+        const price = rows.reduce((acc, row) => acc + (parseFloat(row.price) || 0), 0);
+        const discount = rows.reduce((acc, row) => acc + (parseFloat(row.discount) || 0), 0);
         return { price, discount, net: price - discount };
-    }, [items]);
+    }, [rows]);
 
     const handleSubmit = () => {
         setProcessing(true);
         router.put(
             route('acceptances.updateItemPrices', acceptance.id),
             {
-                items: items.map((i) => ({
-                    id: i.id,
-                    price: parseFloat(i.price) || 0,
-                    discount: parseFloat(i.discount) || 0,
+                items: rows.map((row) => ({
+                    ...(row.type === 'panel' ? { panel_id: row.panelId } : { id: row.id }),
+                    price: parseFloat(row.price) || 0,
+                    discount: parseFloat(row.discount) || 0,
                 })),
             },
             {
@@ -125,104 +177,164 @@ const EditItemPricesForm = ({ open, acceptance, acceptanceItems = [], onClose })
             <Divider />
 
             <DialogContent sx={{ p: 3 }}>
-                {items.length === 0 ? (
+                {rows.length === 0 ? (
                     <Alert severity="info">There are no items to edit.</Alert>
                 ) : (
-                    <TableContainer component={Paper} variant="outlined">
-                        <Table size="small" aria-label="edit item prices table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Item</TableCell>
-                                    <TableCell align="right" width={160}>
-                                        Price
-                                    </TableCell>
-                                    <TableCell align="right" width={160}>
-                                        Discount
-                                    </TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {items.map((item, index) => (
-                                    <TableRow key={item.id}>
+                    <>
+                        {hasPanels && (
+                            <Alert severity="info" sx={{ mb: 2 }}>
+                                A panel is priced as a whole. The amount is split evenly across its
+                                tests, and any leftover is added to the first tests so the shares
+                                add up to the panel price exactly.
+                            </Alert>
+                        )}
+                        <TableContainer component={Paper} variant="outlined">
+                            <Table size="small" aria-label="edit item prices table">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Item</TableCell>
+                                        <TableCell align="right" width={160}>
+                                            Price
+                                        </TableCell>
+                                        <TableCell align="right" width={160}>
+                                            Discount
+                                        </TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {rows.map((row, index) => (
+                                        <TableRow key={row.key}>
+                                            <TableCell>
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: 1,
+                                                    }}
+                                                >
+                                                    {row.type === 'panel' && (
+                                                        <PlaylistAddCheck
+                                                            fontSize="small"
+                                                            color="primary"
+                                                        />
+                                                    )}
+                                                    <Box>
+                                                        <Typography
+                                                            variant="body2"
+                                                            fontWeight="medium"
+                                                            color={
+                                                                row.type === 'panel'
+                                                                    ? 'primary.main'
+                                                                    : 'text.primary'
+                                                            }
+                                                        >
+                                                            {row.name}
+                                                            {row.type === 'panel' && (
+                                                                <Chip
+                                                                    label={`${row.methods.length} tests`}
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                    color="primary"
+                                                                    sx={{
+                                                                        ml: 1,
+                                                                        height: 20,
+                                                                        fontSize: '0.65rem',
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        </Typography>
+                                                        {row.type === 'panel' && (
+                                                            <Typography
+                                                                variant="caption"
+                                                                color="text.secondary"
+                                                            >
+                                                                {row.methods
+                                                                    .filter(Boolean)
+                                                                    .join(' • ')}
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell align="right">
+                                                <TextField
+                                                    type="number"
+                                                    size="small"
+                                                    value={row.price}
+                                                    onChange={handleField(row.key, 'price')}
+                                                    error={Boolean(errors[`items.${index}.price`])}
+                                                    helperText={errors[`items.${index}.price`]}
+                                                    slotProps={{
+                                                        htmlInput: {
+                                                            min: 0,
+                                                            step: 0.01,
+                                                            style: { textAlign: 'right' },
+                                                            'aria-label': `Price for ${row.name}`,
+                                                        },
+                                                    }}
+                                                    sx={{ width: 140 }}
+                                                />
+                                            </TableCell>
+                                            <TableCell align="right">
+                                                <TextField
+                                                    type="number"
+                                                    size="small"
+                                                    value={row.discount}
+                                                    onChange={handleField(row.key, 'discount')}
+                                                    error={Boolean(
+                                                        errors[`items.${index}.discount`],
+                                                    )}
+                                                    helperText={errors[`items.${index}.discount`]}
+                                                    slotProps={{
+                                                        htmlInput: {
+                                                            min: 0,
+                                                            step: 0.01,
+                                                            style: { textAlign: 'right' },
+                                                            'aria-label': `Discount for ${row.name}`,
+                                                        },
+                                                    }}
+                                                    sx={{ width: 140 }}
+                                                />
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                                <TableFooter>
+                                    <TableRow>
                                         <TableCell>
-                                            <Typography variant="body2" fontWeight="medium">
-                                                {item.name}
+                                            <Typography fontWeight="bold">Net Total</Typography>
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            <Typography fontWeight="bold">
+                                                {totals.price.toFixed(2)}
                                             </Typography>
                                         </TableCell>
                                         <TableCell align="right">
-                                            <TextField
-                                                type="number"
-                                                size="small"
-                                                value={item.price}
-                                                onChange={handleField(item.id, 'price')}
-                                                error={Boolean(errors[`items.${index}.price`])}
-                                                helperText={errors[`items.${index}.price`]}
-                                                slotProps={{
-                                                    htmlInput: {
-                                                        min: 0,
-                                                        step: 0.01,
-                                                        style: { textAlign: 'right' },
-                                                    },
-                                                }}
-                                                sx={{ width: 140 }}
-                                            />
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            <TextField
-                                                type="number"
-                                                size="small"
-                                                value={item.discount}
-                                                onChange={handleField(item.id, 'discount')}
-                                                error={Boolean(errors[`items.${index}.discount`])}
-                                                helperText={errors[`items.${index}.discount`]}
-                                                slotProps={{
-                                                    htmlInput: {
-                                                        min: 0,
-                                                        step: 0.01,
-                                                        style: { textAlign: 'right' },
-                                                    },
-                                                }}
-                                                sx={{ width: 140 }}
-                                            />
+                                            <Typography fontWeight="bold" color="error">
+                                                -{totals.discount.toFixed(2)}
+                                            </Typography>
                                         </TableCell>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                            <TableFooter>
-                                <TableRow>
-                                    <TableCell>
-                                        <Typography fontWeight="bold">Net Total</Typography>
-                                    </TableCell>
-                                    <TableCell align="right">
-                                        <Typography fontWeight="bold">
-                                            {totals.price.toFixed(2)}
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell align="right">
-                                        <Typography fontWeight="bold" color="error">
-                                            -{totals.discount.toFixed(2)}
-                                        </Typography>
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell colSpan={2} align="right">
-                                        <Typography variant="h6" fontWeight="bold">
-                                            Net Amount:
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell align="right">
-                                        <Typography
-                                            variant="h6"
-                                            fontWeight="bold"
-                                            color="success.main"
-                                        >
-                                            {totals.net.toFixed(2)}
-                                        </Typography>
-                                    </TableCell>
-                                </TableRow>
-                            </TableFooter>
-                        </Table>
-                    </TableContainer>
+                                    <TableRow>
+                                        <TableCell colSpan={2} align="right">
+                                            <Typography variant="h6" fontWeight="bold">
+                                                Net Amount:
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            <Typography
+                                                variant="h6"
+                                                fontWeight="bold"
+                                                color="success.main"
+                                            >
+                                                {totals.net.toFixed(2)}
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>
+                                </TableFooter>
+                            </Table>
+                        </TableContainer>
+                    </>
                 )}
             </DialogContent>
 
@@ -241,7 +353,7 @@ const EditItemPricesForm = ({ open, acceptance, acceptanceItems = [], onClose })
                 <Button
                     onClick={handleSubmit}
                     variant="contained"
-                    disabled={processing || items.length === 0}
+                    disabled={processing || rows.length === 0}
                     startIcon={<Save />}
                 >
                     Save Changes

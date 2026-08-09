@@ -11,7 +11,10 @@ class UpdateAcceptanceItemPricesRequest extends FormRequest
     {
         return [
             'items' => ['required', 'array', 'min:1'],
-            'items.*.id' => ['required', 'integer'],
+            // An entry addresses either a single item or a whole panel: a panel
+            // is priced as one line and split across its items server-side.
+            'items.*.id' => ['required_without:items.*.panel_id', 'nullable', 'integer'],
+            'items.*.panel_id' => ['required_without:items.*.id', 'nullable', 'string', 'max:36'],
             'items.*.price' => ['required', 'numeric', 'min:0'],
             'items.*.discount' => ['required', 'numeric', 'min:0'],
         ];

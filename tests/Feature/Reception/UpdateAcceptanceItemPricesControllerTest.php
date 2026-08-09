@@ -80,13 +80,35 @@ class UpdateAcceptanceItemPricesControllerTest extends TestCase
         ]);
     }
 
-    private function getMethodTestId(): int
+    /**
+     * @return array<int, AcceptanceItem> the panel's items, in creation order
+     */
+    private function createPanelItems(Acceptance $acceptance, int $count, float $price, float $discount = 0): array
+    {
+        $panelId = (string) Str::uuid();
+        $shares = array_fill(0, $count, $price / $count);
+
+        return array_map(fn ($share) => AcceptanceItem::create([
+            'acceptance_id'    => $acceptance->id,
+            'method_test_id'   => $this->getMethodTestId(TestType::PANEL),
+            'panel_id'         => $panelId,
+            'price'            => $share,
+            'discount'         => $discount / $count,
+            'reportless'       => false,
+            'sampleless'       => false,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]), $shares);
+    }
+
+    private function getMethodTestId(TestType $type = TestType::TEST): int
     {
         $test = Test::create([
             'name'      => 'Test ' . Str::random(4),
             'fullName'  => 'Full Test',
             'code'      => 'T' . uniqid(),
-            'type'      => TestType::TEST,
+            'type'      => $type,
             'status'    => true,
             'can_merge' => false,
         ]);
@@ -214,6 +236,82 @@ class UpdateAcceptanceItemPricesControllerTest extends TestCase
             'id'    => $item->id,
             'price' => 100,
         ]);
+    }
+
+    public function test_updates_a_whole_panel_and_keeps_the_shares_summing_to_the_panel_price(): void
+    {
+        $acceptance = $this->createAcceptance();
+        $panelItems = $this->createPanelItems($acceptance, count: 3, price: 300, discount: 30);
+        $panelId = $panelItems[0]->panel_id;
+
+        $this->put(route('acceptances.updateItemPrices', $acceptance->id), [
+            'items' => [
+                ['panel_id' => $panelId, 'price' => 140, 'discount' => 10],
+            ],
+        ])->assertRedirect();
+
+        $prices = AcceptanceItem::where('panel_id', $panelId)->pluck('price');
+        $discounts = AcceptanceItem::where('panel_id', $panelId)->pluck('discount');
+
+        // 140 / 3 does not divide: the leftover goes to the first items rather
+        // than rounding every share up (which would total 141).
+        $this->assertEqualsCanonicalizing([47, 47, 46], $prices->map(fn ($p) => (int) $p)->all());
+        $this->assertSame(140.0, (float) $prices->sum());
+        $this->assertSame(10.0, round((float) $discounts->sum(), 3));
+    }
+
+    public function test_records_the_panel_total_on_each_item_timeline(): void
+    {
+        $acceptance = $this->createAcceptance();
+        $panelItems = $this->createPanelItems($acceptance, count: 2, price: 100);
+
+        $this->put(route('acceptances.updateItemPrices', $acceptance->id), [
+            'items' => [
+                ['panel_id' => $panelItems[0]->panel_id, 'price' => 75, 'discount' => 0],
+            ],
+        ])->assertRedirect();
+
+        foreach ($panelItems as $item) {
+            $item->refresh();
+            $this->assertStringContainsString(
+                'share of panel price 75',
+                implode(' ', $item->timeline)
+            );
+        }
+    }
+
+    public function test_ignores_a_panel_that_does_not_belong_to_the_acceptance(): void
+    {
+        $acceptance = $this->createAcceptance();
+        $item = $this->createItem($acceptance, price: 100);
+
+        $otherAcceptance = $this->createAcceptance();
+        $foreignPanel = $this->createPanelItems($otherAcceptance, count: 2, price: 200);
+
+        $this->put(route('acceptances.updateItemPrices', $acceptance->id), [
+            'items' => [
+                ['panel_id' => $foreignPanel[0]->panel_id, 'price' => 1, 'discount' => 0],
+            ],
+        ])->assertRedirect();
+
+        foreach ($foreignPanel as $foreignItem) {
+            $this->assertDatabaseHas('acceptance_items', [
+                'id'    => $foreignItem->id,
+                'price' => 100,
+            ]);
+        }
+    }
+
+    public function test_rejects_an_entry_without_an_item_or_panel_reference(): void
+    {
+        $acceptance = $this->createAcceptance();
+        $this->createItem($acceptance, price: 100);
+
+        $this->put(route('acceptances.updateItemPrices', $acceptance->id), [
+            'items' => [
+                ['price' => 10, 'discount' => 0],
+            ],
+        ])->assertSessionHasErrors('items.0.id');
     }
 
     public function test_requires_the_edit_item_prices_permission(): void
