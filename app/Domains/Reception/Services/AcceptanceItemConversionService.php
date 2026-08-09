@@ -11,6 +11,7 @@ use App\Domains\Reception\Adapters\ReferrerAdapter;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Repositories\AcceptanceItemConversionRepository;
 use App\Domains\Reception\Repositories\AcceptanceItemRepository;
+use App\Domains\Shared\Helpers\AmountDistributor;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,16 @@ use Illuminate\Support\Str;
 
 class AcceptanceItemConversionService
 {
+    /**
+     * Price resolved from a test-level tier. Every MethodTest of a PANEL carries
+     * the panel's own test_id, so such a price is the panel's total, not one
+     * item's share.
+     */
+    private const SCOPE_TEST = 'test';
+
+    /** Price resolved from a method-level tier — already a per-item amount. */
+    private const SCOPE_METHOD = 'method';
+
     public function __construct(
         private readonly AcceptanceItemRepository $acceptanceItemRepository,
         private readonly AcceptanceItemConversionRepository $conversionRepository,
@@ -132,21 +143,64 @@ class AcceptanceItemConversionService
         ) {
             $allActiveSamples = collect();
 
+            // Resolve every slot of the resulting panel before writing anything,
+            // so a panel-level price can be split across the slots that share it
+            // instead of being charged in full on each of them.
+            $slots = [];
+
             foreach ($items as $item) {
                 $match = $matchMap[$item->id] ?? null;
+
+                $slots[] = [
+                    'item' => $item,
+                    'methodTest' => $match,
+                    // Use the item's own stored price parameters for recalculation
+                    'resolved' => $this->resolvePriceWithScope(
+                        $match ? $match->test_id : $item->methodTest->test_id,
+                        $match ? $match->method_id : $item->methodTest->method_id,
+                        $referrerId,
+                        $item->customParameters['price'] ?? []
+                    ),
+                ];
+            }
+
+            // Panel tests not covered by any selected item get a new acceptance
+            // item, inheriting the merged price parameters so formulas can be
+            // evaluated.
+            foreach ($panelMethodTests as $mt) {
+                if (in_array($mt->method_id, $coveredMethodIds)) {
+                    continue;
+                }
+
+                $slots[] = [
+                    'item' => null,
+                    'methodTest' => $mt,
+                    'resolved' => $this->resolvePriceWithScope(
+                        $mt->test_id,
+                        $mt->method_id,
+                        $referrerId,
+                        $mergedParamValues
+                    ),
+                ];
+            }
+
+            $prices = $this->splitPanelTotal($slots);
+
+            // Retarget the selected items onto the panel.
+            foreach ($slots as $index => $slot) {
+                $item = $slot['item'];
+
+                if (! $item) {
+                    continue;
+                }
+
+                $match = $slot['methodTest'];
                 $fromMTId = $item->method_test_id;
                 $newMTId = $match ? $match->id : $fromMTId;
 
-                // Use the item's own stored price parameters for recalculation
-                $paramValues = $item->customParameters['price'] ?? [];
-                $testId = $match ? $match->test_id : $item->methodTest->test_id;
-                $methodId = $match ? $match->method_id : $item->methodTest->method_id;
-
-                $price = $this->calculatePrice($testId, $methodId, $referrerId, $paramValues);
-
                 $item->update([
                     'method_test_id' => $newMTId,
-                    'price' => $price,
+                    'price' => $prices[$index],
                     'discount' => 0,
                     'panel_id' => $panelId,
                 ]);
@@ -158,24 +212,18 @@ class AcceptanceItemConversionService
 
             $allActiveSamples = $allActiveSamples->unique('id');
 
-            // Create new items for panel tests not covered by any selected item.
-            // Inherit the merged price parameters so formulas can be evaluated.
-            foreach ($panelMethodTests as $mt) {
-                if (in_array($mt->method_id, $coveredMethodIds)) {
+            // Create the items for the panel tests no selected item covered.
+            foreach ($slots as $index => $slot) {
+                if ($slot['item']) {
                     continue;
                 }
 
-                $newPrice = $this->calculatePrice(
-                    $mt->test_id,
-                    $mt->method_id,
-                    $referrerId,
-                    $mergedParamValues
-                );
+                $mt = $slot['methodTest'];
 
                 $newItem = $this->acceptanceItemRepository->createPanelItem([
                     'acceptance_id' => $acceptanceId,
                     'method_test_id' => $mt->id,
-                    'price' => $newPrice,
+                    'price' => $prices[$index],
                     'discount' => 0,
                     'panel_id' => $panelId,
                     'no_sample' => $mt->method->no_sample ?? 1,
@@ -196,7 +244,55 @@ class AcceptanceItemConversionService
     }
 
     /**
-     * Full pricing cascade:
+     * Turn the slots' resolved prices into the amount each item is stored with.
+     *
+     * A price that came from a test-level tier is the panel's total, because every
+     * MethodTest of a PANEL shares the panel's test_id. The slots that resolved
+     * that way therefore split the total between them — the same way a panel added
+     * through the acceptance form does — while slots priced from a method-level
+     * tier keep the amount they resolved.
+     *
+     * @param  array<int, array{resolved: array{price: float, scope: string}}>  $slots
+     * @return array<int, float>
+     */
+    private function splitPanelTotal(array $slots): array
+    {
+        $prices = array_map(fn (array $slot): float => $slot['resolved']['price'], $slots);
+
+        $sharedIndexes = array_keys(array_filter(
+            $slots,
+            fn (array $slot): bool => $slot['resolved']['scope'] === self::SCOPE_TEST
+                && $slot['resolved']['price'] > 0
+        ));
+
+        if (count($sharedIndexes) < 2) {
+            return $prices;
+        }
+
+        // These slots all resolved the same panel-level price and only differ when
+        // an item carries its own formula parameters, so the first one stands for
+        // the panel total.
+        $shares = AmountDistributor::distribute(
+            $prices[$sharedIndexes[0]],
+            count($sharedIndexes),
+            AmountDistributor::PRICE_DECIMALS
+        );
+
+        foreach ($sharedIndexes as $shareIndex => $slotIndex) {
+            $prices[$slotIndex] = $shares[$shareIndex];
+        }
+
+        return $prices;
+    }
+
+    private function calculatePrice(int $testId, int $methodId, ?int $referrerId, array $paramValues = []): float
+    {
+        return $this->resolvePriceWithScope($testId, $methodId, $referrerId, $paramValues)['price'];
+    }
+
+    /**
+     * Full pricing cascade, reporting which tier the price came from so callers
+     * can tell a panel total (test-level) from a per-item amount (method-level):
      *   Referrer path:
      *     1. Per-method entry in ReferrerTest.methods (FIX / FORMULATE / CONDITIONAL)
      *     2. ReferrerTest test-level price
@@ -205,8 +301,10 @@ class AcceptanceItemConversionService
      *   Individual path:
      *     5. Test.price / Test.extra
      *     6. Method.price / Method.extra
+     *
+     * @return array{price: float, scope: string}
      */
-    private function calculatePrice(int $testId, int $methodId, ?int $referrerId, array $paramValues = []): float
+    private function resolvePriceWithScope(int $testId, int $methodId, ?int $referrerId, array $paramValues = []): array
     {
         $test = $this->laboratoryAdapter->findTest($testId);
         $method = $this->laboratoryAdapter->findMethod($methodId);
@@ -232,7 +330,7 @@ class AcceptanceItemConversionService
                             $paramValues
                         );
                         if ($price > 0) {
-                            return $price;
+                            return ['price' => $price, 'scope' => self::SCOPE_METHOD];
                         }
                     }
 
@@ -244,7 +342,7 @@ class AcceptanceItemConversionService
                         $paramValues
                     );
                     if ($price > 0) {
-                        return $price;
+                        return ['price' => $price, 'scope' => self::SCOPE_TEST];
                     }
                 }
             }
@@ -258,7 +356,7 @@ class AcceptanceItemConversionService
                     $paramValues
                 );
                 if ($price > 0) {
-                    return $price;
+                    return ['price' => $price, 'scope' => self::SCOPE_TEST];
                 }
             }
 
@@ -271,7 +369,7 @@ class AcceptanceItemConversionService
                     $paramValues
                 );
                 if ($price > 0) {
-                    return $price;
+                    return ['price' => $price, 'scope' => self::SCOPE_METHOD];
                 }
             }
         }
@@ -285,7 +383,7 @@ class AcceptanceItemConversionService
                 $paramValues
             );
             if ($price > 0) {
-                return $price;
+                return ['price' => $price, 'scope' => self::SCOPE_TEST];
             }
         }
 
@@ -298,11 +396,13 @@ class AcceptanceItemConversionService
                 $paramValues
             );
             if ($price > 0) {
-                return $price;
+                return ['price' => $price, 'scope' => self::SCOPE_METHOD];
             }
         }
 
-        return 0.0;
+        // Nothing resolved — scope is irrelevant, but a zero must never claim a
+        // share of a panel total.
+        return ['price' => 0.0, 'scope' => self::SCOPE_METHOD];
     }
 
     /**

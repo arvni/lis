@@ -147,6 +147,102 @@ class AcceptanceItemService
     }
 
     /**
+     * Add submitted acceptance items (tests + panels) to an acceptance that
+     * already exists — what the referrer-order pooling flow does when an order is
+     * attached to an acceptance the patient already has.
+     *
+     * Unlike addPoolingItems() these are ordinary items: they keep the submitted
+     * sampleless/reportless flags, are not marked is_pooling, and no source item's
+     * sample count is bumped.
+     *
+     * @param  array<string, mixed>  $acceptanceItems
+     * @return SupportCollection<int, AcceptanceItem>
+     */
+    public function addItemsToExistingAcceptance(Acceptance $acceptance, array $acceptanceItems): SupportCollection
+    {
+        $user    = auth()->user();
+        $created = collect();
+
+        // Process tests
+        foreach ($acceptanceItems['tests'] ?? [] as $item) {
+            if (!empty($item['deleted'])) {
+                continue;
+            }
+
+            $dto = new AcceptanceItemDTO(
+                acceptanceId:     $acceptance->id,
+                methodTestId:     $item['method_test']['id'],
+                price:            $item['price'],
+                discount:         $item['discount'] ?? 0,
+                customParameters: $this->submittedItemParameters($item),
+                timeline:  [Carbon::now()->format('Y-m-d H:i:s') => 'Created By ' . $user->name . ' (Pooling)'],
+                noSample:  $item['no_sample'] ?? 1,
+                sampleless: $item['sampleless'] ?? false,
+            );
+
+            $created->push($this->storeAcceptanceItem($dto));
+        }
+
+        // Process panels
+        foreach ($acceptanceItems['panels'] ?? [] as $panelData) {
+            if (!empty($panelData['deleted']) || empty($panelData['acceptanceItems'])) {
+                continue;
+            }
+
+            $panelId         = Str::uuid();
+            $panelSampleless = $panelData['sampleless'] ?? false;
+            $panelReportless = $panelData['reportless'] ?? false;
+            $itemCount       = count($panelData['acceptanceItems']);
+            // Split the panel totals so the item shares add back up to the panel
+            // price/discount even when they do not divide evenly.
+            $panelPrices = AmountDistributor::distribute(
+                (float) ($panelData['price'] ?? 0),
+                $itemCount,
+                AmountDistributor::PRICE_DECIMALS
+            );
+            $panelDiscounts = AmountDistributor::distribute(
+                (float) ($panelData['discount'] ?? 0),
+                $itemCount,
+                AmountDistributor::DISCOUNT_DECIMALS
+            );
+
+            foreach (array_values($panelData['acceptanceItems']) as $itemIndex => $item) {
+                $dto = new AcceptanceItemDTO(
+                    acceptanceId:     $acceptance->id,
+                    methodTestId:     $item['method_test']['id'],
+                    price:            $panelPrices[$itemIndex],
+                    discount:         $panelDiscounts[$itemIndex],
+                    customParameters: $this->submittedItemParameters($item),
+                    timeline:  [Carbon::now()->format('Y-m-d H:i:s') => 'Created By ' . $user->name . ' (Pooling)'],
+                    noSample:  $item['no_sample'] ?? 1,
+                    panelId:   $panelId,
+                    sampleless: $panelSampleless || ($item['sampleless'] ?? false),
+                    reportless: $panelReportless || ($item['reportless'] ?? false),
+                );
+
+                $created->push($this->storeAcceptanceItem($dto));
+            }
+        }
+
+        return $created;
+    }
+
+    /**
+     * Merge a submitted item's own customParameters with the leftover keys the
+     * acceptance form sends alongside them.
+     *
+     * @param  array<string, mixed>  $item
+     * @return array<string, mixed>
+     */
+    private function submittedItemParameters(array $item): array
+    {
+        return array_merge(
+            $item['customParameters'] ?? [],
+            Arr::except($item, ['method_test', 'price', 'discount', 'patients', 'timeLine', 'id', 'customParameters', 'sampleless'])
+        );
+    }
+
+    /**
      * Increment no_sample by one on the given original (non-pooling) acceptance
      * items, so each pooled test requires one additional sample, and record the
      * bump on each item's timeline.

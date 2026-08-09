@@ -252,6 +252,56 @@ class ReferrerOrderIntakeEndpointsTest extends TestCase
         $this->assertSame(100.0, (float) $item->price);
     }
 
+    public function test_pooling_acceptance_splits_the_panel_total_across_its_items(): void
+    {
+        // 100 over three panel items does not divide evenly, and
+        // acceptance_items.price holds whole units — the stored shares must still
+        // add back up to the panel price.
+        $existing = Acceptance::create([
+            'status' => AcceptanceStatus::POOLING,
+            'step' => 5,
+            'patient_id' => $this->patient->id,
+            'referrer_id' => $this->referrer->id,
+            'acceptor_id' => User::factory()->create()->id,
+            'financial_approved' => false,
+            'out_patient' => true,
+            'waiting_for_pooling' => false,
+        ]);
+        $order = $this->makeOrder([
+            'patient_id' => $this->patient->id,
+            'pooling' => true,
+        ]);
+
+        $this->actingAs($this->userWithPermissions('Referrer.Referrer Orders.Add Acceptance'));
+
+        $this->post(route('referrerOrders.acceptance', $order), [
+            'existing_acceptance_id' => $existing->id,
+            'acceptanceItems' => [
+                'panels' => [[
+                    'price' => 100,
+                    'discount' => 0,
+                    'acceptanceItems' => array_map(
+                        fn () => [
+                            'method_test' => ['id' => $this->makeMethodTestId()],
+                            'no_sample' => 1,
+                            'customParameters' => [],
+                        ],
+                        range(1, 3)
+                    ),
+                ]],
+            ],
+        ])->assertSessionHas('success');
+
+        $this->assertSame($existing->id, $order->fresh()->acceptance_id);
+
+        $prices = $existing->acceptanceItems()->pluck('price')
+            ->map(fn ($price) => (float) $price)
+            ->all();
+
+        $this->assertCount(3, $prices);
+        $this->assertEqualsWithDelta(100.0, array_sum($prices), 0.001);
+    }
+
     public function test_acceptance_endpoint_blocks_order_that_already_has_an_acceptance(): void
     {
         $existing = Acceptance::create([

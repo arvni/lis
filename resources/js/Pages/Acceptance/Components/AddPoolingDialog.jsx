@@ -34,6 +34,15 @@ const AddPoolingDialog = ({ open, onClose, acceptance }) => {
     const [selectedItem, setSelectedItem] = useState(null);
     const [panelData, setPanelData] = useState({});
 
+    // A referred acceptance must be priced from the referrer's tariff, not the
+    // individual one. The index row carries referrer_id/referrer_fullname, while
+    // a fully loaded acceptance carries the nested referrer relation.
+    const referrer = acceptance?.referrer?.id
+        ? acceptance.referrer
+        : acceptance?.referrer_id
+          ? { id: acceptance.referrer_id, fullName: acceptance.referrer_fullname }
+          : null;
+
     useEffect(() => {
         if (!open || !acceptance?.id) return;
         setStep('list');
@@ -71,7 +80,9 @@ const AddPoolingDialog = ({ open, onClose, acceptance }) => {
         try {
             const {
                 data: { data: testData },
-            } = await axios.get(route('api.tests.show', testId));
+            } = await axios.get(route('api.tests.show', testId), {
+                params: referrer ? { referrer: { id: referrer.id } } : {},
+            });
 
             if (item.type === 'test') {
                 // Find the specific method_test that matches the acceptance item
@@ -293,6 +304,7 @@ const AddPoolingDialog = ({ open, onClose, acceptance }) => {
                         : null
                 }
                 initialPanelData={step === 'panel' ? panelData : null}
+                referrer={referrer}
                 patient={patient}
             />
         </>

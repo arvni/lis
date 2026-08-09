@@ -82,6 +82,7 @@ const TestItemsSection = ({
             <PromoteToPanelDialog
                 open={Boolean(promotingTests?.length)}
                 tests={promotingTests ?? []}
+                referrer={acceptance.referrer}
                 onClose={() => setPromotingTests(null)}
                 onConfirm={onPromoteToPanel}
             />
