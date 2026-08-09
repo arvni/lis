@@ -13,6 +13,7 @@ use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\AcceptanceItemConversion;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Services\AcceptanceItemConversionService;
+use App\Domains\Referrer\Models\Referrer;
 use App\Domains\User\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use ReflectionMethod;
@@ -234,7 +235,9 @@ class AcceptanceItemConversionServiceTest extends TestCase
             ->first();
         $this->assertNotNull($created, 'a panel item is created for the uncovered method test');
         $this->assertSame($item->panel_id, $created->panel_id, 'all panel items share one panel_id');
-        $this->assertEqualsWithDelta(60.0, (float) $created->price, 0.001);
+        // The panel's 60 is a total split over its two items, not charged twice.
+        $this->assertEqualsWithDelta(30.0, (float) $created->price, 0.001);
+        $this->assertEqualsWithDelta(30.0, (float) $item->price, 0.001);
 
         $this->assertDatabaseHas('acceptance_item_conversions', [
             'acceptance_item_id' => $item->id,
@@ -242,6 +245,98 @@ class AcceptanceItemConversionServiceTest extends TestCase
             'to_method_test_id' => $panelMtA->id,
             'conversion_type' => 'promote_to_panel',
         ]);
+    }
+
+    public function test_promote_to_panel_splits_an_indivisible_panel_total_without_losing_money(): void
+    {
+        // 100 over three items does not divide evenly — the shares must still add
+        // back up to the panel price exactly.
+        $panelTest = $this->createTest(price: 100);
+        $methods = [$this->createMethod(price: 0), $this->createMethod(price: 0), $this->createMethod(price: 0)];
+        $panelMts = array_map(
+            fn (Method $method) => $this->createMethodTest($method, $panelTest, isDefault: false),
+            $methods
+        );
+
+        $individualMt = $this->createMethodTest($methods[0], $this->createTest(price: 10), isDefault: true);
+        $acceptance = $this->createAcceptance();
+        $item = $this->createItem($acceptance, $individualMt);
+
+        $this->service->promoteToPanel(
+            [$item->id],
+            array_map(fn (MethodTest $mt) => $mt->id, $panelMts)
+        );
+
+        $panelId = $item->refresh()->panel_id;
+        $prices = AcceptanceItem::where('panel_id', $panelId)
+            ->pluck('price')
+            ->map(fn ($price) => (float) $price)
+            ->all();
+
+        $this->assertCount(3, $prices);
+        $this->assertEqualsWithDelta(100.0, array_sum($prices), 0.001);
+    }
+
+    public function test_promote_to_panel_keeps_method_level_prices_per_item(): void
+    {
+        // The panel test carries no price, so each item resolves its own method
+        // price — those are already per-item amounts and must not be split.
+        $panelTest = $this->createTest(price: 0);
+        $methodA = $this->createMethod(price: 40);
+        $methodB = $this->createMethod(price: 25);
+        $panelMtA = $this->createMethodTest($methodA, $panelTest, isDefault: false);
+        $panelMtB = $this->createMethodTest($methodB, $panelTest, isDefault: false);
+
+        $individualMt = $this->createMethodTest($methodA, $this->createTest(price: 0), isDefault: true);
+        $acceptance = $this->createAcceptance();
+        $item = $this->createItem($acceptance, $individualMt);
+
+        $this->service->promoteToPanel([$item->id], [$panelMtA->id, $panelMtB->id]);
+
+        $item->refresh();
+        $created = AcceptanceItem::where('acceptance_id', $acceptance->id)
+            ->where('method_test_id', $panelMtB->id)
+            ->first();
+
+        $this->assertEqualsWithDelta(40.0, (float) $item->price, 0.001);
+        $this->assertEqualsWithDelta(25.0, (float) $created->price, 0.001);
+    }
+
+    public function test_promote_to_panel_splits_the_referrer_panel_price_when_acceptance_is_referred(): void
+    {
+        $referrer = Referrer::create([
+            'fullName' => 'Conversion Referrer',
+            'phoneNo' => '90000001',
+            'billingInfo' => [],
+            'email' => 'conversion@example.com',
+            'reportReceivers' => [],
+        ]);
+
+        // No ReferrerTest row, so the cascade reaches the panel's referrer price.
+        $panelTest = $this->createTest(price: 60, overrides: [
+            'referrer_price' => 90,
+            'referrer_price_type' => MethodPriceType::FIX,
+        ]);
+        $methodA = $this->createMethod(price: 0);
+        $methodB = $this->createMethod(price: 0);
+        $panelMtA = $this->createMethodTest($methodA, $panelTest, isDefault: false);
+        $panelMtB = $this->createMethodTest($methodB, $panelTest, isDefault: false);
+
+        $individualMt = $this->createMethodTest($methodA, $this->createTest(price: 10), isDefault: true);
+        $acceptance = $this->createAcceptance($referrer->id);
+        $item = $this->createItem($acceptance, $individualMt);
+
+        $this->service->promoteToPanel([$item->id], [$panelMtA->id, $panelMtB->id]);
+
+        $item->refresh();
+        $created = AcceptanceItem::where('acceptance_id', $acceptance->id)
+            ->where('method_test_id', $panelMtB->id)
+            ->first();
+
+        // The referrer tariff (90) is used instead of the individual one (60), and
+        // it is a panel total split over the two items.
+        $this->assertEqualsWithDelta(45.0, (float) $item->price, 0.001);
+        $this->assertEqualsWithDelta(45.0, (float) $created->price, 0.001);
     }
 
     public function test_promote_to_panel_logs_conversion_only_for_promoted_items(): void
