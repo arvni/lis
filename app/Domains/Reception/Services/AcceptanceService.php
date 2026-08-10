@@ -97,11 +97,25 @@ class AcceptanceService
      */
     public function approveFinancial(Acceptance $acceptance, int $userId): Acceptance
     {
-        return $this->acceptanceRepository->updateAcceptance($acceptance, [
+        $acceptance = $this->acceptanceRepository->updateAcceptance($acceptance, [
             'financial_approved' => true,
             'financial_approved_by' => $userId,
             'financial_approved_at' => now()
         ]);
+
+        // The acceptance was parked at WAITING_FOR_FINANCIAL_APPROVAL waiting for
+        // exactly this, so recompute. checkAcceptanceReport handles the terminal
+        // case (everything already published → REPORTED, with the referrer sync
+        // and published-report notifications); anything short of that falls
+        // through to the regular state machine, which releases it to
+        // WAITING_FOR_PUBLISHING.
+        $this->statusService->checkAcceptanceReport($acceptance);
+
+        if ($acceptance->status !== AcceptanceStatus::REPORTED) {
+            $this->statusService->checkAndUpdateAcceptanceStatus($acceptance);
+        }
+
+        return $acceptance;
     }
 
     public function storeAcceptance(AcceptanceDTO $acceptanceDTO): Acceptance
@@ -245,11 +259,15 @@ class AcceptanceService
 
                 case 5: // Final Review - process everything
                 default:
+                    $finalizedStatus = $this->resolveFinalizedStatus($acceptance);
                     $acceptance = $this->acceptanceRepository->updateAcceptance($acceptance, [
                         "step" => 5,
-                        "status" => $this->resolveFinalizedStatus($acceptance),
                         "waiting_for_pooling" => $acceptanceDTO->waitingForPooling,
                     ]);
+                    // Through the status service, not the repository: a status
+                    // change has to mirror onto the linked referrer orders and
+                    // push the provider.
+                    $this->statusService->setStatusIfChanged($acceptance, $finalizedStatus);
                     break;
             }
 
@@ -419,10 +437,15 @@ class AcceptanceService
 
     public function updateAcceptanceInvoice(Acceptance $acceptance, int|string $invoiceId): void
     {
+        $finalizedStatus = $this->resolveFinalizedStatus($acceptance);
+
         $this->acceptanceRepository->updateAcceptance($acceptance, [
             "invoice_id" => $invoiceId,
-            "status" => $this->resolveFinalizedStatus($acceptance)
         ]);
+
+        // Through the status service, not the repository: a status change has to
+        // mirror onto the linked referrer orders and push the provider.
+        $this->statusService->setStatusIfChanged($acceptance, $finalizedStatus);
     }
 
     /**
@@ -435,8 +458,8 @@ class AcceptanceService
      * - Referred acceptances are billed to the referrer, so they bypass the
      *   patient payment gate. They only go to SAMPLING when something actually
      *   needs a sample; a fully sampleless acceptance (all items are therefore
-     *   reportless too) has nothing to collect, so it waits for publishing —
-     *   or is reported outright once finance has approved.
+     *   reportless too) has nothing to collect or report, so it goes straight to
+     *   the finance gate — or is reported outright once finance has approved.
      */
     private function resolveFinalizedStatus(Acceptance $acceptance): AcceptanceStatus
     {
@@ -454,7 +477,7 @@ class AcceptanceService
 
         return $acceptance->financial_approved
             ? AcceptanceStatus::REPORTED
-            : AcceptanceStatus::WAITING_FOR_PUBLISHING;
+            : AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL;
     }
 
     public function updateAcceptanceStatus(Acceptance $acceptance, AcceptanceStatus $status): void

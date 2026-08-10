@@ -9,6 +9,7 @@ use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Referrer\DTOs\ReferrerOrderDTO;
+use App\Domains\Referrer\Enums\ReferrerOrderStatus;
 use App\Domains\Referrer\Events\ReferrerOrderCreated;
 use App\Domains\Referrer\Events\ReferrerOrderUpdated;
 use App\Domains\Referrer\Models\ReferrerOrder;
@@ -266,7 +267,7 @@ class ReferrerOrderService
             $acceptance->load('referrerOrders');
         }
 
-        $reported = AcceptanceStatus::REPORTED->value;
+        $reported = ReferrerOrderStatus::REPORTED->value;
         foreach ($acceptance->referrerOrders as $referrerOrder) {
             $alreadyReported = (string) $referrerOrder->status === $reported;
             $this->updateReferrerOrderStatus($referrerOrder, $reported);
@@ -420,8 +421,16 @@ class ReferrerOrderService
     public function checkStatus(ReferrerOrder $referrerOrder): void
     {
         $referrerOrder->load("acceptance");
-        if ($referrerOrder->acceptance && ($referrerOrder->acceptance->status == AcceptanceStatus::PROCESSING || $referrerOrder->acceptance->status == AcceptanceStatus::REPORTED)) {
-            $this->updateReferrerOrderStatus($referrerOrder, $referrerOrder->acceptance->status->value);
+        $mirrored = [
+            AcceptanceStatus::PROCESSING,
+            AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL,
+            AcceptanceStatus::REPORTED,
+        ];
+        if ($referrerOrder->acceptance && in_array($referrerOrder->acceptance->status, $mirrored, true)) {
+            $this->updateReferrerOrderStatus(
+                $referrerOrder,
+                ReferrerOrderStatus::fromAcceptanceStatus($referrerOrder->acceptance->status)->value
+            );
         }
     }
 

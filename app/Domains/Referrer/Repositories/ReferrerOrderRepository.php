@@ -5,6 +5,7 @@ namespace App\Domains\Referrer\Repositories;
 use Illuminate\Database\Eloquent\Builder;
 
 use App\Domains\Shared\Traits\LogsUserActivity;
+use App\Domains\Referrer\Enums\ReferrerOrderStatus;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Ramsey\Collection\Collection;
@@ -62,6 +63,17 @@ class ReferrerOrderRepository
     {
         if (isset($filters["search"])) {
             $query->search($filters["search"]);
+        }
+
+        if (!empty($filters["status"])) {
+            $statuses = array_values(array_filter(
+                (array)$filters["status"],
+                fn($status) => ReferrerOrderStatus::tryFrom((string)$status) !== null
+            ));
+
+            if ($statuses) {
+                $query->whereIn("referrer_orders.status", $statuses);
+            }
         }
     }
 }

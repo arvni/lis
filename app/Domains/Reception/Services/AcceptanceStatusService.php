@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Notification;
 
 /**
  * The acceptance status state machine. Owns every rule that decides whether an
- * acceptance is POOLING / PROCESSING / WAITING_FOR_PUBLISHING / REPORTED and the
+ * acceptance is POOLING / PROCESSING / WAITING_FOR_FINANCIAL_APPROVAL /
+ * WAITING_FOR_PUBLISHING / REPORTED and the
  * published-report notifications that ride on the REPORTED transition. Extracted
  * from AcceptanceService (improvement-plan #26) so that service can stay focused
  * on the acceptance lifecycle (create/update/delete) and delegate status
@@ -32,22 +33,24 @@ class AcceptanceStatusService
         $this->acceptanceRepository->updateAcceptance($acceptance, ['status' => $status]);
 
         // Mirror the acceptance status onto every linked referrer order so the
-        // provider stays in sync on any status change. The webhook payload
-        // collapses the acceptance status to processing/reported, so we map to
-        // the same two values here. updateReferrerOrderStatus only dispatches a
+        // provider stays in sync on any status change. The adapter collapses the
+        // acceptance status onto the referrer-facing set and only dispatches a
         // webhook when the order's status actually changes.
-        $referrerOrderStatus = $status === AcceptanceStatus::REPORTED ? 'reported' : 'processing';
         $acceptance->load('referrerOrders');
         foreach ($acceptance->referrerOrders as $referrerOrder) {
-            $this->referrerAdapter->updateOrderStatus($referrerOrder, $referrerOrderStatus);
+            $this->referrerAdapter->updateOrderStatus($referrerOrder, $status);
         }
     }
 
     /**
      * Set the acceptance status only when it actually differs, so we avoid
      * redundant updates and referrer-order webhook dispatches.
+     *
+     * Public because the acceptance lifecycle (AcceptanceService) also resolves
+     * statuses of its own — every status write must land here so the referrer
+     * orders and the provider stay in sync.
      */
-    private function setStatusIfChanged(Acceptance $acceptance, AcceptanceStatus $status): void
+    public function setStatusIfChanged(Acceptance $acceptance, AcceptanceStatus $status): void
     {
         if ($acceptance->status !== $status) {
             $this->updateAcceptanceStatus($acceptance, $status);
@@ -91,7 +94,7 @@ class AcceptanceStatusService
 
     /**
      * Terminal step shared by the status checks: REPORTED once finance has
-     * approved, otherwise hold at WAITING_FOR_PUBLISHING.
+     * approved, otherwise hold at WAITING_FOR_FINANCIAL_APPROVAL.
      */
     private function finalizeReportedOrWaiting(Acceptance $acceptance): void
     {
@@ -99,7 +102,7 @@ class AcceptanceStatusService
             $acceptance,
             $acceptance->financial_approved
                 ? AcceptanceStatus::REPORTED
-                : AcceptanceStatus::WAITING_FOR_PUBLISHING
+                : AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL
         );
     }
 
@@ -173,16 +176,23 @@ class AcceptanceStatusService
             return;
         }
 
+        // Every reportable item is now reported and approved. Finance gates the
+        // rest of the workflow — publishing only happens once it has signed off.
+        if (! $acceptance->financial_approved) {
+            $this->setStatusIfChanged($acceptance, AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL);
+
+            return;
+        }
+
         // Check if all are published
         $allPublished = $reportableItems->every(function ($item) {
             return $item->report && $item->report->published_at !== null;
         });
 
         if ($allPublished) {
-            // All published, finance approval decides REPORTED vs waiting
-            $this->finalizeReportedOrWaiting($acceptance);
+            $this->setStatusIfChanged($acceptance, AcceptanceStatus::REPORTED);
         } else {
-            // All approved but not all published
+            // Finance approved, still waiting on the reports to go out
             $this->setStatusIfChanged($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
         }
     }
@@ -199,10 +209,8 @@ class AcceptanceStatusService
                 // Send notifications
                 $this->sendPublishedNotifications($acceptance, $silent);
             } else {
-                // Stay at WAITING_FOR_PUBLISHING until financial is approved
-                if ($acceptance->status !== AcceptanceStatus::WAITING_FOR_PUBLISHING) {
-                    $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::WAITING_FOR_PUBLISHING);
-                }
+                // Stay at WAITING_FOR_FINANCIAL_APPROVAL until financial is approved
+                $this->setStatusIfChanged($acceptance, AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL);
             }
         }
     }
@@ -282,6 +290,15 @@ class AcceptanceStatusService
         $publishedTest = $this->acceptanceRepository->countPublishedTests($acceptance);
         if ($publishedTest == $reportableTest) {
             $this->finalizeReportedOrWaiting($acceptance);
+
+            return;
+        }
+
+        // Every report is approved but not yet out. Finance gates publishing, so
+        // park the acceptance there until it signs off.
+        $approvedTest = $this->acceptanceRepository->countApprovedReportableTests($acceptance);
+        if ($approvedTest == $reportableTest && ! $acceptance->financial_approved) {
+            $this->setStatusIfChanged($acceptance, AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL);
 
             return;
         }

@@ -3,8 +3,8 @@
 namespace App\Domains\Referrer\Jobs;
 
 use App\Domains\Laboratory\Enums\TestType;
-use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Referrer\Enums\ReferrerOrderStatus;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -195,7 +195,7 @@ class SendAcceptanceWebhook implements ShouldQueue
         return [
             'order' => [
                 'id' => $acceptance->id,
-                'status' => $acceptance->status !== AcceptanceStatus::REPORTED ? AcceptanceStatus::PROCESSING : AcceptanceStatus::REPORTED,
+                'status' => ReferrerOrderStatus::fromAcceptanceStatus($acceptance->status)->value,
                 'orderForms' => null,
                 'consents' => null,
                 'files' => null,
