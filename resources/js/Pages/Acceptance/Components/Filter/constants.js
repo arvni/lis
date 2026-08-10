@@ -29,6 +29,7 @@ export const STATUSES = [
     'waiting for entering',
     'processing',
     'waiting for publishing',
+    'waiting for financial approval',
     'reported',
     'Canceled',
 ];

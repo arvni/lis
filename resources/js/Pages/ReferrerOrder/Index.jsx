@@ -1,6 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { GridActionsCellItem } from '@mui/x-data-grid';
-import Filter from '@/Components/SearchFilter.jsx';
+import Filter from './Components/Filter';
+import {
+    getReferrerOrderStatusColor,
+    getReferrerOrderStatusLabel,
+} from './Components/Filter/constants';
 import TableLayout from '@/Layouts/TableLayout';
 import { useState, useEffect } from 'react';
 import { RemoveRedEye, Assignment, MergeType } from '@mui/icons-material';
@@ -11,20 +15,6 @@ const Index = () => {
     const { referrerOrders, status, success, requestInputs } = usePage().props;
     const [processing, setProcessing] = useState(false);
     const [filter, setFilter] = useState(requestInputs?.filters || {});
-
-    // Status indicator colors for better visual feedback
-    const getStatusColor = (status) => {
-        switch (status?.toLowerCase()) {
-            case 'completed':
-                return 'success';
-            case 'pending':
-                return 'warning';
-            case 'cancelled':
-                return 'error';
-            default:
-                return 'default';
-        }
-    };
 
     const columns = [
         {
@@ -54,11 +44,11 @@ const Index = () => {
             field: 'status',
             headerName: 'Status',
             type: 'string',
-            width: 140,
+            width: 220,
             renderCell: ({ row }) => (
                 <Chip
-                    label={row.status || 'Unknown'}
-                    color={getStatusColor(row.status)}
+                    label={getReferrerOrderStatusLabel(row.status)}
+                    color={getReferrerOrderStatusColor(row.status)}
                     size="small"
                     variant="outlined"
                 />

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domains\Reception\Adapters;
 
+use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
+use App\Domains\Referrer\Enums\ReferrerOrderStatus;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Referrer\Models\ReferrerTest;
 use App\Domains\Referrer\Repositories\ReferrerOrderRepository;
@@ -57,12 +59,16 @@ class ReferrerAdapter
     }
 
     /**
-     * Mirror a status onto a referrer order (only dispatches a webhook when the
-     * order's status actually changes).
+     * Mirror an acceptance status onto a referrer order, collapsed onto the
+     * referrer-facing status set (only dispatches a webhook when the order's
+     * status actually changes).
      */
-    public function updateOrderStatus(ReferrerOrder $referrerOrder, string $status): void
+    public function updateOrderStatus(ReferrerOrder $referrerOrder, AcceptanceStatus $status): void
     {
-        $this->referrerOrderService->updateReferrerOrderStatus($referrerOrder, $status);
+        $this->referrerOrderService->updateReferrerOrderStatus(
+            $referrerOrder,
+            ReferrerOrderStatus::fromAcceptanceStatus($status)->value
+        );
     }
 
     /**

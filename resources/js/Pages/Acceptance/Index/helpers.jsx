@@ -8,6 +8,7 @@ import {
     HourglassEmpty as HourglassEmptyIcon,
     Warning as WarningIcon,
     MergeType as MergeTypeIcon,
+    AccountBalance as AccountBalanceIcon,
 } from '@mui/icons-material';
 
 // Format currency amounts
@@ -46,6 +47,16 @@ export const getStatusInfo = (status) => {
             color: 'info',
             icon: <SettingsIcon />,
             label: 'Processing',
+        },
+        'waiting for publishing': {
+            color: 'warning',
+            icon: <AssignmentIcon />,
+            label: 'Waiting for Publishing',
+        },
+        'waiting for financial approval': {
+            color: 'warning',
+            icon: <AccountBalanceIcon />,
+            label: 'Waiting for Financial Approval',
         },
         reported: {
             color: 'success',

@@ -261,6 +261,21 @@ class AcceptanceRepository
             ->count();
     }
 
+    /**
+     * Count reportable items whose report has been approved (published or not).
+     * Used to decide when an acceptance is done with the lab and only waiting on
+     * finance.
+     */
+    public function countApprovedReportableTests(Acceptance $acceptance): int
+    {
+        return $acceptance->acceptanceItems()
+            ->where('reportless', false)
+            ->whereHas('report', function (Builder $q) {
+                $q->whereNotNull('approved_at');
+            })
+            ->count();
+    }
+
 
     /**
      * Count published tests for an acceptance.
@@ -590,12 +605,13 @@ class AcceptanceRepository
 
     /**
      * List acceptances waiting for financial check.
-     * Returns acceptances with status WAITING_FOR_PUBLISHING and not financially approved.
+     * Returns acceptances with status WAITING_FOR_FINANCIAL_APPROVAL, i.e. every
+     * reportable item is reported and approved but finance has not signed off.
      */
     public function listWaitingForFinancialCheck(array $queryData): LengthAwarePaginator
     {
         $query = Acceptance::query()
-            ->where('status', AcceptanceStatus::WAITING_FOR_PUBLISHING)
+            ->where('status', AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL)
             ->where('financial_approved', false)
             ->with([
                 'patient',

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Domains\Referrer\Enums\ReferrerOrderStatus;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Referrer\Services\ReferrerOrderService;
 use Illuminate\Console\Command;
@@ -29,7 +30,7 @@ class CheckReferrerOrder extends Command
     {
         ReferrerOrder::withoutEvents(function () {
             ReferrerOrder::query()
-                ->whereIn("status", ["waiting", "processing"])
+                ->whereIn('status', ReferrerOrderStatus::openValues())
                 ->chunk(100, function ($referrerOrders) {
                     $service = resolve(ReferrerOrderService::class);
                     foreach ($referrerOrders as $referrerOrder) {

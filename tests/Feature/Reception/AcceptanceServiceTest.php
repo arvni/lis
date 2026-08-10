@@ -103,6 +103,34 @@ class AcceptanceServiceTest extends TestCase
     }
 
     /**
+     * Step-5 finalization writes the plain fields and the status separately: the
+     * status goes through AcceptanceStatusService so the change mirrors onto the
+     * referrer orders and pushes the provider. Sets up both repository calls and
+     * applies the status to the model, so callers can assert on the result.
+     */
+    private function expectStep5StatusWrite(
+        MockInterface $acceptanceRepo,
+        Acceptance $acceptance,
+        AcceptanceStatus $expected
+    ): void {
+        $acceptanceRepo
+            ->shouldReceive('updateAcceptance')
+            ->once()
+            ->withArgs(fn ($acc, $data) => ! array_key_exists('status', $data) && ($data['step'] ?? null) === 5)
+            ->andReturn($acceptance);
+
+        $acceptanceRepo
+            ->shouldReceive('updateAcceptance')
+            ->once()
+            ->withArgs(fn ($acc, $data) => ($data['status'] ?? null) === $expected)
+            ->andReturnUsing(function (Acceptance $acc, array $data) {
+                $acc->status = $data['status'];
+
+                return $acc;
+            });
+    }
+
+    /**
      * Minimal AcceptanceDTO for tests / panels.
      */
     private function makeAcceptanceDTO(array $overrides = []): AcceptanceDTO
@@ -400,18 +428,7 @@ class AcceptanceServiceTest extends TestCase
         $acceptance->step   = 5;
         $acceptance->setRawAttributes(['step' => 5, 'status' => AcceptanceStatus::PENDING->value, 'id' => 1]);
 
-        $updatedAcceptance         = new Acceptance();
-        $updatedAcceptance->id     = 1;
-        $updatedAcceptance->status = AcceptanceStatus::WAITING_FOR_PAYMENT;
-
-        $acceptanceRepo
-            ->shouldReceive('updateAcceptance')
-            ->once()
-            ->withArgs(function ($acc, $data) {
-                return isset($data['status'])
-                    && $data['status'] === AcceptanceStatus::WAITING_FOR_PAYMENT;
-            })
-            ->andReturn($updatedAcceptance);
+        $this->expectStep5StatusWrite($acceptanceRepo, $acceptance, AcceptanceStatus::WAITING_FOR_PAYMENT);
 
         $result = $service->updateAcceptance($acceptance, ['step' => 5]);
 
@@ -437,24 +454,13 @@ class AcceptanceServiceTest extends TestCase
             'referrer_id' => 7,
         ]);
 
-        $updatedAcceptance         = new Acceptance();
-        $updatedAcceptance->id     = 1;
-        $updatedAcceptance->status = AcceptanceStatus::SAMPLING;
-
         // Has at least one item that needs a sample → route to SAMPLING.
         $acceptanceRepo
             ->shouldReceive('countSamplableItems')
             ->once()
             ->andReturn(1);
 
-        $acceptanceRepo
-            ->shouldReceive('updateAcceptance')
-            ->once()
-            ->withArgs(function ($acc, $data) {
-                return isset($data['status'])
-                    && $data['status'] === AcceptanceStatus::SAMPLING;
-            })
-            ->andReturn($updatedAcceptance);
+        $this->expectStep5StatusWrite($acceptanceRepo, $acceptance, AcceptanceStatus::SAMPLING);
 
         $result = $service->updateAcceptance($acceptance, ['step' => 5]);
 
@@ -463,10 +469,11 @@ class AcceptanceServiceTest extends TestCase
 
     // ─────────────────────────────────────────────────────────────────────────
     // R-05c: referred acceptance with nothing to sample bypasses SAMPLING and
-    // waits for publishing (all sampleless items are reportless too). (Unit test)
+    // waits for financial approval (all sampleless items are reportless too).
+    // (Unit test)
     // ─────────────────────────────────────────────────────────────────────────
 
-    public function test_update_acceptance_step5_referred_without_samplable_items_waits_for_publishing(): void
+    public function test_update_acceptance_step5_referred_without_samplable_items_waits_for_financial_approval(): void
     {
         [$service, $acceptanceRepo] = $this->makeServiceWithMocks();
 
@@ -480,28 +487,21 @@ class AcceptanceServiceTest extends TestCase
             'financial_approved' => false,
         ]);
 
-        $updatedAcceptance         = new Acceptance();
-        $updatedAcceptance->id     = 1;
-        $updatedAcceptance->status = AcceptanceStatus::WAITING_FOR_PUBLISHING;
-
         // Nothing needs a sample → skip SAMPLING.
         $acceptanceRepo
             ->shouldReceive('countSamplableItems')
             ->once()
             ->andReturn(0);
 
-        $acceptanceRepo
-            ->shouldReceive('updateAcceptance')
-            ->once()
-            ->withArgs(function ($acc, $data) {
-                return isset($data['status'])
-                    && $data['status'] === AcceptanceStatus::WAITING_FOR_PUBLISHING;
-            })
-            ->andReturn($updatedAcceptance);
+        $this->expectStep5StatusWrite(
+            $acceptanceRepo,
+            $acceptance,
+            AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL
+        );
 
         $result = $service->updateAcceptance($acceptance, ['step' => 5]);
 
-        $this->assertSame(AcceptanceStatus::WAITING_FOR_PUBLISHING, $result->status);
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $result->status);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -693,8 +693,8 @@ class AcceptanceServiceTest extends TestCase
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // R-07: checkAndUpdateAcceptanceStatus → WAITING_FOR_PUBLISHING when all
-    //       items published but financial_approved=false
+    // R-07: checkAndUpdateAcceptanceStatus → WAITING_FOR_FINANCIAL_APPROVAL when
+    //       all items published but financial_approved=false
     // ─────────────────────────────────────────────────────────────────────────
 
     public function test_check_and_update_acceptance_status_waits_for_financial_approval_before_reporting(): void
@@ -734,7 +734,292 @@ class AcceptanceServiceTest extends TestCase
         $service->checkAndUpdateAcceptanceStatus($acceptance);
 
         $acceptance->refresh();
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $acceptance->status);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // R-07b: reports approved but not yet published, finance not approved →
+    //        WAITING_FOR_FINANCIAL_APPROVAL (finance gates publishing).
+    //        Reportless items are ignored when deciding this.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_check_and_update_acceptance_status_waits_for_finance_once_all_reports_are_approved(): void
+    {
+        $this->setUpDatabase();
+
+        $acceptance = $this->createAcceptance([
+            'status'             => AcceptanceStatus::PROCESSING,
+            'financial_approved' => false,
+        ]);
+
+        $methodTestId = $this->getMethodTestId();
+
+        $item = AcceptanceItem::create([
+            'acceptance_id'    => $acceptance->id,
+            'method_test_id'   => $methodTestId,
+            'price'            => 80,
+            'discount'         => 0,
+            'reportless'       => false,
+            'sampleless'       => false,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]);
+
+        // A reportless item never carries a report and must not hold the
+        // acceptance back.
+        AcceptanceItem::create([
+            'acceptance_id'    => $acceptance->id,
+            'method_test_id'   => $methodTestId,
+            'price'            => 10,
+            'discount'         => 0,
+            'reportless'       => true,
+            'sampleless'       => true,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]);
+
+        // Approved but NOT published.
+        Report::create([
+            'reporter_id'        => auth()->id(),
+            'acceptance_item_id' => $item->id,
+            'status'             => true,
+            'approved_at'        => now(),
+        ]);
+
+        /** @var AcceptanceService $service */
+        $service = app(AcceptanceService::class);
+        $service->checkAndUpdateAcceptanceStatus($acceptance);
+
+        $acceptance->refresh();
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $acceptance->status);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // R-07c: approveFinancial releases the acceptance from the finance gate —
+    //        to WAITING_FOR_PUBLISHING while reports are still unpublished.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_approve_financial_releases_acceptance_to_waiting_for_publishing(): void
+    {
+        $this->setUpDatabase();
+
+        $acceptance = $this->createAcceptance([
+            'status'             => AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL,
+            'financial_approved' => false,
+        ]);
+
+        $item = AcceptanceItem::create([
+            'acceptance_id'    => $acceptance->id,
+            'method_test_id'   => $this->getMethodTestId(),
+            'price'            => 80,
+            'discount'         => 0,
+            'reportless'       => false,
+            'sampleless'       => false,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]);
+
+        Report::create([
+            'reporter_id'        => auth()->id(),
+            'acceptance_item_id' => $item->id,
+            'status'             => true,
+            'approved_at'        => now(),
+        ]);
+
+        /** @var AcceptanceService $service */
+        $service = app(AcceptanceService::class);
+        $service->approveFinancial($acceptance, (int) auth()->id());
+
+        $acceptance->refresh();
+        $this->assertTrue((bool) $acceptance->financial_approved);
         $this->assertSame(AcceptanceStatus::WAITING_FOR_PUBLISHING, $acceptance->status);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // R-07d: approveFinancial on an already-published acceptance reports it
+    //        outright.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_approve_financial_reports_acceptance_when_everything_is_published(): void
+    {
+        $this->setUpDatabase();
+        Notification::fake();
+
+        $acceptance = $this->createAcceptance([
+            'status'             => AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL,
+            'financial_approved' => false,
+            'howReport'          => [],
+        ]);
+
+        $item = AcceptanceItem::create([
+            'acceptance_id'    => $acceptance->id,
+            'method_test_id'   => $this->getMethodTestId(),
+            'price'            => 80,
+            'discount'         => 0,
+            'reportless'       => false,
+            'sampleless'       => false,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]);
+
+        Report::create([
+            'reporter_id'        => auth()->id(),
+            'acceptance_item_id' => $item->id,
+            'status'             => true,
+            'approved_at'        => now(),
+            'published_at'       => now(),
+        ]);
+
+        /** @var AcceptanceService $service */
+        $service = app(AcceptanceService::class);
+        $service->approveFinancial($acceptance, (int) auth()->id());
+
+        $acceptance->refresh();
+        $this->assertSame(AcceptanceStatus::REPORTED, $acceptance->status);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // R-07e: moving to WAITING_FOR_FINANCIAL_APPROVAL mirrors onto the linked
+    //        referrer order and pushes the provider.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_waiting_for_financial_approval_mirrors_onto_referrer_order_and_provider(): void
+    {
+        $this->setUpDatabase();
+        Event::fake([ReferrerOrderUpdated::class]);
+        Http::fake();
+
+        $referrer = Referrer::create([
+            'fullName'        => 'Referrer R07e',
+            'phoneNo'         => '90000007',
+            'billingInfo'     => [],
+            'email'           => 'r07e@example.com',
+            'reportReceivers' => [],
+        ]);
+
+        $acceptance = $this->createAcceptance([
+            'referrer_id'        => $referrer->id,
+            'status'             => AcceptanceStatus::PROCESSING,
+            'financial_approved' => false,
+        ]);
+
+        $referrerOrder = ReferrerOrder::create([
+            'acceptance_id'    => $acceptance->id,
+            'referrer_id'      => $referrer->id,
+            'order_id'         => 'ORD-R07E',
+            'orderInformation' => [],
+            'status'           => 'processing',
+            'patient_id'       => $this->patient->id,
+        ]);
+
+        $item = AcceptanceItem::create([
+            'acceptance_id'    => $acceptance->id,
+            'method_test_id'   => $this->getMethodTestId(),
+            'price'            => 90,
+            'discount'         => 0,
+            'reportless'       => false,
+            'sampleless'       => false,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]);
+
+        Report::create([
+            'reporter_id'        => auth()->id(),
+            'acceptance_item_id' => $item->id,
+            'status'             => true,
+            'approved_at'        => now(),
+            'published_at'       => now(),
+        ]);
+
+        /** @var AcceptanceService $service */
+        $service = app(AcceptanceService::class);
+        $service->checkAndUpdateAcceptanceStatus($acceptance);
+
+        $acceptance->refresh();
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $acceptance->status);
+
+        $referrerOrder->refresh();
+        $this->assertEquals('waiting for financial approval', $referrerOrder->status);
+
+        // The provider is pushed via the order-updated webhook.
+        Event::assertDispatched(
+            ReferrerOrderUpdated::class,
+            fn (ReferrerOrderUpdated $event) => $event->referrerOrder->id === $referrerOrder->id
+        );
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // R-07f: finalizing a referred, fully-sampleless acceptance also mirrors —
+    //        this path resolves its status outside the state machine.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_finalizing_referred_sampleless_acceptance_mirrors_onto_referrer_order(): void
+    {
+        $this->setUpDatabase();
+        Event::fake([ReferrerOrderUpdated::class]);
+        Http::fake();
+
+        $referrer = Referrer::create([
+            'fullName'        => 'Referrer R07f',
+            'phoneNo'         => '90000008',
+            'billingInfo'     => [],
+            'email'           => 'r07f@example.com',
+            'reportReceivers' => [],
+        ]);
+
+        $acceptance = $this->createAcceptance([
+            'referrer_id'        => $referrer->id,
+            'referred'           => true,
+            'status'             => AcceptanceStatus::PENDING,
+            'financial_approved' => false,
+        ]);
+
+        $referrerOrder = ReferrerOrder::create([
+            'acceptance_id'    => $acceptance->id,
+            'referrer_id'      => $referrer->id,
+            'order_id'         => 'ORD-R07F',
+            'orderInformation' => [],
+            'status'           => 'processing',
+            'patient_id'       => $this->patient->id,
+        ]);
+
+        // Nothing to sample → the acceptance goes straight to the finance gate.
+        AcceptanceItem::create([
+            'acceptance_id'    => $acceptance->id,
+            'method_test_id'   => $this->getMethodTestId(),
+            'price'            => 40,
+            'discount'         => 0,
+            'reportless'       => true,
+            'sampleless'       => true,
+            'no_sample'        => 1,
+            'customParameters' => [],
+            'timeline'         => [],
+        ]);
+
+        $invoice = Invoice::create([
+            'owner_type' => 'patient',
+            'owner_id'   => $this->patient->id,
+            'user_id'    => auth()->id(),
+            'status'     => InvoiceStatus::WAITING_FOR_PAYMENT,
+            'discount'   => 0,
+        ]);
+
+        /** @var AcceptanceService $service */
+        $service = app(AcceptanceService::class);
+        $service->updateAcceptanceInvoice($acceptance, $invoice->id);
+
+        $acceptance->refresh();
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $acceptance->status);
+
+        $referrerOrder->refresh();
+        $this->assertEquals('waiting for financial approval', $referrerOrder->status);
+
+        Event::assertDispatched(ReferrerOrderUpdated::class);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

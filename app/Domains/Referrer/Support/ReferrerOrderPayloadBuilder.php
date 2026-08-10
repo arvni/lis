@@ -2,9 +2,9 @@
 
 namespace App\Domains\Referrer\Support;
 
-use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
+use App\Domains\Referrer\Enums\ReferrerOrderStatus;
 use App\Domains\Referrer\Models\ReferrerOrder;
 
 class ReferrerOrderPayloadBuilder
@@ -118,9 +118,7 @@ class ReferrerOrderPayloadBuilder
             'order' => [
                 'id'                => $acceptance->id,
                 'referrer_order_id' => $referrerOrder->id,
-                'status'            => $acceptance->status !== AcceptanceStatus::REPORTED
-                    ? AcceptanceStatus::PROCESSING
-                    : AcceptanceStatus::REPORTED,
+                'status'            => ReferrerOrderStatus::fromAcceptanceStatus($acceptance->status)->value,
                 'orderForms'   => null,
                 'consents'     => null,
                 'files'        => null,
