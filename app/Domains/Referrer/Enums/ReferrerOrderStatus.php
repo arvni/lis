@@ -25,14 +25,21 @@ enum ReferrerOrderStatus: string
      * Collapse an acceptance status onto the referrer-facing order status.
      *
      * The provider panel only cares about three things: the work is still in
-     * flight (processing), it is finished but held back by finance
+     * flight (processing), it is finished but not yet delivered
      * (waiting for financial approval), or the report is out (reported).
+     *
+     * WAITING_FOR_PUBLISHING maps onto the finance status too: internally it
+     * means finance has signed off and only publishing is left, but the
+     * referrer must not see the order fall back to "processing" in between.
+     * The order holds at "waiting for financial approval" until the reports are
+     * actually published.
      */
     public static function fromAcceptanceStatus(AcceptanceStatus $status): self
     {
         return match ($status) {
             AcceptanceStatus::REPORTED => self::REPORTED,
-            AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL => self::WAITING_FOR_FINANCIAL_APPROVAL,
+            AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL,
+            AcceptanceStatus::WAITING_FOR_PUBLISHING => self::WAITING_FOR_FINANCIAL_APPROVAL,
             default => self::PROCESSING,
         };
     }
