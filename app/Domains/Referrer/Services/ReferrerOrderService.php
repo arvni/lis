@@ -424,6 +424,7 @@ class ReferrerOrderService
         $mirrored = [
             AcceptanceStatus::PROCESSING,
             AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL,
+            AcceptanceStatus::WAITING_FOR_PUBLISHING,
             AcceptanceStatus::REPORTED,
         ];
         if ($referrerOrder->acceptance && in_array($referrerOrder->acceptance->status, $mirrored, true)) {

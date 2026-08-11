@@ -27,6 +27,19 @@ class ReferrerOrderStatusTest extends TestCase
     }
 
     /**
+     * Once finance approves, the acceptance moves to WAITING_FOR_PUBLISHING.
+     * The order must hold at the finance status rather than stepping backwards
+     * to "processing" — it only leaves once the reports are published.
+     */
+    public function test_waiting_for_publishing_holds_at_the_finance_status(): void
+    {
+        $this->assertSame(
+            ReferrerOrderStatus::WAITING_FOR_FINANCIAL_APPROVAL,
+            ReferrerOrderStatus::fromAcceptanceStatus(AcceptanceStatus::WAITING_FOR_PUBLISHING)
+        );
+    }
+
+    /**
      * Everything else still collapses to "processing" for the provider.
      */
     public function test_in_flight_statuses_collapse_to_processing(): void
@@ -38,7 +51,6 @@ class ReferrerOrderStatusTest extends TestCase
             AcceptanceStatus::POOLING,
             AcceptanceStatus::WAITING_FOR_ENTERING,
             AcceptanceStatus::PROCESSING,
-            AcceptanceStatus::WAITING_FOR_PUBLISHING,
             AcceptanceStatus::CANCELLED,
         ];
 
