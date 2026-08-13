@@ -1,23 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Notification;
 
 use App\Domains\Notification\Resources\NotificationResource;
 use App\Domains\Notification\Services\NotificationService;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class GetUnreadNotificationsController extends Controller
 {
-    public function __construct(private readonly NotificationService $notificationService)
-    {
-    }
+    public function __construct(private readonly NotificationService $notificationService) {}
 
     /**
-     * Handle the incoming request.
+     * Feeds the bell in the top app bar.
      */
-    public function __invoke(): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+    public function __invoke(Request $request): JsonResponse
     {
         $notifications = $this->notificationService->getUserUnreadNotifications();
-        return NotificationResource::collection($notifications);
+
+        return response()->json([
+            'notifications' => NotificationResource::collection($notifications)->resolve($request),
+            'unread_count' => $this->notificationService->getUserUnreadCount(),
+        ]);
     }
 }

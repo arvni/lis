@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import useSWR from 'swr';
+import { router } from '@inertiajs/react';
 import {
     IconButton,
     Badge,
@@ -152,6 +153,9 @@ const Notification = () => {
                                 onClick={() => {
                                     markAsRead(notification.id);
                                     handleNotificationsClose();
+                                    if (notification.url) {
+                                        router.visit(notification.url);
+                                    }
                                 }}
                                 sx={{
                                     py: 1.5,
@@ -169,11 +173,20 @@ const Notification = () => {
                                             variant="body2"
                                             sx={{ fontWeight: notification.read ? 400 : 500 }}
                                         >
-                                            {notification.text || notification.message}
+                                            {notification.title}
                                         </Typography>
                                     </Box>
+                                    {notification.message && (
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                            sx={{ whiteSpace: 'normal' }}
+                                        >
+                                            {notification.message}
+                                        </Typography>
+                                    )}
                                     <Typography variant="caption" color="text.secondary">
-                                        {notification.time || notification.created_at_formatted}
+                                        {notification.time}
                                     </Typography>
                                 </Box>
                             </MuiMenuItem>
@@ -193,9 +206,8 @@ const Notification = () => {
                         fullWidth
                         size="small"
                         onClick={() => {
-                            // You can navigate to a full notifications page here
-                            window.location.href = route('notifications');
                             handleNotificationsClose();
+                            router.visit(route('notifications'));
                         }}
                     >
                         View all notifications
