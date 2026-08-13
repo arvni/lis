@@ -11,7 +11,6 @@ app/Domains/Auth/AuthServiceInterface.php
 app/Domains/Auth/DTOs/LoginDTO.php
 app/Domains/Auth/Exceptions/AuthenticationFailedException.php
 app/Domains/Auth/Requests/LoginRequest.php
-app/Domains/Auth/Services/AuthService.php
 app/Domains/Billing/Adapters/ReceptionAdapter.php
 app/Domains/Billing/DTOs/InvoiceDTO.php
 app/Domains/Billing/DTOs/PaymentDTO.php

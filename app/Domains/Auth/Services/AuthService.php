@@ -1,8 +1,12 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Domains\Auth\Services;
 
 use App\Domains\Auth\DTOs\LoginDTO;
 use App\Domains\User\Models\User;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -16,18 +20,24 @@ class AuthService
     public function login(LoginDTO $loginDTO): void
     {
         $this->ensureIsNotRateLimited($loginDTO->email, $loginDTO->ip);
-        $this->ensureIsActive($loginDTO->email);
 
         $credentials = $this->getCredentials($loginDTO->email, $loginDTO->password);
 
-        if (!Auth::validate($credentials)) {
+        if (! Auth::validate($credentials)) {
             RateLimiter::hit($this->throttleKey($loginDTO->email, $loginDTO->ip));
 
             throw ValidationException::withMessages(['email' => trans('auth.failed')]);
         }
 
         $user = Auth::getProvider()->retrieveByCredentials($credentials);
-        Auth::login($user);
+
+        // The deactivated-account message is only shown once the password has
+        // checked out. Reporting it up front — as this used to — let anyone
+        // probe which identifiers exist, and did so without hitting the rate
+        // limiter, since it threw before the RateLimiter::hit() below.
+        $this->ensureIsActive($user);
+
+        Auth::login($user, $loginDTO->remember);
 
         RateLimiter::clear($this->throttleKey($loginDTO->email, $loginDTO->ip));
     }
@@ -37,7 +47,7 @@ class AuthService
      */
     private function ensureIsNotRateLimited(string $email, string $ip): void
     {
-        if (!RateLimiter::tooManyAttempts($this->throttleKey($email, $ip), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey($email, $ip), 5)) {
             return;
         }
 
@@ -54,11 +64,9 @@ class AuthService
      *
      * @throws ValidationException
      */
-    private function ensureIsActive(string $email): void
+    private function ensureIsActive(?Authenticatable $user): void
     {
-        if (User::where(filter_var($email, FILTER_VALIDATE_EMAIL) ? 'email' : 'userName', $email)
-            ->where('is_active', true)
-            ->exists()) {
+        if ($user instanceof User && $user->is_active) {
             return;
         }
 
@@ -74,7 +82,7 @@ class AuthService
 
     private function throttleKey(string $email, string $ip): string
     {
-        return Str::transliterate(Str::lower($email) . '|' . $ip);
+        return Str::transliterate(Str::lower($email).'|'.$ip);
     }
 
     public function logout(): void
