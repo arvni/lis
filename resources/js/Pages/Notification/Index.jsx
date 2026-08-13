@@ -52,6 +52,8 @@ const Index = () => {
     const isLoading = !data && !error;
     const notifications = data?.notifications || [];
     const totalPages = data?.meta?.last_page || 1;
+    // Offered types come from what the user has actually received.
+    const availableTypes = data?.types || [];
 
     // Reset selections when tab changes
     useEffect(() => {
@@ -225,6 +227,7 @@ const Index = () => {
                     onFilterClose={handleFilterClose}
                     filterType={filterType}
                     onFilterChange={handleFilterChange}
+                    availableTypes={availableTypes}
                 />
 
                 {selectMode && selectedIds.length > 0 && (

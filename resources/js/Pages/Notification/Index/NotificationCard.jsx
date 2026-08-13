@@ -1,6 +1,16 @@
-import { alpha, Box, Card, CardContent, Chip, IconButton, Typography, useTheme } from '@mui/material';
+import {
+    alpha,
+    Box,
+    Card,
+    CardContent,
+    Chip,
+    IconButton,
+    Typography,
+    useTheme,
+} from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
+import { router } from '@inertiajs/react';
 import { formatRelativeTime } from './helpers';
 
 const NotificationCard = ({ notification, isSelected, selectMode, onToggleSelect, onMenuOpen }) => {
@@ -19,13 +29,19 @@ const NotificationCard = ({ notification, isSelected, selectMode, onToggleSelect
                       ? 'background.paper'
                       : alpha(theme.palette.primary.main, 0.04),
                 transition: 'all 0.2s ease',
-                cursor: selectMode ? 'pointer' : 'default',
+                cursor: selectMode || notification.url ? 'pointer' : 'default',
                 '&:hover': {
                     boxShadow: 3,
                     transform: 'translateY(-2px)',
                 },
             }}
-            onClick={selectMode ? () => onToggleSelect(notification.id) : undefined}
+            onClick={
+                selectMode
+                    ? () => onToggleSelect(notification.id)
+                    : notification.url
+                      ? () => router.visit(notification.url)
+                      : undefined
+            }
         >
             <CardContent>
                 <Box
@@ -84,7 +100,7 @@ const NotificationCard = ({ notification, isSelected, selectMode, onToggleSelect
                                     {formatRelativeTime(notification.created_at)}
                                 </Typography>
 
-                                {notification.type && (
+                                {notification.type && notification.type !== notification.title && (
                                     <Chip
                                         label={notification.type}
                                         size="small"

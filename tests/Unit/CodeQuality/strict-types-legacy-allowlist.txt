@@ -328,12 +328,8 @@ app/Domains/Notification/Listeners/NotifyProviderOfSampleTypeUpdate.php
 app/Domains/Notification/Models/Notification.php
 app/Domains/Notification/Models/WhatsappMessage.php
 app/Domains/Notification/Policies/NotificationPolicy.php
-app/Domains/Notification/Repositories/NotificationRepository.php
-app/Domains/Notification/Requests/ListNotificationRequest.php
 app/Domains/Notification/Requests/ListWhatsappMessageRequest.php
 app/Domains/Notification/Requests/NotificationIdsRequest.php
-app/Domains/Notification/Resources/NotificationResource.php
-app/Domains/Notification/Services/NotificationService.php
 app/Domains/Notification/Services/WhatsappMessageService.php
 app/Domains/Reception/Adapters/LaboratoryAdapter.php
 app/Domains/Reception/Adapters/UserAdapter.php
@@ -653,8 +649,6 @@ app/Http/Controllers/ListUsersController.php
 app/Http/Controllers/Monitoring/NodeController.php
 app/Http/Controllers/Monitoring/NodeSamplesExportController.php
 app/Http/Controllers/Notification/DeleteNotificationsController.php
-app/Http/Controllers/Notification/GetUnreadNotificationsController.php
-app/Http/Controllers/Notification/ListNotificationController.php
 app/Http/Controllers/Notification/MarkAllNotificationsAsReadController.php
 app/Http/Controllers/Notification/MarkNotificationsAsReadController.php
 app/Http/Controllers/Notification/MarkNotificationsAsUnreadController.php

@@ -21,6 +21,7 @@ const NotificationToolbar = ({
     onFilterClose,
     filterType,
     onFilterChange,
+    availableTypes = [],
 }) => (
     <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
         <Grid container spacing={2} sx={{ alignItems: 'center' }}>
@@ -81,24 +82,15 @@ const NotificationToolbar = ({
                         >
                             All Types
                         </MenuItem>
-                        <MenuItem
-                            onClick={() => onFilterChange('system')}
-                            selected={filterType === 'system'}
-                        >
-                            System
-                        </MenuItem>
-                        <MenuItem
-                            onClick={() => onFilterChange('alert')}
-                            selected={filterType === 'alert'}
-                        >
-                            Alerts
-                        </MenuItem>
-                        <MenuItem
-                            onClick={() => onFilterChange('message')}
-                            selected={filterType === 'message'}
-                        >
-                            Messages
-                        </MenuItem>
+                        {availableTypes.map((type) => (
+                            <MenuItem
+                                key={type.value}
+                                onClick={() => onFilterChange(type.value)}
+                                selected={filterType === type.value}
+                            >
+                                {type.label}
+                            </MenuItem>
+                        ))}
                     </Menu>
                 </Box>
             </Grid>
