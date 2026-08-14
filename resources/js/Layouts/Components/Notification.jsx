@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import useSWR from 'swr';
+import axios from 'axios';
 import { router } from '@inertiajs/react';
 import {
     IconButton,
@@ -40,20 +41,9 @@ const Notification = () => {
     const markAllAsRead = async () => {
         try {
             // Send request to mark all as read
-            const response = await fetch(route('api.notifications.markAllAsRead'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document
-                        .querySelector('meta[name="csrf-token"]')
-                        ?.getAttribute('content'),
-                },
-            });
-
-            if (response.ok) {
-                // If successful, revalidate the data
-                mutate();
-            }
+            await axios.post(route('api.notifications.markAllAsRead'));
+            // If successful, revalidate the data
+            mutate();
         } catch (error) {
             console.error('Failed to mark notifications as read:', error);
         }
@@ -64,20 +54,9 @@ const Notification = () => {
     const markAsRead = async (id) => {
         try {
             // Send request to mark specific notification as read
-            const response = await fetch(route('api.notifications.markAsRead', { id }), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document
-                        .querySelector('meta[name="csrf-token"]')
-                        ?.getAttribute('content'),
-                },
-            });
-
-            if (response.ok) {
-                // If successful, revalidate the data
-                mutate();
-            }
+            await axios.post(route('api.notifications.markAsRead'), { ids: [id] });
+            // If successful, revalidate the data
+            mutate();
         } catch (error) {
             console.error(`Failed to mark notification ${id} as read:`, error);
         }
