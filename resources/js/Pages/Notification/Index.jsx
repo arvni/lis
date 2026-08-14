@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import useSWR from 'swr';
+import axios from 'axios';
 import {
     Container,
     Typography,
@@ -123,22 +124,13 @@ const Index = () => {
     // API Interaction Methods
     const markAsRead = async (ids) => {
         try {
-            const response = await fetch(route('api.notifications.markAsRead'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document
-                        .querySelector('meta[name="csrf-token"]')
-                        ?.getAttribute('content'),
-                },
-                body: JSON.stringify({ ids: Array.isArray(ids) ? ids : [ids] }),
+            await axios.post(route('api.notifications.markAsRead'), {
+                ids: Array.isArray(ids) ? ids : [ids],
             });
 
-            if (response.ok) {
-                mutate();
-                if (selectMode && selectedIds.length > 0) {
-                    setSelectedIds([]);
-                }
+            mutate();
+            if (selectMode && selectedIds.length > 0) {
+                setSelectedIds([]);
             }
         } catch (error) {
             console.error('Failed to mark notifications as read:', error);
@@ -147,22 +139,13 @@ const Index = () => {
 
     const markAsUnread = async (ids) => {
         try {
-            const response = await fetch(route('api.notifications.markAsUnread'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document
-                        .querySelector('meta[name="csrf-token"]')
-                        ?.getAttribute('content'),
-                },
-                body: JSON.stringify({ ids: Array.isArray(ids) ? ids : [ids] }),
+            await axios.post(route('api.notifications.markAsUnread'), {
+                ids: Array.isArray(ids) ? ids : [ids],
             });
 
-            if (response.ok) {
-                mutate();
-                if (selectMode && selectedIds.length > 0) {
-                    setSelectedIds([]);
-                }
+            mutate();
+            if (selectMode && selectedIds.length > 0) {
+                setSelectedIds([]);
             }
         } catch (error) {
             console.error('Failed to mark notifications as unread:', error);
@@ -171,22 +154,13 @@ const Index = () => {
 
     const deleteNotifications = async (ids) => {
         try {
-            const response = await fetch(route('api.notifications.delete'), {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document
-                        .querySelector('meta[name="csrf-token"]')
-                        ?.getAttribute('content'),
-                },
-                body: JSON.stringify({ ids: Array.isArray(ids) ? ids : [ids] }),
+            await axios.delete(route('api.notifications.delete'), {
+                data: { ids: Array.isArray(ids) ? ids : [ids] },
             });
 
-            if (response.ok) {
-                mutate();
-                if (selectMode && selectedIds.length > 0) {
-                    setSelectedIds([]);
-                }
+            mutate();
+            if (selectMode && selectedIds.length > 0) {
+                setSelectedIds([]);
             }
         } catch (error) {
             console.error('Failed to delete notifications:', error);
