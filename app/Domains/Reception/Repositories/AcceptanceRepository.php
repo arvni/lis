@@ -8,6 +8,8 @@ use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Reception\Models\AcceptanceItem;
+use App\Domains\Reception\Models\AcceptanceItemState;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Traits\ExtractsTagFilterIds;
 use Carbon\Carbon;
@@ -197,11 +199,85 @@ class AcceptanceRepository
         return Acceptance::findOrFail($id);
     }
 
+    /**
+     * Soft-delete an acceptance together with everything hanging off it.
+     *
+     * The cascade is done by hand because a soft delete fires no database
+     * cascade: items and their states would otherwise stay live and keep showing
+     * up in the lab worklists. Every row is stamped with the acceptance's own
+     * deleted_at, which is what restoreAcceptance() keys off so that items
+     * deleted earlier, on their own, stay deleted.
+     */
     public function deleteAcceptance(Acceptance $acceptance): void
     {
-        // Consider adding logic here if deletion has side effects or requires checks
-        $acceptance->delete();
+        DB::transaction(function () use ($acceptance) {
+            // Only the rows that are still live: anything already deleted was not
+            // taken down by this delete and must not come back with it.
+            $itemIds = $acceptance->acceptanceItems()->pluck('acceptance_items.id')->all();
+            $stateIds = AcceptanceItemState::query()
+                ->whereIn('acceptance_item_id', $itemIds)
+                ->pluck('id')
+                ->all();
+
+            $acceptance->delete();
+            $deletedAt = $acceptance->deleted_at;
+
+            AcceptanceItemState::query()->whereKey($stateIds)->update(['deleted_at' => $deletedAt]);
+            AcceptanceItem::query()->whereKey($itemIds)->update(['deleted_at' => $deletedAt]);
+
+            $acceptance->restore_point = [
+                'acceptance_items' => $itemIds,
+                'acceptance_item_states' => $stateIds,
+            ];
+            $acceptance->save();
+        });
+
         $this->logDeleted($acceptance);
+    }
+
+    /**
+     * Bring a soft-deleted acceptance back, along with the items and item states
+     * its delete recorded in the restore point.
+     */
+    public function restoreAcceptance(Acceptance $acceptance): void
+    {
+        DB::transaction(function () use ($acceptance) {
+            $restorePoint = $acceptance->restore_point ?? [];
+
+            AcceptanceItemState::onlyTrashed()
+                ->whereKey($restorePoint['acceptance_item_states'] ?? [])
+                ->restore();
+
+            AcceptanceItem::onlyTrashed()
+                ->whereKey($restorePoint['acceptance_items'] ?? [])
+                ->restore();
+
+            $acceptance->restore_point = null;
+            $acceptance->restore();
+        });
+
+        $this->logUpdated($acceptance);
+    }
+
+    /**
+     * The trashed-acceptances listing. Counts and aggregates deliberately reach
+     * through the soft deletes — a deleted acceptance's items are deleted too,
+     * and a row showing "0 tests" would be useless when deciding what to restore.
+     */
+    public function listDeletedAcceptances(array $queryData): LengthAwarePaginator
+    {
+        $query = Acceptance::onlyTrashed()
+            ->withCount(['acceptanceItems' => fn ($q) => $q->withTrashed()])
+            ->withAggregate('patient', 'fullName')
+            ->withAggregate('patient', 'idNo')
+            ->withAggregate('referrer', 'fullName');
+
+        if (isset($queryData['filters'])) {
+            $this->applyFilters($query, $queryData['filters']);
+        }
+
+        return $query->orderByDesc('acceptances.deleted_at')
+            ->paginate($queryData['pageSize'] ?? 10);
     }
 
     public function listSampleCollection(array $queryData, float $minAllowablePaymentPercentage): LengthAwarePaginator

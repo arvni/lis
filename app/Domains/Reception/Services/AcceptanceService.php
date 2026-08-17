@@ -16,6 +16,9 @@ use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Events\AcceptanceCancelledEvent;
 use App\Domains\Reception\Events\AcceptanceDeletedEvent;
+use App\Domains\Reception\Events\AcceptanceRestoredEvent;
+use App\Domains\Reception\Exceptions\AcceptanceNotDeletableException;
+use App\Domains\Reception\Exceptions\AcceptanceNotDeletedException;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Models\Report;
@@ -32,6 +35,21 @@ use Throwable;
 
 class AcceptanceService
 {
+    /**
+     * The only statuses an acceptance can be deleted from. Everything else — a
+     * reported acceptance above all, but equally one mid-sampling or waiting on
+     * money — has to be cancelled first.
+     *
+     * Kept in sync with `isDeletableStatus()` in
+     * resources/js/Pages/Acceptance/Index/helpers.jsx, which hides the delete
+     * action everywhere else.
+     */
+    private const DELETABLE_STATUSES = [
+        AcceptanceStatus::PENDING,
+        AcceptanceStatus::PROCESSING,
+        AcceptanceStatus::CANCELLED,
+    ];
+
     protected string $phonePattern = "/^((\+|00)?968)?[279]\d{7}$/i";
 
     private readonly AcceptanceStatusService $statusService;
@@ -416,18 +434,48 @@ class AcceptanceService
     }
 
     /**
-     * @throws Exception
+     * Soft-delete an acceptance, its items and its item states; its invoice is
+     * cancelled — not deleted — through AcceptanceDeletedEvent. Nothing is
+     * destroyed, so a delete is undone by restoreAcceptance().
+     *
+     * @throws AcceptanceNotDeletableException
      */
     public function deleteAcceptance(Acceptance $acceptance): void
     {
+        if (!in_array($acceptance->status, self::DELETABLE_STATUSES, true)) {
+            throw new AcceptanceNotDeletableException($acceptance->status);
+        }
 
-        if ($acceptance->status !== AcceptanceStatus::REPORTED && $acceptance->status !== AcceptanceStatus::PROCESSING && $acceptance->status !== AcceptanceStatus::CANCELLED) {
-            $invoiceId = $acceptance->invoice_id;
-            $this->acceptanceRepository->deleteAcceptance($acceptance);
-            if ($invoiceId)
-                AcceptanceDeletedEvent::dispatch($invoiceId);
-        } else
-            throw new Exception("this Acceptance cannot be deleted");
+        $invoiceId = $acceptance->invoice_id;
+        $this->acceptanceRepository->deleteAcceptance($acceptance);
+
+        if ($invoiceId) {
+            AcceptanceDeletedEvent::dispatch($invoiceId);
+        }
+    }
+
+    /**
+     * Undo a delete: the acceptance, the items and item states that went down
+     * with it, and — through AcceptanceRestoredEvent — its invoice's status.
+     *
+     * @throws AcceptanceNotDeletedException
+     */
+    public function restoreAcceptance(Acceptance $acceptance): void
+    {
+        if (!$acceptance->trashed()) {
+            throw new AcceptanceNotDeletedException;
+        }
+
+        $this->acceptanceRepository->restoreAcceptance($acceptance);
+
+        if ($acceptance->invoice_id) {
+            AcceptanceRestoredEvent::dispatch($acceptance->invoice_id);
+        }
+    }
+
+    public function listDeletedAcceptances(array $queryData): LengthAwarePaginator
+    {
+        return $this->acceptanceRepository->listDeletedAcceptances($queryData);
     }
 
     public function getAcceptanceById(int|string $id): ?Acceptance

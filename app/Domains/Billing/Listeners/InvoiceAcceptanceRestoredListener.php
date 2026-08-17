@@ -1,14 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Billing\Listeners;
 
 use App\Domains\Billing\Services\InvoiceService;
 
-class InvoiceAcceptanceDeletedListener
+class InvoiceAcceptanceRestoredListener
 {
-    /**
-     * Create the event listener.
-     */
     public function __construct(protected InvoiceService $invoiceService)
     {
         //
@@ -17,15 +16,15 @@ class InvoiceAcceptanceDeletedListener
     /**
      * Handle the event.
      *
-     * An acceptance delete is reversible, so the invoice is cancelled rather
-     * than destroyed: its number and its payments have to survive, and a
-     * restore only has to hand the status back.
+     * The delete parked the invoice as cancelled; bringing the acceptance back
+     * hands the status to updateStatus(), which derives it from what has
+     * actually been paid rather than assuming what it was before.
      */
     public function handle(object $event): void
     {
         $invoice = $this->invoiceService->findInvoiceById($event->invoiceId);
         if ($invoice) {
-            $this->invoiceService->cancelInvoice($invoice);
+            $this->invoiceService->updateStatus($invoice);
         }
     }
 }

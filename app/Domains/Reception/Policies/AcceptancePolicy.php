@@ -65,6 +65,20 @@ class AcceptancePolicy
         return true;
     }
 
+    /**
+     * Deleted acceptances are a recovery tool, not part of the daily list, so
+     * seeing them and restoring them ride on the same dedicated permission.
+     */
+    public function viewDeleted(User $authUser): bool
+    {
+        return $authUser->can("Reception.Acceptances.Restore Acceptance");
+    }
+
+    public function restore(User $authUser, Acceptance $acceptance): bool
+    {
+        return $authUser->can("Reception.Acceptances.Restore Acceptance");
+    }
+
     public function editInvoiced(User $authUser): bool
     {
         return $authUser->can("Reception.Acceptances.Edit Invoiced Acceptance");

@@ -240,6 +240,7 @@ class TATService
             ->join('reports', 'reports.acceptance_item_id', '=', 'acceptance_items.id')
             ->join('acceptances', 'acceptances.id', '=', 'acceptance_items.acceptance_id')
             ->whereNull('acceptance_items.deleted_at')
+            ->whereNull('acceptances.deleted_at')
             ->whereNotNull('reports.published_at')
             ->where('tests.type', '!=', TestType::SERVICE->value)
             ->where('acceptances.waiting_for_pooling', false)

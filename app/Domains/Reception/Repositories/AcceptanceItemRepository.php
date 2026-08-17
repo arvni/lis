@@ -304,7 +304,8 @@ class AcceptanceItemRepository
             ->whereHas("test", function ($q) {
                 $q->whereNot("type", TestType::SERVICE);
             })
-            ->with("test", "patients", "acceptance.patient", "acceptance.payments", "acceptance.referrer")
+            // acceptance.invoice: the cash report drops rows whose invoice was cancelled.
+            ->with("test", "patients", "acceptance.patient", "acceptance.payments", "acceptance.referrer", "acceptance.invoice")
             ->get();
     }
 

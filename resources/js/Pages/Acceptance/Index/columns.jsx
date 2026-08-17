@@ -15,7 +15,7 @@ import {
 } from '@mui/icons-material';
 import InlineTagManager from '@/Components/InlineTagManager';
 import { formatDate } from '@/Services/helper.js';
-import { formatCurrency, getStatusInfo, getBarcodeChipColor } from './helpers';
+import { formatCurrency, getStatusInfo, getBarcodeChipColor, isDeletableStatus } from './helpers';
 
 export const buildColumns = ({
     canUpdate,
@@ -357,7 +357,11 @@ export const buildColumns = ({
                 );
             }
 
-            if ((canDelete || params.row.status === 'pending') && invoicedAllowed) {
+            if (
+                (canDelete || params.row.status === 'pending') &&
+                invoicedAllowed &&
+                isDeletableStatus(params.row.status)
+            ) {
                 cols.push(
                     <GridActionsCellItem
                         icon={
