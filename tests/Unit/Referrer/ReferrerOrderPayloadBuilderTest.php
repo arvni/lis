@@ -106,6 +106,55 @@ class ReferrerOrderPayloadBuilderTest extends TestCase
         $this->assertFalse(ReferrerOrderPayloadBuilder::hasSendableItems($acceptance));
     }
 
+    /**
+     * referrer_order_id is matched against the provider's own orders.id, so it
+     * must never carry this order's PK — that is an unrelated sequence in a
+     * different database, and handing it over makes the provider write the
+     * acceptance onto whichever of its orders happens to share the number.
+     */
+    public function test_referrer_order_id_carries_the_providers_order_id_not_the_local_pk(): void
+    {
+        $referrerOrder = new ReferrerOrder();
+        $referrerOrder->id = 99;
+        $referrerOrder->order_id = 'OR.20260101.42';
+        $referrerOrder->orderInformation = ['id' => 42, 'status' => 'pending'];
+
+        $this->assertSame(42, ReferrerOrderPayloadBuilder::providerOrderId($referrerOrder));
+    }
+
+    /**
+     * Rows stored before the provider began sending its id in orderInformation
+     * still carry it in the "OR.<Ymd>.<orderId>" key.
+     */
+    public function test_provider_order_id_falls_back_to_the_order_key(): void
+    {
+        $referrerOrder = new ReferrerOrder();
+        $referrerOrder->id = 99;
+        $referrerOrder->order_id = 'OR.20260101.42';
+        $referrerOrder->orderInformation = ['status' => 'pending'];
+
+        $this->assertSame(42, ReferrerOrderPayloadBuilder::providerOrderId($referrerOrder));
+    }
+
+    /**
+     * Lab-raised orders have no provider order behind them, so they must send
+     * null and leave the provider matching on the acceptance id alone.
+     */
+    public function test_provider_order_id_is_null_for_lab_raised_orders(): void
+    {
+        foreach (['SC-IN-123-1770000000', 'SC-POOL-123-1770000000', 'SYNC-123-1770000000'] as $key) {
+            $referrerOrder = new ReferrerOrder();
+            $referrerOrder->id = 99;
+            $referrerOrder->order_id = $key;
+            $referrerOrder->orderInformation = ['status' => 'processing'];
+
+            $this->assertNull(
+                ReferrerOrderPayloadBuilder::providerOrderId($referrerOrder),
+                "Expected null provider order id for lab-raised key {$key}",
+            );
+        }
+    }
+
     private function makePatient(int $id): Patient
     {
         $patient = new Patient();

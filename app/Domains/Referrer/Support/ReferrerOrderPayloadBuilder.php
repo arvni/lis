@@ -6,6 +6,7 @@ use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Referrer\Enums\ReferrerOrderStatus;
 use App\Domains\Referrer\Models\ReferrerOrder;
+use Illuminate\Support\Str;
 
 class ReferrerOrderPayloadBuilder
 {
@@ -37,6 +38,36 @@ class ReferrerOrderPayloadBuilder
         return $acceptance->acceptanceItems->contains(
             fn(AcceptanceItem $item) => self::isSendableItem($item)
         );
+    }
+
+    /**
+     * The provider's own orders.id for this referrer order, or null when the
+     * order did not originate at a provider.
+     *
+     * Provider submissions arrive keyed by "OR.<Ymd>.<orderId>" and are stored
+     * verbatim in orderInformation, which carries the numeric id; fall back to
+     * the trailing segment of that key for rows saved before the provider began
+     * sending it.
+     */
+    public static function providerOrderId(ReferrerOrder $referrerOrder): ?int
+    {
+        // The "OR." prefix is what marks the order as provider-raised. Lab-raised
+        // keys (SC-*/SYNC-*) are built around an acceptance id and a timestamp,
+        // and nothing in them may be mistaken for a provider order id.
+        $orderId = (string) $referrerOrder->order_id;
+        if (!Str::startsWith($orderId, 'OR.')) {
+            return null;
+        }
+
+        $id = $referrerOrder->orderInformation['id'] ?? null;
+
+        if (is_numeric($id)) {
+            return (int) $id;
+        }
+
+        $trailing = last(explode('.', $orderId));
+
+        return is_numeric($trailing) ? (int) $trailing : null;
     }
 
     public static function build(Acceptance $acceptance, ReferrerOrder $referrerOrder): array
@@ -117,7 +148,14 @@ class ReferrerOrderPayloadBuilder
         return [
             'order' => [
                 'id'                => $acceptance->id,
-                'referrer_order_id' => $referrerOrder->id,
+                // The provider matches this against its own orders.id, so it must
+                // carry the provider's local order id -- not this order's own PK,
+                // which is an unrelated sequence in a different database. The
+                // provider's id rides along in orderInformation, which is the
+                // payload it submitted verbatim. Orders raised inside the lab
+                // (SC-*/SYNC-*) have no provider id and send null, leaving the
+                // provider to match on the acceptance id alone.
+                'referrer_order_id' => self::providerOrderId($referrerOrder),
                 'status'            => ReferrerOrderStatus::fromAcceptanceStatus($acceptance->status)->value,
                 'orderForms'   => null,
                 'consents'     => null,
