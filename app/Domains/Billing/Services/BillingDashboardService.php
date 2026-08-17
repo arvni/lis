@@ -2,6 +2,7 @@
 
 namespace App\Domains\Billing\Services;
 
+use App\Domains\Billing\Enums\InvoiceStatus;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -45,6 +46,8 @@ class BillingDashboardService
             ->join('invoices', 'invoices.id', '=', 'invoice_items.invoice_id')
             ->leftJoin('acceptances', 'acceptances.id', '=', 'invoice_items.acceptance_id')
             ->whereNull('invoice_items.deleted_at')
+            ->whereNull('acceptances.deleted_at')
+            ->where('invoices.status', '!=', InvoiceStatus::CANCELED->value)
             ->where(function ($w) {
                 $w->whereNull('invoice_items.acceptance_id')
                   ->orWhere('acceptances.status', '!=', 'Canceled');
@@ -77,6 +80,7 @@ class BillingDashboardService
         $q = DB::table('acceptance_items')
             ->join('acceptances', 'acceptances.id', '=', 'acceptance_items.acceptance_id')
             ->whereNull('acceptance_items.deleted_at')
+            ->whereNull('acceptances.deleted_at')
             ->whereNull('acceptances.invoice_id')
             ->where('acceptances.status', '!=', 'Canceled')
             ->whereBetween('acceptance_items.created_at', [$from, $to]);
@@ -97,6 +101,25 @@ class BillingDashboardService
         return $q;
     }
 
+    // Payments taken against invoices raised in the window. A cancelled invoice
+    // is excluded here exactly as it is from revenue: leaving its payments in
+    // would drive "outstanding" (revenue − collected) negative.
+    private function paymentsQuery(array $filters, Carbon $from, Carbon $to): \Illuminate\Database\Query\Builder
+    {
+        $q = DB::table('payments')
+            ->join('invoices', 'invoices.id', '=', 'payments.invoice_id')
+            ->where('invoices.status', '!=', InvoiceStatus::CANCELED->value)
+            ->whereBetween('invoices.created_at', [$from, $to]);
+
+        if (!empty($filters['referrer_id'])) {
+            $q->join('acceptances', 'acceptances.invoice_id', '=', 'invoices.id')
+              ->whereNull('acceptances.deleted_at')
+              ->where('acceptances.referrer_id', $filters['referrer_id']);
+        }
+
+        return $q;
+    }
+
     // Acceptance/invoice counts still come from acceptances (not items).
     private function acceptanceCountsQuery(array $filters, Carbon $from, Carbon $to): \Illuminate\Database\Query\Builder
     {
@@ -106,7 +129,14 @@ class BillingDashboardService
             ->join('acceptances', 'acceptances.id', '=', 'acceptance_items.acceptance_id')
             ->leftJoin('invoices', 'invoices.id', '=', 'acceptances.invoice_id')
             ->whereNull('acceptance_items.deleted_at')
-            ->where('acceptances.status', '!=', 'Canceled');
+            ->whereNull('acceptances.deleted_at')
+            ->where('acceptances.status', '!=', 'Canceled')
+            // A cancelled invoice is not billing anyone, so it counts for nothing
+            // here either — but an acceptance with no invoice at all still does.
+            ->where(function ($w) {
+                $w->whereNull('acceptances.invoice_id')
+                  ->orWhere('invoices.status', '!=', InvoiceStatus::CANCELED->value);
+            });
 
         if ($hasInvoice === '1') {
             $q->whereNotNull('acceptances.invoice_id')
@@ -169,16 +199,7 @@ class BillingDashboardService
             ->first();
 
         // Payments: filter by invoice creation date (not acceptance date)
-        $paymentsQ = DB::table('payments')
-            ->join('invoices', 'invoices.id', '=', 'payments.invoice_id')
-            ->whereBetween('invoices.created_at', [$from, $to]);
-
-        if (!empty($filters['referrer_id'])) {
-            $paymentsQ->join('acceptances', 'acceptances.invoice_id', '=', 'invoices.id')
-                      ->where('acceptances.referrer_id', $filters['referrer_id']);
-        }
-
-        $collected = (float) $paymentsQ->sum('payments.price');
+        $collected = (float) $this->paymentsQuery($filters, $from, $to)->sum('payments.price');
 
         return [
             'revenue'          => round($totalRevenue, 3),
@@ -447,16 +468,8 @@ class BillingDashboardService
     {
         [$from, $to] = $this->resolveDates($filters);
 
-        $q = DB::table('payments')
-            ->join('invoices', 'invoices.id', '=', 'payments.invoice_id')
-            ->whereBetween('invoices.created_at', [$from, $to]);
-
-        if (!empty($filters['referrer_id'])) {
-            $q->join('acceptances', 'acceptances.invoice_id', '=', 'invoices.id')
-              ->where('acceptances.referrer_id', $filters['referrer_id']);
-        }
-
-        $rows = $q->selectRaw('payments.paymentMethod as method,
+        $rows = $this->paymentsQuery($filters, $from, $to)
+            ->selectRaw('payments.paymentMethod as method,
                                 COUNT(*)              as count,
                                 ROUND(SUM(payments.price),3) as total')
             ->groupBy('payments.paymentMethod')

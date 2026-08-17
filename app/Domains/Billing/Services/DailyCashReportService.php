@@ -3,7 +3,9 @@
 namespace App\Domains\Billing\Services;
 
 use App\Domains\Billing\Adapters\ReceptionAdapter;
+use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Enums\PaymentMethod;
+use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\Payment;
 use App\Domains\Reception\Models\Acceptance;
 use Carbon\Carbon;
@@ -32,7 +34,8 @@ class DailyCashReportService
 
         foreach ($acceptanceItems->groupBy('acceptance_id') as $acceptanceId => $items) {
             $acceptance = $items->first()->acceptance;
-            if (!$acceptance) {
+            // No acceptance means it was deleted — the belongsTo skips soft deletes.
+            if (!$acceptance || $this->isCancelled($acceptance->invoice)) {
                 continue;
             }
             $processedIds[] = $acceptanceId;
@@ -50,6 +53,9 @@ class DailyCashReportService
     {
         $payments = Payment::whereBetween('created_at', $dateRange)
             ->where('paymentMethod', '!=', PaymentMethod::CREDIT)
+            // Money taken against an invoice that has since been cancelled is not
+            // the day's takings any more — same rule the billing dashboard applies.
+            ->whereHas('invoice', fn($q) => $q->where('status', '!=', InvoiceStatus::CANCELED->value))
             ->with(
                 'invoice.acceptance.acceptanceItems.test',
                 'invoice.acceptance.acceptanceItems.patients',
@@ -74,6 +80,11 @@ class DailyCashReportService
                 $items->sum('discount'),
             );
         }
+    }
+
+    private function isCancelled(?Invoice $invoice): bool
+    {
+        return $invoice?->status === InvoiceStatus::CANCELED->value;
     }
 
     private function buildRow(
