@@ -42,6 +42,7 @@ const Show = ({
     });
 
     const [promotingTests, setPromotingTests] = useState(null); // array of selected tests
+    const [promoteErrors, setPromoteErrors] = useState(null); // server validation errors
     const [editingPrices, setEditingPrices] = useState(false);
     const [editItem, setEditItem] = useState({ open: false, mode: null, test: null, panel: null });
 
@@ -92,8 +93,14 @@ const Show = ({
         );
     };
 
+    const closePromoteDialog = () => {
+        setPromotingTests(null);
+        setPromoteErrors(null);
+    };
+
     const handlePromoteToPanel = (panelMethodTestIds) => {
         if (!promotingTests?.length) return;
+        setPromoteErrors(null);
         router.put(
             route('acceptances.promoteToPanel', { acceptance: acceptance.id }),
             {
@@ -102,8 +109,10 @@ const Show = ({
             },
             {
                 preserveState: true,
+                // `errors` is an always-prop, so it survives this partial reload.
                 only: ['acceptance'],
-                onSuccess: () => setPromotingTests(null),
+                onSuccess: closePromoteDialog,
+                onError: (errs) => setPromoteErrors(errs),
             },
         );
     };
@@ -235,6 +244,8 @@ const Show = ({
                 maxDiscount={maxDiscount}
                 promotingTests={promotingTests}
                 setPromotingTests={setPromotingTests}
+                promoteErrors={promoteErrors}
+                onClosePromote={closePromoteDialog}
                 onPromoteToPanel={handlePromoteToPanel}
                 onEjectPanel={handleEjectPanel}
                 onEditTest={handleEditTest}

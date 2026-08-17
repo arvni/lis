@@ -21,6 +21,8 @@ const TestItemsSection = ({
     maxDiscount,
     promotingTests,
     setPromotingTests,
+    promoteErrors,
+    onClosePromote,
     onPromoteToPanel,
     onEjectPanel,
     onEditTest,
@@ -83,7 +85,8 @@ const TestItemsSection = ({
                 open={Boolean(promotingTests?.length)}
                 tests={promotingTests ?? []}
                 referrer={acceptance.referrer}
-                onClose={() => setPromotingTests(null)}
+                serverErrors={promoteErrors}
+                onClose={onClosePromote ?? (() => setPromotingTests(null))}
                 onConfirm={onPromoteToPanel}
             />
 

@@ -683,7 +683,6 @@ app/Http/Controllers/Reception/PatientController.php
 app/Http/Controllers/Reception/PrintAcceptanceBarcodeController.php
 app/Http/Controllers/Reception/PrintAcceptanceController.php
 app/Http/Controllers/Reception/PrintAcceptanceSamplesController.php
-app/Http/Controllers/Reception/PromoteToPanelController.php
 app/Http/Controllers/Reception/PublishAcceptanceController.php
 app/Http/Controllers/Reception/PublishReportController.php
 app/Http/Controllers/Reception/RejectReportController.php
