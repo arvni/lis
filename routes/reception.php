@@ -93,7 +93,9 @@ Route::group(["prefix" => "reception"], function () {
     Route::get("acceptanceItems/export", ExportAcceptanceItemsController::class)->name("acceptanceItems.export");
     Route::put("acceptanceItems/{acceptanceItem}/tags", [TagAssignmentController::class, "syncAcceptanceItem"])->name("acceptanceItems.tags.update");
     Route::get("acceptanceItems/{acceptanceItem}/check-workflow", CheckAcceptanceItemWorkflowController::class)->name("acceptanceItems.check-workflow");
-    Route::put("acceptances/{acceptance}/acceptance-items/{acceptanceItem}/eject-panel", EjectPanelController::class)->name("acceptanceItems.ejectPanel");
+    // Scoped: the controller authorizes the acceptance in the URL, so the item must
+    // be resolved through it rather than by bare id.
+    Route::put("acceptances/{acceptance}/acceptance-items/{acceptanceItem}/eject-panel", EjectPanelController::class)->name("acceptanceItems.ejectPanel")->scopeBindings();
     Route::put("acceptances/{acceptance}/promote-to-panel", PromoteToPanelController::class)->name("acceptances.promoteToPanel");
     Route::put("acceptances/{acceptance}/acceptance-items/{acceptanceItem}/toggle-reportless", ToggleReportlessAcceptanceItemController::class)->name("acceptanceItems.toggleReportless");
     Route::put("acceptances/{acceptance}/acceptance-items/{acceptanceItem}/toggle-sampleless", ToggleSamplelessAcceptanceItemController::class)->name("acceptanceItems.toggleSampleless");
