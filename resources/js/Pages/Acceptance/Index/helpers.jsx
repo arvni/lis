@@ -84,6 +84,13 @@ export const getStatusInfo = (status) => {
     return statusMap[status.toLowerCase()];
 };
 
+// The only statuses the server will delete from — kept in sync with
+// AcceptanceService::DELETABLE_STATUSES. Offering the action anywhere else only
+// produced an error once the request came back.
+const DELETABLE_STATUSES = ['pending', 'processing', 'canceled'];
+
+export const isDeletableStatus = (status) => DELETABLE_STATUSES.includes(status?.toLowerCase());
+
 export const getBarcodeChipColor = (index) => {
     // Cycle through colors for visual distinction
     const colors = ['primary', 'secondary', 'success', 'warning', 'info'];

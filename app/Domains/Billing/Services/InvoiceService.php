@@ -117,6 +117,15 @@ readonly class InvoiceService
         $this->invoiceRepository->deleteInvoice($invoice);
     }
 
+    /**
+     * Park an invoice as cancelled. The row, its number and its payments stay
+     * put — this is what an acceptance being cancelled or deleted does to it.
+     */
+    public function cancelInvoice(Invoice $invoice): void
+    {
+        $this->invoiceRepository->updateInvoice($invoice, ["status" => InvoiceStatus::CANCELED]);
+    }
+
     public function updateStatus(Invoice $invoice): void
     {
         if ($invoice->isPaid()) {

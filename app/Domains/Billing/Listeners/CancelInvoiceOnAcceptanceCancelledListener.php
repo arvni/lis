@@ -2,7 +2,6 @@
 
 namespace App\Domains\Billing\Listeners;
 
-use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Services\InvoiceService;
 
 class CancelInvoiceOnAcceptanceCancelledListener
@@ -15,7 +14,7 @@ class CancelInvoiceOnAcceptanceCancelledListener
     {
         $invoice = $this->invoiceService->findInvoiceById($event->invoiceId);
         if ($invoice) {
-            $invoice->update(['status' => InvoiceStatus::CANCELED]);
+            $this->invoiceService->cancelInvoice($invoice);
         }
     }
 }

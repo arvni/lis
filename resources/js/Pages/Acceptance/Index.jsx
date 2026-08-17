@@ -4,11 +4,13 @@ import Filter from './Components/Filter';
 import TableLayout from '@/Layouts/TableLayout';
 import DeleteForm from '@/Components/DeleteForm';
 import PageHeader from '@/Components/PageHeader.jsx';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { useSnackbar } from 'notistack';
 import { Stack, Button, Typography, Box, Paper, alpha } from '@mui/material';
 import {
     LocalHospital as LocalHospitalIcon,
     FileDownload as FileDownloadIcon,
+    DeleteSweep as DeleteSweepIcon,
 } from '@mui/icons-material';
 import AddPoolingDialog from '@/Pages/Acceptance/Components/AddPoolingDialog.jsx';
 import { getRowClassName } from './Index/helpers';
@@ -17,6 +19,7 @@ import CancelDialog from './Index/CancelDialog';
 
 const Index = () => {
     const { post, setData, data, reset, processing } = useForm();
+    const { enqueueSnackbar } = useSnackbar();
 
     const {
         acceptances,
@@ -27,6 +30,7 @@ const Index = () => {
         canDelete,
         canCancel,
         canEditInvoiced,
+        canRestore,
     } = usePage().props;
 
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
@@ -114,8 +118,18 @@ const Index = () => {
     const handleDestroy = useCallback(() => {
         post(route('acceptances.destroy', data?.id), {
             onSuccess: handleCloseDeleteForm,
+            // A refused delete (the acceptance moved on since the list was loaded)
+            // used to leave the dialog spinning with nothing to show for it.
+            onError: (errors) => {
+                handleCloseDeleteForm();
+                Object.values(errors ?? {})
+                    .flat()
+                    .forEach(
+                        (message) => message && enqueueSnackbar(message, { variant: 'error' }),
+                    );
+            },
         });
-    }, [post, data?.id, handleCloseDeleteForm]);
+    }, [post, data?.id, handleCloseDeleteForm, enqueueSnackbar]);
 
     return (
         <>
@@ -126,6 +140,17 @@ const Index = () => {
                 subtitle="Manage and view all patient acceptances"
                 actions={
                     <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+                        {canRestore && (
+                            <Button
+                                component={Link}
+                                variant="outlined"
+                                color="error"
+                                startIcon={<DeleteSweepIcon />}
+                                href={route('acceptances.deleted')}
+                            >
+                                Deleted Acceptances
+                            </Button>
+                        )}
                         <Button
                             variant="outlined"
                             color="success"

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Reception;
 
 use App\Domains\Reception\Enums\AcceptanceStatus;
+use App\Domains\Reception\Exceptions\AcceptanceNotDeletableException;
 use App\Domains\Reception\Notifications\WelcomeNotification;
 use App\Domains\Reception\Requests\StoreAcceptanceRequest;
 use App\Domains\Reception\Requests\UpdateAcceptanceRequest;
@@ -49,6 +50,7 @@ class AcceptanceController extends Controller
                 "canDelete" => Gate::allows("delete", $acceptance),
                 "canCancel" => Gate::allows("cancel", $acceptance),
                 "canEditInvoiced" => Gate::allows("editInvoiced", Acceptance::class),
+                "canRestore" => Gate::allows("viewDeleted", Acceptance::class),
             ]);
     }
 
@@ -224,15 +226,22 @@ class AcceptanceController extends Controller
         }
     }
 
-    /**`
+    /**
      * Remove the specified resource from storage.
-     * @throws Exception
+     * @throws AuthorizationException
      */
     public function destroy(Acceptance $acceptance): RedirectResponse
     {
         $this->authorize("delete", $acceptance);
-        $title = $acceptance["name"];
-        $this->acceptanceService->deleteAcceptance($acceptance);
+        $title = $acceptance->patient?->fullName ?: "Acceptance #{$acceptance->id}";
+        try {
+            $this->acceptanceService->deleteAcceptance($acceptance);
+        } catch (AcceptanceNotDeletableException $e) {
+            // The delete action is hidden for these statuses, but a stale list or a
+            // status change mid-session can still get here — answer with an error the
+            // page can render instead of a 500.
+            return back()->withErrors(["message" => $e->getMessage()]);
+        }
         return back()->with(["success" => true, "status" => "$title Successfully Deleted."]);
     }
 }

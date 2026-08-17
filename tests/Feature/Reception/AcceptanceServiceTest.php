@@ -1409,14 +1409,14 @@ class AcceptanceServiceTest extends TestCase
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // R-13: deleteAcceptance throws when status is PROCESSING
+    // R-13: deleteAcceptance throws when status is SAMPLING
     // ─────────────────────────────────────────────────────────────────────────
 
-    public function test_delete_acceptance_throws_when_status_is_processing(): void
+    public function test_delete_acceptance_throws_when_status_is_sampling(): void
     {
         $this->setUpDatabase();
 
-        $acceptance = $this->createAcceptance(['status' => AcceptanceStatus::PROCESSING]);
+        $acceptance = $this->createAcceptance(['status' => AcceptanceStatus::SAMPLING]);
 
         /** @var AcceptanceService $service */
         $service = app(AcceptanceService::class);

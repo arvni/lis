@@ -14,6 +14,8 @@ use App\Http\Controllers\Reception\Api\GetAcceptancePoolingItemsController;
 use App\Http\Controllers\Reception\ApproveFinancialController;
 use App\Http\Controllers\Reception\ApproveReportController;
 use App\Http\Controllers\Reception\CancelAcceptanceController;
+use App\Http\Controllers\Reception\DeletedAcceptanceController;
+use App\Http\Controllers\Reception\RestoreAcceptanceController;
 use App\Http\Controllers\Reception\CheckAcceptanceItemWorkflowController;
 use App\Http\Controllers\Reception\CheckAcceptanceStatusController;
 use App\Http\Controllers\Reception\CreateReportController;
@@ -65,7 +67,12 @@ Route::group(["prefix" => "reception"], function () {
     Route::resource("relatives", RelativeController::class)->only(["store", "update", "destroy"]);
     Route::get("acceptances/financial-check", FinancialCheckController::class)->name("acceptances.financialCheck");
     Route::get("acceptances/export", ExportAcceptancesController::class)->name("acceptances.export");
+    Route::get("acceptances/deleted", DeletedAcceptanceController::class)->name("acceptances.deleted");
     Route::resource("acceptances", AcceptanceController::class)->except("create", "store");
+    // withTrashed: the only acceptance this route can bind is a deleted one.
+    Route::put("acceptances/{acceptance}/restore", RestoreAcceptanceController::class)
+        ->withTrashed()
+        ->name("acceptances.restore");
     Route::get("acceptances/{acceptance}/print", PrintAcceptanceController::class)->name("acceptances.print");
     Route::get("acceptances/{acceptance}/print-samples", PrintAcceptanceSamplesController::class)->name("acceptances.printSamples");
     Route::get("acceptances/{acceptance}/barcodes", PrintAcceptanceBarcodeController::class)->name("acceptances.barcodes");

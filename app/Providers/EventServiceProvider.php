@@ -7,6 +7,7 @@ use App\Domains\Billing\Events\InvoiceAcceptanceUpdateEvent;
 use App\Domains\Billing\Events\PaymentsAddedEvent;
 use App\Domains\Billing\Listeners\CancelInvoiceOnAcceptanceCancelledListener;
 use App\Domains\Billing\Listeners\InvoiceAcceptanceDeletedListener;
+use App\Domains\Billing\Listeners\InvoiceAcceptanceRestoredListener;
 use App\Domains\Document\Listeners\DocumentUpdateListener;
 use App\Domains\Laboratory\Events\ConsentFormDocumentUpdateEvent;
 use App\Domains\Laboratory\Events\ConsentFormUpdated;
@@ -26,6 +27,7 @@ use App\Domains\Notification\Listeners\NotifyProviderOfSampleTypeUpdate;
 use App\Domains\Notification\Listeners\NotifyLogisticsAppOfCollectRequestUpdate;
 use App\Domains\Reception\Events\AcceptanceCancelledEvent;
 use App\Domains\Reception\Events\AcceptanceDeletedEvent;
+use App\Domains\Reception\Events\AcceptanceRestoredEvent;
 use App\Domains\Reception\Events\PatientDocumentUpdateEvent;
 use App\Domains\Reception\Events\ReportPublishedEvent;
 use App\Domains\Reception\Events\SampleCollectedEvent;
@@ -101,6 +103,10 @@ class EventServiceProvider extends ServiceProvider
         Event::listen(
             [AcceptanceDeletedEvent::class],
             [InvoiceAcceptanceDeletedListener::class, 'handle']
+        );
+        Event::listen(
+            [AcceptanceRestoredEvent::class],
+            [InvoiceAcceptanceRestoredListener::class, 'handle']
         );
         Event::listen(
             [AcceptanceCancelledEvent::class],

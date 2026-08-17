@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -44,6 +45,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int $step
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property array<string, list<int>>|null $restore_point ids soft-deleted along with this acceptance
  * @property int|null $financial_approved_by
  * @property string|null $financial_approved_at
  * @property-read string|null $report_date query-derived alias (report-date subquery)
@@ -56,7 +59,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Acceptance extends Model
 {
-    use Searchable, HasRelationships;
+    use Searchable, HasRelationships, SoftDeletes;
 
     protected $fillable = [
         "patient_id",
@@ -84,6 +87,7 @@ class Acceptance extends Model
         "out_patient" => "boolean",
         "waiting_for_pooling" => "boolean",
         "howReport" => "json",
+        "restore_point" => "json",
         "status" => AcceptanceStatus::class,
         "priority" => AcceptancePriority::class,
     ];

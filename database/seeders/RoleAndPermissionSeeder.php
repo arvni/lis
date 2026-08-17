@@ -169,6 +169,7 @@ class RoleAndPermissionSeeder extends Seeder
                     "Cancel Acceptance",
                     "Edit Acceptance",
                     "Delete Acceptance",
+                    "Restore Acceptance",
                     "List Acceptance",
                     "Toggle Reportless Acceptance Item",
                     "Toggle Sampleless Acceptance Item",
