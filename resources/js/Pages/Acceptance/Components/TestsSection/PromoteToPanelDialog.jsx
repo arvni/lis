@@ -34,7 +34,14 @@ const checkCoverage = (panelMethodTests, selectedMethodIds) => {
     return { matched, missing };
 };
 
-const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [], referrer = null }) => {
+const PromoteToPanelDialog = ({
+    open,
+    onClose,
+    onConfirm,
+    tests = [],
+    referrer = null,
+    serverErrors = null,
+}) => {
     const [panels, setPanels] = useState([]);
     const [loadingPanels, setLoadingPanels] = useState(false);
     const [selectedPanel, setSelectedPanel] = useState(null);
@@ -97,6 +104,10 @@ const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [], referrer =
     const panelMethodTests = panelDetails?.method_tests ?? [];
     const { matched, missing } = checkCoverage(panelMethodTests, selectedMethodIds);
     const allCovered = missing.size === 0 && selectedMethodIds.length > 0;
+
+    // Validation errors come back from a redirect, so the dialog has to render
+    // them itself — otherwise the failed submit looks like nothing happened.
+    const serverErrorMessages = Object.values(serverErrors ?? {}).flat().filter(Boolean);
 
     const handleConfirm = () => {
         onConfirm(panelMethodTests.map((mt) => mt.id));
@@ -172,6 +183,20 @@ const PromoteToPanelDialog = ({ open, onClose, onConfirm, tests = [], referrer =
                 {error && (
                     <Alert severity="error" sx={{ mt: 2 }}>
                         {error}
+                    </Alert>
+                )}
+
+                {serverErrorMessages.length > 0 && (
+                    <Alert severity="error" sx={{ mt: 2 }}>
+                        {serverErrorMessages.length === 1 ? (
+                            serverErrorMessages[0]
+                        ) : (
+                            <Box component="ul" sx={{ m: 0, pl: 2 }}>
+                                {serverErrorMessages.map((message) => (
+                                    <li key={message}>{message}</li>
+                                ))}
+                            </Box>
+                        )}
                     </Alert>
                 )}
 
