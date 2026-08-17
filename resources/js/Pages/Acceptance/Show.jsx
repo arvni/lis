@@ -7,6 +7,7 @@ import Prescription from './Components/Prescription';
 import Payment from './Components/Payment';
 import Button from '@mui/material/Button';
 import { Head, router } from '@inertiajs/react';
+import { useSnackbar } from 'notistack';
 import PageHeader from '@/Components/PageHeader.jsx';
 import InlineTagManager from '@/Components/InlineTagManager';
 import StatusChip from './Show/StatusChip';
@@ -40,6 +41,8 @@ const Show = ({
         prescription: false,
         payment: true,
     });
+
+    const { enqueueSnackbar } = useSnackbar();
 
     const [promotingTests, setPromotingTests] = useState(null); // array of selected tests
     const [promoteErrors, setPromoteErrors] = useState(null); // server validation errors
@@ -80,6 +83,12 @@ const Show = ({
         );
     };
 
+    // Eject has no dialog of its own, so its failures go to the snackbar.
+    const reportErrors = (errs) =>
+        Object.values(errs ?? {})
+            .flat()
+            .forEach((message) => message && enqueueSnackbar(message, { variant: 'error' }));
+
     const handleEjectPanel = (panel) => {
         const firstItem = panel.acceptanceItems?.[0];
         if (!firstItem) return;
@@ -89,7 +98,13 @@ const Show = ({
                 acceptanceItem: firstItem.id,
             }),
             {},
-            { preserveState: true, only: ['acceptance'] },
+            {
+                preserveState: true,
+                // The endpoint rejects an item that is not part of a panel; without
+                // this the rejection was dropped and the click looked like a no-op.
+                only: ['acceptance'],
+                onError: reportErrors,
+            },
         );
     };
 
