@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Domains\Referrer\Support\ReferrerOrderPayloadBuilder;
 use App\Events\ReferrerOrderPatientCreated;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -36,9 +37,16 @@ class SendPatientToProviderWebhook implements ShouldQueue
         $patient = $event->patient;
         $referrerOrder = $event->referrerOrder;
 
-        // Build payload
+        // Build payload.
+        //
+        // The provider resolves the order the same way the order webhooks do:
+        // by acceptance id (its orders.server_id), falling back to its own
+        // order id. order_id used to carry this order's "OR.<Ymd>.<id>" key,
+        // which the provider validates as an integer and therefore rejected
+        // outright, so send the numeric id it actually matches on.
         $payload = [
-            'order_id' => $referrerOrder->order_id,
+            'order_id' => ReferrerOrderPayloadBuilder::providerOrderId($referrerOrder),
+            'acceptance_id' => $referrerOrder->acceptance_id,
             'patient' => [
                 'id' => $patient->id, // Local system ID (server_id for provider)
                 'fullName' => $patient->fullName,
