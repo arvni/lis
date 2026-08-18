@@ -19,6 +19,7 @@ use App\Domains\Reception\Events\AcceptanceDeletedEvent;
 use App\Domains\Reception\Events\AcceptanceRestoredEvent;
 use App\Domains\Reception\Exceptions\AcceptanceNotDeletableException;
 use App\Domains\Reception\Exceptions\AcceptanceNotDeletedException;
+use App\Domains\Reception\Exceptions\AcceptanceNotFinanciallyApprovableException;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Models\Report;
@@ -111,10 +112,29 @@ class AcceptanceService
      *
      * @param Acceptance $acceptance
      * @param int $userId
+     * @param bool $allowWithoutInvoice Reviewer acknowledged the missing invoice in the confirmation dialog.
      * @return Acceptance
+     *
+     * @throws AcceptanceNotFinanciallyApprovableException
      */
-    public function approveFinancial(Acceptance $acceptance, int $userId): Acceptance
+    public function approveFinancial(Acceptance $acceptance, int $userId, bool $allowWithoutInvoice = false): Acceptance
     {
+        // Finance normally signs off on an invoice, so releasing an uninvoiced
+        // acceptance to publishing — and on to REPORTED — takes a deliberate
+        // acknowledgement. The confirmation dialog is where that is given; the
+        // default refuses, so a request that never saw the dialog cannot slip
+        // an unbilled acceptance through.
+        if (!$acceptance->invoice_id && !$allowWithoutInvoice) {
+            throw AcceptanceNotFinanciallyApprovableException::missingInvoice($acceptance->id);
+        }
+
+        // Approving twice would run checkAcceptanceReport again on an already
+        // reported acceptance, re-pushing it to the referrer provider and
+        // re-sending the published-report notifications.
+        if ($acceptance->financial_approved) {
+            throw AcceptanceNotFinanciallyApprovableException::alreadyApproved($acceptance->id);
+        }
+
         $acceptance = $this->acceptanceRepository->updateAcceptance($acceptance, [
             'financial_approved' => true,
             'financial_approved_by' => $userId,
