@@ -13,7 +13,6 @@ use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Services\AcceptanceService;
 use App\Domains\Reception\Services\AcceptanceItemService;
 use App\Domains\Referrer\Adapters\ReceptionAdapter;
-use App\Domains\Referrer\DTOs\ReferrerOrderDTO;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\Referrer\Requests\StoreReferrerOrderAcceptanceRequest;
 use App\Domains\Referrer\Services\ReferrerOrderService;
@@ -66,9 +65,7 @@ class StoreReferrerOrderAcceptanceController extends Controller
             (bool) $referrerOrder->pooling,
         );
         $acceptance = $this->acceptanceService->storeAcceptance($acceptanceDto);
-        $referrerOrderDto = ReferrerOrderDTO::fromArray($referrerOrder->toArray());
-        $referrerOrderDto->acceptanceId = $acceptance->id;
-        $this->referrerOrderService->updateReferrerOrder($referrerOrder, $referrerOrderDto);
+        $this->referrerOrderService->linkToAcceptance($referrerOrder, $acceptance);
         return back()->with("success", "your order has been accepted");
     }
 
@@ -99,9 +96,7 @@ class StoreReferrerOrderAcceptanceController extends Controller
         );
 
         // Link referrer order to existing acceptance
-        $referrerOrderDto = ReferrerOrderDTO::fromArray($referrerOrder->toArray());
-        $referrerOrderDto->acceptanceId = $existingAcceptance->id;
-        $this->referrerOrderService->updateReferrerOrder($referrerOrder, $referrerOrderDto);
+        $this->referrerOrderService->linkToAcceptance($referrerOrder, $existingAcceptance);
 
         return back()->with("success", "Tests added to existing acceptance");
     }
