@@ -62,6 +62,28 @@ class ReferrerOrderService
         return $this->referrerRepository->updateReferrerOrder($referrerOrder, $referrerDTO->toArray());
     }
 
+    /**
+     * Point an order at the acceptance it was accepted into, and tell the
+     * provider about the link.
+     *
+     * Only acceptance_id is written — the order's payload, pooling flag and
+     * collect request stay exactly as they were submitted. The update webhook
+     * rebuilds its payload from the live acceptance, so a freshly accepted
+     * order (nothing sampled yet) still sends nothing; the dispatch matters for
+     * pooling orders joining an acceptance that already has sendable items,
+     * which otherwise waited for an unrelated trigger to reach the provider.
+     */
+    public function linkToAcceptance(ReferrerOrder $referrerOrder, Acceptance $acceptance): ReferrerOrder
+    {
+        $linked = $this->referrerRepository->updateReferrerOrder($referrerOrder, [
+            'acceptance_id' => $acceptance->id,
+        ]);
+
+        ReferrerOrderUpdated::dispatch($linked);
+
+        return $linked;
+    }
+
     public function updateReferrerOrderStatus(ReferrerOrder $referrerOrder, string $status): ReferrerOrder
     {
         if ((string) $referrerOrder->status === (string) $status) {

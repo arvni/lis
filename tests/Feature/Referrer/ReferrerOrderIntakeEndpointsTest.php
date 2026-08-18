@@ -13,6 +13,9 @@ use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Patient;
+use App\Domains\Referrer\Enums\CollectRequestStatus;
+use App\Domains\Referrer\Events\ReferrerOrderUpdated;
+use App\Domains\Referrer\Models\CollectRequest;
 use App\Domains\Referrer\Models\Referrer;
 use App\Domains\Referrer\Models\ReferrerOrder;
 use App\Domains\User\Models\User;
@@ -168,6 +171,37 @@ class ReferrerOrderIntakeEndpointsTest extends TestCase
                 && $event->referrerOrder->id === $order->id);
     }
 
+    public function test_patient_endpoint_preserves_the_fields_the_dto_round_trip_used_to_reset(): void
+    {
+        Event::fake([ReferrerOrderPatientCreated::class]);
+
+        $collectRequest = CollectRequest::create([
+            'referrer_id' => $this->referrer->id,
+            'status' => CollectRequestStatus::PENDING,
+            'barcode' => 'CR'.Str::random(6),
+        ]);
+        $order = $this->makeOrder([
+            'pooling' => true,
+            'collect_request_id' => $collectRequest->id,
+            'needs_add_sample' => false,
+        ]);
+
+        $this->actingAs($this->userWithPermissions(
+            'Referrer.Referrer Orders.Add Patient',
+            'Reception.Patients.Create Patient',
+        ));
+
+        $this->post(route('referrerOrders.patient', $order), [
+            'patient' => ['id' => $this->patient->id],
+        ])->assertSessionHas('success', true);
+
+        $order->refresh();
+        $this->assertSame($this->patient->id, $order->patient_id);
+        $this->assertTrue((bool) $order->pooling);
+        $this->assertSame($collectRequest->id, $order->collect_request_id);
+        $this->assertFalse((bool) $order->needs_add_sample);
+    }
+
     public function test_patient_endpoint_is_a_no_op_when_patient_already_attached(): void
     {
         Event::fake([ReferrerOrderPatientCreated::class]);
@@ -227,6 +261,8 @@ class ReferrerOrderIntakeEndpointsTest extends TestCase
 
     public function test_acceptance_endpoint_creates_acceptance_and_links_it_to_the_order(): void
     {
+        Event::fake([ReferrerOrderUpdated::class]);
+
         $order = $this->makeOrder(['patient_id' => $this->patient->id]);
         $user = $this->userWithPermissions('Referrer.Referrer Orders.Add Acceptance');
         $this->actingAs($user);
@@ -250,6 +286,35 @@ class ReferrerOrderIntakeEndpointsTest extends TestCase
         $item = $acceptance->acceptanceItems()->first();
         $this->assertSame($this->methodTestId, $item->method_test_id);
         $this->assertSame(100.0, (float) $item->price);
+
+        // The link is pushed to the provider; the listener decides whether the
+        // acceptance actually has anything sendable yet.
+        Event::assertDispatched(ReferrerOrderUpdated::class,
+            fn (ReferrerOrderUpdated $event) => $event->referrerOrder->id === $order->id
+                && $event->referrerOrder->acceptance_id === $acceptance->id);
+    }
+
+    public function test_acceptance_endpoint_preserves_the_order_payload_when_linking(): void
+    {
+        Event::fake([ReferrerOrderUpdated::class]);
+
+        $order = $this->makeOrder([
+            'patient_id' => $this->patient->id,
+            'collect_request_id' => null,
+            'needs_add_sample' => false,
+        ]);
+        $orderInformation = $order->orderInformation;
+
+        $this->actingAs($this->userWithPermissions('Referrer.Referrer Orders.Add Acceptance'));
+
+        $this->post(route('referrerOrders.acceptance', $order), [
+            'acceptanceItems' => $this->acceptanceItemsPayload(),
+        ])->assertSessionHas('success');
+
+        $order->refresh();
+        $this->assertNotNull($order->acceptance_id);
+        $this->assertSame($orderInformation, $order->orderInformation);
+        $this->assertFalse((bool) $order->needs_add_sample);
     }
 
     public function test_pooling_acceptance_splits_the_panel_total_across_its_items(): void
@@ -300,6 +365,42 @@ class ReferrerOrderIntakeEndpointsTest extends TestCase
 
         $this->assertCount(3, $prices);
         $this->assertEqualsWithDelta(100.0, array_sum($prices), 0.001);
+    }
+
+    public function test_pooling_acceptance_pushes_the_link_and_keeps_the_pooling_flag(): void
+    {
+        Event::fake([ReferrerOrderUpdated::class]);
+
+        $existing = Acceptance::create([
+            'status' => AcceptanceStatus::POOLING,
+            'step' => 5,
+            'patient_id' => $this->patient->id,
+            'referrer_id' => $this->referrer->id,
+            'acceptor_id' => User::factory()->create()->id,
+            'financial_approved' => false,
+            'out_patient' => true,
+            'waiting_for_pooling' => false,
+        ]);
+        $order = $this->makeOrder([
+            'patient_id' => $this->patient->id,
+            'pooling' => true,
+        ]);
+
+        $this->actingAs($this->userWithPermissions('Referrer.Referrer Orders.Add Acceptance'));
+
+        $this->post(route('referrerOrders.acceptance', $order), [
+            'existing_acceptance_id' => $existing->id,
+            'acceptanceItems' => $this->acceptanceItemsPayload(),
+        ])->assertSessionHas('success');
+
+        $order->refresh();
+        $this->assertSame($existing->id, $order->acceptance_id);
+        // findExistingNonPoolingOrder() filters on this flag — linking must not clear it.
+        $this->assertTrue((bool) $order->pooling);
+
+        Event::assertDispatched(ReferrerOrderUpdated::class,
+            fn (ReferrerOrderUpdated $event) => $event->referrerOrder->id === $order->id
+                && $event->referrerOrder->acceptance_id === $existing->id);
     }
 
     public function test_acceptance_endpoint_blocks_order_that_already_has_an_acceptance(): void

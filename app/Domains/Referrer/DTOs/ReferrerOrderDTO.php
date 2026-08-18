@@ -22,6 +22,12 @@ class ReferrerOrderDTO
     {
     }
 
+    /**
+     * Every column toArray() writes back must be read here — a field left out
+     * falls back to its constructor default, so round-tripping an order through
+     * the DTO would silently reset it (pooling to false, collect_request_id to
+     * null, needs_add_sample to true).
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -35,6 +41,9 @@ class ReferrerOrderDTO
             $data['received_at'],
             $data['patient_id'],
             $data['acceptance_id'],
+            $data['collect_request_id'] ?? null,
+            $data['needs_add_sample'] ?? true,
+            $data['pooling'] ?? false,
         );
     }
 
