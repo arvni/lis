@@ -14,6 +14,7 @@ use App\Domains\Laboratory\Models\Test;
 use App\Domains\Reception\DTOs\AcceptanceDTO;
 use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
+use App\Domains\Reception\Exceptions\AcceptanceNotFinanciallyApprovableException;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\AcceptanceItemState;
@@ -805,9 +806,18 @@ class AcceptanceServiceTest extends TestCase
     {
         $this->setUpDatabase();
 
+        $invoice = Invoice::create([
+            'owner_type' => 'patient',
+            'owner_id'   => $this->patient->id,
+            'user_id'    => auth()->id(),
+            'status'     => InvoiceStatus::WAITING_FOR_PAYMENT,
+            'discount'   => 0,
+        ]);
+
         $acceptance = $this->createAcceptance([
             'status'             => AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL,
             'financial_approved' => false,
+            'invoice_id'         => $invoice->id,
         ]);
 
         $item = AcceptanceItem::create([
@@ -839,6 +849,71 @@ class AcceptanceServiceTest extends TestCase
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // R-07c2: approveFinancial refuses an uninvoiced acceptance by default, and
+    //         lets one through only on the explicit acknowledgement the
+    //         confirmation dialog collects.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_approve_financial_rejects_an_acceptance_without_an_invoice(): void
+    {
+        $this->setUpDatabase();
+
+        $acceptance = $this->createAcceptance([
+            'status'             => AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL,
+            'financial_approved' => false,
+        ]);
+
+        /** @var AcceptanceService $service */
+        $service = app(AcceptanceService::class);
+
+        try {
+            $service->approveFinancial($acceptance, (int) auth()->id());
+            $this->fail('Expected an uninvoiced acceptance to be refused.');
+        } catch (AcceptanceNotFinanciallyApprovableException) {
+            $acceptance->refresh();
+            $this->assertFalse((bool) $acceptance->financial_approved);
+            $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $acceptance->status);
+        }
+
+        // Same acceptance, acknowledged: it goes through.
+        $service->approveFinancial($acceptance, (int) auth()->id(), allowWithoutInvoice: true);
+
+        $acceptance->refresh();
+        $this->assertTrue((bool) $acceptance->financial_approved);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // R-07c3: approving twice is refused — the second pass would re-report the
+    //         acceptance and re-fire the published notifications.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_approve_financial_rejects_an_already_approved_acceptance(): void
+    {
+        $this->setUpDatabase();
+
+        $invoice = Invoice::create([
+            'owner_type' => 'patient',
+            'owner_id'   => $this->patient->id,
+            'user_id'    => auth()->id(),
+            'status'     => InvoiceStatus::WAITING_FOR_PAYMENT,
+            'discount'   => 0,
+        ]);
+
+        $acceptance = $this->createAcceptance([
+            'status'             => AcceptanceStatus::WAITING_FOR_PUBLISHING,
+            'financial_approved' => true,
+            'invoice_id'         => $invoice->id,
+        ]);
+
+        /** @var AcceptanceService $service */
+        $service = app(AcceptanceService::class);
+
+        $this->expectException(AcceptanceNotFinanciallyApprovableException::class);
+
+        $service->approveFinancial($acceptance, (int) auth()->id());
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // R-07d: approveFinancial on an already-published acceptance reports it
     //        outright.
     // ─────────────────────────────────────────────────────────────────────────
@@ -848,10 +923,19 @@ class AcceptanceServiceTest extends TestCase
         $this->setUpDatabase();
         Notification::fake();
 
+        $invoice = Invoice::create([
+            'owner_type' => 'patient',
+            'owner_id'   => $this->patient->id,
+            'user_id'    => auth()->id(),
+            'status'     => InvoiceStatus::WAITING_FOR_PAYMENT,
+            'discount'   => 0,
+        ]);
+
         $acceptance = $this->createAcceptance([
             'status'             => AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL,
             'financial_approved' => false,
             'howReport'          => [],
+            'invoice_id'         => $invoice->id,
         ]);
 
         $item = AcceptanceItem::create([

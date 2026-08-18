@@ -661,7 +661,6 @@ app/Http/Controllers/Reception/AcceptanceItemStateController.php
 app/Http/Controllers/Reception/AcceptancePrescriptionController.php
 app/Http/Controllers/Reception/AddPoolingController.php
 app/Http/Controllers/Reception/Api/GetAcceptancePoolingItemsController.php
-app/Http/Controllers/Reception/ApproveFinancialController.php
 app/Http/Controllers/Reception/ApproveReportController.php
 app/Http/Controllers/Reception/CancelAcceptanceController.php
 app/Http/Controllers/Reception/CheckAcceptanceItemWorkflowController.php

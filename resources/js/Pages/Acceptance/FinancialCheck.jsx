@@ -8,6 +8,7 @@ import PageHeader from '@/Components/PageHeader';
 import Filter from './Components/Filter';
 import InvoiceEditForm from '@/Pages/Invoice/Components/InvoiceEditForm';
 import CreateInvoiceForm from '@/Pages/Acceptance/Components/CreateInvoiceForm';
+import ApproveFinancialConfirm from '@/Pages/Acceptance/Components/ApproveFinancialConfirm';
 
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-OM', {
@@ -35,19 +36,34 @@ const FinancialCheck = () => {
     const [openEditForm, setOpenEditForm] = useState(false);
     const [openCreateInvoice, setOpenCreateInvoice] = useState(false);
     const [selectedAcceptance, setSelectedAcceptance] = useState(null);
+    const [approvingAcceptance, setApprovingAcceptance] = useState(null);
     const { data, setData, reset } = useForm();
 
-    const handleApproveFinancial = useCallback((acceptanceId) => {
-        setProcessingAcceptances((prev) => new Set([...prev, acceptanceId]));
+    // Approval is confirmed against the invoice status shown in the dialog, so
+    // the button only opens it — the request goes out from handleConfirmApprove.
+    const handleApproveFinancial = useCallback((acceptance) => {
+        setApprovingAcceptance(acceptance);
+    }, []);
+
+    const handleCancelApprove = useCallback(() => setApprovingAcceptance(null), []);
+
+    const handleConfirmApprove = useCallback(() => {
+        const acceptance = approvingAcceptance;
+        if (!acceptance) return;
+
+        setApprovingAcceptance(null);
+        setProcessingAcceptances((prev) => new Set([...prev, acceptance.id]));
 
         router.put(
-            route('acceptances.approveFinancial', acceptanceId),
-            {},
+            route('acceptances.approveFinancial', acceptance.id),
+            // The endpoint refuses an uninvoiced acceptance unless the reviewer
+            // acknowledged it here.
+            { approve_without_invoice: !acceptance.invoice },
             {
                 onFinish: () => {
                     setProcessingAcceptances((prev) => {
                         const newSet = new Set(prev);
-                        newSet.delete(acceptanceId);
+                        newSet.delete(acceptance.id);
                         return newSet;
                     });
                 },
@@ -55,7 +71,7 @@ const FinancialCheck = () => {
                 only: ['acceptances', 'status', 'success', 'errors'],
             },
         );
-    }, []);
+    }, [approvingAcceptance]);
 
     const handleCreateInvoice = useCallback((acceptance) => {
         setSelectedAcceptance(acceptance);
@@ -229,16 +245,18 @@ const FinancialCheck = () => {
                         );
                     }
 
-                    // Approve Financial button
+                    // Approve Financial button. Enabled without an invoice too —
+                    // the dialog shows the invoice status and takes the
+                    // confirmation for approving unbilled.
                     actions.push(
                         <Button
                             key={`approve-${params.row.id}`}
                             variant="contained"
                             size="small"
-                            color="success"
+                            color={hasInvoice ? 'success' : 'warning'}
                             startIcon={<CheckCircle />}
-                            onClick={() => handleApproveFinancial(params.row.id)}
-                            disabled={isProcessing || !hasInvoice}
+                            onClick={() => handleApproveFinancial(params.row)}
+                            disabled={isProcessing}
                         >
                             Approve
                         </Button>,
@@ -315,8 +333,8 @@ const FinancialCheck = () => {
 
             {!summaryStats.withInvoice && summaryStats.total > 0 && (
                 <Alert severity="warning" sx={{ mb: 2 }}>
-                    All acceptances need invoices before they can be approved. Create invoices to
-                    proceed.
+                    None of these acceptances have an invoice. Create invoices before approving,
+                    or confirm each approval without one.
                 </Alert>
             )}
 
@@ -339,6 +357,14 @@ const FinancialCheck = () => {
             >
                 <InvoiceEditForm invoice={data} onClose={handleCancel} open={openEditForm} />
             </TableLayout>
+
+            <ApproveFinancialConfirm
+                open={!!approvingAcceptance}
+                acceptance={approvingAcceptance}
+                formatCurrency={formatCurrency}
+                onCancel={handleCancelApprove}
+                onConfirm={handleConfirmApprove}
+            />
 
             {openCreateInvoice && selectedAcceptance && (
                 <CreateInvoiceForm
