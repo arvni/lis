@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Reception\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class UpdateAcceptanceItemRequest extends FormRequest
@@ -17,9 +20,13 @@ class UpdateAcceptanceItemRequest extends FormRequest
             'tests' => ['sometimes', 'array'],
             'tests.*.price' => ['required_with:tests', 'numeric', 'min:0'],
             'tests.*.discount' => ['nullable', 'numeric', 'min:0'],
+            // The editor can point an item at another test, so the method test
+            // it lands on is validated rather than trusted.
+            'tests.*.method_test.id' => ['required_with:tests', 'integer', Rule::exists('method_tests', 'id')],
             'panels' => ['sometimes', 'array'],
             'panels.*.price' => ['required_with:panels', 'numeric', 'min:0'],
             'panels.*.discount' => ['nullable', 'numeric', 'min:0'],
+            'panels.*.acceptanceItems.*.method_test.id' => ['required_with:panels', 'integer', Rule::exists('method_tests', 'id')],
         ];
     }
 

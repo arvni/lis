@@ -17,10 +17,12 @@ use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Events\AcceptanceCancelledEvent;
 use App\Domains\Reception\Events\AcceptanceDeletedEvent;
 use App\Domains\Reception\Events\AcceptanceRestoredEvent;
+use App\Domains\Reception\Exceptions\AcceptanceItemTestNotChangeableException;
 use App\Domains\Reception\Exceptions\AcceptanceNotDeletableException;
 use App\Domains\Reception\Exceptions\AcceptanceNotDeletedException;
 use App\Domains\Reception\Exceptions\AcceptanceNotFinanciallyApprovableException;
 use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Models\Report;
 use App\Domains\Reception\Repositories\AcceptanceRepository;
@@ -402,9 +404,15 @@ class AcceptanceService
      * deletes items — it only updates rows that already belong to the given
      * acceptance, so it is safe to call with a single edited test or panel.
      *
+     * The edited item can also point at a different test than it did: the row
+     * is moved onto the new method test in place, keeping its id, timeline and
+     * everything hanging off it — see noteTestChange() for the one case where
+     * that is refused.
+     *
      * @param Acceptance $acceptance
      * @param array $acceptanceItems editor payload: ["tests" => [...], "panels" => [...]]
      * @return void
+     * @throws AcceptanceItemTestNotChangeableException
      * @throws Throwable
      */
     public function updateAcceptanceItemsFromEditor(Acceptance $acceptance, array $acceptanceItems): void
@@ -417,11 +425,72 @@ class AcceptanceService
                 }
                 $existing = $this->acceptanceItemService->findAcceptanceItemById($dto->id);
                 if ($existing && (int)$existing->acceptance_id === (int)$acceptance->id) {
+                    $this->carryOverTimeline($existing, $dto);
+                    $this->noteTestChange($existing, $dto);
                     $this->acceptanceItemService->updateAcceptanceItem($existing, $dto);
                 }
             }
             $this->referrerAdapter->syncOrdersForAcceptance($acceptance);
         });
+    }
+
+    /**
+     * Keep the item's own history: prepareAcceptanceItems() builds the timeline
+     * from the payload alone, and the editor sends none, so without this the
+     * row's entries would be replaced by a single fresh one — and labelled
+     * "Created By", which an edit of an existing row is not.
+     */
+    private function carryOverTimeline(AcceptanceItem $acceptanceItem, AcceptanceItemDTO $dto): void
+    {
+        $existingTimeline = $acceptanceItem->timeline;
+        if (!is_array($existingTimeline)) {
+            $existingTimeline = json_decode($existingTimeline ?? "[]", true) ?? [];
+        }
+
+        $entries = array_map(
+            static fn (string $message): string => str_replace("Created By", "Edited By", $message),
+            $dto->timeline ?? []
+        );
+
+        $dto->timeline = array_merge($existingTimeline, $entries);
+    }
+
+    /**
+     * Record on the DTO's timeline that the item is being moved onto another
+     * test — and refuse the move outright once the item has a sample, a
+     * workflow state or a report, because none of those would still describe
+     * the test the item would end up on.
+     *
+     * @throws AcceptanceItemTestNotChangeableException
+     */
+    private function noteTestChange(AcceptanceItem $acceptanceItem, AcceptanceItemDTO $dto): void
+    {
+        if ((int)$acceptanceItem->method_test_id === $dto->methodTestId) {
+            return;
+        }
+
+        if ($acceptanceItem->acceptanceItemStates()->exists()
+            || $acceptanceItem->activeSamples()->exists()
+            || $acceptanceItem->report()->exists()) {
+            throw new AcceptanceItemTestNotChangeableException($acceptanceItem->id);
+        }
+
+        $from = $this->laboratoryAdapter->findTestByMethodTestId($acceptanceItem->method_test_id)->name
+            ?? "method test #{$acceptanceItem->method_test_id}";
+        $to = $this->laboratoryAdapter->findTestByMethodTestId($dto->methodTestId)->name
+            ?? "method test #{$dto->methodTestId}";
+
+        // prepareAcceptanceItems() always appends its own "Edited By …" entry
+        // last; extend that one instead of adding a second entry, which would
+        // collide with it on the same to-the-second timeline key.
+        $lastKey = $dto->timeline ? array_key_last($dto->timeline) : null;
+        if ($lastKey === null) {
+            $dto->timeline[now()->format("Y-m-d H:i:s")] = "Test changed from $from to $to";
+
+            return;
+        }
+
+        $dto->timeline[$lastKey] .= " — test changed from $from to $to";
     }
 
     /**

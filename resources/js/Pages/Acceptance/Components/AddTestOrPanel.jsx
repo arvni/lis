@@ -15,7 +15,7 @@ import {
     Step,
     StepLabel,
 } from '@mui/material';
-import { Close, Science, PlaylistAddCheck, ArrowBack, Check } from '@mui/icons-material';
+import { Close, Science, PlaylistAddCheck, ArrowBack, Check, SwapHoriz } from '@mui/icons-material';
 import { makeId } from '@/Services/helper';
 import axios from 'axios';
 import { TYPES } from './AddTestOrPanel/constants';
@@ -41,6 +41,10 @@ const AddTestOrPanel = ({
     const isEditTest = Boolean(initialTestData?.method_test?.test?.id);
     const isEditPanel = Boolean(initialPanelData?.panel?.id);
     const isEdit = isEditTest || isEditPanel;
+    // A test or a service can be swapped for another one of the same type — the
+    // row is updated in place. A panel cannot: its items are a structure, not a
+    // single row, so it stays what it is.
+    const canChangeItem = isEditTest && !isEditPanel;
 
     const initType = useCallback(() => {
         if (isEditPanel) return 'PANEL';
@@ -146,6 +150,9 @@ const AddTestOrPanel = ({
     );
 
     const handleTypeSelect = (t) => {
+        // The type is fixed while editing: a swap stays within TEST or SERVICE.
+        if (isEdit) return;
+
         setType(t);
         setTestData(makeTestData({ method_test: { test: { type: t } } }));
         setPanelData(makePanelData());
@@ -260,6 +267,7 @@ const AddTestOrPanel = ({
                         loading={loading}
                         errors={errors}
                         requestedTests={requestedTests}
+                        locked={isEdit}
                         onTypeSelect={handleTypeSelect}
                         onItemSelect={handleItemSelect}
                         onRequestedSelect={handleRequestedSelect}
@@ -307,6 +315,18 @@ const AddTestOrPanel = ({
                                 onClick={() => setStep(0)}
                             >
                                 Back
+                            </Button>
+                        )}
+                        {canChangeItem && (
+                            <Button
+                                variant="outlined"
+                                startIcon={<SwapHoriz />}
+                                onClick={() => {
+                                    setErrors({});
+                                    setStep(0);
+                                }}
+                            >
+                                Change {type === 'SERVICE' ? 'Service' : 'Test'}
                             </Button>
                         )}
                         <Box sx={{ flex: 1 }}>

@@ -10,38 +10,55 @@ const SelectStep = ({
     loading,
     errors,
     requestedTests,
+    locked = false,
     onTypeSelect,
     onItemSelect,
     onRequestedSelect,
 }) => {
     const preview = type !== 'PANEL' ? testData.method_test?.test : panelData.panel;
     const hasPreview = Boolean(preview?.id);
+    const typeLabel = TYPES.find((t) => t.value === type)?.label ?? type;
 
     return (
         <Box>
             <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5 }}>
-                What would you like to add?
+                {locked
+                    ? 'Which one should this item point at?'
+                    : 'What would you like to add?'}
             </Typography>
+
+            {locked && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                    This item stays a {typeLabel.toLowerCase()} — only the{' '}
+                    {typeLabel.toLowerCase()} itself can be changed. The item keeps its place in
+                    the acceptance, so pick a replacement and choose its method next.
+                </Alert>
+            )}
 
             <Grid container spacing={1.5} sx={{ mb: 3 }}>
                 {TYPES.map(({ value, label, desc, color }) => (
                     <Grid key={value} size={{ xs: 12, sm: 4 }}>
                         <Paper
                             elevation={type === value ? 4 : 1}
-                            onClick={() => onTypeSelect(value)}
+                            onClick={locked ? undefined : () => onTypeSelect(value)}
                             sx={{
                                 p: 2,
-                                cursor: 'pointer',
+                                cursor: locked ? 'default' : 'pointer',
                                 borderRadius: 2,
                                 border: '2px solid',
                                 borderColor: type === value ? `${color}.main` : 'transparent',
                                 bgcolor: type === value ? `${color}.50` : 'background.paper',
+                                opacity: locked && type !== value ? 0.4 : 1,
                                 transition: 'all 0.15s ease',
-                                '&:hover': {
-                                    borderColor: `${color}.300`,
-                                    bgcolor: `${color}.50`,
-                                    transform: 'translateY(-1px)',
-                                },
+                                ...(locked
+                                    ? {}
+                                    : {
+                                          '&:hover': {
+                                              borderColor: `${color}.300`,
+                                              bgcolor: `${color}.50`,
+                                              transform: 'translateY(-1px)',
+                                          },
+                                      }),
                             }}
                         >
                             <Typography

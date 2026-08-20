@@ -94,6 +94,16 @@ class LaboratoryAdapter
     }
 
     /**
+     * The test a MethodTest belongs to. Unlike getTestForAcceptanceItem() this
+     * takes the id on its own, so it can also resolve a method test an item is
+     * about to be moved onto.
+     */
+    public function findTestByMethodTestId(int|string $methodTestId): ?Test
+    {
+        return $this->testRepository->findTestByMethodTestId($methodTestId);
+    }
+
+    /**
      * Plain test lookup (no eager loads, unlike getTestById) — used by the pricing cascade.
      */
     public function findTest(int|string $id): ?Test

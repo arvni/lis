@@ -68,6 +68,9 @@ const TestConfigStep = ({ type, data, errors, maxDiscount, patient, onChange }) 
             price: mt.method.price_type === 'Fix' ? mt.method.price : 0,
             discount: 0,
             samples: defaultSamples,
+            // Editing an item onto another test resets its samples, so the count
+            // has to follow rather than keep the previous test's.
+            no_sample: defaultSamples.length,
             customParameters: { sampleType: '', discounts: [] },
         });
         setExpanded({ method: false, samples: true, pricing: false });

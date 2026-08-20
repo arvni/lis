@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Reception\Services;
 
 
@@ -102,7 +104,7 @@ class AcceptanceItemService
                 continue;
             }
 
-            $panelId    = Str::uuid();
+            $panelId    = Str::uuid()->toString();
             $itemCount  = count($panelData['acceptanceItems']);
             // Split the panel totals so the item shares add back up to the panel
             // price/discount even when they do not divide evenly.
@@ -189,7 +191,7 @@ class AcceptanceItemService
                 continue;
             }
 
-            $panelId         = Str::uuid();
+            $panelId         = Str::uuid()->toString();
             $panelSampleless = $panelData['sampleless'] ?? false;
             $panelReportless = $panelData['reportless'] ?? false;
             $itemCount       = count($panelData['acceptanceItems']);
@@ -397,8 +399,13 @@ class AcceptanceItemService
      * (["panel_id" => string, ...]); a panel's price/discount is the total for
      * the panel and is split across its items so the shares sum back exactly.
      *
+     * A formula/conditional entry also carries the parameters its price was
+     * calculated from ("custom_parameters"); those are merged into the item's
+     * stored bag so the next edit starts from what was actually priced. A panel
+     * prices as a whole, so its parameters land on every one of its items.
+     *
      * @param Acceptance $acceptance
-     * @param array $items list of ["id" => int|null, "panel_id" => string|null, "price" => float, "discount" => float]
+     * @param array $items list of ["id" => int|null, "panel_id" => string|null, "price" => float, "discount" => float, "custom_parameters" => array|null]
      * @return void
      */
     public function updateItemPrices(Acceptance $acceptance, array $items): void
@@ -413,15 +420,16 @@ class AcceptanceItemService
             $price = (float)$item["price"];
             $discount = (float)$item["discount"];
             $panelId = $item["panel_id"] ?? null;
+            $customParameters = $item["custom_parameters"] ?? null;
 
             if ($panelId !== null && $panelId !== "") {
-                $this->applyPanelPrice($itemsByPanel->get((string)$panelId), $price, $discount, $editor);
+                $this->applyPanelPrice($itemsByPanel->get((string)$panelId), $price, $discount, $editor, $customParameters);
                 continue;
             }
 
             $acceptanceItem = $itemsById->get($item["id"] ?? null);
             if ($acceptanceItem) {
-                $this->applyItemPrice($acceptanceItem, $price, $discount, $editor);
+                $this->applyItemPrice($acceptanceItem, $price, $discount, $editor, "", $customParameters);
             }
         }
     }
@@ -430,8 +438,9 @@ class AcceptanceItemService
      * Split a panel total across its items and apply each share.
      *
      * @param SupportCollection<int, AcceptanceItem>|null $panelItems
+     * @param array<string, mixed>|null $customParameters
      */
-    private function applyPanelPrice(?SupportCollection $panelItems, float $price, float $discount, ?string $editor): void
+    private function applyPanelPrice(?SupportCollection $panelItems, float $price, float $discount, ?string $editor, ?array $customParameters = null): void
     {
         if (!$panelItems || $panelItems->isEmpty()) {
             return;
@@ -443,17 +452,23 @@ class AcceptanceItemService
         $note = " (share of panel price $price and discount $discount over $count items)";
 
         foreach ($panelItems->values() as $index => $panelItem) {
-            $this->applyItemPrice($panelItem, $prices[$index], $discounts[$index], $editor, $note);
+            $this->applyItemPrice($panelItem, $prices[$index], $discounts[$index], $editor, $note, $customParameters);
         }
     }
 
     /**
-     * Write a single item's price/discount, skipping unchanged items and
+     * Write a single item's price/discount — and the parameters that price was
+     * calculated from, when it has any — skipping items nothing changed on and
      * recording the change on the item timeline.
+     *
+     * @param array<string, mixed>|null $customParameters
      */
-    private function applyItemPrice(AcceptanceItem $acceptanceItem, float $price, float $discount, ?string $editor, string $note = ""): void
+    private function applyItemPrice(AcceptanceItem $acceptanceItem, float $price, float $discount, ?string $editor, string $note = "", ?array $customParameters = null): void
     {
-        if ((float)$acceptanceItem->price === $price && (float)$acceptanceItem->discount === $discount) {
+        $mergedParameters = $this->mergeCustomParameters($acceptanceItem, $customParameters);
+        $amountsUnchanged = (float)$acceptanceItem->price === $price && (float)$acceptanceItem->discount === $discount;
+
+        if ($amountsUnchanged && $mergedParameters === null) {
             return;
         }
 
@@ -462,13 +477,43 @@ class AcceptanceItemService
             $timeline = json_decode($timeline ?? "[]", true) ?? [];
         }
         $timeline[now()->format("Y-m-d H:i:s")] =
-            "Price set to $price and discount to $discount by $editor" . $note;
+            "Price set to $price and discount to $discount by $editor" . $note
+            . ($mergedParameters !== null ? " (pricing parameters updated)" : "");
 
-        $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, [
+        $updateData = [
             "price" => $price,
             "discount" => $discount,
             "timeline" => $timeline,
-        ]);
+        ];
+        if ($mergedParameters !== null) {
+            $updateData["customParameters"] = $mergedParameters;
+        }
+
+        $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, $updateData);
+    }
+
+    /**
+     * Merge submitted pricing parameters into an item's stored customParameters,
+     * leaving every other key (samples, discounts, details…) alone. Returns null
+     * when there is nothing to write.
+     *
+     * @param array<string, mixed>|null $submitted
+     * @return array<string, mixed>|null
+     */
+    private function mergeCustomParameters(AcceptanceItem $acceptanceItem, ?array $submitted): ?array
+    {
+        if (empty($submitted)) {
+            return null;
+        }
+
+        $existing = $acceptanceItem->customParameters;
+        if (!is_array($existing)) {
+            $existing = json_decode($existing ?? "[]", true) ?? [];
+        }
+
+        $merged = array_replace($existing, $submitted);
+
+        return $merged === $existing ? null : $merged;
     }
 
     public function updateAcceptanceItemTimeline(AcceptanceItem $acceptanceItem, string $message): AcceptanceItem

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Reception\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -17,6 +19,11 @@ class UpdateAcceptanceItemPricesRequest extends FormRequest
             'items.*.panel_id' => ['required_without:items.*.id', 'nullable', 'string', 'max:36'],
             'items.*.price' => ['required', 'numeric', 'min:0'],
             'items.*.discount' => ['required', 'numeric', 'min:0'],
+            // Formula/conditional rows are priced from their parameters, which
+            // are sent back so the item remembers what the price was built from.
+            'items.*.custom_parameters' => ['sometimes', 'nullable', 'array'],
+            'items.*.custom_parameters.price' => ['sometimes', 'nullable', 'array'],
+            'items.*.custom_parameters.price.*' => ['nullable', 'numeric'],
         ];
     }
 

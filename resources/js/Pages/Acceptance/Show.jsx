@@ -61,6 +61,13 @@ const Show = ({
 
     const closeEditItem = () => setEditItem({ open: false, mode: null, test: null, panel: null });
 
+    // The item editor closes itself on submit, and eject has no dialog of its
+    // own, so their failures go to the snackbar.
+    const reportErrors = (errs) =>
+        Object.values(errs ?? {})
+            .flat()
+            .forEach((message) => message && enqueueSnackbar(message, { variant: 'error' }));
+
     const submitEditedTest = (testItem) => {
         router.put(
             route('acceptances.updateItem', acceptance.id),
@@ -68,6 +75,7 @@ const Show = ({
             {
                 preserveScroll: true,
                 onSuccess: closeEditItem,
+                onError: reportErrors,
             },
         );
     };
@@ -79,15 +87,10 @@ const Show = ({
             {
                 preserveScroll: true,
                 onSuccess: closeEditItem,
+                onError: reportErrors,
             },
         );
     };
-
-    // Eject has no dialog of its own, so its failures go to the snackbar.
-    const reportErrors = (errs) =>
-        Object.values(errs ?? {})
-            .flat()
-            .forEach((message) => message && enqueueSnackbar(message, { variant: 'error' }));
 
     const handleEjectPanel = (panel) => {
         const firstItem = panel.acceptanceItems?.[0];
@@ -250,7 +253,6 @@ const Show = ({
             {/* Acceptance Items */}
             <TestItemsSection
                 acceptance={acceptance}
-                acceptanceItems={acceptanceItems}
                 patient={patient}
                 totals={totals}
                 expanded={expanded.items}
