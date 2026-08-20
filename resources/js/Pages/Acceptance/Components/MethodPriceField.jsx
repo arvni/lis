@@ -49,6 +49,12 @@ const PriceField = ({ method, onChange, values = {}, errors = {} }) => {
         };
     }, [method, values?.price]);
 
+    // getCondition returns the condition itself, which carries no index of its
+    // own — find it, or the matched row never highlights.
+    const selectedConditionIndex = selectedCondition
+        ? (method.extra.conditions ?? []).indexOf(selectedCondition)
+        : -1;
+
     // Enhanced change handler with improved validation
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -192,24 +198,24 @@ const PriceField = ({ method, onChange, values = {}, errors = {} }) => {
                                                 p: 1.5,
                                                 mb: 1,
                                                 backgroundColor:
-                                                    selectedCondition?.index === index
+                                                    selectedConditionIndex === index
                                                         ? 'success.light'
                                                         : 'background.paper',
                                                 color:
-                                                    selectedCondition?.index === index
+                                                    selectedConditionIndex === index
                                                         ? 'white'
                                                         : 'text.primary',
                                                 borderRadius: 1,
                                                 border: '1px solid',
                                                 borderColor:
-                                                    selectedCondition?.index === index
+                                                    selectedConditionIndex === index
                                                         ? 'success.main'
                                                         : 'divider',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                             }}
                                         >
-                                            {selectedCondition?.index === index && (
+                                            {selectedConditionIndex === index && (
                                                 <CheckCircleOutlineIcon sx={{ mr: 1 }} />
                                             )}
                                             <Typography variant="body2" fontFamily="monospace">

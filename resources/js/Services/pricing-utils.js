@@ -14,8 +14,10 @@ function replaceParameters(formula, parameters, values) {
     // Sort parameters by length in descending order to prevent partial replacements
     const sortedParams = [...parameters].sort((a, b) => b.length - a.length);
 
-    // Create a new copy of the formula to avoid mutation
-    let replacedFormula = formula;
+    // Create a new copy of the formula to avoid mutation. A conditional price is
+    // its condition's `value`, which the method's JSON often holds as a plain
+    // number — coerce, or every string op below throws and the price reads 0.
+    let replacedFormula = String(formula ?? '');
 
     // Safely replace each parameter
     for (const param of sortedParams) {
