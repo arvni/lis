@@ -314,6 +314,94 @@ class UpdateAcceptanceItemPricesControllerTest extends TestCase
         ])->assertSessionHasErrors('items.0.id');
     }
 
+    public function test_stores_the_parameters_a_dynamic_price_was_calculated_from(): void
+    {
+        $acceptance = $this->createAcceptance();
+        $item = $this->createItem($acceptance, price: 100);
+        $item->update(['customParameters' => ['sampleType' => 3, 'discounts' => [['value' => 5]]]]);
+
+        $this->put(route('acceptances.updateItemPrices', $acceptance->id), [
+            'items' => [
+                [
+                    'id'                => $item->id,
+                    'price'             => 240,
+                    'discount'          => 0,
+                    'custom_parameters' => ['price' => ['area' => 12, 'copies' => 2]],
+                ],
+            ],
+        ])->assertRedirect();
+
+        $item->refresh();
+        $this->assertSame(240.0, (float) $item->price);
+        $this->assertSame(['area' => 12, 'copies' => 2], $item->customParameters['price']);
+        // Everything the parameters do not cover survives the merge.
+        $this->assertSame(3, $item->customParameters['sampleType']);
+        $this->assertSame(5, $item->customParameters['discounts'][0]['value']);
+    }
+
+    public function test_saves_parameters_even_when_the_amounts_did_not_change(): void
+    {
+        $acceptance = $this->createAcceptance();
+        $item = $this->createItem($acceptance, price: 100, discount: 10);
+
+        $this->put(route('acceptances.updateItemPrices', $acceptance->id), [
+            'items' => [
+                [
+                    'id'                => $item->id,
+                    'price'             => 100,
+                    'discount'          => 10,
+                    'custom_parameters' => ['price' => ['area' => 4]],
+                ],
+            ],
+        ])->assertRedirect();
+
+        $item->refresh();
+        $this->assertSame(['area' => 4], $item->customParameters['price']);
+        $this->assertStringContainsString('pricing parameters updated', implode(' ', $item->timeline));
+    }
+
+    public function test_applies_panel_parameters_to_every_item_of_the_panel(): void
+    {
+        $acceptance = $this->createAcceptance();
+        $panelItems = $this->createPanelItems($acceptance, count: 3, price: 300);
+
+        $this->put(route('acceptances.updateItemPrices', $acceptance->id), [
+            'items' => [
+                [
+                    'panel_id'          => $panelItems[0]->panel_id,
+                    'price'             => 150,
+                    'discount'          => 0,
+                    'custom_parameters' => ['price' => ['weeks' => 6]],
+                ],
+            ],
+        ])->assertRedirect();
+
+        foreach ($panelItems as $panelItem) {
+            $panelItem->refresh();
+            // A panel prices as a whole, so its parameters belong on every share.
+            $this->assertSame(['weeks' => 6], $panelItem->customParameters['price']);
+        }
+    }
+
+    public function test_rejects_a_non_numeric_pricing_parameter(): void
+    {
+        $acceptance = $this->createAcceptance();
+        $item = $this->createItem($acceptance, price: 100);
+
+        $this->put(route('acceptances.updateItemPrices', $acceptance->id), [
+            'items' => [
+                [
+                    'id'                => $item->id,
+                    'price'             => 10,
+                    'discount'          => 0,
+                    'custom_parameters' => ['price' => ['area' => 'twelve']],
+                ],
+            ],
+        ])->assertSessionHasErrors('items.0.custom_parameters.price.area');
+
+        $this->assertDatabaseHas('acceptance_items', ['id' => $item->id, 'price' => 100]);
+    }
+
     public function test_requires_the_edit_item_prices_permission(): void
     {
         $acceptance = $this->createAcceptance();

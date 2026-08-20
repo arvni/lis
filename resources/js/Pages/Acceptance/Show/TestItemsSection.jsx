@@ -12,7 +12,6 @@ import SectionTitle from './SectionTitle';
 
 const TestItemsSection = ({
     acceptance,
-    acceptanceItems,
     patient,
     totals,
     expanded,
@@ -94,7 +93,7 @@ const TestItemsSection = ({
                 <EditItemPricesForm
                     open={editingPrices}
                     acceptance={acceptance}
-                    acceptanceItems={acceptanceItems}
+                    groupedItems={acceptance?.acceptance_items ?? {}}
                     onClose={() => setEditingPrices(false)}
                 />
             )}
