@@ -30,6 +30,7 @@ class PurchaseRequestRepository
         $view = $filters['filters']['view'] ?? 'mine';
         $status = $filters['filters']['status'] ?? '';
         $urgency = $filters['filters']['urgency'] ?? '';
+        $search = trim((string) ($filters['filters']['search'] ?? ''));
 
         $query = PurchaseRequest::with(['requestedBy', 'lines.item', 'lines.unit'])
             ->withCount('lines')
@@ -59,8 +60,34 @@ class PurchaseRequestRepository
         if ($urgency !== '') {
             $query->where('urgency', $urgency);
         }
+        if ($search !== '') {
+            $this->applySearch($query, $search);
+        }
 
         return $query->paginate((int) ($filters['pageSize'] ?? 15));
+    }
+
+    /**
+     * Free-text search over the PO number and the identifiers carried on the
+     * request's lines — item code/name and catalog number — plus the lot
+     * numbers recorded against it at receiving, so a container in hand can be
+     * traced back to the request that ordered it.
+     *
+     * @param  Builder<PurchaseRequest>  $query
+     */
+    private function applySearch(Builder $query, string $search): void
+    {
+        $term = '%'.$search.'%';
+
+        $query->where(function (Builder $q) use ($term) {
+            $q->where('po_number', 'like', $term)
+                ->orWhereHas('lines', fn (Builder $q2) => $q2->where('cat_no', 'like', $term))
+                ->orWhereHas('lines.item', fn (Builder $q2) => $q2->where(function (Builder $q3) use ($term) {
+                    $q3->where('item_code', 'like', $term)
+                        ->orWhere('name', 'like', $term);
+                }))
+                ->orWhereHas('receipts.lines', fn (Builder $q2) => $q2->where('lot_number', 'like', $term));
+        });
     }
 
     /**

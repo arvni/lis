@@ -22,6 +22,7 @@ const STATUS_COLORS = {
 
 const TransactionsFilter = ({ defaultFilter, onFilter, stores }) => {
     const [values, setValues] = useState({
+        search: defaultFilter?.search ?? '',
         transaction_type: defaultFilter?.transaction_type ?? '',
         status: defaultFilter?.status ?? '',
         store_id: defaultFilter?.store_id ?? '',
@@ -32,11 +33,29 @@ const TransactionsFilter = ({ defaultFilter, onFilter, stores }) => {
     const apply = () =>
         onFilter(Object.fromEntries(Object.entries(values).filter(([, v]) => v !== '')))();
     const reset = () => {
-        setValues({ transaction_type: '', status: '', store_id: '', date_from: '', date_to: '' });
+        setValues({
+            search: '',
+            transaction_type: '',
+            status: '',
+            store_id: '',
+            date_from: '',
+            date_to: '',
+        });
         onFilter({})();
     };
     return (
         <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+            <Grid size={{ xs: 12, md: 4 }}>
+                <TextField
+                    fullWidth
+                    size="small"
+                    label="Search"
+                    placeholder="Reference, item, lot no or cat no"
+                    value={values.search}
+                    onChange={set('search')}
+                    onKeyDown={(e) => e.key === 'Enter' && apply()}
+                />
+            </Grid>
             <Grid size={{ xs: 12, md: 2 }}>
                 <TextField
                     select

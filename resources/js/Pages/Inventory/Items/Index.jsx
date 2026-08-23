@@ -37,6 +37,7 @@ const ItemsFilter = ({ defaultFilter, onFilter }) => {
                     fullWidth
                     size="small"
                     label="Search"
+                    placeholder="Code, name, lot no or cat no"
                     value={values.search}
                     onChange={set('search')}
                     onKeyDown={(e) => e.key === 'Enter' && apply()}

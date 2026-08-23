@@ -103,6 +103,8 @@ class StockTransactionRepository
      */
     private function applyTransactionFilters(Builder $query, array $filters): void
     {
+        if (isset($filters['search']) && $filters['search'] !== '')
+            $this->applySearch($query, (string) $filters['search']);
         if (isset($filters['transaction_type']))
             $query->where('transaction_type', $filters['transaction_type']);
         if (isset($filters['status']))
@@ -113,6 +115,30 @@ class StockTransactionRepository
             $query->whereDate('transaction_date', '>=', $filters['date_from']);
         if (isset($filters['date_to']))
             $query->whereDate('transaction_date', '<=', $filters['date_to']);
+    }
+
+    /**
+     * Free-text search across the transaction reference and the identifiers
+     * carried on its lines — item code/name, lot number and catalog number —
+     * so a container in hand can be traced back to the movement that booked it.
+     *
+     * @param Builder<StockTransaction> $query
+     */
+    private function applySearch(Builder $query, string $search): void
+    {
+        $term = '%'.$search.'%';
+
+        $query->where(function (Builder $q) use ($term) {
+            $q->where('reference_number', 'like', $term)
+                ->orWhereHas('lines', fn (Builder $q2) => $q2->where(function (Builder $q3) use ($term) {
+                    $q3->where('lot_number', 'like', $term)
+                        ->orWhere('cat_no', 'like', $term);
+                }))
+                ->orWhereHas('lines.item', fn (Builder $q2) => $q2->where(function (Builder $q3) use ($term) {
+                    $q3->where('item_code', 'like', $term)
+                        ->orWhere('name', 'like', $term);
+                }));
+        });
     }
 
     public function createTransaction(array $data): StockTransaction

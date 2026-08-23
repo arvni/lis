@@ -50,6 +50,7 @@ const STATUS_COLORS = {
 
 const PRFilter = ({ defaultFilter, onFilter }) => {
     const [values, setValues] = useState({
+        search: defaultFilter?.search ?? '',
         status: defaultFilter?.status ?? '',
         urgency: defaultFilter?.urgency ?? '',
     });
@@ -57,12 +58,23 @@ const PRFilter = ({ defaultFilter, onFilter }) => {
     const apply = () =>
         onFilter(Object.fromEntries(Object.entries(values).filter(([, v]) => v !== '')))();
     const reset = () => {
-        setValues({ status: '', urgency: '' });
+        setValues({ search: '', status: '', urgency: '' });
         onFilter({})();
     };
 
     return (
         <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+            <Grid size={{ xs: 12, md: 4 }}>
+                <TextField
+                    fullWidth
+                    size="small"
+                    label="Search"
+                    placeholder="PO no, item, lot no or cat no"
+                    value={values.search}
+                    onChange={set('search')}
+                    onKeyDown={(e) => e.key === 'Enter' && apply()}
+                />
+            </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
                 <TextField
                     select
@@ -96,7 +108,7 @@ const PRFilter = ({ defaultFilter, onFilter }) => {
                     <MenuItem value="URGENT">Urgent</MenuItem>
                 </TextField>
             </Grid>
-            <Grid size={{ xs: 12, md: 7 }}>
+            <Grid size={{ xs: 12, md: 3 }}>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button variant="contained" size="small" onClick={apply}>
                         Apply

@@ -22,6 +22,7 @@ class ExportStockTransactionsRequest extends FormRequest
     {
         return [
             'filters' => 'nullable|array',
+            'filters.search' => 'nullable|string|max:255',
             'filters.transaction_type' => ['nullable', Rule::enum(TransactionType::class)],
             'filters.status' => ['nullable', Rule::enum(TransactionStatus::class)],
             'filters.store_id' => 'nullable|integer',

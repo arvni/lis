@@ -12,6 +12,21 @@ class ItemRepository
     use LogsUserActivity;
 
     /**
+     * Search surface for the items index: the item's own identifiers plus the
+     * stock identifiers users actually have in hand — the lot number printed on
+     * a received container and the supplier catalog number, which is recorded
+     * both when the item is ordered (purchase request line) and when it is
+     * booked in (transaction line).
+     *
+     * @var list<string>
+     */
+    private const INDEX_SEARCH_ATTRIBUTES = [
+        'item_code', 'name', 'scientific_name',
+        'lots.lot_number', 'transactionLines.lot_number',
+        'transactionLines.cat_no', 'purchaseRequestLines.cat_no',
+    ];
+
+    /**
      * Active items for typeahead/scan lookup — matched by exact item code when a
      * barcode is given, otherwise by a search term. Returns a lightweight subset.
      *
@@ -34,7 +49,7 @@ class ItemRepository
     {
         $query = Item::with('defaultUnit');
         if (isset($queryData['filters']['search']))
-            $query->search($queryData['filters']['search']);
+            $query->search($queryData['filters']['search'], self::INDEX_SEARCH_ATTRIBUTES);
         if (isset($queryData['filters']['department']))
             $query->where('department', $queryData['filters']['department']);
         if (isset($queryData['filters']['material_type']))
