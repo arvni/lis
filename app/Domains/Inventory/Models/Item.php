@@ -98,6 +98,12 @@ class Item extends Model
         return $this->hasMany(StockTransactionLine::class);
     }
 
+    /** @return HasMany<PurchaseRequestLine, $this> */
+    public function purchaseRequestLines(): HasMany
+    {
+        return $this->hasMany(PurchaseRequestLine::class);
+    }
+
     /** @return HasMany<ReorderAlert, $this> */
     public function reorderAlerts(): HasMany
     {

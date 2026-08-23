@@ -112,7 +112,8 @@ const StockIndex = () => {
                             <TextField
                                 fullWidth
                                 size="small"
-                                label="Search item name / code"
+                                label="Search"
+                                placeholder="Name, code, lot no or cat no"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && applyFilters()}

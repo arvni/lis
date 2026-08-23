@@ -87,9 +87,19 @@ readonly class StockCardService
         }
 
         if (! empty($filters['search'])) {
-            $query->where(function ($q) use ($filters) {
-                $q->where('name', 'like', '%'.$filters['search'].'%')
-                    ->orWhere('item_code', 'like', '%'.$filters['search'].'%');
+            $term = '%'.$filters['search'].'%';
+
+            // Users search by whatever is on the container in front of them:
+            // item name/code, the lot number, or the supplier catalog number —
+            // which is recorded both when the item is ordered and when it is
+            // booked in. Lot matches respect the store/location scope so a lot
+            // held elsewhere does not surface here.
+            $query->where(function ($q) use ($term, $lotFilter) {
+                $q->where('name', 'like', $term)
+                    ->orWhere('item_code', 'like', $term)
+                    ->orWhereHas('lots', fn ($q2) => $lotFilter($q2)->where('lot_number', 'like', $term))
+                    ->orWhereHas('transactionLines', fn ($q2) => $q2->where('cat_no', 'like', $term))
+                    ->orWhereHas('purchaseRequestLines', fn ($q2) => $q2->where('cat_no', 'like', $term));
             });
         }
         if (! empty($filters['department'])) {
