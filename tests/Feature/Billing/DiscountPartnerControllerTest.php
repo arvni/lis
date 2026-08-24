@@ -101,6 +101,36 @@ class DiscountPartnerControllerTest extends TestCase
         $this->assertSame([$replacement->id], $partner->offers->pluck('id')->all());
     }
 
+    public function test_a_self_serve_offer_cannot_be_granted_to_a_partner(): void
+    {
+        $selfServe = $this->offer('Ramadan 10%', contractOnly: false);
+
+        $this->actingAs($this->permittedUser())
+            ->post(route('discount-partners.store'), [
+                'name' => 'Acme Corp',
+                'offers' => [['id' => $selfServe->id]],
+            ])
+            ->assertSessionHasErrors('offers.0.id');
+
+        $this->assertNull(DiscountPartner::query()->firstWhere('name', 'Acme Corp'));
+    }
+
+    public function test_a_self_serve_offer_cannot_be_grafted_onto_a_partner_by_update(): void
+    {
+        $partner = DiscountPartner::create(['name' => 'Acme Corp']);
+        $selfServe = $this->offer('Ramadan 10%', contractOnly: false);
+
+        $this->actingAs($this->permittedUser())
+            ->put(route('discount-partners.update', $partner->id), [
+                'name' => 'Acme Corp',
+                'active' => true,
+                'offers' => [['id' => $selfServe->id]],
+            ])
+            ->assertSessionHasErrors('offers.0.id');
+
+        $this->assertTrue($partner->refresh()->offers->isEmpty());
+    }
+
     public function test_a_partner_is_soft_deleted(): void
     {
         $partner = DiscountPartner::create(['name' => 'Acme Corp']);
@@ -112,7 +142,7 @@ class DiscountPartnerControllerTest extends TestCase
         $this->assertSoftDeleted('discount_partners', ['id' => $partner->id]);
     }
 
-    private function offer(string $title = 'Staff 20%'): Offer
+    private function offer(string $title = 'Staff 20%', bool $contractOnly = true): Offer
     {
         return Offer::create([
             'title' => $title,
@@ -120,6 +150,7 @@ class DiscountPartnerControllerTest extends TestCase
             'type' => OfferType::PERCENTAGE,
             'amount' => 20,
             'active' => true,
+            'contract_only' => $contractOnly,
         ]);
     }
 

@@ -37,6 +37,7 @@ class StoreOfferRequest extends FormRequest
             'started_at' => 'nullable|date',
             'ended_at' => 'nullable|date|after_or_equal:started_at',
             'active' => 'boolean',
+            'contract_only' => 'boolean',
         ];
 
         // Add specific validation for amount based on type
@@ -70,6 +71,7 @@ class StoreOfferRequest extends FormRequest
             'started_at.date' => 'The start date must be a valid date.',
             'ended_at.date' => 'The end date must be a valid date.',
             'ended_at.after_or_equal' => 'The end date must be after or equal to the start date.',
+            'contract_only.boolean' => 'The contract-only setting must be true or false.',
         ];
     }
 
@@ -81,10 +83,12 @@ class StoreOfferRequest extends FormRequest
     protected function prepareForValidation()
     {
         // Convert string boolean to actual boolean
-        if ($this->has('active') && is_string($this->active)) {
-            $this->merge([
-                'active' => filter_var($this->active, FILTER_VALIDATE_BOOLEAN),
-            ]);
+        foreach (['active', 'contract_only'] as $flag) {
+            if ($this->has($flag) && is_string($this->input($flag))) {
+                $this->merge([
+                    $flag => filter_var($this->input($flag), FILTER_VALIDATE_BOOLEAN),
+                ]);
+            }
         }
 
         // Format dates if they exist

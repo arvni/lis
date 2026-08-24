@@ -12,6 +12,8 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import TestIcon from '@mui/icons-material/Science';
 import ReferrerIcon from '@mui/icons-material/Share';
+import CardMembershipIcon from '@mui/icons-material/CardMembership';
+import PublicIcon from '@mui/icons-material/Public';
 
 import TableLayout from '@/Layouts/TableLayout';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -179,6 +181,31 @@ const OffersIndex = () => {
         );
     }, []);
 
+    // Helper to render who an offer reaches: everyone, or partner cardholders only
+    const renderAudience = useCallback((params) => {
+        return params.row.contract_only ? (
+            <Tooltip title="Applied only when a discount partner card is presented">
+                <Chip
+                    icon={<CardMembershipIcon />}
+                    label="Contract"
+                    size="small"
+                    color="warning"
+                    variant="outlined"
+                />
+            </Tooltip>
+        ) : (
+            <Tooltip title="Applied automatically to every matching patient">
+                <Chip
+                    icon={<PublicIcon />}
+                    label="All patients"
+                    size="small"
+                    color="default"
+                    variant="outlined"
+                />
+            </Tooltip>
+        );
+    }, []);
+
     // Memoize columns definition to prevent recreating on every render
     const columns = useMemo(
         () => [
@@ -215,6 +242,15 @@ const OffersIndex = () => {
                 flex: 0.5,
                 sortable: false,
                 renderCell: renderRelationships,
+            },
+            {
+                field: 'contract_only',
+                headerName: 'Audience',
+                type: 'boolean',
+                flex: 0.4,
+                align: 'center',
+                headerAlign: 'center',
+                renderCell: renderAudience,
             },
             {
                 field: 'active',
@@ -258,6 +294,7 @@ const OffersIndex = () => {
             renderStatus,
             renderDateRange,
             renderRelationships,
+            renderAudience,
         ],
     );
 

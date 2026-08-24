@@ -7,6 +7,7 @@ namespace App\Domains\Billing\Requests;
 use App\Domains\Billing\Models\DiscountPartner;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 
 class StoreDiscountPartnerRequest extends FormRequest
 {
@@ -33,7 +34,13 @@ class StoreDiscountPartnerRequest extends FormRequest
             'active' => 'boolean',
             'notes' => 'nullable|string|max:2000',
             'offers' => 'nullable|array',
-            'offers.*.id' => 'required|exists:offers,id',
+            // Only contract offers may be granted here. A self-serve offer is already
+            // applied to every patient by reception, so contracting it would discount
+            // the same item twice.
+            'offers.*.id' => [
+                'required',
+                Rule::exists('offers', 'id')->where('contract_only', true),
+            ],
         ];
     }
 
@@ -45,7 +52,7 @@ class StoreDiscountPartnerRequest extends FormRequest
         return [
             'name.required' => 'The partner company name is required.',
             'ends_at.after_or_equal' => 'The contract end date must be on or after the start date.',
-            'offers.*.id.exists' => 'One or more selected offers do not exist.',
+            'offers.*.id.exists' => 'One or more selected offers are not contract offers. Mark the offer as contract-only before granting it to a partner.',
         ];
     }
 

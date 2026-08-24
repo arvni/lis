@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property \Illuminate\Support\Carbon|null $started_at
  * @property \Illuminate\Support\Carbon|null $ended_at
  * @property bool $active
+ * @property bool $contract_only
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
@@ -34,13 +35,15 @@ class Offer extends Model
         "started_at",
         "ended_at",
         "active",
+        "contract_only",
     ];
 
     protected $casts = [
         "type" => OfferType::class,
         "started_at" => "date:Y-m-d",
         "ended_at" => "date:Y-m-d",
-        "active" => "boolean"
+        "active" => "boolean",
+        "contract_only" => "boolean",
     ];
 
     /** @return BelongsToMany<Test, $this> */

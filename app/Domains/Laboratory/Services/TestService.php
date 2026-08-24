@@ -87,7 +87,11 @@ readonly class TestService
             "offers" => function ($q) use ($referrer) {
                 $q->where("started_at", "<=", now())
                     ->where("ended_at", ">=", now())
-                    ->where("active", true);
+                    ->where("active", true)
+                    // Contract offers belong to a discount partner and are applied
+                    // only by CardDiscountSyncService when a card is presented.
+                    // Reception must never auto-apply one to a normal patient.
+                    ->where("contract_only", false);
                 if ($referrer)
                     $q->where(function ($q) use ($referrer) {
                         $q->whereHas("referrers", function ($q) use ($referrer) {
