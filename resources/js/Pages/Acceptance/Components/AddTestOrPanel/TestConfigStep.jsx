@@ -23,6 +23,7 @@ import {
 import MethodTable from './MethodTable';
 import SampleRow from './SampleRow';
 import PricingSection from './PricingSection';
+import { discountTotalFor } from '../discountTotals';
 
 // ─── Test/Service Configure Step ───────────────────────────────────────────────
 const TestConfigStep = ({ type, data, errors, maxDiscount, patient, onChange }) => {
@@ -63,17 +64,40 @@ const TestConfigStep = ({ type, data, errors, maxDiscount, patient, onChange }) 
             ? [{ patients: defaultPatient ? [defaultPatient] : [], sampleType: '' }]
             : [{ patients: Array(pCount).fill(defaultPatient).filter(Boolean), sampleType: '' }];
 
+        const price = mt.method.price_type === 'Fix' ? mt.method.price : 0;
+
+        // The sample type and the formula parameters described the method being
+        // replaced, so they go. The discount lines describe the item — the offers
+        // its test carries, what reception typed, what a partner card granted — and
+        // survive a method change; only what they are worth follows the new price.
+        const customParameters = { ...(data.customParameters || {}), sampleType: '' };
+        delete customParameters.price;
+
         onChange({
             method_test: { ...data.method_test, id: methodId, method: mt.method },
-            price: mt.method.price_type === 'Fix' ? mt.method.price : 0,
-            discount: 0,
+            price,
+            discount: discountTotalFor(customParameters, price, maxDiscount),
             samples: defaultSamples,
             // Editing an item onto another test resets its samples, so the count
             // has to follow rather than keep the previous test's.
             no_sample: defaultSamples.length,
-            customParameters: { sampleType: '', discounts: [] },
+            customParameters,
         });
         setExpanded({ method: false, samples: true, pricing: false });
+    };
+
+    // A dynamic method prices off its parameters, so filling one moves the price —
+    // and with it what a percentage line is worth. MethodPriceField only reports the
+    // new price, so the total is restated here rather than left stale.
+    const handlePricingChange = (updates) => {
+        if (updates.price === undefined) return onChange(updates);
+
+        const next = updates.customParameters ?? data.customParameters;
+
+        return onChange({
+            ...updates,
+            discount: discountTotalFor(next, updates.price, maxDiscount),
+        });
     };
 
     const handleSampleChange = (si, field, value, pi) => {
@@ -276,7 +300,7 @@ const TestConfigStep = ({ type, data, errors, maxDiscount, patient, onChange }) 
                             discount={data.discount}
                             maxDiscount={maxDiscount}
                             errors={errors}
-                            onChange={onChange}
+                            onChange={handlePricingChange}
                         />
                     </AccordionDetails>
                 </Accordion>

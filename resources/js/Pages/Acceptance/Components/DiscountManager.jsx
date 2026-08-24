@@ -18,6 +18,12 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 import CardDiscountLines from './CardDiscountLines';
+import {
+    cardDiscountLines,
+    cardDiscountTotal,
+    manualDiscountLines,
+    manualDiscountTotal,
+} from './discountTotals';
 
 // Define discount types
 const DISCOUNT_TYPES = [
@@ -47,17 +53,9 @@ const DiscountManager = ({
         () => customParameters.discounts || [],
         [customParameters.discounts],
     );
-    const cardDiscounts = useMemo(
-        () => allDiscounts.filter((discount) => discount.source === 'CARD'),
-        [allDiscounts],
-    );
-    const cardTotal = useMemo(
-        () => cardDiscounts.reduce((total, discount) => total + Number(discount.amount || 0), 0),
-        [cardDiscounts],
-    );
-    const [discounts, setDiscounts] = useState(
-        allDiscounts.filter((discount) => discount.source !== 'CARD'),
-    );
+    const cardDiscounts = useMemo(() => cardDiscountLines(allDiscounts), [allDiscounts]);
+    const cardTotal = useMemo(() => cardDiscountTotal(allDiscounts), [allDiscounts]);
+    const [discounts, setDiscounts] = useState(manualDiscountLines(allDiscounts));
 
     // Card lines ride along untouched so a submit never drops them; the server
     // recalculates them regardless.
@@ -79,15 +77,7 @@ const DiscountManager = ({
     }, []);
 
     // Calculate total discount amount
-    const calculateTotalDiscount = (discountArray) => {
-        return discountArray.reduce((total, discount) => {
-            if (discount.type === 'PERCENTAGE') {
-                return total + (price * discount.value) / 100;
-            } else {
-                return total + Number(discount.value);
-            }
-        }, 0);
-    };
+    const calculateTotalDiscount = (discountArray) => manualDiscountTotal(discountArray, price);
 
     // Calculate total discount percentage
     const calculateTotalDiscountPercentage = (discountArray) => {
