@@ -96,12 +96,21 @@ class InvoiceComposer
         $invoice->invoiceItems()->whereNull('locked_at')->update(['locked_at' => now()]);
     }
 
-    private function isLocked(Invoice $invoice): bool
+    /**
+     * A settled invoice is frozen: nothing may recompose or re-discount it.
+     */
+    public function isLocked(Invoice $invoice): bool
     {
         if ($invoice->statement_id) {
             return true;
         }
-        return in_array($invoice->status, [
+        // invoices.status is stored (and read back) as a plain string — the model has
+        // no enum cast — so normalise before comparing or this never matches.
+        $status = $invoice->status instanceof InvoiceStatus
+            ? $invoice->status
+            : InvoiceStatus::tryFrom((string) $invoice->status);
+
+        return in_array($status, [
             InvoiceStatus::PAID,
             InvoiceStatus::CREDIT_PAID,
             InvoiceStatus::CANCELED,
