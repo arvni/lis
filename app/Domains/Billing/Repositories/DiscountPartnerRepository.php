@@ -45,6 +45,17 @@ class DiscountPartnerRepository
             ->get(['id', 'name']);
     }
 
+    /**
+     * Whether any partner contract still points at this offer. Used to stop an
+     * offer being taken out of contract-only mode while cards still redeem it.
+     */
+    public function offerIsContracted(int $offerId): bool
+    {
+        return DiscountPartner::query()
+            ->whereHas('offers', fn (Builder $offers) => $offers->where('offers.id', $offerId))
+            ->exists();
+    }
+
     public function createPartner(array $data): DiscountPartner
     {
         $partner = DiscountPartner::query()->make($data);

@@ -28,6 +28,7 @@ import {
     AttachMoney,
     Info,
     CheckCircle,
+    CardMembership,
 } from '@mui/icons-material';
 import { LocateFixedIcon } from 'lucide-react';
 
@@ -44,6 +45,7 @@ const AddForm = ({ open, onClose, defaultValue }) => {
         started_at: '',
         ended_at: '',
         active: true,
+        contract_only: false,
         ...defaultValue,
     };
 
@@ -147,6 +149,39 @@ const FormContent = () => {
                                 </Box>
                             }
                         />
+                    </Grid>
+
+                    <Grid size={{ xs: 12 }}>
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={!!data?.contract_only}
+                                    onChange={handleChange}
+                                    name="contract_only"
+                                    color="warning"
+                                />
+                            }
+                            label={
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <CardMembership
+                                        fontSize="small"
+                                        color={data?.contract_only ? 'warning' : 'disabled'}
+                                        sx={{ mr: 1 }}
+                                    />
+                                    <Typography>Contract offer (partner cards only)</Typography>
+                                </Box>
+                            }
+                        />
+                        {errors?.contract_only && (
+                            <Alert severity="error" sx={{ mt: 1 }}>
+                                {errors.contract_only}
+                            </Alert>
+                        )}
+                        <Alert severity="info" sx={{ mt: 1 }}>
+                            {data?.contract_only
+                                ? 'Only patients presenting a discount partner card get this offer. Reception will not apply it to anyone else, and it can be granted to a partner contract.'
+                                : 'Reception applies this offer automatically to every matching patient. Turn this on to reserve it for discount partner cards.'}
+                        </Alert>
                     </Grid>
                 </Grid>
             </Paper>

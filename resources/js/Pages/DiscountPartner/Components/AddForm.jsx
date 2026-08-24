@@ -203,7 +203,9 @@ const FormContent = () => {
 
                 <Alert severity="info" sx={{ mb: 2 }}>
                     An offer decides which tests are discounted and by how much. Until one is
-                    attached here, this partner&apos;s cards discount nothing.
+                    attached here, this partner&apos;s cards discount nothing. Only offers marked
+                    contract-only can be granted &mdash; anything else is already applied to every
+                    patient by reception.
                 </Alert>
 
                 <SelectSearch
@@ -215,7 +217,7 @@ const FormContent = () => {
                     url={route('api.contractOffers.list')}
                     label="Offers"
                     error={!!errors?.offers}
-                    helperText={errors?.offers || 'Search active offers by title'}
+                    helperText={errors?.offers || 'Search contract offers by title'}
                 />
             </Paper>
 

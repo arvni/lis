@@ -23,6 +23,8 @@ import PercentIcon from '@mui/icons-material/Percent';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import CardMembershipIcon from '@mui/icons-material/CardMembership';
+import PublicIcon from '@mui/icons-material/Public';
 
 import SelectSearch from '@/Components/SelectSearch';
 
@@ -38,6 +40,7 @@ const Filter = ({ defaultValues, onFilter }) => {
         date_end: '',
         tests: [],
         referrers: [],
+        contract_only: '',
     });
 
     // Count active filters
@@ -96,6 +99,7 @@ const Filter = ({ defaultValues, onFilter }) => {
             date_end: '',
             tests: [],
             referrers: [],
+            contract_only: '',
         };
         setFilters(resetFilters);
         onFilter(resetFilters)();
@@ -311,6 +315,36 @@ const Filter = ({ defaultValues, onFilter }) => {
                                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                 <AttachMoneyIcon fontSize="small" sx={{ mr: 1 }} />
                                                 Fixed Amount
+                                            </Box>
+                                        </MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+
+                            <Grid size={{ xs: 12, md: 3 }}>
+                                <FormControl fullWidth variant="outlined">
+                                    <InputLabel id="contract-only-label">Audience</InputLabel>
+                                    <Select
+                                        labelId="contract-only-label"
+                                        name="contract_only"
+                                        value={filters.contract_only}
+                                        onChange={handleSelectChange}
+                                        label="Audience"
+                                    >
+                                        <MenuItem value="">All Offers</MenuItem>
+                                        <MenuItem value="false">
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                <PublicIcon fontSize="small" sx={{ mr: 1 }} />
+                                                All patients
+                                            </Box>
+                                        </MenuItem>
+                                        <MenuItem value="true">
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                <CardMembershipIcon
+                                                    fontSize="small"
+                                                    sx={{ mr: 1 }}
+                                                />
+                                                Partner cards only
                                             </Box>
                                         </MenuItem>
                                     </Select>

@@ -68,6 +68,8 @@ class OfferRepository
                 ->whereDate("ended_at", "<=", $filters["date"]);
         if (isset($filters["active"]))
             $query->where("active", $filters["active"]);
+        if (isset($filters["contract_only"]) && $filters["contract_only"] !== "")
+            $query->where("contract_only", filter_var($filters["contract_only"], FILTER_VALIDATE_BOOLEAN));
     }
 
 }

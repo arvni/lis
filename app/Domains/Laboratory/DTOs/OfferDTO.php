@@ -16,6 +16,7 @@ class OfferDTO
         public bool      $active = true,
         public ?string   $started_at = null,
         public ?string   $ended_at = null,
+        public bool      $contract_only = false,
     )
     {
     }
@@ -31,7 +32,8 @@ class OfferDTO
             $data["referrers"] ?? [],
             $data["active"],
             $data["started_at"] ?? null,
-            $data["ended_at"] ?? null,);
+            $data["ended_at"] ?? null,
+            (bool)($data["contract_only"] ?? false),);
     }
 
     public function toArray(): array
@@ -46,6 +48,7 @@ class OfferDTO
             "active" => $this->active,
             "started_at" => $this->started_at,
             "ended_at" => $this->ended_at,
+            "contract_only" => $this->contract_only,
         ];
     }
 }

@@ -362,6 +362,7 @@ class CardDiscountSyncServiceTest extends TestCase
             'type' => $type,
             'amount' => $amount,
             'active' => true,
+            'contract_only' => true,
         ]);
         $offer->tests()->sync(collect($tests)->pluck('id')->all());
 
