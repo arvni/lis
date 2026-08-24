@@ -7,6 +7,7 @@ namespace App\Domains\Reception\Services;
 
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\DTOs\AcceptanceItemDTO;
+use App\Domains\Reception\Events\AcceptanceItemsChangedEvent;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Repositories\AcceptanceItemRepository;
@@ -145,6 +146,8 @@ class AcceptanceItemService
             $this->incrementOriginalNoSample($acceptance, $panelData['original_acceptance_item_ids'] ?? []);
         }
 
+        AcceptanceItemsChangedEvent::dispatch($acceptance->id);
+
         return $created;
     }
 
@@ -225,6 +228,8 @@ class AcceptanceItemService
                 $created->push($this->storeAcceptanceItem($dto));
             }
         }
+
+        AcceptanceItemsChangedEvent::dispatch($acceptance->id);
 
         return $created;
     }
@@ -432,6 +437,8 @@ class AcceptanceItemService
                 $this->applyItemPrice($acceptanceItem, $price, $discount, $editor, "", $customParameters);
             }
         }
+
+        AcceptanceItemsChangedEvent::dispatch($acceptance->id);
     }
 
     /**
@@ -532,7 +539,11 @@ class AcceptanceItemService
 
     public function deleteAcceptanceItem(AcceptanceItem $acceptanceItem): void
     {
+        $acceptanceId = $acceptanceItem->acceptance_id;
         $this->acceptanceItemRepository->deleteAcceptanceItem($acceptanceItem);
+        if ($acceptanceId) {
+            AcceptanceItemsChangedEvent::dispatch($acceptanceId);
+        }
     }
 
     public function getReportHistory(int|string $acceptanceItemId): Collection

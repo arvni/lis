@@ -18,6 +18,9 @@ import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import InterpreterModeIcon from '@mui/icons-material/InterpreterMode';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BusinessIcon from '@mui/icons-material/Business';
+import HandshakeIcon from '@mui/icons-material/Handshake';
+import CardMembershipIcon from '@mui/icons-material/CardMembership';
+import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import {
     Analytics,
@@ -232,6 +235,24 @@ const routes = (sections = []) => {
                     icon: <ReceiptLongIcon />,
                     route: 'statements.index',
                     permission: 'Billing.Statements.List Statements',
+                },
+                {
+                    title: 'Discount Partners',
+                    icon: <HandshakeIcon />,
+                    route: 'discount-partners.index',
+                    permission: 'Billing.Discount Partners.List Discount Partners',
+                },
+                {
+                    title: 'Discount Cards',
+                    icon: <CardMembershipIcon />,
+                    route: 'discount-cards.index',
+                    permission: 'Billing.Discount Cards.List Discount Cards',
+                },
+                {
+                    title: 'Discount Usage',
+                    icon: <QueryStatsIcon />,
+                    route: 'discountUsage.index',
+                    permission: 'Billing.Discount Cards.View Usage Report',
                 },
             ],
         },

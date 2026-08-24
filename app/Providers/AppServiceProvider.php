@@ -2,10 +2,14 @@
 
 namespace App\Providers;
 
+use App\Domains\Billing\Models\DiscountCard;
+use App\Domains\Billing\Models\DiscountPartner;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\System\Policies\FailedJobPolicy;
 use App\Domains\Billing\Models\Payment;
 use App\Domains\Billing\Models\Statement;
+use App\Domains\Billing\Policies\DiscountCardPolicy;
+use App\Domains\Billing\Policies\DiscountPartnerPolicy;
 use App\Domains\Billing\Policies\InvoicePolicy;
 use App\Domains\Billing\Policies\PaymentPolicy;
 use App\Domains\Billing\Policies\StatementPolicy;
@@ -195,6 +199,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);
         Gate::policy(Statement::class, StatementPolicy::class);
+        Gate::policy(DiscountPartner::class, DiscountPartnerPolicy::class);
+        Gate::policy(DiscountCard::class, DiscountCardPolicy::class);
 
         Gate::policy(Document::class, DocumentPolicy::class);
         Gate::policy(MonitoringNode::class, MonitoringNodePolicy::class);

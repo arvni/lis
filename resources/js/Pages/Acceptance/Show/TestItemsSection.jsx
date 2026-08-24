@@ -8,6 +8,7 @@ import TestsTable from '@/Pages/Acceptance/Components/TestsSection/TestsTable.js
 import PromoteToPanelDialog from '@/Pages/Acceptance/Components/TestsSection/PromoteToPanelDialog.jsx';
 import EditItemPricesForm from '@/Pages/Acceptance/Components/EditItemPricesForm.jsx';
 import AddTestOrPanel from '@/Pages/Acceptance/Components/AddTestOrPanel.jsx';
+import DiscountCardField from '@/Pages/Acceptance/Components/DiscountCardField.jsx';
 import SectionTitle from './SectionTitle';
 
 const TestItemsSection = ({
@@ -32,6 +33,9 @@ const TestItemsSection = ({
     closeEditItem,
     onSubmitTest,
     onSubmitPanel,
+    discountCard,
+    canApplyDiscountCard,
+    errors,
 }) => (
     <Accordion
         expanded={expanded}
@@ -55,6 +59,12 @@ const TestItemsSection = ({
             <SectionTitle icon={Science} title="Test Items" />
         </AccordionSummary>
         <AccordionDetails sx={{ backgroundColor: 'background.default', p: 3 }}>
+            <DiscountCardField
+                acceptanceId={acceptance?.id}
+                card={discountCard}
+                canApply={canApplyDiscountCard}
+                errors={errors}
+            />
             {canEditItemPrices && (
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
                     <Button

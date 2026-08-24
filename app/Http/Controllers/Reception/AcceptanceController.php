@@ -8,6 +8,7 @@ use App\Domains\Reception\Notifications\WelcomeNotification;
 use App\Domains\Reception\Requests\StoreAcceptanceRequest;
 use App\Domains\Reception\Requests\UpdateAcceptanceRequest;
 use App\Domains\Reception\DTOs\AcceptanceDTO;
+use App\Domains\Billing\Models\DiscountCard;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Services\AcceptanceService;
@@ -149,10 +150,34 @@ class AcceptanceController extends Controller
             "canUpdatePriority" => Gate::allows("Reception.Acceptances.Update Priority"),
             "canEditItemPrices" => Gate::allows("editItemPrices", $acceptance),
             "maxDiscount" => $this->settingRepository->getSettingsByClassAndKey('Payment', 'maxDiscount'),
+            "discountCard" => $this->discountCardSummary($acceptance),
+            "canApplyDiscountCard" => Gate::allows("apply", DiscountCard::class),
         ];
         return Inertia::render('Acceptance/Show', $data);
     }
 
+
+    /**
+     * The attached partner card, as much of it as reception needs to see.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function discountCardSummary(Acceptance $acceptance): ?array
+    {
+        $acceptance->loadMissing('discountCard.partner:id,name');
+        $card = $acceptance->discountCard;
+
+        if (! $card) {
+            return null;
+        }
+
+        return [
+            'id' => $card->id,
+            'number' => $card->number,
+            'partner' => $card->partner?->name,
+            'expires_at' => $card->expires_at?->format('Y-m-d'),
+        ];
+    }
 
     /**
      * edit a created resource in storage.

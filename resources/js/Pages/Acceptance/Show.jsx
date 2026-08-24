@@ -31,6 +31,9 @@ const Show = ({
     canUpdatePriority,
     canEditItemPrices,
     maxDiscount = 0,
+    discountCard = null,
+    canApplyDiscountCard = false,
+    errors = {},
 }) => {
     // State
     const [expanded, setExpanded] = useState({
@@ -273,6 +276,9 @@ const Show = ({
                 closeEditItem={closeEditItem}
                 onSubmitTest={submitEditedTest}
                 onSubmitPanel={submitEditedPanel}
+                discountCard={discountCard}
+                canApplyDiscountCard={canApplyDiscountCard}
+                errors={errors}
             />
 
             {/* Prescription */}
