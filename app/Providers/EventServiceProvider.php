@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use App\Domains\Billing\Events\AcceptanceItemPricingEvent;
+use App\Domains\Billing\Listeners\ReleaseCardDiscountsListener;
+use App\Domains\Billing\Listeners\SyncCardDiscountsListener;
+use App\Domains\Reception\Events\AcceptanceCardReleasedEvent;
+use App\Domains\Reception\Events\AcceptanceItemsChangedEvent;
 use App\Domains\Billing\Events\InvoiceAcceptanceUpdateEvent;
 use App\Domains\Billing\Events\PaymentsAddedEvent;
 use App\Domains\Billing\Listeners\CancelInvoiceOnAcceptanceCancelledListener;
@@ -83,6 +87,14 @@ class EventServiceProvider extends ServiceProvider
         Event::listen(
             [AcceptanceItemPricingEvent::class],
             [AcceptanceItemPricingListener::class, 'handle']
+        );
+        Event::listen(
+            [AcceptanceItemsChangedEvent::class],
+            [SyncCardDiscountsListener::class, 'handle']
+        );
+        Event::listen(
+            [AcceptanceCardReleasedEvent::class],
+            [ReleaseCardDiscountsListener::class, 'handle']
         );
         Event::listen(
             [

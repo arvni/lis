@@ -2,6 +2,7 @@
 
 namespace App\Domains\Reception\Models;
 
+use App\Domains\Billing\Models\DiscountCard;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\Payment;
 use App\Domains\Consultation\Models\Consultation;
@@ -32,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int|null $invoice_id
  * @property int $patient_id
  * @property int|null $referrer_id
+ * @property int|null $discount_card_id
  * @property int|null $sampler_id
  * @property string|null $referenceCode
  * @property int|null $samplerGender
@@ -68,6 +70,7 @@ class Acceptance extends Model
         "waiting_for_pooling",
         "invoice_id",
         "referrer_id",
+        "discount_card_id",
         "sampler_id",
         "acceptor_id",
         "doctor_id",
@@ -139,6 +142,12 @@ class Acceptance extends Model
     public function referrer(): BelongsTo
     {
         return $this->belongsTo(Referrer::class);
+    }
+
+    /** @return BelongsTo<DiscountCard, $this> */
+    public function discountCard(): BelongsTo
+    {
+        return $this->belongsTo(DiscountCard::class);
     }
 
     /** @return HasMany<ReferrerOrder, $this> */

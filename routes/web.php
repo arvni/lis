@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ListRoleController;
+use App\Http\Controllers\Billing\VerifyDiscountCardController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Document\DocumentController;
 use App\Http\Controllers\Document\UpdateBatchDocumentsController;
@@ -21,6 +22,12 @@ Route::get('/', function () {
 });
 
 Route::get('ping', fn() => response()->json(['status' => 'ok']))->name('ping');
+
+// Public target of a discount card's QR code. Deliberately outside the auth group:
+// a bearer card carries no patient data, and the holder is not a system user.
+Route::get('c/{uuid}', VerifyDiscountCardController::class)
+    ->middleware('throttle:30,1')
+    ->name('discount-cards.verify');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');

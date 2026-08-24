@@ -14,7 +14,9 @@ use App\Domains\Reception\DTOs\AcceptanceDTO;
 use App\Domains\Reception\DTOs\AcceptanceItemDTO;
 use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
+use App\Domains\Reception\Events\AcceptanceCardReleasedEvent;
 use App\Domains\Reception\Events\AcceptanceCancelledEvent;
+use App\Domains\Reception\Events\AcceptanceItemsChangedEvent;
 use App\Domains\Reception\Events\AcceptanceDeletedEvent;
 use App\Domains\Reception\Events\AcceptanceRestoredEvent;
 use App\Domains\Reception\Exceptions\AcceptanceItemTestNotChangeableException;
@@ -520,6 +522,8 @@ class AcceptanceService
 
         // Update acceptance using repository
         $this->acceptanceRepository->updateAcceptance($acceptance, $updateData);
+
+        AcceptanceItemsChangedEvent::dispatch($acceptance->id);
     }
 
     /**
@@ -537,6 +541,8 @@ class AcceptanceService
 
         $invoiceId = $acceptance->invoice_id;
         $this->acceptanceRepository->deleteAcceptance($acceptance);
+
+        AcceptanceCardReleasedEvent::dispatch($acceptance->id, 'Acceptance deleted');
 
         if ($invoiceId) {
             AcceptanceDeletedEvent::dispatch($invoiceId);
@@ -556,6 +562,8 @@ class AcceptanceService
         }
 
         $this->acceptanceRepository->restoreAcceptance($acceptance);
+
+        AcceptanceItemsChangedEvent::dispatch($acceptance->id);
 
         if ($acceptance->invoice_id) {
             AcceptanceRestoredEvent::dispatch($acceptance->invoice_id);
@@ -783,6 +791,7 @@ class AcceptanceService
                 "status" => AcceptanceStatus::CANCELLED
             ]);
             $acceptance->acceptanceItemStates()->update(["status" => AcceptanceItemStateStatus::REJECTED]);
+            AcceptanceCardReleasedEvent::dispatch($acceptance->id, 'Acceptance cancelled');
             if ($acceptance->invoice_id) {
                 AcceptanceCancelledEvent::dispatch($acceptance->invoice_id);
             }

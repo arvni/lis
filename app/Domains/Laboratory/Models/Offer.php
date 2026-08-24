@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string|null $description
  * @property \App\Domains\Laboratory\Enums\OfferType $type
  * @property numeric $amount
+ * @property numeric|null $max_amount_per_acceptance
  * @property \Illuminate\Support\Carbon|null $started_at
  * @property \Illuminate\Support\Carbon|null $ended_at
  * @property bool $active
@@ -29,6 +30,7 @@ class Offer extends Model
         "description",
         "type",
         "amount",
+        "max_amount_per_acceptance",
         "started_at",
         "ended_at",
         "active",

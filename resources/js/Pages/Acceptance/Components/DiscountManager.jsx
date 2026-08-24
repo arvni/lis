@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     Box,
     Button,
@@ -16,6 +16,8 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+
+import CardDiscountLines from './CardDiscountLines';
 
 // Define discount types
 const DISCOUNT_TYPES = [
@@ -39,8 +41,34 @@ const DiscountManager = ({
     onChange,
     errors = {},
 }) => {
-    // Initialize or use existing discounts array from customParameters
-    const [discounts, setDiscounts] = useState(customParameters.discounts || []);
+    // Card discounts come from the partner contract and are read-only here; only
+    // the manually-entered ones are editable, so the two are kept apart.
+    const allDiscounts = useMemo(
+        () => customParameters.discounts || [],
+        [customParameters.discounts],
+    );
+    const cardDiscounts = useMemo(
+        () => allDiscounts.filter((discount) => discount.source === 'CARD'),
+        [allDiscounts],
+    );
+    const cardTotal = useMemo(
+        () => cardDiscounts.reduce((total, discount) => total + Number(discount.amount || 0), 0),
+        [cardDiscounts],
+    );
+    const [discounts, setDiscounts] = useState(
+        allDiscounts.filter((discount) => discount.source !== 'CARD'),
+    );
+
+    // Card lines ride along untouched so a submit never drops them; the server
+    // recalculates them regardless.
+    const emit = (manualDiscounts, manualTotal) =>
+        onChange({
+            customParameters: {
+                ...customParameters,
+                discounts: [...cardDiscounts, ...manualDiscounts],
+            },
+            discount: cardTotal + manualTotal,
+        });
 
     useEffect(() => {
         handleDiscountChange();
@@ -81,14 +109,7 @@ const DiscountManager = ({
         setDiscounts(newDiscounts);
 
         // Update parent component
-        const totalDiscount = calculateTotalDiscount(newDiscounts);
-        onChange({
-            customParameters: {
-                ...customParameters,
-                discounts: newDiscounts,
-            },
-            discount: totalDiscount,
-        });
+        emit(newDiscounts, calculateTotalDiscount(newDiscounts));
     };
 
     // Remove a discount
@@ -97,14 +118,7 @@ const DiscountManager = ({
         setDiscounts(newDiscounts);
 
         // Update parent component
-        const totalDiscount = calculateTotalDiscount(newDiscounts);
-        onChange({
-            customParameters: {
-                ...customParameters,
-                discounts: newDiscounts,
-            },
-            discount: totalDiscount,
-        });
+        emit(newDiscounts, calculateTotalDiscount(newDiscounts));
     };
 
     // Update a discount field
@@ -146,13 +160,7 @@ const DiscountManager = ({
         }
 
         // Update parent component
-        onChange({
-            customParameters: {
-                ...customParameters,
-                discounts: totalDiscount > maxAmount ? adjustedDiscounts : newDiscounts,
-            },
-            discount: finalDiscount,
-        });
+        emit(totalDiscount > maxAmount ? adjustedDiscounts : newDiscounts, finalDiscount);
     };
 
     // Calculate remaining available discount
@@ -199,13 +207,17 @@ const DiscountManager = ({
                 </Box>
             </Box>
 
+            <CardDiscountLines discounts={cardDiscounts} />
+
             {discounts.length === 0 ? (
                 <Typography
                     variant="body2"
                     color="text.secondary"
                     sx={{ textAlign: 'center', py: 2 }}
                 >
-                    No discounts applied. Click &quot;Add Discount&quot; to apply one.
+                    {cardDiscounts.length
+                        ? 'No manual discount on top of the partner card.'
+                        : 'No discounts applied. Click "Add Discount" to apply one.'}
                 </Typography>
             ) : (
                 discounts.map((discount, index) => (

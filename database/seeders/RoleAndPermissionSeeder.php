@@ -130,6 +130,21 @@ class RoleAndPermissionSeeder extends Seeder
                     "Delete Statement",
                     "List Statements",
                 ],
+                "Discount Partners" => [
+                    "View Discount Partner",
+                    "Create Discount Partner",
+                    "Edit Discount Partner",
+                    "Delete Discount Partner",
+                    "List Discount Partners",
+                ],
+                "Discount Cards" => [
+                    "List Discount Cards",
+                    "Issue Discount Cards",
+                    "Edit Discount Card",
+                    "Revoke Discount Card",
+                    "Apply To Acceptance",
+                    "View Usage Report",
+                ],
             ],
             "User Management" => [
                 "Users" => [

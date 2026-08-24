@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\Api\Reception\ListPatientsController;
+use App\Http\Controllers\Api\Reception\ResolveDiscountCardController;
 use App\Http\Controllers\Api\Reception\ListReferrerAcceptanceReportedOrExpectedToBeReportedController;
 use App\Http\Controllers\Api\Reception\ListTagsController;
 use App\Http\Controllers\Api\Reception\TATAnalyticsController;
 use App\Http\Controllers\Api\Reception\TATItemsController;
 use App\Http\Controllers\Document\DownloadReportController;
 use App\Http\Controllers\Reception\AcceptanceController;
+use App\Http\Controllers\Reception\AcceptanceDiscountCardController;
 use App\Http\Controllers\Reception\AcceptanceItemStateController;
 use App\Http\Controllers\Reception\AcceptancePrescriptionController;
 use App\Http\Controllers\Reception\AddPoolingController;
@@ -80,6 +82,8 @@ Route::group(["prefix" => "reception"], function () {
     Route::put("acceptances/{acceptance}/cancel", CancelAcceptanceController::class)->name("acceptances.cancel");
     Route::patch("acceptances/{acceptance}/priority", UpdateAcceptancePriorityController::class)->name("acceptances.updatePriority");
     Route::put("acceptances/{acceptance}/item-prices", UpdateAcceptanceItemPricesController::class)->name("acceptances.updateItemPrices");
+    Route::post("acceptances/{acceptance}/discount-card", [AcceptanceDiscountCardController::class, "store"])->name("acceptances.discountCard.store");
+    Route::delete("acceptances/{acceptance}/discount-card", [AcceptanceDiscountCardController::class, "destroy"])->name("acceptances.discountCard.destroy");
     Route::put("acceptances/{acceptance}/items", UpdateAcceptanceItemController::class)->name("acceptances.updateItem");
     Route::get("tat-dashboard", TATDashboardController::class)->name("tat.dashboard");
     Route::post("acceptances/{acceptance}/pooling", AddPoolingController::class)->name("acceptances.addPooling");
@@ -132,6 +136,7 @@ Route::group(["prefix" => "api/reception", "as" => "api."], function () {
     Route::get("patients/{idNo}", GetPatientWithIdNoController::class)->name("patients.getByIdNo");
     Route::get("patients", ListPatientsController::class)->name("patients.list");
     Route::get("tags", ListTagsController::class)->name("tags.list");
+    Route::get("discount-cards/resolve", ResolveDiscountCardController::class)->name("discountCards.resolve");
     Route::get("sample-collection/{acceptance}", ListBarcodesController::class)->name("sampleCollection.list");
     Route::get("acceptances/{acceptance}/pooling-items", GetAcceptancePoolingItemsController::class)->name("acceptances.poolingItems");
     Route::get("tat/items", TATItemsController::class)->name("tat.items");
