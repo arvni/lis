@@ -56,6 +56,11 @@ class DiscountPartnerRepository
             ->exists();
     }
 
+    public function find(int $id): ?DiscountPartner
+    {
+        return DiscountPartner::query()->find($id);
+    }
+
     public function createPartner(array $data): DiscountPartner
     {
         $partner = DiscountPartner::query()->make($data);

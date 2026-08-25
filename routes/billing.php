@@ -12,7 +12,9 @@ use App\Http\Controllers\Billing\DiscountCardController;
 use App\Http\Controllers\Billing\DiscountPartnerController;
 use App\Http\Controllers\Billing\DiscountUsageReportController;
 use App\Http\Controllers\Billing\ExportDiscountUsageController;
+use App\Http\Controllers\Billing\AssignDiscountCardsController;
 use App\Http\Controllers\Billing\IssueDiscountCardsController;
+use App\Http\Controllers\Billing\ReleaseDiscountCardsController;
 use App\Http\Controllers\Billing\PrintDiscountCardBatchController;
 use App\Http\Controllers\Billing\RevokeDiscountCardController;
 use App\Http\Controllers\Billing\ExportInvoicesController;
@@ -39,6 +41,8 @@ Route::group(["prefix" => "billing"], function () {
 
     Route::resource("discount-partners", DiscountPartnerController::class)->except("create", "edit", "show");
     Route::post("discount-cards/issue", IssueDiscountCardsController::class)->name("discountCards.issue");
+    Route::post("discount-cards/assign", AssignDiscountCardsController::class)->name("discountCards.assign");
+    Route::post("discount-cards/release", ReleaseDiscountCardsController::class)->name("discountCards.release");
     Route::post("discount-cards/{discountCard}/revoke", RevokeDiscountCardController::class)->name("discountCards.revoke");
     Route::get("discount-card-batches/{batch}/print", PrintDiscountCardBatchController::class)->name("discountCardBatches.print");
     Route::resource("discount-cards", DiscountCardController::class)->only("index", "update");

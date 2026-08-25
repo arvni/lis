@@ -44,9 +44,12 @@ const NoPrint = styled(Box)(() => ({
 const PrintBatch = () => {
     const { batch, cards, range } = usePage().props;
 
+    // Serials need not start at 1, so paging walks the batch's own window.
+    const first = range.first ?? 1;
+    const last = range.last ?? batch.quantity;
     const pageSize = range.to - range.from + 1;
-    const hasPrevious = range.from > 1;
-    const hasNext = range.to < batch.quantity;
+    const hasPrevious = range.from > first;
+    const hasNext = range.to < last;
 
     const goToRange = (from) => {
         router.visit(route('discountCardBatches.print', batch.id), {
@@ -67,7 +70,7 @@ const PrintBatch = () => {
                     flexWrap="wrap"
                 >
                     <Box>
-                        <Typography variant="h5">{batch.partner}</Typography>
+                        <Typography variant="h5">{batch.partner ?? 'Unassigned stock'}</Typography>
                         <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
                             <Chip size="small" label={`Series ${batch.series}`} />
                             <Chip
@@ -87,7 +90,7 @@ const PrintBatch = () => {
                         <Button
                             disabled={!hasPrevious}
                             startIcon={<ArrowBackIcon />}
-                            onClick={() => goToRange(Math.max(1, range.from - pageSize))}
+                            onClick={() => goToRange(Math.max(first, range.from - pageSize))}
                         >
                             Previous
                         </Button>
@@ -120,7 +123,7 @@ const PrintBatch = () => {
                         />
                         <Box sx={{ minWidth: 0 }}>
                             <Typography variant="subtitle2" noWrap>
-                                {batch.partner}
+                                {batch.partner ?? batch.series}
                             </Typography>
                             <Typography
                                 sx={{ fontFamily: 'monospace', fontSize: '3.2mm', mt: 0.5 }}

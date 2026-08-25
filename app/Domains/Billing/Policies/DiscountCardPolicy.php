@@ -51,4 +51,13 @@ class DiscountCardPolicy
     {
         return $user->can('Billing.Discount Cards.Issue Discount Cards');
     }
+
+    /**
+     * Handing stock to a partner is what gives a card its discount, so it is
+     * gated like minting rather than like editing one card.
+     */
+    public function assign(User $user): bool
+    {
+        return $user->can('Billing.Discount Cards.Assign Discount Cards');
+    }
 }

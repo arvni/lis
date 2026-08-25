@@ -24,9 +24,9 @@ class AcceptanceDiscountCardService
     /**
      * @return array{valid: bool, reason: string|null, card: array<string, mixed>|null}
      */
-    public function preview(string $code, ?string $signature = null): array
+    public function preview(string $code): array
     {
-        return $this->billingAdapter->resolveDiscountCard($code, $signature);
+        return $this->billingAdapter->resolveDiscountCard($code);
     }
 
     /**
@@ -35,9 +35,9 @@ class AcceptanceDiscountCardService
      *
      * @return array{valid: bool, reason: string|null, card: array<string, mixed>|null}
      */
-    public function attach(Acceptance $acceptance, string $code, ?string $signature = null): array
+    public function attach(Acceptance $acceptance, string $code): array
     {
-        $verdict = $this->billingAdapter->resolveDiscountCard($code, $signature);
+        $verdict = $this->billingAdapter->resolveDiscountCard($code);
 
         if (! $verdict['valid'] || ! $verdict['card']) {
             return $verdict;

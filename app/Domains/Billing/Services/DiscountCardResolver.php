@@ -8,38 +8,41 @@ use App\Domains\Billing\DTOs\CardValidityDTO;
 use App\Domains\Billing\Enums\DiscountCardStatus;
 use App\Domains\Billing\Models\DiscountCard;
 use App\Domains\Billing\Repositories\DiscountCardRepository;
-use App\Domains\Billing\Support\CardQrSigner;
+use App\Domains\Billing\Support\CardNumberTemplate;
 
 /**
- * Turns a scanned code into a yes/no with a reason. The single place card validity
- * is decided, so the public page and reception can never disagree about a card.
+ * Turns a scanned or typed card number into a yes/no with a reason. The single
+ * place card validity is decided, so nothing downstream can disagree about a card.
+ *
+ * The number is the whole credential — the barcode carries it and nothing else —
+ * so its unguessability comes from the template it was minted with, not from a
+ * signature riding alongside it.
  */
 class DiscountCardResolver
 {
     public function __construct(
         private readonly DiscountCardRepository $cardRepository,
-        private readonly CardQrSigner $signer,
     ) {}
 
     /**
-     * Scanners hand us the whole QR URL; receptionists type the printed number.
-     * Both land here.
+     * The barcode scans to the number and a receptionist types the same thing, so
+     * both land here with nothing to tell them apart.
      */
-    public function resolve(string $code, ?string $signature = null): CardValidityDTO
+    public function resolve(string $code): CardValidityDTO
     {
-        $uuid = $this->extractUuid($code);
+        $number = strtoupper(trim($code));
 
-        $card = $uuid
-            ? $this->cardRepository->findByUuid($uuid)
-            : $this->cardRepository->findByNumber(trim($code));
+        // Templated numbers carry a check character, so a mistyped or misread one
+        // is caught before the query and told apart from a number that simply is
+        // not a card. Legacy numbers have none and fall through to the lookup.
+        if ($this->looksTemplated($number) && ! CardNumberTemplate::hasValidCheckCharacter($number)) {
+            return CardValidityDTO::invalid('That card number looks mistyped — please check it and try again.');
+        }
+
+        $card = $this->cardRepository->findByNumber($number);
 
         if (! $card) {
             return CardValidityDTO::invalid('This card is not recognised.');
-        }
-
-        // Only enforced for QR scans: a typed card number never carries a signature.
-        if ($uuid && $signature !== null && ! $this->signer->verify($uuid, $signature)) {
-            return CardValidityDTO::invalid('This card code could not be verified.');
         }
 
         return $this->assess($card);
@@ -63,6 +66,10 @@ class DiscountCardResolver
             return CardValidityDTO::invalid('This card has reached its usage limit.', $card);
         }
 
+        if ($card->isUnassigned()) {
+            return CardValidityDTO::invalid('This card has not been assigned to a partner yet.', $card);
+        }
+
         $partner = $card->partner;
         if (! $partner || ! $partner->isInForce()) {
             return CardValidityDTO::invalid('The contract behind this card is not currently in force.', $card);
@@ -75,14 +82,13 @@ class DiscountCardResolver
     }
 
     /**
-     * Accepts a bare uuid or the full QR URL a scanner types in.
+     * A templated number ends in `-X`: one character after the final separator.
+     * Legacy numbers end in a zero-padded serial, which is longer than one.
      */
-    private function extractUuid(string $code): ?string
+    private function looksTemplated(string $number): bool
     {
-        if (preg_match('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i', $code, $matches) === 1) {
-            return strtolower($matches[0]);
-        }
+        $split = strrpos($number, '-');
 
-        return null;
+        return $split !== false && $split === strlen($number) - 2;
     }
 }

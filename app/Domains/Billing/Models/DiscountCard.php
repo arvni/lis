@@ -19,12 +19,14 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property string $uuid
  * @property int $discount_card_batch_id
- * @property int $discount_partner_id
+ * @property int|null $discount_partner_id
  * @property string $series
  * @property int $serial
  * @property string $number
  * @property DiscountCardStatus $status
  * @property Carbon|null $issued_at
+ * @property Carbon|null $assigned_at
+ * @property int|null $assigned_by
  * @property Carbon|null $activated_at
  * @property Carbon|null $expires_at
  * @property int|null $usage_limit
@@ -46,6 +48,8 @@ class DiscountCard extends Model
         'number',
         'status',
         'issued_at',
+        'assigned_at',
+        'assigned_by',
         'activated_at',
         'expires_at',
         'usage_limit',
@@ -58,6 +62,7 @@ class DiscountCard extends Model
         'usage_limit' => 'integer',
         'used_count' => 'integer',
         'issued_at' => 'datetime',
+        'assigned_at' => 'datetime',
         'activated_at' => 'datetime',
         'expires_at' => 'date:Y-m-d',
     ];
@@ -95,5 +100,11 @@ class DiscountCard extends Model
     public function hasReachedUsageLimit(): bool
     {
         return $this->usage_limit !== null && $this->used_count >= $this->usage_limit;
+    }
+
+    /** Stock: minted and printed, but not yet promised to any partner. */
+    public function isUnassigned(): bool
+    {
+        return $this->discount_partner_id === null;
     }
 }

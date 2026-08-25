@@ -9,6 +9,7 @@ use App\Domains\Billing\Models\DiscountCard;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class DiscountCardRepository
 {
@@ -31,14 +32,6 @@ class DiscountCardRepository
         return $query->paginate($queryData['pageSize'] ?? 10);
     }
 
-    public function findByUuid(string $uuid): ?DiscountCard
-    {
-        return DiscountCard::query()
-            ->with(['partner.offers'])
-            ->where('uuid', $uuid)
-            ->first();
-    }
-
     public function findByNumber(string $number): ?DiscountCard
     {
         return DiscountCard::query()
@@ -53,11 +46,76 @@ class DiscountCardRepository
      *
      * @param  list<array<string, mixed>>  $rows
      */
+    /**
+     * Which of these numbers are already taken. Used before minting a run so a
+     * random draw never collides with a card that already exists.
+     *
+     * @param  list<string>  $numbers
+     * @return list<string>
+     */
+    public function existingNumbers(array $numbers): array
+    {
+        if ($numbers === []) {
+            return [];
+        }
+
+        return DiscountCard::withTrashed()
+            ->whereIn('number', $numbers)
+            ->pluck('number')
+            ->all();
+    }
+
     public function insertMany(array $rows): void
     {
         foreach (array_chunk($rows, 500) as $chunk) {
             DiscountCard::query()->insert($chunk);
         }
+    }
+
+    /**
+     * @param  list<int>  $ids
+     * @return Collection<int, DiscountCard>
+     */
+    public function lockByIds(array $ids): Collection
+    {
+        return DiscountCard::query()->whereIn('id', $ids)->lockForUpdate()->get();
+    }
+
+    /**
+     * Cards in one batch whose serial falls in the range, locked for the rest of
+     * the transaction so two assignments cannot claim the same range at once.
+     *
+     * @return Collection<int, DiscountCard>
+     */
+    public function lockBySerialRange(?int $batchId, ?int $from, ?int $to): Collection
+    {
+        if ($batchId === null || $from === null || $to === null) {
+            return new Collection;
+        }
+
+        return DiscountCard::query()
+            ->where('discount_card_batch_id', $batchId)
+            ->whereBetween('serial', [$from, $to])
+            ->orderBy('serial')
+            ->lockForUpdate()
+            ->get();
+    }
+
+    /**
+     * @param  list<int>  $ids
+     * @return int rows moved
+     */
+    public function assignToPartner(array $ids, ?int $partnerId, ?int $actorId): int
+    {
+        if ($ids === []) {
+            return 0;
+        }
+
+        return DiscountCard::query()->whereIn('id', $ids)->update([
+            'discount_partner_id' => $partnerId,
+            'assigned_at' => $partnerId === null ? null : now(),
+            'assigned_by' => $partnerId === null ? null : $actorId,
+        ]);
     }
 
     public function updateCard(DiscountCard $card, array $data): DiscountCard

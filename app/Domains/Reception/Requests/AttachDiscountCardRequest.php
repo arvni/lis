@@ -24,7 +24,6 @@ class AttachDiscountCardRequest extends FormRequest
         return [
             // Either the printed card number or the whole scanned QR URL.
             'code' => 'required|string|max:255',
-            'signature' => 'nullable|string|max:64',
         ];
     }
 

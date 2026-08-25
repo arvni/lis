@@ -140,6 +140,7 @@ class RoleAndPermissionSeeder extends Seeder
                 "Discount Cards" => [
                     "List Discount Cards",
                     "Issue Discount Cards",
+                    "Assign Discount Cards",
                     "Edit Discount Card",
                     "Revoke Discount Card",
                     "Apply To Acceptance",
