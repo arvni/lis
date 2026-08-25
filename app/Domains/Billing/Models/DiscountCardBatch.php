@@ -12,13 +12,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
- * One print run of cards for a partner.
+ * One print run. Its partner is optional: a run can be minted as stock, printed,
+ * and kept in a drawer until someone decides which partner it goes to.
  *
  * @property int $id
- * @property int $discount_partner_id
+ * @property int|null $discount_partner_id
  * @property string $series
  * @property string|null $prefix
+ * @property string|null $number_template
  * @property int $quantity
+ * @property int $serial_from
  * @property Carbon|null $expires_at
  * @property int|null $usage_limit
  * @property int|null $issued_by
@@ -36,7 +39,9 @@ class DiscountCardBatch extends Model
         'discount_partner_id',
         'series',
         'prefix',
+        'number_template',
         'quantity',
+        'serial_from',
         'expires_at',
         'usage_limit',
         'issued_by',
@@ -46,6 +51,7 @@ class DiscountCardBatch extends Model
 
     protected $casts = [
         'quantity' => 'integer',
+        'serial_from' => 'integer',
         'usage_limit' => 'integer',
         'expires_at' => 'date:Y-m-d',
         'printed_at' => 'datetime',
@@ -73,5 +79,11 @@ class DiscountCardBatch extends Model
     public function issuer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'issued_by');
+    }
+
+    /** The last serial this batch covers; serials are contiguous from serial_from. */
+    public function serialTo(): int
+    {
+        return $this->serial_from + $this->quantity - 1;
     }
 }

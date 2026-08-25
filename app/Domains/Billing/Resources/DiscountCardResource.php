@@ -9,8 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * The uuid is deliberately absent: it is the card's only credential, and the
- * listing has no use for it. It is emitted solely into the printed QR.
+ * The number is the card's credential and is shown here, because this listing is
+ * already behind the card-admin permission and staff need it to find a card.
  *
  * @mixin DiscountCard
  */
@@ -33,10 +33,13 @@ class DiscountCardResource extends JsonResource
             'expires_at' => $this->expires_at?->format('Y-m-d'),
             'usage_limit' => $this->usage_limit,
             'used_count' => $this->used_count,
-            'partner' => $this->whenLoaded('partner', fn () => [
+            'assigned' => ! $this->isUnassigned(),
+            'assigned_at' => $this->assigned_at?->format('Y-m-d H:i'),
+            // Null for stock: minted and printable, not yet promised to anyone.
+            'partner' => $this->whenLoaded('partner', fn () => $this->partner ? [
                 'id' => $this->partner->id,
                 'name' => $this->partner->name,
-            ]),
+            ] : null),
             'batch' => $this->whenLoaded('batch', fn () => [
                 'id' => $this->batch->id,
                 'series' => $this->batch->series,

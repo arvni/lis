@@ -24,11 +24,7 @@ class AcceptanceDiscountCardController extends Controller
     {
         $validated = $request->validated();
 
-        $verdict = $this->cardService->attach(
-            $acceptance,
-            $validated['code'],
-            $validated['signature'] ?? null
-        );
+        $verdict = $this->cardService->attach($acceptance, $validated['code']);
 
         if (! $verdict['valid']) {
             return back()->withErrors(['code' => $verdict['reason'] ?? 'This card cannot be used.']);

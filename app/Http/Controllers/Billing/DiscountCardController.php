@@ -40,6 +40,7 @@ class DiscountCardController extends Controller
                 DiscountCardStatus::assignable()
             ),
             'canIssue' => $request->user()?->can('issue', DiscountCard::class) ?? false,
+            'canAssign' => $request->user()?->can('assign', DiscountCard::class) ?? false,
         ]);
     }
 

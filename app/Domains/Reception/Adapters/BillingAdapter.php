@@ -43,9 +43,9 @@ class BillingAdapter
      *
      * @return array{valid: bool, reason: string|null, card: array<string, mixed>|null}
      */
-    public function resolveDiscountCard(string $code, ?string $signature = null): array
+    public function resolveDiscountCard(string $code): array
     {
-        $verdict = $this->cardResolver->resolve($code, $signature);
+        $verdict = $this->cardResolver->resolve($code);
         $card = $verdict->card;
 
         return [

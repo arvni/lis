@@ -1,11 +1,13 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
-import { Button, Tooltip, Typography } from '@mui/material';
+import { Button, Chip, Stack, Tooltip, Typography } from '@mui/material';
 import { GridActionsCellItem } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import BlockIcon from '@mui/icons-material/Block';
 import PrintIcon from '@mui/icons-material/Print';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import UndoIcon from '@mui/icons-material/Undo';
 
 import TableLayout from '@/Layouts/TableLayout';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -14,14 +16,18 @@ import PageHeader from '@/Components/PageHeader.jsx';
 import Filter from './Components/Filter';
 import IssueBatchForm from './Components/IssueBatchForm';
 import EditCardForm from './Components/EditCardForm';
+import AssignCardsForm from './Components/AssignCardsForm';
 import StatusChip from './Components/StatusChip';
 
 const DiscountCardIndex = () => {
-    const { cards, status, errors, success, requestInputs, statuses, canIssue } = usePage().props;
+    const { cards, status, errors, success, requestInputs, statuses, canIssue, canAssign } =
+        usePage().props;
 
     const [openIssueForm, setOpenIssueForm] = useState(false);
     const [openRevokeConfirm, setOpenRevokeConfirm] = useState(false);
     const [selectedCard, setSelectedCard] = useState(null);
+    // Empty selection opens the dialog in range mode; one card opens it on that card.
+    const [assignSelection, setAssignSelection] = useState(null);
 
     const findCard = useCallback(
         (id) => cards.data.find((card) => card.id === id) ?? { id },
@@ -34,6 +40,25 @@ const DiscountCardIndex = () => {
         (id) => () => {
             setSelectedCard(findCard(id));
             setOpenRevokeConfirm(true);
+        },
+        [findCard],
+    );
+
+    const handleAssign = useCallback(
+        (id) => () => setAssignSelection([findCard(id)]),
+        [findCard],
+    );
+
+    // Release needs no dialog: the card names its own partner, and the server
+    // refuses anything that has already been used.
+    const handleRelease = useCallback(
+        (id) => () => {
+            const card = findCard(id);
+            if (!card?.partner?.id) return;
+            router.post(route('discountCards.release'), {
+                discount_partner_id: card.partner.id,
+                card_ids: [card.id],
+            });
         },
         [findCard],
     );
@@ -98,7 +123,12 @@ const DiscountCardIndex = () => {
                 type: 'string',
                 flex: 0.8,
                 sortable: false,
-                renderCell: (params) => params.row.partner?.name ?? '—',
+                renderCell: (params) =>
+                    params.row.partner?.name ?? (
+                        <Tooltip title="Minted and printable, but discounts nothing until assigned">
+                            <Chip label="Stock" size="small" color="warning" variant="outlined" />
+                        </Tooltip>
+                    ),
             },
             {
                 field: 'status',
@@ -153,6 +183,21 @@ const DiscountCardIndex = () => {
                         showInMenu
                     />,
                     <GridActionsCellItem
+                        key={`assign-${params.row.id}`}
+                        icon={<AssignmentIndIcon />}
+                        label="Assign to partner"
+                        onClick={handleAssign(params.row.id)}
+                        showInMenu
+                    />,
+                    <GridActionsCellItem
+                        key={`release-${params.row.id}`}
+                        icon={<UndoIcon />}
+                        label="Release to stock"
+                        onClick={handleRelease(params.row.id)}
+                        showInMenu
+                        disabled={!params.row.assigned}
+                    />,
+                    <GridActionsCellItem
                         key={`revoke-${params.row.id}`}
                         icon={<BlockIcon color="error" />}
                         label="Revoke"
@@ -162,7 +207,7 @@ const DiscountCardIndex = () => {
                 ],
             },
         ],
-        [handleEdit, handleRevoke, handlePrintBatch, renderUsage],
+        [handleEdit, handleRevoke, handlePrintBatch, handleAssign, handleRelease, renderUsage],
     );
 
     return (
@@ -172,17 +217,29 @@ const DiscountCardIndex = () => {
                 title="Discount Cards"
                 subtitle="Bearer cards issued against partner contracts"
                 actions={
-                    canIssue ? (
-                        <Button
-                            onClick={() => setOpenIssueForm(true)}
-                            startIcon={<AddIcon />}
-                            color="success"
-                            variant="contained"
-                            size="medium"
-                        >
-                            Issue Cards
-                        </Button>
-                    ) : null
+                    <Stack direction="row" spacing={1}>
+                        {canAssign ? (
+                            <Button
+                                onClick={() => setAssignSelection([])}
+                                startIcon={<AssignmentIndIcon />}
+                                variant="outlined"
+                                size="medium"
+                            >
+                                Assign Range
+                            </Button>
+                        ) : null}
+                        {canIssue ? (
+                            <Button
+                                onClick={() => setOpenIssueForm(true)}
+                                startIcon={<AddIcon />}
+                                color="success"
+                                variant="contained"
+                                size="medium"
+                            >
+                                Issue Cards
+                            </Button>
+                        ) : null}
+                    </Stack>
                 }
             />
 
@@ -203,6 +260,14 @@ const DiscountCardIndex = () => {
             />
 
             {openIssueForm && <IssueBatchForm open={openIssueForm} onClose={handleCloseForm} />}
+
+            {assignSelection !== null && (
+                <AssignCardsForm
+                    open
+                    selectedCards={assignSelection}
+                    onClose={() => setAssignSelection(null)}
+                />
+            )}
 
             {selectedCard && !openRevokeConfirm && (
                 <EditCardForm

@@ -9,7 +9,6 @@ use App\Domains\Billing\Models\DiscountCard;
 use App\Domains\Billing\Models\DiscountCardBatch;
 use App\Domains\Billing\Repositories\DiscountCardBatchRepository;
 use App\Domains\Billing\Repositories\DiscountCardRepository;
-use App\Domains\Billing\Support\CardQrSigner;
 use DNS2D;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -25,7 +24,6 @@ class DiscountCardService
     public function __construct(
         private readonly DiscountCardRepository $cardRepository,
         private readonly DiscountCardBatchRepository $batchRepository,
-        private readonly CardQrSigner $signer,
     ) {}
 
     public function listCards(array $queryData): LengthAwarePaginator
@@ -87,7 +85,9 @@ class DiscountCardService
             'series' => $card->series,
             'serial' => $card->serial,
             'expires_at' => $card->expires_at?->format('Y-m-d'),
-            'qr' => $this->qrDataUri($this->signer->urlFor($card)),
+            // The number is the credential, so it is all the code carries — no URL,
+            // nothing for a scanner to open, nothing to leak about the contract.
+            'qr' => $this->qrDataUri($card->number),
         ];
     }
 

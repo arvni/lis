@@ -27,12 +27,8 @@ class ResolveDiscountCardController extends Controller
 
         $validated = $request->validate([
             'code' => 'required|string|max:255',
-            'signature' => 'nullable|string|max:64',
         ]);
 
-        return response()->json($this->cardService->preview(
-            $validated['code'],
-            $validated['signature'] ?? null
-        ));
+        return response()->json($this->cardService->preview($validated['code']));
     }
 }

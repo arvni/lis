@@ -27,9 +27,14 @@ class PrintDiscountCardBatchController extends Controller
     {
         $this->authorize('print', DiscountCard::class);
 
-        $from = max(1, (int) $request->integer('from', 1));
+        // Serials are not necessarily 1-based — a batch can continue where the last
+        // one stopped — so the range is clamped to the batch's own serial window.
+        $first = $batch->serial_from;
+        $last = $batch->serialTo();
+
+        $from = min(max($first, (int) $request->integer('from', $first)), $last);
         $to = (int) $request->integer('to', $from + DiscountCardService::PRINT_CHUNK - 1);
-        $to = min($to, $from + DiscountCardService::PRINT_CHUNK - 1, $batch->quantity);
+        $to = min($to, $from + DiscountCardService::PRINT_CHUNK - 1, $last);
 
         $batch->loadMissing('partner:id,name');
 
@@ -38,10 +43,11 @@ class PrintDiscountCardBatchController extends Controller
                 'id' => $batch->id,
                 'series' => $batch->series,
                 'quantity' => $batch->quantity,
+                // Null on a stock run: printed now, assigned to someone later.
                 'partner' => $batch->partner?->name,
                 'expires_at' => $batch->expires_at?->format('Y-m-d'),
             ],
-            'range' => ['from' => $from, 'to' => $to],
+            'range' => ['from' => $from, 'to' => $to, 'first' => $first, 'last' => $last],
             'cards' => $this->cardService->buildPrintSheet($batch, $from, $to),
         ]);
     }

@@ -28,6 +28,8 @@ const IssueBatchForm = ({ open, onClose }) => (
             discount_partner_id: '',
             quantity: 50,
             prefix: '',
+            number_template: 'DDDD-DDDD-DDDD-DDDD',
+            serial_from: 1,
             expires_at: '',
             usage_limit: '',
             notes: '',
@@ -74,20 +76,27 @@ const FormContent = () => {
                     the contract says otherwise.
                 </Alert>
 
+                {!data.discount_partner_id && (
+                    <Alert severity="warning" sx={{ mb: 3 }}>
+                        No partner chosen, so this run is minted as <strong>stock</strong>. The cards
+                        print and can be kept in hand, but they discount nothing until they are
+                        assigned to a partner.
+                    </Alert>
+                )}
+
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12 }}>
                         <SelectSearch
                             value={data.partner}
                             onChange={handlePartnerChange}
                             name="partner"
-                            required
                             fullWidth
                             url={route('api.discountPartners.list')}
-                            label="Partner"
+                            label="Partner (optional)"
                             error={!!errors?.discount_partner_id}
                             helperText={
                                 errors?.discount_partner_id ||
-                                'Whose contract these cards belong to'
+                                'Leave empty to mint stock and assign it later'
                             }
                         />
                     </Grid>
@@ -123,6 +132,42 @@ const FormContent = () => {
                             onChange={handleChange}
                             error={!!errors?.prefix}
                             helperText={errors?.prefix || 'Printed on the card, e.g. ACME'}
+                        />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 8 }}>
+                        <TextField
+                            label="Number Template"
+                            name="number_template"
+                            fullWidth
+                            value={data.number_template ?? ''}
+                            onChange={handleChange}
+                            error={!!errors?.number_template}
+                            helperText={
+                                errors?.number_template ||
+                                "D = digit, L = capital letter, D{1-9} or L{A-F} to narrow the range, 'quoted' text stays literal"
+                            }
+                        />
+                        <Alert severity="info" variant="outlined" sx={{ mt: 1 }}>
+                            Numbers are drawn at random inside the template and carry a check
+                            character, so a card cannot be guessed from another one and a mistyped
+                            number is caught at the scanner. Leave empty to keep the old
+                            series-and-serial format.
+                        </Alert>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 4 }}>
+                        <TextField
+                            label="Serials Start At"
+                            name="serial_from"
+                            type="number"
+                            fullWidth
+                            value={data.serial_from ?? ''}
+                            onChange={handleChange}
+                            error={!!errors?.serial_from}
+                            helperText={
+                                errors?.serial_from ||
+                                'Continue where the last run stopped, so ranges stay meaningful'
+                            }
+                            slotProps={{ htmlInput: { min: 1 } }}
                         />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
