@@ -77,7 +77,7 @@ class DiscountCardResolverTest extends TestCase
         $this->assertTrue($this->resolver->resolve('  '.strtolower($number).' ')->valid);
     }
 
-    public function test_a_mistyped_templated_number_is_called_out_as_mistyped(): void
+    public function test_a_mistyped_number_is_simply_not_found(): void
     {
         $number = CardNumberTemplate::compile('DDDD-DDDD-DDDD-DDDD')->generate();
         $this->card(['number' => $number]);
@@ -87,9 +87,11 @@ class DiscountCardResolverTest extends TestCase
 
         $verdict = $this->resolver->resolve($mistyped);
 
+        // The check character is stored but never travels with the number, so
+        // there is nothing to tell a typo apart from a card that does not exist.
         $this->assertFalse($verdict->valid);
-        // Told apart from "not a card" so reception knows to re-read the number.
-        $this->assertStringContainsString('mistyped', (string) $verdict->reason);
+        $this->assertNull($verdict->card);
+        $this->assertStringContainsString('not recognised', (string) $verdict->reason);
     }
 
     public function test_an_unknown_code_is_rejected(): void

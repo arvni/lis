@@ -13,6 +13,7 @@ use App\Domains\Billing\Models\DiscountPartner;
 use App\Domains\Billing\Services\DiscountCardAssignmentService;
 use App\Domains\Billing\Services\DiscountCardIssuanceService;
 use App\Domains\Billing\Services\DiscountCardResolver;
+use App\Domains\Billing\Support\CardNumberTemplate;
 use App\Domains\Laboratory\Enums\OfferType;
 use App\Domains\Laboratory\Models\Offer;
 use App\Domains\User\Models\User;
@@ -68,7 +69,31 @@ class DiscountCardAssignmentTest extends TestCase
         $batch = $this->issueStock(10, "'LAB'-DDDD-DDDD");
 
         foreach ($batch->cards as $card) {
-            $this->assertMatchesRegularExpression('/^LAB-\d{4}-\d{4}-[0-9A-Z]$/', $card->number);
+            // Exactly the template — the check character is stored beside it.
+            $this->assertMatchesRegularExpression('/^LAB-\d{4}-\d{4}$/', $card->number);
+        }
+    }
+
+    public function test_the_check_character_is_stored_but_kept_out_of_the_number(): void
+    {
+        $batch = $this->issueStock(5, 'DDDD-DDDD');
+
+        foreach ($batch->cards as $card) {
+            $this->assertMatchesRegularExpression('/^[0-9A-Z]$/', (string) $card->check_character);
+            $this->assertStringNotContainsString((string) $card->check_character, substr($card->number, -1));
+            $this->assertSame(
+                CardNumberTemplate::checkCharacterFor($card->number),
+                $card->check_character
+            );
+        }
+    }
+
+    public function test_a_legacy_batch_gets_no_check_character(): void
+    {
+        $batch = $this->issueStock(3, template: null);
+
+        foreach ($batch->cards as $card) {
+            $this->assertNull($card->check_character);
         }
     }
 

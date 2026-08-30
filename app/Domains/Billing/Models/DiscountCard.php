@@ -23,6 +23,7 @@ use Illuminate\Support\Carbon;
  * @property string $series
  * @property int $serial
  * @property string $number
+ * @property string|null $check_character
  * @property DiscountCardStatus $status
  * @property Carbon|null $issued_at
  * @property Carbon|null $assigned_at
@@ -46,6 +47,7 @@ class DiscountCard extends Model
         'series',
         'serial',
         'number',
+        'check_character',
         'status',
         'issued_at',
         'assigned_at',
