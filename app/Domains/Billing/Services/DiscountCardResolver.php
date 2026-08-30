@@ -8,7 +8,6 @@ use App\Domains\Billing\DTOs\CardValidityDTO;
 use App\Domains\Billing\Enums\DiscountCardStatus;
 use App\Domains\Billing\Models\DiscountCard;
 use App\Domains\Billing\Repositories\DiscountCardRepository;
-use App\Domains\Billing\Support\CardNumberTemplate;
 
 /**
  * Turns a scanned or typed card number into a yes/no with a reason. The single
@@ -16,7 +15,8 @@ use App\Domains\Billing\Support\CardNumberTemplate;
  *
  * The number is the whole credential — the barcode carries it and nothing else —
  * so its unguessability comes from the template it was minted with, not from a
- * signature riding alongside it.
+ * signature riding alongside it. The stored check character is deliberately not
+ * consulted here: it is not printed or encoded, so a scan never carries one.
  */
 class DiscountCardResolver
 {
@@ -32,13 +32,9 @@ class DiscountCardResolver
     {
         $number = strtoupper(trim($code));
 
-        // Templated numbers carry a check character, so a mistyped or misread one
-        // is caught before the query and told apart from a number that simply is
-        // not a card. Legacy numbers have none and fall through to the lookup.
-        if ($this->looksTemplated($number) && ! CardNumberTemplate::hasValidCheckCharacter($number)) {
-            return CardValidityDTO::invalid('That card number looks mistyped — please check it and try again.');
-        }
-
+        // The check character is stored but never travels with the number, so a
+        // mistyped card is indistinguishable from one that does not exist. Both
+        // land on "not recognised" below.
         $card = $this->cardRepository->findByNumber($number);
 
         if (! $card) {
@@ -79,16 +75,5 @@ class DiscountCardResolver
         }
 
         return CardValidityDTO::valid($card);
-    }
-
-    /**
-     * A templated number ends in `-X`: one character after the final separator.
-     * Legacy numbers end in a zero-padded serial, which is longer than one.
-     */
-    private function looksTemplated(string $number): bool
-    {
-        $split = strrpos($number, '-');
-
-        return $split !== false && $split === strlen($number) - 2;
     }
 }

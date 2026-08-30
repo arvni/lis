@@ -23,6 +23,9 @@ use App\Domains\Billing\Exceptions\InvalidCardNumberTemplateException;
  * card's only credential now, so a holder must not be able to derive a sibling
  * card from the one in their hand. The batch's shared, recognisable part comes
  * from literals; its contiguous ordering comes from the serial, not the number.
+ *
+ * A check character is computed per number and stored beside it, but deliberately
+ * kept out of the number, the print and the QR — see checkCharacterFor().
  */
 final class CardNumberTemplate
 {
@@ -87,41 +90,39 @@ final class CardNumberTemplate
     }
 
     /**
-     * One number, check character included. Uniqueness is the caller's problem —
-     * it holds the batch and knows what it has already minted.
+     * One card number, exactly the shape of the template — the check character is
+     * NOT part of it. Uniqueness is the caller's problem: it holds the batch and
+     * knows what it has already minted.
      */
     public function generate(): string
     {
-        $body = '';
+        $number = '';
 
         foreach ($this->tokens as $token) {
             if (isset($token['literal'])) {
-                $body .= $token['literal'];
+                $number .= $token['literal'];
 
                 continue;
             }
             $charset = $token['charset'];
-            $body .= $charset[random_int(0, strlen($charset) - 1)];
+            $number .= $charset[random_int(0, strlen($charset) - 1)];
         }
 
-        return $body.'-'.self::checkCharacter($body);
+        return $number;
     }
 
     /**
-     * Whether a number carries the check character its body implies. A typed or
-     * mis-scanned number is rejected here rather than after a database round trip,
-     * and it tells the two apart: "not a card" versus "not typed correctly".
+     * The check character for a number, stored alongside it but never printed,
+     * never encoded into the QR and never asked for at reception.
+     *
+     * Because it does not travel with the number, nothing can verify a number
+     * against it: a card arrives as its digits alone, so a mistyped one is simply
+     * not found. It is kept as a record of what was minted, not as a guard.
+     * Restoring typo protection means putting it back into the number itself.
      */
-    public static function hasValidCheckCharacter(string $number): bool
+    public static function checkCharacterFor(string $body): string
     {
-        $number = strtoupper(trim($number));
-        $split = strrpos($number, '-');
-
-        if ($split === false || $split === 0 || $split !== strlen($number) - 2) {
-            return false;
-        }
-
-        return substr($number, -1) === self::checkCharacter(substr($number, 0, $split));
+        return self::checkCharacter($body);
     }
 
     /**

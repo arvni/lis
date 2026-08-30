@@ -85,6 +85,9 @@ class DiscountCardIssuanceService
                 'series' => $batch->series,
                 'serial' => $serial++,
                 'number' => $number,
+                'check_character' => $dto->number_template === null
+                    ? null
+                    : CardNumberTemplate::checkCharacterFor($number),
                 'status' => $status->value,
                 'issued_at' => $now,
                 'assigned_at' => $batch->discount_partner_id ? $now : null,

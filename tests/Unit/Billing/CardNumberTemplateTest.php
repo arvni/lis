@@ -14,14 +14,14 @@ class CardNumberTemplateTest extends TestCase
     {
         $number = CardNumberTemplate::compile('DDDD-DDDD-DDDD-DDDD')->generate();
 
-        $this->assertMatchesRegularExpression('/^\d{4}-\d{4}-\d{4}-\d{4}-[0-9A-Z]$/', $number);
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{4}-\d{4}-\d{4}$/', $number);
     }
 
     public function test_l_mints_capital_letters(): void
     {
         $number = CardNumberTemplate::compile('LLLL')->generate();
 
-        $this->assertMatchesRegularExpression('/^[A-Z]{4}-[0-9A-Z]$/', $number);
+        $this->assertMatchesRegularExpression('/^[A-Z]{4}$/', $number);
     }
 
     public function test_a_digit_range_is_honoured(): void
@@ -29,7 +29,7 @@ class CardNumberTemplateTest extends TestCase
         $template = CardNumberTemplate::compile('D{1-3}D{1-3}D{1-3}D{1-3}');
 
         for ($i = 0; $i < 50; $i++) {
-            $this->assertMatchesRegularExpression('/^[123]{4}-[0-9A-Z]$/', $template->generate());
+            $this->assertMatchesRegularExpression('/^[123]{4}$/', $template->generate());
         }
     }
 
@@ -38,7 +38,7 @@ class CardNumberTemplateTest extends TestCase
         $template = CardNumberTemplate::compile('L{A-C}L{A-C}L{A-C}');
 
         for ($i = 0; $i < 50; $i++) {
-            $this->assertMatchesRegularExpression('/^[ABC]{3}-[0-9A-Z]$/', $template->generate());
+            $this->assertMatchesRegularExpression('/^[ABC]{3}$/', $template->generate());
         }
     }
 
@@ -46,66 +46,50 @@ class CardNumberTemplateTest extends TestCase
     {
         $number = CardNumberTemplate::compile("'LAB'-DDDD")->generate();
 
-        $this->assertMatchesRegularExpression('/^LAB-\d{4}-[0-9A-Z]$/', $number);
+        $this->assertMatchesRegularExpression('/^LAB-\d{4}$/', $number);
     }
 
     public function test_unquoted_literals_survive_as_typed(): void
     {
         $number = CardNumberTemplate::compile('1000-DDDD')->generate();
 
-        $this->assertMatchesRegularExpression('/^1000-\d{4}-[0-9A-Z]$/', $number);
+        $this->assertMatchesRegularExpression('/^1000-\d{4}$/', $number);
     }
 
-    public function test_the_check_character_verifies(): void
+    public function test_the_number_carries_no_check_character(): void
     {
-        $template = CardNumberTemplate::compile('DDDD-DDDD-DDDD-DDDD');
-
-        for ($i = 0; $i < 50; $i++) {
-            $this->assertTrue(CardNumberTemplate::hasValidCheckCharacter($template->generate()));
+        // It is stored beside the number, never inside it — the printed card and
+        // the QR show exactly the template and nothing more.
+        for ($i = 0; $i < 20; $i++) {
+            $this->assertMatchesRegularExpression(
+                '/^\d{4}-\d{4}-\d{4}-\d{4}$/',
+                CardNumberTemplate::compile('DDDD-DDDD-DDDD-DDDD')->generate()
+            );
         }
     }
 
-    public function test_a_mistyped_character_fails_the_check(): void
+    public function test_the_check_character_is_derived_from_the_number(): void
+    {
+        $number = CardNumberTemplate::compile('DDDD-DDDD-DDDD-DDDD')->generate();
+
+        $this->assertMatchesRegularExpression('/^[0-9A-Z]$/', CardNumberTemplate::checkCharacterFor($number));
+        // Stable: the same number always yields the same character.
+        $this->assertSame(
+            CardNumberTemplate::checkCharacterFor($number),
+            CardNumberTemplate::checkCharacterFor($number)
+        );
+    }
+
+    public function test_a_changed_number_yields_a_different_check_character(): void
     {
         $number = CardNumberTemplate::compile('DDDD-DDDD')->generate();
-        $this->assertTrue(CardNumberTemplate::hasValidCheckCharacter($number));
+        $altered = $number;
+        $altered[0] = (string) ((((int) $number[0]) + 1) % 10);
 
-        // Bump one body digit; the check character no longer agrees with it.
-        $mistyped = $number;
-        $mistyped[0] = (string) ((((int) $number[0]) + 1) % 10);
-
-        $this->assertFalse(CardNumberTemplate::hasValidCheckCharacter($mistyped));
-    }
-
-    public function test_a_transposition_fails_the_check(): void
-    {
-        $number = CardNumberTemplate::compile('DDDDDDDD')->generate();
-        $body = substr($number, 0, -2);
-
-        // Find any neighbouring pair that differs and swap it.
-        for ($i = 0; $i < strlen($body) - 1; $i++) {
-            if ($body[$i] === $body[$i + 1]) {
-                continue;
-            }
-            $swapped = $body;
-            [$swapped[$i], $swapped[$i + 1]] = [$body[$i + 1], $body[$i]];
-
-            $this->assertFalse(
-                CardNumberTemplate::hasValidCheckCharacter($swapped.substr($number, -2)),
-                'A transposed pair should not pass the check.'
-            );
-
-            return;
-        }
-
-        $this->markTestSkipped('Generated number had no distinct neighbouring pair to transpose.');
-    }
-
-    public function test_a_number_without_a_check_character_is_rejected(): void
-    {
-        $this->assertFalse(CardNumberTemplate::hasValidCheckCharacter('1000-2000'));
-        $this->assertFalse(CardNumberTemplate::hasValidCheckCharacter('nonsense'));
-        $this->assertFalse(CardNumberTemplate::hasValidCheckCharacter(''));
+        $this->assertNotSame(
+            CardNumberTemplate::checkCharacterFor($number),
+            CardNumberTemplate::checkCharacterFor($altered)
+        );
     }
 
     public function test_capacity_counts_what_the_placeholders_allow(): void
