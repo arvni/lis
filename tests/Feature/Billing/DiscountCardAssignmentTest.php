@@ -80,7 +80,11 @@ class DiscountCardAssignmentTest extends TestCase
 
         foreach ($batch->cards as $card) {
             $this->assertMatchesRegularExpression('/^[0-9A-Z]$/', (string) $card->check_character);
-            $this->assertStringNotContainsString((string) $card->check_character, substr($card->number, -1));
+            // Exactly the template's 4+4 digits: had the check character been
+            // appended, the number would carry a ninth one. Comparing it against
+            // the last digit instead would fail whenever the two coincide, which
+            // they legitimately do — the character is derived from the number.
+            $this->assertMatchesRegularExpression('/^\d{4}-\d{4}$/', $card->number);
             $this->assertSame(
                 CardNumberTemplate::checkCharacterFor($card->number),
                 $card->check_character
