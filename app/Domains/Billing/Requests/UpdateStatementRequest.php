@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Billing\Requests;
 
+use App\Domains\Billing\Enums\InvoiceStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -28,8 +31,12 @@ class UpdateStatementRequest extends StoreStatementRequest
             'required',
             Rule::exists('invoices', 'id')
                 ->where(function ($query) {
-                    $query->whereNull('statement_id')
-                        ->orWhere('statement_id', '=', $this->route('statement')->id);
+                    // Nothing cancelled may be added, but an invoice already on this
+                    // statement stays valid even if it was cancelled afterwards.
+                    $query->where(function ($q) {
+                        $q->whereNull('statement_id')
+                            ->where('status', '!=', InvoiceStatus::CANCELED->value);
+                    })->orWhere('statement_id', '=', $this->route('statement')->id);
                 }),
         ];
         unset($rules['referrer.id']);

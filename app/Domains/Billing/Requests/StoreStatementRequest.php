@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Billing\Requests;
 
+use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Models\Statement;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -31,6 +34,8 @@ class StoreStatementRequest extends FormRequest
                 "required",
                 Rule::exists('invoices', 'id')
                     ->whereNull('statement_id')
+                    // A cancelled invoice bills nobody, so it cannot go on a statement.
+                    ->whereNot('status', InvoiceStatus::CANCELED->value)
             ],
             "referrer.id" => "required|exists:referrers,id",
         ];
