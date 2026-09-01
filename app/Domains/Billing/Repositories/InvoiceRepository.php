@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Domains\Shared\Traits\FiltersByDateRange;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Billing\Enums\InvoiceItemKind;
+use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\Statement;
 use Carbon\Carbon;
@@ -91,6 +92,8 @@ class InvoiceRepository
     {
         $query = $this->applyQuery(['acceptance.patient'])
             ->whereNull('invoices.statement_id')
+            // A cancelled invoice bills nobody, so it must never reach a statement.
+            ->where('invoices.status', '!=', InvoiceStatus::CANCELED->value)
             ->whereHas('acceptances', fn($q) => $q->where('referrer_id', $referrerId));
 
         if ($month) {

@@ -40,10 +40,8 @@ app/Domains/Billing/Requests/DailyCashReportRequest.php
 app/Domains/Billing/Requests/ExportInvoicesRequest.php
 app/Domains/Billing/Requests/StoreInvoiceRequest.php
 app/Domains/Billing/Requests/StorePaymentRequest.php
-app/Domains/Billing/Requests/StoreStatementRequest.php
 app/Domains/Billing/Requests/UpdateInvoiceRequest.php
 app/Domains/Billing/Requests/UpdatePaymentRequest.php
-app/Domains/Billing/Requests/UpdateStatementRequest.php
 app/Domains/Billing/Services/BillingDashboardService.php
 app/Domains/Billing/Services/DailyCashReportService.php
 app/Domains/Billing/Services/InvoiceComposer.php
