@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domains\Inventory\Repositories;
 
-use App\Domains\Inventory\Enums\LotStatus;
 use App\Domains\Inventory\Models\StockLot;
 use App\Domains\Inventory\Models\StockLotRelocation;
 use Illuminate\Database\Eloquent\Collection;
@@ -69,7 +68,7 @@ class StockLotRelocationRepository
             ->where('lot_number', $lot->lot_number)
             ->where('store_id', $toStoreId)
             ->where('store_location_id', $toLocationId)
-            ->where('status', LotStatus::ACTIVE->value)
+            ->where('status', $lot->status->value)
             ->where('received_date', $lot->received_date)
             ->where('unit_price_base', $lot->unit_price_base)
             ->whereKeyNot($lot->id)

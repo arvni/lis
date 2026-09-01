@@ -20,11 +20,16 @@ class ItemStockController extends Controller
     {
         $storeId   = $request->integer('store_id') ?: null;
         $totalBase = $this->stockLots->totalActiveBaseUnits($item->id, $storeId);
+        $expiredBase = $this->stockLots->totalExpiredBaseUnits($item->id, $storeId);
         $formatted = $this->conversionService->formatStock($item->id, $totalBase);
 
         return response()->json([
             'total_base' => $totalBase,
             'formatted'  => $formatted,
+            'expired_base' => $expiredBase,
+            'expired_formatted' => $expiredBase > 0
+                ? $this->conversionService->formatStock($item->id, $expiredBase)
+                : null,
             'is_low'     => $item->minimum_stock_level > 0 && $totalBase < (float) $item->minimum_stock_level,
         ]);
     }

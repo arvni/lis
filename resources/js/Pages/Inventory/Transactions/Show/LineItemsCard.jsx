@@ -2,6 +2,7 @@ import {
     Card,
     CardContent,
     CardHeader,
+    Chip,
     Table,
     TableBody,
     TableCell,
@@ -71,6 +72,15 @@ const LineItemsCard = ({ transaction }) => (
                                     <Typography variant="body2">{line.expiry_date}</Typography>
                                 ) : (
                                     '—'
+                                )}
+                                {(line.is_expired ||
+                                    transaction.transaction_type === 'EXPIRED_REMOVAL') && (
+                                    <Chip
+                                        label="EXPIRED"
+                                        size="small"
+                                        color="error"
+                                        sx={{ height: 16, fontSize: '0.6rem' }}
+                                    />
                                 )}
                             </TableCell>
                             <TableCell align="right">

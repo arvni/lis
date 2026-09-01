@@ -56,6 +56,15 @@ const ItemStockHint = ({ itemId, storeId, requestedBase = null, onAvailable }) =
                 color={color}
                 sx={{ height: 20, fontSize: '0.7rem' }}
             />
+            {data.expired_base > 0 && (
+                <Chip
+                    label={`Expired: ${data.expired_formatted}`}
+                    size="small"
+                    variant="outlined"
+                    color="error"
+                    sx={{ height: 20, fontSize: '0.7rem', ml: 0.5 }}
+                />
+            )}
             {exceeded && (
                 <Chip
                     label="Exceeds stock"

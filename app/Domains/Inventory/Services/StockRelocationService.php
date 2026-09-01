@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Domains\Inventory\Services;
 
 use App\Domains\Inventory\DTOs\RelocateStockDTO;
-use App\Domains\Inventory\Enums\LotStatus;
 use App\Domains\Inventory\Models\StockLot;
 use App\Domains\Inventory\Models\StockLotRelocation;
 use App\Domains\Inventory\Repositories\StockLotRelocationRepository;
@@ -91,11 +90,17 @@ readonly class StockRelocationService
         return $this->relocationRepository->historyForLot($lot);
     }
 
+    /**
+     * Expired stock moves like any other: it is sitting on a shelf and often
+     * needs shifting to a quarantine place before it is written off. What it
+     * must not do is come out of the move usable, so the destination keeps the
+     * source lot's status.
+     */
     private function assertMovable(StockLot $lot): void
     {
-        if ($lot->status !== LotStatus::ACTIVE) {
+        if (! in_array($lot->status->value, StockLot::onHandStatuses(), true)) {
             throw new RuntimeException(
-                "Only active stock can be relocated; lot {$lot->lot_number} is {$lot->status->value}."
+                "Only stock on hand can be relocated; lot {$lot->lot_number} is {$lot->status->value}."
             );
         }
     }
@@ -189,7 +194,7 @@ readonly class StockRelocationService
             'unit_price_base' => $lot->unit_price_base,
             'store_id' => $toStoreId,
             'store_location_id' => $toLocationId,
-            'status' => LotStatus::ACTIVE->value,
+            'status' => $lot->status->value,
         ]);
     }
 

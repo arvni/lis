@@ -4,6 +4,7 @@ import {
     Card,
     CardActionArea,
     CardContent,
+    Chip,
     Dialog,
     DialogActions,
     DialogContent,
@@ -41,6 +42,14 @@ const LotPickerDialog = ({ open, lots, onSelect, onClose }) => (
                                 >
                                     <Typography variant="body2" fontWeight="bold">
                                         {lot.lot_number}
+                                        {lot.is_expired && (
+                                            <Chip
+                                                label="EXPIRED"
+                                                size="small"
+                                                color="error"
+                                                sx={{ ml: 1, height: 16, fontSize: '0.6rem' }}
+                                            />
+                                        )}
                                         {lot.brand && (
                                             <Typography
                                                 component="span"

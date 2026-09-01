@@ -34,6 +34,7 @@ const StockIndex = () => {
     const [materialType, setMaterialType] = useState(filters.material_type ?? '');
     const [locationId, setLocationId] = useState(filters.location_id ?? '');
     const [lowStockOnly, setLowStockOnly] = useState(!!filters.low_stock_only);
+    const [expiredOnly, setExpiredOnly] = useState(!!filters.expired_only);
 
     const applyFilters = (overrides = {}) => {
         const params = {
@@ -43,6 +44,7 @@ const StockIndex = () => {
             material_type: materialType || undefined,
             location_id: locationId || undefined,
             low_stock_only: lowStockOnly || undefined,
+            expired_only: expiredOnly || undefined,
             ...overrides,
         };
         Object.keys(params).forEach((k) => params[k] === undefined && delete params[k]);
@@ -55,6 +57,7 @@ const StockIndex = () => {
         setMaterialType('');
         setLocationId('');
         setLowStockOnly(false);
+        setExpiredOnly(false);
         router.visit(route('inventory.stock.index'), { data: {} });
     };
 
@@ -165,6 +168,18 @@ const StockIndex = () => {
                                 label="Low Stock"
                                 sx={{ m: 0 }}
                             />
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={expiredOnly}
+                                        onChange={(e) => setExpiredOnly(e.target.checked)}
+                                        size="small"
+                                        color="error"
+                                    />
+                                }
+                                label="Has Expired"
+                                sx={{ m: 0 }}
+                            />
                         </Grid>
                         <Grid size={{ xs: 12, md: 1 }}>
                             <Box sx={{ display: 'flex', gap: 1 }}>
@@ -194,13 +209,14 @@ const StockIndex = () => {
                                 <TableCell>Department</TableCell>
                                 <TableCell>Storage</TableCell>
                                 <TableCell align="right">Stock (Base Units)</TableCell>
+                                <TableCell align="right">Expired</TableCell>
                                 <TableCell align="right">Min Level</TableCell>
                                 <TableCell>Alert</TableCell>
                                 <TableCell />
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {stock.map(({ item, total_base, is_low_stock }) => (
+                            {stock.map(({ item, total_base, expired_base, is_low_stock }) => (
                                 <TableRow key={item.id} hover>
                                     <TableCell>{item.item_code}</TableCell>
                                     <TableCell>
@@ -233,9 +249,41 @@ const StockIndex = () => {
                                             {item.default_unit?.abbreviation}
                                         </Typography>
                                     </TableCell>
+                                    <TableCell align="right">
+                                        {expired_base > 0 ? (
+                                            <Typography
+                                                variant="body2"
+                                                color="error"
+                                                fontWeight="bold"
+                                            >
+                                                {Number(expired_base).toFixed(2)}{' '}
+                                                {item.default_unit?.abbreviation}
+                                            </Typography>
+                                        ) : (
+                                            <Typography variant="body2" color="text.disabled">
+                                                —
+                                            </Typography>
+                                        )}
+                                    </TableCell>
                                     <TableCell align="right">{item.minimum_stock_level}</TableCell>
                                     <TableCell>
-                                        <StockBadge isLowStock={is_low_stock} />
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                gap: 0.5,
+                                                flexWrap: 'wrap',
+                                            }}
+                                        >
+                                            <StockBadge isLowStock={is_low_stock} />
+                                            {expired_base > 0 && (
+                                                <Chip
+                                                    label="EXPIRED"
+                                                    size="small"
+                                                    color="error"
+                                                    variant="outlined"
+                                                />
+                                            )}
+                                        </Box>
                                     </TableCell>
                                     <TableCell>
                                         <Button
@@ -252,7 +300,7 @@ const StockIndex = () => {
                             ))}
                             {stock.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={8} align="center">
+                                    <TableCell colSpan={9} align="center">
                                         <Typography color="text.secondary">
                                             No stock data found.
                                         </Typography>

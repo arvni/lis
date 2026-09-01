@@ -29,7 +29,7 @@ import RelocateDialog from '../Lots/RelocateDialog';
 
 const StockCard = () => {
     const { stockCard, stores, storeId, canRelocate = false } = usePage().props;
-    const { item, entries, lots, total_base, total_fmt } = stockCard;
+    const { item, entries, lots, total_base, total_fmt, expired_base, expired_fmt } = stockCard;
 
     // The lot whose stock is being moved — null when the dialog is closed.
     const [lotToMove, setLotToMove] = useState(null);
@@ -97,8 +97,24 @@ const StockCard = () => {
                                     {item.default_unit?.abbreviation}
                                 </Typography>
                             )}
-                            <Box sx={{ mt: 1 }}>
+                            {expired_base > 0 && (
+                                <Typography variant="caption" color="error" display="block">
+                                    Plus{' '}
+                                    {expired_fmt ||
+                                        `${Number(expired_base).toFixed(2)} ${item.default_unit?.abbreviation}`}{' '}
+                                    expired, not counted above
+                                </Typography>
+                            )}
+                            <Box sx={{ mt: 1, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                                 <StockBadge isLowStock={isLowStock} />
+                                {expired_base > 0 && (
+                                    <Chip
+                                        label="HAS EXPIRED"
+                                        size="small"
+                                        color="error"
+                                        variant="outlined"
+                                    />
+                                )}
                             </Box>
                         </CardContent>
                     </Card>
@@ -306,8 +322,10 @@ const StockCard = () => {
                 <Grid size={{ xs: 12, lg: 4 }}>
                     <Card>
                         <CardHeader
-                            title="Active Lots"
-                            subheader={`${lots.length} lot${lots.length !== 1 ? 's' : ''} in stock`}
+                            title="Lots on Hand"
+                            subheader={`${lots.length} lot${lots.length !== 1 ? 's' : ''} in stock${
+                                expired_base > 0 ? ', expired included' : ''
+                            }`}
                         />
                         <CardContent sx={{ p: 0, overflowX: 'auto' }}>
                             <Table size="small">
@@ -331,7 +349,9 @@ const StockCard = () => {
                                             : null;
                                         const isExpiring =
                                             daysLeft !== null && daysLeft <= 30 && daysLeft > 0;
-                                        const isExpired = daysLeft !== null && daysLeft <= 0;
+                                        const isExpired =
+                                            lot.status === 'EXPIRED' ||
+                                            (daysLeft !== null && daysLeft <= 0);
                                         return (
                                             <TableRow
                                                 key={lot.id}
@@ -445,7 +465,7 @@ const StockCard = () => {
                                         <TableRow>
                                             <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
                                                 <Typography color="text.secondary">
-                                                    No active lots.
+                                                    No lots on hand.
                                                 </Typography>
                                             </TableCell>
                                         </TableRow>

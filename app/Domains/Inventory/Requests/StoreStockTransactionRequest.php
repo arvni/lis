@@ -29,6 +29,7 @@ class StoreStockTransactionRequest extends FormRequest
             'lines.*.cat_no'             => 'nullable|string',
             'lines.*.barcode'            => 'nullable|string',
             'lines.*.expiry_date'        => 'nullable|date',
+            'lines.*.is_expired'         => 'nullable|boolean',
             'lines.*.unit_price'         => 'nullable|numeric|min:0',
             'lines.*.store_location_id'  => 'nullable|exists:store_locations,id',
             'lines.*.notes'              => 'nullable|string',

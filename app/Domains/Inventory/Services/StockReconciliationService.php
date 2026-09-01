@@ -41,7 +41,12 @@ readonly class StockReconciliationService
     public function recalculate(Item $item, int $userId, ?int $storeId = null): array
     {
         $expected = $this->replay->expectedByStore($item->id);
-        $actual = $this->lots->activeTotalsByStore($item->id);
+
+        // The ledger does not know about expiry — it only knows stock came in
+        // and has not gone out again — so the figure it is compared against has
+        // to count expired lots as still on hand. Otherwise every expired lot
+        // would read as a shortfall and be silently replaced.
+        $actual = $this->lots->onHandTotalsByStore($item->id);
 
         $storeIds = array_unique(array_merge(array_keys($expected), array_keys($actual)));
         sort($storeIds);
@@ -93,13 +98,14 @@ readonly class StockReconciliationService
 
     /**
      * Surplus on the shelves that the ledger does not account for: take it off
-     * the oldest lots first, mirroring how an export would have consumed it.
+     * the expired lots first and then the oldest usable ones, mirroring how an
+     * export would have consumed it.
      */
     private function drawDown(Item $item, int $storeId, float $quantity): void
     {
         $remaining = $quantity;
 
-        foreach ($this->lots->activeFifoLots($item->id, $storeId) as $lot) {
+        foreach ($this->lots->activeFifoLots($item->id, $storeId, includeExpired: true) as $lot) {
             if ($remaining <= 0) {
                 break;
             }

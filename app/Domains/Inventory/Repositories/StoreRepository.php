@@ -2,6 +2,7 @@
 
 namespace App\Domains\Inventory\Repositories;
 
+use App\Domains\Inventory\Models\StockLot;
 use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\StoreLocation;
 use App\Domains\Shared\Traits\LogsUserActivity;
@@ -36,9 +37,11 @@ class StoreRepository
             $isOutbound = in_array($type, ['EXPORT', 'RETURN', 'EXPIRED_REMOVAL', 'TRANSFER']);
 
             if ($isOutbound) {
+                // Expired lots count as stock held here — they still have to be
+                // exported or written off from wherever they are sitting.
                 $query->whereHas('lots', fn (Builder $q) => $q
                     ->where('item_id', $itemId)
-                    ->where('status', 'ACTIVE')
+                    ->whereIn('status', StockLot::onHandStatuses())
                     ->where('quantity_base_units', '>', 0)
                 );
             }

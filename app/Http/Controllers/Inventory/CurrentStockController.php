@@ -17,7 +17,7 @@ class CurrentStockController extends Controller
     public function __invoke(Request $request): Response
     {
         $storeId = $request->integer('store_id') ?: null;
-        $filters = $request->only(['search', 'department', 'material_type', 'low_stock_only', 'location_id']);
+        $filters = $request->only(['search', 'department', 'material_type', 'low_stock_only', 'expired_only', 'location_id']);
         $stock = $this->stockCardService->getCurrentStock($storeId, $filters);
         $stores = Store::active()->get(['id', 'name']);
 

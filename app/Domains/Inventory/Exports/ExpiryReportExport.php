@@ -16,8 +16,10 @@ class ExpiryReportExport implements FromCollection, WithHeadings, WithMapping, W
 
     public function collection(): Collection
     {
+        // Lots the nightly sweep has already flagged EXPIRED belong in this
+        // report too — the "EXPIRED" row status below is written for them.
         return StockLot::with(['item', 'store', 'location'])
-            ->where('status', 'ACTIVE')
+            ->onHand()
             ->where('quantity_base_units', '>', 0)
             ->whereNotNull('expiry_date')
             ->when($this->storeId, fn($q) => $q->where('store_id', $this->storeId))

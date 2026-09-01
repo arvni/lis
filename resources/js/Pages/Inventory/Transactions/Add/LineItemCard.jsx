@@ -3,12 +3,15 @@ import {
     Button,
     Card,
     CardContent,
+    Checkbox,
     Chip,
     Divider,
+    FormControlLabel,
     Grid,
     IconButton,
     Stack,
     TextField,
+    Tooltip,
     Typography,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -40,197 +43,238 @@ const LineItemCard = ({
     onSetLocation,
     onBarcodeFound,
     onBarcodeNotFound,
-}) => (
-    <Card
-        variant="outlined"
-        sx={{ bgcolor: line._barcode_locked ? 'action.hover' : 'background.paper' }}
-    >
-        <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                px: 2,
-                py: 1,
-                bgcolor: 'action.selected',
-            }}
+}) => {
+    // Removing expired stock is by definition expired, so the flag is set and
+    // locked there; everywhere else it is the operator's explicit decision.
+    const forcedExpired = transactionType === 'EXPIRED_REMOVAL';
+    const isExpiredLine = forcedExpired || !!line.is_expired;
+    const showExpiredToggle = usesExistingLots;
+
+    return (
+        <Card
+            variant="outlined"
+            sx={{ bgcolor: line._barcode_locked ? 'action.hover' : 'background.paper' }}
         >
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                <Typography variant="subtitle2">Line {idx + 1}</Typography>
-                {line._barcode_locked && (
-                    <Chip
-                        size="small"
-                        color="warning"
-                        variant="outlined"
-                        icon={<LockOpenIcon fontSize="small" />}
-                        label="Auto-filled — click Unlock to edit"
-                    />
-                )}
-            </Stack>
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                {line._barcode_locked && (
-                    <Button
-                        size="small"
-                        color="warning"
-                        startIcon={<LockOpenIcon fontSize="small" />}
-                        onClick={onUnlock}
-                    >
-                        Unlock
-                    </Button>
-                )}
-                <IconButton
-                    size="small"
-                    color="error"
-                    title="Remove line"
-                    onClick={onRemove}
-                >
-                    <DeleteIcon fontSize="small" />
-                </IconButton>
-            </Stack>
-        </Stack>
-        <Divider />
-        <CardContent>
-            <Grid container spacing={2}>
-                <Grid size={{ xs: 12, md: 4 }}>
-                    <BarcodeInput
-                        size="small"
-                        value={line.barcode}
-                        onChange={(val) => onUpdate('barcode', val)}
-                        onFound={onBarcodeFound}
-                        onNotFound={onBarcodeNotFound}
-                    />
-                </Grid>
-                <Grid size={{ xs: 12, md: 5 }}>
-                    <ItemSelect
-                        size="small"
-                        value={line._item}
-                        onChange={onSetItem}
-                        required
-                        disabled={line._barcode_locked}
-                        error={!!errors[`lines.${idx}.item_id`]}
-                    />
-                </Grid>
-                <Grid size={{ xs: 6, md: 3 }}>
-                    <UnitSelect
-                        size="small"
-                        itemId={line._item?.id}
-                        allUnits={[]}
-                        value={line._unit}
-                        onChange={onSetUnit}
-                        required
-                        disabled={line._barcode_locked}
-                        error={!!errors[`lines.${idx}.unit_id`]}
-                    />
-                </Grid>
-                <Grid size={{ xs: 6, md: 2 }}>
-                    <TextField
-                        size="small"
-                        type="number"
-                        fullWidth
-                        required
-                        label="Quantity"
-                        value={line.quantity}
-                        onChange={(e) => onUpdate('quantity', e.target.value)}
-                        slotProps={{ htmlInput: { min: 0, step: 'any' } }}
-                        error={!!errors[`lines.${idx}.quantity`]}
-                        autoFocus={line._barcode_locked}
-                    />
-                </Grid>
-                <Grid size={{ xs: 12, md: 5 }}>
-                    <LocationSelect
-                        size="small"
-                        storeId={storeId}
-                        itemId={line._item?.id}
-                        transactionType={transactionType}
-                        value={line._location}
-                        onChange={onSetLocation}
-                        label="Location"
-                    />
-                </Grid>
-                <Grid size={{ xs: 12, md: 5 }}>
-                    {usesExistingLots ? (
-                        <LotSelect
+            <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    px: 2,
+                    py: 1,
+                    bgcolor: 'action.selected',
+                }}
+            >
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                    <Typography variant="subtitle2">Line {idx + 1}</Typography>
+                    {isExpiredLine && (
+                        <Chip size="small" color="error" variant="outlined" label="Expired stock" />
+                    )}
+                    {line._barcode_locked && (
+                        <Chip
                             size="small"
-                            itemId={line._item?.id}
-                            storeId={storeId}
-                            value={line._lot}
-                            onChange={onSetLot}
-                            disabled={line._barcode_locked}
-                        />
-                    ) : (
-                        // Entry: lot number is always free-text, never locked
-                        <TextField
-                            size="small"
-                            fullWidth
-                            label="Lot #"
-                            value={line.lot_number}
-                            onChange={(e) => onUpdate('lot_number', e.target.value)}
+                            color="warning"
+                            variant="outlined"
+                            icon={<LockOpenIcon fontSize="small" />}
+                            label="Auto-filled — click Unlock to edit"
                         />
                     )}
-                </Grid>
-                {isEntry && (
+                </Stack>
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                    {line._barcode_locked && (
+                        <Button
+                            size="small"
+                            color="warning"
+                            startIcon={<LockOpenIcon fontSize="small" />}
+                            onClick={onUnlock}
+                        >
+                            Unlock
+                        </Button>
+                    )}
+                    <IconButton size="small" color="error" title="Remove line" onClick={onRemove}>
+                        <DeleteIcon fontSize="small" />
+                    </IconButton>
+                </Stack>
+            </Stack>
+            <Divider />
+            <CardContent>
+                <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, md: 4 }}>
+                        <BarcodeInput
+                            size="small"
+                            value={line.barcode}
+                            onChange={(val) => onUpdate('barcode', val)}
+                            onFound={onBarcodeFound}
+                            onNotFound={onBarcodeNotFound}
+                        />
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 5 }}>
+                        <ItemSelect
+                            size="small"
+                            value={line._item}
+                            onChange={onSetItem}
+                            required
+                            disabled={line._barcode_locked}
+                            error={!!errors[`lines.${idx}.item_id`]}
+                        />
+                    </Grid>
+                    <Grid size={{ xs: 6, md: 3 }}>
+                        <UnitSelect
+                            size="small"
+                            itemId={line._item?.id}
+                            allUnits={[]}
+                            value={line._unit}
+                            onChange={onSetUnit}
+                            required
+                            disabled={line._barcode_locked}
+                            error={!!errors[`lines.${idx}.unit_id`]}
+                        />
+                    </Grid>
                     <Grid size={{ xs: 6, md: 2 }}>
                         <TextField
                             size="small"
                             type="number"
                             fullWidth
-                            label="Unit Price"
-                            value={line.unit_price}
-                            onChange={(e) => onUpdate('unit_price', e.target.value)}
+                            required
+                            label="Quantity"
+                            value={line.quantity}
+                            onChange={(e) => onUpdate('quantity', e.target.value)}
                             slotProps={{ htmlInput: { min: 0, step: 'any' } }}
+                            error={!!errors[`lines.${idx}.quantity`]}
+                            autoFocus={line._barcode_locked}
                         />
                     </Grid>
-                )}
-                {showExpiry && (
-                    <>
-                        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                            <BrandInput
+                    <Grid size={{ xs: 12, md: 5 }}>
+                        <LocationSelect
+                            size="small"
+                            storeId={storeId}
+                            itemId={line._item?.id}
+                            transactionType={transactionType}
+                            value={line._location}
+                            onChange={onSetLocation}
+                            label="Location"
+                        />
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 5 }}>
+                        {usesExistingLots ? (
+                            <LotSelect
                                 size="small"
-                                value={line.brand}
                                 itemId={line._item?.id}
-                                onChange={(v) => onUpdate('brand', v)}
+                                storeId={storeId}
+                                value={line._lot}
+                                onChange={onSetLot}
+                                includeExpired={isExpiredLine}
+                                disabled={line._barcode_locked}
                             />
-                        </Grid>
-                        <Grid size={{ xs: 6, sm: 3, md: 4 }}>
+                        ) : (
+                            // Entry: lot number is always free-text, never locked
                             <TextField
                                 size="small"
                                 fullWidth
-                                label="Catalog No"
-                                value={line.cat_no}
-                                onChange={(e) => onUpdate('cat_no', e.target.value)}
+                                label="Lot #"
+                                value={line.lot_number}
+                                onChange={(e) => onUpdate('lot_number', e.target.value)}
                             />
+                        )}
+                    </Grid>
+                    {showExpiredToggle && (
+                        <Grid size={{ xs: 12, md: 5 }}>
+                            <Tooltip
+                                title={
+                                    forcedExpired
+                                        ? 'Expired removal always works on expired stock.'
+                                        : isEntry
+                                          ? 'The goods coming back are past their expiry date — they are booked in as expired and stay unusable.'
+                                          : 'Offers expired lots for this line and draws them down before any usable stock.'
+                                }
+                            >
+                                <FormControlLabel
+                                    sx={{ mt: 0.5 }}
+                                    control={
+                                        <Checkbox
+                                            size="small"
+                                            color="error"
+                                            checked={isExpiredLine}
+                                            disabled={forcedExpired}
+                                            onChange={(e) =>
+                                                onUpdate('is_expired', e.target.checked)
+                                            }
+                                        />
+                                    }
+                                    label={
+                                        <Typography variant="body2">
+                                            This item is expired
+                                        </Typography>
+                                    }
+                                />
+                            </Tooltip>
                         </Grid>
-                        <Grid size={{ xs: 6, sm: 3, md: 4 }}>
+                    )}
+                    {isEntry && (
+                        <Grid size={{ xs: 6, md: 2 }}>
                             <TextField
                                 size="small"
-                                type="date"
+                                type="number"
                                 fullWidth
-                                label="Expiry Date"
-                                value={line.expiry_date}
-                                onChange={(e) => onUpdate('expiry_date', e.target.value)}
-                                slotProps={{ inputLabel: { shrink: true } }}
+                                label="Unit Price"
+                                value={line.unit_price}
+                                onChange={(e) => onUpdate('unit_price', e.target.value)}
+                                slotProps={{ htmlInput: { min: 0, step: 'any' } }}
                             />
                         </Grid>
-                    </>
+                    )}
+                    {showExpiry && (
+                        <>
+                            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                <BrandInput
+                                    size="small"
+                                    value={line.brand}
+                                    itemId={line._item?.id}
+                                    onChange={(v) => onUpdate('brand', v)}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 6, sm: 3, md: 4 }}>
+                                <TextField
+                                    size="small"
+                                    fullWidth
+                                    label="Catalog No"
+                                    value={line.cat_no}
+                                    onChange={(e) => onUpdate('cat_no', e.target.value)}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 6, sm: 3, md: 4 }}>
+                                <TextField
+                                    size="small"
+                                    type="date"
+                                    fullWidth
+                                    label="Expiry Date"
+                                    value={line.expiry_date}
+                                    onChange={(e) => onUpdate('expiry_date', e.target.value)}
+                                    slotProps={{ inputLabel: { shrink: true } }}
+                                />
+                            </Grid>
+                        </>
+                    )}
+                </Grid>
+                {showFifo && line._item && line.quantity && (
+                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px dashed', borderColor: 'divider' }}>
+                        <FifoPreview
+                            itemId={line._item?.id}
+                            storeId={storeId}
+                            includeExpired={isExpiredLine}
+                            quantityBaseUnits={
+                                line._unit?.conversion_to_base
+                                    ? parseFloat(line.quantity) *
+                                      parseFloat(line._unit.conversion_to_base)
+                                    : null
+                            }
+                        />
+                    </Box>
                 )}
-            </Grid>
-            {showFifo && line._item && line.quantity && (
-                <Box sx={{ mt: 2, pt: 2, borderTop: '1px dashed', borderColor: 'divider' }}>
-                    <FifoPreview
-                        itemId={line._item?.id}
-                        storeId={storeId}
-                        quantityBaseUnits={
-                            line._unit?.conversion_to_base
-                                ? parseFloat(line.quantity) *
-                                  parseFloat(line._unit.conversion_to_base)
-                                : null
-                        }
-                    />
-                </Box>
-            )}
-        </CardContent>
-    </Card>
-);
+            </CardContent>
+        </Card>
+    );
+};
 
 export default LineItemCard;

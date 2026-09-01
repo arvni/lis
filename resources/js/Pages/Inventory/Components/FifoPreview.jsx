@@ -16,10 +16,11 @@ import {
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 /**
- * Shows FIFO lot breakdown for an outbound line.
- * Props: itemId, storeId, quantityBaseUnits
+ * Shows FIFO lot breakdown for an outbound line. When the line is flagged as
+ * expired stock, expired lots join the pool and are drawn down first.
+ * Props: itemId, storeId, quantityBaseUnits, includeExpired
  */
-const FifoPreview = ({ itemId, storeId, quantityBaseUnits }) => {
+const FifoPreview = ({ itemId, storeId, quantityBaseUnits, includeExpired = false }) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -35,12 +36,13 @@ const FifoPreview = ({ itemId, storeId, quantityBaseUnits }) => {
                     item_id: itemId,
                     store_id: storeId,
                     quantity_base_units: quantityBaseUnits,
+                    include_expired: includeExpired ? 1 : 0,
                 },
             })
             .then((r) => setData(r.data))
             .catch(() => setData(null))
             .finally(() => setLoading(false));
-    }, [itemId, storeId, quantityBaseUnits]);
+    }, [itemId, storeId, quantityBaseUnits, includeExpired]);
 
     if (!itemId || !storeId || !quantityBaseUnits) return null;
 
@@ -59,7 +61,7 @@ const FifoPreview = ({ itemId, storeId, quantityBaseUnits }) => {
                 icon={<WarningAmberIcon fontSize="small" />}
                 sx={{ py: 0.5, mt: 0.5, fontSize: '0.75rem' }}
             >
-                No stock available for this item/store.
+                No {includeExpired ? '' : 'usable '}stock available for this item/store.
             </Alert>
         );
 
@@ -121,7 +123,8 @@ const FifoPreview = ({ itemId, storeId, quantityBaseUnits }) => {
                                                 }}
                                             >
                                                 <span>{expiry}</span>
-                                                {daysLeft !== null && daysLeft < 0 && (
+                                                {(lot.is_expired ||
+                                                    (daysLeft !== null && daysLeft < 0)) && (
                                                     <Chip
                                                         label="EXP"
                                                         size="small"
