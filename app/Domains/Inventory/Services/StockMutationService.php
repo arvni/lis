@@ -39,7 +39,9 @@ class StockMutationService
 
         foreach ($tx->lines as $line) {
             $needed    = (float) $line->quantity_base_units;
-            $available = (float) $this->lotRepository->getTotalStockInStore($line->item_id, $tx->store_id);
+            $available = (float) $this->lotRepository->getTotalStockInStore(
+                $line->item_id, $tx->store_id, $this->drawsExpiredStock($tx, $line)
+            );
 
             if ($available < $needed) {
                 $itemName  = $line->item->name ?? "Item #{$line->item_id}";
@@ -74,6 +76,16 @@ class StockMutationService
         return "{$itemCode}-{$suffix}";
     }
 
+    /**
+     * Whether a line may draw on expired stock: either the operator ticked the
+     * expired box, or the whole transaction exists to clear expired stock out.
+     */
+    private function drawsExpiredStock(StockTransaction $tx, StockTransactionLine $line): bool
+    {
+        return (bool) $line->is_expired
+            || $tx->transaction_type === TransactionType::EXPIRED_REMOVAL;
+    }
+
     private function applyEntry(StockTransaction $tx): void
     {
         $totalValue = 0;
@@ -96,7 +108,11 @@ class StockMutationService
                 'unit_price_base'     => $unitPriceBase,
                 'store_id'            => $tx->store_id,
                 'store_location_id'   => $line->store_location_id,
-                'status'              => LotStatus::ACTIVE->value,
+                // Stock booked in as expired — a return of goods that are past
+                // their date — lands on the shelf without becoming usable.
+                'status'              => $line->is_expired
+                    ? LotStatus::EXPIRED->value
+                    : LotStatus::ACTIVE->value,
             ]);
 
             $totalValue += (float) ($line->total_price ?? 0);
@@ -111,7 +127,7 @@ class StockMutationService
 
         foreach ($tx->lines as $line) {
             $needed = (float) $line->quantity_base_units;
-            $lots   = $this->lotRepository->activeFifoLots($line->item_id, $tx->store_id);
+            $lots   = $this->lotRepository->activeFifoLots($line->item_id, $tx->store_id, $this->drawsExpiredStock($tx, $line));
             $available = $lots->sum('quantity_base_units');
 
             if ($available < $needed)
@@ -160,7 +176,7 @@ class StockMutationService
     {
         foreach ($tx->lines as $line) {
             $needed = (float) $line->quantity_base_units;
-            $lots   = $this->lotRepository->activeFifoLots($line->item_id, $tx->store_id);
+            $lots   = $this->lotRepository->activeFifoLots($line->item_id, $tx->store_id, $this->drawsExpiredStock($tx, $line));
             $available = $lots->sum('quantity_base_units');
 
             if ($available < $needed)
@@ -198,9 +214,11 @@ class StockMutationService
     private function applyExpiredRemoval(StockTransaction $tx): void
     {
         foreach ($tx->lines as $line) {
+            // Everything past its date goes, whatever the line quantity says —
+            // including lots the nightly sweep has not flagged EXPIRED yet.
             StockLot::where('item_id', $line->item_id)
                 ->where('store_id', $tx->store_id)
-                ->where('status', LotStatus::EXPIRED->value)
+                ->expired()
                 ->update(['quantity_base_units' => 0, 'status' => LotStatus::CONSUMED->value]);
         }
     }

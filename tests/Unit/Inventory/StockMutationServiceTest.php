@@ -114,7 +114,7 @@ class StockMutationServiceTest extends TestCase
     public function test_validate_stock_reports_shortage_for_export(): void
     {
         $this->lotRepository->shouldReceive('getTotalStockInStore')
-            ->with(1, 9)->andReturn('30');
+            ->with(1, 9, false)->andReturn('30');
 
         $tx = $this->transaction(TransactionType::EXPORT, [
             $this->line(['item_id' => 1, 'quantity_base_units' => 100], new Item(['name' => 'Reagent A'])),
@@ -131,7 +131,7 @@ class StockMutationServiceTest extends TestCase
     public function test_validate_stock_is_empty_when_supply_meets_demand(): void
     {
         $this->lotRepository->shouldReceive('getTotalStockInStore')
-            ->with(1, 9)->andReturn('100');
+            ->with(1, 9, false)->andReturn('100');
 
         $tx = $this->transaction(TransactionType::TRANSFER, [
             $this->line(['item_id' => 1, 'quantity_base_units' => 100], new Item(['name' => 'Reagent A'])),
@@ -143,7 +143,7 @@ class StockMutationServiceTest extends TestCase
     public function test_validate_stock_labels_shortage_by_item_id_without_item_name(): void
     {
         $this->lotRepository->shouldReceive('getTotalStockInStore')
-            ->with(7, 9)->andReturn('0');
+            ->with(7, 9, true)->andReturn('0');
 
         $tx = $this->transaction(TransactionType::EXPIRED_REMOVAL, [
             $this->line(['item_id' => 7, 'quantity_base_units' => 5], new Item),

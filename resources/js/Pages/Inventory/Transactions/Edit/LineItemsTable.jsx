@@ -1,6 +1,7 @@
 import {
     Alert,
     Box,
+    Checkbox,
     IconButton,
     Table,
     TableBody,
@@ -8,6 +9,7 @@ import {
     TableHead,
     TableRow,
     TextField,
+    Tooltip,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
@@ -55,6 +57,7 @@ const LineItemsTable = ({
                         <TableCell sx={{ width: 85 }}>Qty</TableCell>
                         <TableCell sx={{ minWidth: 160 }}>Location</TableCell>
                         <TableCell sx={{ width: 110 }}>Lot #</TableCell>
+                        {usesExistingLots && <TableCell sx={{ width: 70 }}>Expired</TableCell>}
                         {showExpiry && <TableCell sx={{ width: 120 }}>Brand</TableCell>}
                         {showExpiry && <TableCell sx={{ width: 100 }}>Cat No</TableCell>}
                         {showExpiry && <TableCell sx={{ width: 130 }}>Expiry</TableCell>}
@@ -140,6 +143,9 @@ const LineItemsTable = ({
                                         storeId={storeId}
                                         value={line._lot}
                                         onChange={(lot) => onSetLot(idx, lot)}
+                                        includeExpired={
+                                            txType === 'EXPIRED_REMOVAL' || !!line.is_expired
+                                        }
                                         disabled={line._barcode_locked}
                                     />
                                 ) : (
@@ -155,6 +161,23 @@ const LineItemsTable = ({
                                     />
                                 )}
                             </TableCell>
+                            {usesExistingLots && (
+                                <TableCell>
+                                    <Tooltip title="This item is expired — the line may draw on expired stock.">
+                                        <Checkbox
+                                            size="small"
+                                            color="error"
+                                            checked={
+                                                txType === 'EXPIRED_REMOVAL' || !!line.is_expired
+                                            }
+                                            disabled={txType === 'EXPIRED_REMOVAL'}
+                                            onChange={(e) =>
+                                                onUpdate(idx, 'is_expired', e.target.checked)
+                                            }
+                                        />
+                                    </Tooltip>
+                                </TableCell>
+                            )}
                             {showExpiry && (
                                 <TableCell>
                                     <BrandInput

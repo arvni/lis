@@ -1,18 +1,27 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Autocomplete, TextField, CircularProgress, Typography, Box } from '@mui/material';
+import { Autocomplete, TextField, CircularProgress, Typography, Box, Chip } from '@mui/material';
 import axios from 'axios';
 
 /**
  * Searchable lot selector for outbound transactions.
  *
  * Props:
- *   itemId   – numeric item id (required for outbound)
- *   storeId  – numeric store id for filtering
- *   value    – selected lot object or null
- *   onChange – fn(lot | null)
- *   size     – MUI size
+ *   itemId         – numeric item id (required for outbound)
+ *   storeId        – numeric store id for filtering
+ *   value          – selected lot object or null
+ *   onChange       – fn(lot | null)
+ *   includeExpired – also offer lots that are past their expiry date
+ *   size           – MUI size
  */
-const LotSelect = ({ itemId, storeId, value, onChange, size = 'medium', disabled = false }) => {
+const LotSelect = ({
+    itemId,
+    storeId,
+    value,
+    onChange,
+    includeExpired = false,
+    size = 'medium',
+    disabled = false,
+}) => {
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [inputValue, setInputValue] = useState('');
@@ -35,6 +44,7 @@ const LotSelect = ({ itemId, storeId, value, onChange, size = 'medium', disabled
                 setLoading(true);
                 const params = { search };
                 if (storeId) params.store_id = storeId;
+                if (includeExpired) params.include_expired = 1;
                 axios
                     .get(route('api.inventory.items.lots', itemId), { params })
                     .then(({ data }) => {
@@ -48,7 +58,7 @@ const LotSelect = ({ itemId, storeId, value, onChange, size = 'medium', disabled
                     });
             }, 250);
         },
-        [itemId, storeId],
+        [itemId, storeId, includeExpired],
     );
 
     // Reload when item or store changes
@@ -60,6 +70,22 @@ const LotSelect = ({ itemId, storeId, value, onChange, size = 'medium', disabled
         // is not a re-run trigger (depending on it would clear the lot on every re-render).
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemId, storeId]);
+
+    // Unticking the expired box has to drop an expired lot that is already
+    // selected, otherwise the line would keep drawing stock it no longer allows.
+    const skipFirstExpiredRun = useRef(true);
+    useEffect(() => {
+        if (skipFirstExpiredRun.current) {
+            skipFirstExpiredRun.current = false;
+            return;
+        }
+        fetchLots(inputValue);
+        if (!includeExpired && value?.is_expired) {
+            onChange(null);
+            setInputValue('');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [includeExpired]);
 
     const getLabel = (opt) => {
         if (!opt) return '';
@@ -92,6 +118,14 @@ const LotSelect = ({ itemId, storeId, value, onChange, size = 'medium', disabled
                     <Box>
                         <Typography variant="body2">
                             {opt.lot_number}
+                            {opt.is_expired && (
+                                <Chip
+                                    label="EXPIRED"
+                                    size="small"
+                                    color="error"
+                                    sx={{ ml: 1, height: 16, fontSize: '0.6rem' }}
+                                />
+                            )}
                             {opt.brand && (
                                 <Typography
                                     component="span"

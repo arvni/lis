@@ -27,7 +27,9 @@ class BarcodeScanController extends Controller
 
         if ($itemBarcode) {
             $item = $itemBarcode->item;
-            $lots = $this->stockLots->activeLotsForItem($item->id)
+            // Expired lots are offered too: the operator may well be holding an
+            // expired container, and the line records that when they pick it.
+            $lots = $this->stockLots->activeLotsForItem($item->id, includeExpired: true)
                 ->map(fn (StockLot $l) => $this->lotShape($l))
                 ->values();
 
@@ -82,6 +84,7 @@ class BarcodeScanController extends Controller
             'brand'               => $lot->brand,
             'expiry_date'         => $lot->expiry_date?->format('Y-m-d'),
             'quantity_base_units' => $lot->quantity_base_units,
+            'is_expired'          => $lot->isExpired(),
         ];
     }
 }

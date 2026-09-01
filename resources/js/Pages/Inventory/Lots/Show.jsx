@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
     Box,
@@ -15,10 +16,12 @@ import {
     Typography,
 } from '@mui/material';
 import PrintIcon from '@mui/icons-material/Print';
+import MoveDownIcon from '@mui/icons-material/MoveDown';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
+import RelocateDialog from './RelocateDialog';
 
 const STATUS_COLORS = {
     ACTIVE: 'success',
@@ -28,8 +31,12 @@ const STATUS_COLORS = {
 };
 
 const LotShow = () => {
-    const { lot, lines } = usePage().props;
+    const { lot, lines, relocations = [], stores = [], canRelocate = false } = usePage().props;
     const item = lot.item;
+
+    const [relocateOpen, setRelocateOpen] = useState(false);
+    const canMoveStock =
+        canRelocate && lot.status === 'ACTIVE' && Number(lot.quantity_base_units) > 0;
 
     const totalIn = lines.filter((l) => l.direction === 'IN').reduce((s, l) => s + l.base_units, 0);
     const totalOut = lines
@@ -46,14 +53,26 @@ const LotShow = () => {
             <PageHeader
                 title={`Lot: ${lot.lot_number}`}
                 actions={
-                    <Button
-                        startIcon={<PrintIcon />}
-                        variant="outlined"
-                        size="small"
-                        onClick={() => router.visit(route('inventory.lots.label', lot.id))}
-                    >
-                        Print Label
-                    </Button>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                        {canMoveStock && (
+                            <Button
+                                startIcon={<MoveDownIcon />}
+                                variant="contained"
+                                size="small"
+                                onClick={() => setRelocateOpen(true)}
+                            >
+                                Move Stock
+                            </Button>
+                        )}
+                        <Button
+                            startIcon={<PrintIcon />}
+                            variant="outlined"
+                            size="small"
+                            onClick={() => router.visit(route('inventory.lots.label', lot.id))}
+                        >
+                            Print Label
+                        </Button>
+                    </Box>
                 }
             />
 
@@ -82,6 +101,10 @@ const LotShow = () => {
                                 ],
                                 ['Store', lot.store?.name],
                                 ['Location', lot.location?.label],
+                                [
+                                    'On Hand',
+                                    `${Number(lot.quantity_base_units)} ${item?.default_unit?.name ?? ''}`.trim(),
+                                ],
                                 ['Status', lot.status],
                             ].map(([label, value]) =>
                                 value ? (
@@ -252,6 +275,59 @@ const LotShow = () => {
                     </Table>
                 </CardContent>
             </Card>
+
+            <Card sx={{ mt: 3 }}>
+                <CardHeader
+                    title="Relocation History"
+                    subheader="Moves of this lot between stores and locations — quantity unchanged"
+                />
+                <CardContent sx={{ p: 0, overflowX: 'auto' }}>
+                    <Table size="small" sx={{ minWidth: 650 }}>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Date</TableCell>
+                                <TableCell>From</TableCell>
+                                <TableCell>To</TableCell>
+                                <TableCell align="right">Base Units</TableCell>
+                                <TableCell>Moved By</TableCell>
+                                <TableCell>Notes</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {relocations.map((move) => (
+                                <TableRow key={move.id} hover>
+                                    <TableCell>{move.date}</TableCell>
+                                    <TableCell>{move.from || '\u2014'}</TableCell>
+                                    <TableCell>{move.to || '\u2014'}</TableCell>
+                                    <TableCell align="right" sx={{ fontWeight: 600 }}>
+                                        {move.quantity}
+                                    </TableCell>
+                                    <TableCell>{move.moved_by || '\u2014'}</TableCell>
+                                    <TableCell>{move.notes || '\u2014'}</TableCell>
+                                </TableRow>
+                            ))}
+                            {relocations.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                                        <Typography color="text.secondary">
+                                            This lot has not been moved.
+                                        </Typography>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+
+            {canMoveStock && (
+                <RelocateDialog
+                    open={relocateOpen}
+                    onClose={() => setRelocateOpen(false)}
+                    lot={lot}
+                    stores={stores}
+                />
+            )}
         </>
     );
 };
@@ -260,7 +336,7 @@ const breadcrumbs = (lot) => [
     { title: 'Inventory', link: null },
     { title: 'Stock', link: route('inventory.stock.index') },
     {
-        title: lot?.item?.item_code ? route('inventory.stock.card', lot?.item_id) : null,
+        title: lot?.item?.item_code ?? null,
         link: lot?.item_id ? route('inventory.stock.card', lot?.item_id) : null,
     },
     { title: `Lot: ${lot?.lot_number}`, link: null },

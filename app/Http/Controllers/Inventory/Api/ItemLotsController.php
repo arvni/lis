@@ -18,6 +18,7 @@ class ItemLotsController extends Controller
             $item->id,
             $request->integer('store_id') ?: null,
             $request->filled('search') ? $request->input('search') : null,
+            $request->boolean('include_expired'),
         )->map(fn($lot) => [
             'id'                  => $lot->id,
             'lot_number'          => $lot->lot_number,
@@ -27,6 +28,7 @@ class ItemLotsController extends Controller
             'quantity_base_units' => $lot->quantity_base_units,
             'store_id'            => $lot->store_id,
             'store_location_id'   => $lot->store_location_id,
+            'is_expired'          => $lot->isExpired(),
         ]);
 
         return response()->json($lots);

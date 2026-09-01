@@ -73,6 +73,8 @@ const TransactionEdit = () => {
                           _lot: lot,
                           lot_number: lot?.lot_number ?? '',
                           brand: lot?.brand ?? '',
+                          expiry_date: lot?.expiry_date ?? l.expiry_date,
+                          is_expired: lot ? !!lot.is_expired : l.is_expired,
                       }
                     : l,
             ),
@@ -138,6 +140,7 @@ const TransactionEdit = () => {
                               lot_number: lot.lot_number ?? '',
                               brand: lot.brand ?? '',
                               expiry_date: lot.expiry_date ?? '',
+                              is_expired: !!lot.is_expired,
                               barcode: scanData.barcode ?? l.barcode,
                           }
                         : l,
@@ -212,6 +215,7 @@ const TransactionEdit = () => {
                           lot_number: lot.lot_number ?? '',
                           brand: lot.brand ?? '',
                           expiry_date: lot.expiry_date ?? '',
+                          is_expired: !!lot.is_expired,
                       }
                     : l,
             ),

@@ -71,6 +71,8 @@ const TransactionAdd = () => {
         );
     };
 
+    // Picking an expired lot flags the line, and carries the lot's expiry across
+    // so a return books the goods back in still expired rather than as good stock.
     const setLineLot = (idx, lot) => {
         syncLines(
             lineItems.map((l, i) =>
@@ -80,6 +82,8 @@ const TransactionAdd = () => {
                           _lot: lot,
                           lot_number: lot?.lot_number ?? '',
                           brand: lot?.brand ?? '',
+                          expiry_date: lot?.expiry_date ?? l.expiry_date,
+                          is_expired: lot ? !!lot.is_expired : l.is_expired,
                       }
                     : l,
             ),
@@ -148,6 +152,7 @@ const TransactionAdd = () => {
                               lot_number: lot.lot_number ?? '',
                               brand: lot.brand ?? '',
                               expiry_date: lot.expiry_date ?? '',
+                              is_expired: !!lot.is_expired,
                               barcode: scanData.barcode ?? l.barcode,
                           }
                         : l,
@@ -224,6 +229,7 @@ const TransactionAdd = () => {
                           lot_number: lot.lot_number ?? '',
                           brand: lot.brand ?? '',
                           expiry_date: lot.expiry_date ?? '',
+                          is_expired: !!lot.is_expired,
                       }
                     : l,
             ),

@@ -16,12 +16,13 @@ class FifoPreviewController extends Controller
         $itemId  = $request->integer('item_id');
         $storeId = $request->integer('store_id');
         $needed  = (float) $request->input('quantity_base_units', 0);
+        $includeExpired = $request->boolean('include_expired');
 
         if (!$itemId || !$storeId || $needed <= 0) {
             return response()->json(['lots' => [], 'available' => 0, 'shortfall' => 0]);
         }
 
-        $lots      = $this->lotRepository->activeFifoLots($itemId, $storeId);
+        $lots      = $this->lotRepository->activeFifoLots($itemId, $storeId, $includeExpired);
         $available = (float) $lots->sum('quantity_base_units');
         $remaining = $needed;
         $breakdown = [];
@@ -34,6 +35,7 @@ class FifoPreviewController extends Controller
                 'brand'               => $lot->brand,
                 'expiry_date'         => $lot->expiry_date?->format('Y-m-d'),
                 'quantity_base_units' => (float) $lot->quantity_base_units,
+                'is_expired'          => $lot->isExpired(),
                 'take'                => $take,
                 'remaining_after'     => round((float) $lot->quantity_base_units - $take, 6),
             ];

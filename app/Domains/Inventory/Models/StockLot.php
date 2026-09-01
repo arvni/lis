@@ -81,6 +81,68 @@ class StockLot extends Model
     }
 
     /**
+     * Statuses that mean the stock is physically sitting on the shelf: usable
+     * lots plus expired ones, which are still on hand until they are removed
+     * or returned.
+     *
+     * @return array<int, string>
+     */
+    public static function onHandStatuses(): array
+    {
+        return [LotStatus::ACTIVE->value, LotStatus::EXPIRED->value];
+    }
+
+    /**
+     * @param  Builder<StockLot>  $query
+     * @return Builder<StockLot>
+     */
+    public function scopeOnHand(Builder $query): Builder
+    {
+        return $query->whereIn('status', self::onHandStatuses());
+    }
+
+    /**
+     * Lots that are no longer usable — flagged EXPIRED by the nightly sweep, or
+     * still ACTIVE but already past their date because the sweep has not run.
+     *
+     * @param  Builder<StockLot>  $query
+     * @return Builder<StockLot>
+     */
+    public function scopeExpired(Builder $query): Builder
+    {
+        return $query->where(fn (Builder $q) => $q
+            ->where('status', LotStatus::EXPIRED->value)
+            ->orWhere(fn (Builder $q2) => $q2
+                ->where('status', LotStatus::ACTIVE->value)
+                ->whereNotNull('expiry_date')
+                ->whereDate('expiry_date', '<', now())
+            )
+        );
+    }
+
+    /**
+     * Usable stock: active lots that have not passed their expiry date.
+     *
+     * @param  Builder<StockLot>  $query
+     * @return Builder<StockLot>
+     */
+    public function scopeUsable(Builder $query): Builder
+    {
+        return $query->where('status', LotStatus::ACTIVE->value)
+            ->where(fn (Builder $q) => $q
+                ->whereNull('expiry_date')
+                ->orWhereDate('expiry_date', '>=', now())
+            );
+    }
+
+    /** Past its expiry date, or already flagged as expired. */
+    public function isExpired(): bool
+    {
+        return $this->status === LotStatus::EXPIRED
+            || ($this->expiry_date !== null && $this->expiry_date->isBefore(now()->startOfDay()));
+    }
+
+    /**
      * @param  Builder<StockLot>  $query
      * @return Builder<StockLot>
      */

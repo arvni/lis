@@ -2,6 +2,7 @@
 
 namespace App\Domains\Inventory\Repositories;
 
+use App\Domains\Inventory\Models\StockLot;
 use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\StoreLocation;
 use App\Domains\Shared\Traits\LogsUserActivity;
@@ -36,9 +37,11 @@ class StoreRepository
             $isOutbound = in_array($type, ['EXPORT', 'RETURN', 'EXPIRED_REMOVAL', 'TRANSFER']);
 
             if ($isOutbound) {
+                // Expired lots count as stock held here — they still have to be
+                // exported or written off from wherever they are sitting.
                 $query->whereHas('lots', fn (Builder $q) => $q
                     ->where('item_id', $itemId)
-                    ->where('status', 'ACTIVE')
+                    ->whereIn('status', StockLot::onHandStatuses())
                     ->where('quantity_base_units', '>', 0)
                 );
             }
@@ -89,6 +92,22 @@ class StoreRepository
     {
         $store->delete();
         $this->logDeleted($store);
+    }
+
+    public function findActiveStore(int $storeId): ?Store
+    {
+        return Store::active()->find($storeId);
+    }
+
+    /**
+     * An active location, but only if it really sits in the given store —
+     * locations are store-scoped and must never be borrowed across stores.
+     */
+    public function findActiveLocationInStore(int $storeId, int $locationId): ?StoreLocation
+    {
+        return StoreLocation::active()
+            ->where('store_id', $storeId)
+            ->find($locationId);
     }
 
     public function createLocation(Store $store, array $data): StoreLocation

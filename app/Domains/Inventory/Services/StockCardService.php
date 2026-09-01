@@ -55,18 +55,29 @@ readonly class StockCardService
             ];
         }
 
-        $activeLots = StockLot::where('item_id', $itemId)
+        // Expired lots are still on the shelf, so they belong on the card — but
+        // they are totalled separately from the stock that can actually be used.
+        $lots = StockLot::where('item_id', $itemId)
             ->when($storeId, fn ($q) => $q->where('store_id', $storeId))
-            ->where('status', 'ACTIVE')
+            ->onHand()
             ->with('store', 'location')
             ->get();
+
+        [$expiredLots, $usableLots] = $lots->partition(fn (StockLot $lot) => $lot->isExpired());
+
+        $usableBase = (float) $usableLots->sum('quantity_base_units');
+        $expiredBase = (float) $expiredLots->sum('quantity_base_units');
 
         return [
             'item' => $item,
             'entries' => $entries,
-            'lots' => $activeLots,
-            'total_base' => $activeLots->sum('quantity_base_units'),
-            'total_fmt' => $this->conversionService->formatStock($itemId, (float) $activeLots->sum('quantity_base_units')),
+            'lots' => $lots,
+            'total_base' => $usableBase,
+            'total_fmt' => $this->conversionService->formatStock($itemId, $usableBase),
+            'expired_base' => $expiredBase,
+            'expired_fmt' => $expiredBase > 0
+                ? $this->conversionService->formatStock($itemId, $expiredBase)
+                : null,
         ];
     }
 
@@ -74,16 +85,25 @@ readonly class StockCardService
     {
         $locationId = ! empty($filters['location_id']) ? (int) $filters['location_id'] : null;
 
-        $lotFilter = fn ($q) => $q->where('status', 'ACTIVE')
+        // Stock on the shelf, split into what can be used and what has expired.
+        // Expired lots stay visible here — they still occupy space and can be
+        // exported or written off — but they never count towards the usable
+        // total, so a low-stock alert is not silenced by dead stock.
+        $scoped = fn ($q) => $q
             ->when($storeId, fn ($q2) => $q2->where('store_id', $storeId))
             ->when($locationId, fn ($q2) => $q2->where('store_location_id', $locationId));
 
+        $lotFilter = fn ($q) => $scoped($q)->usable();
+        $expiredFilter = fn ($q) => $scoped($q)->expired();
+        $onHandFilter = fn ($q) => $scoped($q)->onHand();
+
         $query = Item::with(['defaultUnit', 'unitConversions'])
             ->active()
-            ->withSum(['lots' => $lotFilter], 'quantity_base_units');
+            ->withSum(['lots as usable_base_units' => $lotFilter], 'quantity_base_units')
+            ->withSum(['lots as expired_base_units' => $expiredFilter], 'quantity_base_units');
 
         if ($locationId) {
-            $query->whereHas('lots', $lotFilter);
+            $query->whereHas('lots', $onHandFilter);
         }
 
         if (! empty($filters['search'])) {
@@ -94,10 +114,10 @@ readonly class StockCardService
             // which is recorded both when the item is ordered and when it is
             // booked in. Lot matches respect the store/location scope so a lot
             // held elsewhere does not surface here.
-            $query->where(function ($q) use ($term, $lotFilter) {
+            $query->where(function ($q) use ($term, $onHandFilter) {
                 $q->where('name', 'like', $term)
                     ->orWhere('item_code', 'like', $term)
-                    ->orWhereHas('lots', fn ($q2) => $lotFilter($q2)->where('lot_number', 'like', $term))
+                    ->orWhereHas('lots', fn ($q2) => $onHandFilter($q2)->where('lot_number', 'like', $term))
                     ->orWhereHas('transactionLines', fn ($q2) => $q2->where('cat_no', 'like', $term))
                     ->orWhereHas('purchaseRequestLines', fn ($q2) => $q2->where('cat_no', 'like', $term));
             });
@@ -110,13 +130,18 @@ readonly class StockCardService
         }
 
         return $query->get()->map(function (Item $item) {
-            $total = (float) ($item->lots_sum_quantity_base_units ?? 0);
+            $total = (float) ($item->usable_base_units ?? 0);
+            $expired = (float) ($item->expired_base_units ?? 0);
 
             return [
                 'item' => $item,
                 'total_base' => $total,
+                'expired_base' => $expired,
+                'has_expired' => $expired > 0,
                 'is_low_stock' => $item->minimum_stock_level > 0 && $total < (float) $item->minimum_stock_level,
             ];
-        })->when(! empty($filters['low_stock_only']), fn ($c) => $c->filter(fn ($r) => $r['is_low_stock'])->values());
+        })
+            ->when(! empty($filters['low_stock_only']), fn ($c) => $c->filter(fn ($r) => $r['is_low_stock'])->values())
+            ->when(! empty($filters['expired_only']), fn ($c) => $c->filter(fn ($r) => $r['has_expired'])->values());
     }
 }

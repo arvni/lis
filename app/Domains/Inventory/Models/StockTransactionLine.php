@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $brand
  * @property string|null $barcode
  * @property \Illuminate\Support\Carbon|null $expiry_date
+ * @property bool $is_expired
  * @property int|null $store_location_id
  * @property numeric|null $unit_price
  * @property numeric|null $total_price
@@ -28,7 +29,7 @@ class StockTransactionLine extends Model
 {
     protected $fillable = [
         'transaction_id', 'item_id', 'unit_id', 'quantity', 'quantity_base_units',
-        'lot_number', 'brand', 'cat_no', 'barcode', 'expiry_date', 'store_location_id',
+        'lot_number', 'brand', 'cat_no', 'barcode', 'expiry_date', 'is_expired', 'store_location_id',
         'unit_price', 'total_price', 'notes',
     ];
 
@@ -38,6 +39,7 @@ class StockTransactionLine extends Model
         'unit_price'          => 'decimal:4',
         'total_price'         => 'decimal:4',
         'expiry_date'         => 'date:Y-m-d',
+        'is_expired'          => 'boolean',
     ];
 
     /** @return BelongsTo<StockTransaction, $this> */
