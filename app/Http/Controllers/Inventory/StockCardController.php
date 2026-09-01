@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Domains\Inventory\Models\Item;
+use App\Domains\Inventory\Models\StockTransaction;
 use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Services\StockCardService;
 use App\Http\Controllers\Controller;
@@ -20,6 +21,8 @@ class StockCardController extends Controller
         $stockCard = $this->stockCardService->getStockCard($item->id, $storeId);
         $stores    = Store::active()->get(['id', 'name']);
 
-        return Inertia::render('Inventory/Stock/Card', compact('stockCard', 'stores', 'storeId'));
+        $canRelocate = $request->user()?->can('approve', StockTransaction::class) ?? false;
+
+        return Inertia::render('Inventory/Stock/Card', compact('stockCard', 'stores', 'storeId', 'canRelocate'));
     }
 }

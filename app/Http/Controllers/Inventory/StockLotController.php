@@ -3,18 +3,26 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Domains\Inventory\Models\StockLot;
+use App\Domains\Inventory\Models\StockLotRelocation;
 use App\Domains\Inventory\Models\StockTransaction;
 use App\Domains\Inventory\Models\StockTransactionLine;
 use App\Domains\Inventory\Repositories\StockTransactionRepository;
+use App\Domains\Inventory\Repositories\StoreRepository;
+use App\Domains\Inventory\Services\StockRelocationService;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class StockLotController extends Controller
 {
-    public function __construct(private StockTransactionRepository $stockTransactions) {}
+    public function __construct(
+        private StockTransactionRepository $stockTransactions,
+        private StockRelocationService $relocationService,
+        private StoreRepository $stores,
+    ) {}
 
-    public function show(StockLot $lot): Response
+    public function show(Request $request, StockLot $lot): Response
     {
         $this->authorize('viewAny', StockTransaction::class);
 
@@ -40,9 +48,28 @@ class StockLotController extends Controller
                 ];
             });
 
+        $relocations = $this->relocationService->historyForLot($lot)
+            ->map(fn (StockLotRelocation $move) => [
+                'id'         => $move->id,
+                'date'       => $move->created_at?->format('Y-m-d H:i'),
+                'quantity'   => (float) $move->quantity_base_units,
+                'from'       => $this->placeLabel($move->fromStore?->name, $move->fromLocation?->label),
+                'to'         => $this->placeLabel($move->toStore?->name, $move->toLocation?->label),
+                'moved_by'   => $move->user?->name,
+                'notes'      => $move->notes,
+            ]);
+
         return Inertia::render('Inventory/Lots/Show', [
-            'lot'   => $lot,
-            'lines' => $lines,
+            'lot'         => $lot,
+            'lines'       => $lines,
+            'relocations' => $relocations,
+            'stores'      => $this->stores->activeForSelect(),
+            'canRelocate' => $request->user()?->can('approve', StockTransaction::class) ?? false,
         ]);
+    }
+
+    private function placeLabel(?string $store, ?string $location): string
+    {
+        return collect([$store, $location])->filter()->implode(' · ');
     }
 }

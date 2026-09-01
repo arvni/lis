@@ -65,6 +65,22 @@ class StockLotRepository
             ->sum('quantity_base_units');
     }
 
+    /**
+     * Active base units an item holds, grouped by store.
+     *
+     * @return array<int, float> store id => quantity
+     */
+    public function activeTotalsByStore(int $itemId): array
+    {
+        return StockLot::where('item_id', $itemId)
+            ->where('status', LotStatus::ACTIVE->value)
+            ->groupBy('store_id')
+            ->selectRaw('store_id, SUM(quantity_base_units) AS total')
+            ->pluck('total', 'store_id')
+            ->map(fn ($total) => (float) $total)
+            ->all();
+    }
+
     public function getLotsExpiringSoon(int $days = 30): Collection
     {
         return StockLot::with(['item', 'store'])

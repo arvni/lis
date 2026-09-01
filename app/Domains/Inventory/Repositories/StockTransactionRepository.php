@@ -16,6 +16,25 @@ class StockTransactionRepository
     use LogsUserActivity;
 
     /**
+     * Every approved line for an item in ledger order — the sequence stock was
+     * actually applied in, which a replay has to follow exactly.
+     *
+     * @return EloquentCollection<int, StockTransactionLine>
+     */
+    public function approvedLinesForItem(int $itemId): EloquentCollection
+    {
+        return StockTransactionLine::with('transaction')
+            ->where('item_id', $itemId)
+            ->whereHas('transaction', fn (Builder $q) => $q->where('status', 'APPROVED'))
+            ->join('stock_transactions', 'stock_transactions.id', '=', 'stock_transaction_lines.transaction_id')
+            ->orderBy('stock_transactions.transaction_date')
+            ->orderBy('stock_transactions.id')
+            ->orderBy('stock_transaction_lines.id')
+            ->select('stock_transaction_lines.*')
+            ->get();
+    }
+
+    /**
      * Approved transaction lines that reference a lot (by item + lot number),
      * oldest first, with transaction/store/unit/location eager-loaded.
      *

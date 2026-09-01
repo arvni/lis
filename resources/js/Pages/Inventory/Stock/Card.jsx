@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
 import {
     Box,
+    Button,
     Card,
     CardContent,
     CardHeader,
@@ -18,20 +20,56 @@ import {
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import PrintIcon from '@mui/icons-material/Print';
+import MoveDownIcon from '@mui/icons-material/MoveDown';
+import CalculateIcon from '@mui/icons-material/Calculate';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
 import { StockBadge } from '../Components/StockBadge';
+import RelocateDialog from '../Lots/RelocateDialog';
 
 const StockCard = () => {
-    const { stockCard, stores, storeId } = usePage().props;
+    const { stockCard, stores, storeId, canRelocate = false } = usePage().props;
     const { item, entries, lots, total_base, total_fmt } = stockCard;
+
+    // The lot whose stock is being moved — null when the dialog is closed.
+    const [lotToMove, setLotToMove] = useState(null);
+    const [recalculating, setRecalculating] = useState(false);
+
+    // Re-derives this item's stock from its approved transactions and writes the
+    // lots back into agreement. Scoped to the chosen store when one is filtered.
+    const recalculate = () => {
+        setRecalculating(true);
+        router.post(
+            route('inventory.stock.recalculate', item.id),
+            { store_id: storeId || undefined },
+            {
+                preserveScroll: true,
+                onFinish: () => setRecalculating(false),
+            },
+        );
+    };
 
     const isLowStock = item.minimum_stock_level > 0 && total_base < item.minimum_stock_level;
 
     return (
         <>
             <Head title={`Stock Card — ${item.item_code}`} />
-            <PageHeader title={`${item.item_code} — ${item.name}`} />
+            <PageHeader
+                title={`${item.item_code} — ${item.name}`}
+                actions={
+                    canRelocate && (
+                        <Button
+                            startIcon={<CalculateIcon />}
+                            variant="outlined"
+                            size="small"
+                            onClick={recalculate}
+                            disabled={recalculating}
+                        >
+                            {recalculating ? 'Recalculating…' : 'Recalculate Stock'}
+                        </Button>
+                    )
+                }
+            />
 
             <Grid container spacing={3} sx={{ mb: 3 }}>
                 <Grid size={{ xs: 12, md: 4 }}>
@@ -271,7 +309,7 @@ const StockCard = () => {
                             title="Active Lots"
                             subheader={`${lots.length} lot${lots.length !== 1 ? 's' : ''} in stock`}
                         />
-                        <CardContent sx={{ p: 0 }}>
+                        <CardContent sx={{ p: 0, overflowX: 'auto' }}>
                             <Table size="small">
                                 <TableHead>
                                     <TableRow>
@@ -389,6 +427,15 @@ const StockCard = () => {
                                                                 )
                                                             }
                                                         />
+                                                        {canRelocate && (
+                                                            <MoveDownIcon
+                                                                fontSize="small"
+                                                                color="action"
+                                                                titleAccess="Move stock"
+                                                                sx={{ cursor: 'pointer' }}
+                                                                onClick={() => setLotToMove(lot)}
+                                                            />
+                                                        )}
                                                     </Box>
                                                 </TableCell>
                                             </TableRow>
@@ -409,6 +456,15 @@ const StockCard = () => {
                     </Card>
                 </Grid>
             </Grid>
+
+            {lotToMove && (
+                <RelocateDialog
+                    open
+                    onClose={() => setLotToMove(null)}
+                    lot={{ ...lotToMove, item }}
+                    stores={stores}
+                />
+            )}
         </>
     );
 };

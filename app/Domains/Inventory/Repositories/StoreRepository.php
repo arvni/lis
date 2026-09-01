@@ -91,6 +91,22 @@ class StoreRepository
         $this->logDeleted($store);
     }
 
+    public function findActiveStore(int $storeId): ?Store
+    {
+        return Store::active()->find($storeId);
+    }
+
+    /**
+     * An active location, but only if it really sits in the given store —
+     * locations are store-scoped and must never be borrowed across stores.
+     */
+    public function findActiveLocationInStore(int $storeId, int $locationId): ?StoreLocation
+    {
+        return StoreLocation::active()
+            ->where('store_id', $storeId)
+            ->find($locationId);
+    }
+
     public function createLocation(Store $store, array $data): StoreLocation
     {
         $data['label'] = StoreLocation::generateLabel(
