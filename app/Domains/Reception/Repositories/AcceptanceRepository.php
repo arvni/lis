@@ -12,6 +12,7 @@ use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\AcceptanceItemState;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Traits\ExtractsTagFilterIds;
+use App\Domains\Shared\Helpers\MoneySql;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -60,12 +61,11 @@ class AcceptanceRepository
 
     /**
      * Get the raw SQL expression for calculating payable amount.
-     * Uses COALESCE to handle cases where there are no items or discounts.
+     * Uses COALESCE to handle cases where the acceptance has no items.
      */
     private function getPayableAmountSql(): string
     {
-        return 'COALESCE((SELECT SUM(acceptance_items.price) FROM acceptance_items WHERE acceptances.id = acceptance_items.acceptance_id AND acceptance_items.deleted_at IS NULL), 0) -
-                COALESCE((SELECT SUM(acceptance_items.discount) FROM acceptance_items WHERE acceptances.id = acceptance_items.acceptance_id AND acceptance_items.deleted_at IS NULL), 0)';
+        return 'COALESCE((SELECT SUM('.MoneySql::net('acceptance_items').') FROM acceptance_items WHERE acceptances.id = acceptance_items.acceptance_id AND acceptance_items.deleted_at IS NULL), 0)';
     }
 
     public function listAcceptances(array $queryData): LengthAwarePaginator
@@ -670,7 +670,7 @@ class AcceptanceRepository
                     ->leftJoin("invoices", "payments.invoice_id", "=", "invoices.id")
                     ->whereColumn('invoices.id', 'acceptances.invoice_id')
                     ->havingRaw('COALESCE(SUM(payments.price), 0) >= (
-                    SELECT COALESCE(SUM(ai.price - ai.discount), 0)
+                    SELECT COALESCE(SUM('.MoneySql::net('ai').'), 0)
                     FROM acceptance_items ai
                     WHERE ai.acceptance_id = acceptances.id
                     AND ai.deleted_at IS NULL

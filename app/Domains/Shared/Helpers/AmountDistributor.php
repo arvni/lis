@@ -55,4 +55,79 @@ final class AmountDistributor
 
         return $shares;
     }
+
+    /**
+     * Split $total into shares that sum back to $total exactly, where no share
+     * may exceed its matching cap.
+     *
+     * This is how a panel discount is spread over the panel's items: prices are
+     * stored in whole units while discounts keep thousandths, so splitting the
+     * two independently can hand an item a 3.334 discount on a 3 price. That row
+     * then makes MySQL abort any `price - discount` aggregate with
+     * "1690 DECIMAL UNSIGNED value is out of range", because both columns are
+     * unsigned. Capping each share at its own price keeps the two splits
+     * consistent with each other.
+     *
+     * A total larger than the caps allow is truncated to their sum, and a
+     * negative total yields zeros — a discount can zero an item out but never
+     * take it negative.
+     *
+     * @param  list<float>  $caps  the ceiling for each share, in the same order
+     * @return list<float>
+     */
+    public static function distributeCapped(float $total, array $caps, int $decimals = self::DISCOUNT_DECIMALS): array
+    {
+        $parts = count($caps);
+
+        if ($parts < 1) {
+            return [];
+        }
+
+        $factor = 10 ** $decimals;
+        $capUnits = array_map(
+            static fn ($cap): int => max(0, (int) round((float) $cap * $factor)),
+            array_values($caps)
+        );
+        $remaining = min(max(0, (int) round($total * $factor)), array_sum($capUnits));
+
+        $shares = array_fill(0, $parts, 0);
+
+        // Fill evenly, round after round, skipping whatever has hit its cap. The
+        // leftover units that no longer divide go one apiece to the earliest
+        // shares with room, the same largest-remainder bias distribute() uses.
+        while ($remaining > 0) {
+            $open = [];
+            for ($index = 0; $index < $parts; $index++) {
+                if ($shares[$index] < $capUnits[$index]) {
+                    $open[] = $index;
+                }
+            }
+
+            if ($open === []) {
+                break;
+            }
+
+            $each = intdiv($remaining, count($open));
+
+            if ($each === 0) {
+                foreach ($open as $index) {
+                    if ($remaining === 0) {
+                        break;
+                    }
+                    $shares[$index]++;
+                    $remaining--;
+                }
+
+                break;
+            }
+
+            foreach ($open as $index) {
+                $give = min($each, $capUnits[$index] - $shares[$index]);
+                $shares[$index] += $give;
+                $remaining -= $give;
+            }
+        }
+
+        return array_map(static fn (int $units): float => $units / $factor, $shares);
+    }
 }

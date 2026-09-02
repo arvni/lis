@@ -260,6 +260,33 @@ class UpdateAcceptanceItemPricesControllerTest extends TestCase
         $this->assertSame(10.0, round((float) $discounts->sum(), 3));
     }
 
+    public function test_a_fully_discounted_panel_never_discounts_an_item_past_its_own_price(): void
+    {
+        $acceptance = $this->createAcceptance();
+        $panelItems = $this->createPanelItems($acceptance, count: 3, price: 300, discount: 30);
+        $panelId = $panelItems[0]->panel_id;
+
+        // 10 over 3 prices the items 4/3/3, because prices are stored in whole
+        // units — while the discount splits in thousandths. Split apart, the 3.334
+        // share lands on an item priced 3, and both columns are unsigned, so every
+        // `price - discount` aggregate that touches the row aborts the query.
+        $this->put(route('acceptances.updateItemPrices', $acceptance->id), [
+            'items' => [
+                ['panel_id' => $panelId, 'price' => 10, 'discount' => 10],
+            ],
+        ])->assertRedirect();
+
+        $items = AcceptanceItem::where('panel_id', $panelId)->get();
+
+        // The panel still gives away exactly what it was told to.
+        $this->assertSame(10.0, (float) $items->sum('price'));
+        $this->assertSame(10.0, round((float) $items->sum('discount'), 3));
+
+        foreach ($items as $item) {
+            $this->assertLessThanOrEqual((float) $item->price, (float) $item->discount);
+        }
+    }
+
     public function test_records_the_panel_total_on_each_item_timeline(): void
     {
         $acceptance = $this->createAcceptance();

@@ -114,9 +114,9 @@ class AcceptanceItemService
                 $itemCount,
                 AmountDistributor::PRICE_DECIMALS
             );
-            $panelDiscounts = AmountDistributor::distribute(
+            $panelDiscounts = AmountDistributor::distributeCapped(
                 (float) ($panelData['discount'] ?? 0),
-                $itemCount,
+                $panelPrices,
                 AmountDistributor::DISCOUNT_DECIMALS
             );
 
@@ -205,9 +205,9 @@ class AcceptanceItemService
                 $itemCount,
                 AmountDistributor::PRICE_DECIMALS
             );
-            $panelDiscounts = AmountDistributor::distribute(
+            $panelDiscounts = AmountDistributor::distributeCapped(
                 (float) ($panelData['discount'] ?? 0),
-                $itemCount,
+                $panelPrices,
                 AmountDistributor::DISCOUNT_DECIMALS
             );
 
@@ -455,7 +455,7 @@ class AcceptanceItemService
 
         $count = $panelItems->count();
         $prices = AmountDistributor::distribute($price, $count, AmountDistributor::PRICE_DECIMALS);
-        $discounts = AmountDistributor::distribute($discount, $count, AmountDistributor::DISCOUNT_DECIMALS);
+        $discounts = AmountDistributor::distributeCapped($discount, $prices, AmountDistributor::DISCOUNT_DECIMALS);
         $note = " (share of panel price $price and discount $discount over $count items)";
 
         foreach ($panelItems->values() as $index => $panelItem) {
