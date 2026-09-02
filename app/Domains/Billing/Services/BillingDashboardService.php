@@ -3,6 +3,7 @@
 namespace App\Domains\Billing\Services;
 
 use App\Domains\Billing\Enums\InvoiceStatus;
+use App\Domains\Shared\Helpers\MoneySql;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -188,7 +189,7 @@ class BillingDashboardService
         $nonInvoicedRevenue = 0.0;
         if ($hasInvoice !== '1') {
             $nonInvoicedRevenue = (float) $this->nonInvoicedItemsQuery($filters, $from, $to)
-                ->sum(DB::raw('acceptance_items.price - acceptance_items.discount'));
+                ->sum(DB::raw(MoneySql::net('acceptance_items')));
         }
 
         $totalRevenue = $invoicedRevenue + $nonInvoicedRevenue;
@@ -239,7 +240,7 @@ class BillingDashboardService
         // ② Non-invoiced — grouped by acceptance_item creation month
         $nonInvoicedMap = $this->nonInvoicedItemsQuery($trendFilters, $from, $to)
             ->selectRaw("DATE_FORMAT(acceptance_items.created_at, '%Y-%m') AS period,
-                          ROUND(SUM(acceptance_items.price - acceptance_items.discount),3) AS income")
+                          ROUND(SUM(".MoneySql::net('acceptance_items')."),3) AS income")
             ->groupBy('period')
             ->get()
             ->keyBy('period');
@@ -376,25 +377,25 @@ class BillingDashboardService
     {
         $panelTotals = (clone $this->nonInvoicedItemsQuery($filters, $from, $to))
             ->whereNotNull('acceptance_items.panel_id')
-            ->selectRaw('
+            ->selectRaw("
                 acceptance_items.panel_id AS panel_id,
                 COUNT(DISTINCT acceptance_items.method_test_id) AS distinct_tests,
-                SUM(acceptance_items.price - acceptance_items.discount) AS panel_total
-            ')
+                SUM(".MoneySql::net('acceptance_items').") AS panel_total
+            ")
             ->groupBy('acceptance_items.panel_id');
 
         return $this->nonInvoicedItemsQuery($filters, $from, $to)
             ->join('method_tests', 'method_tests.id', '=', 'acceptance_items.method_test_id')
             ->join('tests',        'tests.id',        '=', 'method_tests.test_id')
             ->leftJoinSub($panelTotals, 'pt', 'pt.panel_id', '=', 'acceptance_items.panel_id')
-            ->selectRaw('
+            ->selectRaw("
                 tests.id   AS test_id,
                 tests.name AS test_name,
                 COUNT(*)   AS count,
                 ROUND(SUM(CASE WHEN acceptance_items.panel_id IS NULL
-                               THEN acceptance_items.price - acceptance_items.discount
+                               THEN ".MoneySql::net('acceptance_items')."
                                ELSE pt.panel_total / pt.distinct_tests END), 3) AS income
-            ')
+            ")
             ->groupBy('tests.id', 'tests.name')
             ->get();
     }
@@ -425,7 +426,7 @@ class BillingDashboardService
                 COALESCE(acceptances.referrer_id, 0)                                          AS referrer_id,
                 COALESCE(referrers.fullName, 'Direct')                                        AS referrer_name,
                 COUNT(DISTINCT acceptances.id)                                                AS acceptance_count,
-                ROUND(SUM(acceptance_items.price - acceptance_items.discount), 3)             AS income
+                ROUND(SUM(".MoneySql::net('acceptance_items')."), 3)                          AS income
             ")
             ->groupBy('acceptances.referrer_id', 'referrers.fullName')
             ->get();

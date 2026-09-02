@@ -177,6 +177,39 @@ class BillingDashboardServiceTest extends TestCase
         $this->assertSame(0, $summary['acceptance_count']);
     }
 
+    // ── Items discounted past their own price ────────────────────────────────────
+
+    public function test_an_item_discounted_past_its_price_does_not_break_the_dashboard(): void
+    {
+        // Legacy rows, from before the panel split capped each share at its own
+        // price. Both money columns are unsigned, so a plain `price - discount`
+        // does not go negative here — MySQL aborts the whole statement with
+        // "1690 DECIMAL UNSIGNED value is out of range" and the page 500s.
+        $this->makeNonInvoicedItem(price: 3, discount: 3.334);
+
+        $summary = $this->service->getSummary([]);
+
+        // The row is worth nothing, not minus a third of a rial.
+        $this->assertEqualsWithDelta(0.0, $summary['revenue'], 0.001);
+        $this->assertSame(1, $summary['acceptance_count']);
+
+        $this->assertNotEmpty($this->service->getByTest([]));
+        $this->assertNotEmpty($this->service->getByReferrer([]));
+        $this->assertEqualsWithDelta(
+            0.0,
+            collect($this->service->getByMonth([]))->sum('non_invoiced_income'),
+            0.001
+        );
+    }
+
+    public function test_an_over_discounted_item_does_not_drag_down_the_rest(): void
+    {
+        $this->makeNonInvoicedItem(price: 100, discount: 10);
+        $this->makeNonInvoicedItem(price: 3, discount: 3.334);
+
+        $this->assertEqualsWithDelta(90.0, $this->service->getSummary([])['revenue'], 0.001);
+    }
+
     /**
      * An acceptance whose items are invoiced, with an optional payment against
      * the invoice. Returns the invoice.

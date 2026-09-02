@@ -57,4 +57,53 @@ class AmountDistributorTest extends TestCase
         $this->assertSame([1.0, 1.0, 0.0, 0.0, 0.0], $shares);
         $this->assertSame(2.0, array_sum($shares));
     }
+
+    public function test_capped_shares_never_pass_their_price(): void
+    {
+        // The reported case: a 10 panel over 3 items prices them 4/3/3, so an
+        // uncapped 100% discount handed the 3 items 3.334 and blew up every
+        // `price - discount` aggregate that touched them.
+        $prices = AmountDistributor::distribute(10, 3);
+        $shares = AmountDistributor::distributeCapped(10, $prices);
+
+        $this->assertSame([4.0, 3.0, 3.0], $shares);
+        $this->assertSame(10.0, array_sum($shares));
+
+        foreach ($shares as $index => $share) {
+            $this->assertLessThanOrEqual($prices[$index], $share);
+        }
+    }
+
+    public function test_capped_split_keeps_its_total_when_nothing_hits_a_cap(): void
+    {
+        $shares = AmountDistributor::distributeCapped(10, [100.0, 100.0, 100.0]);
+
+        $this->assertSame([3.334, 3.333, 3.333], $shares);
+        $this->assertSame(10.0, round(array_sum($shares), AmountDistributor::DISCOUNT_DECIMALS));
+    }
+
+    public function test_capped_split_pushes_the_excess_onto_the_parts_with_room(): void
+    {
+        $shares = AmountDistributor::distributeCapped(30, [2.0, 50.0, 50.0]);
+
+        $this->assertSame([2.0, 14.0, 14.0], $shares);
+        $this->assertSame(30.0, array_sum($shares));
+    }
+
+    public function test_capped_split_cannot_exceed_the_sum_of_the_caps(): void
+    {
+        $shares = AmountDistributor::distributeCapped(100, [3.0, 4.0]);
+
+        $this->assertSame([3.0, 4.0], $shares);
+    }
+
+    public function test_capped_split_treats_a_negative_total_as_nothing(): void
+    {
+        $this->assertSame([0.0, 0.0], AmountDistributor::distributeCapped(-5, [3.0, 4.0]));
+    }
+
+    public function test_capped_split_without_caps_produces_nothing(): void
+    {
+        $this->assertSame([], AmountDistributor::distributeCapped(140, []));
+    }
 }

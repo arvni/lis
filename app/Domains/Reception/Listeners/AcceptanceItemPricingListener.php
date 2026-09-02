@@ -63,9 +63,9 @@ class AcceptanceItemPricingListener
                 count($acceptanceItems),
                 AmountDistributor::PRICE_DECIMALS
             );
-            $discounts = AmountDistributor::distribute(
+            $discounts = AmountDistributor::distributeCapped(
                 (float) $acceptanceItemData['discount'],
-                count($acceptanceItems),
+                $prices,
                 AmountDistributor::DISCOUNT_DECIMALS
             );
 

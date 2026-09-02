@@ -743,9 +743,9 @@ class AcceptanceService
                         $panelItemCount,
                         AmountDistributor::PRICE_DECIMALS
                     );
-                    $panelDiscounts = AmountDistributor::distribute(
+                    $panelDiscounts = AmountDistributor::distributeCapped(
                         (float)$panelData['discount'],
-                        $panelItemCount,
+                        $panelPrices,
                         AmountDistributor::DISCOUNT_DECIMALS
                     );
                     foreach (array_values($panelData["acceptanceItems"]) as $itemIndex => $item) {
