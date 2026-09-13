@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Reception;
 
+use App\Domains\Billing\Enums\InvoiceItemKind;
 use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Models\Invoice;
+use App\Domains\Billing\Models\InvoiceItem;
 use App\Domains\Billing\Models\Payment;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Laboratory\Models\Method;
@@ -53,6 +55,35 @@ class AcceptanceRepositoryTest extends TestCase
 
         $this->pay($acceptance, 0.2);
         $this->assertSame(1, $this->repository->getTotalWaitingForSampling());
+    }
+
+    // The Financial Check page decides whether an invoice is fully paid — and so
+    // whether it may be approved — from the sums loaded with it.
+    public function test_the_financial_check_list_loads_each_invoice_with_its_payment_sums(): void
+    {
+        $acceptance = $this->makeAcceptance();
+        $acceptance->update(['status' => AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL]);
+
+        InvoiceItem::create([
+            'invoice_id' => $acceptance->invoice_id,
+            'acceptance_id' => $acceptance->id,
+            'kind' => InvoiceItemKind::TEST,
+            'title' => 'Test line',
+            'unit_price' => 50,
+            'qty' => 1,
+            'price' => 50,
+            'discount' => 5,
+        ]);
+        $this->pay($acceptance, 20);
+        $this->pay($acceptance, 5);
+
+        $listed = $this->repository->listWaitingForFinancialCheck([])->items();
+
+        $this->assertCount(1, $listed);
+        $invoice = $listed[0]->invoice;
+        $this->assertEqualsWithDelta(50, (float) $invoice->invoice_items_sum_price, 0.0001);
+        $this->assertEqualsWithDelta(5, (float) $invoice->invoice_items_sum_discount, 0.0001);
+        $this->assertEqualsWithDelta(25, (float) $invoice->payments_sum_price, 0.0001);
     }
 
     private function makeAcceptance(): Acceptance

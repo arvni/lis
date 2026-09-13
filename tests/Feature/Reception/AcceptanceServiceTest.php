@@ -3,9 +3,12 @@
 namespace Tests\Feature\Reception;
 
 use App\Domains\Billing\DTOs\PaymentDTO;
+use App\Domains\Billing\Enums\InvoiceItemKind;
 use App\Domains\Billing\Enums\InvoiceStatus;
 use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Models\Invoice;
+use App\Domains\Billing\Models\InvoiceItem;
+use App\Domains\Billing\Models\Payment;
 use App\Domains\Billing\Services\PaymentService;
 use App\Domains\Referrer\Enums\ReferrerOrderStatus;
 use App\Domains\Setting\Services\SettingService;
@@ -916,6 +919,70 @@ class AcceptanceServiceTest extends TestCase
         $this->expectException(AcceptanceNotFinanciallyApprovableException::class);
 
         $service->approveFinancial($acceptance, (int) auth()->id());
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // R-07c4: an invoice with a balance still owing is refused — finance signs
+    //         off on money received — and goes through once it is paid off.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_approve_financial_rejects_an_invoice_until_it_is_fully_paid(): void
+    {
+        $this->setUpDatabase();
+
+        $invoice = Invoice::create([
+            'owner_type' => 'patient',
+            'owner_id'   => $this->patient->id,
+            'user_id'    => auth()->id(),
+            'status'     => InvoiceStatus::PARTIALLY_PAID,
+            'discount'   => 0,
+        ]);
+
+        InvoiceItem::create([
+            'invoice_id' => $invoice->id,
+            'kind'       => InvoiceItemKind::TEST,
+            'title'      => 'Test line',
+            'unit_price' => 80,
+            'qty'        => 1,
+            'price'      => 80,
+            'discount'   => 0,
+        ]);
+
+        $pay = fn (float $amount) => Payment::create([
+            'invoice_id'    => $invoice->id,
+            'price'         => $amount,
+            'paymentMethod' => PaymentMethod::CASH,
+            'cashier_id'    => auth()->id(),
+            'payer_type'    => Patient::class,
+            'payer_id'      => $this->patient->id,
+        ]);
+        $pay(30);
+
+        $acceptance = $this->createAcceptance([
+            'status'             => AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL,
+            'financial_approved' => false,
+            'invoice_id'         => $invoice->id,
+        ]);
+
+        /** @var AcceptanceService $service */
+        $service = app(AcceptanceService::class);
+
+        try {
+            $service->approveFinancial($acceptance, (int) auth()->id());
+            $this->fail('Expected a not fully paid invoice to be refused.');
+        } catch (AcceptanceNotFinanciallyApprovableException $e) {
+            $this->assertStringContainsString('needs to be fully paid', $e->getMessage());
+            $acceptance->refresh();
+            $this->assertFalse((bool) $acceptance->financial_approved);
+            $this->assertNull($acceptance->financial_approved_by);
+            $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $acceptance->status);
+        }
+
+        // The balance is settled: the same acceptance goes through.
+        $pay(50);
+        $service->approveFinancial($acceptance, (int) auth()->id());
+
+        $this->assertTrue((bool) $acceptance->refresh()->financial_approved);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

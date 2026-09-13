@@ -692,7 +692,13 @@ class AcceptanceRepository
             ->with([
                 'patient',
                 'referrer',
-                'invoice',
+                // The sums let the page show whether the invoice is fully paid,
+                // which financial approval requires.
+                'invoice' => function ($q) {
+                    $q->withSum('invoiceItems', 'price')
+                        ->withSum('invoiceItems', 'discount')
+                        ->withSum('payments', 'price');
+                },
                 'financialApprovedBy',
                 'acceptanceItems' => function ($q) {
                     $q->where('reportless', false)
