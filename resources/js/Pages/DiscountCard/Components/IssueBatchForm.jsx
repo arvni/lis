@@ -16,6 +16,21 @@ import { CardMembership, Event, Numbers, Repeat } from '@mui/icons-material';
 import SelectSearch from '@/Components/SelectSearch';
 import { FormProvider, useFormState } from '@/Components/FormTemplate.jsx';
 
+// Module-level so FormProvider gets the same object on every render: it resets the form
+// whenever its default values change, which would wipe the input after a validation error.
+const emptyBatch = {
+    partner: null,
+    discount_partner_id: '',
+    quantity: 50,
+    prefix: '',
+    number_template: 'DDDD-DDDD-DDDD-DDDD',
+    serial_from: 1,
+    expires_at: '',
+    usage_limit: '',
+    notes: '',
+    activate_immediately: false,
+};
+
 const IssueBatchForm = ({ open, onClose }) => (
     <FormProvider
         onClose={onClose}
@@ -23,18 +38,7 @@ const IssueBatchForm = ({ open, onClose }) => (
         url={route('discountCards.issue')}
         maxWidth="sm"
         generalTitle="Card Batch"
-        defaultValue={{
-            partner: null,
-            discount_partner_id: '',
-            quantity: 50,
-            prefix: '',
-            number_template: 'DDDD-DDDD-DDDD-DDDD',
-            serial_from: 1,
-            expires_at: '',
-            usage_limit: '',
-            notes: '',
-            activate_immediately: false,
-        }}
+        defaultValue={emptyBatch}
     >
         <FormContent />
     </FormProvider>

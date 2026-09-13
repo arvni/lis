@@ -7,14 +7,17 @@ namespace App\Domains\Billing\Repositories;
 use App\Domains\Billing\Enums\DiscountCardStatus;
 use App\Domains\Billing\Models\DiscountCard;
 use App\Domains\Shared\Traits\LogsUserActivity;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class DiscountCardRepository
 {
     use LogsUserActivity;
 
+    /**
+     * @return LengthAwarePaginator<int, DiscountCard>
+     */
     public function listCards(array $queryData): LengthAwarePaginator
     {
         $query = DiscountCard::query()

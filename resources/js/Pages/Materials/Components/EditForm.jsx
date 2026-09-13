@@ -2,32 +2,37 @@ import { TextField, Paper, Typography, Divider, InputAdornment } from '@mui/mate
 import Grid from '@mui/material/Grid';
 import SelectSearch from '@/Components/SelectSearch';
 import { FormProvider, useFormState } from '@/Components/FormTemplate.jsx';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Science, QrCode, CalendarToday, Numbers, Person } from '@mui/icons-material';
 
 const toDateInput = (value) => (value ? String(value).slice(0, 10) : '');
 
 const EditForm = ({ open, onClose, defaultValue }) => {
-    const defaultData = {
-        id: defaultValue?.id,
-        _method: 'put',
-        sample_type: defaultValue?.sample_type_id
-            ? { id: defaultValue.sample_type_id, name: defaultValue.sample_type_name }
-            : null,
-        packing_series: defaultValue?.packing_series ?? '',
-        tube_series: defaultValue?.tube_series ?? '',
-        barcode: defaultValue?.barcode ?? '',
-        tube_barcode: defaultValue?.tube_barcode ?? '',
-        manufactured_date: toDateInput(defaultValue?.manufactured_date),
-        expire_date: toDateInput(defaultValue?.expire_date),
-        assigned_at: toDateInput(defaultValue?.assigned_at),
-        referrer: defaultValue?.referrer
-            ? {
-                  id: defaultValue.referrer.id,
-                  name: defaultValue.referrer.name ?? defaultValue.referrer.fullName,
-              }
-            : null,
-    };
+    // FormProvider resets the form whenever this object changes. A fresh object on every
+    // render would wipe what the user typed as soon as a validation error re-renders the page.
+    const defaultData = useMemo(
+        () => ({
+            id: defaultValue?.id,
+            _method: 'put',
+            sample_type: defaultValue?.sample_type_id
+                ? { id: defaultValue.sample_type_id, name: defaultValue.sample_type_name }
+                : null,
+            packing_series: defaultValue?.packing_series ?? '',
+            tube_series: defaultValue?.tube_series ?? '',
+            barcode: defaultValue?.barcode ?? '',
+            tube_barcode: defaultValue?.tube_barcode ?? '',
+            manufactured_date: toDateInput(defaultValue?.manufactured_date),
+            expire_date: toDateInput(defaultValue?.expire_date),
+            assigned_at: toDateInput(defaultValue?.assigned_at),
+            referrer: defaultValue?.referrer
+                ? {
+                      id: defaultValue.referrer.id,
+                      name: defaultValue.referrer.name ?? defaultValue.referrer.fullName,
+                  }
+                : null,
+        }),
+        [defaultValue],
+    );
 
     return (
         <FormProvider

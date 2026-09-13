@@ -17,7 +17,7 @@ import {
 import Grid from '@mui/material/Grid';
 import SelectSearch from '@/Components/SelectSearch';
 import { FormProvider, useFormState } from '@/Components/FormTemplate.jsx';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     ReceiptLong,
     Science,
@@ -35,19 +35,24 @@ import { LocateFixedIcon } from 'lucide-react';
 const AddForm = ({ open, onClose, defaultValue }) => {
     const url = defaultValue?.id ? route('offers.update', defaultValue.id) : route('offers.store');
 
-    const defaultData = {
-        title: '',
-        description: '',
-        type: 'PERCENTAGE', // Default selection
-        amount: '',
-        tests: [],
-        referrers: [],
-        started_at: '',
-        ended_at: '',
-        active: true,
-        contract_only: false,
-        ...defaultValue,
-    };
+    // FormProvider resets the form whenever this object changes. A fresh object on every
+    // render would wipe what the user typed as soon as a validation error re-renders the page.
+    const defaultData = useMemo(
+        () => ({
+            title: '',
+            description: '',
+            type: 'PERCENTAGE', // Default selection
+            amount: '',
+            tests: [],
+            referrers: [],
+            started_at: '',
+            ended_at: '',
+            active: true,
+            contract_only: false,
+            ...defaultValue,
+        }),
+        [defaultValue],
+    );
 
     return (
         <FormProvider
@@ -55,7 +60,8 @@ const AddForm = ({ open, onClose, defaultValue }) => {
             defaultValue={defaultData}
             open={open}
             url={url}
-            generalTitle={defaultValue?.id ? 'Edit Offer' : 'Create New Offer'}
+            // FormProvider already prefixes "Add New" / "Edit".
+            generalTitle="Offer"
         >
             <FormContent />
         </FormProvider>

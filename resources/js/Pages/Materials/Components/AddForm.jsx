@@ -1,7 +1,7 @@
 import { Alert } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { FormProvider, useFormState } from '@/Components/FormTemplate.jsx';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { emptyTube } from './AddForm/constants';
 import SampleTypeSection from './AddForm/SampleTypeSection';
 import TubeDetailsSection from './AddForm/TubeDetailsSection';
@@ -11,12 +11,17 @@ const AddForm = ({ open, onClose, defaultValue }) => {
         ? route('materials.update', defaultValue.id)
         : route('materials.store');
 
-    const defaultData = {
-        sample_type: null,
-        number_of_tubes: 1,
-        tubes: [emptyTube()],
-        ...defaultValue,
-    };
+    // FormProvider resets the form whenever this object changes. A fresh object on every
+    // render would wipe what the user typed as soon as a validation error re-renders the page.
+    const defaultData = useMemo(
+        () => ({
+            sample_type: null,
+            number_of_tubes: 1,
+            tubes: [emptyTube()],
+            ...defaultValue,
+        }),
+        [defaultValue],
+    );
 
     return (
         <FormProvider
@@ -25,7 +30,8 @@ const AddForm = ({ open, onClose, defaultValue }) => {
             open={open}
             url={url}
             maxWidth="md"
-            generalTitle={defaultValue?.id ? 'Edit Material' : ' Materials'}
+            // FormProvider already prefixes "Add New" / "Edit".
+            generalTitle="Material"
         >
             <FormContent />
         </FormProvider>

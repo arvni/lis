@@ -10,7 +10,7 @@ use App\Domains\Billing\Models\DiscountCardBatch;
 use App\Domains\Billing\Repositories\DiscountCardBatchRepository;
 use App\Domains\Billing\Repositories\DiscountCardRepository;
 use DNS2D;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class DiscountCardService
@@ -26,6 +26,9 @@ class DiscountCardService
         private readonly DiscountCardBatchRepository $batchRepository,
     ) {}
 
+    /**
+     * @return LengthAwarePaginator<int, DiscountCard>
+     */
     public function listCards(array $queryData): LengthAwarePaginator
     {
         return $this->cardRepository->listCards($queryData);
