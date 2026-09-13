@@ -89,11 +89,7 @@ readonly class PaymentService
     {
         $invoice->loadMissing(['acceptanceItems', 'payments']);
 
-        $payableAmount = $invoice->acceptanceItems->sum('price') - $invoice->acceptanceItems->sum('discount');
-        $totalPaid = $invoice->payments->sum('price');
-        $minAllowablePaymentPercentage = $this->settingAdapter->getSettingByKey("Payment", "minPayment");
-
-        if ($payableAmount > 0 && ($totalPaid * $minAllowablePaymentPercentage / 100) >= $payableAmount) {
+        if ($this->payableAmount($invoice) > 0 && $this->hasReachedMinimumPayment($invoice)) {
             $invoice->acceptanceItems
                 ->groupBy('acceptance_id')
                 ->keys()
@@ -104,6 +100,31 @@ readonly class PaymentService
                 });
         }
         $this->invoiceService->updateStatus($invoice);
+    }
+
+    /**
+     * Whether the payments on an invoice have cleared the minimum-payment
+     * setting — the bar that releases its acceptances from WAITING_FOR_PAYMENT.
+     * An invoice with nothing to pay has nothing to wait for.
+     */
+    public function hasReachedMinimumPayment(Invoice $invoice): bool
+    {
+        $invoice->loadMissing(['acceptanceItems', 'payments']);
+
+        $payableAmount = $this->payableAmount($invoice);
+        if ($payableAmount <= 0) {
+            return true;
+        }
+
+        $totalPaid = $invoice->payments->sum('price');
+        $minAllowablePaymentPercentage = $this->settingAdapter->getSettingByKey("Payment", "minPayment");
+
+        return ($totalPaid * $minAllowablePaymentPercentage / 100) >= $payableAmount;
+    }
+
+    private function payableAmount(Invoice $invoice): float|int
+    {
+        return $invoice->acceptanceItems->sum('price') - $invoice->acceptanceItems->sum('discount');
     }
 
     public function updatePayments(Invoice $invoice, array $paymentsData): void

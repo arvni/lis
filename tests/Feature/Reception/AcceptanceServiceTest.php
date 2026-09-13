@@ -2,8 +2,13 @@
 
 namespace Tests\Feature\Reception;
 
+use App\Domains\Billing\DTOs\PaymentDTO;
 use App\Domains\Billing\Enums\InvoiceStatus;
+use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Models\Invoice;
+use App\Domains\Billing\Services\PaymentService;
+use App\Domains\Referrer\Enums\ReferrerOrderStatus;
+use App\Domains\Setting\Services\SettingService;
 use App\Domains\Notification\Models\WhatsappMessage;
 use App\Domains\Reception\Adapters\LaboratoryAdapter;
 use App\Domains\Laboratory\Enums\TestType;
@@ -1072,8 +1077,149 @@ class AcceptanceServiceTest extends TestCase
             'patient_id'       => $this->patient->id,
         ]);
 
-        // Nothing to sample → the acceptance goes straight to the finance gate.
-        AcceptanceItem::create([
+        // Nothing to sample or report, and the referrer is billed by the invoice
+        // → no finance gate: the acceptance is reported outright.
+        $this->createNothingToReportItem($acceptance);
+
+        $invoice = $this->createPatientInvoice();
+
+        /** @var AcceptanceService $service */
+        $service = app(AcceptanceService::class);
+        $service->updateAcceptanceInvoice($acceptance, $invoice->id);
+
+        $acceptance->refresh();
+        $this->assertSame(AcceptanceStatus::REPORTED, $acceptance->status);
+
+        $referrerOrder->refresh();
+        $this->assertEquals(ReferrerOrderStatus::REPORTED->value, $referrerOrder->status);
+
+        Event::assertDispatched(ReferrerOrderUpdated::class);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // R-07g: an acceptance with nothing to report skips finance once it is
+    //        billed — an invoice for a referred one, a paid invoice for a
+    //        walk-in. Unbilled, it still waits for finance.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function test_check_status_keeps_uninvoiced_acceptance_with_nothing_to_report_at_finance(): void
+    {
+        $acceptance = $this->createAcceptance(['status' => AcceptanceStatus::WAITING_FOR_ENTERING]);
+        $this->createNothingToReportItem($acceptance);
+
+        app(AcceptanceService::class)->checkAcceptanceStatus($acceptance);
+
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $acceptance->fresh()->status);
+    }
+
+    public function test_check_status_reports_paid_walk_in_with_nothing_to_report(): void
+    {
+        $this->useMinimumPayment(100);
+        $invoice = $this->createPatientInvoice();
+        $acceptance = $this->createAcceptance([
+            'status'     => AcceptanceStatus::WAITING_FOR_ENTERING,
+            'invoice_id' => $invoice->id,
+        ]);
+        $this->createNothingToReportItem($acceptance, ['price' => 40]);
+        $this->pay($invoice, 40);
+
+        app(AcceptanceService::class)->checkAcceptanceStatus($acceptance->fresh());
+
+        $acceptance->refresh();
+        $this->assertSame(AcceptanceStatus::REPORTED, $acceptance->status);
+        $this->assertFalse((bool) $acceptance->financial_approved);
+    }
+
+    public function test_check_status_keeps_unpaid_walk_in_waiting_for_payment(): void
+    {
+        $this->useMinimumPayment(100);
+        $invoice = $this->createPatientInvoice();
+        $acceptance = $this->createAcceptance([
+            'status'     => AcceptanceStatus::WAITING_FOR_PAYMENT,
+            'invoice_id' => $invoice->id,
+        ]);
+        $this->createNothingToReportItem($acceptance, ['price' => 40]);
+
+        app(AcceptanceService::class)->checkAcceptanceStatus($acceptance);
+
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_PAYMENT, $acceptance->fresh()->status);
+    }
+
+    public function test_payment_reports_walk_in_with_nothing_to_sample(): void
+    {
+        $this->useMinimumPayment(100);
+        $invoice = $this->createPatientInvoice();
+        $acceptance = $this->createAcceptance([
+            'status'     => AcceptanceStatus::WAITING_FOR_PAYMENT,
+            'invoice_id' => $invoice->id,
+        ]);
+        $this->createNothingToReportItem($acceptance, ['price' => 40]);
+
+        // PaymentsAddedEvent → AcceptancePaymentListener, end to end.
+        $this->pay($invoice, 40);
+
+        $this->assertSame(AcceptanceStatus::REPORTED, $acceptance->fresh()->status);
+    }
+
+    public function test_payment_moves_walk_in_with_samplable_items_to_sampling(): void
+    {
+        $this->useMinimumPayment(100);
+        $invoice = $this->createPatientInvoice();
+        $acceptance = $this->createAcceptance([
+            'status'     => AcceptanceStatus::WAITING_FOR_PAYMENT,
+            'invoice_id' => $invoice->id,
+        ]);
+        $this->createNothingToReportItem($acceptance, [
+            'price'      => 40,
+            'reportless' => false,
+            'sampleless' => false,
+        ]);
+
+        $this->pay($invoice, 40);
+
+        $this->assertSame(AcceptanceStatus::SAMPLING, $acceptance->fresh()->status);
+    }
+
+    public function test_status_check_leaves_cancelled_invoiced_acceptance_cancelled(): void
+    {
+        $acceptance = $this->createAcceptance([
+            'status'      => AcceptanceStatus::CANCELLED,
+            'referrer_id' => $this->createReferrer('90000011')->id,
+            'invoice_id'  => $this->createPatientInvoice()->id,
+        ]);
+        $this->createNothingToReportItem($acceptance);
+
+        app(AcceptanceService::class)->checkAndUpdateAcceptanceStatus($acceptance);
+
+        $this->assertSame(AcceptanceStatus::CANCELLED, $acceptance->fresh()->status);
+    }
+
+    public function test_invoiced_acceptance_with_reports_still_waits_for_finance(): void
+    {
+        $acceptance = $this->createAcceptance([
+            'status'      => AcceptanceStatus::PROCESSING,
+            'referrer_id' => $this->createReferrer('90000012')->id,
+            'invoice_id'  => $this->createPatientInvoice()->id,
+        ]);
+        $item = $this->createNothingToReportItem($acceptance, [
+            'reportless' => false,
+            'sampleless' => false,
+        ]);
+        Report::create([
+            'reporter_id'        => auth()->id(),
+            'acceptance_item_id' => $item->id,
+            'status'             => true,
+            'approved_at'        => now(),
+        ]);
+
+        app(AcceptanceService::class)->checkAndUpdateAcceptanceStatus($acceptance);
+
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $acceptance->fresh()->status);
+    }
+
+    private function createNothingToReportItem(Acceptance $acceptance, array $attributes = []): AcceptanceItem
+    {
+        return AcceptanceItem::create(array_merge([
             'acceptance_id'    => $acceptance->id,
             'method_test_id'   => $this->getMethodTestId(),
             'price'            => 40,
@@ -1083,27 +1229,51 @@ class AcceptanceServiceTest extends TestCase
             'no_sample'        => 1,
             'customParameters' => [],
             'timeline'         => [],
-        ]);
+        ], $attributes));
+    }
 
-        $invoice = Invoice::create([
+    private function createPatientInvoice(): Invoice
+    {
+        return Invoice::create([
             'owner_type' => 'patient',
             'owner_id'   => $this->patient->id,
             'user_id'    => auth()->id(),
             'status'     => InvoiceStatus::WAITING_FOR_PAYMENT,
             'discount'   => 0,
         ]);
+    }
 
-        /** @var AcceptanceService $service */
-        $service = app(AcceptanceService::class);
-        $service->updateAcceptanceInvoice($acceptance, $invoice->id);
+    private function createReferrer(string $phoneNo): Referrer
+    {
+        return Referrer::create([
+            'fullName'        => 'Referrer '.$phoneNo,
+            'phoneNo'         => $phoneNo,
+            'billingInfo'     => [],
+            'email'           => $phoneNo.'@example.com',
+            'reportReceivers' => [],
+        ]);
+    }
 
-        $acceptance->refresh();
-        $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $acceptance->status);
+    private function useMinimumPayment(int $percentage): void
+    {
+        $settings = Mockery::mock(SettingService::class);
+        $settings->shouldReceive('getSettingByKey')
+            ->with('Payment', 'minPayment')
+            ->andReturn($percentage);
+        $this->app->instance(SettingService::class, $settings);
+    }
 
-        $referrerOrder->refresh();
-        $this->assertEquals('waiting for financial approval', $referrerOrder->status);
-
-        Event::assertDispatched(ReferrerOrderUpdated::class);
+    private function pay(Invoice $invoice, float $amount): void
+    {
+        app(PaymentService::class)->storePayment(new PaymentDTO(
+            invoiceId: $invoice->id,
+            cashierId: (int) auth()->id(),
+            payerType: 'patient',
+            payerId: $this->patient->id,
+            price: $amount,
+            paymentMethod: PaymentMethod::CASH,
+            information: null,
+        ));
     }
 
     // ─────────────────────────────────────────────────────────────────────────

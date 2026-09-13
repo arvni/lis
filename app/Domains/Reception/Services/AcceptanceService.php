@@ -7,6 +7,7 @@ namespace App\Domains\Reception\Services;
 
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Laboratory\Enums\TestType;
+use App\Domains\Reception\Adapters\BillingAdapter;
 use App\Domains\Reception\Adapters\LaboratoryAdapter;
 use App\Domains\Reception\Adapters\ReferrerAdapter;
 use App\Domains\Reception\Adapters\SettingAdapter;
@@ -75,7 +76,11 @@ class AcceptanceService
         // existing callers — including tests that build the service with the five
         // original mocks — keep working unchanged; the container injects the real
         // collaborators in production.
-        $this->statusService = $statusService ?? new AcceptanceStatusService($acceptanceRepository, $referrerAdapter);
+        $this->statusService = $statusService ?? new AcceptanceStatusService(
+            $acceptanceRepository,
+            $referrerAdapter,
+            app(BillingAdapter::class),
+        );
         $this->barcodeService = $barcodeService ?? new AcceptanceBarcodeService();
     }
 
@@ -310,6 +315,7 @@ class AcceptanceService
                     // change has to mirror onto the linked referrer orders and
                     // push the provider.
                     $this->statusService->setStatusIfChanged($acceptance, $finalizedStatus);
+                    $this->releaseIfBilledWithNothingToReport($acceptance);
                     break;
             }
 
@@ -591,6 +597,53 @@ class AcceptanceService
         // Through the status service, not the repository: a status change has to
         // mirror onto the linked referrer orders and push the provider.
         $this->statusService->setStatusIfChanged($acceptance, $finalizedStatus);
+
+        $this->releaseIfBilledWithNothingToReport($acceptance);
+    }
+
+    /**
+     * The payment gate was cleared. An acceptance with something to sample goes
+     * on to SAMPLING; one with nothing to sample (so nothing to report) is done.
+     */
+    public function handlePaymentReceived(Acceptance $acceptance): void
+    {
+        if ($acceptance->status === AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL) {
+            $this->statusService->finalizeIfNothingToReport($acceptance);
+
+            return;
+        }
+
+        if ($acceptance->status !== AcceptanceStatus::WAITING_FOR_PAYMENT) {
+            return;
+        }
+
+        if ($this->acceptanceRepository->countSamplableItems($acceptance) === 0
+            && $this->statusService->finalizeIfNothingToReport($acceptance)) {
+            return;
+        }
+
+        $this->statusService->setStatusIfChanged($acceptance, AcceptanceStatus::SAMPLING);
+    }
+
+    /**
+     * An acceptance with nothing to report stops waiting on finance once it is
+     * billed. Re-check whenever an invoice or a finalized status may have just
+     * unlocked that.
+     */
+    private function releaseIfBilledWithNothingToReport(Acceptance $acceptance): void
+    {
+        if (! $acceptance->invoice_id) {
+            return;
+        }
+
+        if (! in_array($acceptance->status, [
+            AcceptanceStatus::WAITING_FOR_PAYMENT,
+            AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL,
+        ], true)) {
+            return;
+        }
+
+        $this->statusService->finalizeIfNothingToReport($acceptance);
     }
 
     /**

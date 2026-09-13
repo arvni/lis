@@ -223,6 +223,35 @@ class PaymentServiceTest extends TestCase
         ]);
     }
 
+    /**
+     * B-09: hasReachedMinimumPayment applies the same threshold as the event.
+     * minPayment=50, payable=200 → totalPaid * 50 / 100 >= 200 needs 400 paid.
+     */
+    public function test_has_reached_minimum_payment_follows_the_payment_threshold(): void
+    {
+        $this->service->storePayment($this->makeDto(100));
+        $this->assertFalse($this->service->hasReachedMinimumPayment($this->invoice->fresh()));
+
+        $this->service->storePayment($this->makeDto(300));
+        $this->assertTrue($this->service->hasReachedMinimumPayment($this->invoice->fresh()));
+    }
+
+    /**
+     * B-10: An invoice with nothing to pay has cleared the minimum payment.
+     */
+    public function test_has_reached_minimum_payment_for_an_invoice_with_nothing_to_pay(): void
+    {
+        $emptyInvoice = Invoice::create([
+            'owner_type' => 'patient',
+            'owner_id' => $this->patient->id,
+            'user_id' => $this->cashier->id,
+            'status' => InvoiceStatus::WAITING_FOR_PAYMENT,
+            'discount' => 0,
+        ]);
+
+        $this->assertTrue($this->service->hasReachedMinimumPayment($emptyInvoice));
+    }
+
     protected function tearDown(): void
     {
         Mockery::close();
