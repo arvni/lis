@@ -68,7 +68,7 @@ class WorkflowTemplateController extends Controller
         $this->authorize('delete', WorkflowTemplate::class);
 
         if (!$this->templateService->deleteIfUnused($workflowTemplate)) {
-            return back()->with(['success' => false, 'status' => 'Cannot delete: template is used by existing purchase requests.']);
+            return back()->with(['success' => false, 'status' => 'Cannot delete: template is used by existing purchase or export requests.']);
         }
 
         return redirect()->route('inventory.workflow-templates.index')

@@ -216,6 +216,14 @@ const WorkflowTemplatesIndex = () => {
                                             {tpl.purchase_requests_count} PR
                                             {tpl.purchase_requests_count !== 1 ? 's' : ''}
                                         </Typography>
+                                        <Typography
+                                            variant="caption"
+                                            color="text.secondary"
+                                            display="block"
+                                        >
+                                            {tpl.export_requests_count} export
+                                            {tpl.export_requests_count !== 1 ? 's' : ''}
+                                        </Typography>
                                     </TableCell>
                                     <TableCell>
                                         <Chip

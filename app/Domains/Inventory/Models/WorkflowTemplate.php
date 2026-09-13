@@ -44,6 +44,12 @@ class WorkflowTemplate extends Model
         return $this->hasMany(PurchaseRequest::class);
     }
 
+    /** @return HasMany<StockExportRequest, $this> */
+    public function exportRequests(): HasMany
+    {
+        return $this->hasMany(StockExportRequest::class);
+    }
+
     /**
      * @param  Builder<WorkflowTemplate>  $query
      * @return Builder<WorkflowTemplate>

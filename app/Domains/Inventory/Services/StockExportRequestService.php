@@ -100,6 +100,9 @@ readonly class StockExportRequestService
             unset($data['lines']);
             $requester = auth()->user();
             $data['requested_by_user_id'] = $requester->id;
+            // Set explicitly: the column's DB default isn't read back onto the model,
+            // and the lifecycle guards below read $request->status.
+            $data['status'] = StockExportRequestStatus::DRAFT->value;
             unset($data['workflow_template_id']); // determined after creation
             $request = $this->exportRequestRepository->create($data);
             foreach ($lines as $line) {
@@ -142,6 +145,8 @@ readonly class StockExportRequestService
 
     public function submit(StockExportRequest $request, ?string $changeNotes = null): StockExportRequest
     {
+        $this->assertStatus($request, [StockExportRequestStatus::DRAFT], 'Only draft export requests can be submitted.');
+
         $isResubmission = $this->exportRequestRepository->hasRejectedHistory($request);
 
         // Re-match template on every submission so late-created templates are picked up
@@ -160,8 +165,20 @@ readonly class StockExportRequestService
         return $request;
     }
 
+    /**
+     * Single-click approval for a request no workflow template matched. Requests
+     * with a workflow are approved step by step through the workflow service.
+     */
     public function approve(StockExportRequest $request): StockExportRequest
     {
+        $this->assertStatus($request, [StockExportRequestStatus::SUBMITTED], 'Only submitted export requests can be approved.');
+        if ($request->workflow_template_id) {
+            throw new RuntimeException('This request has an approval workflow — approve its steps instead.');
+        }
+        if ($request->requested_by_user_id === auth()->id()) {
+            throw new RuntimeException('You cannot approve your own export request.');
+        }
+
         $request->update([
             'status' => StockExportRequestStatus::APPROVED->value,
             'approved_by_user_id' => auth()->id(),
@@ -178,6 +195,12 @@ readonly class StockExportRequestService
      */
     public function fulfill(StockExportRequest $request, array $data): StockExportRequest
     {
+        $this->assertStatus(
+            $request,
+            [StockExportRequestStatus::APPROVED, StockExportRequestStatus::PARTIALLY_FULFILLED],
+            'Only approved export requests can be fulfilled.',
+        );
+
         return DB::transaction(function () use ($request, $data) {
             // Load the request's own lines once and scope everything to them, so a
             // submitted export_line_id can never reference another request's line (IDOR).
@@ -301,6 +324,19 @@ readonly class StockExportRequestService
     public function getOrderedApprovals(StockExportRequest $request): Collection
     {
         return $this->approvalRepository->getOrderedForRequest($request);
+    }
+
+    /**
+     * The server-side half of the lifecycle: the Show page only offers an action in
+     * the right status, but the endpoint must refuse it otherwise too.
+     *
+     * @param  list<StockExportRequestStatus>  $allowed
+     */
+    private function assertStatus(StockExportRequest $request, array $allowed, string $message): void
+    {
+        if (! in_array($request->status, $allowed, true)) {
+            throw new RuntimeException($message);
+        }
     }
 
     private function log(StockExportRequest $request, string $event, ?string $notes = null, ?string $changeNotes = null): void

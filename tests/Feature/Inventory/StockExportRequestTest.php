@@ -341,4 +341,81 @@ class StockExportRequestTest extends TestCase
 
         $this->assertSame(StockExportRequestStatus::SUBMITTED, $er->fresh()->status);
     }
+
+    // -------------------------------------------------------------------------
+    // Lifecycle guards
+    // -------------------------------------------------------------------------
+
+    public function test_requester_cannot_directly_approve_own_request(): void
+    {
+        $this->seedStock(10);
+        $er = app(StockExportRequestService::class)->createRequest($this->storePayload());
+        $er->update(['status' => StockExportRequestStatus::SUBMITTED->value]);
+
+        // $this->user holds the approve permission but is also the requester.
+        $this->put(route('inventory.export-requests.update', $er->id), ['action' => 'approve'])
+            ->assertRedirect()
+            ->assertSessionHas('success', false);
+
+        $this->assertSame(StockExportRequestStatus::SUBMITTED, $er->fresh()->status);
+    }
+
+    public function test_direct_approve_refused_when_request_has_a_workflow(): void
+    {
+        $this->makeDefaultTemplateWithStep('Export Approver');
+        $this->seedStock(10);
+        $er = app(StockExportRequestService::class)->createRequest($this->storePayload());
+        $er->update(['status' => StockExportRequestStatus::SUBMITTED->value]);
+        $this->assertNotNull($er->workflow_template_id);
+
+        $this->actingAs($this->userWithPermissions(['Inventory.ExportRequests.Approve Export Request']));
+
+        $this->put(route('inventory.export-requests.update', $er->id), ['action' => 'approve'])
+            ->assertRedirect()
+            ->assertSessionHas('success', false);
+
+        $this->assertSame(StockExportRequestStatus::SUBMITTED, $er->fresh()->status);
+    }
+
+    public function test_direct_approve_by_another_user_approves_request_without_workflow(): void
+    {
+        $this->seedStock(10);
+        $er = app(StockExportRequestService::class)->createRequest($this->storePayload());
+        $er->update(['status' => StockExportRequestStatus::SUBMITTED->value]);
+
+        $this->actingAs($this->userWithPermissions(['Inventory.ExportRequests.Approve Export Request']));
+
+        $this->put(route('inventory.export-requests.update', $er->id), ['action' => 'approve'])
+            ->assertRedirect()
+            ->assertSessionHas('success', true);
+
+        $this->assertSame(StockExportRequestStatus::APPROVED, $er->fresh()->status);
+    }
+
+    public function test_submit_throws_unless_draft(): void
+    {
+        $this->seedStock(10);
+        $service = app(StockExportRequestService::class);
+        $er = $service->createRequest($this->storePayload());
+        $er->update(['status' => StockExportRequestStatus::APPROVED->value]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageMatches('/Only draft/');
+        $service->submit($er);
+    }
+
+    public function test_fulfill_endpoint_refuses_unapproved_request(): void
+    {
+        $lot = $this->seedStock(10);
+        $er = app(StockExportRequestService::class)->createRequest($this->storePayload()); // DRAFT
+        $line = $er->lines->first();
+
+        $this->post(route('inventory.export-requests.store-fulfillment', $er->id), [
+            'lines' => [['export_line_id' => $line->id, 'qty' => 1]],
+        ])->assertRedirect()->assertSessionHas('success', false);
+
+        $this->assertSame(StockExportRequestStatus::DRAFT, $er->fresh()->status);
+        $this->assertEquals(10, (float) $lot->fresh()->quantity_base_units);
+        $this->assertDatabaseCount('stock_transactions', 0);
+    }
 }

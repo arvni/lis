@@ -74,12 +74,12 @@ class WorkflowTemplateService
     }
 
     /**
-     * Delete a template unless it is referenced by existing purchase requests.
+     * Delete a template unless it is referenced by existing purchase or export requests.
      * Returns false (without deleting) when the template is still in use.
      */
     public function deleteIfUnused(WorkflowTemplate $template): bool
     {
-        if ($this->repository->hasPurchaseRequests($template)) {
+        if ($this->repository->isInUse($template)) {
             return false;
         }
 

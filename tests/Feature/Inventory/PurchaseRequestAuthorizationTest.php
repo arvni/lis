@@ -173,4 +173,103 @@ class PurchaseRequestAuthorizationTest extends TestCase
 
         $this->assertNotSame(403, $response->baseResponse->getStatusCode());
     }
+
+    // ── direct approve / submit actions on update ───────────────────────────────
+
+    private function submittedPrWithoutWorkflow(): PurchaseRequest
+    {
+        return PurchaseRequest::create([
+            'requested_by_user_id' => $this->requester->id,
+            'urgency'              => 'normal',
+            'status'               => PurchaseRequestStatus::SUBMITTED->value,
+            'workflow_template_id' => null,
+        ]);
+    }
+
+    public function test_direct_approve_forbidden_without_approve_permission(): void
+    {
+        $pr = $this->submittedPrWithoutWorkflow();
+        $creator = User::factory()->create();
+        $this->grant($creator, 'Inventory.PurchaseRequests.Create Purchase Request');
+
+        $this->actingAs($creator)
+            ->put(route('inventory.purchase-requests.update', $pr), ['action' => 'approve'])
+            ->assertForbidden();
+
+        $this->assertSame(PurchaseRequestStatus::SUBMITTED, $pr->fresh()->status);
+    }
+
+    public function test_direct_approve_allowed_with_approve_permission(): void
+    {
+        $pr = $this->submittedPrWithoutWorkflow();
+        $this->grant($this->approver, 'Inventory.PurchaseRequests.Approve Purchase Request');
+
+        $this->actingAs($this->approver)
+            ->put(route('inventory.purchase-requests.update', $pr), ['action' => 'approve'])
+            ->assertRedirect()
+            ->assertSessionHas('success', true);
+
+        $this->assertSame(PurchaseRequestStatus::APPROVED, $pr->fresh()->status);
+    }
+
+    public function test_requester_cannot_directly_approve_own_request_even_with_permission(): void
+    {
+        $pr = $this->submittedPrWithoutWorkflow();
+        $this->grant($this->requester, 'Inventory.PurchaseRequests.Approve Purchase Request');
+
+        $this->actingAs($this->requester)
+            ->put(route('inventory.purchase-requests.update', $pr), ['action' => 'approve'])
+            ->assertRedirect()
+            ->assertSessionHas('success', false);
+
+        $this->assertSame(PurchaseRequestStatus::SUBMITTED, $pr->fresh()->status);
+    }
+
+    public function test_submit_forbidden_without_create_permission(): void
+    {
+        $pr = PurchaseRequest::create([
+            'requested_by_user_id' => $this->requester->id,
+            'urgency'              => 'normal',
+            'status'               => PurchaseRequestStatus::DRAFT->value,
+        ]);
+
+        $this->actingAs($this->approver)
+            ->put(route('inventory.purchase-requests.update', $pr), ['action' => 'submit'])
+            ->assertForbidden();
+
+        $this->assertSame(PurchaseRequestStatus::DRAFT, $pr->fresh()->status);
+    }
+
+    // ── out-of-order lifecycle endpoints ────────────────────────────────────────
+
+    public function test_ship_on_draft_is_refused_without_changing_status(): void
+    {
+        $pr = PurchaseRequest::create([
+            'requested_by_user_id' => $this->requester->id,
+            'urgency'              => 'normal',
+            'status'               => PurchaseRequestStatus::DRAFT->value,
+        ]);
+        $this->grant($this->requester, 'Inventory.PurchaseRequests.Ship Purchase Request');
+
+        $this->actingAs($this->requester)
+            ->post(route('inventory.purchase-requests.ship', $pr), ['tracking_number' => 'TRK-1'])
+            ->assertRedirect()
+            ->assertSessionHas('success', false);
+
+        $this->assertSame(PurchaseRequestStatus::DRAFT, $pr->fresh()->status);
+    }
+
+    public function test_receive_page_forbidden_before_shipment(): void
+    {
+        $pr = PurchaseRequest::create([
+            'requested_by_user_id' => $this->requester->id,
+            'urgency'              => 'normal',
+            'status'               => PurchaseRequestStatus::ORDERED->value,
+        ]);
+        $this->grant($this->requester, 'Inventory.PurchaseRequests.Create Purchase Request');
+
+        $this->actingAs($this->requester)
+            ->get(route('inventory.purchase-requests.receive', $pr))
+            ->assertForbidden();
+    }
 }

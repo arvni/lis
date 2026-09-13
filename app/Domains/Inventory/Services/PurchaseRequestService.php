@@ -182,6 +182,9 @@ readonly class PurchaseRequestService
             unset($data['lines']);
             $requester = auth()->user();
             $data['requested_by_user_id'] = $requester->id;
+            // Set explicitly: the column's DB default isn't read back onto the model,
+            // and the lifecycle guards below read $pr->status.
+            $data['status'] = PurchaseRequestStatus::DRAFT->value;
             unset($data['workflow_template_id']); // determined after lines are saved
             $pr = $this->purchaseRequestRepository->create($data);
             foreach ($lines as $line) {
@@ -226,6 +229,8 @@ readonly class PurchaseRequestService
 
     public function submit(PurchaseRequest $pr, ?string $changeNotes = null): PurchaseRequest
     {
+        $this->assertStatus($pr, [PurchaseRequestStatus::DRAFT], 'Only draft purchase requests can be submitted.');
+
         $isResubmission = $this->purchaseRequestRepository->hasRejectedHistory($pr);
 
         // Re-match template on every submission so late-created templates are picked up
@@ -244,8 +249,20 @@ readonly class PurchaseRequestService
         return $pr;
     }
 
+    /**
+     * Single-click approval for a request no workflow template matched. Requests
+     * with a workflow are approved step by step through the workflow service.
+     */
     public function approve(PurchaseRequest $pr): PurchaseRequest
     {
+        $this->assertStatus($pr, [PurchaseRequestStatus::SUBMITTED], 'Only submitted purchase requests can be approved.');
+        if ($pr->workflow_template_id) {
+            throw new RuntimeException('This request has an approval workflow — approve its steps instead.');
+        }
+        if ($pr->requested_by_user_id === auth()->id()) {
+            throw new RuntimeException('You cannot approve your own purchase request.');
+        }
+
         $pr->update([
             'status' => PurchaseRequestStatus::APPROVED->value,
             'approved_by_user_id' => auth()->id(),
@@ -257,6 +274,8 @@ readonly class PurchaseRequestService
 
     public function order(PurchaseRequest $pr, string $poNumber, ?int $supplierId, ?UploadedFile $file): PurchaseRequest
     {
+        $this->assertStatus($pr, [PurchaseRequestStatus::APPROVED], 'Only approved purchase requests can be ordered.');
+
         $updates = [
             'status' => PurchaseRequestStatus::ORDERED->value,
             'po_number' => $poNumber,
@@ -277,6 +296,8 @@ readonly class PurchaseRequestService
 
     public function recordPayment(PurchaseRequest $pr, array $data, ?UploadedFile $file): PurchaseRequest
     {
+        $this->assertStatus($pr, [PurchaseRequestStatus::ORDERED], 'Payment can only be recorded for ordered purchase requests.');
+
         $updates = [
             'status' => PurchaseRequestStatus::PAID->value,
             'payment_date' => $data['payment_date'],
@@ -297,6 +318,12 @@ readonly class PurchaseRequestService
 
     public function markShipped(PurchaseRequest $pr, array $data): PurchaseRequest
     {
+        $this->assertStatus(
+            $pr,
+            [PurchaseRequestStatus::ORDERED, PurchaseRequestStatus::PAID],
+            'Only ordered or paid purchase requests can be marked as shipped.',
+        );
+
         $pr->update([
             'status' => PurchaseRequestStatus::SHIPPED->value,
             'shipment_date' => $data['shipment_date'] ?? null,
@@ -310,17 +337,43 @@ readonly class PurchaseRequestService
 
     public function receiveItems(PurchaseRequest $pr, array $data): PurchaseRequest
     {
+        $this->assertStatus(
+            $pr,
+            [PurchaseRequestStatus::SHIPPED, PurchaseRequestStatus::PARTIALLY_RECEIVED],
+            'Items can only be received on shipped purchase requests.',
+        );
+
         return DB::transaction(function () use ($pr, $data) {
             $storeId = $data['store_id'];
             $lines = $data['lines'];
 
-            $txLines = [];
+            // Load the request's own lines once and scope everything to them, so a
+            // submitted pr_line_id can never reference another request's line (IDOR).
+            $pr->load('lines.item');
+            $linesById = $pr->lines->keyBy('id');
+
+            // A line may legitimately arrive as several entries (e.g. two lots), so the
+            // remaining check runs on each line's total, not on every entry alone.
+            $qtyByLine = [];
             foreach ($lines as $ld) {
-                $prLine = $this->purchaseRequestRepository->findLineOrFail($ld['pr_line_id']);
+                $lineId = (int) $ld['pr_line_id'];
+                if (! $linesById->has($lineId)) {
+                    throw new RuntimeException('A submitted line does not belong to this purchase request.');
+                }
+                $qtyByLine[$lineId] = ($qtyByLine[$lineId] ?? 0.0) + (float) $ld['qty'];
+            }
+
+            foreach ($qtyByLine as $lineId => $qty) {
+                $prLine = $linesById->get($lineId);
                 $remaining = (float) $prLine->qty - (float) $prLine->qty_received;
-                if ((float) $ld['qty'] > $remaining) {
+                if ($qty > $remaining) {
                     throw new RuntimeException("Qty received exceeds remaining for item {$prLine->item->name}.");
                 }
+            }
+
+            $txLines = [];
+            foreach ($lines as $ld) {
+                $prLine = $linesById->get((int) $ld['pr_line_id']);
 
                 $txLines[] = [
                     'item_id' => $prLine->item_id,
@@ -358,7 +411,7 @@ readonly class PurchaseRequestService
 
             // Create receipt lines and update qty_received
             foreach ($lines as $ld) {
-                $prLine = $this->purchaseRequestRepository->findLineOrFail($ld['pr_line_id']);
+                $prLine = $linesById->get((int) $ld['pr_line_id']);
                 $this->purchaseRequestRepository->createReceiptLine([
                     'receipt_id' => $receipt->id,
                     'pr_line_id' => $prLine->id,
@@ -406,14 +459,6 @@ readonly class PurchaseRequestService
         return $pr;
     }
 
-    public function markOrdered(PurchaseRequest $pr): PurchaseRequest
-    {
-        $pr->update(['status' => PurchaseRequestStatus::ORDERED->value]);
-        $this->log($pr, 'ORDERED');
-
-        return $pr;
-    }
-
     public function loadForShow(PurchaseRequest $pr, User $user): array
     {
         $pr->load([
@@ -457,6 +502,19 @@ readonly class PurchaseRequestService
     public function getOrderedApprovals(PurchaseRequest $pr): Collection
     {
         return $this->approvalRepository->getOrderedForRequest($pr);
+    }
+
+    /**
+     * The server-side half of the lifecycle: the Show page only offers an action in
+     * the right status, but the endpoint must refuse it otherwise too.
+     *
+     * @param  list<PurchaseRequestStatus>  $allowed
+     */
+    private function assertStatus(PurchaseRequest $pr, array $allowed, string $message): void
+    {
+        if (! in_array($pr->status, $allowed, true)) {
+            throw new RuntimeException($message);
+        }
     }
 
     private function log(PurchaseRequest $pr, string $event, ?string $notes = null, ?string $changeNotes = null): void

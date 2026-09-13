@@ -168,11 +168,6 @@ class PurchaseRequestRepository
         return $pr->histories()->where('event', 'REJECTED')->exists();
     }
 
-    public function findLineOrFail(int|string $lineId): PurchaseRequestLine
-    {
-        return PurchaseRequestLine::findOrFail($lineId);
-    }
-
     public function incrementLineQtyReceived(PurchaseRequestLine $line, float $qty): void
     {
         $line->increment('qty_received', $qty);

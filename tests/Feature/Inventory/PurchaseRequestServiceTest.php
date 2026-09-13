@@ -9,6 +9,7 @@ use App\Domains\Inventory\Enums\TransactionType;
 use App\Domains\Inventory\Models\Item;
 use App\Domains\Inventory\Models\PurchaseRequest;
 use App\Domains\Inventory\Models\PurchaseRequestLine;
+use App\Domains\Inventory\Models\PurchaseRequestReceiptLine;
 use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\StockTransaction;
 use App\Domains\Inventory\Models\Unit;
@@ -20,6 +21,7 @@ use App\Domains\Inventory\Services\WorkflowTemplateMatcher;
 use App\Domains\User\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
+use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -225,7 +227,7 @@ class PurchaseRequestServiceTest extends TestCase
 
     public function test_receive_items_creates_entry_transaction_and_updates_qty_received(): void
     {
-        $pr = $this->makePr(['status' => PurchaseRequestStatus::ORDERED->value]);
+        $pr = $this->makePr(['status' => PurchaseRequestStatus::SHIPPED->value]);
         $line = $this->addLine($pr, 10);
 
         // Mock transactionService so we don't need the full unit conversion stack
@@ -263,7 +265,7 @@ class PurchaseRequestServiceTest extends TestCase
 
     public function test_receive_items_partial_sets_partially_received_status(): void
     {
-        $pr = $this->makePr(['status' => PurchaseRequestStatus::ORDERED->value]);
+        $pr = $this->makePr(['status' => PurchaseRequestStatus::SHIPPED->value]);
         $line = $this->addLine($pr, 10);
 
         $fakeTx = StockTransaction::create([
@@ -300,7 +302,7 @@ class PurchaseRequestServiceTest extends TestCase
 
     public function test_receive_items_throws_when_qty_exceeds_remaining(): void
     {
-        $pr = $this->makePr(['status' => PurchaseRequestStatus::ORDERED->value]);
+        $pr = $this->makePr(['status' => PurchaseRequestStatus::SHIPPED->value]);
         $line = $this->addLine($pr, 10);
 
         $this->mock(WorkflowTemplateMatcher::class)->shouldReceive('find')->andReturn(null);
@@ -324,7 +326,7 @@ class PurchaseRequestServiceTest extends TestCase
 
     public function test_receive_items_full_sets_received_status(): void
     {
-        $pr = $this->makePr(['status' => PurchaseRequestStatus::ORDERED->value]);
+        $pr = $this->makePr(['status' => PurchaseRequestStatus::SHIPPED->value]);
         $line = $this->addLine($pr, 10);
 
         $fakeTx = StockTransaction::create([
@@ -371,6 +373,201 @@ class PurchaseRequestServiceTest extends TestCase
         $this->expectExceptionMessageMatches('/cannot be cancelled/i');
 
         $service->cancel($pr);
+    }
+
+    // -------------------------------------------------------------------------
+    // Lifecycle guards: each transition refuses the wrong starting status
+    // -------------------------------------------------------------------------
+
+    public function test_submit_throws_unless_draft(): void
+    {
+        $pr = $this->makePr(['status' => PurchaseRequestStatus::APPROVED->value]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageMatches('/Only draft/');
+
+        app(PurchaseRequestService::class)->submit($pr);
+    }
+
+    public function test_direct_approve_throws_unless_submitted(): void
+    {
+        $pr = $this->makePr(['requested_by_user_id' => User::factory()->create()->id]); // DRAFT
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageMatches('/Only submitted/');
+
+        app(PurchaseRequestService::class)->approve($pr);
+    }
+
+    public function test_direct_approve_throws_when_request_has_a_workflow(): void
+    {
+        $template = WorkflowTemplate::create(['name' => 'Has Steps']);
+        $pr = $this->makePr([
+            'requested_by_user_id' => User::factory()->create()->id,
+            'status'               => PurchaseRequestStatus::SUBMITTED->value,
+            'workflow_template_id' => $template->id,
+        ]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageMatches('/approval workflow/');
+
+        app(PurchaseRequestService::class)->approve($pr);
+    }
+
+    public function test_requester_cannot_directly_approve_own_request(): void
+    {
+        // Requested by $this->user, who is also the acting user.
+        $pr = $this->makePr(['status' => PurchaseRequestStatus::SUBMITTED->value]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageMatches('/your own/');
+
+        app(PurchaseRequestService::class)->approve($pr);
+    }
+
+    public function test_direct_approve_approves_another_users_submitted_request(): void
+    {
+        $pr = $this->makePr([
+            'requested_by_user_id' => User::factory()->create()->id,
+            'status'               => PurchaseRequestStatus::SUBMITTED->value,
+        ]);
+
+        app(PurchaseRequestService::class)->approve($pr);
+
+        $fresh = $pr->fresh();
+        $this->assertSame(PurchaseRequestStatus::APPROVED, $fresh->status);
+        $this->assertSame($this->user->id, $fresh->approved_by_user_id);
+    }
+
+    public function test_order_payment_and_shipment_advance_in_sequence(): void
+    {
+        $pr = $this->makePr(['status' => PurchaseRequestStatus::APPROVED->value]);
+        $service = app(PurchaseRequestService::class);
+
+        $service->order($pr, 'PO-100', null, null);
+        $this->assertSame(PurchaseRequestStatus::ORDERED, $pr->fresh()->status);
+
+        $service->recordPayment($pr, ['payment_date' => '2026-09-13'], null);
+        $this->assertSame(PurchaseRequestStatus::PAID, $pr->fresh()->status);
+
+        $service->markShipped($pr, []);
+        $this->assertSame(PurchaseRequestStatus::SHIPPED, $pr->fresh()->status);
+    }
+
+    /** @return array<string, array{string, PurchaseRequestStatus}> */
+    public static function outOfOrderTransitions(): array
+    {
+        return [
+            'order a draft'              => ['order', PurchaseRequestStatus::DRAFT],
+            'order a submitted request'  => ['order', PurchaseRequestStatus::SUBMITTED],
+            'pay an approved request'    => ['pay', PurchaseRequestStatus::APPROVED],
+            'pay a shipped request'      => ['pay', PurchaseRequestStatus::SHIPPED],
+            'ship an approved request'   => ['ship', PurchaseRequestStatus::APPROVED],
+            'ship a received request'    => ['ship', PurchaseRequestStatus::RECEIVED],
+            'receive an ordered request' => ['receive', PurchaseRequestStatus::ORDERED],
+            'receive a cancelled one'    => ['receive', PurchaseRequestStatus::CANCELLED],
+        ];
+    }
+
+    #[DataProvider('outOfOrderTransitions')]
+    public function test_transition_is_refused_from_the_wrong_status(string $action, PurchaseRequestStatus $status): void
+    {
+        $pr = $this->makePr(['status' => $status->value]);
+        $line = $this->addLine($pr, 10);
+        $service = app(PurchaseRequestService::class);
+
+        try {
+            match ($action) {
+                'order'   => $service->order($pr, 'PO-1', null, null),
+                'pay'     => $service->recordPayment($pr, ['payment_date' => '2026-09-13'], null),
+                'ship'    => $service->markShipped($pr, []),
+                'receive' => $service->receiveItems($pr, [
+                    'store_id' => $this->store->id,
+                    'lines'    => [['pr_line_id' => $line->id, 'qty' => 1]],
+                ]),
+            };
+            $this->fail("Expected '{$action}' to be refused from {$status->value}.");
+        } catch (RuntimeException) {
+            $this->assertSame($status, $pr->fresh()->status);
+            $this->assertEquals(0, (float) $line->fresh()->qty_received);
+            $this->assertSame(0, StockTransaction::count());
+        }
+    }
+
+    public function test_receive_items_rejects_line_from_another_request(): void
+    {
+        $pr = $this->makePr(['status' => PurchaseRequestStatus::SHIPPED->value]);
+        $this->addLine($pr, 10);
+        $other = $this->makePr(['status' => PurchaseRequestStatus::SHIPPED->value]);
+        $foreignLine = $this->addLine($other, 10);
+
+        $this->mock(StockTransactionService::class)->shouldNotReceive('createTransaction');
+
+        try {
+            app(PurchaseRequestService::class)->receiveItems($pr, [
+                'store_id' => $this->store->id,
+                'lines'    => [['pr_line_id' => $foreignLine->id, 'qty' => 1]],
+            ]);
+            $this->fail('Expected a foreign line to be refused.');
+        } catch (RuntimeException $e) {
+            $this->assertStringContainsString('does not belong', $e->getMessage());
+        }
+
+        $this->assertEquals(0, (float) $foreignLine->fresh()->qty_received);
+    }
+
+    public function test_receive_items_rejects_duplicated_line_that_over_receives(): void
+    {
+        $pr = $this->makePr(['status' => PurchaseRequestStatus::SHIPPED->value]);
+        $line = $this->addLine($pr, 10);
+
+        $this->mock(StockTransactionService::class)->shouldNotReceive('createTransaction');
+
+        // Each entry fits the remaining 10 on its own; together they are 12.
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageMatches('/exceeds remaining/');
+
+        app(PurchaseRequestService::class)->receiveItems($pr, [
+            'store_id' => $this->store->id,
+            'lines'    => [
+                ['pr_line_id' => $line->id, 'qty' => 6],
+                ['pr_line_id' => $line->id, 'qty' => 6],
+            ],
+        ]);
+    }
+
+    public function test_receive_items_accepts_one_line_split_across_two_lots(): void
+    {
+        $pr = $this->makePr(['status' => PurchaseRequestStatus::SHIPPED->value]);
+        $line = $this->addLine($pr, 10);
+
+        $fakeTx = StockTransaction::create([
+            'transaction_type'     => TransactionType::ENTRY->value,
+            'reference_number'     => 'ENT-FAKE-004',
+            'transaction_date'     => now()->toDateString(),
+            'store_id'             => $this->store->id,
+            'requested_by_user_id' => $this->user->id,
+            'status'               => TransactionStatus::APPROVED->value,
+        ]);
+
+        $txServiceMock = $this->mock(StockTransactionService::class);
+        $txServiceMock->shouldReceive('createTransaction')->once()
+            ->withArgs(fn (array $data) => count($data['lines']) === 2)
+            ->andReturn($fakeTx);
+        $txServiceMock->shouldReceive('submitForApproval')->once()->andReturn($fakeTx);
+        $txServiceMock->shouldReceive('approve')->once()->andReturn($fakeTx);
+
+        $result = app(PurchaseRequestService::class)->receiveItems($pr, [
+            'store_id' => $this->store->id,
+            'lines'    => [
+                ['pr_line_id' => $line->id, 'qty' => 4, 'lot_number' => 'LOT-A'],
+                ['pr_line_id' => $line->id, 'qty' => 6, 'lot_number' => 'LOT-B'],
+            ],
+        ]);
+
+        $this->assertEqualsWithDelta(10, (float) $line->fresh()->qty_received, 0.001);
+        $this->assertEquals(PurchaseRequestStatus::RECEIVED, $result->fresh()->status);
+        $this->assertSame(2, PurchaseRequestReceiptLine::count());
     }
 
     protected function tearDown(): void
