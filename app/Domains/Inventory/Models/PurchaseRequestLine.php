@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Inventory\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -8,7 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $id
  * @property int $purchase_request_id
- * @property int $item_id
+ * @property int|null $item_id null while the line names an item not in the catalogue yet
+ * @property string|null $item_name typed name of a not-in-catalogue item (kept after linking)
  * @property int $unit_id
  * @property numeric $qty
  * @property numeric|null $estimated_unit_price
@@ -24,7 +27,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PurchaseRequestLine extends Model
 {
     protected $fillable = [
-        'purchase_request_id', 'item_id', 'unit_id', 'qty', 'estimated_unit_price',
+        'purchase_request_id', 'item_id', 'item_name', 'unit_id', 'qty', 'estimated_unit_price',
         'preferred_supplier_id', 'notes', 'cat_no', 'brand', 'unit_price', 'qty_received',
     ];
 
@@ -57,5 +60,17 @@ class PurchaseRequestLine extends Model
     public function preferredSupplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class, 'preferred_supplier_id');
+    }
+
+    /** Whether the line still names an item that isn't linked to the catalogue. */
+    public function isManual(): bool
+    {
+        return $this->item_id === null;
+    }
+
+    /** The catalogue item's name, or the typed name of a manual line. */
+    public function displayName(): string
+    {
+        return $this->item->name ?? (string) $this->item_name;
     }
 }

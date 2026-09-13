@@ -240,7 +240,9 @@ const ActionDialogs = ({
                         {brandLines.map((bl, idx) => (
                             <TableRow key={bl.id}>
                                 <TableCell>
-                                    <Typography variant="body2">{bl.item?.name}</Typography>
+                                    <Typography variant="body2">
+                                        {bl.item?.name ?? bl.item_name}
+                                    </Typography>
                                     <Typography variant="caption" color="text.secondary">
                                         {bl.item?.item_code}
                                     </Typography>

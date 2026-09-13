@@ -47,8 +47,8 @@ const ReceivingHistoryCard = ({ receipts = [] }) => (
                             <TableCell>
                                 {receipt.lines?.map((rl) => (
                                     <Typography key={rl.id} variant="caption" display="block">
-                                        {rl.pr_line?.item?.name}: {rl.qty_received}{' '}
-                                        {rl.pr_line?.unit?.name}
+                                        {rl.pr_line?.item?.name ?? rl.pr_line?.item_name}:{' '}
+                                        {rl.qty_received} {rl.pr_line?.unit?.name}
                                         {rl.lot_number ? ` · Lot ${rl.lot_number}` : ''}
                                     </Typography>
                                 ))}

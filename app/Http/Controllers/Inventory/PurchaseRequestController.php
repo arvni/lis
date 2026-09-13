@@ -23,6 +23,7 @@ use App\Domains\Inventory\Models\Store;
 use App\Domains\Inventory\Models\Supplier;
 use App\Domains\Inventory\Services\PurchaseRequestService;
 use App\Domains\Inventory\Services\PurchaseRequestWorkflowService;
+use App\Domains\Inventory\Services\UnitService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,6 +36,7 @@ class PurchaseRequestController extends Controller
     public function __construct(
         private PurchaseRequestService $prService,
         private PurchaseRequestWorkflowService $workflowService,
+        private UnitService $unitService,
     ) {
         $this->middleware('indexProvider')->only('index');
     }
@@ -60,6 +62,8 @@ class PurchaseRequestController extends Controller
         return Inertia::render('Inventory/PurchaseRequests/Add', [
             'suppliers' => Supplier::active()->get(['id', 'name']),
             'defaults'  => $defaults,
+            // Unit choices for a line not in the catalogue (a picked item narrows its own).
+            'units'     => $this->unitService->allUnits(),
         ]);
     }
 
@@ -90,6 +94,7 @@ class PurchaseRequestController extends Controller
 
         return Inertia::render('Inventory/PurchaseRequests/Edit', [
             'purchaseRequest' => $purchaseRequest,
+            'units'           => $this->unitService->allUnits(),
         ]);
     }
 
