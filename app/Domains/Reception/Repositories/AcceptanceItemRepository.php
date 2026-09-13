@@ -5,6 +5,7 @@ namespace App\Domains\Reception\Repositories;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Laboratory\Enums\TestType;
+use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\Report;
@@ -19,6 +20,33 @@ use Illuminate\Support\Facades\Gate;
 class AcceptanceItemRepository
 {
     use LogsUserActivity, ExtractsTagFilterIds;
+
+    /**
+     * Unreported items of the given tests that are still on the TAT clock: the acceptance is
+     * neither finished nor waiting for pooling, the item expects a report and its method has a TAT.
+     *
+     * @param  list<int>  $testIds
+     * @return Collection<int, AcceptanceItem>
+     */
+    public function getOpenItemsForTests(array $testIds): Collection
+    {
+        return AcceptanceItem::query()
+            ->whereHas("methodTest", fn($q) => $q->whereIn("test_id", $testIds))
+            ->where("reportless", false)
+            ->whereDoesntHave("report")
+            ->whereHas("test", fn($q) => $q->where("tests.type", "!=", TestType::SERVICE->value))
+            ->whereHas("method", fn($q) => $q->where("methods.turnaround_time", ">", 0))
+            ->whereHas("acceptance", fn($q) => $q
+                ->where("waiting_for_pooling", false)
+                ->whereNotIn("status", [AcceptanceStatus::REPORTED->value, AcceptanceStatus::CANCELLED->value]))
+            ->with([
+                "acceptance" => fn($q) => $q->select("id", "referenceCode", "patient_id"),
+                "acceptance.patient" => fn($q) => $q->select("id", "fullName"),
+                "test" => fn($q) => $q->select("tests.id", "tests.name"),
+                "method" => fn($q) => $q->select("methods.id", "methods.turnaround_time"),
+            ])
+            ->get();
+    }
 
 
     /**

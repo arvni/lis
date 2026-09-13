@@ -294,6 +294,12 @@ class RoleAndPermissionSeeder extends Seeder
                     "Delete Tag",
                     "List Tags",
                 ],
+                "TAT Alerts" => [
+                    "Create TAT Alert",
+                    "Edit TAT Alert",
+                    "Delete TAT Alert",
+                    "List TAT Alerts",
+                ],
             ],
             "Inventory" => [
                 "Items" => [
