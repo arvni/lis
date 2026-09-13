@@ -6,14 +6,17 @@ namespace App\Domains\Billing\Repositories;
 
 use App\Domains\Billing\Models\DiscountPartner;
 use App\Domains\Shared\Traits\LogsUserActivity;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class DiscountPartnerRepository
 {
     use LogsUserActivity;
 
+    /**
+     * @return LengthAwarePaginator<int, DiscountPartner>
+     */
     public function listPartners(array $queryData): LengthAwarePaginator
     {
         $query = DiscountPartner::query()

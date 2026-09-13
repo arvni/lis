@@ -9,6 +9,7 @@ use App\Domains\Laboratory\Enums\OfferType;
 use App\Domains\Laboratory\Models\Offer;
 use App\Domains\User\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -39,11 +40,21 @@ class DiscountPartnerControllerTest extends TestCase
 
     public function test_a_permitted_user_sees_the_partner_list(): void
     {
-        DiscountPartner::create(['name' => 'Acme Corp']);
+        $partner = DiscountPartner::create(['name' => 'Acme Corp']);
+        $partner->offers()->attach($this->offer()->id);
 
+        // The grid reads `total` from the top level of the page data, so it must not be
+        // tucked under a resource collection's `meta` (the list showed "0 of 0 records").
         $this->actingAs($this->permittedUser())
             ->get(route('discount-partners.index'))
-            ->assertOk();
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('DiscountPartner/Index', false)
+                ->where('partners.total', 1)
+                ->where('partners.current_page', 1)
+                ->where('partners.data.0.name', 'Acme Corp')
+                ->where('partners.data.0.cards_count', 0)
+                ->where('partners.data.0.offers.0.name', 'Staff 20%'));
     }
 
     public function test_a_partner_is_created_with_its_offers_attached(): void

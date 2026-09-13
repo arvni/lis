@@ -7,14 +7,17 @@ namespace App\Domains\Billing\Services;
 use App\Domains\Billing\DTOs\DiscountPartnerDTO;
 use App\Domains\Billing\Models\DiscountPartner;
 use App\Domains\Billing\Repositories\DiscountPartnerRepository;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 
 class DiscountPartnerService
 {
     public function __construct(private readonly DiscountPartnerRepository $partnerRepository) {}
 
+    /**
+     * @return LengthAwarePaginator<int, DiscountPartner>
+     */
     public function listPartners(array $queryData): LengthAwarePaginator
     {
         return $this->partnerRepository->listPartners($queryData);

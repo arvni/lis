@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     Alert,
     Box,
@@ -30,17 +30,22 @@ const AddForm = ({ open, onClose, defaultValue }) => {
         ? route('discount-partners.update', defaultValue.id)
         : route('discount-partners.store');
 
-    const defaultData = {
-        name: '',
-        contract_no: '',
-        contact: { person: '', phone: '', email: '', address: '' },
-        starts_at: '',
-        ends_at: '',
-        active: true,
-        notes: '',
-        offers: [],
-        ...defaultValue,
-    };
+    // FormProvider resets the form whenever this object changes. A fresh object on every
+    // render would wipe what the user typed as soon as a validation error re-renders the page.
+    const defaultData = useMemo(
+        () => ({
+            name: '',
+            contract_no: '',
+            contact: { person: '', phone: '', email: '', address: '' },
+            starts_at: '',
+            ends_at: '',
+            active: true,
+            notes: '',
+            offers: [],
+            ...defaultValue,
+        }),
+        [defaultValue],
+    );
 
     return (
         <FormProvider
@@ -49,7 +54,8 @@ const AddForm = ({ open, onClose, defaultValue }) => {
             open={open}
             url={url}
             maxWidth="md"
-            generalTitle={defaultValue?.id ? 'Edit Discount Partner' : 'Discount Partner'}
+            // FormProvider already prefixes "Add New" / "Edit".
+            generalTitle="Discount Partner"
         >
             <FormContent />
         </FormProvider>
