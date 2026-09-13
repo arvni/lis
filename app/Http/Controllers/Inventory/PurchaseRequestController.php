@@ -109,13 +109,25 @@ class PurchaseRequestController extends Controller
                 ->with(['success' => true, 'status' => 'Purchase request updated.']);
         }
 
-        // change_notes is unvalidated on action requests (rules() returns []) — cast for strict types
-        $changeNotes = $request->input('change_notes');
+        // Authorize per action: submitting needs create, a direct approve needs the approve
+        // ability. The service enforces the status, workflow and self-approval rules.
         match ($action) {
-            'submit'  => $this->prService->submit($purchaseRequest, $changeNotes === null ? null : (string) $changeNotes),
-            'approve' => $this->prService->approve($purchaseRequest),
+            'submit'  => $this->authorize('create', PurchaseRequest::class),
+            'approve' => $this->authorize('approve', PurchaseRequest::class),
             default   => abort(400, "Unknown action: {$action}"),
         };
+
+        // change_notes is unvalidated on action requests (rules() returns []) — cast for strict types
+        $changeNotes = $request->input('change_notes');
+        try {
+            if ($action === 'submit') {
+                $this->prService->submit($purchaseRequest, $changeNotes === null ? null : (string) $changeNotes);
+            } else {
+                $this->prService->approve($purchaseRequest);
+            }
+        } catch (RuntimeException $e) {
+            return back()->with(['success' => false, 'status' => $e->getMessage()]);
+        }
         return back()->with(['success' => true, 'status' => 'Purchase request updated.']);
     }
 
@@ -123,27 +135,43 @@ class PurchaseRequestController extends Controller
     {
         $this->authorize('order', $purchaseRequest);
         $data = $request->validated();
-        $this->prService->order($purchaseRequest, $data['po_number'], isset($data['supplier_id']) ? (int) $data['supplier_id'] : null, $request->file('po_file'));
+        try {
+            $this->prService->order($purchaseRequest, $data['po_number'], isset($data['supplier_id']) ? (int) $data['supplier_id'] : null, $request->file('po_file'));
+        } catch (RuntimeException $e) {
+            return back()->with(['success' => false, 'status' => $e->getMessage()]);
+        }
         return back()->with(['success' => true, 'status' => 'Order confirmed. PO number saved.']);
     }
 
     public function pay(PayPurchaseRequestRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('pay', $purchaseRequest);
-        $this->prService->recordPayment($purchaseRequest, $request->validated(), $request->file('payment_file'));
+        try {
+            $this->prService->recordPayment($purchaseRequest, $request->validated(), $request->file('payment_file'));
+        } catch (RuntimeException $e) {
+            return back()->with(['success' => false, 'status' => $e->getMessage()]);
+        }
         return back()->with(['success' => true, 'status' => 'Payment recorded.']);
     }
 
     public function ship(ShipPurchaseRequestRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('ship', $purchaseRequest);
-        $this->prService->markShipped($purchaseRequest, $request->validated());
+        try {
+            $this->prService->markShipped($purchaseRequest, $request->validated());
+        } catch (RuntimeException $e) {
+            return back()->with(['success' => false, 'status' => $e->getMessage()]);
+        }
         return back()->with(['success' => true, 'status' => 'Marked as shipped.']);
     }
 
     public function receiveItems(PurchaseRequest $purchaseRequest): Response
     {
         $this->authorize('create', PurchaseRequest::class);
+
+        if (! in_array($purchaseRequest->status, [PurchaseRequestStatus::SHIPPED, PurchaseRequestStatus::PARTIALLY_RECEIVED], true))
+            abort(403, 'Only shipped purchase requests can be received.');
+
         $purchaseRequest->load(['lines.item.defaultUnit', 'lines.unit']);
         return Inertia::render('Inventory/PurchaseRequests/ReceiveItems', [
             'purchaseRequest' => $purchaseRequest,

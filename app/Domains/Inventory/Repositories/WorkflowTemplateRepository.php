@@ -15,7 +15,7 @@ class WorkflowTemplateRepository
     public function listWithStepsAndUsage(): Collection
     {
         return WorkflowTemplate::with('steps.approverUser')
-            ->withCount('purchaseRequests')
+            ->withCount(['purchaseRequests', 'exportRequests'])
             ->orderBy('name')
             ->get();
     }
@@ -71,9 +71,11 @@ class WorkflowTemplateRepository
         }
     }
 
-    public function hasPurchaseRequests(WorkflowTemplate $template): bool
+    /** Whether any purchase or export request still references the template. */
+    public function isInUse(WorkflowTemplate $template): bool
     {
-        return $template->purchaseRequests()->exists();
+        return $template->purchaseRequests()->exists()
+            || $template->exportRequests()->exists();
     }
 
     public function delete(WorkflowTemplate $template): void

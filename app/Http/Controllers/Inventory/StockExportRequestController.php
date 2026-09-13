@@ -113,16 +113,23 @@ class StockExportRequestController extends Controller
         // Authorize per action: a direct approve needs the approve ability; submitting
         // (and any other draft transition) needs create. Without this the action branch
         // would let any authenticated user approve/submit another user's request.
+        // The service enforces the status, workflow and self-approval rules.
+        match ($action) {
+            'submit' => $this->authorize('create', StockExportRequest::class),
+            'approve' => $this->authorize('approve', $exportRequest),
+            default => abort(400, "Unknown action: {$action}"),
+        };
+
         // change_notes is unvalidated on action requests (rules() returns []) — cast for strict types.
         $changeNotes = $request->input('change_notes');
-        if ($action === 'submit') {
-            $this->authorize('create', StockExportRequest::class);
-            $this->service->submit($exportRequest, $changeNotes === null ? null : (string) $changeNotes);
-        } elseif ($action === 'approve') {
-            $this->authorize('approve', $exportRequest);
-            $this->service->approve($exportRequest);
-        } else {
-            abort(400, "Unknown action: {$action}");
+        try {
+            if ($action === 'submit') {
+                $this->service->submit($exportRequest, $changeNotes === null ? null : (string) $changeNotes);
+            } else {
+                $this->service->approve($exportRequest);
+            }
+        } catch (RuntimeException $e) {
+            return back()->with(['success' => false, 'status' => $e->getMessage()]);
         }
 
         return back()->with(['success' => true, 'status' => 'Export request updated.']);
