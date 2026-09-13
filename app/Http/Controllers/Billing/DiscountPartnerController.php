@@ -31,10 +31,13 @@ class DiscountPartnerController extends Controller
     {
         $this->authorize('viewAny', DiscountPartner::class);
         $requestInputs = $request->all();
-        $partners = $this->partnerService->listPartners($requestInputs);
+        // Shape each row with the resource but keep the paginator's own top-level `total` and
+        // `current_page`: TableLayout reads them there, not from a resource collection's `meta`.
+        $partners = $this->partnerService->listPartners($requestInputs)
+            ->through(fn (DiscountPartner $partner) => (new DiscountPartnerResource($partner))->resolve($request));
 
         return Inertia::render('DiscountPartner/Index', [
-            'partners' => DiscountPartnerResource::collection($partners),
+            'partners' => $partners,
             'requestInputs' => $requestInputs,
         ]);
     }
