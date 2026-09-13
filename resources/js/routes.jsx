@@ -40,6 +40,7 @@ import WarehouseIcon from '@mui/icons-material/Warehouse';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import AlarmIcon from '@mui/icons-material/Alarm';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
@@ -454,6 +455,12 @@ const routes = (sections = []) => {
                     route: 'settings.index',
                     permission: 'Advance Settings.Settings.List Settings',
                     icon: <SettingsIcon />,
+                },
+                {
+                    title: 'TAT Alerts',
+                    route: 'tat-alert-rules.index',
+                    permission: 'Advance Settings.TAT Alerts.List TAT Alerts',
+                    icon: <AlarmIcon />,
                 },
                 {
                     title: 'Tags',
