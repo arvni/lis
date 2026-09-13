@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, act } from '@testing-library/react';
+import { render, act, within } from '@testing-library/react';
 import { router } from '@inertiajs/react';
 import FinancialCheck from '@/Pages/Acceptance/FinancialCheck';
 import TableLayout from '@/Layouts/TableLayout';
@@ -25,12 +25,31 @@ vi.mock('./Components/Filter', () => ({ default: () => null }));
 vi.mock('@/Pages/Invoice/Components/InvoiceEditForm', () => ({ default: () => null }));
 vi.mock('@/Pages/Acceptance/Components/CreateInvoiceForm', () => ({ default: () => null }));
 
-const withInvoice = { id: 1, patient: { fullName: 'A' }, invoice: { id: 9, total: 30 } };
+const withInvoice = {
+    id: 1,
+    patient: { fullName: 'A' },
+    invoice: {
+        id: 9,
+        invoice_items_sum_price: '30.000',
+        invoice_items_sum_discount: '0.000',
+        payments_sum_price: '30.000',
+    },
+};
 const withoutInvoice = { id: 2, patient: { fullName: 'B' }, invoice: null };
+const partlyPaid = {
+    id: 3,
+    patient: { fullName: 'C' },
+    invoice: {
+        id: 10,
+        invoice_items_sum_price: '50.000',
+        invoice_items_sum_discount: '0.000',
+        payments_sum_price: '20.000',
+    },
+};
 
 const renderPage = () => {
     pageProps = {
-        acceptances: { data: [withInvoice, withoutInvoice] },
+        acceptances: { data: [withInvoice, withoutInvoice, partlyPaid] },
         status: null,
         errors: {},
         success: null,
@@ -39,11 +58,21 @@ const renderPage = () => {
     render(<FinancialCheck />);
 };
 
-const approveButtonFor = (row) => {
+const column = (field) => {
     const { columns } = vi.mocked(TableLayout).mock.calls.at(-1)[0];
-    const actions = columns.find((c) => c.field === 'actions').getActions({ row });
 
-    return actions.find((action) => action.key === `approve-${row.id}`);
+    return columns.find((c) => c.field === field);
+};
+
+const approveButtonFor = (row) =>
+    column('actions')
+        .getActions({ row })
+        .find((action) => action.key === `approve-${row.id}`);
+
+const invoiceCellFor = (row) => {
+    const { container } = render(column('invoice_status').renderCell({ row }));
+
+    return within(container);
 };
 
 const confirmProps = () => vi.mocked(ApproveFinancialConfirm).mock.calls.at(-1)[0];
@@ -66,6 +95,17 @@ describe('Acceptance/FinancialCheck approval', () => {
 
         expect(confirmProps().open).toBe(true);
         expect(confirmProps().acceptance).toBe(withoutInvoice);
+        expect(router.put).not.toHaveBeenCalled();
+    });
+
+    // The confirmation is where a not fully paid invoice is explained and
+    // blocked, so the row still opens it rather than failing silently.
+    it('opens the confirmation for a partly paid invoice', () => {
+        renderPage();
+
+        act(() => approveButtonFor(partlyPaid).props.onClick());
+
+        expect(confirmProps().acceptance).toBe(partlyPaid);
         expect(router.put).not.toHaveBeenCalled();
     });
 
@@ -99,5 +139,31 @@ describe('Acceptance/FinancialCheck approval', () => {
 
         expect(confirmProps().open).toBe(false);
         expect(router.put).not.toHaveBeenCalled();
+    });
+});
+
+describe('Acceptance/FinancialCheck invoice status', () => {
+    it('marks an invoice with a balance owing as not fully paid, with what remains', () => {
+        renderPage();
+
+        const cell = invoiceCellFor(partlyPaid);
+
+        expect(cell.getByText('Not Fully Paid')).toBeInTheDocument();
+        expect(cell.getByText(/Remaining: .*30\.000 of .*50\.000/)).toBeInTheDocument();
+    });
+
+    it('marks a fully paid invoice with its total', () => {
+        renderPage();
+
+        const cell = invoiceCellFor(withInvoice);
+
+        expect(cell.getByText('Fully Paid')).toBeInTheDocument();
+        expect(cell.getByText(/Total: .*30\.000/)).toBeInTheDocument();
+    });
+
+    it('marks an acceptance without an invoice', () => {
+        renderPage();
+
+        expect(invoiceCellFor(withoutInvoice).getByText('No Invoice')).toBeInTheDocument();
     });
 });
