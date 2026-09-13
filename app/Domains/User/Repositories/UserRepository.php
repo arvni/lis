@@ -60,6 +60,23 @@ class UserRepository
         return User::role($role)->get();
     }
 
+    /**
+     * Active users that are listed by id or hold one of the given roles, each returned once.
+     *
+     * @param  list<int>  $userIds
+     * @param  list<int>  $roleIds
+     * @return Collection<int, User>
+     */
+    public function getActiveByIdsOrRoleIds(array $userIds, array $roleIds): Collection
+    {
+        return User::query()
+            ->where('is_active', true)
+            ->where(fn (Builder $query) => $query
+                ->whereIn('id', $userIds)
+                ->orWhereHas('roles', fn (Builder $roles) => $roles->whereIn('roles.id', $roleIds)))
+            ->get();
+    }
+
     public function create(array $data): User
     {
 

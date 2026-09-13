@@ -23,6 +23,13 @@ Schedule::command('inventory:escalate-overdue-pr-steps')
         Log::error('Scheduled command failed: inventory:escalate-overdue-pr-steps');
     });
 
+Schedule::command('reception:send-tat-alerts')
+    ->dailyAt('08:00')
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        Log::error('Scheduled command failed: reception:send-tat-alerts');
+    });
+
 Schedule::command('monitoring:fetch-samples')
     ->everyFiveMinutes()
     ->withoutOverlapping()

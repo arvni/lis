@@ -55,10 +55,12 @@ use App\Domains\Reception\Models\AcceptanceItemState;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Models\Report;
 use App\Domains\Reception\Models\Sample;
+use App\Domains\Reception\Models\TatAlertRule;
 use App\Domains\Reception\Policies\AcceptancePolicy;
 use App\Domains\Reception\Policies\PatientPolicy;
 use App\Domains\Reception\Policies\ReportPolicy;
 use App\Domains\Reception\Policies\SamplePolicy;
+use App\Domains\Reception\Policies\TatAlertRulePolicy;
 use App\Domains\Referrer\Models\Material;
 use App\Domains\Referrer\Models\OrderMaterial;
 use App\Domains\Referrer\Models\Referrer;
@@ -162,6 +164,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Sample::class, SamplePolicy::class);
         Gate::policy(Report::class, ReportPolicy::class);
         Gate::policy(Patient::class, PatientPolicy::class);
+        Gate::policy(TatAlertRule::class, TatAlertRulePolicy::class);
 
         Gate::policy(SectionGroup::class, SectionGroupPolicy::class);
         Gate::policy(Section::class, SectionPolicy::class);

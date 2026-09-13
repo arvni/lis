@@ -329,7 +329,6 @@ app/Domains/Notification/Requests/ListWhatsappMessageRequest.php
 app/Domains/Notification/Requests/NotificationIdsRequest.php
 app/Domains/Notification/Services/WhatsappMessageService.php
 app/Domains/Reception/Adapters/LaboratoryAdapter.php
-app/Domains/Reception/Adapters/UserAdapter.php
 app/Domains/Reception/Adapters/WorkflowAdapter.php
 app/Domains/Reception/DTOs/AcceptanceDTO.php
 app/Domains/Reception/DTOs/AcceptanceItemDTO.php

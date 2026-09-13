@@ -47,6 +47,7 @@ use App\Http\Controllers\Reception\ShowAcceptanceItemController;
 use App\Http\Controllers\Reception\TagAssignmentController;
 use App\Http\Controllers\Reception\TagController;
 use App\Http\Controllers\Reception\TATDashboardController;
+use App\Http\Controllers\Reception\TatAlertRuleController;
 use App\Http\Controllers\Reception\EjectPanelController;
 use App\Http\Controllers\Reception\PromoteToPanelController;
 use App\Http\Controllers\Reception\ToggleReportlessAcceptanceItemController;
@@ -86,6 +87,7 @@ Route::group(["prefix" => "reception"], function () {
     Route::delete("acceptances/{acceptance}/discount-card", [AcceptanceDiscountCardController::class, "destroy"])->name("acceptances.discountCard.destroy");
     Route::put("acceptances/{acceptance}/items", UpdateAcceptanceItemController::class)->name("acceptances.updateItem");
     Route::get("tat-dashboard", TATDashboardController::class)->name("tat.dashboard");
+    Route::resource("tat-alert-rules", TatAlertRuleController::class)->except("create", "edit", "show");
     Route::post("acceptances/{acceptance}/pooling", AddPoolingController::class)->name("acceptances.addPooling");
     Route::put("acceptances/{acceptance}/check-status", CheckAcceptanceStatusController::class)->name("acceptances.checkStatus");
     Route::post("acceptances/{acceptance}/prescription", AcceptancePrescriptionController::class)
