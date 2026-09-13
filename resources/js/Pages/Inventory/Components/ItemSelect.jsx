@@ -15,6 +15,7 @@ let debounceTimer = null;
  *   error        – bool
  *   helperText   – string
  *   size         – MUI size ("small" | "medium")
+ *   autoFocus    – focus the search box when it mounts
  */
 const ItemSelect = ({
     value,
@@ -24,6 +25,7 @@ const ItemSelect = ({
     error = false,
     helperText = '',
     size = 'medium',
+    autoFocus = false,
 }) => {
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -75,6 +77,7 @@ const ItemSelect = ({
                     size={size}
                     error={error}
                     helperText={helperText}
+                    autoFocus={autoFocus}
                     slotProps={{
                         ...params.slotProps,
                         input: {

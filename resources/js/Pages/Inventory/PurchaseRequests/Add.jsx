@@ -6,140 +6,32 @@ import {
     Card,
     CardContent,
     CardHeader,
-    Grid,
-    TextField,
-    MenuItem,
-    IconButton,
-    Table,
-    TableHead,
-    TableBody,
-    TableRow,
-    TableCell,
     CircularProgress,
-    Alert,
+    Grid,
+    MenuItem,
+    TextField,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
-import UnitSelect from '@/Pages/Inventory/Components/UnitSelect';
-import SupplierSelect from '@/Pages/Inventory/Components/SupplierSelect';
-import BrandInput from '@/Pages/Inventory/Components/BrandInput';
-import PriceHint from '@/Pages/Inventory/Components/PriceHint';
-import LineItemField from '@/Pages/Inventory/PurchaseRequests/Components/LineItemField';
+import PurchaseRequestLinesEditor from '@/Pages/Inventory/PurchaseRequests/Components/PurchaseRequestLinesEditor';
+import { lineFromSource, toPayload } from '@/Pages/Inventory/PurchaseRequests/Components/lineState';
 
 const URGENCY_OPTIONS = ['LOW', 'NORMAL', 'HIGH', 'URGENT'];
-
-const emptyLine = () => ({
-    _item: null,
-    _unit: null,
-    _preferred_supplier: null,
-    _manual: false,
-    item_id: null,
-    item_name: '',
-    unit_id: null,
-    qty: '',
-    estimated_unit_price: '',
-    preferred_supplier_id: '',
-    cat_no: '',
-    brand: '',
-    notes: '',
-});
-
-const toPayload = ({ _item, _unit, _preferred_supplier, _manual, ...rest }) => rest;
-
-const lineFromSource = (line) => ({
-    _item: line.item ?? null,
-    _unit: line.unit ?? null,
-    _preferred_supplier: line.preferred_supplier ?? null,
-    _manual: !line.item_id,
-    item_id: line.item_id,
-    item_name: line.item_name ?? '',
-    unit_id: line.unit_id,
-    qty: line.qty ?? '',
-    estimated_unit_price: line.estimated_unit_price ?? '',
-    preferred_supplier_id: line.preferred_supplier_id ?? '',
-    cat_no: line.cat_no ?? '',
-    brand: line.brand ?? '',
-    notes: line.notes ?? '',
-});
-
-const payloadFromSource = (line) => toPayload(lineFromSource(line));
 
 const Add = () => {
     const { defaults, units } = usePage().props;
 
+    const [lineItems, setLineItems] = useState(() => defaults?.lines?.map(lineFromSource) ?? []);
+
     const { data, setData, post, processing, errors } = useForm({
         urgency: defaults?.urgency ?? 'NORMAL',
         notes: defaults?.notes ?? '',
-        lines: defaults?.lines?.map(payloadFromSource) ?? [],
+        lines: lineItems.map(toPayload),
     });
-
-    const [lineItems, setLineItems] = useState(() => defaults?.lines?.map(lineFromSource) ?? []);
 
     const syncLines = (updated) => {
         setLineItems(updated);
         setData('lines', updated.map(toPayload));
-    };
-
-    const addLine = () => syncLines([...lineItems, emptyLine()]);
-
-    const removeLine = (idx) => syncLines(lineItems.filter((_, i) => i !== idx));
-
-    const setLineItem = (idx, item) => {
-        syncLines(
-            lineItems.map((l, i) =>
-                i === idx
-                    ? { ...l, _item: item, item_id: item?.id ?? null, _unit: null, unit_id: null }
-                    : l,
-            ),
-        );
-    };
-
-    const setLineUnit = (idx, unit) => {
-        syncLines(
-            lineItems.map((l, i) =>
-                i === idx ? { ...l, _unit: unit, unit_id: unit?.id ?? null } : l,
-            ),
-        );
-    };
-
-    // Switching between a catalogue item and a typed name starts the item (and
-    // the unit, whose options depend on it) over.
-    const setLineManual = (idx, manual) => {
-        syncLines(
-            lineItems.map((l, i) =>
-                i === idx
-                    ? {
-                          ...l,
-                          _manual: manual,
-                          _item: null,
-                          item_id: null,
-                          item_name: '',
-                          _unit: null,
-                          unit_id: null,
-                      }
-                    : l,
-            ),
-        );
-    };
-
-    const updateLine = (idx, field, value) => {
-        syncLines(lineItems.map((l, i) => (i === idx ? { ...l, [field]: value } : l)));
-    };
-
-    const setLineSupplier = (idx, supplier) => {
-        syncLines(
-            lineItems.map((l, i) =>
-                i === idx
-                    ? {
-                          ...l,
-                          _preferred_supplier: supplier,
-                          preferred_supplier_id: supplier?.id ?? '',
-                      }
-                    : l,
-            ),
-        );
     };
 
     const handleSubmit = (e) => {
@@ -193,169 +85,15 @@ const Add = () => {
                 <Card>
                     <CardHeader
                         title="Requested Items"
-                        action={
-                            <Button
-                                startIcon={<AddIcon />}
-                                onClick={addLine}
-                                size="small"
-                                variant="outlined"
-                            >
-                                Add Item
-                            </Button>
-                        }
+                        subheader="Add each item you need with its quantity. The estimated price is optional."
                     />
-                    <CardContent sx={{ p: lineItems.length ? 0 : undefined, overflowX: 'auto' }}>
-                        {lineItems.length === 0 ? (
-                            <Alert severity="info" sx={{ m: 2 }}>
-                                Click &quot;Add Item&quot; to begin building your request.
-                            </Alert>
-                        ) : (
-                            <Table size="small" sx={{ minWidth: 900 }}>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell sx={{ minWidth: 260 }}>Item</TableCell>
-                                        <TableCell sx={{ minWidth: 180 }}>Unit</TableCell>
-                                        <TableCell sx={{ width: 100 }}>Qty</TableCell>
-                                        <TableCell sx={{ width: 120 }}>Est. Unit Price</TableCell>
-                                        <TableCell sx={{ minWidth: 130 }}>Cat No</TableCell>
-                                        <TableCell sx={{ minWidth: 140 }}>Brand</TableCell>
-                                        <TableCell sx={{ minWidth: 160 }}>
-                                            Preferred Supplier
-                                        </TableCell>
-                                        <TableCell sx={{ minWidth: 140 }}>Notes</TableCell>
-                                        <TableCell sx={{ width: 48 }} />
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {lineItems.map((line, idx) => (
-                                        <TableRow key={idx}>
-                                            <TableCell>
-                                                <LineItemField
-                                                    manual={line._manual}
-                                                    item={line._item}
-                                                    itemName={line.item_name}
-                                                    onItemChange={(item) => setLineItem(idx, item)}
-                                                    onNameChange={(v) =>
-                                                        updateLine(idx, 'item_name', v)
-                                                    }
-                                                    onManualChange={(m) => setLineManual(idx, m)}
-                                                    error={
-                                                        errors[`lines.${idx}.item_id`] ??
-                                                        errors[`lines.${idx}.item_name`]
-                                                    }
-                                                />
-                                                <PriceHint
-                                                    itemId={line._item?.id}
-                                                    supplierId={line._preferred_supplier?.id}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <UnitSelect
-                                                    size="small"
-                                                    itemId={line._item?.id}
-                                                    allUnits={units ?? []}
-                                                    value={line._unit}
-                                                    onChange={(unit) => setLineUnit(idx, unit)}
-                                                    required
-                                                    error={!!errors[`lines.${idx}.unit_id`]}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <TextField
-                                                    size="small"
-                                                    type="number"
-                                                    placeholder="Qty"
-                                                    value={line.qty}
-                                                    onChange={(e) =>
-                                                        updateLine(idx, 'qty', e.target.value)
-                                                    }
-                                                    slotProps={{
-                                                        htmlInput: { min: 0, step: 'any' },
-                                                    }}
-                                                    fullWidth
-                                                    error={!!errors[`lines.${idx}.qty`]}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <TextField
-                                                    size="small"
-                                                    type="number"
-                                                    placeholder="0.00"
-                                                    value={line.estimated_unit_price}
-                                                    onChange={(e) =>
-                                                        updateLine(
-                                                            idx,
-                                                            'estimated_unit_price',
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    slotProps={{
-                                                        htmlInput: { min: 0, step: 'any' },
-                                                    }}
-                                                    fullWidth
-                                                    error={
-                                                        !!errors[
-                                                            `lines.${idx}.estimated_unit_price`
-                                                        ]
-                                                    }
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <TextField
-                                                    size="small"
-                                                    fullWidth
-                                                    placeholder="Cat No"
-                                                    value={line.cat_no}
-                                                    onChange={(e) =>
-                                                        updateLine(idx, 'cat_no', e.target.value)
-                                                    }
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <BrandInput
-                                                    value={line.brand}
-                                                    itemId={line._item?.id}
-                                                    onChange={(v) => updateLine(idx, 'brand', v)}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <SupplierSelect
-                                                    size="small"
-                                                    label="Preferred Supplier"
-                                                    value={line._preferred_supplier}
-                                                    onChange={(s) => setLineSupplier(idx, s)}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <TextField
-                                                    size="small"
-                                                    fullWidth
-                                                    placeholder="Notes"
-                                                    value={line.notes}
-                                                    onChange={(e) =>
-                                                        updateLine(idx, 'notes', e.target.value)
-                                                    }
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <IconButton
-                                                    size="small"
-                                                    color="error"
-                                                    onClick={() => removeLine(idx)}
-                                                >
-                                                    <DeleteIcon fontSize="small" />
-                                                </IconButton>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        )}
-                        {errors.lines && (
-                            <Alert severity="error" sx={{ mt: 1 }}>
-                                {errors.lines}
-                            </Alert>
-                        )}
+                    <CardContent>
+                        <PurchaseRequestLinesEditor
+                            lines={lineItems}
+                            onChange={syncLines}
+                            errors={errors}
+                            units={units}
+                        />
                     </CardContent>
                 </Card>
 
