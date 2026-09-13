@@ -21,6 +21,8 @@ import {
 } from '@mui/material';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
+import ItemSelect from '@/Pages/Inventory/Components/ItemSelect';
+import UnitSelect from '@/Pages/Inventory/Components/UnitSelect';
 import LocationSelect from '@/Pages/Inventory/Components/LocationSelect';
 import BrandInput from '@/Pages/Inventory/Components/BrandInput';
 
@@ -41,6 +43,11 @@ const ReceiveItems = () => {
         expiry_date: '',
         store_location_id: null,
         unit_price: l.unit_price ?? '',
+        // Only used by a line not in the catalogue: the item and unit it is received as.
+        item_id: null,
+        unit_id: null,
+        _linkItem: null,
+        _linkUnit: null,
         _location: null,
         _selected: true,
         _line: l,
@@ -71,13 +78,40 @@ const ReceiveItems = () => {
         );
     };
 
+    // Picking a different item resets the unit and location, whose options depend on it.
+    const setLinkItem = (idx, item) => {
+        setReceiveLines((prev) =>
+            prev.map((l, i) =>
+                i === idx
+                    ? {
+                          ...l,
+                          _linkItem: item,
+                          item_id: item?.id ?? null,
+                          _linkUnit: null,
+                          unit_id: null,
+                          _location: null,
+                          store_location_id: null,
+                      }
+                    : l,
+            ),
+        );
+    };
+
+    const setLinkUnit = (idx, unit) => {
+        setReceiveLines((prev) =>
+            prev.map((l, i) =>
+                i === idx ? { ...l, _linkUnit: unit, unit_id: unit?.id ?? null } : l,
+            ),
+        );
+    };
+
     const nullify = (v) => (v === '' || v === undefined ? null : v);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const selected = receiveLines
             .filter((l) => l._selected)
-            .map(({ _location, _selected, _line, ...rest }) => ({
+            .map(({ _location, _selected, _line, _linkItem, _linkUnit, ...rest }) => ({
                 ...rest,
                 barcode: nullify(rest.barcode),
                 unit_price: nullify(rest.unit_price),
@@ -112,6 +146,9 @@ const ReceiveItems = () => {
     }
 
     const errorMessages = Object.values(errors).filter(Boolean);
+    const hasUnlinkedLine = receiveLines.some(
+        (l) => l._selected && !l._line.item_id && (!l.item_id || !l.unit_id),
+    );
 
     return (
         <>
@@ -211,15 +248,58 @@ const ReceiveItems = () => {
                                                 />
                                             </TableCell>
                                             <TableCell>
-                                                <Typography variant="body2">
-                                                    {rl._line.item?.name}
-                                                </Typography>
-                                                <Typography
-                                                    variant="caption"
-                                                    color="text.secondary"
-                                                >
-                                                    {rl._line.unit?.name}
-                                                </Typography>
+                                                {rl._line.item_id ? (
+                                                    <>
+                                                        <Typography variant="body2">
+                                                            {rl._line.item?.name}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="caption"
+                                                            color="text.secondary"
+                                                        >
+                                                            {rl._line.unit?.name}
+                                                        </Typography>
+                                                    </>
+                                                ) : (
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            gap: 1,
+                                                            minWidth: 240,
+                                                        }}
+                                                    >
+                                                        <Typography variant="body2">
+                                                            {rl._line.item_name}
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="caption"
+                                                            color="text.secondary"
+                                                        >
+                                                            Not in catalogue (requested in{' '}
+                                                            {rl._line.unit?.name}). Link it to an
+                                                            item to add it to stock.
+                                                        </Typography>
+                                                        <ItemSelect
+                                                            size="small"
+                                                            label="Catalogue item"
+                                                            value={rl._linkItem}
+                                                            onChange={(item) =>
+                                                                setLinkItem(idx, item)
+                                                            }
+                                                            required={rl._selected}
+                                                        />
+                                                        <UnitSelect
+                                                            size="small"
+                                                            itemId={rl._linkItem?.id}
+                                                            value={rl._linkUnit}
+                                                            onChange={(unit) =>
+                                                                setLinkUnit(idx, unit)
+                                                            }
+                                                            required={rl._selected}
+                                                        />
+                                                    </Box>
+                                                )}
                                             </TableCell>
                                             <TableCell align="right">{remaining}</TableCell>
                                             <TableCell>
@@ -318,7 +398,7 @@ const ReceiveItems = () => {
                                             <TableCell>
                                                 <BrandInput
                                                     value={rl.brand}
-                                                    itemId={rl._line.item_id}
+                                                    itemId={rl._line.item_id ?? rl.item_id}
                                                     disabled={!rl._selected}
                                                     onChange={(v) =>
                                                         updateReceiveLine(idx, 'brand', v)
@@ -346,7 +426,7 @@ const ReceiveItems = () => {
                                                 <LocationSelect
                                                     size="small"
                                                     storeId={storeId}
-                                                    itemId={rl._line.item_id}
+                                                    itemId={rl._line.item_id ?? rl.item_id}
                                                     transactionType="ENTRY"
                                                     value={rl._location}
                                                     onChange={(loc) => setLocation(idx, loc)}
@@ -375,7 +455,12 @@ const ReceiveItems = () => {
                         type="submit"
                         variant="contained"
                         color="success"
-                        disabled={submitting || !storeId || receiveLines.every((l) => !l._selected)}
+                        disabled={
+                            submitting ||
+                            !storeId ||
+                            hasUnlinkedLine ||
+                            receiveLines.every((l) => !l._selected)
+                        }
                         startIcon={submitting && <CircularProgress size={16} />}
                     >
                         Confirm Receipt &amp; Create Stock Entry

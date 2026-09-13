@@ -67,7 +67,12 @@ const Show = () => {
 
     const openBrandsDialog = () => {
         setBrandLines(
-            (pr.lines ?? []).map((l) => ({ id: l.id, brand: l.brand ?? '', item: l.item })),
+            (pr.lines ?? []).map((l) => ({
+                id: l.id,
+                brand: l.brand ?? '',
+                item: l.item,
+                item_name: l.item_name,
+            })),
         );
         setBrandsDialog(true);
     };
@@ -217,7 +222,10 @@ const breadcrumbs = (pr) => [
 ];
 
 Show.layout = (page) => (
-    <AuthenticatedLayout auth={page.props.auth} breadcrumbs={breadcrumbs(page.props.purchaseRequest)}>
+    <AuthenticatedLayout
+        auth={page.props.auth}
+        breadcrumbs={breadcrumbs(page.props.purchaseRequest)}
+    >
         {page}
     </AuthenticatedLayout>
 );

@@ -2,6 +2,7 @@ import {
     Card,
     CardContent,
     CardHeader,
+    Chip,
     LinearProgress,
     Table,
     TableBody,
@@ -41,10 +42,21 @@ const LineItemsCard = ({ lines = [] }) => (
                         return (
                             <TableRow key={line.id}>
                                 <TableCell>
-                                    <Typography variant="body2">{line.item?.name}</Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                        {line.item?.item_code}
+                                    <Typography variant="body2">
+                                        {line.item?.name ?? line.item_name}
                                     </Typography>
+                                    {line.item_id ? (
+                                        <Typography variant="caption" color="text.secondary">
+                                            {line.item?.item_code}
+                                        </Typography>
+                                    ) : (
+                                        <Chip
+                                            label="Not in catalogue"
+                                            size="small"
+                                            variant="outlined"
+                                            color="warning"
+                                        />
+                                    )}
                                 </TableCell>
                                 <TableCell>{line.cat_no || '—'}</TableCell>
                                 <TableCell>{line.brand || '—'}</TableCell>

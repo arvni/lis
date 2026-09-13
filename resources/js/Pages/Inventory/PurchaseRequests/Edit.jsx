@@ -22,21 +22,23 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
-import ItemSelect from '@/Pages/Inventory/Components/ItemSelect';
 import UnitSelect from '@/Pages/Inventory/Components/UnitSelect';
 import SupplierSelect from '@/Pages/Inventory/Components/SupplierSelect';
 import BrandInput from '@/Pages/Inventory/Components/BrandInput';
 import PriceHint from '@/Pages/Inventory/Components/PriceHint';
+import LineItemField from '@/Pages/Inventory/PurchaseRequests/Components/LineItemField';
 
 const URGENCY_OPTIONS = ['NORMAL', 'URGENT'];
 
-const toPayload = ({ _item, _unit, _preferred_supplier, ...rest }) => rest;
+const toPayload = ({ _item, _unit, _preferred_supplier, _manual, ...rest }) => rest;
 
 const lineFromExisting = (line) => ({
     _item: line.item ?? null,
     _unit: line.unit ?? null,
     _preferred_supplier: line.preferred_supplier ?? null,
+    _manual: !line.item_id,
     item_id: line.item_id,
+    item_name: line.item_name ?? '',
     unit_id: line.unit_id,
     qty: line.qty ?? '',
     estimated_unit_price: line.estimated_unit_price ?? '',
@@ -50,7 +52,9 @@ const emptyLine = () => ({
     _item: null,
     _unit: null,
     _preferred_supplier: null,
+    _manual: false,
     item_id: null,
+    item_name: '',
     unit_id: null,
     qty: '',
     estimated_unit_price: '',
@@ -61,7 +65,7 @@ const emptyLine = () => ({
 });
 
 const Edit = () => {
-    const { purchaseRequest } = usePage().props;
+    const { purchaseRequest, units } = usePage().props;
     const pr = purchaseRequest;
 
     const { data, setData, put, processing, errors } = useForm({
@@ -94,6 +98,26 @@ const Edit = () => {
         syncLines(
             lineItems.map((l, i) =>
                 i === idx ? { ...l, _unit: unit, unit_id: unit?.id ?? null } : l,
+            ),
+        );
+    };
+
+    // Switching between a catalogue item and a typed name starts the item (and
+    // the unit, whose options depend on it) over.
+    const setLineManual = (idx, manual) => {
+        syncLines(
+            lineItems.map((l, i) =>
+                i === idx
+                    ? {
+                          ...l,
+                          _manual: manual,
+                          _item: null,
+                          item_id: null,
+                          item_name: '',
+                          _unit: null,
+                          unit_id: null,
+                      }
+                    : l,
             ),
         );
     };
@@ -204,13 +228,19 @@ const Edit = () => {
                                     {lineItems.map((line, idx) => (
                                         <TableRow key={idx}>
                                             <TableCell>
-                                                <ItemSelect
-                                                    size="small"
-                                                    value={line._item}
-                                                    onChange={(item) => setLineItem(idx, item)}
-                                                    required
-                                                    error={!!errors[`lines.${idx}.item_id`]}
-                                                    helperText={errors[`lines.${idx}.item_id`]}
+                                                <LineItemField
+                                                    manual={line._manual}
+                                                    item={line._item}
+                                                    itemName={line.item_name}
+                                                    onItemChange={(item) => setLineItem(idx, item)}
+                                                    onNameChange={(v) =>
+                                                        updateLine(idx, 'item_name', v)
+                                                    }
+                                                    onManualChange={(m) => setLineManual(idx, m)}
+                                                    error={
+                                                        errors[`lines.${idx}.item_id`] ??
+                                                        errors[`lines.${idx}.item_name`]
+                                                    }
                                                 />
                                                 <PriceHint
                                                     itemId={line._item?.id}
@@ -221,7 +251,7 @@ const Edit = () => {
                                                 <UnitSelect
                                                     size="small"
                                                     itemId={line._item?.id}
-                                                    allUnits={[]}
+                                                    allUnits={units ?? []}
                                                     value={line._unit}
                                                     onChange={(unit) => setLineUnit(idx, unit)}
                                                     required

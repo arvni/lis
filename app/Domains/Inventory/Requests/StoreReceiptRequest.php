@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Inventory\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -19,6 +21,9 @@ class StoreReceiptRequest extends FormRequest
             'lines'                      => 'required|array|min:1',
             'lines.*.pr_line_id'         => 'required|exists:purchase_request_lines,id',
             'lines.*.qty'                => 'required|numeric|min:0.000001',
+            // Only for a line not in the catalogue yet: the item and unit it is received as.
+            'lines.*.item_id'            => 'nullable|exists:items,id',
+            'lines.*.unit_id'            => 'nullable|exists:units,id',
             'lines.*.lot_number'         => 'nullable|string',
             'lines.*.brand'              => 'nullable|string',
             'lines.*.cat_no'             => 'nullable|string',

@@ -10,6 +10,7 @@ use App\Domains\Inventory\Adapters\UserAdapter;
 use App\Domains\Inventory\Enums\PurchaseRequestStatus;
 use App\Domains\Inventory\Enums\WorkflowRequestType;
 use App\Domains\Inventory\Models\PurchaseRequest;
+use App\Domains\Inventory\Models\PurchaseRequestLine;
 use App\Domains\Inventory\Models\WorkflowTemplate;
 use App\Domains\Inventory\Repositories\PurchaseRequestApprovalRepository;
 use App\Domains\Inventory\Repositories\PurchaseRequestRepository;
@@ -188,7 +189,7 @@ readonly class PurchaseRequestService
             unset($data['workflow_template_id']); // determined after lines are saved
             $pr = $this->purchaseRequestRepository->create($data);
             foreach ($lines as $line) {
-                $pr->lines()->create($line);
+                $pr->lines()->create($this->normalizeLine($line));
             }
 
             // Match template after lines are persisted so estimated total is available
@@ -212,7 +213,7 @@ readonly class PurchaseRequestService
             $pr->update($data);
             $pr->lines()->delete();
             foreach ($lines as $line) {
-                $pr->lines()->create($line);
+                $pr->lines()->create($this->normalizeLine($line));
             }
 
             // Re-match template in case urgency or estimated totals changed
@@ -367,9 +368,11 @@ readonly class PurchaseRequestService
                 $prLine = $linesById->get($lineId);
                 $remaining = (float) $prLine->qty - (float) $prLine->qty_received;
                 if ($qty > $remaining) {
-                    throw new RuntimeException("Qty received exceeds remaining for item {$prLine->item->name}.");
+                    throw new RuntimeException("Qty received exceeds remaining for item {$prLine->displayName()}.");
                 }
             }
+
+            $this->linkManualLines($linesById, $lines);
 
             $txLines = [];
             foreach ($lines as $ld) {
@@ -502,6 +505,62 @@ readonly class PurchaseRequestService
     public function getOrderedApprovals(PurchaseRequest $pr): Collection
     {
         return $this->approvalRepository->getOrderedForRequest($pr);
+    }
+
+    /**
+     * A stock entry needs a real item, so a line that only names an item not in the
+     * catalogue is linked on receipt to the item and unit the receiver picked. The
+     * typed name stays on the line as a record of what was asked for.
+     *
+     * @param  Collection<int, PurchaseRequestLine>  $linesById
+     * @param  array<int, array<string, mixed>>  $entries
+     */
+    private function linkManualLines(Collection $linesById, array $entries): void
+    {
+        /** @var array<int, array{int, int}> $links pr line id => [item id, unit id] */
+        $links = [];
+        foreach ($entries as $entry) {
+            $prLine = $linesById->get((int) $entry['pr_line_id']);
+            if (! $prLine->isManual()) {
+                continue;
+            }
+
+            $link = [(int) ($entry['item_id'] ?? 0), (int) ($entry['unit_id'] ?? 0)];
+            if ($link[0] === 0 || $link[1] === 0) {
+                throw new RuntimeException("Link \"{$prLine->item_name}\" to a catalogue item and unit before receiving it.");
+            }
+            if (isset($links[$prLine->id])) {
+                if ($links[$prLine->id] !== $link) {
+                    throw new RuntimeException("\"{$prLine->item_name}\" is linked to different items in the same receipt.");
+                }
+
+                continue;
+            }
+            if (! $this->purchaseRequestRepository->itemAcceptsUnit($link[0], $link[1])) {
+                throw new RuntimeException("The chosen unit isn't used by the item linked to \"{$prLine->item_name}\".");
+            }
+            $links[$prLine->id] = $link;
+        }
+
+        foreach ($links as $lineId => [$itemId, $unitId]) {
+            $this->purchaseRequestRepository->linkLineToItem($linesById->get($lineId), $itemId, $unitId);
+        }
+    }
+
+    /**
+     * A line names a catalogue item or a typed item_name, never both: a picked item
+     * wins, so a stale typed name can't linger next to it.
+     *
+     * @param  array<string, mixed>  $line
+     * @return array<string, mixed>
+     */
+    private function normalizeLine(array $line): array
+    {
+        if (! empty($line['item_id'])) {
+            $line['item_name'] = null;
+        }
+
+        return $line;
     }
 
     /**

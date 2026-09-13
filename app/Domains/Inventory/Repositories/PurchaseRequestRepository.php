@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Inventory\Repositories;
 
 use App\Domains\Inventory\Enums\PurchaseRequestStatus;
+use App\Domains\Inventory\Models\Item;
 use App\Domains\Inventory\Models\PurchaseRequest;
 use App\Domains\Inventory\Models\PurchaseRequestHistory;
 use App\Domains\Inventory\Models\PurchaseRequestLine;
@@ -69,7 +70,8 @@ class PurchaseRequestRepository
 
     /**
      * Free-text search over the PO number and the identifiers carried on the
-     * request's lines — item code/name and catalog number — plus the lot
+     * request's lines — item code/name, a not-in-catalogue line's typed name and
+     * catalog number — plus the lot
      * numbers recorded against it at receiving, so a container in hand can be
      * traced back to the request that ordered it.
      *
@@ -81,7 +83,10 @@ class PurchaseRequestRepository
 
         $query->where(function (Builder $q) use ($term) {
             $q->where('po_number', 'like', $term)
-                ->orWhereHas('lines', fn (Builder $q2) => $q2->where('cat_no', 'like', $term))
+                ->orWhereHas('lines', fn (Builder $q2) => $q2->where(function (Builder $q3) use ($term) {
+                    $q3->where('cat_no', 'like', $term)
+                        ->orWhere('item_name', 'like', $term);
+                }))
                 ->orWhereHas('lines.item', fn (Builder $q2) => $q2->where(function (Builder $q3) use ($term) {
                     $q3->where('item_code', 'like', $term)
                         ->orWhere('name', 'like', $term);
@@ -171,6 +176,24 @@ class PurchaseRequestRepository
     public function incrementLineQtyReceived(PurchaseRequestLine $line, float $qty): void
     {
         $line->increment('qty_received', $qty);
+    }
+
+    /**
+     * Whether the unit is one the item is counted in — its default unit or one it has a
+     * conversion for (the same set the item's unit picker offers).
+     */
+    public function itemAcceptsUnit(int $itemId, int $unitId): bool
+    {
+        return Item::whereKey($itemId)
+            ->where(fn (Builder $q) => $q->where('default_unit_id', $unitId)
+                ->orWhereHas('unitConversions', fn (Builder $c) => $c->where('unit_id', $unitId)))
+            ->exists();
+    }
+
+    /** Point a not-in-catalogue line at the catalogue item (and unit) it was received as. */
+    public function linkLineToItem(PurchaseRequestLine $line, int $itemId, int $unitId): void
+    {
+        $line->update(['item_id' => $itemId, 'unit_id' => $unitId]);
     }
 
     public function updateLineBrand(PurchaseRequest $pr, int|string $lineId, ?string $brand): void

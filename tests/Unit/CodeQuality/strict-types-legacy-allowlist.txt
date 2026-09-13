@@ -104,7 +104,6 @@ app/Domains/Inventory/Models/PurchaseRequest.php
 app/Domains/Inventory/Models/PurchaseRequestApproval.php
 app/Domains/Inventory/Models/PurchaseRequestComment.php
 app/Domains/Inventory/Models/PurchaseRequestHistory.php
-app/Domains/Inventory/Models/PurchaseRequestLine.php
 app/Domains/Inventory/Models/PurchaseRequestReceipt.php
 app/Domains/Inventory/Models/PurchaseRequestReceiptLine.php
 app/Domains/Inventory/Models/ReorderAlert.php
@@ -156,8 +155,6 @@ app/Domains/Inventory/Requests/SetBrandsRequest.php
 app/Domains/Inventory/Requests/ShipPurchaseRequestRequest.php
 app/Domains/Inventory/Requests/StoreItemRequest.php
 app/Domains/Inventory/Requests/StoreLocationRequest.php
-app/Domains/Inventory/Requests/StorePurchaseRequestRequest.php
-app/Domains/Inventory/Requests/StoreReceiptRequest.php
 app/Domains/Inventory/Requests/StoreStockTransactionRequest.php
 app/Domains/Inventory/Requests/StoreStoreRequest.php
 app/Domains/Inventory/Requests/StoreSupplierRequest.php
