@@ -11,6 +11,7 @@ use App\Domains\Billing\Models\DiscountPartner;
 use App\Domains\User\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -47,9 +48,17 @@ class DiscountCardControllerTest extends TestCase
     {
         $this->card();
 
+        // The grid reads `total` from the top level of the page data, so it must not be
+        // tucked under a resource collection's `meta` (the list showed "0 of 0 records").
         $this->actingAs($this->permittedUser())
             ->get(route('discount-cards.index'))
-            ->assertOk();
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('DiscountCard/Index', false)
+                ->where('cards.total', 1)
+                ->where('cards.current_page', 1)
+                ->where('cards.data.0.number', 'ACME-00001')
+                ->where('cards.data.0.partner.name', 'Acme Corp'));
     }
 
     public function test_issuing_requires_permission(): void

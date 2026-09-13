@@ -30,10 +30,13 @@ class DiscountCardController extends Controller
     {
         $this->authorize('viewAny', DiscountCard::class);
         $requestInputs = $request->all();
-        $cards = $this->cardService->listCards($requestInputs);
+        // Shape each row with the resource but keep the paginator's own top-level `total` and
+        // `current_page`: TableLayout reads them there, not from a resource collection's `meta`.
+        $cards = $this->cardService->listCards($requestInputs)
+            ->through(fn (DiscountCard $card) => (new DiscountCardResource($card))->resolve($request));
 
         return Inertia::render('DiscountCard/Index', [
-            'cards' => DiscountCardResource::collection($cards),
+            'cards' => $cards,
             'requestInputs' => $requestInputs,
             'statuses' => array_map(
                 static fn (DiscountCardStatus $status): string => $status->value,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     Alert,
     Box,
@@ -22,25 +22,34 @@ import { FormProvider, useFormState } from '@/Components/FormTemplate.jsx';
  * ticked in the list. The two are mutually exclusive — the server refuses both
  * at once rather than guessing which was meant.
  */
-const AssignCardsForm = ({ open, onClose, selectedCards = [] }) => (
-    <FormProvider
-        onClose={onClose}
-        open={open}
-        url={route('discountCards.assign')}
-        maxWidth="sm"
-        generalTitle="Assign Cards"
-        defaultValue={{
+const AssignCardsForm = ({ open, onClose, selectedCards = [] }) => {
+    // FormProvider resets the form whenever this object changes. A fresh object on every
+    // render would wipe what the user typed as soon as a validation error re-renders the page.
+    const defaultData = useMemo(
+        () => ({
             partner: null,
             discount_partner_id: '',
             card_ids: selectedCards.map((card) => card.id),
             discount_card_batch_id: '',
             serial_from: '',
             serial_to: '',
-        }}
-    >
-        <FormContent selectedCards={selectedCards} />
-    </FormProvider>
-);
+        }),
+        [selectedCards],
+    );
+
+    return (
+        <FormProvider
+            onClose={onClose}
+            open={open}
+            url={route('discountCards.assign')}
+            maxWidth="sm"
+            generalTitle="Assign Cards"
+            defaultValue={defaultData}
+        >
+            <FormContent selectedCards={selectedCards} />
+        </FormProvider>
+    );
+};
 
 const FormContent = ({ selectedCards }) => {
     const { data, setData, errors } = useFormState();

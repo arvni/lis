@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     Box,
     Divider,
@@ -13,23 +13,34 @@ import { Event, Repeat, Tune } from '@mui/icons-material';
 
 import { FormProvider, useFormState } from '@/Components/FormTemplate.jsx';
 
-const EditCardForm = ({ open, onClose, card, statuses = [] }) => (
-    <FormProvider
-        onClose={onClose}
-        open={open}
-        url={route('discount-cards.update', card.id)}
-        maxWidth="xs"
-        generalTitle={`Card ${card.number}`}
-        defaultValue={{
+const EditCardForm = ({ open, onClose, card, statuses = [] }) => {
+    // FormProvider resets the form whenever this object changes, so it must survive re-renders
+    // (a validation error would otherwise wipe the input). The `id` is what makes FormProvider
+    // title the dialog "Edit" rather than "Add New"; the update request ignores it.
+    const defaultData = useMemo(
+        () => ({
+            id: card.id,
             _method: 'put',
             status: card.status ?? 'Inactive',
             expires_at: card.expires_at ?? '',
             usage_limit: card.usage_limit ?? '',
-        }}
-    >
-        <FormContent statuses={statuses} />
-    </FormProvider>
-);
+        }),
+        [card],
+    );
+
+    return (
+        <FormProvider
+            onClose={onClose}
+            open={open}
+            url={route('discount-cards.update', card.id)}
+            maxWidth="xs"
+            generalTitle={`Card ${card.number}`}
+            defaultValue={defaultData}
+        >
+            <FormContent statuses={statuses} />
+        </FormProvider>
+    );
+};
 
 const FormContent = ({ statuses }) => {
     const { data, setData, errors } = useFormState();
