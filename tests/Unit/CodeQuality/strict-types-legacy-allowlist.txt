@@ -350,7 +350,6 @@ app/Domains/Reception/Exports/AcceptanceItemsExport.php
 app/Domains/Reception/Exports/AcceptancesExport.php
 app/Domains/Reception/Exports/DailyReceptionReportExport.php
 app/Domains/Reception/Factories/SignerFactory.php
-app/Domains/Reception/Listeners/AcceptancePaymentListener.php
 app/Domains/Reception/Listeners/AcceptanceReportedListener.php
 app/Domains/Reception/Listeners/SampleCollectedListener.php
 app/Domains/Reception/Models/Acceptance.php

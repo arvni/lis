@@ -11,6 +11,7 @@ use App\Domains\Billing\Services\CardDiscountSyncService;
 use App\Domains\Billing\Services\DiscountCardResolver;
 use App\Domains\Billing\Services\InvoiceComposer;
 use App\Domains\Billing\Services\InvoiceService;
+use App\Domains\Billing\Services\PaymentService;
 
 class BillingAdapter
 {
@@ -20,6 +21,7 @@ class BillingAdapter
         private InvoiceComposer $invoiceComposer,
         private DiscountCardResolver $cardResolver,
         private CardDiscountSyncService $cardDiscountSyncService,
+        private PaymentService $paymentService,
     ) {}
 
     public function getInvoiceNo(Invoice $invoice): string
@@ -30,6 +32,17 @@ class BillingAdapter
     public function findInvoiceById(int|string $id): ?Invoice
     {
         return $this->invoiceService->findInvoiceById($id);
+    }
+
+    /**
+     * Whether the invoice's payments have cleared the minimum-payment bar — the
+     * same one that releases a walk-in acceptance from WAITING_FOR_PAYMENT.
+     */
+    public function hasReachedMinimumPayment(int|string $invoiceId): bool
+    {
+        $invoice = $this->invoiceService->findInvoiceById($invoiceId);
+
+        return $invoice !== null && $this->paymentService->hasReachedMinimumPayment($invoice);
     }
 
     public function recomposeInvoice(Invoice $invoice, bool $force = false): int

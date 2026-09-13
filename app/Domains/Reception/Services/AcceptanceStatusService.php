@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Reception\Services;
 
 use App\Domains\Laboratory\Enums\TestType;
+use App\Domains\Reception\Adapters\BillingAdapter;
 use App\Domains\Reception\Adapters\ReferrerAdapter;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
@@ -26,6 +27,7 @@ class AcceptanceStatusService
     public function __construct(
         private readonly AcceptanceRepository $acceptanceRepository,
         private readonly ReferrerAdapter $referrerAdapter,
+        private readonly BillingAdapter $billingAdapter,
     ) {}
 
     public function updateAcceptanceStatus(Acceptance $acceptance, AcceptanceStatus $status): void
@@ -107,6 +109,92 @@ class AcceptanceStatusService
     }
 
     /**
+     * Finalize an acceptance that has nothing to report — no test items, or
+     * every item reportless. For callers outside the state machine: an invoice
+     * attached, a payment received, step-5 finalization.
+     *
+     * @return bool True when the acceptance had nothing to report and was handled.
+     */
+    public function finalizeIfNothingToReport(Acceptance $acceptance): bool
+    {
+        if ($acceptance->waiting_for_pooling) {
+            return false;
+        }
+
+        $this->markServiceItemsAsReportless($acceptance);
+
+        if ($this->acceptanceRepository->countReportableTests($acceptance) > 0) {
+            return false;
+        }
+
+        $this->finalizeWithoutReports($acceptance);
+
+        return true;
+    }
+
+    /**
+     * Terminal step for an acceptance with nothing to report. There is no
+     * report for finance to hold back, so once it is billed it is REPORTED
+     * outright. Unbilled, it falls back to the finance gate — except an
+     * invoiced walk-in, which keeps waiting for its payment like any other.
+     */
+    private function finalizeWithoutReports(Acceptance $acceptance): void
+    {
+        // Not finalized yet, cancelled, or already done: nothing to move.
+        if (in_array($acceptance->status, [
+            AcceptanceStatus::PENDING,
+            AcceptanceStatus::CANCELLED,
+            AcceptanceStatus::REPORTED,
+        ], true)) {
+            return;
+        }
+
+        $billed = $this->canSkipFinancialApproval($acceptance);
+
+        if ($acceptance->status === AcceptanceStatus::WAITING_FOR_PAYMENT && $acceptance->invoice_id) {
+            if (! $billed) {
+                return;
+            }
+
+            // Paid, but a sample is still owed: carry on as a payment would.
+            if ($this->acceptanceRepository->countSamplableItems($acceptance) > 0) {
+                $this->setStatusIfChanged($acceptance, AcceptanceStatus::SAMPLING);
+
+                return;
+            }
+        }
+
+        if (! $billed && ! $acceptance->financial_approved) {
+            $this->setStatusIfChanged($acceptance, AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL);
+
+            return;
+        }
+
+        $this->updateAcceptanceStatus($acceptance, AcceptanceStatus::REPORTED);
+        // Delivered the same way as a published acceptance (checkAcceptanceReport).
+        // No patient notification: there is no report to announce.
+        $this->referrerAdapter->syncReportedAcceptance($acceptance);
+    }
+
+    /**
+     * Billed enough to skip finance: a referred acceptance needs only its
+     * invoice (the referrer is billed), a walk-in's invoice must also have
+     * cleared the minimum payment.
+     */
+    private function canSkipFinancialApproval(Acceptance $acceptance): bool
+    {
+        if (! $acceptance->invoice_id) {
+            return false;
+        }
+
+        if ($acceptance->referred) {
+            return true;
+        }
+
+        return $this->billingAdapter->hasReachedMinimumPayment($acceptance->invoice_id);
+    }
+
+    /**
      * Status for an acceptance that still has unfinished work: PROCESSING once a
      * section has actually picked an item up, otherwise WAITING_FOR_ENTERING when
      * samples are collected and merely waiting to be entered.
@@ -149,9 +237,9 @@ class AcceptanceStatusService
 
         $reportableItems = $acceptance->acceptanceItems;
 
-        // If no reportable items, finance approval decides REPORTED vs waiting
+        // Nothing to report: billing (or finance) decides REPORTED vs waiting
         if ($reportableItems->isEmpty()) {
-            $this->finalizeReportedOrWaiting($acceptance);
+            $this->finalizeWithoutReports($acceptance);
 
             return;
         }
@@ -279,9 +367,9 @@ class AcceptanceStatusService
 
         $reportableTest = $this->acceptanceRepository->countReportableTests($acceptance);
 
-        // No reportable tests, finance approval decides REPORTED vs waiting
+        // Nothing to report: billing (or finance) decides REPORTED vs waiting
         if (! $reportableTest) {
-            $this->finalizeReportedOrWaiting($acceptance);
+            $this->finalizeWithoutReports($acceptance);
 
             return;
         }
