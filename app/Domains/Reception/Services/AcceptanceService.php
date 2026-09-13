@@ -60,6 +60,7 @@ class AcceptanceService
 
     private readonly AcceptanceStatusService $statusService;
     private readonly AcceptanceBarcodeService $barcodeService;
+    private readonly BillingAdapter $billingAdapter;
 
     public function __construct(
         private readonly AcceptanceRepository  $acceptanceRepository,
@@ -69,6 +70,7 @@ class AcceptanceService
         private readonly ReferrerAdapter       $referrerAdapter,
         ?AcceptanceStatusService               $statusService = null,
         ?AcceptanceBarcodeService              $barcodeService = null,
+        ?BillingAdapter                        $billingAdapter = null,
     )
     {
         // Status decisions and barcode grouping were split out of this service
@@ -76,10 +78,11 @@ class AcceptanceService
         // existing callers — including tests that build the service with the five
         // original mocks — keep working unchanged; the container injects the real
         // collaborators in production.
+        $this->billingAdapter = $billingAdapter ?? app(BillingAdapter::class);
         $this->statusService = $statusService ?? new AcceptanceStatusService(
             $acceptanceRepository,
             $referrerAdapter,
-            app(BillingAdapter::class),
+            $this->billingAdapter,
         );
         $this->barcodeService = $barcodeService ?? new AcceptanceBarcodeService();
     }
@@ -142,6 +145,12 @@ class AcceptanceService
         // re-sending the published-report notifications.
         if ($acceptance->financial_approved) {
             throw AcceptanceNotFinanciallyApprovableException::alreadyApproved($acceptance->id);
+        }
+
+        // Finance signs off on money received: an invoice with a balance still
+        // owing holds the acceptance back until it is fully paid.
+        if ($acceptance->invoice_id && !$this->billingAdapter->isInvoiceFullyPaid($acceptance->invoice_id)) {
+            throw AcceptanceNotFinanciallyApprovableException::notFullyPaid($acceptance->id);
         }
 
         $acceptance = $this->acceptanceRepository->updateAcceptance($acceptance, [

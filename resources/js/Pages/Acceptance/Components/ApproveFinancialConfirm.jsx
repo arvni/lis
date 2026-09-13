@@ -14,18 +14,22 @@ import {
 } from '@mui/material';
 import { CheckCircle, Receipt, MoneyOff } from '@mui/icons-material';
 import PropTypes from 'prop-types';
+import { invoicePaymentStanding } from './invoicePayment';
 
 /**
  * Confirmation step for financial approval.
  *
  * Approval releases the acceptance to publishing, so the reviewer confirms it
- * against what they can see here — above all whether an invoice exists. An
- * uninvoiced acceptance can still be approved, but only deliberately: the
- * confirm button says so, and the request carries the acknowledgement the
- * endpoint requires.
+ * against what they can see here — above all whether an invoice exists and is
+ * fully paid. An invoice that is not fully paid cannot be approved; the
+ * endpoint refuses it too. An uninvoiced acceptance can still be approved, but
+ * only deliberately: the confirm button says so, and the request carries the
+ * acknowledgement the endpoint requires.
  */
 const ApproveFinancialConfirm = ({ open, acceptance, formatCurrency, loading, onCancel, onConfirm }) => {
     const invoice = acceptance?.invoice;
+    const payment = invoice ? invoicePaymentStanding(invoice) : null;
+    const notFullyPaid = !!payment && !payment.fullyPaid;
 
     return (
         <Dialog
@@ -54,16 +58,23 @@ const ApproveFinancialConfirm = ({ open, acceptance, formatCurrency, loading, on
                             Invoice
                         </Typography>
                         {invoice ? (
-                            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                                <Chip
-                                    icon={<Receipt />}
-                                    label="Has Invoice"
-                                    size="small"
-                                    color="success"
-                                    variant="filled"
-                                />
-                                <Typography variant="body2">
-                                    Total: {formatCurrency(invoice.total)}
+                            <Stack spacing={0.5}>
+                                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                                    <Chip
+                                        icon={<Receipt />}
+                                        label={notFullyPaid ? 'Not Fully Paid' : 'Fully Paid'}
+                                        size="small"
+                                        color={notFullyPaid ? 'error' : 'success'}
+                                        variant="filled"
+                                    />
+                                    <Typography variant="body2">
+                                        Total: {formatCurrency(payment.total)}
+                                    </Typography>
+                                </Stack>
+                                <Typography variant="body2" color="text.secondary">
+                                    Paid: {formatCurrency(payment.paid)}
+                                    {notFullyPaid &&
+                                        ` · Remaining: ${formatCurrency(payment.remaining)}`}
                                 </Typography>
                             </Stack>
                         ) : (
@@ -77,11 +88,18 @@ const ApproveFinancialConfirm = ({ open, acceptance, formatCurrency, loading, on
                         )}
                     </Box>
 
-                    {invoice ? (
+                    {notFullyPaid && (
+                        <Alert severity="error">
+                            This invoice is not fully paid. It needs to be fully paid before it
+                            can be approved financially.
+                        </Alert>
+                    )}
+                    {invoice && !notFullyPaid && (
                         <Alert severity="info">
                             Approving releases this acceptance for publishing.
                         </Alert>
-                    ) : (
+                    )}
+                    {!invoice && (
                         <Alert severity="warning">
                             This acceptance has no invoice. Approving it now releases it for
                             publishing unbilled — create an invoice first unless you mean to.
@@ -99,7 +117,7 @@ const ApproveFinancialConfirm = ({ open, acceptance, formatCurrency, loading, on
                     color={invoice ? 'success' : 'warning'}
                     startIcon={<CheckCircle />}
                     onClick={onConfirm}
-                    disabled={loading}
+                    disabled={loading || notFullyPaid}
                     autoFocus
                     sx={{ textTransform: 'none' }}
                 >

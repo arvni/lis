@@ -33,8 +33,8 @@ class ApproveFinancialController extends Controller
         try {
             $this->acceptanceService->approveFinancial($acceptance, (int) $user->id, $approveWithoutInvoice);
         } catch (AcceptanceNotFinanciallyApprovableException $e) {
-            // An unacknowledged uninvoiced acceptance, or one a second reviewer
-            // just approved.
+            // An unacknowledged uninvoiced acceptance, an invoice that is not
+            // fully paid, or one a second reviewer just approved.
             return back()->withErrors(["message" => $e->getMessage()]);
         }
 

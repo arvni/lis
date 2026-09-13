@@ -9,6 +9,7 @@ import Filter from './Components/Filter';
 import InvoiceEditForm from '@/Pages/Invoice/Components/InvoiceEditForm';
 import CreateInvoiceForm from '@/Pages/Acceptance/Components/CreateInvoiceForm';
 import ApproveFinancialConfirm from '@/Pages/Acceptance/Components/ApproveFinancialConfirm';
+import { invoicePaymentStanding } from '@/Pages/Acceptance/Components/invoicePayment';
 
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-OM', {
@@ -148,13 +149,15 @@ const FinancialCheck = () => {
                 sortable: false,
                 renderCell: ({ row }) => {
                     if (row.invoice) {
+                        const payment = invoicePaymentStanding(row.invoice);
+
                         return (
                             <Box>
                                 <Chip
                                     icon={<Receipt />}
-                                    label="Has Invoice"
+                                    label={payment.fullyPaid ? 'Fully Paid' : 'Not Fully Paid'}
                                     size="small"
-                                    color="success"
+                                    color={payment.fullyPaid ? 'success' : 'error'}
                                     variant="filled"
                                     sx={{ mb: 0.5 }}
                                 />
@@ -163,7 +166,9 @@ const FinancialCheck = () => {
                                     color="text.secondary"
                                     display="block"
                                 >
-                                    Total: {formatCurrency(row.invoice.total)}
+                                    {payment.fullyPaid
+                                        ? `Total: ${formatCurrency(payment.total)}`
+                                        : `Remaining: ${formatCurrency(payment.remaining)} of ${formatCurrency(payment.total)}`}
                                 </Typography>
                             </Box>
                         );

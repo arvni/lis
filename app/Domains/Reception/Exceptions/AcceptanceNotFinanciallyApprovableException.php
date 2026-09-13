@@ -21,6 +21,13 @@ class AcceptanceNotFinanciallyApprovableException extends Exception
         );
     }
 
+    public static function notFullyPaid(int $acceptanceId): self
+    {
+        return new self(
+            "Acceptance #{$acceptanceId}'s invoice is not fully paid; it needs to be fully paid before financial approval."
+        );
+    }
+
     public static function alreadyApproved(int $acceptanceId): self
     {
         return new self(

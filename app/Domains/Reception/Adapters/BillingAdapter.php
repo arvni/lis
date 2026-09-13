@@ -45,6 +45,17 @@ class BillingAdapter
         return $invoice !== null && $this->paymentService->hasReachedMinimumPayment($invoice);
     }
 
+    /**
+     * Whether the invoice's payments cover its full amount — the same rule that
+     * marks an invoice PAID.
+     */
+    public function isInvoiceFullyPaid(int|string $invoiceId): bool
+    {
+        $invoice = $this->invoiceService->findInvoiceById($invoiceId);
+
+        return $invoice !== null && $invoice->isPaid();
+    }
+
     public function recomposeInvoice(Invoice $invoice, bool $force = false): int
     {
         return $this->invoiceComposer->recompose($invoice, $force);
