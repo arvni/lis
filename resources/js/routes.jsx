@@ -54,6 +54,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import SensorDoorIcon from '@mui/icons-material/SensorDoor';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import {
     PercentDiamond,
     Stethoscope as Doctor,
@@ -535,6 +536,12 @@ const routes = (sections = []) => {
             permission: 'Attendance',
             icon: <FingerprintIcon />,
             child: [
+                {
+                    title: 'Daily Attendance',
+                    route: 'attendance.days.index',
+                    permission: 'Attendance.Daily Attendance.List Attendance',
+                    icon: <EventAvailableIcon />,
+                },
                 {
                     title: 'Punches',
                     route: 'attendance.transactions.index',

@@ -39,6 +39,15 @@ readonly class UserAdapter
     }
 
     /**
+     * @param  list<int>  $userIds
+     * @return array<int, string> attendance numbers keyed by user id; users without one are left out
+     */
+    public function getAttendanceNumbersForUsers(array $userIds): array
+    {
+        return $userIds === [] ? [] : $this->userRepository->getAttendanceNumbersByIds($userIds);
+    }
+
+    /**
      * @return list<string>
      */
     public function getAllAttendanceNumbers(): array

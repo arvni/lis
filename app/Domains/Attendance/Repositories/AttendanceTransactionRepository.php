@@ -6,10 +6,27 @@ namespace App\Domains\Attendance\Repositories;
 
 use App\Domains\Attendance\Models\AttendanceTransaction;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 
 class AttendanceTransactionRepository
 {
+    /**
+     * Punches from the start of one day to the end of another, oldest first.
+     *
+     * @param  list<string>|null  $attendanceIds  only these Employee IDs (null = all)
+     * @return Collection<int, AttendanceTransaction>
+     */
+    public function punchesBetween(Carbon $from, Carbon $to, ?array $attendanceIds): Collection
+    {
+        return AttendanceTransaction::query()
+            ->when($attendanceIds !== null, fn (Builder $query) => $query->whereIn('attendance_id', $attendanceIds))
+            ->whereBetween('access_date_and_time', [$from->format('Y-m-d 00:00:00'), $to->format('Y-m-d 23:59:59')])
+            ->orderBy('access_date_and_time')
+            ->get(['attendance_id', 'access_date_and_time']);
+    }
+
     /**
      * @param  array<string, mixed>  $queryData
      * @param  list<string>|null  $onlyAttendanceIds  restrict to these Employee IDs (null = no restriction)

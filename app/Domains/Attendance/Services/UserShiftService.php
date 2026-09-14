@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Attendance\Services;
 
 use App\Domains\Attendance\DTOs\UserShiftDTO;
+use App\Domains\Attendance\Events\AttendanceRebuildRequested;
 use App\Domains\Attendance\Models\UserShift;
 use App\Domains\Attendance\Repositories\UserShiftRepository;
 use Illuminate\Database\Eloquent\Collection;
@@ -32,9 +33,10 @@ class UserShiftService
      */
     public function assign(int $userId, UserShiftDTO $dto): UserShift
     {
-        return DB::transaction(function () use ($userId, $dto) {
+        $from = Carbon::parse($dto->effectiveFrom)->startOfDay();
+
+        $assignment = DB::transaction(function () use ($userId, $dto, $from) {
             $latest = $this->userShiftRepository->latestForUser($userId);
-            $from = Carbon::parse($dto->effectiveFrom)->startOfDay();
 
             if ($latest) {
                 if ($from->lte($latest->effective_from)) {
@@ -56,6 +58,10 @@ class UserShiftService
                 'effective_to' => $dto->effectiveTo,
             ]);
         });
+
+        $this->recalculateFrom($userId, $from);
+
+        return $assignment;
     }
 
     /**
@@ -65,6 +71,9 @@ class UserShiftService
      */
     public function removeAssignment(UserShift $assignment): void
     {
+        $userId = $assignment->user_id;
+        $from = $assignment->effective_from->copy();
+
         DB::transaction(function () use ($assignment) {
             $latest = $this->userShiftRepository->latestForUser($assignment->user_id);
             if ($latest?->id !== $assignment->id) {
@@ -79,5 +88,18 @@ class UserShiftService
                 $this->userShiftRepository->update($previous, ['effective_to' => null]);
             }
         });
+
+        $this->recalculateFrom($userId, $from);
+    }
+
+    /**
+     * Days already judged under the old assignments are recalculated, once the change is committed.
+     */
+    private function recalculateFrom(int $userId, Carbon $from): void
+    {
+        $today = Carbon::today();
+        if ($from->lte($today)) {
+            AttendanceRebuildRequested::dispatch($from->toDateString(), $today->toDateString(), [$userId]);
+        }
     }
 }

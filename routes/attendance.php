@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Attendance\Api\ListActiveShiftsController;
+use App\Http\Controllers\Attendance\AttendanceDayController;
 use App\Http\Controllers\Attendance\AttendanceTransactionController;
+use App\Http\Controllers\Attendance\ExportAttendanceDaysController;
 use App\Http\Controllers\Attendance\HolidayController;
 use App\Http\Controllers\Attendance\ShiftController;
 use App\Http\Controllers\Attendance\UserShiftController;
@@ -11,6 +13,10 @@ Route::prefix('attendance')->name('attendance.')->group(function () {
     Route::resource('shifts', ShiftController::class)->except('create', 'edit', 'show');
     Route::resource('holidays', HolidayController::class)->except('create', 'edit', 'show');
     Route::get('punches', [AttendanceTransactionController::class, 'index'])->name('transactions.index');
+    Route::get('days', [AttendanceDayController::class, 'index'])->name('days.index');
+    Route::get('days/export', ExportAttendanceDaysController::class)->name('days.export');
+    Route::put('days/{attendanceDay}', [AttendanceDayController::class, 'update'])->name('days.update');
+    Route::put('days/{attendanceDay}/reset', [AttendanceDayController::class, 'reset'])->name('days.reset');
 });
 
 Route::prefix('api/attendance')->name('api.attendance.')->group(function () {

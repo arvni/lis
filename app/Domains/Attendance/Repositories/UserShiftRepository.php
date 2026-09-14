@@ -6,6 +6,7 @@ namespace App\Domains\Attendance\Repositories;
 
 use App\Domains\Attendance\Models\UserShift;
 use App\Domains\Shared\Traits\LogsUserActivity;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class UserShiftRepository
@@ -21,6 +22,22 @@ class UserShiftRepository
             ->where('user_id', $userId)
             ->with('shift:id,name,is_active')
             ->orderByDesc('effective_from')
+            ->get();
+    }
+
+    /**
+     * Assignments covering any day between the dates (Y-m-d, inclusive), with each shift's weekly hours.
+     *
+     * @param  list<int>|null  $userIds  only these users (null = everyone)
+     * @return Collection<int, UserShift>
+     */
+    public function overlapping(string $from, string $to, ?array $userIds): Collection
+    {
+        return UserShift::query()
+            ->when($userIds !== null, fn (Builder $query) => $query->whereIn('user_id', $userIds))
+            ->where('effective_from', '<=', $to)
+            ->where(fn (Builder $query) => $query->whereNull('effective_to')->orWhere('effective_to', '>=', $from))
+            ->with('shift.days')
             ->get();
     }
 

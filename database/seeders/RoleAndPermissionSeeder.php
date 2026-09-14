@@ -180,6 +180,11 @@ class RoleAndPermissionSeeder extends Seeder
                 "Transactions" => [
                     "List Transactions",
                 ],
+                "Daily Attendance" => [
+                    "List Attendance",
+                    "Correct Attendance",
+                    "Export Attendance",
+                ],
             ],
             "Sample Collection" => [
                 "Samples" => [

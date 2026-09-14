@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Domains\Attendance\Events\AttendanceRebuildRequested;
+use App\Domains\Attendance\Listeners\RebuildAttendanceDays;
 use App\Domains\Billing\Events\AcceptanceItemPricingEvent;
 use App\Domains\Billing\Listeners\ReleaseCardDiscountsListener;
 use App\Domains\Billing\Listeners\SyncCardDiscountsListener;
@@ -140,5 +142,6 @@ class EventServiceProvider extends ServiceProvider
         Event::listen(ReferrerOrderCreated::class, [SendReferrerOrderWebhook::class, 'handle']);
         Event::listen(ReferrerOrderUpdated::class, [SendReferrerOrderUpdateWebhook::class, 'handle']);
         Event::listen(ActivityLogged::class, [LogUserActivityListener::class, 'handle']);
+        Event::listen(AttendanceRebuildRequested::class, [RebuildAttendanceDays::class, 'handle']);
     }
 }
