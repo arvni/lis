@@ -174,6 +174,12 @@ class RoleAndPermissionSeeder extends Seeder
                     "Edit Holiday",
                     "Delete Holiday",
                 ],
+                "Shift Assignments" => [
+                    "Manage Shift Assignments",
+                ],
+                "Transactions" => [
+                    "List Transactions",
+                ],
             ],
             "Sample Collection" => [
                 "Samples" => [

@@ -44,4 +44,10 @@ class Shift extends Model
     {
         return $this->hasMany(ShiftDay::class)->orderBy('weekday');
     }
+
+    /** @return HasMany<UserShift, $this> */
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(UserShift::class);
+    }
 }

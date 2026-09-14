@@ -6,6 +6,7 @@ namespace Tests\Feature\Attendance;
 
 use App\Domains\Attendance\Enums\Weekday;
 use App\Domains\Attendance\Models\Shift;
+use App\Domains\Attendance\Models\UserShift;
 use App\Domains\User\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -177,6 +178,25 @@ class ShiftControllerTest extends TestCase
 
         $this->assertDatabaseMissing('shifts', ['id' => $shift->id]);
         $this->assertDatabaseMissing('shift_days', ['shift_id' => $shift->id]);
+    }
+
+    public function test_a_shift_that_was_ever_assigned_cannot_be_deleted(): void
+    {
+        $shift = $this->makeShift('Morning', [1 => ['08:00', '16:00']]);
+        UserShift::create([
+            'user_id' => User::factory()->create()->id,
+            'shift_id' => $shift->id,
+            'effective_from' => '2026-01-01',
+            'effective_to' => '2026-06-30',
+        ]);
+
+        $this->actingAs($this->permittedUser())
+            ->delete(route('attendance.shifts.destroy', $shift->id))
+            ->assertRedirect()
+            ->assertSessionHas('success', false)
+            ->assertSessionHas('status', "Morning is assigned to users, so it can't be deleted. Mark it inactive instead.");
+
+        $this->assertModelExists($shift);
     }
 
     /**

@@ -100,7 +100,7 @@ const ShiftIndex = () => {
                 flex: 0.8,
                 renderCell: (params) => (
                     <Box>
-                        <Typography fontWeight="medium">{params.value}</Typography>
+                        <Typography sx={{ fontWeight: 500 }}>{params.value}</Typography>
                         {params.row.description && (
                             <Typography variant="body2" color="text.secondary">
                                 {params.row.description}

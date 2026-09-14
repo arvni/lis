@@ -77,6 +77,30 @@ class UserRepository
             ->get();
     }
 
+    /**
+     * Users whose attendance number (their HikCentral Employee ID) is one of the given numbers.
+     *
+     * @param  list<string>  $attendanceNumbers
+     * @return Collection<int, User>
+     */
+    public function getByAttendanceNumbers(array $attendanceNumbers): Collection
+    {
+        return User::query()->whereIn('attendance_number', $attendanceNumbers)->get(['id', 'name', 'attendance_number']);
+    }
+
+    /**
+     * Every attendance number in use.
+     *
+     * @return list<string>
+     */
+    public function getAttendanceNumbers(): array
+    {
+        return array_values(array_map(
+            'strval',
+            User::query()->whereNotNull('attendance_number')->pluck('attendance_number')->all()
+        ));
+    }
+
     public function create(array $data): User
     {
 
