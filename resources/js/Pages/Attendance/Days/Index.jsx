@@ -21,6 +21,7 @@ export const STATUS_COLORS = {
     ABSENT: 'error',
     OFF: 'default',
     HOLIDAY: 'info',
+    LEAVE: 'secondary',
 };
 
 export const formatMinutes = (minutes) => {
@@ -164,6 +165,12 @@ const DayIndex = () => {
             {
                 field: 'worked_minutes',
                 headerName: 'Worked',
+                flex: 0.5,
+                renderCell: (params) => <MinutesCell minutes={params.value} />,
+            },
+            {
+                field: 'leave_minutes',
+                headerName: 'On Leave',
                 flex: 0.5,
                 renderCell: (params) => <MinutesCell minutes={params.value} />,
             },

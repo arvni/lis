@@ -25,6 +25,9 @@ enum AttendanceStatus: string
     /** The date is on the holiday list. */
     case HOLIDAY = 'HOLIDAY';
 
+    /** Approved leave covers the whole working day. */
+    case LEAVE = 'LEAVE';
+
     public function label(): string
     {
         return match ($this) {
@@ -33,6 +36,7 @@ enum AttendanceStatus: string
             self::ABSENT => 'Absent',
             self::OFF => 'Day off',
             self::HOLIDAY => 'Holiday',
+            self::LEAVE => 'On leave',
         };
     }
 

@@ -34,6 +34,7 @@ class AttendanceDayResource extends JsonResource
             'late_minutes' => $this->late_minutes,
             'early_leave_minutes' => $this->early_leave_minutes,
             'worked_minutes' => $this->worked_minutes,
+            'leave_minutes' => $this->leave_minutes,
             'is_manual' => $this->is_manual,
             'note' => $this->note,
             'corrected_by' => $this->whenLoaded('correctedBy', fn () => $this->correctedBy?->name),

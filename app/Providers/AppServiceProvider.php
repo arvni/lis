@@ -6,10 +6,14 @@ use App\Domains\Attendance\Models\AttendanceDay;
 use App\Domains\Attendance\Models\AttendanceTransaction;
 use App\Domains\Attendance\Policies\AttendanceDayPolicy;
 use App\Domains\Attendance\Models\Holiday;
+use App\Domains\Attendance\Models\LeaveKind;
+use App\Domains\Attendance\Models\LeaveRequest;
 use App\Domains\Attendance\Models\Shift;
 use App\Domains\Attendance\Models\UserShift;
 use App\Domains\Attendance\Policies\AttendanceTransactionPolicy;
 use App\Domains\Attendance\Policies\HolidayPolicy;
+use App\Domains\Attendance\Policies\LeaveKindPolicy;
+use App\Domains\Attendance\Policies\LeaveRequestPolicy;
 use App\Domains\Attendance\Policies\ShiftPolicy;
 use App\Domains\Attendance\Policies\UserShiftPolicy;
 use App\Domains\Billing\Models\DiscountCard;
@@ -181,6 +185,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(UserShift::class, UserShiftPolicy::class);
         Gate::policy(AttendanceTransaction::class, AttendanceTransactionPolicy::class);
         Gate::policy(AttendanceDay::class, AttendanceDayPolicy::class);
+        Gate::policy(LeaveKind::class, LeaveKindPolicy::class);
+        Gate::policy(LeaveRequest::class, LeaveRequestPolicy::class);
 
         Gate::policy(SectionGroup::class, SectionGroupPolicy::class);
         Gate::policy(Section::class, SectionPolicy::class);

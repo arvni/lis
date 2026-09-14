@@ -25,6 +25,7 @@ use Illuminate\Support\Carbon;
  * @property int $late_minutes
  * @property int $early_leave_minutes
  * @property int $worked_minutes
+ * @property int $leave_minutes minutes of the working day covered by approved leave
  * @property bool $is_manual
  * @property string|null $note
  * @property int|null $corrected_by
@@ -46,6 +47,7 @@ class AttendanceDay extends Model
         'late_minutes',
         'early_leave_minutes',
         'worked_minutes',
+        'leave_minutes',
         'is_manual',
         'note',
         'corrected_by',
@@ -60,6 +62,7 @@ class AttendanceDay extends Model
         'late_minutes' => 'integer',
         'early_leave_minutes' => 'integer',
         'worked_minutes' => 'integer',
+        'leave_minutes' => 'integer',
         'is_manual' => 'boolean',
         'corrected_at' => 'datetime',
     ];

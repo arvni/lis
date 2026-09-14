@@ -26,6 +26,7 @@ import PageHeader from '@/Components/PageHeader';
 const REQUEST_TYPE_LABELS = {
     PURCHASE: 'Purchase Requests',
     EXPORT: 'Export Requests',
+    LEAVE: 'Leave Requests',
 };
 
 const WorkflowTemplatesIndex = () => {
@@ -109,7 +110,10 @@ const WorkflowTemplatesIndex = () => {
                                     </TableCell>
                                     <TableCell>
                                         <Chip
-                                            label={REQUEST_TYPE_LABELS[tpl.request_type] ?? 'All'}
+                                            label={
+                                                REQUEST_TYPE_LABELS[tpl.request_type] ??
+                                                'Purchase & export'
+                                            }
                                             size="small"
                                             color={tpl.request_type ? 'info' : 'default'}
                                             variant={tpl.request_type ? 'filled' : 'outlined'}

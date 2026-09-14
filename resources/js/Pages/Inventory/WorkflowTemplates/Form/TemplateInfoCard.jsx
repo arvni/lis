@@ -39,11 +39,22 @@ const TemplateInfoCard = ({ data, setData, errors, requestTypes = [] }) => (
                 size="small"
                 label="Applies to"
                 value={data.request_type}
-                onChange={(e) => setData('request_type', e.target.value)}
+                onChange={(e) => {
+                    const { value } = e.target;
+                    setData((prev) => ({
+                        ...prev,
+                        request_type: value,
+                        // Leave workflows are picked by the requester's roles only.
+                        conditions:
+                            value === 'LEAVE'
+                                ? { ...prev.conditions, urgencies: [], min_total: '' }
+                                : prev.conditions,
+                    }));
+                }}
                 error={!!errors.request_type}
-                helperText={errors.request_type ?? 'Which request type this workflow governs'}
+                helperText={errors.request_type ?? 'Which requests this workflow governs'}
             >
-                <MenuItem value="">All request types</MenuItem>
+                <MenuItem value="">Purchase & export requests</MenuItem>
                 {requestTypes.map((t) => (
                     <MenuItem key={t.value} value={t.value}>
                         {t.label}

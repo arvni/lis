@@ -9,6 +9,7 @@ use App\Domains\Attendance\DTOs\ShiftHours;
 use App\Domains\Attendance\Enums\AttendanceStatus;
 use App\Domains\Attendance\Models\AttendanceDay;
 use App\Domains\Attendance\Repositories\AttendanceDayRepository;
+use App\Domains\Attendance\Repositories\LeaveRequestRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
@@ -20,6 +21,8 @@ class AttendanceDayService
         private readonly AttendanceDayRepository $dayRepository,
         private readonly AttendanceDayCalculator $calculator,
         private readonly AttendanceProcessingService $processingService,
+        private readonly LeaveRequestRepository $leaveRepository,
+        private readonly LeaveCoverage $leaveCoverage,
     ) {}
 
     /**
@@ -58,13 +61,19 @@ class AttendanceDayService
             ? new ShiftHours($day->scheduled_start, $day->scheduled_end)
             : null;
 
+        $excused = $hours === null ? [] : $this->leaveCoverage->excusedOn(
+            $this->leaveRepository->approvedBetween($date->toDateString(), $date->toDateString(), [$day->user_id]),
+            $date,
+            $hours,
+        );
+
         // A corrected day is settled, so judge it as a day that is over.
         $result = $this->calculator->calculate(
             $date,
             $hours,
             $day->status === AttendanceStatus::HOLIDAY,
             $punches,
-            [],
+            $excused,
             $date->copy()->addDay(),
         ) ?? throw new LogicException('A day that is over always has a result.');
 
@@ -75,6 +84,7 @@ class AttendanceDayService
             'late_minutes' => $result->lateMinutes,
             'early_leave_minutes' => $result->earlyLeaveMinutes,
             'worked_minutes' => $result->workedMinutes,
+            'leave_minutes' => $result->leaveMinutes,
             'is_manual' => true,
             'note' => $dto->note,
             'corrected_by' => $correctedBy,

@@ -42,22 +42,58 @@ class AttendanceDayCalculator
 
         $start = $date->copy()->setTimeFromTimeString($hours->start);
         $end = $date->copy()->setTimeFromTimeString($hours->end);
+        $leave = self::coveredMinutes($start, $end, $excused);
+
+        // Leave for the whole working day: nothing else to judge, even while the day is still running.
+        if ($leave > 0 && $leave >= self::minutesBetween($start, $end)) {
+            return new AttendanceDayResult(AttendanceStatus::LEAVE, $checkIn, $checkOut, 0, 0, $worked, $leave);
+        }
 
         if ($checkIn === null) {
             return $now->lt($end)
                 ? null
-                : new AttendanceDayResult(AttendanceStatus::ABSENT, null, null, 0, 0, 0);
+                : new AttendanceDayResult(AttendanceStatus::ABSENT, null, null, 0, 0, 0, $leave);
         }
 
         $late = self::minutesBetween(self::expectedArrival($start, $excused), $checkIn);
 
         if ($checkOut === null) {
-            return new AttendanceDayResult(AttendanceStatus::INCOMPLETE, $checkIn, null, $late, 0, 0);
+            return new AttendanceDayResult(AttendanceStatus::INCOMPLETE, $checkIn, null, $late, 0, 0, $leave);
         }
 
         $early = self::minutesBetween($checkOut, self::expectedDeparture($end, $excused));
 
-        return new AttendanceDayResult(AttendanceStatus::PRESENT, $checkIn, $checkOut, $late, $early, $worked);
+        return new AttendanceDayResult(AttendanceStatus::PRESENT, $checkIn, $checkOut, $late, $early, $worked, $leave);
+    }
+
+    /**
+     * Whole minutes of the shift covered by excused time; overlapping ranges count once.
+     *
+     * @param  list<TimeRange>  $excused
+     */
+    private static function coveredMinutes(Carbon $start, Carbon $end, array $excused): int
+    {
+        $spans = [];
+        foreach ($excused as $range) {
+            $from = max($range->start->getTimestamp(), $start->getTimestamp());
+            $to = min($range->end->getTimestamp(), $end->getTimestamp());
+            if ($from < $to) {
+                $spans[] = [$from, $to];
+            }
+        }
+        usort($spans, fn (array $a, array $b) => $a[0] <=> $b[0]);
+
+        $covered = 0;
+        $reach = PHP_INT_MIN;
+        foreach ($spans as [$from, $to]) {
+            $from = max($from, $reach);
+            if ($to > $from) {
+                $covered += $to - $from;
+            }
+            $reach = max($reach, $to);
+        }
+
+        return intdiv($covered, 60);
     }
 
     /**

@@ -30,6 +30,7 @@ class AttendanceDaysExport implements FromCollection, ShouldAutoSize, WithHeadin
         'Late (min)',
         'Early Leave (min)',
         'Worked (min)',
+        'On Leave (min)',
         'Corrected',
         'Note',
     ];
@@ -64,6 +65,7 @@ class AttendanceDaysExport implements FromCollection, ShouldAutoSize, WithHeadin
             $day->late_minutes,
             $day->early_leave_minutes,
             $day->worked_minutes,
+            $day->leave_minutes,
             $day->is_manual ? 'Yes' : 'No',
             $day->note,
         ];
@@ -78,7 +80,7 @@ class AttendanceDaysExport implements FromCollection, ShouldAutoSize, WithHeadin
     /** @return array<int, array<string, mixed>> */
     public function styles(Worksheet $sheet): array
     {
-        $sheet->setAutoFilter('A1:N1');
+        $sheet->setAutoFilter('A1:O1');
 
         return [
             1 => [
