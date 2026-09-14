@@ -5,10 +5,6 @@ declare(strict_types=1);
 namespace App\Domains\Attendance\Services;
 
 use App\Domains\Attendance\Adapters\UserAdapter;
-use App\Domains\Attendance\DTOs\ShiftHours;
-use App\Domains\Attendance\Models\Shift;
-use App\Domains\Attendance\Models\ShiftDay;
-use App\Domains\Attendance\Models\UserShift;
 use App\Domains\Attendance\Repositories\AttendanceDayRepository;
 use App\Domains\Attendance\Repositories\AttendanceTransactionRepository;
 use App\Domains\Attendance\Repositories\HolidayRepository;
@@ -34,6 +30,7 @@ class AttendanceProcessingService
         private readonly UserAdapter $userAdapter,
         private readonly LeaveRequestRepository $leaveRepository,
         private readonly LeaveCoverage $leaveCoverage,
+        private readonly ShiftSchedule $schedule,
     ) {}
 
     /**
@@ -93,13 +90,13 @@ class AttendanceProcessingService
                     continue;
                 }
 
-                $assignment = $this->assignmentOn($assignmentsByUser[$userId] ?? [], $date);
+                $assignment = $this->schedule->assignmentOn($assignmentsByUser[$userId] ?? [], $date);
                 $dayPunches = $punches[$userId][$day] ?? [];
                 if ($assignment === null && $dayPunches === []) {
                     continue;
                 }
 
-                $hours = $assignment ? $this->hoursOn($assignment->shift, $date) : null;
+                $hours = $assignment ? $this->schedule->hoursOn($assignment->shift, $date) : null;
                 $excused = $hours ? $this->leaveCoverage->excusedOn($leavesByUser[$userId] ?? [], $date, $hours) : [];
                 $result = $this->calculator->calculate($date->copy(), $hours, isset($holidays[$day]), $dayPunches, $excused, $now);
                 if ($result === null) {
@@ -175,27 +172,5 @@ class AttendanceProcessingService
         }
 
         return $punches;
-    }
-
-    /**
-     * @param  list<UserShift>  $assignments
-     */
-    private function assignmentOn(array $assignments, Carbon $date): ?UserShift
-    {
-        foreach ($assignments as $assignment) {
-            if ($assignment->effective_from->lte($date)
-                && ($assignment->effective_to === null || $assignment->effective_to->gte($date))) {
-                return $assignment;
-            }
-        }
-
-        return null;
-    }
-
-    private function hoursOn(Shift $shift, Carbon $date): ?ShiftHours
-    {
-        $day = $shift->days->first(fn (ShiftDay $shiftDay) => $shiftDay->weekday->value === $date->dayOfWeek);
-
-        return $day ? new ShiftHours($day->start_time, $day->end_time) : null;
     }
 }

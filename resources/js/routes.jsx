@@ -56,6 +56,7 @@ import ScheduleIcon from '@mui/icons-material/Schedule';
 import SensorDoorIcon from '@mui/icons-material/SensorDoor';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import BeachAccessIcon from '@mui/icons-material/BeachAccess';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import {
     PercentDiamond,
     Stethoscope as Doctor,
@@ -542,6 +543,12 @@ const routes = (sections = []) => {
                     route: 'attendance.days.index',
                     permission: 'Attendance.Daily Attendance.List Attendance',
                     icon: <EventAvailableIcon />,
+                },
+                {
+                    // Everyone sees their own month; the page offers other people to attendance viewers.
+                    title: 'Calendar',
+                    route: 'attendance.calendar.index',
+                    icon: <CalendarMonthIcon />,
                 },
                 {
                     title: 'Leave Requests',

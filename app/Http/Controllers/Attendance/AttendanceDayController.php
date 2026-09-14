@@ -56,11 +56,11 @@ class AttendanceDayController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function reset(AttendanceDay $attendanceDay): RedirectResponse
+    public function reset(AttendanceDay $attendanceDay, Request $request): RedirectResponse
     {
         $this->authorize('update', $attendanceDay);
         $date = $attendanceDay->date->format('Y-m-d');
-        $this->dayService->resetToAutomatic($attendanceDay);
+        $this->dayService->resetToAutomatic($attendanceDay, (int) $request->user()?->getAuthIdentifier());
 
         return back()->with(['success' => true, 'status' => "Attendance for $date recalculated from punches"]);
     }

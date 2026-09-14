@@ -106,6 +106,24 @@ class LeaveRequestRepository
     }
 
     /**
+     * One person's pending or approved leave touching any day between the dates, with its kind.
+     *
+     * @return Collection<int, LeaveRequest>
+     */
+    public function activeForUserBetween(int $userId, string $from, string $to): Collection
+    {
+        return LeaveRequest::query()
+            ->with('kind:id,name')
+            ->where('user_id', $userId)
+            ->whereIn('status', [LeaveRequestStatus::PENDING->value, LeaveRequestStatus::APPROVED->value])
+            ->where('start_date', '<=', $to)
+            ->where('end_date', '>=', $from)
+            ->orderBy('start_date')
+            ->orderBy('start_time')
+            ->get();
+    }
+
+    /**
      * Approved leave touching any day between the dates (Y-m-d, inclusive).
      *
      * @param  list<int>|null  $userIds  only these people (null = everyone)

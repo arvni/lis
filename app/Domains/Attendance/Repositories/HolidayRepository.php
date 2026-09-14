@@ -38,6 +38,21 @@ class HolidayRepository
     }
 
     /**
+     * Holidays between the dates (Y-m-d, inclusive), keyed by Y-m-d.
+     *
+     * @return array<string, Holiday>
+     */
+    public function holidaysBetween(string $from, string $to): array
+    {
+        $holidays = [];
+        foreach (Holiday::query()->whereBetween('date', [$from, $to])->get(['id', 'date', 'title']) as $holiday) {
+            $holidays[$holiday->date->format('Y-m-d')] = $holiday;
+        }
+
+        return $holidays;
+    }
+
+    /**
      * Holiday dates between the dates (Y-m-d, inclusive).
      *
      * @return list<string> Y-m-d

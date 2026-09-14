@@ -29,6 +29,24 @@ readonly class UserAdapter
     }
 
     /**
+     * @param  list<int>  $userIds
+     * @return array<int, User> keyed by user id
+     */
+    public function getUsersByIds(array $userIds): array
+    {
+        if ($userIds === []) {
+            return [];
+        }
+
+        $users = [];
+        foreach ($this->userRepository->getByIds($userIds) as $user) {
+            $users[$user->id] = $user;
+        }
+
+        return $users;
+    }
+
+    /**
      * Active users as id/name pairs, narrowed by name, for the "on behalf of" picker.
      *
      * @return Collection<int, User>
