@@ -49,7 +49,8 @@ class UserController extends Controller
             $validated["stamp"]?? null,
             $validated['title'],
             $validated['roles'],
-            $validated['is_active']
+            $validated['is_active'],
+            $validated['attendance_number'] ?? null
         );
         $this->userService->createUser($userDto);
         return redirect()->route('users.index')->with('success', 'User created successfully.');
@@ -77,7 +78,8 @@ class UserController extends Controller
             $validated["stamp"]?? null,
             $validated['title'],
             $validated['roles'],
-            $validated['is_active']
+            $validated['is_active'],
+            $validated['attendance_number'] ?? null
         );
         $this->userService->updateUser($user, $userDto);
         Cache::forget("user-$user->id-section-routes");

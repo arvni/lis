@@ -84,6 +84,12 @@ const UserForm = ({
                         {renderTextField('title', 'Title Under Signature')}
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                        {renderTextField('attendance_number', 'Attendance Number')}
+                        <Typography variant="caption" display="block" color="text.secondary">
+                            Must match this person&apos;s Employee ID in HikCentral
+                        </Typography>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                         <Box sx={{ pt: 2 }}>
                             <FormControlLabel
                                 control={

@@ -9,6 +9,7 @@ const Add = ({ errors: initialErrors }) => {
     const { data, setData, post, processing } = useForm({
         name: '',
         username: '',
+        attendance_number: '',
         mobile: '',
         email: '',
         title: '',

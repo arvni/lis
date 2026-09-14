@@ -32,6 +32,7 @@ const Index = ({ users, status, errors, success, requestInputs }) => {
         { field: 'email', headerName: 'Email', type: 'email', width: 200 },
         { field: 'mobile', headerName: 'Mobile', type: 'mobile', width: 150 },
         { field: 'title', headerName: 'Title', width: 150 },
+        { field: 'attendance_number', headerName: 'Attendance No.', width: 130 },
         {
             field: 'roles',
             headerName: 'Roles',

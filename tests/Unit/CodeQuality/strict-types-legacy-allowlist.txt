@@ -505,12 +505,10 @@ app/Domains/Shared/Traits/HasSelectOptions.php
 app/Domains/Shared/Traits/LogsUserActivity.php
 app/Domains/System/Policies/FailedJobPolicy.php
 app/Domains/User/DTOs/RoleDTO.php
-app/Domains/User/DTOs/UserDTO.php
 app/Domains/User/Enums/ActivityType.php
 app/Domains/User/Events/UserDocumentUpdateEvent.php
 app/Domains/User/Listeners/SectionPermissionsListener.php
 app/Domains/User/Models/Role.php
-app/Domains/User/Models/User.php
 app/Domains/User/Models/UserActivity.php
 app/Domains/User/Policies/RolePolicy.php
 app/Domains/User/Policies/UserPolicy.php
@@ -519,9 +517,7 @@ app/Domains/User/Repositories/RoleRepository.php
 app/Domains/User/Repositories/UserActivityRepository.php
 app/Domains/User/Repositories/UserRepository.php
 app/Domains/User/Requests/StoreRoleRequest.php
-app/Domains/User/Requests/StoreUserRequest.php
 app/Domains/User/Requests/UpdateRoleRequest.php
-app/Domains/User/Requests/UpdateUserRequest.php
 app/Domains/User/Services/PermissionService.php
 app/Domains/User/Services/RoleService.php
 app/Domains/User/Services/UserActivityService.php

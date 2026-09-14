@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\User\Requests;
 
 use App\Domains\User\Models\User;
@@ -26,6 +28,7 @@ class UpdateUserRequest extends StoreUserRequest
         $rules = parent::rules();
         $rules['username'] = ['required', 'string', 'max:255', 'unique:users,username,'.$this->routeUserModel()->id];
         $rules['email'] = ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$this->routeUserModel()->id];
+        $rules['attendance_number'] = ['nullable', 'string', 'max:64', 'unique:users,attendance_number,'.$this->routeUserModel()->id];
         unset($rules['password'], $rules['password_confirmation']);
 
         return $rules;
