@@ -151,20 +151,29 @@ const FinancialCheck = () => {
                     if (row.invoice) {
                         const payment = invoicePaymentStanding(row.invoice);
 
+                        // Stacked with a gap: the chip is inline-flex and the
+                        // caption a span, so they would otherwise run together
+                        // on one line and be clipped by the cell.
                         return (
-                            <Box>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'flex-start',
+                                    gap: 0.5,
+                                }}
+                            >
                                 <Chip
                                     icon={<Receipt />}
                                     label={payment.fullyPaid ? 'Fully Paid' : 'Not Fully Paid'}
                                     size="small"
                                     color={payment.fullyPaid ? 'success' : 'error'}
                                     variant="filled"
-                                    sx={{ mb: 0.5 }}
                                 />
                                 <Typography
                                     variant="caption"
                                     color="text.secondary"
-                                    display="block"
+                                    sx={{ whiteSpace: 'normal', lineHeight: 1.4 }}
                                 >
                                     {payment.fullyPaid
                                         ? `Total: ${formatCurrency(payment.total)}`
@@ -353,6 +362,9 @@ const FinancialCheck = () => {
                 Filter={Filter}
                 errors={errors}
                 loading={processingAcceptances.size > 0 || loading}
+                // Patient and invoice cells run to two lines; a fixed row
+                // height clips the second.
+                getRowHeight={() => 'auto'}
                 emptyStateProps={{
                     title: 'No Acceptances for Financial Check',
                     description:
