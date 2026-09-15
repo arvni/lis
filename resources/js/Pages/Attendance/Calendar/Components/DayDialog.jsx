@@ -88,6 +88,11 @@ const DayDialog = ({ day, person, canCorrect = false, onClose }) => {
                         In {attendance.check_in ?? '—'} · Out {attendance.check_out ?? '—'} · Worked{' '}
                         {formatMinutes(attendance.worked_minutes)}
                     </Typography>
+                    {attendance.overtime_minutes > 0 && (
+                        <Typography variant="body2" sx={{ color: 'success.main' }}>
+                            Overtime {formatMinutes(attendance.overtime_minutes)}
+                        </Typography>
+                    )}
                     {(attendance.late_minutes > 0 || attendance.early_leave_minutes > 0) && (
                         <Typography variant="body2" sx={{ color: 'warning.main' }}>
                             Late {formatMinutes(attendance.late_minutes)} · Left early{' '}

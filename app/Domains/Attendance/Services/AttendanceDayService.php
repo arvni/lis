@@ -90,6 +90,7 @@ class AttendanceDayService
                 'late_minutes' => $result->lateMinutes,
                 'early_leave_minutes' => $result->earlyLeaveMinutes,
                 'worked_minutes' => $result->workedMinutes,
+                'overtime_minutes' => $result->overtimeMinutes,
                 'leave_minutes' => $result->leaveMinutes,
                 'is_manual' => true,
                 'note' => $dto->note,
@@ -148,7 +149,7 @@ class AttendanceDayService
     /**
      * The parts of a day a hand edit can change, as stored in the change log.
      *
-     * @return array{check_in: string|null, check_out: string|null, status: string, late_minutes: int, early_leave_minutes: int, worked_minutes: int, leave_minutes: int}
+     * @return array{check_in: string|null, check_out: string|null, status: string, late_minutes: int, early_leave_minutes: int, worked_minutes: int, overtime_minutes: int, leave_minutes: int}
      */
     private function snapshot(AttendanceDay $day): array
     {
@@ -159,6 +160,7 @@ class AttendanceDayService
             'late_minutes' => $day->late_minutes,
             'early_leave_minutes' => $day->early_leave_minutes,
             'worked_minutes' => $day->worked_minutes,
+            'overtime_minutes' => $day->overtime_minutes,
             'leave_minutes' => $day->leave_minutes,
         ];
     }

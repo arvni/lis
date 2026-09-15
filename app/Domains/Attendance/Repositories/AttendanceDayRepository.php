@@ -15,7 +15,7 @@ class AttendanceDayRepository
 {
     use LogsUserActivity;
 
-    private const SORTABLE = ['date', 'status', 'late_minutes', 'early_leave_minutes', 'worked_minutes'];
+    private const SORTABLE = ['date', 'status', 'late_minutes', 'early_leave_minutes', 'worked_minutes', 'overtime_minutes'];
 
     /** Columns the scheduled job may overwrite on an automatic day. */
     private const CALCULATED_COLUMNS = [
@@ -28,6 +28,7 @@ class AttendanceDayRepository
         'late_minutes',
         'early_leave_minutes',
         'worked_minutes',
+        'overtime_minutes',
         'leave_minutes',
         'is_manual',
         'note',
@@ -72,7 +73,7 @@ class AttendanceDayRepository
     /**
      * Each person's month in numbers: minutes summed and days counted by status.
      *
-     * @return array<int, array{worked_minutes: int, late_minutes: int, early_leave_minutes: int, leave_minutes: int, present_days: int, absent_days: int, leave_days: int, corrected_days: int}>
+     * @return array<int, array{worked_minutes: int, overtime_minutes: int, late_minutes: int, early_leave_minutes: int, leave_minutes: int, present_days: int, absent_days: int, leave_days: int, corrected_days: int}>
      */
     public function totalsByUserBetween(string $from, string $to): array
     {
@@ -81,6 +82,7 @@ class AttendanceDayRepository
             ->groupBy('user_id')
             ->select('user_id')
             ->selectRaw('SUM(worked_minutes) AS worked_minutes')
+            ->selectRaw('SUM(overtime_minutes) AS overtime_minutes')
             ->selectRaw('SUM(late_minutes) AS late_minutes')
             ->selectRaw('SUM(early_leave_minutes) AS early_leave_minutes')
             ->selectRaw('SUM(leave_minutes) AS leave_minutes')
@@ -98,6 +100,7 @@ class AttendanceDayRepository
         foreach ($rows as $row) {
             $totals[(int) $row->user_id] = [
                 'worked_minutes' => (int) $row->worked_minutes,
+                'overtime_minutes' => (int) $row->overtime_minutes,
                 'late_minutes' => (int) $row->late_minutes,
                 'early_leave_minutes' => (int) $row->early_leave_minutes,
                 'leave_minutes' => (int) $row->leave_minutes,

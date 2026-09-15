@@ -23,6 +23,7 @@ class AttendanceSummaryExport implements FromArray, ShouldAutoSize, WithHeadings
         'Attendance No.',
         'Scheduled (min)',
         'Worked (min)',
+        'Overtime (min)',
         'Late (min)',
         'Early Leave (min)',
         'On Leave (min)',
@@ -33,7 +34,7 @@ class AttendanceSummaryExport implements FromArray, ShouldAutoSize, WithHeadings
     ];
 
     /**
-     * @param  list<array{name: string, attendance_number: string|null, scheduled_minutes: int, worked_minutes: int, late_minutes: int, early_leave_minutes: int, leave_minutes: int, present_days: int, absent_days: int, leave_days: int, corrected_days: int}>  $people
+     * @param  list<array{name: string, attendance_number: string|null, scheduled_minutes: int, worked_minutes: int, overtime_minutes: int, late_minutes: int, early_leave_minutes: int, leave_minutes: int, present_days: int, absent_days: int, leave_days: int, corrected_days: int}>  $people
      */
     public function __construct(
         private readonly Carbon $month,
@@ -50,6 +51,7 @@ class AttendanceSummaryExport implements FromArray, ShouldAutoSize, WithHeadings
             $person['attendance_number'],
             $person['scheduled_minutes'],
             $person['worked_minutes'],
+            $person['overtime_minutes'],
             $person['late_minutes'],
             $person['early_leave_minutes'],
             $person['leave_minutes'],
@@ -69,7 +71,7 @@ class AttendanceSummaryExport implements FromArray, ShouldAutoSize, WithHeadings
     /** @return array<int, array<string, mixed>> */
     public function styles(Worksheet $sheet): array
     {
-        $sheet->setAutoFilter('A1:K1');
+        $sheet->setAutoFilter('A1:L1');
 
         return [
             1 => [

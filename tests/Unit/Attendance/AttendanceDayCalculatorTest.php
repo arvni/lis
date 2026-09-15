@@ -178,6 +178,56 @@ class AttendanceDayCalculatorTest extends TestCase
         $this->assertSame(AttendanceStatus::OFF, $this->calculate(null, [], excused: [['08:00', '16:00']])?->status);
     }
 
+    public function test_time_before_the_shift_starts_and_after_it_ends_is_overtime(): void
+    {
+        $result = $this->calculate($this->morning(), ['07:40:00', '17:10:00']);
+
+        $this->assertSame(AttendanceStatus::PRESENT, $result?->status);
+        $this->assertSame(90, $result->overtimeMinutes);
+        $this->assertSame(570, $result->workedMinutes);
+    }
+
+    public function test_arriving_late_does_not_cancel_staying_late(): void
+    {
+        $result = $this->calculate($this->morning(), ['08:30:00', '17:10:00']);
+
+        $this->assertSame(30, $result?->lateMinutes);
+        $this->assertSame(70, $result->overtimeMinutes);
+    }
+
+    public function test_a_day_inside_the_shift_has_no_overtime(): void
+    {
+        $this->assertSame(0, $this->calculate($this->morning(), ['08:11:04', '15:47:52'])?->overtimeMinutes);
+        $this->assertSame(0, $this->calculate($this->morning(), ['07:59:30', '16:00:59'])?->overtimeMinutes);
+    }
+
+    public function test_punches_wholly_outside_the_shift_are_all_overtime(): void
+    {
+        $this->assertSame(90, $this->calculate($this->morning(), ['16:30:00', '18:00:00'])?->overtimeMinutes);
+        $this->assertSame(60, $this->calculate($this->morning(), ['06:00:00', '07:00:00'])?->overtimeMinutes);
+    }
+
+    public function test_overtime_needs_a_check_out(): void
+    {
+        $result = $this->calculate($this->morning(), ['06:30:00']);
+
+        $this->assertSame(AttendanceStatus::INCOMPLETE, $result?->status);
+        $this->assertSame(0, $result->overtimeMinutes);
+    }
+
+    public function test_all_time_worked_on_a_holiday_or_a_day_off_is_overtime(): void
+    {
+        $this->assertSame(120, $this->calculate($this->morning(), ['09:00:00', '11:00:00'], holiday: true)?->overtimeMinutes);
+        $this->assertSame(150, $this->calculate(null, ['10:00:00', '12:30:00'])?->overtimeMinutes);
+    }
+
+    public function test_leave_at_the_end_of_the_day_does_not_turn_staying_into_overtime_before_the_shift_ends(): void
+    {
+        $result = $this->calculate($this->morning(), ['08:00:00', '16:30:00'], excused: [['14:00', '16:00']]);
+
+        $this->assertSame(30, $result?->overtimeMinutes);
+    }
+
     private function morning(): ShiftHours
     {
         return new ShiftHours('08:00:00', '16:00:00');

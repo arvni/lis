@@ -36,6 +36,7 @@ class AttendanceMonthExport implements FromArray, ShouldAutoSize, WithHeadings, 
         'Late (min)',
         'Early Leave (min)',
         'Worked (min)',
+        'Overtime (min)',
         'On Leave (min)',
         'Holiday',
         'Leave Requests',
@@ -65,6 +66,7 @@ class AttendanceMonthExport implements FromArray, ShouldAutoSize, WithHeadings, 
             $totals['late_minutes'],
             $totals['early_leave_minutes'],
             $totals['worked_minutes'],
+            $totals['overtime_minutes'],
             $totals['leave_minutes'],
             null, null,
             $totals['corrected_days'],
@@ -83,7 +85,7 @@ class AttendanceMonthExport implements FromArray, ShouldAutoSize, WithHeadings, 
     /** @return array<int, array<string, mixed>> */
     public function styles(Worksheet $sheet): array
     {
-        $sheet->setAutoFilter('A1:Q1');
+        $sheet->setAutoFilter('A1:R1');
         $totalsRow = count($this->month->days) + 2;
 
         return [
@@ -121,6 +123,7 @@ class AttendanceMonthExport implements FromArray, ShouldAutoSize, WithHeadings, 
             $record ? $record->late_minutes : null,
             $record ? $record->early_leave_minutes : null,
             $record ? $record->worked_minutes : null,
+            $record ? $record->overtime_minutes : null,
             $record ? $record->leave_minutes : null,
             $day->holiday?->title,
             $day->leaves === [] ? null : implode('; ', array_map(fn (LeaveRequest $leave) => $this->leaveLabel($leave), $day->leaves)),

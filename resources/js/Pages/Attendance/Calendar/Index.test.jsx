@@ -60,6 +60,7 @@ const renderPage = ({
             totals: {
                 scheduled_minutes: 10080,
                 worked_minutes: 456,
+                overtime_minutes: 95,
                 late_minutes: 11,
                 early_leave_minutes: 12,
                 leave_minutes: 0,
@@ -131,8 +132,21 @@ describe('Attendance/Calendar/Index', () => {
                         check_in: '08:11',
                         check_out: '15:47',
                         worked_minutes: 456,
+                        overtime_minutes: 0,
                         late_minutes: 11,
                         early_leave_minutes: 12,
+                    },
+                },
+                15: {
+                    attendance: {
+                        status: 'PRESENT',
+                        status_label: 'Present',
+                        check_in: '07:40',
+                        check_out: '17:10',
+                        worked_minutes: 570,
+                        overtime_minutes: 90,
+                        late_minutes: 0,
+                        early_leave_minutes: 0,
                     },
                 },
                 24: {
@@ -154,14 +168,18 @@ describe('Attendance/Calendar/Index', () => {
         expect(monday).toHaveTextContent('In 08:11 · Out 15:47');
         expect(monday).toHaveTextContent('Worked 7 h 36 m');
         expect(monday).toHaveTextContent('Late 11 m');
+        expect(monday).not.toHaveTextContent('Overtime');
+        expect(screen.getByTestId('day-15')).toHaveTextContent('Overtime 1 h 30 m');
         expect(screen.getByTestId('day-24')).toHaveTextContent('Annual 10:00–12:00 (pending)');
     });
 
-    it("sums up the month's hours", () => {
+    it("sums up the month's hours, overtime included", () => {
         renderPage();
 
         expect(screen.getByText('168 h')).toBeInTheDocument();
         expect(screen.getByText('7 h 36 m')).toBeInTheDocument();
+        expect(screen.getByText('Overtime')).toBeInTheDocument();
+        expect(screen.getByText('1 h 35 m')).toBeInTheDocument();
     });
 
     it('moves between months for the same person', () => {

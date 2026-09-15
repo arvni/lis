@@ -116,6 +116,7 @@ class AttendanceProcessingService
                     'late_minutes' => $result->lateMinutes,
                     'early_leave_minutes' => $result->earlyLeaveMinutes,
                     'worked_minutes' => $result->workedMinutes,
+                    'overtime_minutes' => $result->overtimeMinutes,
                     'leave_minutes' => $result->leaveMinutes,
                     'is_manual' => false,
                     'note' => null,

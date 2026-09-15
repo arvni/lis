@@ -121,6 +121,15 @@ describe('Attendance/Days/Index', () => {
         );
     });
 
+    it('shows the overtime next to the worked time', () => {
+        renderPage();
+        const fields = vi.mocked(TableLayout).mock.calls.at(-1)[0].columns.map((col) => col.field);
+        render(column('overtime_minutes').renderCell({ value: 70 }));
+
+        expect(fields.indexOf('overtime_minutes')).toBe(fields.indexOf('worked_minutes') + 1);
+        expect(screen.getByText('1 h 10 m')).toBeInTheDocument();
+    });
+
     it('exports the rows being looked at', () => {
         renderPage(['Attendance.Daily Attendance.Export Attendance']);
 

@@ -56,6 +56,7 @@ const leaveLabel = (leave) => {
 const TOTALS = [
     { key: 'scheduled_minutes', label: 'Scheduled' },
     { key: 'worked_minutes', label: 'Worked' },
+    { key: 'overtime_minutes', label: 'Overtime' },
     { key: 'late_minutes', label: 'Late' },
     { key: 'early_leave_minutes', label: 'Left early' },
     { key: 'leave_minutes', label: 'On leave' },
@@ -156,6 +157,11 @@ const DayCell = ({ day, onOpen }) => {
             {attendance?.worked_minutes > 0 && (
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                     Worked {formatMinutes(attendance.worked_minutes)}
+                </Typography>
+            )}
+            {attendance?.overtime_minutes > 0 && (
+                <Typography variant="caption" sx={{ color: 'success.main' }}>
+                    Overtime {formatMinutes(attendance.overtime_minutes)}
                 </Typography>
             )}
             {attendance?.late_minutes > 0 && (
