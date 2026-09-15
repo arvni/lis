@@ -32,6 +32,7 @@ const RequestInfoCard = ({ pr, poDocument, paymentDocument, onViewDoc }) => (
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
                     <InfoRow label="PO Number">{pr.po_number}</InfoRow>
+                    <InfoRow label="PO Signer">{pr.signer?.name}</InfoRow>
                     <InfoRow
                         label="PO File"
                         chipContent={
@@ -70,6 +71,22 @@ const RequestInfoCard = ({ pr, poDocument, paymentDocument, onViewDoc }) => (
                         Notes
                     </Typography>
                     <Typography variant="body2">{pr.notes}</Typography>
+                </>
+            )}
+            {pr.po_notes && (
+                <>
+                    <Divider sx={{ my: 1.5 }} />
+                    <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        display="block"
+                        gutterBottom
+                    >
+                        Note to supplier
+                    </Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+                        {pr.po_notes}
+                    </Typography>
                 </>
             )}
         </CardContent>

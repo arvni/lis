@@ -16,6 +16,8 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection as SupportCollection;
 
 class PurchaseRequestRepository
 {
@@ -214,5 +216,29 @@ class PurchaseRequestRepository
     public function createHistory(array $fields): PurchaseRequestHistory
     {
         return PurchaseRequestHistory::create($fields);
+    }
+
+    /**
+     * Every PO number starting with the prefix, locked for update so a concurrent
+     * approval waits instead of reading the same last number.
+     *
+     * @return SupportCollection<int, string>
+     */
+    public function lockPoNumbersStartingWith(string $prefix): SupportCollection
+    {
+        return PurchaseRequest::where('po_number', 'like', $prefix.'%')
+            ->lockForUpdate()
+            ->pluck('po_number');
+    }
+
+    /** When the request received its final approval — the date its purchase order carries. */
+    public function approvedAt(PurchaseRequest $pr): ?Carbon
+    {
+        $history = PurchaseRequestHistory::where('purchase_request_id', $pr->id)
+            ->where('event', 'APPROVED')
+            ->latest('id')
+            ->first();
+
+        return $history?->created_at;
     }
 }

@@ -61,6 +61,7 @@ Route::group(['prefix' => 'inventory', 'as' => 'inventory.'], function () {
     Route::post('transactions/{transaction}/confirm-receipt', ConfirmTransferReceiptController::class)->name('transactions.confirm-receipt');
     Route::resource('purchase-requests', PurchaseRequestController::class)->except('destroy');
     Route::post('purchase-requests/{purchaseRequest}/order', [PurchaseRequestController::class, 'order'])->name('purchase-requests.order');
+    Route::get('purchase-requests/{purchaseRequest}/print', [PurchaseRequestController::class, 'print'])->name('purchase-requests.print');
     Route::post('purchase-requests/{purchaseRequest}/pay', [PurchaseRequestController::class, 'pay'])->name('purchase-requests.pay');
     Route::post('purchase-requests/{purchaseRequest}/ship', [PurchaseRequestController::class, 'ship'])->name('purchase-requests.ship');
     Route::get('purchase-requests/{purchaseRequest}/receive', [PurchaseRequestController::class, 'receiveItems'])->name('purchase-requests.receive');

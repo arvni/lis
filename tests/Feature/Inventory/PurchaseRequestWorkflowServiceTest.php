@@ -153,6 +153,7 @@ class PurchaseRequestWorkflowServiceTest extends TestCase
         $this->service->approveStep($pr, $this->approver, 'looks good');
 
         $this->assertSame(PurchaseRequestStatus::APPROVED, $pr->fresh()->status);
+        $this->assertSame('PO-'.now()->year.'-0001', $pr->fresh()->po_number);
         Notification::assertSentTo($this->requester, PurchaseRequestApprovedNotification::class);
     }
 
@@ -165,6 +166,7 @@ class PurchaseRequestWorkflowServiceTest extends TestCase
         $this->service->approveStep($pr, $this->approver);
 
         $this->assertNotSame(PurchaseRequestStatus::APPROVED, $pr->fresh()->status);
+        $this->assertNull($pr->fresh()->po_number, 'numbered only on the final approval');
         $this->assertSame('Step 2', $this->service->getActiveApproval($pr)->step->name);
     }
 

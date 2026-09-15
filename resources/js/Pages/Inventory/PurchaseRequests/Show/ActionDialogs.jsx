@@ -1,5 +1,8 @@
 import { router } from '@inertiajs/react';
 import {
+    Alert,
+    Autocomplete,
+    Box,
     Button,
     Dialog,
     DialogActions,
@@ -16,6 +19,10 @@ import {
 import SupplierSelect from '@/Pages/Inventory/Components/SupplierSelect';
 import BrandInput from '@/Pages/Inventory/Components/BrandInput';
 
+// What a signer still needs on their user profile before the PO can carry it.
+const missingSignerImages = (signer) =>
+    [!signer.signature && 'signature', !signer.stamp && 'stamp'].filter(Boolean).join(' or ');
+
 const ActionDialogs = ({
     pr,
     orderDialog,
@@ -23,6 +30,9 @@ const ActionDialogs = ({
     orderForm,
     orderSupplier,
     setOrderSupplier,
+    signers,
+    orderSigner,
+    setOrderSigner,
     submitOrder,
     payDialog,
     setPayDialog,
@@ -51,17 +61,10 @@ const ActionDialogs = ({
         <Dialog open={orderDialog} onClose={() => setOrderDialog(false)} maxWidth="sm" fullWidth>
             <DialogTitle>Issue Purchase Order</DialogTitle>
             <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-                <TextField
-                    size="small"
-                    fullWidth
-                    required
-                    label="PO Number"
-                    sx={{ mt: 2 }}
-                    value={orderForm.data.po_number}
-                    onChange={(e) => orderForm.setData('po_number', e.target.value)}
-                    error={!!orderForm.errors.po_number}
-                    helperText={orderForm.errors.po_number}
-                />
+                <Typography variant="body2" sx={{ mt: 2 }}>
+                    PO number <strong>{pr.po_number}</strong> — assigned when the request was
+                    approved.
+                </Typography>
                 <SupplierSelect
                     size="small"
                     required
@@ -72,6 +75,69 @@ const ActionDialogs = ({
                         orderForm.setData('supplier_id', s?.id ?? '');
                     }}
                     error={!!orderForm.errors.supplier_id}
+                />
+                <Autocomplete
+                    size="small"
+                    options={signers ?? []}
+                    getOptionLabel={(u) => (u.title ? `${u.name} — ${u.title}` : u.name)}
+                    isOptionEqualToValue={(a, b) => a.id === b.id}
+                    value={orderSigner}
+                    onChange={(_, u) => {
+                        setOrderSigner(u);
+                        orderForm.setData('signer_user_id', u?.id ?? '');
+                    }}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            required
+                            label="Signer"
+                            error={!!orderForm.errors.signer_user_id}
+                            helperText={
+                                orderForm.errors.signer_user_id ??
+                                'Their signature and stamp are printed on the PO'
+                            }
+                        />
+                    )}
+                />
+                {orderSigner && (orderSigner.signature || orderSigner.stamp) && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        {orderSigner.signature && (
+                            <Box
+                                component="img"
+                                src={orderSigner.signature}
+                                alt="Signature"
+                                sx={{ height: 48, maxWidth: 160, objectFit: 'contain' }}
+                            />
+                        )}
+                        {orderSigner.stamp && (
+                            <Box
+                                component="img"
+                                src={orderSigner.stamp}
+                                alt="Stamp"
+                                sx={{ height: 64, objectFit: 'contain' }}
+                            />
+                        )}
+                    </Box>
+                )}
+                {orderSigner && missingSignerImages(orderSigner) && (
+                    <Alert severity="warning">
+                        {orderSigner.name} has no {missingSignerImages(orderSigner)} on file — add
+                        it on their user profile, or the PO prints without it.
+                    </Alert>
+                )}
+                <TextField
+                    size="small"
+                    fullWidth
+                    multiline
+                    minRows={2}
+                    label="Note to supplier"
+                    value={orderForm.data.po_notes}
+                    onChange={(e) => orderForm.setData('po_notes', e.target.value)}
+                    error={!!orderForm.errors.po_notes}
+                    helperText={
+                        orderForm.errors.po_notes ??
+                        'Optional — printed on the PO; the request notes stay internal'
+                    }
                 />
                 <TextField
                     size="small"
@@ -94,8 +160,8 @@ const ActionDialogs = ({
                     onClick={submitOrder}
                     disabled={
                         orderForm.processing ||
-                        !orderForm.data.po_number ||
-                        !orderForm.data.supplier_id
+                        !orderForm.data.supplier_id ||
+                        !orderForm.data.signer_user_id
                     }
                 >
                     Issue PO

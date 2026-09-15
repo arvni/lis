@@ -139,13 +139,23 @@ class PurchaseRequestController extends Controller
     public function order(OrderPurchaseRequestRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('order', $purchaseRequest);
-        $data = $request->validated();
         try {
-            $this->prService->order($purchaseRequest, $data['po_number'], isset($data['supplier_id']) ? (int) $data['supplier_id'] : null, $request->file('po_file'));
+            $this->prService->order($purchaseRequest, $request->validated(), $request->file('po_file'));
         } catch (RuntimeException $e) {
             return back()->with(['success' => false, 'status' => $e->getMessage()]);
         }
-        return back()->with(['success' => true, 'status' => 'Order confirmed. PO number saved.']);
+        return back()->with(['success' => true, 'status' => "Purchase order {$purchaseRequest->po_number} issued."]);
+    }
+
+    public function print(PurchaseRequest $purchaseRequest): Response
+    {
+        $this->authorize('viewAny', PurchaseRequest::class);
+        try {
+            $props = $this->prService->loadForPrint($purchaseRequest);
+        } catch (RuntimeException $e) {
+            abort(404, $e->getMessage());
+        }
+        return Inertia::render('Inventory/PurchaseRequests/Print', $props);
     }
 
     public function pay(PayPurchaseRequestRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse

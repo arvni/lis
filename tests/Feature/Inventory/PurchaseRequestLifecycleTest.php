@@ -116,6 +116,10 @@ class PurchaseRequestLifecycleTest extends TestCase
         $this->assertShowPageLetsAct($this->labManager, $pr, true);
         $this->assertShowPageLetsAct($this->requester, $pr, false);
 
+        // There is no purchase order yet: numbering starts at approval.
+        $this->assertNull($pr->fresh()->po_number);
+        $this->act($this->purchaser)->get(route('inventory.purchase-requests.print', $pr))->assertNotFound();
+
         // 3. Workflow: step 1 (by role), then step 2 (by named user) → APPROVED.
         $this->act($this->labManager)
             ->post(route('inventory.purchase-requests.approve-step', $pr), ['notes' => 'Needed for the PCR run'])
@@ -130,12 +134,36 @@ class PurchaseRequestLifecycleTest extends TestCase
         $this->assertSame($this->financeHead->id, $pr->fresh()->approved_by_user_id);
         Notification::assertSentTo($this->requester, PurchaseRequestApprovedNotification::class);
 
+        // Approval numbers the purchase order, which can now be printed by anyone who can see requests.
+        $poNumber = 'PO-'.now()->year.'-0001';
+        $this->assertSame($poNumber, $pr->fresh()->po_number);
+        $this->act($this->requester)->get(route('inventory.purchase-requests.print', $pr))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Inventory/PurchaseRequests/Print')
+                ->where('purchaseRequest.po_number', $poNumber)
+                ->has('purchaseRequest.lines', 2)
+                ->where('purchaseRequest.signer', null)
+                ->whereType('approvedAt', 'string'));
+        $this->act($this->makeUser('Outsider', []))->get(route('inventory.purchase-requests.print', $pr))
+            ->assertForbidden();
+
         // 4. Issue PO — the requester has no ordering permission.
         $this->act($this->requester)->post(route('inventory.purchase-requests.order', $pr), $this->orderPayload())
             ->assertForbidden();
+        // A PO names its signer, picked from the users offered on the request page.
+        $this->act($this->purchaser)->get(route('inventory.purchase-requests.show', $pr))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('signers', fn ($signers) => collect($signers)->contains('id', $this->labManager->id)));
+        $this->act($this->purchaser)->post(route('inventory.purchase-requests.order', $pr), ['supplier_id' => $this->supplier->id])
+            ->assertSessionHasErrors('signer_user_id');
         $this->act($this->purchaser)->post(route('inventory.purchase-requests.order', $pr), $this->orderPayload())
             ->assertSessionHas('success', true);
         $this->assertStatus($pr, PurchaseRequestStatus::ORDERED);
+        $this->act($this->requester)->get(route('inventory.purchase-requests.print', $pr))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('purchaseRequest.signer.name', 'Lab Manager')
+                ->where('purchaseRequest.po_notes', 'Deliver to the molecular lab before the 30th.'));
 
         // 5. Record payment.
         $this->act($this->purchaser)->post(route('inventory.purchase-requests.pay', $pr), [
@@ -190,7 +218,7 @@ class PurchaseRequestLifecycleTest extends TestCase
         $this->assertEqualsWithDelta(5, (float) $tipsLine->fresh()->qty_received, 0.001);
 
         $pr->refresh();
-        $this->assertSame('PO-2026-0042', $pr->po_number);
+        $this->assertSame($poNumber, $pr->po_number, 'issuing, paying and receiving keep the approval number');
         $this->assertSame($this->supplier->id, $pr->supplier_id);
         $this->assertSame('BANK-778', $pr->payment_reference);
         $this->assertSame('DHL-123456', $pr->tracking_number);
@@ -226,6 +254,7 @@ class PurchaseRequestLifecycleTest extends TestCase
         $this->act($approver)->put(route('inventory.purchase-requests.update', $pr), ['action' => 'approve'])
             ->assertSessionHas('success', true);
         $this->assertStatus($pr, PurchaseRequestStatus::APPROVED);
+        $this->assertSame('PO-'.now()->year.'-0001', $pr->fresh()->po_number);
 
         $this->act($this->purchaser)->post(route('inventory.purchase-requests.order', $pr), $this->orderPayload())
             ->assertSessionHas('success', true);
@@ -402,7 +431,11 @@ class PurchaseRequestLifecycleTest extends TestCase
     /** @return array<string, mixed> */
     private function orderPayload(): array
     {
-        return ['po_number' => 'PO-2026-0042', 'supplier_id' => $this->supplier->id];
+        return [
+            'supplier_id' => $this->supplier->id,
+            'signer_user_id' => $this->labManager->id,
+            'po_notes' => 'Deliver to the molecular lab before the 30th.',
+        ];
     }
 
     /** Each request starts from the request page, as a user would. */

@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int|null $supplier_id
  * @property string|null $po_number
  * @property string|null $po_file
+ * @property int|null $signer_user_id
+ * @property string|null $po_notes note to the supplier, printed on the purchase order
  * @property \Illuminate\Support\Carbon|null $payment_date
  * @property string|null $payment_reference
  * @property string|null $payment_file
@@ -34,7 +36,7 @@ class PurchaseRequest extends Model
     protected $fillable = [
         'requested_by_user_id', 'approved_by_user_id', 'supplier_id',
         'urgency', 'notes', 'status', 'workflow_template_id',
-        'po_number', 'po_file',
+        'po_number', 'po_file', 'signer_user_id', 'po_notes',
         'payment_date', 'payment_reference', 'payment_file',
         'shipment_date', 'tracking_number', 'expected_delivery_date', 'currency',
     ];
@@ -56,6 +58,16 @@ class PurchaseRequest extends Model
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by_user_id');
+    }
+
+    /**
+     * The user who signs the purchase order.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function signer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'signer_user_id');
     }
 
     /** @return BelongsTo<Supplier, $this> */

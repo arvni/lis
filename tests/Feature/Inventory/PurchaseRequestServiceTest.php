@@ -439,13 +439,76 @@ class PurchaseRequestServiceTest extends TestCase
         $this->assertSame($this->user->id, $fresh->approved_by_user_id);
     }
 
-    public function test_order_payment_and_shipment_advance_in_sequence(): void
+    public function test_direct_approvals_number_purchase_orders_in_sequence(): void
     {
-        $pr = $this->makePr(['status' => PurchaseRequestStatus::APPROVED->value]);
+        $service = app(PurchaseRequestService::class);
+        $first = $this->makePr(['requested_by_user_id' => User::factory()->create()->id, 'status' => PurchaseRequestStatus::SUBMITTED->value]);
+        $second = $this->makePr(['requested_by_user_id' => User::factory()->create()->id, 'status' => PurchaseRequestStatus::SUBMITTED->value]);
+        $draft = $this->makePr();
+
+        $service->approve($first);
+        $service->approve($second);
+
+        $year = now()->year;
+        $this->assertSame("PO-{$year}-0001", $first->fresh()->po_number);
+        $this->assertSame("PO-{$year}-0002", $second->fresh()->po_number);
+        $this->assertNull($draft->fresh()->po_number, 'a request that is not approved takes no number');
+    }
+
+    public function test_print_is_refused_until_the_request_has_a_po_number(): void
+    {
+        $pr = $this->makePr(['status' => PurchaseRequestStatus::SUBMITTED->value]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageMatches('/no purchase order yet/');
+
+        app(PurchaseRequestService::class)->loadForPrint($pr);
+    }
+
+    public function test_print_still_names_an_item_archived_after_approval(): void
+    {
+        $pr = $this->makePr(['status' => PurchaseRequestStatus::APPROVED->value, 'po_number' => 'PO-2026-0001']);
+        $this->addLine($pr);
+        $this->item->delete();
+
+        $props = app(PurchaseRequestService::class)->loadForPrint($pr);
+
+        $this->assertSame('PR Test Item', $props['purchaseRequest']->lines->sole()->item?->name);
+    }
+
+    public function test_print_carries_the_signer_and_supplier_note_chosen_at_issue(): void
+    {
+        $signer = User::factory()->create([
+            'name'      => 'Dr. Layla Signer',
+            'title'     => 'Laboratory Director',
+            'signature' => '/documents/signature-doc/download',
+            'stamp'     => '/documents/stamp-doc/download',
+        ]);
+        $pr = $this->makePr(['status' => PurchaseRequestStatus::APPROVED->value, 'po_number' => 'PO-2026-0001']);
         $service = app(PurchaseRequestService::class);
 
-        $service->order($pr, 'PO-100', null, null);
+        $service->order($pr, ['signer_user_id' => $signer->id, 'po_notes' => 'Deliver to the main store.'], null);
+        $order = $service->loadForPrint($pr->fresh())['purchaseRequest'];
+        $printed = $order->signer;
+
+        $this->assertSame('Deliver to the main store.', $order->po_notes);
+
+        $this->assertSame('Dr. Layla Signer', $printed->name);
+        $this->assertSame('Laboratory Director', $printed->title);
+        $this->assertSame('/documents/signature-doc/download', $printed->signature);
+        $this->assertSame('/documents/stamp-doc/download', $printed->stamp);
+    }
+
+    public function test_order_payment_and_shipment_advance_in_sequence(): void
+    {
+        $pr = $this->makePr(['status' => PurchaseRequestStatus::APPROVED->value, 'po_number' => 'PO-2026-0005']);
+        $service = app(PurchaseRequestService::class);
+
+        $service->order($pr, ['signer_user_id' => $this->user->id], null);
         $this->assertSame(PurchaseRequestStatus::ORDERED, $pr->fresh()->status);
+        $this->assertSame($this->user->id, $pr->fresh()->signer_user_id);
+        $this->assertSame('PO-2026-0005', $pr->fresh()->po_number, 'issuing keeps the number given on approval');
+        $this->assertDatabaseHas('purchase_request_histories', ['purchase_request_id' => $pr->id, 'event' => 'ORDERED', 'notes' => 'PO: PO-2026-0005']);
 
         $service->recordPayment($pr, ['payment_date' => '2026-09-13'], null);
         $this->assertSame(PurchaseRequestStatus::PAID, $pr->fresh()->status);
@@ -478,7 +541,7 @@ class PurchaseRequestServiceTest extends TestCase
 
         try {
             match ($action) {
-                'order'   => $service->order($pr, 'PO-1', null, null),
+                'order'   => $service->order($pr, ['signer_user_id' => $this->user->id], null),
                 'pay'     => $service->recordPayment($pr, ['payment_date' => '2026-09-13'], null),
                 'ship'    => $service->markShipped($pr, []),
                 'receive' => $service->receiveItems($pr, [

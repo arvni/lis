@@ -33,6 +33,7 @@ readonly class PurchaseRequestService
         private PurchaseRequestApprovalRepository $approvalRepository,
         private WorkflowTemplateRepository $templateRepository,
         private UserAdapter $userAdapter,
+        private PurchaseOrderNumberService $poNumbers,
     ) {}
 
     public function listRequests(array $filters): LengthAwarePaginator
@@ -264,23 +265,36 @@ readonly class PurchaseRequestService
             throw new RuntimeException('You cannot approve your own purchase request.');
         }
 
-        $pr->update([
-            'status' => PurchaseRequestStatus::APPROVED->value,
-            'approved_by_user_id' => auth()->id(),
-        ]);
-        $this->log($pr, 'APPROVED');
+        DB::transaction(function () use ($pr) {
+            $pr->update([
+                'status' => PurchaseRequestStatus::APPROVED->value,
+                'approved_by_user_id' => auth()->id(),
+                // Numbered only now, so requests that never get approved don't use one up.
+                'po_number' => $pr->po_number ?? $this->poNumbers->next(),
+            ]);
+            $this->log($pr, 'APPROVED');
+        });
 
         return $pr;
     }
 
-    public function order(PurchaseRequest $pr, string $poNumber, ?int $supplierId, ?UploadedFile $file): PurchaseRequest
+    /**
+     * Issue the purchase order to the supplier. Its number was assigned on approval.
+     * $data names the supplier, the signer whose signature and stamp are printed on the
+     * order, and an optional note to the supplier (printed instead of the request's own
+     * notes, which are internal).
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function order(PurchaseRequest $pr, array $data, ?UploadedFile $file): PurchaseRequest
     {
         $this->assertStatus($pr, [PurchaseRequestStatus::APPROVED], 'Only approved purchase requests can be ordered.');
 
         $updates = [
             'status' => PurchaseRequestStatus::ORDERED->value,
-            'po_number' => $poNumber,
-            'supplier_id' => $supplierId,
+            'supplier_id' => isset($data['supplier_id']) ? (int) $data['supplier_id'] : null,
+            'signer_user_id' => (int) $data['signer_user_id'],
+            'po_notes' => $data['po_notes'] ?? null,
         ];
         if ($file) {
             $doc = $this->documentAdapter->storeDocument(
@@ -290,7 +304,7 @@ readonly class PurchaseRequestService
         }
 
         $pr->update($updates);
-        $this->log($pr, 'ORDERED', "PO: {$poNumber}");
+        $this->log($pr, 'ORDERED', "PO: {$pr->po_number}");
 
         return $pr;
     }
@@ -465,7 +479,7 @@ readonly class PurchaseRequestService
     public function loadForShow(PurchaseRequest $pr, User $user): array
     {
         $pr->load([
-            'requestedBy', 'approvedBy', 'supplier',
+            'requestedBy', 'approvedBy', 'supplier', 'signer',
             'workflowTemplate',
             'lines.item.defaultUnit', 'lines.unit', 'lines.preferredSupplier',
             'histories.user',
@@ -499,6 +513,36 @@ readonly class PurchaseRequestService
                 : [],
             'poDocument' => $poDocument,
             'paymentDocument' => $paymentDocument,
+            // Who can sign the purchase order, offered when it is issued.
+            'signers' => $pr->status === PurchaseRequestStatus::APPROVED && $user->can('order', $pr)
+                ? $this->userAdapter->getActiveSignersForSelect()
+                : [],
+        ];
+    }
+
+    /**
+     * Everything the printable purchase order shows. Only an approved request carries
+     * a PO number, so anything earlier has no purchase order to print.
+     *
+     * @return array<string, mixed>
+     */
+    public function loadForPrint(PurchaseRequest $pr): array
+    {
+        if ($pr->po_number === null) {
+            throw new RuntimeException('This request has no purchase order yet — it is numbered once approved.');
+        }
+
+        $pr->load([
+            'supplier.contacts', 'lines.unit',
+            // The order carries its signer's signature and stamp.
+            'signer:id,name,title,signature,stamp',
+            // An item archived after approval still has to be named on the order.
+            'lines.item' => fn ($q) => $q->withTrashed(),
+        ]);
+
+        return [
+            'purchaseRequest' => $pr,
+            'approvedAt' => $this->purchaseRequestRepository->approvedAt($pr)?->toIso8601String(),
         ];
     }
 
