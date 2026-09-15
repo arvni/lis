@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export const emptyStep = (sortOrder = 0) => ({
     name: '',
     sort_order: sortOrder,
@@ -6,5 +8,5 @@ export const emptyStep = (sortOrder = 0) => ({
     approver_user_id: null,
     approver_role: null,
     _user: null,
-    _id: crypto.randomUUID(),
+    _id: uuidv4(),
 });
