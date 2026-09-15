@@ -53,6 +53,7 @@ import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import ScheduleIcon from '@mui/icons-material/Schedule';
+import SensorDoorIcon from '@mui/icons-material/SensorDoor';
 import {
     PercentDiamond,
     Stethoscope as Doctor,
@@ -534,6 +535,12 @@ const routes = (sections = []) => {
             permission: 'Attendance',
             icon: <FingerprintIcon />,
             child: [
+                {
+                    title: 'Punches',
+                    route: 'attendance.transactions.index',
+                    permission: 'Attendance.Transactions.List Transactions',
+                    icon: <SensorDoorIcon />,
+                },
                 {
                     title: 'Shifts',
                     route: 'attendance.shifts.index',

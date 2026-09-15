@@ -7,6 +7,7 @@ namespace App\Domains\Attendance\Repositories;
 use App\Domains\Attendance\Models\Shift;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class ShiftRepository
@@ -34,6 +35,21 @@ class ShiftRepository
         );
 
         return $query->paginate($queryData['pageSize'] ?? 10);
+    }
+
+    /**
+     * Active shifts as id/name pairs for pickers, optionally narrowed by name.
+     *
+     * @return Collection<int, Shift>
+     */
+    public function getActiveForSelect(?string $search): Collection
+    {
+        return Shift::query()
+            ->where('is_active', true)
+            ->when($search !== null, fn (Builder $query) => $query->search(['name'], $search))
+            ->orderBy('name')
+            ->limit(50)
+            ->get(['id', 'name']);
     }
 
     /**

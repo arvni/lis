@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import UserForm from '@/Pages/User/Components/Form';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router, useForm } from '@inertiajs/react';
-import { Snackbar, Alert } from '@mui/material';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Snackbar, Alert, Container } from '@mui/material';
+import ShiftAssignmentsPanel from '@/Pages/User/Components/ShiftAssignmentsPanel';
+
+const MANAGE_SHIFTS = 'Attendance.Shift Assignments.Manage Shift Assignments';
 
 const EditUser = ({ user, errors: serverErrors, _auth }) => {
     // Initialize form with user data and method
@@ -10,6 +13,8 @@ const EditUser = ({ user, errors: serverErrors, _auth }) => {
         ...user,
         _method: 'put',
     });
+
+    const canManageShifts = (usePage().props.auth?.permissions ?? []).includes(MANAGE_SHIFTS);
 
     // Local state for client-side errors and notifications
     const [errors, setErrors] = useState({});
@@ -98,6 +103,12 @@ const EditUser = ({ user, errors: serverErrors, _auth }) => {
                 cancel={handleCancel}
                 edit
             />
+
+            {canManageShifts && (
+                <Container maxWidth="lg" sx={{ mb: 4 }}>
+                    <ShiftAssignmentsPanel userId={user.id} />
+                </Container>
+            )}
 
             {/* Notification system */}
             <Snackbar

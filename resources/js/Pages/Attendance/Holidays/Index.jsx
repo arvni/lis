@@ -75,7 +75,9 @@ const HolidayIndex = () => {
                 headerName: 'Date',
                 type: 'string',
                 flex: 0.5,
-                renderCell: (params) => <Typography fontWeight="medium">{params.value}</Typography>,
+                renderCell: (params) => (
+                    <Typography sx={{ fontWeight: 500 }}>{params.value}</Typography>
+                ),
             },
             {
                 field: 'weekday',

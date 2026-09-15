@@ -7,12 +7,26 @@ namespace App\Domains\Attendance\Services;
 use App\Domains\Attendance\DTOs\ShiftDTO;
 use App\Domains\Attendance\Models\Shift;
 use App\Domains\Attendance\Repositories\ShiftRepository;
+use App\Domains\Attendance\Repositories\UserShiftRepository;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class ShiftService
 {
-    public function __construct(private readonly ShiftRepository $shiftRepository) {}
+    public function __construct(
+        private readonly ShiftRepository $shiftRepository,
+        private readonly UserShiftRepository $userShiftRepository,
+    ) {}
+
+    /**
+     * @return Collection<int, Shift>
+     */
+    public function listActiveShiftsForSelect(?string $search): Collection
+    {
+        return $this->shiftRepository->getActiveForSelect($search);
+    }
 
     /**
      * @param  array<string, mixed>  $queryData
@@ -43,8 +57,16 @@ class ShiftService
         });
     }
 
+    /**
+     * @throws RuntimeException while any assignment, past or present, uses the shift
+     */
     public function deleteShift(Shift $shift): void
     {
+        // Past attendance is judged against the shifts people had then, so a shift in use stays.
+        if ($this->userShiftRepository->existsForShift($shift->id)) {
+            throw new RuntimeException("$shift->name is assigned to users, so it can't be deleted. Mark it inactive instead.");
+        }
+
         $this->shiftRepository->deleteShift($shift);
     }
 }

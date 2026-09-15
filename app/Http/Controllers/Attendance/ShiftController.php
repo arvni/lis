@@ -17,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use RuntimeException;
 
 class ShiftController extends Controller
 {
@@ -66,7 +67,11 @@ class ShiftController extends Controller
     {
         $this->authorize('delete', $shift);
         $name = $shift->name;
-        $this->shiftService->deleteShift($shift);
+        try {
+            $this->shiftService->deleteShift($shift);
+        } catch (RuntimeException $e) {
+            return back()->with(['success' => false, 'status' => $e->getMessage()]);
+        }
 
         return back()->with(['success' => true, 'status' => "$name deleted successfully"]);
     }
