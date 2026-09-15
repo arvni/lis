@@ -32,6 +32,9 @@ class AttendanceTransactionResource extends JsonResource
             'attendance_id' => $this->attendance_id,
             'access_date_and_time' => $this->access_date_and_time->format('Y-m-d H:i:s'),
             'user' => $this->matchedUser ? ['id' => $this->matchedUser->id, 'name' => $this->matchedUser->name] : null,
+            // Set when the punch came from an Excel import rather than HikCentral.
+            'imported_by' => $this->imported_by === null ? null : ($this->importer->name ?? 'a deleted user'),
+            'imported_at' => $this->imported_by === null ? null : $this->created_at?->format('Y-m-d H:i'),
         ];
     }
 }

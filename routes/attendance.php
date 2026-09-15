@@ -18,6 +18,7 @@ Route::prefix('attendance')->name('attendance.')->group(function () {
     Route::resource('shifts', ShiftController::class)->except('create', 'edit', 'show');
     Route::resource('holidays', HolidayController::class)->except('create', 'edit', 'show');
     Route::get('punches', [AttendanceTransactionController::class, 'index'])->name('transactions.index');
+    Route::post('punches/import', [AttendanceTransactionController::class, 'import'])->name('transactions.import');
     Route::get('calendar', [AttendanceCalendarController::class, 'index'])->name('calendar.index');
     Route::get('calendar/export', [AttendanceCalendarController::class, 'export'])->name('calendar.export');
     Route::get('calendar/export-summary', [AttendanceCalendarController::class, 'exportSummary'])->name('calendar.export-summary');
