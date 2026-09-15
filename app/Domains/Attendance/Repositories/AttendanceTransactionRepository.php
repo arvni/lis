@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AttendanceTransactionRepository
 {
@@ -44,8 +45,21 @@ class AttendanceTransactionRepository
             ->when(! empty($filters['attendance_id']), fn (Builder $query) => $query->where('attendance_id', $filters['attendance_id']))
             ->when(! empty($filters['from_date']), fn (Builder $query) => $query->where('access_date_and_time', '>=', $filters['from_date'].' 00:00:00'))
             ->when(! empty($filters['to_date']), fn (Builder $query) => $query->where('access_date_and_time', '<=', $filters['to_date'].' 23:59:59'))
+            ->with('importer:id,name')
             ->orderBy('access_date_and_time', $direction)
             ->orderBy('id', $direction)
             ->paginate($queryData['pageSize'] ?? 10);
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $rows  column => value
+     */
+    public function insertMany(array $rows): void
+    {
+        DB::transaction(function () use ($rows) {
+            foreach (array_chunk($rows, 500) as $chunk) {
+                AttendanceTransaction::query()->insert($chunk);
+            }
+        });
     }
 }

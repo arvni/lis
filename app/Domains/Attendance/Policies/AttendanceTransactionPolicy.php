@@ -12,4 +12,9 @@ class AttendanceTransactionPolicy
     {
         return $user->can('Attendance.Transactions.List Transactions');
     }
+
+    public function import(User $user): bool
+    {
+        return $user->can('Attendance.Transactions.Import Transactions');
+    }
 }

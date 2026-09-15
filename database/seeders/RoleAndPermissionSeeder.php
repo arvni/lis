@@ -179,6 +179,7 @@ class RoleAndPermissionSeeder extends Seeder
                 ],
                 "Transactions" => [
                     "List Transactions",
+                    "Import Transactions",
                 ],
                 "Daily Attendance" => [
                     "List Attendance",
