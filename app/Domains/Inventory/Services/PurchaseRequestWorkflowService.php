@@ -25,6 +25,7 @@ class PurchaseRequestWorkflowService
         private readonly PurchaseRequestRepository $purchaseRequestRepository,
         private readonly PurchaseRequestApprovalRepository $approvalRepository,
         private readonly UserAdapter $userAdapter,
+        private readonly PurchaseOrderNumberService $poNumbers,
     ) {}
 
     public function initiate(PurchaseRequest $pr): void
@@ -125,6 +126,7 @@ class PurchaseRequestWorkflowService
                 $pr->update([
                     'status' => PurchaseRequestStatus::APPROVED->value,
                     'approved_by_user_id' => $user->id,
+                    'po_number' => $pr->po_number ?? $this->poNumbers->next(),
                 ]);
                 $this->log($pr, 'APPROVED');
 

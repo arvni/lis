@@ -49,6 +49,17 @@ class UserRepository
     }
 
     /**
+     * Active users with the title, signature and stamp printed where they sign, ordered
+     * by name (for signer pickers).
+     *
+     * @return Collection<int, User>
+     */
+    public function getActiveSignersForSelect(): Collection
+    {
+        return User::where('is_active', true)->orderBy('name')->get(['id', 'name', 'title', 'signature', 'stamp']);
+    }
+
+    /**
      * Users holding the given role (web guard). Throws when the role does not exist.
      *
      * @return Collection<int, User>

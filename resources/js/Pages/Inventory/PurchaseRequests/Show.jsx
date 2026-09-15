@@ -28,6 +28,7 @@ const Show = () => {
         status,
         poDocument,
         paymentDocument,
+        signers,
     } = usePage().props;
     const [viewingDoc, setViewingDoc] = useState(null);
 
@@ -56,7 +57,12 @@ const Show = () => {
     const [brandLines, setBrandLines] = useState([]);
 
     const [orderSupplier, setOrderSupplier] = useState(pr.supplier ?? null);
-    const orderForm = useForm({ po_number: '', supplier_id: pr.supplier_id ?? '', po_file: null });
+    const [orderSigner, setOrderSigner] = useState(null);
+    const orderForm = useForm({
+        supplier_id: pr.supplier_id ?? '',
+        signer_user_id: '',
+        po_file: null,
+    });
     const payForm = useForm({ payment_date: '', payment_reference: '', payment_file: null });
     const shipForm = useForm({
         shipment_date: '',
@@ -115,7 +121,7 @@ const Show = () => {
         <>
             <Head title={`Purchase Request #${pr.id}`} />
             <PageHeader
-                title={`Purchase Request #${pr.id}${pr.po_number ? ` · PO ${pr.po_number}` : ''}`}
+                title={`Purchase Request #${pr.id}${pr.po_number ? ` · ${pr.po_number}` : ''}`}
                 actions={
                     <HeaderActions
                         pr={pr}
@@ -178,6 +184,9 @@ const Show = () => {
                 orderForm={orderForm}
                 orderSupplier={orderSupplier}
                 setOrderSupplier={setOrderSupplier}
+                signers={signers}
+                orderSigner={orderSigner}
+                setOrderSigner={setOrderSigner}
                 submitOrder={submitOrder}
                 payDialog={payDialog}
                 setPayDialog={setPayDialog}

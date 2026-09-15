@@ -148,7 +148,6 @@ app/Domains/Inventory/Requests/CancelPurchaseRequestRequest.php
 app/Domains/Inventory/Requests/DelegateStepRequest.php
 app/Domains/Inventory/Requests/ImportItemFileRequest.php
 app/Domains/Inventory/Requests/ImportItemRowsRequest.php
-app/Domains/Inventory/Requests/OrderPurchaseRequestRequest.php
 app/Domains/Inventory/Requests/PayPurchaseRequestRequest.php
 app/Domains/Inventory/Requests/RejectStepRequest.php
 app/Domains/Inventory/Requests/SetBrandsRequest.php

@@ -8,6 +8,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import PaymentIcon from '@mui/icons-material/Payment';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import MoveToInboxIcon from '@mui/icons-material/MoveToInbox';
+import PrintIcon from '@mui/icons-material/Print';
 import SearchIcon from '@mui/icons-material/Search';
 import { canCancel, canReceive } from './constants';
 
@@ -36,6 +37,18 @@ const HeaderActions = ({
         >
             Repeat
         </Button>
+        {pr.po_number && (
+            <Button
+                startIcon={<PrintIcon />}
+                variant="outlined"
+                component="a"
+                href={route('inventory.purchase-requests.print', pr.id)}
+                target="_blank"
+                rel="noopener"
+            >
+                Print PO
+            </Button>
+        )}
         {canDirectApprove && (
             <Button
                 startIcon={<SearchIcon />}

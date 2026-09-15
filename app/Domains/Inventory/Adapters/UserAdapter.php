@@ -36,6 +36,16 @@ readonly class UserAdapter
     }
 
     /**
+     * Active users with their title, signature and stamp, to pick who signs a purchase order.
+     *
+     * @return Collection<int, User>
+     */
+    public function getActiveSignersForSelect(): Collection
+    {
+        return $this->userRepository->getActiveSignersForSelect();
+    }
+
+    /**
      * Users holding the given role (used to notify step approvers).
      *
      * @return Collection<int, User>
