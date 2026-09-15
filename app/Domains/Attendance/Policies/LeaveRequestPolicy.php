@@ -37,6 +37,12 @@ class LeaveRequestPolicy
         return $this->leaveService->isLeaveManager($user);
     }
 
+    /** Leave managers see how much leave anyone has used; everyone else only their own. */
+    public function viewUsageOfOthers(User $user): bool
+    {
+        return $this->leaveService->isLeaveManager($user);
+    }
+
     public function approve(User $user, LeaveRequest $leave): bool
     {
         return $this->leaveService->canAct($leave, $user);

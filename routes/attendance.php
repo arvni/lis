@@ -10,6 +10,7 @@ use App\Http\Controllers\Attendance\ExportAttendanceDaysController;
 use App\Http\Controllers\Attendance\HolidayController;
 use App\Http\Controllers\Attendance\LeaveKindController;
 use App\Http\Controllers\Attendance\LeaveRequestController;
+use App\Http\Controllers\Attendance\LeaveUsageController;
 use App\Http\Controllers\Attendance\ShiftController;
 use App\Http\Controllers\Attendance\UserShiftController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,7 @@ Route::prefix('attendance')->name('attendance.')->group(function () {
     Route::put('days/{attendanceDay}/reset', [AttendanceDayController::class, 'reset'])->name('days.reset');
     Route::resource('leave-kinds', LeaveKindController::class)->except('create', 'edit', 'show');
     Route::get('leave-requests', [LeaveRequestController::class, 'index'])->name('leave-requests.index');
+    Route::get('leave-usage', [LeaveUsageController::class, 'index'])->name('leave-usage.index');
     Route::post('leave-requests', [LeaveRequestController::class, 'store'])->name('leave-requests.store');
     Route::put('leave-requests/{leaveRequest}/approve', [LeaveRequestController::class, 'approve'])->name('leave-requests.approve');
     Route::put('leave-requests/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])->name('leave-requests.reject');

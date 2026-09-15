@@ -3,6 +3,7 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { Box, Button, Chip, Tab, Tabs, Typography } from '@mui/material';
 import { GridActionsCellItem } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
+import DataUsageIcon from '@mui/icons-material/DataUsage';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import TableLayout from '@/Layouts/TableLayout';
@@ -157,14 +158,24 @@ const LeaveRequestIndex = () => {
                 title="Leave Requests"
                 subtitle="Full days or hours off, approved step by step"
                 actions={
-                    <Button
-                        startIcon={<AddIcon />}
-                        variant="contained"
-                        color="success"
-                        onClick={() => setOpenForm(true)}
-                    >
-                        Request leave
-                    </Button>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        <Button
+                            startIcon={<DataUsageIcon />}
+                            variant="outlined"
+                            component="a"
+                            href={route('attendance.leave-usage.index')}
+                        >
+                            Leave usage
+                        </Button>
+                        <Button
+                            startIcon={<AddIcon />}
+                            variant="contained"
+                            color="success"
+                            onClick={() => setOpenForm(true)}
+                        >
+                            Request leave
+                        </Button>
+                    </Box>
                 }
             />
 
