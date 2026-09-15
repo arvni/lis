@@ -161,6 +161,20 @@ class RoleAndPermissionSeeder extends Seeder
                     "List Roles",
                 ],
             ],
+            "Attendance" => [
+                "Shifts" => [
+                    "List Shifts",
+                    "Create Shift",
+                    "Edit Shift",
+                    "Delete Shift",
+                ],
+                "Holidays" => [
+                    "List Holidays",
+                    "Create Holiday",
+                    "Edit Holiday",
+                    "Delete Holiday",
+                ],
+            ],
             "Sample Collection" => [
                 "Samples" => [
                     "View Sample",

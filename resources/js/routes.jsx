@@ -51,6 +51,8 @@ import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import RequestPageIcon from '@mui/icons-material/RequestPage';
 import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
+import ScheduleIcon from '@mui/icons-material/Schedule';
 import {
     PercentDiamond,
     Stethoscope as Doctor,
@@ -524,6 +526,25 @@ const routes = (sections = []) => {
                     route: 'system.failed-jobs',
                     permission: 'System.Failed Jobs.List Failed Jobs',
                     icon: <BugReport fontSize="small" />,
+                },
+            ],
+        },
+        {
+            title: 'Attendance',
+            permission: 'Attendance',
+            icon: <FingerprintIcon />,
+            child: [
+                {
+                    title: 'Shifts',
+                    route: 'attendance.shifts.index',
+                    permission: 'Attendance.Shifts.List Shifts',
+                    icon: <ScheduleIcon />,
+                },
+                {
+                    title: 'Holidays',
+                    route: 'attendance.holidays.index',
+                    permission: 'Attendance.Holidays.List Holidays',
+                    icon: <EventBusyIcon />,
                 },
             ],
         },

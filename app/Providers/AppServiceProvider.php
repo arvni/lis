@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Domains\Attendance\Models\Holiday;
+use App\Domains\Attendance\Models\Shift;
+use App\Domains\Attendance\Policies\HolidayPolicy;
+use App\Domains\Attendance\Policies\ShiftPolicy;
 use App\Domains\Billing\Models\DiscountCard;
 use App\Domains\Billing\Models\DiscountPartner;
 use App\Domains\Billing\Models\Invoice;
@@ -165,6 +169,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Report::class, ReportPolicy::class);
         Gate::policy(Patient::class, PatientPolicy::class);
         Gate::policy(TatAlertRule::class, TatAlertRulePolicy::class);
+
+        Gate::policy(Shift::class, ShiftPolicy::class);
+        Gate::policy(Holiday::class, HolidayPolicy::class);
 
         Gate::policy(SectionGroup::class, SectionGroupPolicy::class);
         Gate::policy(Section::class, SectionPolicy::class);
