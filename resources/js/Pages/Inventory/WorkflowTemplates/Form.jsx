@@ -5,6 +5,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
 import { PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
+import { v4 as uuidv4 } from 'uuid';
 import { emptyStep } from './Form/constants';
 import TemplateInfoCard from './Form/TemplateInfoCard';
 import MatchingConditionsCard from './Form/MatchingConditionsCard';
@@ -24,7 +25,7 @@ const WorkflowTemplateForm = () => {
             approver_user_id: s.approver_user_id ?? null,
             approver_role: s.approver_role ?? null,
             _user: s.approver_user ?? null,
-            _id: crypto.randomUUID(),
+            _id: uuidv4(),
         }));
     };
 
