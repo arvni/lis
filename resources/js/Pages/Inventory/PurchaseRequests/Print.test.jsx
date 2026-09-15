@@ -70,6 +70,9 @@ describe('Inventory/PurchaseRequests/Print', () => {
         expect(screen.getAllByText(/14 Sept? 2026/).length).toBeGreaterThan(0);
         expect(screen.queryByText('PR #42')).not.toBeInTheDocument();
         expect(screen.queryByText('NORMAL')).not.toBeInTheDocument();
+        expect(screen.queryByText('Requested by')).not.toBeInTheDocument();
+        expect(screen.queryByText('Sara Requester')).not.toBeInTheDocument();
+        expect(screen.queryByText('Currency')).not.toBeInTheDocument();
         expect(screen.getByText('Lab Supplies Co')).toBeInTheDocument();
         expect(screen.getByText('ali@labsupplies.test')).toBeInTheDocument();
 

@@ -49,7 +49,7 @@ const Name = ({ children }) => (
     <Box sx={{ fontSize: '10.5pt', fontWeight: 700, color: BRAND.ink }}>{children}</Box>
 );
 
-const PartiesSection = ({ pr, currency }) => {
+const PartiesSection = ({ pr }) => {
     const supplier = pr.supplier;
     const contact = supplier?.contacts?.find((c) => c.is_primary) ?? supplier?.contacts?.[0];
     const supplierAddress = [supplier?.address, supplier?.city, supplier?.country]
@@ -83,11 +83,9 @@ const PartiesSection = ({ pr, currency }) => {
             <Panel title="Deliver to">
                 <Name>{COMPANY.name}</Name>
                 <Box sx={{ mb: '1mm', color: BRAND.muted }}>{COMPANY.address}</Box>
-                <Field label="Requested by">{pr.requested_by?.name}</Field>
                 <Field label="Expected">
                     {pr.expected_delivery_date && formatDate(pr.expected_delivery_date)}
                 </Field>
-                <Field label="Currency">{currency}</Field>
             </Panel>
         </Box>
     );

@@ -533,7 +533,7 @@ readonly class PurchaseRequestService
         }
 
         $pr->load([
-            'requestedBy', 'supplier.contacts', 'lines.unit',
+            'supplier.contacts', 'lines.unit',
             // The order carries its signer's signature and stamp.
             'signer:id,name,title,signature,stamp',
             // An item archived after approval still has to be named on the order.

@@ -102,7 +102,7 @@ const Print = () => {
                 )}
 
                 <OrderHeader pr={pr} approvedAt={approvedAt} />
-                <PartiesSection pr={pr} currency={currency} />
+                <PartiesSection pr={pr} />
                 <OrderLinesTable lines={pr.lines} currency={currency} />
 
                 {/* The note to the supplier from Issue PO — the request's own notes are internal. */}
