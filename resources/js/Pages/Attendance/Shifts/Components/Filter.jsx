@@ -20,7 +20,7 @@ const emptyFilters = {
     is_active: '',
 };
 
-const Filter = ({ defaultValues, onFilter }) => {
+const Filter = ({ defaultValues, onFilter, searchHelp = 'Shift name' }) => {
     const [filters, setFilters] = useState(emptyFilters);
 
     useEffect(() => {
@@ -64,7 +64,7 @@ const Filter = ({ defaultValues, onFilter }) => {
                             size="small"
                             value={filters.search ?? ''}
                             onChange={handleChange}
-                            helperText="Shift name"
+                            helperText={searchHelp}
                         />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 4 }}>

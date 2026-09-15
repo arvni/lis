@@ -12,6 +12,7 @@ use App\Domains\Attendance\Models\UserShift;
 use App\Domains\Attendance\Repositories\AttendanceDayRepository;
 use App\Domains\Attendance\Repositories\AttendanceTransactionRepository;
 use App\Domains\Attendance\Repositories\HolidayRepository;
+use App\Domains\Attendance\Repositories\LeaveRequestRepository;
 use App\Domains\Attendance\Repositories\UserShiftRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -31,6 +32,8 @@ class AttendanceProcessingService
         private readonly HolidayRepository $holidayRepository,
         private readonly AttendanceTransactionRepository $transactionRepository,
         private readonly UserAdapter $userAdapter,
+        private readonly LeaveRequestRepository $leaveRepository,
+        private readonly LeaveCoverage $leaveCoverage,
     ) {}
 
     /**
@@ -66,6 +69,11 @@ class AttendanceProcessingService
         $punches = $this->punchesByUserAndDay($from, $to, $userIds);
         $existing = $this->dayRepository->existingKeys($fromDate, $toDate, $userIds);
 
+        $leavesByUser = [];
+        foreach ($this->leaveRepository->approvedBetween($fromDate, $toDate, $userIds) as $leave) {
+            $leavesByUser[$leave->user_id][] = $leave;
+        }
+
         $userIdsInRange = array_values(array_unique([
             ...array_keys($assignmentsByUser),
             ...array_keys($punches),
@@ -92,7 +100,8 @@ class AttendanceProcessingService
                 }
 
                 $hours = $assignment ? $this->hoursOn($assignment->shift, $date) : null;
-                $result = $this->calculator->calculate($date->copy(), $hours, isset($holidays[$day]), $dayPunches, [], $now);
+                $excused = $hours ? $this->leaveCoverage->excusedOn($leavesByUser[$userId] ?? [], $date, $hours) : [];
+                $result = $this->calculator->calculate($date->copy(), $hours, isset($holidays[$day]), $dayPunches, $excused, $now);
                 if ($result === null) {
                     continue;
                 }
@@ -110,6 +119,7 @@ class AttendanceProcessingService
                     'late_minutes' => $result->lateMinutes,
                     'early_leave_minutes' => $result->earlyLeaveMinutes,
                     'worked_minutes' => $result->workedMinutes,
+                    'leave_minutes' => $result->leaveMinutes,
                     'is_manual' => false,
                     'note' => null,
                     'corrected_by' => null,

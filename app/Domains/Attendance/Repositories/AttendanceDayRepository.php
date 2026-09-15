@@ -27,6 +27,7 @@ class AttendanceDayRepository
         'late_minutes',
         'early_leave_minutes',
         'worked_minutes',
+        'leave_minutes',
         'is_manual',
         'note',
         'corrected_by',

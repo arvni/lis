@@ -185,6 +185,13 @@ class RoleAndPermissionSeeder extends Seeder
                     "Correct Attendance",
                     "Export Attendance",
                 ],
+                "Leave Requests" => [
+                    "Manage Leave Requests",
+                ],
+                "Leave Kinds" => [
+                    "List Leave Kinds",
+                    "Manage Leave Kinds",
+                ],
             ],
             "Sample Collection" => [
                 "Samples" => [

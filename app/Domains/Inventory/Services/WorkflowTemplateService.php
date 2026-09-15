@@ -50,6 +50,9 @@ class WorkflowTemplateService
             $this->repository->clearDefaultFlag();
         }
 
+        // Leave has no urgency or total, so a leave workflow is picked by the requester's roles alone.
+        $isLeave = ($data['request_type'] ?? null) === WorkflowRequestType::LEAVE->value;
+
         $fields = [
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
@@ -58,9 +61,9 @@ class WorkflowTemplateService
             'request_type' => $data['request_type'] ?? null,
             'priority' => $data['priority'] ?? 0,
             'conditions' => [
-                'urgencies' => $data['conditions']['urgencies'] ?? [],
+                'urgencies' => $isLeave ? [] : ($data['conditions']['urgencies'] ?? []),
                 'requester_roles' => $data['conditions']['requester_roles'] ?? [],
-                'min_total' => $data['conditions']['min_total'] ?? null,
+                'min_total' => $isLeave ? null : ($data['conditions']['min_total'] ?? null),
             ],
         ];
 

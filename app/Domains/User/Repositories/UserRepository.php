@@ -78,6 +78,31 @@ class UserRepository
     }
 
     /**
+     * Active users as id/name pairs, optionally narrowed by name or username, ordered by name.
+     *
+     * @return Collection<int, User>
+     */
+    public function searchActiveForSelect(?string $search, int $limit = 50): Collection
+    {
+        return User::query()
+            ->where('is_active', true)
+            ->when($search !== null && $search !== '', fn (Builder $query) => $query->search(['name', 'username'], $search))
+            ->orderBy('name')
+            ->limit($limit)
+            ->get(['id', 'name']);
+    }
+
+    /**
+     * Active users holding the permission, directly or through a role. Throws when it does not exist.
+     *
+     * @return Collection<int, User>
+     */
+    public function getActiveUsersWithPermission(string $permission): Collection
+    {
+        return User::permission($permission)->where('is_active', true)->get();
+    }
+
+    /**
      * Users whose attendance number (their HikCentral Employee ID) is one of the given numbers.
      *
      * @param  list<string>  $attendanceNumbers

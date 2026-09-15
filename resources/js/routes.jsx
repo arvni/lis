@@ -55,6 +55,7 @@ import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import SensorDoorIcon from '@mui/icons-material/SensorDoor';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 import {
     PercentDiamond,
     Stethoscope as Doctor,
@@ -532,8 +533,8 @@ const routes = (sections = []) => {
             ],
         },
         {
+            // No group permission: everyone can reach Leave Requests; other items check their own.
             title: 'Attendance',
-            permission: 'Attendance',
             icon: <FingerprintIcon />,
             child: [
                 {
@@ -541,6 +542,11 @@ const routes = (sections = []) => {
                     route: 'attendance.days.index',
                     permission: 'Attendance.Daily Attendance.List Attendance',
                     icon: <EventAvailableIcon />,
+                },
+                {
+                    title: 'Leave Requests',
+                    route: 'attendance.leave-requests.index',
+                    icon: <BeachAccessIcon />,
                 },
                 {
                     title: 'Punches',
@@ -559,6 +565,18 @@ const routes = (sections = []) => {
                     route: 'attendance.holidays.index',
                     permission: 'Attendance.Holidays.List Holidays',
                     icon: <EventBusyIcon />,
+                },
+                {
+                    title: 'Leave Kinds',
+                    route: 'attendance.leave-kinds.index',
+                    permission: 'Attendance.Leave Kinds.List Leave Kinds',
+                    icon: <CategoryIcon />,
+                },
+                {
+                    title: 'Leave Workflows',
+                    route: 'inventory.workflow-templates.index',
+                    permission: 'Inventory.WorkflowTemplates.List Workflow Templates',
+                    icon: <AccountTreeIcon />,
                 },
             ],
         },

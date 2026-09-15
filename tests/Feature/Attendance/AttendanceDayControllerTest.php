@@ -66,7 +66,7 @@ class AttendanceDayControllerTest extends TestCase
                 ->where('days.total', 3)
                 ->where('days.data.0.date', '2026-09-15')
                 ->where('days.data.0.scheduled_start', '08:00')
-                ->has('statuses', 5));
+                ->has('statuses', 6));
 
         $this->actingAs($viewer)
             ->get(route('attendance.days.index', ['filters' => ['status' => 'ABSENT']]))
@@ -211,7 +211,7 @@ class AttendanceDayControllerTest extends TestCase
             return $rows->count() === 1
                 && $export->map($rows->first()) === [
                     '2026-09-15', 'Tuesday', 'Sara Ahmed', null, '08:00', '16:00', null, null,
-                    'Absent', 0, 0, 0, 'No', null,
+                    'Absent', 0, 0, 0, 0, 'No', null,
                 ];
         });
     }

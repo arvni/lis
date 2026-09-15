@@ -19,5 +19,6 @@ final readonly class AttendanceDayResult
         public int $lateMinutes,
         public int $earlyLeaveMinutes,
         public int $workedMinutes,
+        public int $leaveMinutes = 0,
     ) {}
 }

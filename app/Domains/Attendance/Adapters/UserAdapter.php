@@ -6,6 +6,9 @@ namespace App\Domains\Attendance\Adapters;
 
 use App\Domains\User\Models\User;
 use App\Domains\User\Repositories\UserRepository;
+use Illuminate\Database\Eloquent\Collection;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
+use Spatie\Permission\Exceptions\RoleDoesNotExist;
 
 /**
  * Adapter that translates between the Attendance and User domains: HikCentral punches carry an
@@ -14,6 +17,54 @@ use App\Domains\User\Repositories\UserRepository;
 readonly class UserAdapter
 {
     public function __construct(private UserRepository $userRepository) {}
+
+    public function findUser(int $userId): ?User
+    {
+        return $this->userRepository->findById($userId);
+    }
+
+    public function findUserOrFail(int $userId): User
+    {
+        return $this->userRepository->findOrFail($userId);
+    }
+
+    /**
+     * Active users as id/name pairs, narrowed by name, for the "on behalf of" picker.
+     *
+     * @return Collection<int, User>
+     */
+    public function searchActiveUsers(?string $search): Collection
+    {
+        return $this->userRepository->searchActiveForSelect($search);
+    }
+
+    /**
+     * Active holders of a role; nobody when the role no longer exists.
+     *
+     * @return Collection<int, User>
+     */
+    public function getUsersWithRole(string $roleName): Collection
+    {
+        try {
+            return $this->userRepository->getUsersByRoleName($roleName)->where('is_active', true)->values();
+        } catch (RoleDoesNotExist) {
+            return new Collection;
+        }
+    }
+
+    /**
+     * Active users holding a permission, directly or through a role; nobody when it doesn't exist.
+     *
+     * @return Collection<int, User>
+     */
+    public function getUsersWithPermission(string $permission): Collection
+    {
+        try {
+            return $this->userRepository->getActiveUsersWithPermission($permission);
+        } catch (PermissionDoesNotExist) {
+            return new Collection;
+        }
+    }
 
     public function findAttendanceNumber(int $userId): ?string
     {

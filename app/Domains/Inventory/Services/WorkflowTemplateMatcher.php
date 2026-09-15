@@ -11,8 +11,9 @@ class WorkflowTemplateMatcher
     /**
      * Find the best matching template for a given requester + urgency.
      *
-     * Only templates whose request_type matches (or is NULL = applies to both)
-     * are considered. Evaluation order (priority ASC, lower = higher priority):
+     * Only templates whose request_type matches (or is NULL = applies to purchase and export requests)
+     * are considered. Leave requests only use templates explicitly typed LEAVE.
+     * Evaluation order (priority ASC, lower = higher priority):
      *   1. Templates with conditions — first one whose conditions ALL pass wins.
      *   2. If nothing matched, fall back to the is_default template.
      *   3. If no default exists, return null (no workflow).
@@ -24,7 +25,11 @@ class WorkflowTemplateMatcher
     public function find(User $requester, string $urgency, float $estimatedTotal = 0, ?WorkflowRequestType $requestType = null): ?WorkflowTemplate
     {
         $templates = WorkflowTemplate::active()
-            ->when($requestType !== null, fn ($query) => $query->where(
+            ->when($requestType === WorkflowRequestType::LEAVE, fn ($query) => $query->where(
+                'request_type',
+                WorkflowRequestType::LEAVE->value,
+            ))
+            ->when($requestType !== null && $requestType !== WorkflowRequestType::LEAVE, fn ($query) => $query->where(
                 fn ($q) => $q->whereNull('request_type')->orWhere('request_type', $requestType->value),
             ))
             ->orderBy('priority')
