@@ -73,6 +73,22 @@ const RequestInfoCard = ({ pr, poDocument, paymentDocument, onViewDoc }) => (
                     <Typography variant="body2">{pr.notes}</Typography>
                 </>
             )}
+            {pr.po_notes && (
+                <>
+                    <Divider sx={{ my: 1.5 }} />
+                    <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        display="block"
+                        gutterBottom
+                    >
+                        Note to supplier
+                    </Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+                        {pr.po_notes}
+                    </Typography>
+                </>
+            )}
         </CardContent>
     </Card>
 );

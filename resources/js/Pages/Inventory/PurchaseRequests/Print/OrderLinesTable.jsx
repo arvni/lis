@@ -84,17 +84,6 @@ const OrderLinesTable = ({ lines = [], currency }) => {
                                 <Box sx={{ fontWeight: 600 }}>
                                     {line.item?.name ?? line.item_name}
                                 </Box>
-                                {line.notes && (
-                                    <Box
-                                        sx={{
-                                            fontSize: '7.5pt',
-                                            fontStyle: 'italic',
-                                            color: BRAND.muted,
-                                        }}
-                                    >
-                                        {line.notes}
-                                    </Box>
-                                )}
                             </Box>
                             <Box component="td" sx={cell}>
                                 {line.cat_no || '—'}

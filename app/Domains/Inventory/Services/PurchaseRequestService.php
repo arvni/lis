@@ -279,17 +279,22 @@ readonly class PurchaseRequestService
     }
 
     /**
-     * Issue the purchase order to the supplier. Its number was assigned on approval;
-     * the signer is the user whose signature and stamp are printed on it.
+     * Issue the purchase order to the supplier. Its number was assigned on approval.
+     * $data names the supplier, the signer whose signature and stamp are printed on the
+     * order, and an optional note to the supplier (printed instead of the request's own
+     * notes, which are internal).
+     *
+     * @param  array<string, mixed>  $data
      */
-    public function order(PurchaseRequest $pr, ?int $supplierId, int $signerId, ?UploadedFile $file): PurchaseRequest
+    public function order(PurchaseRequest $pr, array $data, ?UploadedFile $file): PurchaseRequest
     {
         $this->assertStatus($pr, [PurchaseRequestStatus::APPROVED], 'Only approved purchase requests can be ordered.');
 
         $updates = [
             'status' => PurchaseRequestStatus::ORDERED->value,
-            'supplier_id' => $supplierId,
-            'signer_user_id' => $signerId,
+            'supplier_id' => isset($data['supplier_id']) ? (int) $data['supplier_id'] : null,
+            'signer_user_id' => (int) $data['signer_user_id'],
+            'po_notes' => $data['po_notes'] ?? null,
         ];
         if ($file) {
             $doc = $this->documentAdapter->storeDocument(

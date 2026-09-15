@@ -161,7 +161,9 @@ class PurchaseRequestLifecycleTest extends TestCase
             ->assertSessionHas('success', true);
         $this->assertStatus($pr, PurchaseRequestStatus::ORDERED);
         $this->act($this->requester)->get(route('inventory.purchase-requests.print', $pr))
-            ->assertInertia(fn (Assert $page) => $page->where('purchaseRequest.signer.name', 'Lab Manager'));
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('purchaseRequest.signer.name', 'Lab Manager')
+                ->where('purchaseRequest.po_notes', 'Deliver to the molecular lab before the 30th.'));
 
         // 5. Record payment.
         $this->act($this->purchaser)->post(route('inventory.purchase-requests.pay', $pr), [
@@ -429,7 +431,11 @@ class PurchaseRequestLifecycleTest extends TestCase
     /** @return array<string, mixed> */
     private function orderPayload(): array
     {
-        return ['supplier_id' => $this->supplier->id, 'signer_user_id' => $this->labManager->id];
+        return [
+            'supplier_id' => $this->supplier->id,
+            'signer_user_id' => $this->labManager->id,
+            'po_notes' => 'Deliver to the molecular lab before the 30th.',
+        ];
     }
 
     /** Each request starts from the request page, as a user would. */

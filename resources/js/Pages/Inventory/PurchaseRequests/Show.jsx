@@ -61,6 +61,7 @@ const Show = () => {
     const orderForm = useForm({
         supplier_id: pr.supplier_id ?? '',
         signer_user_id: '',
+        po_notes: '',
         po_file: null,
     });
     const payForm = useForm({ payment_date: '', payment_reference: '', payment_file: null });

@@ -128,6 +128,20 @@ const ActionDialogs = ({
                 <TextField
                     size="small"
                     fullWidth
+                    multiline
+                    minRows={2}
+                    label="Note to supplier"
+                    value={orderForm.data.po_notes}
+                    onChange={(e) => orderForm.setData('po_notes', e.target.value)}
+                    error={!!orderForm.errors.po_notes}
+                    helperText={
+                        orderForm.errors.po_notes ??
+                        'Optional — printed on the PO; the request notes stay internal'
+                    }
+                />
+                <TextField
+                    size="small"
+                    fullWidth
                     label="PO File (PDF/Image)"
                     type="file"
                     slotProps={{

@@ -476,7 +476,7 @@ class PurchaseRequestServiceTest extends TestCase
         $this->assertSame('PR Test Item', $props['purchaseRequest']->lines->sole()->item?->name);
     }
 
-    public function test_print_carries_the_signature_and_stamp_of_the_signer_chosen_at_issue(): void
+    public function test_print_carries_the_signer_and_supplier_note_chosen_at_issue(): void
     {
         $signer = User::factory()->create([
             'name'      => 'Dr. Layla Signer',
@@ -487,8 +487,11 @@ class PurchaseRequestServiceTest extends TestCase
         $pr = $this->makePr(['status' => PurchaseRequestStatus::APPROVED->value, 'po_number' => 'PO-2026-0001']);
         $service = app(PurchaseRequestService::class);
 
-        $service->order($pr, null, $signer->id, null);
-        $printed = $service->loadForPrint($pr->fresh())['purchaseRequest']->signer;
+        $service->order($pr, ['signer_user_id' => $signer->id, 'po_notes' => 'Deliver to the main store.'], null);
+        $order = $service->loadForPrint($pr->fresh())['purchaseRequest'];
+        $printed = $order->signer;
+
+        $this->assertSame('Deliver to the main store.', $order->po_notes);
 
         $this->assertSame('Dr. Layla Signer', $printed->name);
         $this->assertSame('Laboratory Director', $printed->title);
@@ -501,7 +504,7 @@ class PurchaseRequestServiceTest extends TestCase
         $pr = $this->makePr(['status' => PurchaseRequestStatus::APPROVED->value, 'po_number' => 'PO-2026-0005']);
         $service = app(PurchaseRequestService::class);
 
-        $service->order($pr, null, $this->user->id, null);
+        $service->order($pr, ['signer_user_id' => $this->user->id], null);
         $this->assertSame(PurchaseRequestStatus::ORDERED, $pr->fresh()->status);
         $this->assertSame($this->user->id, $pr->fresh()->signer_user_id);
         $this->assertSame('PO-2026-0005', $pr->fresh()->po_number, 'issuing keeps the number given on approval');
@@ -538,7 +541,7 @@ class PurchaseRequestServiceTest extends TestCase
 
         try {
             match ($action) {
-                'order'   => $service->order($pr, null, $this->user->id, null),
+                'order'   => $service->order($pr, ['signer_user_id' => $this->user->id], null),
                 'pay'     => $service->recordPayment($pr, ['payment_date' => '2026-09-13'], null),
                 'ship'    => $service->markShipped($pr, []),
                 'receive' => $service->receiveItems($pr, [

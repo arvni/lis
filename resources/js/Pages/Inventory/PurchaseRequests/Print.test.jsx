@@ -128,6 +128,28 @@ describe('Inventory/PurchaseRequests/Print', () => {
         expect(screen.queryByAltText(/^Stamp of/)).not.toBeInTheDocument();
     });
 
+    it("prints the note to the supplier, never the request's own notes", () => {
+        const lines = request().lines.map((line) => ({
+            ...line,
+            notes: 'Internal: check stock first',
+        }));
+        renderPage({
+            purchaseRequest: request({ lines, po_notes: 'Deliver to the main store before 9 am.' }),
+        });
+
+        expect(screen.getByText('Notes')).toBeInTheDocument();
+        expect(screen.getByText('Deliver to the main store before 9 am.')).toBeInTheDocument();
+        expect(screen.queryByText('Deliver to the molecular lab')).not.toBeInTheDocument();
+        expect(screen.queryByText('Internal: check stock first')).not.toBeInTheDocument();
+    });
+
+    it('has no Notes section without a note to the supplier', () => {
+        renderPage();
+
+        expect(screen.queryByText('Notes')).not.toBeInTheDocument();
+        expect(screen.queryByText('Deliver to the molecular lab')).not.toBeInTheDocument();
+    });
+
     it('marks a cancelled order', () => {
         renderPage({ purchaseRequest: request({ status: 'CANCELLED' }) });
 

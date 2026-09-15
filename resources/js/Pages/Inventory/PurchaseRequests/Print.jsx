@@ -105,11 +105,12 @@ const Print = () => {
                 <PartiesSection pr={pr} currency={currency} />
                 <OrderLinesTable lines={pr.lines} currency={currency} />
 
-                {pr.notes && (
+                {/* The note to the supplier from Issue PO — the request's own notes are internal. */}
+                {pr.po_notes && (
                     <Box sx={{ mt: '6mm', breakInside: 'avoid' }}>
                         <SectionTitle>Notes</SectionTitle>
                         <Box sx={{ fontSize: '8.5pt', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
-                            {pr.notes}
+                            {pr.po_notes}
                         </Box>
                     </Box>
                 )}

@@ -20,6 +20,8 @@ class OrderPurchaseRequestRequest extends FormRequest
             'supplier_id' => 'required|exists:suppliers,id',
             // Signs the PO: their signature and stamp are printed on it.
             'signer_user_id' => 'required|exists:users,id,is_active,1',
+            // Printed on the PO; the request's own notes stay internal.
+            'po_notes' => 'nullable|string|max:2000',
             'po_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ];
     }

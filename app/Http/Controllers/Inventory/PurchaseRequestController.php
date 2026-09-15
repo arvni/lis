@@ -139,9 +139,8 @@ class PurchaseRequestController extends Controller
     public function order(OrderPurchaseRequestRequest $request, PurchaseRequest $purchaseRequest): RedirectResponse
     {
         $this->authorize('order', $purchaseRequest);
-        $data = $request->validated();
         try {
-            $this->prService->order($purchaseRequest, isset($data['supplier_id']) ? (int) $data['supplier_id'] : null, (int) $data['signer_user_id'], $request->file('po_file'));
+            $this->prService->order($purchaseRequest, $request->validated(), $request->file('po_file'));
         } catch (RuntimeException $e) {
             return back()->with(['success' => false, 'status' => $e->getMessage()]);
         }
