@@ -16,6 +16,12 @@ class AttendanceDayPolicy
 
     public function update(User $user, AttendanceDay $day): bool
     {
+        return $this->correct($user);
+    }
+
+    /** Whether the person may correct recorded days at all (e.g. to offer the action on the calendar). */
+    public function correct(User $user): bool
+    {
         return $user->can('Attendance.Daily Attendance.Correct Attendance');
     }
 

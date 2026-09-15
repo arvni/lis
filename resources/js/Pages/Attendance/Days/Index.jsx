@@ -5,33 +5,19 @@ import { GridActionsCellItem } from '@mui/x-data-grid';
 import DownloadIcon from '@mui/icons-material/Download';
 import EditIcon from '@mui/icons-material/Edit';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 import TableLayout from '@/Layouts/TableLayout';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader.jsx';
 import Filter from './Components/Filter';
 import CorrectionForm from './Components/CorrectionForm';
+import { STATUS_COLORS, formatMinutes } from './attendanceFormat';
+
+export { STATUS_COLORS, formatMinutes };
 
 const CORRECT = 'Attendance.Daily Attendance.Correct Attendance';
 const EXPORT = 'Attendance.Daily Attendance.Export Attendance';
-
-export const STATUS_COLORS = {
-    PRESENT: 'success',
-    INCOMPLETE: 'warning',
-    ABSENT: 'error',
-    OFF: 'default',
-    HOLIDAY: 'info',
-    LEAVE: 'secondary',
-};
-
-export const formatMinutes = (minutes) => {
-    if (!minutes) return '—';
-    const hours = Math.floor(minutes / 60);
-    const rest = minutes % 60;
-    if (!hours) return `${rest} m`;
-
-    return rest ? `${hours} h ${rest} m` : `${hours} h`;
-};
 
 export const StatusCell = ({ day }) => (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -77,6 +63,17 @@ const DayIndex = () => {
     );
 
     const handleCloseForm = useCallback(() => setSelectedDay(null), []);
+
+    const handleOpenMonth = useCallback(
+        (row) => () =>
+            router.visit(
+                route('attendance.calendar.index', {
+                    user_id: row.user?.id,
+                    month: row.date.slice(0, 7),
+                }),
+            ),
+        [],
+    );
 
     const handlePageReload = useCallback((page, filters, sort, pageSize) => {
         router.visit(route('attendance.days.index'), {
@@ -181,8 +178,17 @@ const DayIndex = () => {
                 sortable: false,
                 width: 90,
                 getActions: (params) => {
-                    if (!canCorrect) return [];
                     const actions = [
+                        <GridActionsCellItem
+                            key={`month-${params.row.id}`}
+                            icon={<CalendarMonthIcon />}
+                            label="Open month"
+                            onClick={handleOpenMonth(params.row)}
+                            showInMenu
+                        />,
+                    ];
+                    if (!canCorrect) return actions;
+                    actions.push(
                         <GridActionsCellItem
                             key={`correct-${params.row.id}`}
                             icon={<EditIcon />}
@@ -190,7 +196,7 @@ const DayIndex = () => {
                             onClick={handleCorrect(params.row.id)}
                             showInMenu
                         />,
-                    ];
+                    );
                     if (params.row.is_manual) {
                         actions.push(
                             <GridActionsCellItem
@@ -207,7 +213,7 @@ const DayIndex = () => {
                 },
             },
         ],
-        [canCorrect, handleCorrect, handleReset],
+        [canCorrect, handleCorrect, handleReset, handleOpenMonth],
     );
 
     return (

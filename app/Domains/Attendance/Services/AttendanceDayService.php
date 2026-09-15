@@ -6,13 +6,16 @@ namespace App\Domains\Attendance\Services;
 
 use App\Domains\Attendance\DTOs\AttendanceCorrectionDTO;
 use App\Domains\Attendance\DTOs\ShiftHours;
+use App\Domains\Attendance\Enums\AttendanceChangeAction;
 use App\Domains\Attendance\Enums\AttendanceStatus;
 use App\Domains\Attendance\Models\AttendanceDay;
+use App\Domains\Attendance\Repositories\AttendanceDayChangeRepository;
 use App\Domains\Attendance\Repositories\AttendanceDayRepository;
 use App\Domains\Attendance\Repositories\LeaveRequestRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use LogicException;
 
 class AttendanceDayService
@@ -23,6 +26,7 @@ class AttendanceDayService
         private readonly AttendanceProcessingService $processingService,
         private readonly LeaveRequestRepository $leaveRepository,
         private readonly LeaveCoverage $leaveCoverage,
+        private readonly AttendanceDayChangeRepository $changeRepository,
     ) {}
 
     /**
@@ -49,6 +53,7 @@ class AttendanceDayService
      */
     public function correct(AttendanceDay $day, AttendanceCorrectionDTO $dto, int $correctedBy): AttendanceDay
     {
+        $before = $this->snapshot($day);
         $date = $day->date->copy()->startOfDay();
         $punches = [];
         foreach ([$dto->checkIn, $dto->checkOut] as $time) {
@@ -77,26 +82,46 @@ class AttendanceDayService
             $date->copy()->addDay(),
         ) ?? throw new LogicException('A day that is over always has a result.');
 
-        return $this->dayRepository->update($day, [
-            'check_in' => $result->checkIn,
-            'check_out' => $result->checkOut,
-            'status' => $result->status,
-            'late_minutes' => $result->lateMinutes,
-            'early_leave_minutes' => $result->earlyLeaveMinutes,
-            'worked_minutes' => $result->workedMinutes,
-            'leave_minutes' => $result->leaveMinutes,
-            'is_manual' => true,
-            'note' => $dto->note,
-            'corrected_by' => $correctedBy,
-            'corrected_at' => Carbon::now(),
-        ]);
+        return DB::transaction(function () use ($day, $result, $dto, $correctedBy, $before) {
+            $updated = $this->dayRepository->update($day, [
+                'check_in' => $result->checkIn,
+                'check_out' => $result->checkOut,
+                'status' => $result->status,
+                'late_minutes' => $result->lateMinutes,
+                'early_leave_minutes' => $result->earlyLeaveMinutes,
+                'worked_minutes' => $result->workedMinutes,
+                'leave_minutes' => $result->leaveMinutes,
+                'is_manual' => true,
+                'note' => $dto->note,
+                'corrected_by' => $correctedBy,
+                'corrected_at' => Carbon::now(),
+            ]);
+
+            $this->changeRepository->record([
+                'attendance_day_id' => $updated->id,
+                'user_id' => $updated->user_id,
+                'date' => $updated->date->toDateString(),
+                'action' => AttendanceChangeAction::CORRECTED,
+                'before' => $before,
+                'after' => $this->snapshot($updated),
+                'note' => $dto->note,
+                'changed_by' => $correctedBy,
+            ]);
+
+            return $updated;
+        });
     }
 
     /**
      * Hand a corrected day back to the scheduled job and recalculate it from the punches now.
      */
-    public function resetToAutomatic(AttendanceDay $day): void
+    public function resetToAutomatic(AttendanceDay $day, int $resetBy): void
     {
+        $before = $this->snapshot($day);
+        $dayId = $day->id;
+        $userId = $day->user_id;
+        $date = $day->date->copy();
+
         $this->dayRepository->update($day, [
             'is_manual' => false,
             'note' => null,
@@ -104,6 +129,37 @@ class AttendanceDayService
             'corrected_at' => null,
         ]);
 
-        $this->processingService->rebuild($day->date, $day->date, [$day->user_id]);
+        $this->processingService->rebuild($date, $date, [$userId]);
+
+        // The day may be gone: without a shift or punches it no longer applies.
+        $after = $this->dayRepository->findById($dayId);
+        $this->changeRepository->record([
+            'attendance_day_id' => $after?->id,
+            'user_id' => $userId,
+            'date' => $date->toDateString(),
+            'action' => AttendanceChangeAction::RESET,
+            'before' => $before,
+            'after' => $after ? $this->snapshot($after) : null,
+            'note' => null,
+            'changed_by' => $resetBy,
+        ]);
+    }
+
+    /**
+     * The parts of a day a hand edit can change, as stored in the change log.
+     *
+     * @return array{check_in: string|null, check_out: string|null, status: string, late_minutes: int, early_leave_minutes: int, worked_minutes: int, leave_minutes: int}
+     */
+    private function snapshot(AttendanceDay $day): array
+    {
+        return [
+            'check_in' => $day->check_in?->format('H:i:s'),
+            'check_out' => $day->check_out?->format('H:i:s'),
+            'status' => $day->status->value,
+            'late_minutes' => $day->late_minutes,
+            'early_leave_minutes' => $day->early_leave_minutes,
+            'worked_minutes' => $day->worked_minutes,
+            'leave_minutes' => $day->leave_minutes,
+        ];
     }
 }

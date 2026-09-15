@@ -80,8 +80,21 @@ describe('Attendance/Days/Index', () => {
     it('offers no corrections or export without permission', () => {
         renderPage();
 
-        expect(column('id').getActions({ row: day })).toEqual([]);
+        expect(
+            column('id')
+                .getActions({ row: day })
+                .map((action) => action.props.label),
+        ).toEqual(['Open month']);
         expect(screen.queryByText('Export')).not.toBeInTheDocument();
+    });
+
+    it("opens the person's month on the calendar", () => {
+        renderPage();
+        column('id').getActions({ row: day })[0].props.onClick();
+
+        expect(router.visit).toHaveBeenCalledWith(
+            expect.stringContaining('attendance.calendar.index'),
+        );
     });
 
     it('lets a permitted user correct a day, and recalculate it once corrected', () => {
@@ -91,11 +104,15 @@ describe('Attendance/Days/Index', () => {
                 .getActions({ row })
                 .map((action) => action.props.label);
 
-        expect(labels(day)).toEqual(['Correct']);
-        expect(labels({ ...day, is_manual: true })).toEqual(['Correct', 'Recalculate from punches']);
+        expect(labels(day)).toEqual(['Open month', 'Correct']);
+        expect(labels({ ...day, is_manual: true })).toEqual([
+            'Open month',
+            'Correct',
+            'Recalculate from punches',
+        ]);
 
         column('id')
-            .getActions({ row: { ...day, is_manual: true } })[1]
+            .getActions({ row: { ...day, is_manual: true } })[2]
             .props.onClick();
         expect(router.put).toHaveBeenCalledWith(
             expect.stringContaining('attendance.days.reset'),

@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Attendance\Api\ListActiveShiftsController;
+use App\Http\Controllers\Attendance\Api\ListCalendarPeopleController;
 use App\Http\Controllers\Attendance\Api\ListLeavePeopleController;
+use App\Http\Controllers\Attendance\AttendanceCalendarController;
 use App\Http\Controllers\Attendance\AttendanceDayController;
 use App\Http\Controllers\Attendance\AttendanceTransactionController;
 use App\Http\Controllers\Attendance\ExportAttendanceDaysController;
@@ -16,6 +18,9 @@ Route::prefix('attendance')->name('attendance.')->group(function () {
     Route::resource('shifts', ShiftController::class)->except('create', 'edit', 'show');
     Route::resource('holidays', HolidayController::class)->except('create', 'edit', 'show');
     Route::get('punches', [AttendanceTransactionController::class, 'index'])->name('transactions.index');
+    Route::get('calendar', [AttendanceCalendarController::class, 'index'])->name('calendar.index');
+    Route::get('calendar/export', [AttendanceCalendarController::class, 'export'])->name('calendar.export');
+    Route::get('calendar/export-summary', [AttendanceCalendarController::class, 'exportSummary'])->name('calendar.export-summary');
     Route::get('days', [AttendanceDayController::class, 'index'])->name('days.index');
     Route::get('days/export', ExportAttendanceDaysController::class)->name('days.export');
     Route::put('days/{attendanceDay}', [AttendanceDayController::class, 'update'])->name('days.update');
@@ -31,6 +36,7 @@ Route::prefix('attendance')->name('attendance.')->group(function () {
 Route::prefix('api/attendance')->name('api.attendance.')->group(function () {
     Route::get('shifts', ListActiveShiftsController::class)->name('shifts.list');
     Route::get('leave-people', ListLeavePeopleController::class)->name('leave-people.list');
+    Route::get('calendar-people', ListCalendarPeopleController::class)->name('calendar-people.list');
     Route::get('users/{user}/shift-assignments', [UserShiftController::class, 'index'])->name('users.shift-assignments.index');
     Route::post('users/{user}/shift-assignments', [UserShiftController::class, 'store'])->name('users.shift-assignments.store');
     Route::delete('users/{user}/shift-assignments/{userShift}', [UserShiftController::class, 'destroy'])->name('users.shift-assignments.destroy');

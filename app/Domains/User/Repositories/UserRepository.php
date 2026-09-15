@@ -103,6 +103,15 @@ class UserRepository
     }
 
     /**
+     * @param  list<int>  $ids
+     * @return Collection<int, User>
+     */
+    public function getByIds(array $ids): Collection
+    {
+        return User::query()->whereIn('id', $ids)->get(['id', 'name', 'attendance_number']);
+    }
+
+    /**
      * Users whose attendance number (their HikCentral Employee ID) is one of the given numbers.
      *
      * @param  list<string>  $attendanceNumbers
