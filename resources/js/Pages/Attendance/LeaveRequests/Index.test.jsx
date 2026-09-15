@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import LeaveRequestIndex from '@/Pages/Attendance/LeaveRequests/Index';
+import TableLayout from '@/Layouts/TableLayout';
 import { currentStepLabel, formatLeavePeriod } from '@/Pages/Attendance/LeaveRequests/leaveFormat';
 
 let props;
@@ -11,7 +12,7 @@ vi.mock('@inertiajs/react', () => ({
     Head: () => null,
 }));
 
-vi.mock('@/Layouts/TableLayout', () => ({ default: () => null }));
+vi.mock('@/Layouts/TableLayout', () => ({ default: vi.fn(() => null) }));
 vi.mock('@/Layouts/AuthenticatedLayout', () => ({ default: () => null }));
 vi.mock('@/Components/PageHeader.jsx', () => ({ default: ({ actions }) => actions }));
 vi.mock('@/Pages/Attendance/LeaveRequests/Components/LeaveRequestForm', () => ({
@@ -84,6 +85,26 @@ describe('Attendance/LeaveRequests/Index', () => {
         expect(screen.getByRole('tab', { name: 'Awaiting my approval' })).toBeInTheDocument();
         expect(screen.queryByRole('tab', { name: 'All requests' })).not.toBeInTheDocument();
         expect(screen.getByText('Request leave')).toBeInTheDocument();
+    });
+
+    it('keeps the tab out of the table filters, so the filter panel stays closed', () => {
+        renderPage(false, 'approvals');
+        const tableProps = vi.mocked(TableLayout).mock.calls.at(-1)[0];
+
+        expect(tableProps.defaultValues.filters).toEqual({});
+        expect(screen.getByRole('tab', { name: 'Awaiting my approval' })).toHaveAttribute(
+            'aria-selected',
+            'true',
+        );
+    });
+
+    it('gives the status and dates room for their longest labels', () => {
+        renderPage();
+        const columns = vi.mocked(TableLayout).mock.calls.at(-1)[0].columns;
+        const minWidth = (field) => columns.find((column) => column.field === field).minWidth;
+
+        expect(minWidth('status')).toBeGreaterThanOrEqual(200);
+        expect(minWidth('start_date')).toBeGreaterThanOrEqual(190);
     });
 
     it('shows all requests to leave managers only', () => {

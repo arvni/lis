@@ -26,6 +26,14 @@ const LeaveRequestIndex = () => {
     const requestedScope = requestInputs?.filters?.scope ?? 'mine';
     const scope = scopes.some((option) => option.value === requestedScope) ? requestedScope : 'mine';
 
+    // The tab travels to the server as `filters.scope`, but it isn't a filter the person set:
+    // keep it out of the table, or the filter panel opens (and counts it) on the other tabs.
+    const tableInputs = useMemo(() => {
+        const { scope: _scope, ...filters } = requestInputs?.filters ?? {};
+
+        return { ...requestInputs, filters };
+    }, [requestInputs]);
+
     const [openForm, setOpenForm] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
     // Read from the latest props, so the details dialog shows a decision as soon as the page reloads.
@@ -50,10 +58,13 @@ const LeaveRequestIndex = () => {
 
     const columns = useMemo(
         () => [
+            // Minimum widths: the grid autosizes on mount and would otherwise squeeze these
+            // columns to 100px, cutting off e.g. the "Waiting for approval" chip.
             {
                 field: 'user',
                 headerName: 'Person',
                 flex: 0.9,
+                minWidth: 170,
                 sortable: false,
                 renderCell: (params) => (
                     <Box>
@@ -73,6 +84,7 @@ const LeaveRequestIndex = () => {
                 field: 'kind',
                 headerName: 'Kind',
                 flex: 0.5,
+                minWidth: 110,
                 sortable: false,
                 renderCell: (params) => params.value?.name,
             },
@@ -80,6 +92,7 @@ const LeaveRequestIndex = () => {
                 field: 'start_date',
                 headerName: 'When',
                 flex: 1,
+                minWidth: 190,
                 renderCell: (params) => (
                     <Box>
                         <Typography variant="body2">{formatLeavePeriod(params.row)}</Typography>
@@ -93,6 +106,7 @@ const LeaveRequestIndex = () => {
                 field: 'status',
                 headerName: 'Status',
                 flex: 1,
+                minWidth: 200,
                 sortable: false,
                 renderCell: (params) => (
                     <Box>
@@ -116,6 +130,7 @@ const LeaveRequestIndex = () => {
                 field: 'created_at',
                 headerName: 'Requested',
                 flex: 0.6,
+                minWidth: 140,
             },
             {
                 field: 'id',
@@ -160,7 +175,7 @@ const LeaveRequestIndex = () => {
             </Tabs>
 
             <TableLayout
-                defaultValues={requestInputs}
+                defaultValues={tableInputs}
                 success={success}
                 status={status}
                 reload={handlePageReload}
