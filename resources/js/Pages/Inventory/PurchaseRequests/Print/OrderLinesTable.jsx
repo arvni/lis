@@ -84,9 +84,6 @@ const OrderLinesTable = ({ lines = [], currency }) => {
                                 <Box sx={{ fontWeight: 600 }}>
                                     {line.item?.name ?? line.item_name}
                                 </Box>
-                                <Box sx={{ fontSize: '7.5pt', color: BRAND.muted }}>
-                                    {line.item?.item_code ?? 'Not in catalogue'}
-                                </Box>
                                 {line.notes && (
                                     <Box
                                         sx={{

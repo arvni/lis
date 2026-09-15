@@ -74,7 +74,10 @@ describe('Inventory/PurchaseRequests/Print', () => {
         expect(screen.getByText('ali@labsupplies.test')).toBeInTheDocument();
 
         expect(screen.getByText('Taq Polymerase')).toBeInTheDocument();
-        expect(screen.getByText('Not in catalogue')).toBeInTheDocument();
+        expect(screen.getByText('Filter tips 200µl')).toBeInTheDocument();
+        // Internal identifiers stay off the supplier's copy.
+        expect(screen.queryByText('TAQ-500')).not.toBeInTheDocument();
+        expect(screen.queryByText('Not in catalogue')).not.toBeInTheDocument();
         expect(screen.getByText('450.000')).toBeInTheDocument();
         expect(screen.getByText('62.500')).toBeInTheDocument();
         expect(screen.getByText('Total (OMR)')).toBeInTheDocument();
