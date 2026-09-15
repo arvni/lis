@@ -166,6 +166,12 @@ const DayIndex = () => {
                 renderCell: (params) => <MinutesCell minutes={params.value} />,
             },
             {
+                field: 'overtime_minutes',
+                headerName: 'Overtime',
+                flex: 0.5,
+                renderCell: (params) => <MinutesCell minutes={params.value} />,
+            },
+            {
                 field: 'leave_minutes',
                 headerName: 'On Leave',
                 flex: 0.5,

@@ -76,6 +76,17 @@ describe('DayDialog', () => {
         ).toBeInTheDocument();
     });
 
+    it('shows the overtime only when there is some', () => {
+        const { unmount } = render(
+            <DayDialog day={day({ overtime_minutes: 70 })} person={person} onClose={vi.fn()} />,
+        );
+        expect(screen.getByText('Overtime 1 h 10 m')).toBeInTheDocument();
+        unmount();
+
+        render(<DayDialog day={day({ overtime_minutes: 0 })} person={person} onClose={vi.fn()} />);
+        expect(screen.queryByText(/Overtime/)).not.toBeInTheDocument();
+    });
+
     it('tells a day straight from the doors apart', () => {
         render(<DayDialog day={day({ is_manual: false })} person={person} onClose={vi.fn()} />);
 

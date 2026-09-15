@@ -15,6 +15,10 @@ use Illuminate\Support\Carbon;
  *
  * The first punch is the check-in and the last is the check-out; punches in between are ignored.
  * Minutes are whole minutes, rounded down, and there is no grace period.
+ *
+ * Overtime is time at work outside the shift: before it starts plus after it ends, whatever happened
+ * in between (arriving late doesn't cancel staying late). On a day off or a holiday all worked time
+ * is overtime. It needs both a check-in and a check-out.
  */
 class AttendanceDayCalculator
 {
@@ -37,16 +41,17 @@ class AttendanceDayCalculator
         if ($isHoliday || $hours === null) {
             $status = $isHoliday ? AttendanceStatus::HOLIDAY : AttendanceStatus::OFF;
 
-            return new AttendanceDayResult($status, $checkIn, $checkOut, 0, 0, $worked);
+            return new AttendanceDayResult($status, $checkIn, $checkOut, 0, 0, $worked, overtimeMinutes: $worked);
         }
 
         $start = $date->copy()->setTimeFromTimeString($hours->start);
         $end = $date->copy()->setTimeFromTimeString($hours->end);
         $leave = self::coveredMinutes($start, $end, $excused);
+        $overtime = self::overtimeMinutes($checkIn, $checkOut, $start, $end);
 
         // Leave for the whole working day: nothing else to judge, even while the day is still running.
         if ($leave > 0 && $leave >= self::minutesBetween($start, $end)) {
-            return new AttendanceDayResult(AttendanceStatus::LEAVE, $checkIn, $checkOut, 0, 0, $worked, $leave);
+            return new AttendanceDayResult(AttendanceStatus::LEAVE, $checkIn, $checkOut, 0, 0, $worked, $leave, $overtime);
         }
 
         if ($checkIn === null) {
@@ -63,7 +68,22 @@ class AttendanceDayCalculator
 
         $early = self::minutesBetween($checkOut, self::expectedDeparture($end, $excused));
 
-        return new AttendanceDayResult(AttendanceStatus::PRESENT, $checkIn, $checkOut, $late, $early, $worked, $leave);
+        return new AttendanceDayResult(AttendanceStatus::PRESENT, $checkIn, $checkOut, $late, $early, $worked, $leave, $overtime);
+    }
+
+    /**
+     * Whole minutes at work before the shift starts plus after it ends; 0 without both punches.
+     */
+    private static function overtimeMinutes(?Carbon $checkIn, ?Carbon $checkOut, Carbon $start, Carbon $end): int
+    {
+        if ($checkIn === null || $checkOut === null) {
+            return 0;
+        }
+
+        $before = self::minutesBetween($checkIn, $checkOut->lt($start) ? $checkOut : $start);
+        $after = self::minutesBetween($checkIn->gt($end) ? $checkIn : $end, $checkOut);
+
+        return $before + $after;
     }
 
     /**

@@ -117,6 +117,24 @@ class AttendanceDayControllerTest extends TestCase
         $this->assertNotNull($day->corrected_at);
     }
 
+    public function test_correcting_times_outside_the_shift_records_the_overtime(): void
+    {
+        $day = $this->makeDay(User::factory()->create(), '2026-09-15', AttendanceStatus::ABSENT);
+
+        $this->actingAs($this->userWith(self::CORRECT))
+            ->put(route('attendance.days.update', $day->id), [
+                'check_in' => '07:30',
+                'check_out' => '17:15',
+                'note' => 'Stayed for the audit',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $day->refresh();
+        $this->assertSame(AttendanceStatus::PRESENT, $day->status);
+        $this->assertSame(585, $day->worked_minutes);
+        $this->assertSame(30 + 75, $day->overtime_minutes);
+    }
+
     public function test_clearing_both_times_makes_a_working_day_absent(): void
     {
         $day = $this->makeDay(User::factory()->create(), '2026-09-15', AttendanceStatus::PRESENT, [
@@ -211,8 +229,9 @@ class AttendanceDayControllerTest extends TestCase
             return $rows->count() === 1
                 && $export->map($rows->first()) === [
                     '2026-09-15', 'Tuesday', 'Sara Ahmed', null, '08:00', '16:00', null, null,
-                    'Absent', 0, 0, 0, 0, 'No', null,
-                ];
+                    'Absent', 0, 0, 0, 0, 0, 'No', null,
+                ]
+                && $export->headings()[12] === 'Overtime (min)';
         });
     }
 

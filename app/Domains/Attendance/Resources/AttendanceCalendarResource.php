@@ -74,6 +74,7 @@ class AttendanceCalendarResource extends JsonResource
                 'late_minutes' => $record->late_minutes,
                 'early_leave_minutes' => $record->early_leave_minutes,
                 'worked_minutes' => $record->worked_minutes,
+                'overtime_minutes' => $record->overtime_minutes,
                 'leave_minutes' => $record->leave_minutes,
                 'is_manual' => $record->is_manual,
                 'note' => $record->note,

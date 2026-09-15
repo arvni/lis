@@ -96,6 +96,7 @@ class AttendanceCalendarControllerTest extends TestCase
             'late_minutes' => 11,
             'early_leave_minutes' => 12,
             'worked_minutes' => 456,
+            'overtime_minutes' => 25,
         ]);
         $this->day($sara, '2026-09-16', AttendanceStatus::ABSENT);
 
@@ -127,7 +128,9 @@ class AttendanceCalendarControllerTest extends TestCase
                 ->where('calendar.days.25.is_future', true)
                 // 22 working days (Sunday–Thursday) minus the holiday, 8 hours each.
                 ->where('calendar.totals.scheduled_minutes', 21 * 480)
+                ->where('calendar.days.13.attendance.overtime_minutes', 25)
                 ->where('calendar.totals.worked_minutes', 456)
+                ->where('calendar.totals.overtime_minutes', 25)
                 ->where('calendar.totals.late_minutes', 11)
                 ->where('calendar.totals.early_leave_minutes', 12)
                 ->where('calendar.totals.present_days', 1)

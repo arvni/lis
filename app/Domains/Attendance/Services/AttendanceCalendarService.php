@@ -63,6 +63,7 @@ class AttendanceCalendarService
         $totals = [
             'scheduled_minutes' => 0,
             'worked_minutes' => 0,
+            'overtime_minutes' => 0,
             'late_minutes' => 0,
             'early_leave_minutes' => 0,
             'leave_minutes' => 0,
@@ -84,6 +85,7 @@ class AttendanceCalendarService
             $totals['scheduled_minutes'] += $scheduled;
             if ($record !== null) {
                 $totals['worked_minutes'] += $record->worked_minutes;
+                $totals['overtime_minutes'] += $record->overtime_minutes;
                 $totals['late_minutes'] += $record->late_minutes;
                 $totals['early_leave_minutes'] += $record->early_leave_minutes;
                 $totals['leave_minutes'] += $record->leave_minutes;
@@ -116,7 +118,7 @@ class AttendanceCalendarService
     /**
      * One row per person with a shift or recorded days in the month, by name.
      *
-     * @return list<array{name: string, attendance_number: string|null, scheduled_minutes: int, worked_minutes: int, late_minutes: int, early_leave_minutes: int, leave_minutes: int, present_days: int, absent_days: int, leave_days: int, corrected_days: int}>
+     * @return list<array{name: string, attendance_number: string|null, scheduled_minutes: int, worked_minutes: int, overtime_minutes: int, late_minutes: int, early_leave_minutes: int, leave_minutes: int, present_days: int, absent_days: int, leave_days: int, corrected_days: int}>
      */
     public function monthSummary(Carbon $month): array
     {
@@ -147,6 +149,7 @@ class AttendanceCalendarService
                 'attendance_number' => $user->attendance_number,
                 'scheduled_minutes' => $this->scheduledMinutes($assignmentsByUser[$userId] ?? [], $holidays, $first, $last),
                 'worked_minutes' => $totals['worked_minutes'] ?? 0,
+                'overtime_minutes' => $totals['overtime_minutes'] ?? 0,
                 'late_minutes' => $totals['late_minutes'] ?? 0,
                 'early_leave_minutes' => $totals['early_leave_minutes'] ?? 0,
                 'leave_minutes' => $totals['leave_minutes'] ?? 0,

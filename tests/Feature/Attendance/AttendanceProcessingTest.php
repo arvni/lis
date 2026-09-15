@@ -98,6 +98,8 @@ class AttendanceProcessingTest extends TestCase
         $this->assertSame(AttendanceStatus::OFF, $day?->status);
         $this->assertNull($day->shift_id);
         $this->assertSame(120, $day->worked_minutes);
+        // No working hours that day, so every minute at work is overtime.
+        $this->assertSame(120, $day->overtime_minutes);
         $this->assertSame(0, AttendanceDay::query()->where('user_id', $absentee->id)->count());
         $this->assertSame(1, AttendanceDay::query()->count());
     }

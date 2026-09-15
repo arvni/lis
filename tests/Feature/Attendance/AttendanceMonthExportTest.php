@@ -53,6 +53,13 @@ class AttendanceMonthExportTest extends TestCase
             'early_leave_minutes' => 12,
             'worked_minutes' => 456,
         ]);
+        // Saturday 12th: came in on a day off, so all of it is overtime.
+        $this->day($sara, '2026-09-12', AttendanceStatus::OFF, [
+            'check_in' => '2026-09-12 10:00:00',
+            'check_out' => '2026-09-12 12:00:00',
+            'worked_minutes' => 120,
+            'overtime_minutes' => 120,
+        ]);
 
         $this->actingAs($sara)
             ->get(route('attendance.calendar.export', ['month' => '2026-09']))
@@ -62,14 +69,17 @@ class AttendanceMonthExportTest extends TestCase
             $rows = $export->array();
 
             return count($rows) === 31
-                && $rows[13] === ['2026-09-14', 'Monday', 'Morning', '08:00', '16:00', 480, 'Present', '08:11:04', '15:47:52', 11, 12, 456, 0, null, null, 'No', null]
+                && $export->headings()[12] === 'Overtime (min)'
+                && $rows[13] === ['2026-09-14', 'Monday', 'Morning', '08:00', '16:00', 480, 'Present', '08:11:04', '15:47:52', 11, 12, 456, 0, 0, null, null, 'No', null]
+                && $rows[11][11] === 120 && $rows[11][12] === 120
                 && $rows[2][6] === 'No record'
                 && $rows[3][6] === 'Day off'
-                && $rows[14][6] === 'Holiday' && $rows[14][5] === 0 && $rows[14][13] === 'Test holiday'
+                && $rows[14][6] === 'Holiday' && $rows[14][5] === 0 && $rows[14][14] === 'Test holiday'
                 && $rows[20][6] === 'Scheduled'
                 && $rows[30][0] === 'Total'
                 && $rows[30][5] === 21 * 480
-                && $rows[30][11] === 456
+                && $rows[30][11] === 576
+                && $rows[30][12] === 120
                 && $rows[30][6] === '1 present, 0 absent, 0 on leave';
         });
     }
@@ -92,10 +102,10 @@ class AttendanceMonthExportTest extends TestCase
         $sara = User::factory()->create(['name' => 'Sara Ahmed', 'attendance_number' => '00123']);
         $omar = User::factory()->create(['name' => 'Omar Said', 'attendance_number' => null]);
         $this->morningShiftFor($sara);
-        $this->day($sara, '2026-09-14', AttendanceStatus::PRESENT, ['late_minutes' => 11, 'early_leave_minutes' => 12, 'worked_minutes' => 456]);
+        $this->day($sara, '2026-09-14', AttendanceStatus::PRESENT, ['late_minutes' => 11, 'early_leave_minutes' => 12, 'worked_minutes' => 456, 'overtime_minutes' => 30]);
         $this->day($sara, '2026-09-16', AttendanceStatus::ABSENT);
-        $this->day($omar, '2026-09-10', AttendanceStatus::OFF, ['worked_minutes' => 120, 'is_manual' => true]);
-        $this->day($omar, '2026-08-31', AttendanceStatus::PRESENT, ['worked_minutes' => 480]); // another month
+        $this->day($omar, '2026-09-10', AttendanceStatus::OFF, ['worked_minutes' => 120, 'overtime_minutes' => 120, 'is_manual' => true]);
+        $this->day($omar, '2026-08-31', AttendanceStatus::PRESENT, ['worked_minutes' => 480, 'overtime_minutes' => 60]); // another month
 
         $this->actingAs($this->userWith('Attendance.Daily Attendance.List Attendance'))
             ->get(route('attendance.calendar.export-summary', ['month' => '2026-09']))
@@ -105,10 +115,11 @@ class AttendanceMonthExportTest extends TestCase
             ->get(route('attendance.calendar.export-summary', ['month' => '2026-09']))
             ->assertOk();
 
-        Excel::assertDownloaded('attendance-summary-2026-09.xlsx', fn (AttendanceSummaryExport $export) => $export->array() === [
-            ['Omar Said', null, 0, 120, 0, 0, 0, 0, 0, 0, 1],
-            ['Sara Ahmed', '00123', 22 * 480, 456, 11, 12, 0, 1, 1, 0, 0],
-        ]);
+        Excel::assertDownloaded('attendance-summary-2026-09.xlsx', fn (AttendanceSummaryExport $export) => $export->headings()[4] === 'Overtime (min)'
+            && $export->array() === [
+                ['Omar Said', null, 0, 120, 120, 0, 0, 0, 0, 0, 0, 1],
+                ['Sara Ahmed', '00123', 22 * 480, 456, 30, 11, 12, 0, 1, 1, 0, 0],
+            ]);
     }
 
     private function morningShiftFor(User $person): void
