@@ -51,4 +51,11 @@ Schedule::command('referrerOrder:check')
         Log::error('Scheduled command failed: referrerOrder:check');
     });
 
+Schedule::command('attendance:process')
+    ->everyTenMinutes()
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        Log::error('Scheduled command failed: attendance:process');
+    });
+
 Schedule::command('telescope:prune --hours=48')->daily();

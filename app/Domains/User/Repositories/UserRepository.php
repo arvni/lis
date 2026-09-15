@@ -89,6 +89,23 @@ class UserRepository
     }
 
     /**
+     * The attendance numbers of the given users; users without one are left out.
+     *
+     * @param  list<int>  $userIds
+     * @return array<int, string> keyed by user id
+     */
+    public function getAttendanceNumbersByIds(array $userIds): array
+    {
+        $numbers = [];
+        $users = User::query()->whereIn('id', $userIds)->whereNotNull('attendance_number')->get(['id', 'attendance_number']);
+        foreach ($users as $user) {
+            $numbers[$user->id] = (string) $user->attendance_number;
+        }
+
+        return $numbers;
+    }
+
+    /**
      * Every attendance number in use.
      *
      * @return list<string>

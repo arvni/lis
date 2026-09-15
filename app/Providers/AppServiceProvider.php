@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Domains\Attendance\Models\AttendanceDay;
 use App\Domains\Attendance\Models\AttendanceTransaction;
+use App\Domains\Attendance\Policies\AttendanceDayPolicy;
 use App\Domains\Attendance\Models\Holiday;
 use App\Domains\Attendance\Models\Shift;
 use App\Domains\Attendance\Models\UserShift;
@@ -178,6 +180,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Holiday::class, HolidayPolicy::class);
         Gate::policy(UserShift::class, UserShiftPolicy::class);
         Gate::policy(AttendanceTransaction::class, AttendanceTransactionPolicy::class);
+        Gate::policy(AttendanceDay::class, AttendanceDayPolicy::class);
 
         Gate::policy(SectionGroup::class, SectionGroupPolicy::class);
         Gate::policy(Section::class, SectionPolicy::class);
