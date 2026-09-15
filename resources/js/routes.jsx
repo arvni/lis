@@ -57,6 +57,7 @@ import SensorDoorIcon from '@mui/icons-material/SensorDoor';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import DataUsageIcon from '@mui/icons-material/DataUsage';
 import {
     PercentDiamond,
     Stethoscope as Doctor,
@@ -554,6 +555,12 @@ const routes = (sections = []) => {
                     title: 'Leave Requests',
                     route: 'attendance.leave-requests.index',
                     icon: <BeachAccessIcon />,
+                },
+                {
+                    // Everyone sees their own; the page offers other people and all staff to leave managers.
+                    title: 'Leave Usage',
+                    route: 'attendance.leave-usage.index',
+                    icon: <DataUsageIcon />,
                 },
                 {
                     title: 'Punches',
