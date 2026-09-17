@@ -23,14 +23,18 @@ class StoreLeaveKindRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:100', Rule::unique('leave_kinds', 'name')->ignore($this->route('leave_kind'))],
+            // Whether time off of this kind is still paid; the salary slip deducts the rest.
+            'is_paid' => 'boolean',
             'is_active' => 'boolean',
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        if ($this->has('is_active') && is_string($this->is_active)) {
-            $this->merge(['is_active' => filter_var($this->is_active, FILTER_VALIDATE_BOOLEAN)]);
+        foreach (['is_paid', 'is_active'] as $flag) {
+            if ($this->has($flag) && is_string($this->{$flag})) {
+                $this->merge([$flag => filter_var($this->{$flag}, FILTER_VALIDATE_BOOLEAN)]);
+            }
         }
     }
 }

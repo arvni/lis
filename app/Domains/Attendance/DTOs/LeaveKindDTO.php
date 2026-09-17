@@ -8,6 +8,8 @@ class LeaveKindDTO
 {
     public function __construct(
         public string $name,
+        /** Unpaid leave is deducted on the salary slip; paid leave isn't. */
+        public bool $isPaid,
         public bool $isActive,
     ) {}
 
@@ -16,7 +18,11 @@ class LeaveKindDTO
      */
     public static function fromArray(array $data): self
     {
-        return new self($data['name'], (bool) ($data['is_active'] ?? true));
+        return new self(
+            $data['name'],
+            (bool) ($data['is_paid'] ?? true),
+            (bool) ($data['is_active'] ?? true),
+        );
     }
 
     /**
@@ -26,6 +32,7 @@ class LeaveKindDTO
     {
         return [
             'name' => $this->name,
+            'is_paid' => $this->isPaid,
             'is_active' => $this->isActive,
         ];
     }

@@ -62,7 +62,7 @@ const Empty = ({ year }) => (
     </Typography>
 );
 
-const PersonUsage = ({ usage }) => (
+const PersonUsage = ({ usage, year }) => (
     <>
         <Grid container spacing={1.5} sx={{ mb: 2 }}>
             {AMOUNTS.map(({ key, label, help }) => (
@@ -87,7 +87,7 @@ const PersonUsage = ({ usage }) => (
 
         <Section title="By kind">
             {usage.kinds.length === 0 ? (
-                <Empty year={usage.year} />
+                <Empty year={year} />
             ) : (
                 <Box sx={{ overflowX: 'auto' }}>
                     <Table size="small">
@@ -114,9 +114,9 @@ const PersonUsage = ({ usage }) => (
             )}
         </Section>
 
-        <Section title={`Requests in ${usage.year}`}>
+        <Section title={`Requests in ${year}`}>
             {usage.requests.length === 0 ? (
-                <Empty year={usage.year} />
+                <Empty year={year} />
             ) : (
                 <Box sx={{ overflowX: 'auto' }}>
                     <Table size="small">
@@ -310,7 +310,7 @@ const LeaveUsageIndex = () => {
                     onOpen={(userId) => visit({ user_id: userId, year })}
                 />
             ) : (
-                <PersonUsage usage={usage} />
+                <PersonUsage usage={usage} year={year} />
             )}
         </>
     );
