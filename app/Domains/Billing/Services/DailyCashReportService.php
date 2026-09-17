@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Billing\Services;
 
 use App\Domains\Billing\Adapters\ReceptionAdapter;
@@ -8,6 +10,7 @@ use App\Domains\Billing\Enums\PaymentMethod;
 use App\Domains\Billing\Models\Invoice;
 use App\Domains\Billing\Models\Payment;
 use App\Domains\Reception\Models\Acceptance;
+use App\Domains\Reception\Models\AcceptanceItem;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -15,6 +18,9 @@ class DailyCashReportService
 {
     public function __construct(private ReceptionAdapter $receptionAdapter) {}
 
+    /**
+     * @return list<array<string, mixed>>
+     */
     public function buildReportData(Carbon $date): array
     {
         $dateRange = [$date->copy()->startOfDay(), $date->copy()->endOfDay()];
@@ -28,6 +34,11 @@ class DailyCashReportService
         return $data;
     }
 
+    /**
+     * @param  array{0: Carbon, 1: Carbon}  $dateRange
+     * @param  list<array<string, mixed>>  $data
+     * @param  list<int>  $processedIds
+     */
     private function processAcceptanceItems(array $dateRange, array &$data, array &$processedIds): void
     {
         $acceptanceItems = $this->receptionAdapter->acceptanceItemsForCashReport($dateRange);
@@ -38,17 +49,16 @@ class DailyCashReportService
             if (!$acceptance || $this->isCancelled($acceptance->invoice)) {
                 continue;
             }
-            $processedIds[] = $acceptanceId;
-            $data[] = $this->buildRow(
-                $acceptance,
-                $this->extractTestNames($items),
-                $this->extractPatientNames($items, $acceptance),
-                $items->sum('price'),
-                $items->sum('discount'),
-            );
+            $processedIds[] = (int) $acceptanceId;
+            $data[] = $this->buildRow($acceptance, $dateRange);
         }
     }
 
+    /**
+     * @param  array{0: Carbon, 1: Carbon}  $dateRange
+     * @param  list<array<string, mixed>>  $data
+     * @param  list<int>  $processedIds
+     */
     private function processPayments(array $dateRange, array &$data, array &$processedIds): void
     {
         $payments = Payment::whereBetween('created_at', $dateRange)
@@ -71,14 +81,7 @@ class DailyCashReportService
                 continue;
             }
             $processedIds[] = $acceptance->id;
-            $items = $acceptance->acceptanceItems;
-            $data[] = $this->buildRow(
-                $acceptance,
-                $this->extractTestNames($items),
-                $this->extractPatientNames($items, $acceptance),
-                $items->sum('price'),
-                $items->sum('discount'),
-            );
+            $data[] = $this->buildRow($acceptance, $dateRange);
         }
     }
 
@@ -87,27 +90,50 @@ class DailyCashReportService
         return $invoice?->status === InvoiceStatus::CANCELED->value;
     }
 
-    private function buildRow(
-        Acceptance $acceptance,
-        string $testName,
-        string $patientName,
-        float $total,
-        float $totalDiscount,
-    ): array {
-        $paymentsExcludingCredit = $acceptance->payments->where('paymentMethod', '!=', PaymentMethod::CREDIT);
-        $totalPaid = $paymentsExcludingCredit->sum('price');
+    /**
+     * One row per acceptance, covering *only that day's activity*: the items booked
+     * on the report date and the money collected on it. Nothing here reaches outside
+     * the day, which is what makes the daily figures additive — sum `test_price`
+     * across every day and you get what was billed, sum `prepayment` and you get what
+     * was collected — and makes a re-export of an old day reproduce its own numbers
+     * instead of drifting as later items and payments land.
+     *
+     * The trade-off, chosen deliberately: `remaining` is that day's balance, not the
+     * patient's. A row that exists only because money came in has no items that day,
+     * so it reports a price of 0 and a negative `remaining` — the day reduced what was
+     * outstanding. Summed across days those negatives land on the true balance owed.
+     *
+     * Every item type counts towards the price, services included.
+     *
+     * @param  array{0: Carbon, 1: Carbon}  $dateRange
+     * @return array<string, mixed>
+     */
+    private function buildRow(Acceptance $acceptance, array $dateRange): array
+    {
+        $items = $this->itemsWithin($acceptance->acceptanceItems, $dateRange);
+        $total = (float) $items->sum('price');
+        $totalDiscount = (float) $items->sum('discount');
+
+        // Credit is a promise to pay, never cash in the drawer.
+        $nonCredit = $acceptance->payments->where('paymentMethod', '!=', PaymentMethod::CREDIT);
+        $paidOnDate = $this->paymentsWithin($nonCredit, $dateRange);
+        $paidToday = (float) $paidOnDate->sum('price');
 
         return [
-            'test_name'      => $testName,
-            'patient_name'   => $patientName,
+            'test_name'      => $this->extractTestNames($items),
+            'patient_name'   => $this->extractPatientNames($items, $acceptance),
             'test_price'     => $total,
-            'payment_method' => $paymentsExcludingCredit->map(fn($p) => $p->paymentMethod->name)->unique()->join(', '),
+            'payment_method' => $paidOnDate->map(fn(Payment $p) => $p->paymentMethod->name)->unique()->join(', '),
             'discount'       => $totalDiscount,
-            'prepayment'     => $totalPaid,
-            'remaining'      => $total - $totalPaid - $totalDiscount,
-            'receipt_no'     => $paymentsExcludingCredit
+            'prepayment'     => $paidToday,
+            // Pre-split for the sheet's summary line, so it never has to parse the
+            // joined `payment_method` label back into amounts.
+            'paid_cash_card' => $this->sumForMethods($paidOnDate, [PaymentMethod::CASH, PaymentMethod::CARD]),
+            'paid_transfer'  => $this->sumForMethods($paidOnDate, [PaymentMethod::TRANSFER]),
+            'remaining'      => $total - $paidToday - $totalDiscount,
+            'receipt_no'     => $paidOnDate
                 ->whereIn('paymentMethod', [PaymentMethod::CARD, PaymentMethod::TRANSFER])
-                ->map(fn($p) => $p->information['transferReference'] ?? $p->information['receiptReferenceCode'] ?? '')
+                ->map(fn(Payment $p) => $p->information['transferReference'] ?? $p->information['receiptReferenceCode'] ?? '')
                 ->filter()
                 ->unique()
                 ->implode(', '),
@@ -115,11 +141,63 @@ class DailyCashReportService
         ];
     }
 
+    /**
+     * @param  Collection<int, AcceptanceItem>  $items
+     * @param  array{0: Carbon, 1: Carbon}  $dateRange
+     * @return Collection<int, AcceptanceItem>
+     */
+    private function itemsWithin(Collection $items, array $dateRange): Collection
+    {
+        return $items
+            ->filter(fn(AcceptanceItem $item) => $this->createdWithin($item->created_at, $dateRange))
+            ->values();
+    }
+
+    /**
+     * @param  Collection<int, Payment>  $payments
+     * @param  array{0: Carbon, 1: Carbon}  $dateRange
+     * @return Collection<int, Payment>
+     */
+    private function paymentsWithin(Collection $payments, array $dateRange): Collection
+    {
+        return $payments
+            ->filter(fn(Payment $payment) => $this->createdWithin($payment->created_at, $dateRange))
+            ->values();
+    }
+
+    /**
+     * The one date rule both a row's items and its payments are held to — a record
+     * belongs to the report only if it came into being on the report date.
+     *
+     * @param  array{0: Carbon, 1: Carbon}  $dateRange
+     */
+    private function createdWithin(?Carbon $createdAt, array $dateRange): bool
+    {
+        [$from, $to] = $dateRange;
+
+        return $createdAt !== null && $createdAt >= $from && $createdAt <= $to;
+    }
+
+    /**
+     * @param  Collection<int, Payment>  $payments
+     * @param  list<PaymentMethod>  $methods
+     */
+    private function sumForMethods(Collection $payments, array $methods): float
+    {
+        return (float) $payments->whereIn('paymentMethod', $methods)->sum('price');
+    }
+
+    /**
+     * @param  Collection<int, AcceptanceItem>  $items
+     */
     private function extractTestNames(Collection $items): string
     {
         return $items->pluck('test.name')->filter()->unique()->implode(', ');
     }
 
+    /**
+     * @param  Collection<int, AcceptanceItem>  $items
+     */
     private function extractPatientNames(Collection $items, Acceptance $acceptance): string
     {
         return $items
@@ -127,6 +205,7 @@ class DailyCashReportService
             ->merge([$acceptance->patient])
             ->unique('id')
             ->map(fn($p) => $p->fullName ?? '')
+            ->filter()
             ->implode(', ');
     }
 }
