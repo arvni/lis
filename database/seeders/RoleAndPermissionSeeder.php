@@ -21,418 +21,443 @@ class RoleAndPermissionSeeder extends Seeder
     {
         $permissions = [
 
-            "Referrer" => [
-                "View Referrer",
-                "Create Referrer",
-                "Edit Referrer",
-                "Delete Referrer",
-                "List Referrers",
-                "Referrer Orders" => [
-                    "View Referrer Order",
-                    "Edit Referrer Order",
-                    "Delete Referrer Order",
-                    "List Referrer Orders",
-                    "Add Patient",
-                    "Add Acceptance",
-                    "Add Samples"
+            'Referrer' => [
+                'View Referrer',
+                'Create Referrer',
+                'Edit Referrer',
+                'Delete Referrer',
+                'List Referrers',
+                'Referrer Orders' => [
+                    'View Referrer Order',
+                    'Edit Referrer Order',
+                    'Delete Referrer Order',
+                    'List Referrer Orders',
+                    'Add Patient',
+                    'Add Acceptance',
+                    'Add Samples',
                 ],
-                "Collect Request" => [
-                    "View Collect Request",
-                    "Edit Collect Request",
-                    "Delete Collect Request",
-                    "List Collect Requests",
-                    "Create Collect Request",
+                'Collect Request' => [
+                    'View Collect Request',
+                    'Edit Collect Request',
+                    'Delete Collect Request',
+                    'List Collect Requests',
+                    'Create Collect Request',
                 ],
-                "Sample Collector" => [
-                    "View Sample Collector",
-                    "Edit Sample Collector",
-                    "Delete Sample Collector",
-                    "List Sample Collectors",
-                    "Create Sample Collector",
+                'Sample Collector' => [
+                    'View Sample Collector',
+                    'Edit Sample Collector',
+                    'Delete Sample Collector',
+                    'List Sample Collectors',
+                    'Create Sample Collector',
                 ],
-                "Materials" => [
-                    "Create Material",
-                    "Edit Material",
-                    "Delete Material",
-                    "List Materials",
+                'Materials' => [
+                    'Create Material',
+                    'Edit Material',
+                    'Delete Material',
+                    'List Materials',
                 ],
-                "Order Materials" => [
-                    "Create Order Material",
-                    "View Order Material",
-                    "Edit Order Material",
-                    "Delete Order Material",
-                    "List Order Materials",
-                ],
-            ],
-            "Consultation" => [
-                "Consultations" => [
-                    "View Consultation",
-                    "Done Consultation",
-                    "Create Consultation",
-                    "Edit Consultation",
-                    "Delete Consultation",
-                    "List Consultations",
-                    "Waiting List Consultations",
-                ],
-                "Consultants" => [
-                    "View Consultant",
-                    "Create Consultant",
-                    "Edit Consultant",
-                    "Delete Consultant",
-                    "List Consultants",
-                ],
-                "Reservations" => [
-                    "View Reservation",
-                    "Create Reservation",
-                    "Edit Reservation",
-                    "Delete Reservation",
-                    "List Reservations",
-                ]
-            ],
-            "Report" => [
-                "View Report",
-                "Create Report",
-                "Edit Report",
-                "Delete Report",
-                "List Report",
-                "Edit All Reports",
-                "Access All Reports",
-                "Approve Report",
-                "Print Report",
-                "Financial Check",
-                "Approve Financial",
-                "Publish Report",
-                "Unpublish Report",
-                "Admin Create Report",
-            ],
-            "Billing" => [
-                "Dashboard" => [
-                    "View Dashboard",
-                ],
-                "Invoices" => [
-                    "View Invoice",
-                    "Create Invoice",
-                    "Edit Invoice",
-                    "Delete Invoice",
-                    "List Invoices",
-                ],
-                "Payments" => [
-                    "View Payment",
-                    "Create Payment",
-                    "Edit Payment",
-                    "Delete Payment",
-                    "List Payments",
-                ],
-                "Statements" => [
-                    "View Statement",
-                    "Create Statement",
-                    "Edit Statement",
-                    "Delete Statement",
-                    "List Statements",
-                ],
-                "Discount Partners" => [
-                    "View Discount Partner",
-                    "Create Discount Partner",
-                    "Edit Discount Partner",
-                    "Delete Discount Partner",
-                    "List Discount Partners",
-                ],
-                "Discount Cards" => [
-                    "List Discount Cards",
-                    "Issue Discount Cards",
-                    "Assign Discount Cards",
-                    "Edit Discount Card",
-                    "Revoke Discount Card",
-                    "Apply To Acceptance",
-                    "View Usage Report",
+                'Order Materials' => [
+                    'Create Order Material',
+                    'View Order Material',
+                    'Edit Order Material',
+                    'Delete Order Material',
+                    'List Order Materials',
                 ],
             ],
-            "User Management" => [
-                "Users" => [
-                    "Create User",
-                    "Edit User",
-                    "Delete User",
-                    "List Users",
+            'Consultation' => [
+                'Consultations' => [
+                    'View Consultation',
+                    'Done Consultation',
+                    'Create Consultation',
+                    'Edit Consultation',
+                    'Delete Consultation',
+                    'List Consultations',
+                    'Waiting List Consultations',
                 ],
-                "Roles" => [
-                    "Create Role",
-                    "Edit Role",
-                    "Delete Role",
-                    "List Roles",
+                'Consultants' => [
+                    'View Consultant',
+                    'Create Consultant',
+                    'Edit Consultant',
+                    'Delete Consultant',
+                    'List Consultants',
                 ],
-            ],
-            "Attendance" => [
-                "Shifts" => [
-                    "List Shifts",
-                    "Create Shift",
-                    "Edit Shift",
-                    "Delete Shift",
-                ],
-                "Holidays" => [
-                    "List Holidays",
-                    "Create Holiday",
-                    "Edit Holiday",
-                    "Delete Holiday",
-                ],
-                "Shift Assignments" => [
-                    "Manage Shift Assignments",
-                ],
-                "Transactions" => [
-                    "List Transactions",
-                    "Import Transactions",
-                ],
-                "Daily Attendance" => [
-                    "List Attendance",
-                    "Correct Attendance",
-                    "Export Attendance",
-                ],
-                "Leave Requests" => [
-                    "Manage Leave Requests",
-                ],
-                "Leave Kinds" => [
-                    "List Leave Kinds",
-                    "Manage Leave Kinds",
+                'Reservations' => [
+                    'View Reservation',
+                    'Create Reservation',
+                    'Edit Reservation',
+                    'Delete Reservation',
+                    'List Reservations',
                 ],
             ],
-            "Sample Collection" => [
-                "Samples" => [
-                    "View Sample",
-                    "Create Sample",
-                    "Edit Sample",
-                    "Delete Sample",
-                    "List Samples",
+            'Report' => [
+                'View Report',
+                'Create Report',
+                'Edit Report',
+                'Delete Report',
+                'List Report',
+                'Edit All Reports',
+                'Access All Reports',
+                'Approve Report',
+                'Print Report',
+                'Financial Check',
+                'Approve Financial',
+                'Publish Report',
+                'Unpublish Report',
+                'Admin Create Report',
+            ],
+            'Billing' => [
+                'Dashboard' => [
+                    'View Dashboard',
+                ],
+                'Invoices' => [
+                    'View Invoice',
+                    'Create Invoice',
+                    'Edit Invoice',
+                    'Delete Invoice',
+                    'List Invoices',
+                ],
+                'Payments' => [
+                    'View Payment',
+                    'Create Payment',
+                    'Edit Payment',
+                    'Delete Payment',
+                    'List Payments',
+                ],
+                'Statements' => [
+                    'View Statement',
+                    'Create Statement',
+                    'Edit Statement',
+                    'Delete Statement',
+                    'List Statements',
+                ],
+                'Discount Partners' => [
+                    'View Discount Partner',
+                    'Create Discount Partner',
+                    'Edit Discount Partner',
+                    'Delete Discount Partner',
+                    'List Discount Partners',
+                ],
+                'Discount Cards' => [
+                    'List Discount Cards',
+                    'Issue Discount Cards',
+                    'Assign Discount Cards',
+                    'Edit Discount Card',
+                    'Revoke Discount Card',
+                    'Apply To Acceptance',
+                    'View Usage Report',
                 ],
             ],
-            "Reception" => [
-                "Patients" => [
-                    "View Patient",
-                    "Create Patient",
-                    "Edit Patient",
-                    "Delete Patient",
-                    "List Patients",
-                    "Merge Patients",
+            'User Management' => [
+                'Users' => [
+                    'Create User',
+                    'Edit User',
+                    'Delete User',
+                    'List Users',
                 ],
-                "Acceptances" => [
-                    "View Acceptance",
-                    "Create Acceptance",
-                    "Cancel Acceptance",
-                    "Edit Acceptance",
-                    "Delete Acceptance",
-                    "Restore Acceptance",
-                    "List Acceptance",
-                    "Toggle Reportless Acceptance Item",
-                    "Toggle Sampleless Acceptance Item",
-                    "Check Status",
-                    "Update Priority",
-                    "Edit Invoiced Acceptance",
-                    "Edit Item Prices",
-                    "Assign Tag",
-                ],
-                "TAT" => [
-                    "View Dashboard",
+                'Roles' => [
+                    'Create Role',
+                    'Edit Role',
+                    'Delete Role',
+                    'List Roles',
                 ],
             ],
-            "Advance Settings" => [
-                "Section Groups" => [
-                    "Create Section Group",
-                    "Edit Section Group",
-                    "Delete Section Group",
-                    "List Section Groups",
+            'Attendance' => [
+                'Shifts' => [
+                    'List Shifts',
+                    'Create Shift',
+                    'Edit Shift',
+                    'Delete Shift',
                 ],
-                "Sections" => [
-                    "Create Section",
-                    "Edit Section",
-                    "Delete Section",
-                    "List Sections",
+                'Holidays' => [
+                    'List Holidays',
+                    'Create Holiday',
+                    'Edit Holiday',
+                    'Delete Holiday',
                 ],
-                "Settings" => [
-                    "Edit Setting",
-                    "List Settings",
+                'Shift Assignments' => [
+                    'Manage Shift Assignments',
                 ],
-                "Workflows" => [
-                    "Create Workflow",
-                    "Edit Workflow",
-                    "Delete Workflow",
-                    "List Workflows",
+                'Transactions' => [
+                    'List Transactions',
+                    'Import Transactions',
                 ],
-                "Approval Flows" => [
-                    "Create Approval Flow",
-                    "Edit Approval Flow",
-                    "Delete Approval Flow",
-                    "List Approval Flows",
+                'Daily Attendance' => [
+                    'List Attendance',
+                    'Correct Attendance',
+                    'Export Attendance',
                 ],
-                "Sample Types" => [
-                    "Create Sample Type",
-                    "Edit Sample Type",
-                    "Delete Sample Type",
-                    "List Sample Types",
+                'Leave Requests' => [
+                    'Manage Leave Requests',
                 ],
-                "Consent Form" => [
-                    "Create Consent Form",
-                    "Edit Consent Form",
-                    "Delete Consent Form",
-                    "List Consent Forms",
-                ],
-                "Request Form" => [
-                    "Create Request Form",
-                    "Edit Request Form",
-                    "Delete Request Form",
-                    "List Request Forms",
-                ],
-                "Instruction" => [
-                    "Create Instruction",
-                    "Edit Instruction",
-                    "Delete Instruction",
-                    "List Instructions",
-                ],
-                "Barcode Groups" => [
-                    "Create Barcode Group",
-                    "Edit Barcode Group",
-                    "Delete Barcode Group",
-                    "List Barcode Groups",
-                ],
-                "Offers" => [
-                    "Create Offer",
-                    "Edit Offer",
-                    "Delete Offer",
-                    "List Offers",
-                ],
-                "Doctors" => [
-                    "Create Doctor",
-                    "Edit Doctor",
-                    "Delete Doctor",
-                    "List Doctors",
-                ],
-                "Test Groups" => [
-                    "Create Test Group",
-                    "Edit Test Group",
-                    "Delete Test Group",
-                    "List Test Groups",
-                ],
-                "Report Templates" => [
-                    "Create Report Template",
-                    "Edit Report Template",
-                    "Delete Report Template",
-                    "List Report Templates",
-                ],
-                "Test" => [
-                    "Create Test",
-                    "Edit Test",
-                    "Delete Test",
-                    "List Tests",
-                ],
-                "Tags" => [
-                    "Create Tag",
-                    "Edit Tag",
-                    "Delete Tag",
-                    "List Tags",
-                ],
-                "TAT Alerts" => [
-                    "Create TAT Alert",
-                    "Edit TAT Alert",
-                    "Delete TAT Alert",
-                    "List TAT Alerts",
+                'Leave Kinds' => [
+                    'List Leave Kinds',
+                    'Manage Leave Kinds',
                 ],
             ],
-            "Inventory" => [
-                "Items" => [
-                    "List Items",
-                    "View Item",
-                    "Create Item",
-                    "Edit Item",
-                    "Delete Item",
+            'Payroll' => [
+                'Contracts' => [
+                    'List Contracts',
+                    'Create Contract',
+                    'Edit Contract',
+                    'Delete Contract',
                 ],
-                "Suppliers" => [
-                    "List Suppliers",
-                    "View Supplier",
-                    "Create Supplier",
-                    "Edit Supplier",
-                    "Delete Supplier",
+                'Item Types' => [
+                    'List Item Types',
+                    'Manage Item Types',
                 ],
-                "Stores" => [
-                    "List Stores",
-                    "View Store",
-                    "Create Store",
-                    "Edit Store",
-                    "Delete Store",
+                // A person's own allowances and deductions, including loans.
+                'Staff Allowances' => [
+                    'List Staff Allowances',
+                    'Manage Staff Allowances',
                 ],
-                "Transactions" => [
-                    "List Transactions",
-                    "View Transaction",
-                    "Create Transaction",
-                    "Approve Transaction",
-                    "Cancel Transaction",
-                ],
-                "PurchaseRequests" => [
-                    "List Purchase Requests",
-                    "View All Purchase Requests",
-                    "Create Purchase Request",
-                    "Approve Purchase Request",
-                    "Order Purchase Request",
-                    "Pay Purchase Request",
-                    "Ship Purchase Request",
-                ],
-                "ExportRequests" => [
-                    "List Export Requests",
-                    "View All Export Requests",
-                    "Create Export Request",
-                    "Approve Export Request",
-                    "Fulfill Export Request",
-                ],
-                "WorkflowTemplates" => [
-                    "List Workflow Templates",
-                    "Manage Workflow Templates",
-                ],
-                "Stock" => [
-                    "View Stock",
-                ],
-                "ReorderAlerts" => [
-                    "View Reorder Alerts",
-                    "Resolve Reorder Alert",
+                // Preparing a slip and releasing it are separate jobs, so a clerk can work up the
+                // month without also deciding it goes out. Seeing your OWN issued slip needs no
+                // permission at all — that is the point of issuing one.
+                'Salary Slips' => [
+                    'Manage Salary Slips',
+                    'Issue Salary Slips',
+                    'View All Salary Slips',
                 ],
             ],
-            "Monitoring" => [
-                "Nodes" => [
-                    "List Nodes",
-                    "View Node",
-                    "Update Node",
+            'Sample Collection' => [
+                'Samples' => [
+                    'View Sample',
+                    'Create Sample',
+                    'Edit Sample',
+                    'Delete Sample',
+                    'List Samples',
                 ],
             ],
-            "Dashboard" => [
-                "Total Acceptances",
-                "Total Tests",
-                "Total Waiting Sampling",
-                "Total Consultation",
-                "Total Waiting Consultation",
-                "Total Payments",
-                "Total Reports Waiting For Approving",
-            ],
-            "Statistics",
-            "Test List",
-            "System" => [
-                "Failed Jobs" => [
-                    "List Failed Jobs",
-                    "Retry Failed Job",
-                    "Delete Failed Job",
+            'Reception' => [
+                'Patients' => [
+                    'View Patient',
+                    'Create Patient',
+                    'Edit Patient',
+                    'Delete Patient',
+                    'List Patients',
+                    'Merge Patients',
                 ],
-                "Audit Log" => [
-                    "View Audit Log",
+                'Acceptances' => [
+                    'View Acceptance',
+                    'Create Acceptance',
+                    'Cancel Acceptance',
+                    'Edit Acceptance',
+                    'Delete Acceptance',
+                    'Restore Acceptance',
+                    'List Acceptance',
+                    'Toggle Reportless Acceptance Item',
+                    'Toggle Sampleless Acceptance Item',
+                    'Check Status',
+                    'Update Priority',
+                    'Edit Invoiced Acceptance',
+                    'Edit Item Prices',
+                    'Assign Tag',
+                ],
+                'TAT' => [
+                    'View Dashboard',
                 ],
             ],
-            "QC" => [
-                "Samples" => [
-                    "List Samples",
-                    "Approve Sample",
+            'Advance Settings' => [
+                'Section Groups' => [
+                    'Create Section Group',
+                    'Edit Section Group',
+                    'Delete Section Group',
+                    'List Section Groups',
+                ],
+                'Sections' => [
+                    'Create Section',
+                    'Edit Section',
+                    'Delete Section',
+                    'List Sections',
+                ],
+                'Settings' => [
+                    'Edit Setting',
+                    'List Settings',
+                ],
+                'Workflows' => [
+                    'Create Workflow',
+                    'Edit Workflow',
+                    'Delete Workflow',
+                    'List Workflows',
+                ],
+                'Approval Flows' => [
+                    'Create Approval Flow',
+                    'Edit Approval Flow',
+                    'Delete Approval Flow',
+                    'List Approval Flows',
+                ],
+                'Sample Types' => [
+                    'Create Sample Type',
+                    'Edit Sample Type',
+                    'Delete Sample Type',
+                    'List Sample Types',
+                ],
+                'Consent Form' => [
+                    'Create Consent Form',
+                    'Edit Consent Form',
+                    'Delete Consent Form',
+                    'List Consent Forms',
+                ],
+                'Request Form' => [
+                    'Create Request Form',
+                    'Edit Request Form',
+                    'Delete Request Form',
+                    'List Request Forms',
+                ],
+                'Instruction' => [
+                    'Create Instruction',
+                    'Edit Instruction',
+                    'Delete Instruction',
+                    'List Instructions',
+                ],
+                'Barcode Groups' => [
+                    'Create Barcode Group',
+                    'Edit Barcode Group',
+                    'Delete Barcode Group',
+                    'List Barcode Groups',
+                ],
+                'Offers' => [
+                    'Create Offer',
+                    'Edit Offer',
+                    'Delete Offer',
+                    'List Offers',
+                ],
+                'Doctors' => [
+                    'Create Doctor',
+                    'Edit Doctor',
+                    'Delete Doctor',
+                    'List Doctors',
+                ],
+                'Test Groups' => [
+                    'Create Test Group',
+                    'Edit Test Group',
+                    'Delete Test Group',
+                    'List Test Groups',
+                ],
+                'Report Templates' => [
+                    'Create Report Template',
+                    'Edit Report Template',
+                    'Delete Report Template',
+                    'List Report Templates',
+                ],
+                'Test' => [
+                    'Create Test',
+                    'Edit Test',
+                    'Delete Test',
+                    'List Tests',
+                ],
+                'Tags' => [
+                    'Create Tag',
+                    'Edit Tag',
+                    'Delete Tag',
+                    'List Tags',
+                ],
+                'TAT Alerts' => [
+                    'Create TAT Alert',
+                    'Edit TAT Alert',
+                    'Delete TAT Alert',
+                    'List TAT Alerts',
                 ],
             ],
-            "Document" => [
-                "Documents" => [
-                    "Create Document",
-                    "View Document",
-                    "Edit Document",
-                    "Delete Document"
-                ]
-            ]
+            'Inventory' => [
+                'Items' => [
+                    'List Items',
+                    'View Item',
+                    'Create Item',
+                    'Edit Item',
+                    'Delete Item',
+                ],
+                'Suppliers' => [
+                    'List Suppliers',
+                    'View Supplier',
+                    'Create Supplier',
+                    'Edit Supplier',
+                    'Delete Supplier',
+                ],
+                'Stores' => [
+                    'List Stores',
+                    'View Store',
+                    'Create Store',
+                    'Edit Store',
+                    'Delete Store',
+                ],
+                'Transactions' => [
+                    'List Transactions',
+                    'View Transaction',
+                    'Create Transaction',
+                    'Approve Transaction',
+                    'Cancel Transaction',
+                ],
+                'PurchaseRequests' => [
+                    'List Purchase Requests',
+                    'View All Purchase Requests',
+                    'Create Purchase Request',
+                    'Approve Purchase Request',
+                    'Order Purchase Request',
+                    'Pay Purchase Request',
+                    'Ship Purchase Request',
+                ],
+                'ExportRequests' => [
+                    'List Export Requests',
+                    'View All Export Requests',
+                    'Create Export Request',
+                    'Approve Export Request',
+                    'Fulfill Export Request',
+                ],
+                'WorkflowTemplates' => [
+                    'List Workflow Templates',
+                    'Manage Workflow Templates',
+                ],
+                'Stock' => [
+                    'View Stock',
+                ],
+                'ReorderAlerts' => [
+                    'View Reorder Alerts',
+                    'Resolve Reorder Alert',
+                ],
+            ],
+            'Monitoring' => [
+                'Nodes' => [
+                    'List Nodes',
+                    'View Node',
+                    'Update Node',
+                ],
+            ],
+            'Dashboard' => [
+                'Total Acceptances',
+                'Total Tests',
+                'Total Waiting Sampling',
+                'Total Consultation',
+                'Total Waiting Consultation',
+                'Total Payments',
+                'Total Reports Waiting For Approving',
+            ],
+            'Statistics',
+            'Test List',
+            'System' => [
+                'Failed Jobs' => [
+                    'List Failed Jobs',
+                    'Retry Failed Job',
+                    'Delete Failed Job',
+                ],
+                'Audit Log' => [
+                    'View Audit Log',
+                ],
+            ],
+            'QC' => [
+                'Samples' => [
+                    'List Samples',
+                    'Approve Sample',
+                ],
+            ],
+            'Document' => [
+                'Documents' => [
+                    'Create Document',
+                    'View Document',
+                    'Edit Document',
+                    'Delete Document',
+                ],
+            ],
         ];
 
         $sectionPermissions = $this->getSectionsPermissions();
@@ -440,30 +465,32 @@ class RoleAndPermissionSeeder extends Seeder
 
         $permissions = array_merge($permissions, $sectionPermissions, $documentsPermissions);
 
-        $this->createPermissions($permissions, "");
+        $this->createPermissions($permissions, '');
         $permissions = Permission::all();
-        $admin = Role::findOrCreate("Admin");
-        $admin->permissions()->sync($permissions->pluck("id"));
-        $user = User::query()->where("username", "admin")->first();
-        if (!$user)
+        $admin = Role::findOrCreate('Admin');
+        $admin->permissions()->sync($permissions->pluck('id'));
+        $user = User::query()->where('username', 'admin')->first();
+        if (! $user) {
             $user = User::factory()->create([
-                "name" => "Admin",
-                "email" => env("ADMIN_EMAIL", "admin@lis.com"),
-                "username" => "admin",
-                "password" => bcrypt(env("ADMIN_PASSWORD", "P@ssw0rd")),
+                'name' => 'Admin',
+                'email' => env('ADMIN_EMAIL', 'admin@lis.com'),
+                'username' => 'admin',
+                'password' => bcrypt(env('ADMIN_PASSWORD', 'P@ssw0rd')),
             ]);
+        }
         $user->roles()->sync([$admin->id]);
     }
 
     protected function createPermissions(array $permissions, string $prefix): void
     {
-        if ($prefix)
+        if ($prefix) {
             Permission::findOrCreate($prefix);
+        }
         foreach ($permissions as $group => $permission) {
-            if (is_array($permission))
-                $this->createPermissions($permission, ($prefix ? "$prefix." : $prefix) . $group);
-            else {
-                $tmp = $prefix ? "$prefix." : "";
+            if (is_array($permission)) {
+                $this->createPermissions($permission, ($prefix ? "$prefix." : $prefix).$group);
+            } else {
+                $tmp = $prefix ? "$prefix." : '';
                 Permission::findOrCreate("{$tmp}$permission");
             }
         }
@@ -490,6 +517,7 @@ class RoleAndPermissionSeeder extends Seeder
                 "Sections$prefix.Section.$sectionId.Dashboard.Total Average Duration",
             ];
         }
+
         return collect($permissions)->unique()->toArray();
     }
 
@@ -497,30 +525,31 @@ class RoleAndPermissionSeeder extends Seeder
     {
         $idList = $this->getSectionGroupIds($sectionGroup);
         $output = [];
-        $tmp = "";
+        $tmp = '';
         foreach ($idList as $id) {
             $tmp .= ".$id";
             $output[] = "Sections$tmp";
         }
+
         return [$tmp, $output];
     }
 
     private function getSectionGroupIds($sectionGroup): array
     {
-        if (isset($sectionGroup["parent"]) && $sectionGroup["section_group_id"]) {
-            return [... $this->getSectionGroupIds($sectionGroup["parent"]), $sectionGroup["id"]];
+        if (isset($sectionGroup['parent']) && $sectionGroup['section_group_id']) {
+            return [...$this->getSectionGroupIds($sectionGroup['parent']), $sectionGroup['id']];
         }
-        return [$sectionGroup["id"]];
+
+        return [$sectionGroup['id']];
     }
 
     private function getDocumentsPermissions(): array
     {
         return [
-            "Documents" => Arr::map(
+            'Documents' => Arr::map(
                 DocumentTag::values(),
-                fn($item) => Str::of($item)->replace('_', ' ')->title()->toString()
+                fn ($item) => Str::of($item)->replace('_', ' ')->title()->toString()
             ),
         ];
     }
-
 }
