@@ -7,8 +7,10 @@ namespace App\Domains\Attendance\Services;
 use App\Domains\Attendance\Adapters\UserAdapter;
 use App\Domains\Attendance\DTOs\CalendarDay;
 use App\Domains\Attendance\DTOs\CalendarMonth;
+use App\Domains\Attendance\DTOs\ShiftHours;
 use App\Domains\Attendance\Enums\AttendanceStatus;
 use App\Domains\Attendance\Models\LeaveRequest;
+use App\Domains\Attendance\Models\ShiftDay;
 use App\Domains\Attendance\Models\UserShift;
 use App\Domains\Attendance\Repositories\AttendanceDayChangeRepository;
 use App\Domains\Attendance\Repositories\AttendanceDayRepository;
@@ -163,6 +165,74 @@ class AttendanceCalendarService
         usort($rows, fn (array $a, array $b) => strcasecmp($a['name'], $b['name']));
 
         return $rows;
+    }
+
+    /**
+     * The minutes one person was meant to work between two dates, holidays left out. Asked for by
+     * anything that needs to turn a salary into an hourly rate.
+     */
+    public function scheduledMinutesFor(int $userId, string $from, string $to): int
+    {
+        $assignments = array_values($this->userShiftRepository->overlapping($from, $to, [$userId])->all());
+        $holidays = $this->holidayRepository->holidaysBetween($from, $to);
+
+        return $this->scheduledMinutes($assignments, $holidays, Carbon::parse($from), Carbon::parse($to));
+    }
+
+    /**
+     * One person's recorded days between two dates, summed. All zeroes when nothing is recorded.
+     *
+     * @return array{worked_minutes: int, overtime_minutes: int, late_minutes: int, early_leave_minutes: int, leave_minutes: int, present_days: int, absent_days: int, leave_days: int, corrected_days: int}
+     */
+    public function periodTotals(int $userId, string $from, string $to): array
+    {
+        $totals = $this->dayRepository->totalsByUserBetween($from, $to, [$userId]);
+
+        return $totals[$userId] ?? [
+            'worked_minutes' => 0,
+            'overtime_minutes' => 0,
+            'late_minutes' => 0,
+            'early_leave_minutes' => 0,
+            'leave_minutes' => 0,
+            'present_days' => 0,
+            'absent_days' => 0,
+            'leave_days' => 0,
+            'corrected_days' => 0,
+        ];
+    }
+
+    /** The shift the person is assigned on a date, if any. */
+    public function assignedShiftIdOn(int $userId, string $date): ?int
+    {
+        $assignments = array_values($this->userShiftRepository->overlapping($date, $date, [$userId])->all());
+
+        return $this->schedule->assignmentOn($assignments, Carbon::parse($date))?->shift_id;
+    }
+
+    /**
+     * How long one working day is for the person on a date, averaged over the days their shift
+     * actually covers — a shift of four 10-hour days has 10-hour days, not 8-hour ones.
+     *
+     * Null when they have no shift assignment then: nothing says what a day of theirs is worth, and
+     * inventing a figure would make a salary slip look authoritative while resting on a guess.
+     */
+    public function workingDayMinutesFor(int $userId, string $date): ?int
+    {
+        $assignments = array_values($this->userShiftRepository->overlapping($date, $date, [$userId])->all());
+        $assignment = $this->schedule->assignmentOn($assignments, Carbon::parse($date));
+        if ($assignment === null) {
+            return null;
+        }
+
+        $minutes = 0;
+        $days = 0;
+        foreach ($assignment->shift->days as $day) {
+            /** @var ShiftDay $day */
+            $minutes += $this->schedule->minutesOf(new ShiftHours($day->start_time, $day->end_time));
+            $days++;
+        }
+
+        return $days === 0 ? null : intdiv($minutes, $days);
     }
 
     /**

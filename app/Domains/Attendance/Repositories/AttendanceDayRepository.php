@@ -73,12 +73,14 @@ class AttendanceDayRepository
     /**
      * Each person's month in numbers: minutes summed and days counted by status.
      *
+     * @param  list<int>|null  $userIds  everyone when null
      * @return array<int, array{worked_minutes: int, overtime_minutes: int, late_minutes: int, early_leave_minutes: int, leave_minutes: int, present_days: int, absent_days: int, leave_days: int, corrected_days: int}>
      */
-    public function totalsByUserBetween(string $from, string $to): array
+    public function totalsByUserBetween(string $from, string $to, ?array $userIds = null): array
     {
         $rows = AttendanceDay::query()
             ->whereBetween('date', [$from, $to])
+            ->when($userIds !== null, fn (Builder $query) => $query->whereIn('user_id', $userIds))
             ->groupBy('user_id')
             ->select('user_id')
             ->selectRaw('SUM(worked_minutes) AS worked_minutes')

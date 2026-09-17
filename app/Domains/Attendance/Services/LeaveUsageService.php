@@ -21,7 +21,8 @@ use App\Domains\User\Models\User;
 use Illuminate\Support\Carbon;
 
 /**
- * How much leave people have used in a calendar year, per leave kind.
+ * How much leave people have used over a period, per leave kind. The period is usually a calendar
+ * year, but anything can be asked for — a contract's duration, say.
  *
  * Full-day leave counts the working days it covers: days the person's shift has hours, minus holidays.
  * On dates without any shift assignment every day except holidays counts. Hourly leave counts its
@@ -48,18 +49,30 @@ class LeaveUsageService
 
     public function forPerson(int $userId, int $year, ?Carbon $today = null): LeaveUsage
     {
-        $today = ($today ?? Carbon::today())->copy()->startOfDay();
         [$from, $to] = $this->bounds($year);
+
+        return $this->forPeriod($userId, $from, $to, $today);
+    }
+
+    /**
+     * The same count over any period, e.g. the run of an employment contract.
+     *
+     * @param  string  $from  first day, Y-m-d
+     * @param  string  $to  last day, Y-m-d
+     */
+    public function forPeriod(int $userId, string $from, string $to, ?Carbon $today = null): LeaveUsage
+    {
+        $today = ($today ?? Carbon::today())->copy()->startOfDay();
 
         $assignments = array_values($this->userShiftRepository->overlapping($from, $to, [$userId])->all());
         $holidays = $this->holidayRepository->holidaysBetween($from, $to);
 
         $counted = [];
         foreach ($this->leaveRepository->activeForUserBetween($userId, $from, $to) as $leave) {
-            $counted[] = $this->count($leave, $assignments, $holidays, $year, $today);
+            $counted[] = $this->count($leave, $assignments, $holidays, $from, $to, $today);
         }
 
-        return $this->usage($year, $counted);
+        return $this->usage($from, $to, $counted);
     }
 
     /**
@@ -96,10 +109,10 @@ class LeaveUsageService
             }
 
             $counted = array_map(
-                fn (LeaveRequest $leave) => $this->count($leave, $assignmentsByUser[$userId] ?? [], $holidays, $year, $today),
+                fn (LeaveRequest $leave) => $this->count($leave, $assignmentsByUser[$userId] ?? [], $holidays, $from, $to, $today),
                 $leaves,
             );
-            $rows[] = ['user' => $user, 'usage' => $this->usage($year, $counted)];
+            $rows[] = ['user' => $user, 'usage' => $this->usage($from, $to, $counted)];
         }
 
         usort($rows, fn (array $a, array $b) => strcasecmp($a['user']->name, $b['user']->name));
@@ -111,11 +124,11 @@ class LeaveUsageService
      * @param  list<UserShift>  $assignments  the person's assignments
      * @param  array<string, Holiday>  $holidays  keyed by Y-m-d
      */
-    private function count(LeaveRequest $leave, array $assignments, array $holidays, int $year, Carbon $today): CountedLeave
+    private function count(LeaveRequest $leave, array $assignments, array $holidays, string $from, string $to, Carbon $today): CountedLeave
     {
-        [$yearStart, $yearEnd] = $this->bounds($year);
-        $first = Carbon::parse(max($leave->start_date->toDateString(), $yearStart));
-        $last = Carbon::parse(min($leave->end_date->toDateString(), $yearEnd));
+        // Leave can start before the period or end after it; only the part inside counts.
+        $first = Carbon::parse(max($leave->start_date->toDateString(), $from));
+        $last = Carbon::parse(min($leave->end_date->toDateString(), $to));
 
         $days = ['past' => 0, 'future' => 0];
         $minutes = ['past' => 0, 'future' => 0];
@@ -159,7 +172,7 @@ class LeaveUsageService
     /**
      * @param  list<CountedLeave>  $counted
      */
-    private function usage(int $year, array $counted): LeaveUsage
+    private function usage(string $from, string $to, array $counted): LeaveUsage
     {
         $empty = ['taken_days' => 0, 'taken_minutes' => 0, 'booked_days' => 0, 'booked_minutes' => 0, 'pending_days' => 0, 'pending_minutes' => 0];
         $byKind = [];
@@ -186,7 +199,7 @@ class LeaveUsageService
         }
         usort($kinds, fn (LeaveUsageLine $a, LeaveUsageLine $b) => strcasecmp($a->kindName, $b->kindName));
 
-        return new LeaveUsage($year, $kinds, $this->line(null, 'Total', $total), $counted);
+        return new LeaveUsage($from, $to, $kinds, $this->line(null, 'Total', $total), $counted);
     }
 
     /**

@@ -595,6 +595,41 @@ const routes = (sections = []) => {
             ],
         },
         {
+            // Salaries are confidential, so every item here checks its own permission and there is
+            // no self-service view.
+            title: 'Payroll',
+            icon: <Payments />,
+            child: [
+                {
+                    title: 'Contracts',
+                    route: 'payroll.contracts.index',
+                    permission: 'Payroll.Contracts.List Contracts',
+                    icon: <HistoryEduIcon />,
+                },
+                {
+                    // No permission: everyone reaches this to see the slips issued to them. The
+                    // page itself shows other people's only to those who may see them.
+                    title: 'Salary Slips',
+                    route: 'payroll.salary-slips.index',
+                    icon: <ReceiptLongIcon />,
+                },
+                {
+                    // What each person is paid or owes, including loans.
+                    title: 'Staff Allowances',
+                    route: 'payroll.staff-allowances.index',
+                    permission: 'Payroll.Staff Allowances.List Staff Allowances',
+                    icon: <AttachMoney />,
+                },
+                {
+                    // The catalogue the above are picked from.
+                    title: 'Allowances & Deductions',
+                    route: 'payroll.item-types.index',
+                    permission: 'Payroll.Item Types.List Item Types',
+                    icon: <CategoryIcon />,
+                },
+            ],
+        },
+        {
             title: 'User Management',
             permission: 'User Management',
             icon: <ManageAccountsIcon />,

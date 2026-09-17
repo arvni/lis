@@ -44,7 +44,9 @@ class LeaveKindRepository
      */
     public function activeKinds(): Collection
     {
-        return LeaveKind::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']);
+        // is_paid comes along because payroll has to tell unpaid leave apart to deduct it; without
+        // it the attribute reads as null and unpaid leave is mistaken for paid.
+        return LeaveKind::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'is_paid']);
     }
 
     /**

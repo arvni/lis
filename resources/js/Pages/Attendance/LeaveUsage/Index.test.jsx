@@ -28,7 +28,8 @@ const line = (kind, amounts = {}) => ({
 });
 
 const usage = {
-    year: 2026,
+    from: '2026-01-01',
+    to: '2026-12-31',
     total: line('Total', { taken_days: 5, taken_minutes: 120, booked_days: 1, pending_days: 5 }),
     kinds: [
         line('Annual', { taken_days: 5, taken_minutes: 120, booked_days: 1 }),

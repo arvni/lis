@@ -76,6 +76,18 @@ const LeaveKindIndex = () => {
                 ),
             },
             {
+                field: 'is_paid',
+                headerName: 'Pay',
+                flex: 0.4,
+                renderCell: (params) =>
+                    params.value ? (
+                        <Chip label="Paid" size="small" variant="outlined" />
+                    ) : (
+                        // Unpaid leave is deducted on the salary slip, so it is worth spotting.
+                        <Chip label="Unpaid" size="small" color="warning" variant="outlined" />
+                    ),
+            },
+            {
                 field: 'is_active',
                 headerName: 'Status',
                 flex: 0.4,

@@ -4,12 +4,12 @@ namespace App\Providers;
 
 use App\Domains\Attendance\Models\AttendanceDay;
 use App\Domains\Attendance\Models\AttendanceTransaction;
-use App\Domains\Attendance\Policies\AttendanceDayPolicy;
 use App\Domains\Attendance\Models\Holiday;
 use App\Domains\Attendance\Models\LeaveKind;
 use App\Domains\Attendance\Models\LeaveRequest;
 use App\Domains\Attendance\Models\Shift;
 use App\Domains\Attendance\Models\UserShift;
+use App\Domains\Attendance\Policies\AttendanceDayPolicy;
 use App\Domains\Attendance\Policies\AttendanceTransactionPolicy;
 use App\Domains\Attendance\Policies\HolidayPolicy;
 use App\Domains\Attendance\Policies\LeaveKindPolicy;
@@ -19,7 +19,6 @@ use App\Domains\Attendance\Policies\UserShiftPolicy;
 use App\Domains\Billing\Models\DiscountCard;
 use App\Domains\Billing\Models\DiscountPartner;
 use App\Domains\Billing\Models\Invoice;
-use App\Domains\System\Policies\FailedJobPolicy;
 use App\Domains\Billing\Models\Payment;
 use App\Domains\Billing\Models\Statement;
 use App\Domains\Billing\Policies\DiscountCardPolicy;
@@ -36,7 +35,25 @@ use App\Domains\Consultation\Policies\ConsultationPolicy;
 use App\Domains\Consultation\Policies\TimePolicy;
 use App\Domains\Document\Models\Document;
 use App\Domains\Document\Policies\DocumentPolicy;
-use App\Domains\Notification\Policies\NotificationPolicy;
+use App\Domains\Inventory\Models\Item;
+use App\Domains\Inventory\Models\PurchaseRequest;
+use App\Domains\Inventory\Models\StockExportRequest;
+use App\Domains\Inventory\Models\StockTransaction;
+use App\Domains\Inventory\Models\Store;
+use App\Domains\Inventory\Models\Supplier;
+use App\Domains\Inventory\Models\Unit;
+use App\Domains\Inventory\Models\WorkflowTemplate;
+use App\Domains\Inventory\Policies\ItemPolicy;
+use App\Domains\Inventory\Policies\PurchaseRequestApprovalPolicy;
+use App\Domains\Inventory\Policies\PurchaseRequestPolicy;
+use App\Domains\Inventory\Policies\StockExportRequestApprovalPolicy;
+use App\Domains\Inventory\Policies\StockExportRequestPolicy;
+use App\Domains\Inventory\Policies\StockTransactionPolicy;
+use App\Domains\Inventory\Policies\StorePolicy;
+use App\Domains\Inventory\Policies\SupplierPolicy;
+use App\Domains\Inventory\Policies\UnitPolicy;
+use App\Domains\Inventory\Policies\WorkflowTemplatePolicy;
+use App\Domains\Laboratory\Models\ApprovalFlow;
 use App\Domains\Laboratory\Models\BarcodeGroup;
 use App\Domains\Laboratory\Models\ConsentForm;
 use App\Domains\Laboratory\Models\Instruction;
@@ -45,11 +62,8 @@ use App\Domains\Laboratory\Models\RequestForm;
 use App\Domains\Laboratory\Models\SampleType;
 use App\Domains\Laboratory\Models\Section;
 use App\Domains\Laboratory\Models\SectionGroup;
-use App\Domains\Laboratory\Services\SectionLookupService;
-use App\Domains\Shared\Contracts\SectionLookupInterface;
 use App\Domains\Laboratory\Models\Test;
 use App\Domains\Laboratory\Models\TestGroup;
-use App\Domains\Laboratory\Models\ApprovalFlow;
 use App\Domains\Laboratory\Models\Workflow;
 use App\Domains\Laboratory\Policies\ApprovalFlowPolicy;
 use App\Domains\Laboratory\Policies\BarcodeGroupPolicy;
@@ -63,6 +77,18 @@ use App\Domains\Laboratory\Policies\SectionPolicy;
 use App\Domains\Laboratory\Policies\TestGroupPolicy;
 use App\Domains\Laboratory\Policies\TestPolicy;
 use App\Domains\Laboratory\Policies\WorkflowPolicy;
+use App\Domains\Laboratory\Services\SectionLookupService;
+use App\Domains\Monitoring\Models\MonitoringNode;
+use App\Domains\Monitoring\Policies\MonitoringNodePolicy;
+use App\Domains\Notification\Policies\NotificationPolicy;
+use App\Domains\Payroll\Models\EmploymentContract;
+use App\Domains\Payroll\Models\PayrollItem;
+use App\Domains\Payroll\Models\PayrollItemType;
+use App\Domains\Payroll\Models\SalarySlip;
+use App\Domains\Payroll\Policies\EmploymentContractPolicy;
+use App\Domains\Payroll\Policies\PayrollItemPolicy;
+use App\Domains\Payroll\Policies\PayrollItemTypePolicy;
+use App\Domains\Payroll\Policies\SalarySlipPolicy;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\AcceptanceItemState;
@@ -75,38 +101,20 @@ use App\Domains\Reception\Policies\PatientPolicy;
 use App\Domains\Reception\Policies\ReportPolicy;
 use App\Domains\Reception\Policies\SamplePolicy;
 use App\Domains\Reception\Policies\TatAlertRulePolicy;
+use App\Domains\Referrer\Models\CollectRequest;
 use App\Domains\Referrer\Models\Material;
 use App\Domains\Referrer\Models\OrderMaterial;
 use App\Domains\Referrer\Models\Referrer;
 use App\Domains\Referrer\Models\ReferrerOrder;
-use App\Domains\Referrer\Models\CollectRequest;
 use App\Domains\Referrer\Models\SampleCollector;
+use App\Domains\Referrer\Policies\CollectRequestPolicy;
 use App\Domains\Referrer\Policies\MaterialPolicy;
 use App\Domains\Referrer\Policies\OrderMaterialPolicy;
-use App\Domains\Referrer\Policies\ReferrerPolicy;
 use App\Domains\Referrer\Policies\ReferrerOrderPolicy;
-use App\Domains\Referrer\Policies\CollectRequestPolicy;
+use App\Domains\Referrer\Policies\ReferrerPolicy;
 use App\Domains\Referrer\Policies\SampleCollectorPolicy;
-use App\Domains\Monitoring\Models\MonitoringNode;
-use App\Domains\Monitoring\Policies\MonitoringNodePolicy;
-use App\Domains\Inventory\Models\Item;
-use App\Domains\Inventory\Models\Supplier;
-use App\Domains\Inventory\Models\Store;
-use App\Domains\Inventory\Models\StockTransaction;
-use App\Domains\Inventory\Models\PurchaseRequest;
-use App\Domains\Inventory\Models\StockExportRequest;
-use App\Domains\Inventory\Models\Unit;
-use App\Domains\Inventory\Models\WorkflowTemplate;
-use App\Domains\Inventory\Policies\ItemPolicy;
-use App\Domains\Inventory\Policies\SupplierPolicy;
-use App\Domains\Inventory\Policies\StorePolicy;
-use App\Domains\Inventory\Policies\StockTransactionPolicy;
-use App\Domains\Inventory\Policies\PurchaseRequestApprovalPolicy;
-use App\Domains\Inventory\Policies\PurchaseRequestPolicy;
-use App\Domains\Inventory\Policies\StockExportRequestApprovalPolicy;
-use App\Domains\Inventory\Policies\StockExportRequestPolicy;
-use App\Domains\Inventory\Policies\UnitPolicy;
-use App\Domains\Inventory\Policies\WorkflowTemplatePolicy;
+use App\Domains\Shared\Contracts\SectionLookupInterface;
+use App\Domains\System\Policies\FailedJobPolicy;
 use App\Domains\User\Models\Role;
 use App\Domains\User\Models\User;
 use App\Domains\User\Policies\RolePolicy;
@@ -136,9 +144,9 @@ class AppServiceProvider extends ServiceProvider
     {
         DB::listen(function ($query) {
             if ($query->time > 1000) {
-                Log::warning('🚨 Slow Query Detected: ' . $query->sql, [
+                Log::warning('🚨 Slow Query Detected: '.$query->sql, [
                     'bindings' => $query->bindings,
-                    'time' => $query->time
+                    'time' => $query->time,
                 ]);
             }
         });
@@ -152,23 +160,23 @@ class AppServiceProvider extends ServiceProvider
 
         Relation::morphMap([
             'user' => User::class,
-            "role" => Role::class,
-            "document" => Document::class,
-            "patient" => Patient::class,
-            "reporttemplate" => ReportTemplate::class,
-            "acceptance" => Acceptance::class,
-            "acceptanceitem" => AcceptanceItem::class,
-            "acceptanceitemstate" => AcceptanceItemState::class,
-            "report" => Report::class,
-            "referrer" => Referrer::class,
-            "invoice" => Invoice::class,
-            "consultation" => Consultation::class,
-            "consultant" => Consultant::class,
-            "customer" => Customer::class,
-            "referrerOrder" => ReferrerOrder::class,
-            "requestform" => RequestForm::class,
-            "consentform" => ConsentForm::class,
-            "instruction" => Instruction::class
+            'role' => Role::class,
+            'document' => Document::class,
+            'patient' => Patient::class,
+            'reporttemplate' => ReportTemplate::class,
+            'acceptance' => Acceptance::class,
+            'acceptanceitem' => AcceptanceItem::class,
+            'acceptanceitemstate' => AcceptanceItemState::class,
+            'report' => Report::class,
+            'referrer' => Referrer::class,
+            'invoice' => Invoice::class,
+            'consultation' => Consultation::class,
+            'consultant' => Consultant::class,
+            'customer' => Customer::class,
+            'referrerOrder' => ReferrerOrder::class,
+            'requestform' => RequestForm::class,
+            'consentform' => ConsentForm::class,
+            'instruction' => Instruction::class,
         ]);
 
         Gate::policy(User::class, UserPolicy::class);
@@ -188,6 +196,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(LeaveKind::class, LeaveKindPolicy::class);
         Gate::policy(LeaveRequest::class, LeaveRequestPolicy::class);
 
+        Gate::policy(EmploymentContract::class, EmploymentContractPolicy::class);
+        Gate::policy(PayrollItemType::class, PayrollItemTypePolicy::class);
+        Gate::policy(PayrollItem::class, PayrollItemPolicy::class);
+        Gate::policy(SalarySlip::class, SalarySlipPolicy::class);
+
         Gate::policy(SectionGroup::class, SectionGroupPolicy::class);
         Gate::policy(Section::class, SectionPolicy::class);
         Gate::policy(Workflow::class, WorkflowPolicy::class);
@@ -201,7 +214,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Instruction::class, InstructionPolicy::class);
         Gate::policy(Test::class, TestPolicy::class);
 
-
         Gate::policy(Consultation::class, ConsultationPolicy::class);
         Gate::policy(Consultant::class, ConsultantPolicy::class);
         Gate::policy(Time::class, TimePolicy::class);
@@ -213,13 +225,13 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(CollectRequest::class, CollectRequestPolicy::class);
         Gate::policy(SampleCollector::class, SampleCollectorPolicy::class);
 
-        $failedJobPolicy = new FailedJobPolicy();
-        Gate::define('failed-jobs.list',   fn($user) => $failedJobPolicy->viewAny($user));
-        Gate::define('failed-jobs.retry',  fn($user) => $failedJobPolicy->retry($user));
-        Gate::define('failed-jobs.delete', fn($user) => $failedJobPolicy->delete($user));
+        $failedJobPolicy = new FailedJobPolicy;
+        Gate::define('failed-jobs.list', fn ($user) => $failedJobPolicy->viewAny($user));
+        Gate::define('failed-jobs.retry', fn ($user) => $failedJobPolicy->retry($user));
+        Gate::define('failed-jobs.delete', fn ($user) => $failedJobPolicy->delete($user));
 
-        $notificationPolicy = new NotificationPolicy();
-        Gate::define('notifications.manage-whatsapp', fn($user) => $notificationPolicy->manageWhatsapp($user));
+        $notificationPolicy = new NotificationPolicy;
+        Gate::define('notifications.manage-whatsapp', fn ($user) => $notificationPolicy->manageWhatsapp($user));
 
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);
@@ -244,17 +256,17 @@ class AppServiceProvider extends ServiceProvider
         // registered as gate abilities backed by PurchaseRequestApprovalPolicy. The string
         // "Class@method" form is container-resolved, so the policy's workflow-service
         // dependency is injected.
-        Gate::define('purchase-requests.approve-step', PurchaseRequestApprovalPolicy::class . '@approveStep');
-        Gate::define('purchase-requests.reject-step', PurchaseRequestApprovalPolicy::class . '@rejectStep');
-        Gate::define('purchase-requests.delegate-step', PurchaseRequestApprovalPolicy::class . '@delegateStep');
-        Gate::define('purchase-requests.recall', PurchaseRequestApprovalPolicy::class . '@recall');
-        Gate::define('purchase-requests.bulk-approve', PurchaseRequestApprovalPolicy::class . '@bulkApprove');
+        Gate::define('purchase-requests.approve-step', PurchaseRequestApprovalPolicy::class.'@approveStep');
+        Gate::define('purchase-requests.reject-step', PurchaseRequestApprovalPolicy::class.'@rejectStep');
+        Gate::define('purchase-requests.delegate-step', PurchaseRequestApprovalPolicy::class.'@delegateStep');
+        Gate::define('purchase-requests.recall', PurchaseRequestApprovalPolicy::class.'@recall');
+        Gate::define('purchase-requests.bulk-approve', PurchaseRequestApprovalPolicy::class.'@bulkApprove');
 
         // Export request workflow-approver abilities (mirrors the purchase-request setup).
-        Gate::define('export-requests.approve-step', StockExportRequestApprovalPolicy::class . '@approveStep');
-        Gate::define('export-requests.reject-step', StockExportRequestApprovalPolicy::class . '@rejectStep');
-        Gate::define('export-requests.delegate-step', StockExportRequestApprovalPolicy::class . '@delegateStep');
-        Gate::define('export-requests.recall', StockExportRequestApprovalPolicy::class . '@recall');
-        Gate::define('export-requests.bulk-approve', StockExportRequestApprovalPolicy::class . '@bulkApprove');
+        Gate::define('export-requests.approve-step', StockExportRequestApprovalPolicy::class.'@approveStep');
+        Gate::define('export-requests.reject-step', StockExportRequestApprovalPolicy::class.'@rejectStep');
+        Gate::define('export-requests.delegate-step', StockExportRequestApprovalPolicy::class.'@delegateStep');
+        Gate::define('export-requests.recall', StockExportRequestApprovalPolicy::class.'@recall');
+        Gate::define('export-requests.bulk-approve', StockExportRequestApprovalPolicy::class.'@bulkApprove');
     }
 }

@@ -27,7 +27,8 @@ class LeaveUsageResource extends JsonResource
         $usage = $this->resource;
 
         return [
-            'year' => $usage->year,
+            'from' => $usage->from,
+            'to' => $usage->to,
             'total' => self::line($usage->total),
             'kinds' => array_map(self::line(...), $usage->kinds),
             'requests' => array_map(fn (CountedLeave $counted) => [
@@ -41,7 +42,7 @@ class LeaveUsageResource extends JsonResource
                 'end_time' => $counted->leave->end_time !== null ? substr($counted->leave->end_time, 0, 5) : null,
                 'status' => $counted->leave->status->value,
                 'status_label' => $counted->leave->status->label(),
-                // Working days (full-day leave) or minutes (hourly leave) inside the year.
+                // Working days (full-day leave) or minutes (hourly leave) inside the period.
                 'days' => $counted->days(),
                 'minutes' => $counted->minutes(),
             ], $usage->requests),

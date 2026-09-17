@@ -10,7 +10,10 @@ const LeaveKindForm = ({ open, onClose, defaultValue }) => {
         : route('attendance.leave-kinds.store');
 
     // FormProvider resets the form whenever this object changes, so keep it stable across renders.
-    const defaultData = useMemo(() => ({ name: '', is_active: true, ...defaultValue }), [defaultValue]);
+    const defaultData = useMemo(
+        () => ({ name: '', is_paid: true, is_active: true, ...defaultValue }),
+        [defaultValue],
+    );
 
     return (
         <FormProvider
@@ -46,6 +49,23 @@ const FormContent = () => {
                         onChange={handleChange}
                         error={!!errors?.name}
                         helperText={errors?.name || 'e.g. Annual, Sick, Unpaid'}
+                    />
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                name="is_paid"
+                                checked={!!data.is_paid}
+                                onChange={handleChange}
+                                color="success"
+                            />
+                        }
+                        label={
+                            data.is_paid
+                                ? 'Paid — time off of this kind doesn’t reduce pay'
+                                : 'Unpaid — deducted on the salary slip'
+                        }
                     />
                 </Grid>
                 <Grid size={{ xs: 12 }}>

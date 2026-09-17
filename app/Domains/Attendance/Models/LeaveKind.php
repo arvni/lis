@@ -13,6 +13,7 @@ use Illuminate\Support\Carbon;
  *
  * @property int $id
  * @property string $name
+ * @property bool $is_paid
  * @property bool $is_active
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -23,10 +24,12 @@ class LeaveKind extends Model
 
     protected $fillable = [
         'name',
+        'is_paid',
         'is_active',
     ];
 
     protected $casts = [
+        'is_paid' => 'boolean',
         'is_active' => 'boolean',
     ];
 
