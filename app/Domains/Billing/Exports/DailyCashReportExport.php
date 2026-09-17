@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Billing\Exports;
 
 use Illuminate\Support\Collection;
@@ -47,14 +49,15 @@ class DailyCashReportExport implements
      */
     protected function calculateSummary(): void
     {
-        $paid = $this->data->whereIn('payment_method', ['CASH','CARD'])->sum('prepayment');
-        $notPaid = $this->data->where('payment_method', 'CREDIT')->sum('remaining');
-        $transfer = $this->data->where('payment_method', 'TRANSFER')->sum('test_price');
-
+        // The service pre-splits each row's takings by method, so these are sums of
+        // numbers rather than a filter on the joined `payment_method` label — a row
+        // paid part cash part card reads as "CASH, CARD" and would match neither.
         $this->summary = [
-            'paid' => $paid,
-            'not_paid' => $notPaid,
-            'transfer' => $transfer
+            // Cash and card are money in the drawer; transfers are reported apart.
+            'paid'     => (float) $this->data->sum('paid_cash_card'),
+            'transfer' => (float) $this->data->sum('paid_transfer'),
+            // What the day's acceptances still owe, credit included.
+            'not_paid' => (float) $this->data->sum('remaining'),
         ];
     }
 

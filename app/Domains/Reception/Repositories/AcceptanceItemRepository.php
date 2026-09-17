@@ -321,7 +321,9 @@ class AcceptanceItemRepository
     }
 
     /**
-     * Non-service acceptance items in the date range, eager-loaded for the daily cash report.
+     * Acceptance items in the date range, eager-loaded for the daily cash report.
+     * Every type counts, services included — a service is billed money like a test,
+     * so it belongs in the day's takings.
      *
      * @return Collection<int, AcceptanceItem>
      */
@@ -329,11 +331,17 @@ class AcceptanceItemRepository
     {
         return AcceptanceItem::query()
             ->whereBetween("created_at", $dateRange)
-            ->whereHas("test", function ($q) {
-                $q->whereNot("type", TestType::SERVICE);
-            })
+            // These items only discover which acceptances saw activity; the row itself is
+            // built from the acceptance, so nothing here needs the item's own relations.
             // acceptance.invoice: the cash report drops rows whose invoice was cancelled.
-            ->with("test", "patients", "acceptance.patient", "acceptance.payments", "acceptance.referrer", "acceptance.invoice")
+            ->with(
+                "acceptance.patient",
+                "acceptance.payments",
+                "acceptance.referrer",
+                "acceptance.invoice",
+                "acceptance.acceptanceItems.test",
+                "acceptance.acceptanceItems.patients",
+            )
             ->get();
     }
 

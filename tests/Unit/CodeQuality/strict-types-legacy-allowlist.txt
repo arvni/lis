@@ -22,7 +22,6 @@ app/Domains/Billing/Enums/PaymentMethod.php
 app/Domains/Billing/Events/AcceptanceItemPricingEvent.php
 app/Domains/Billing/Events/InvoiceAcceptanceUpdateEvent.php
 app/Domains/Billing/Events/PaymentsAddedEvent.php
-app/Domains/Billing/Exports/DailyCashReportExport.php
 app/Domains/Billing/Exports/InvoicesExport.php
 app/Domains/Billing/Exports/MonthlyStatementExport.php
 app/Domains/Billing/Listeners/CancelInvoiceOnAcceptanceCancelledListener.php
@@ -43,7 +42,6 @@ app/Domains/Billing/Requests/StorePaymentRequest.php
 app/Domains/Billing/Requests/UpdateInvoiceRequest.php
 app/Domains/Billing/Requests/UpdatePaymentRequest.php
 app/Domains/Billing/Services/BillingDashboardService.php
-app/Domains/Billing/Services/DailyCashReportService.php
 app/Domains/Billing/Services/InvoiceComposer.php
 app/Domains/Billing/Services/InvoiceItemSyncService.php
 app/Domains/Billing/Services/InvoiceService.php
