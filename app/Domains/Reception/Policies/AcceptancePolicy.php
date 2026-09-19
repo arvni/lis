@@ -94,7 +94,22 @@ class AcceptancePolicy
         if ($acceptance->invoice_id) {
             return false;
         }
+        // Changing an amount you are not allowed to see would be a blind write,
+        // so editing prices requires being able to read them first.
+        if (! $this->viewFinancials($authUser, $acceptance)) {
+            return false;
+        }
         return $authUser->can("Reception.Acceptances.Edit Item Prices");
+    }
+
+    /**
+     * Determine whether the user can see what an acceptance costs — the item
+     * prices and discounts, the invoice, and the payments against it. Reception
+     * staff who only register patients do not need to see the money.
+     */
+    public function viewFinancials(User $authUser, Acceptance $acceptance): bool
+    {
+        return $authUser->can("Reception.Financials.View");
     }
 
     public function sampleCollection(User $authUser): bool

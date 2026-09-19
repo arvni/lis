@@ -10,10 +10,7 @@ import {
     useMediaQuery,
 } from '@mui/material';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import {
-    ExpandMore as ExpandMoreIcon,
-    Payment as PaymentIcon,
-} from '@mui/icons-material';
+import { ExpandMore as ExpandMoreIcon, Payment as PaymentIcon } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 import { sum } from '@/Services/helper';
 import AddPayment from '@/Pages/Acceptance/Components/AddPayment';
@@ -36,6 +33,7 @@ const PaymentComponent = ({
     acceptanceItems,
     status,
     minAllowablePayment = 0,
+    canCreatePayment = false,
     handleChange,
     data,
     defaultExpanded = true,
@@ -254,6 +252,7 @@ const PaymentComponent = ({
                                 invoice={invoice}
                                 onAddPayment={handleOpenAddPayment}
                                 onPrintReceipt={handlePrintReceipt}
+                                canCreatePayment={canCreatePayment}
                             />
                         </>
                     ) : (

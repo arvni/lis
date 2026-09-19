@@ -51,7 +51,6 @@ class Invoice extends Model
         'owner_type',
         'status',
         'subject',
-        'total_price',
         'discount',
     ];
 

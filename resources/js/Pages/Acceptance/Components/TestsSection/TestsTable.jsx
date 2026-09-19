@@ -32,6 +32,7 @@ const TestsTable = ({
     onPromoteTest,
     showButton = false,
     showTotal = true,
+    showPrices = true,
 }) => {
     const { totalDiscount, totalPrice, hasItems } = useTotalCalculations(tests, panels);
 
@@ -112,8 +113,12 @@ const TestsTable = ({
                             <TableCell>Patient</TableCell>
                             <TableCell>Tags</TableCell>
                             <TableCell>Details</TableCell>
-                            <TableCell align="right">Discount</TableCell>
-                            <TableCell align="right">Price</TableCell>
+                            {showPrices && (
+                                <>
+                                    <TableCell align="right">Discount</TableCell>
+                                    <TableCell align="right">Price</TableCell>
+                                </>
+                            )}
                             {hasActions && <TableCell align="center">Actions</TableCell>}
                         </TableRow>
                     </TableHead>
@@ -129,6 +134,7 @@ const TestsTable = ({
                                 onRestore={onRestorePanel ? () => onRestorePanel(panel.id) : null}
                                 onEject={onEjectPanel ? () => onEjectPanel(panel) : null}
                                 hasSelectionColumn={Boolean(onPromoteTest)}
+                                showPrices={showPrices}
                             />
                         ))}
 
@@ -143,11 +149,12 @@ const TestsTable = ({
                                 onRestore={onRestoreTest ? () => onRestoreTest(test.id) : null}
                                 selected={selectedIds.includes(test.id)}
                                 onSelect={onPromoteTest ? handleSelect : null}
+                                showPrices={showPrices}
                             />
                         ))}
                     </TableBody>
 
-                    {showTotal && (
+                    {showTotal && showPrices && (
                         <TableFooter>
                             <TableRow>
                                 <TableCell colSpan={onPromoteTest ? 9 : 8} align="right">

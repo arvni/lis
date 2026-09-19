@@ -9,6 +9,7 @@ use App\Domains\Reception\Requests\StoreAcceptanceRequest;
 use App\Domains\Reception\Requests\UpdateAcceptanceRequest;
 use App\Domains\Reception\DTOs\AcceptanceDTO;
 use App\Domains\Billing\Models\DiscountCard;
+use App\Domains\Billing\Models\Payment;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\Patient;
 use App\Domains\Reception\Services\AcceptanceService;
@@ -25,6 +26,20 @@ use Inertia\Response;
 
 class AcceptanceController extends Controller
 {
+    /**
+     * Keys holding an amount, or the rule used to derive one.
+     */
+    private const MONEY_KEYS = [
+        'price',
+        'discount',
+        'discounts',
+        'price_type',
+        'extra',
+        'referrer_price',
+        'referrer_price_type',
+        'referrer_extra',
+    ];
+
     public function __construct(private readonly AcceptanceService $acceptanceService,
                                 private readonly SettingRepository $settingRepository)
     {
@@ -124,6 +139,19 @@ class AcceptanceController extends Controller
         }
         $acceptance = $this->acceptanceService->showAcceptance($acceptance);
 
+        $canViewFinancials = Gate::allows("viewFinancials", $acceptance);
+        $groupedItems = $this->acceptanceService->organizeAcceptanceItems($acceptance->acceptanceItems->toArray());
+        $acceptanceItems = $acceptance->acceptanceItems->toArray();
+        $invoice = $acceptance->invoice;
+
+        // Hiding the amounts in the page alone would still ship them in the
+        // Inertia payload, so they leave the server only for those allowed to see them.
+        if (! $canViewFinancials) {
+            $groupedItems = $this->withoutMoney($groupedItems);
+            $acceptanceItems = $this->withoutMoney($acceptanceItems);
+            $invoice = null;
+        }
+
         $data = [
             "acceptance" => array_merge(Arr::except($acceptance->toArray(), [
                 "acceptance_items",
@@ -134,26 +162,66 @@ class AcceptanceController extends Controller
 
             ]),
                 ([
-                    "acceptance_items" => $this->acceptanceService->organizeAcceptanceItems($acceptance->acceptanceItems->toArray()),
+                    "acceptance_items" => $groupedItems,
                     "prescription" => $acceptance->prescription ? [
                         "id" => $acceptance->prescription->hash,
                         'originalName' => $acceptance->prescription->originalName
                     ] : null,
                 ])),
             "patient" => $acceptance->patient,
-            "acceptanceItems" => $acceptance->acceptanceItems,
-            "invoice" => $acceptance->invoice,
-            "minAllowablePayment",
+            "acceptanceItems" => $acceptanceItems,
+            "invoice" => $invoice,
+            // This was a value with no key, so the prop never reached the page and
+            // the receipt button fell back to a 0% threshold.
+            "minAllowablePayment" => $this->settingRepository->getSettingsByClassAndKey('Payment', 'minPayment'),
             "canEdit" => Gate::allows("update", $acceptance),
             "canPrintBarcode" => $acceptance->status === AcceptanceStatus::PROCESSING || $acceptance->status === AcceptanceStatus::REPORTED || $acceptance->status === AcceptanceStatus::WAITING_FOR_ENTERING || $acceptance->status === AcceptanceStatus::POOLING,
             "canCheckStatus" => Gate::allows("checkStatus", $acceptance),
             "canUpdatePriority" => Gate::allows("Reception.Acceptances.Update Priority"),
-            "canEditItemPrices" => Gate::allows("editItemPrices", $acceptance),
+            // Editing prices you are not allowed to see makes no sense, so the
+            // editor is offered only alongside the amounts themselves. The
+            // endpoint's own authorization is unchanged.
+            "canEditItemPrices" => $canViewFinancials && Gate::allows("editItemPrices", $acceptance),
+            "canViewFinancials" => $canViewFinancials,
+            // Seeing the money and taking a payment are separate concerns: a
+            // cashier takes payments, a technician may only look.
+            "canCreatePayment" => $canViewFinancials && Gate::allows("create", Payment::class),
             "maxDiscount" => $this->settingRepository->getSettingsByClassAndKey('Payment', 'maxDiscount'),
             "discountCard" => $this->discountCardSummary($acceptance),
             "canApplyDiscountCard" => Gate::allows("apply", DiscountCard::class),
         ];
         return Inertia::render('Acceptance/Show', $data);
+    }
+
+    /**
+     * Strip every amount out of an items payload.
+     *
+     * Money sits in several shapes inside the tree — on each item, summed onto
+     * its panel, and again on the catalogue entry the item points at — so the
+     * keys are removed wherever they appear rather than at known paths. The
+     * payload is normalised through JSON first because the tree mixes arrays,
+     * objects and collections.
+     */
+    private function withoutMoney(mixed $items): mixed
+    {
+        return $this->stripMoneyKeys(json_decode((string) json_encode($items), true));
+    }
+
+    private function stripMoneyKeys(mixed $data): mixed
+    {
+        if (! is_array($data)) {
+            return $data;
+        }
+
+        $stripped = [];
+        foreach ($data as $key => $value) {
+            if (is_string($key) && in_array($key, self::MONEY_KEYS, true)) {
+                continue;
+            }
+            $stripped[$key] = $this->stripMoneyKeys($value);
+        }
+
+        return $stripped;
     }
 
 

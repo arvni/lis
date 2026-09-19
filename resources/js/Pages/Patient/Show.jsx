@@ -42,6 +42,7 @@ const Show = ({
     canEdit = false,
     canCreateAcceptance = false,
     canCreateConsultation = false,
+    canViewFinancials = false,
     allowedTags = [],
 }) => {
     const { enqueueSnackbar } = useSnackbar();
@@ -82,21 +83,27 @@ const Show = ({
                 count: acceptances?.length,
                 dataKey: 'acceptances',
             },
-            {
-                label: 'Invoices',
-                icon: <ReceiptIcon fontSize="small" />,
-                count: invoices?.length,
-                dataKey: 'invoices',
-            },
-            {
-                label: 'Payments',
-                icon: <PaymentsIcon fontSize="small" />,
-                count: payments?.length,
-                dataKey: 'payments',
-            },
+            // Invoices and Payments are money: both tabs exist only for those
+            // allowed to see it. They sit last, so no other tab index shifts.
+            ...(canViewFinancials
+                ? [
+                      {
+                          label: 'Invoices',
+                          icon: <ReceiptIcon fontSize="small" />,
+                          count: invoices?.length,
+                          dataKey: 'invoices',
+                      },
+                      {
+                          label: 'Payments',
+                          icon: <PaymentsIcon fontSize="small" />,
+                          count: payments?.length,
+                          dataKey: 'payments',
+                      },
+                  ]
+                : []),
             // Consider adding Relatives/PatientMeta to tabs if they should be lazy-loaded too
         ],
-        [documents, consultations, acceptances, invoices, payments],
+        [documents, consultations, acceptances, invoices, payments, canViewFinancials],
     ); // Recalculate counts if data changes
 
     // Actions based on permissions (Fixed navigation for Add Acceptance)
@@ -307,34 +314,38 @@ const Show = ({
                         />
                     )}
                 </TabPanel>
-                {/* Invoices Tab */}
-                <TabPanel value={tabValue} index={4} loading={loadingTabs['invoices']}>
-                    {invoices !== undefined && (
-                        <LoadMore
-                            title="Invoices"
-                            items={invoices || []}
-                            columns={invoiceColumns}
-                            defaultExpanded
-                            loading={loadingTabs['invoices']}
-                            pageSize={5}
-                            emptyMessage="No invoices found for this patient"
-                        />
-                    )}
-                </TabPanel>
-                {/* Payments Tab */}
-                <TabPanel value={tabValue} index={5} loading={loadingTabs['payments']}>
-                    {payments !== undefined && (
-                        <LoadMore
-                            title="Payments"
-                            items={payments || []}
-                            columns={paymentColumns}
-                            defaultExpanded
-                            loading={loadingTabs['payments']}
-                            pageSize={5}
-                            emptyMessage="No payments found for this patient"
-                        />
-                    )}
-                </TabPanel>
+                {canViewFinancials && (
+                    <>
+                        {/* Invoices Tab */}
+                        <TabPanel value={tabValue} index={4} loading={loadingTabs['invoices']}>
+                            {invoices !== undefined && (
+                                <LoadMore
+                                    title="Invoices"
+                                    items={invoices || []}
+                                    columns={invoiceColumns}
+                                    defaultExpanded
+                                    loading={loadingTabs['invoices']}
+                                    pageSize={5}
+                                    emptyMessage="No invoices found for this patient"
+                                />
+                            )}
+                        </TabPanel>
+                        {/* Payments Tab */}
+                        <TabPanel value={tabValue} index={5} loading={loadingTabs['payments']}>
+                            {payments !== undefined && (
+                                <LoadMore
+                                    title="Payments"
+                                    items={payments || []}
+                                    columns={paymentColumns}
+                                    defaultExpanded
+                                    loading={loadingTabs['payments']}
+                                    pageSize={5}
+                                    emptyMessage="No payments found for this patient"
+                                />
+                            )}
+                        </TabPanel>
+                    </>
+                )}
             </Box>
 
             {/* Add Consultation Form Modal */}

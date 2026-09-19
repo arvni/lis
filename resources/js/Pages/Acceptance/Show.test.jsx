@@ -4,6 +4,7 @@ import { router } from '@inertiajs/react';
 import { useSnackbar } from 'notistack';
 import Show from '@/Pages/Acceptance/Show';
 import TestItemsSection from '@/Pages/Acceptance/Show/TestItemsSection';
+import Payment from '@/Pages/Acceptance/Components/Payment';
 
 vi.mock('@inertiajs/react', () => ({
     router: { put: vi.fn() },
@@ -17,7 +18,7 @@ vi.mock('@/Pages/Acceptance/Show/TestItemsSection', () => ({ default: vi.fn(() =
 vi.mock('@/Layouts/AuthenticatedLayout', () => ({ default: () => null }));
 vi.mock('@/Pages/Patient/Components/PatientInfo', () => ({ default: () => null }));
 vi.mock('@/Pages/Acceptance/Components/Prescription', () => ({ default: () => null }));
-vi.mock('@/Pages/Acceptance/Components/Payment', () => ({ default: () => null }));
+vi.mock('@/Pages/Acceptance/Components/Payment', () => ({ default: vi.fn(() => null) }));
 vi.mock('@/Components/PageHeader.jsx', () => ({ default: () => null }));
 vi.mock('@/Components/InlineTagManager', () => ({ default: () => null }));
 vi.mock('@/Pages/Acceptance/Show/StatusChip', () => ({ default: () => null }));
@@ -39,7 +40,7 @@ const panel = { acceptanceItems: [{ id: 42 }] };
 
 let enqueueSnackbar;
 
-const renderShow = () => {
+const renderShow = (props = {}) => {
     render(
         <Show
             acceptance={acceptance}
@@ -48,6 +49,7 @@ const renderShow = () => {
             invoice={null}
             canEdit
             status={null}
+            {...props}
         />,
     );
 
@@ -58,6 +60,28 @@ beforeEach(() => {
     vi.clearAllMocks();
     enqueueSnackbar = vi.fn();
     vi.mocked(useSnackbar).mockReturnValue({ enqueueSnackbar });
+});
+
+describe('Acceptance/Show financial visibility', () => {
+    it('leaves out the payment section when the user cannot see financials', () => {
+        renderShow();
+
+        expect(Payment).not.toHaveBeenCalled();
+    });
+
+    it('renders the payment section once the user can see financials', () => {
+        renderShow({ canViewFinancials: true });
+
+        expect(Payment).toHaveBeenCalled();
+    });
+
+    it('tells the items section whether to show prices', () => {
+        expect(renderShow().canViewFinancials).toBe(false);
+
+        vi.clearAllMocks();
+
+        expect(renderShow({ canViewFinancials: true }).canViewFinancials).toBe(true);
+    });
 });
 
 describe('Acceptance/Show eject panel', () => {

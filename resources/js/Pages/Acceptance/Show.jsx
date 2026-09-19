@@ -30,6 +30,8 @@ const Show = ({
     canCheckStatus,
     canUpdatePriority,
     canEditItemPrices,
+    canViewFinancials = false,
+    canCreatePayment = false,
     maxDiscount = 0,
     discountCard = null,
     canApplyDiscountCard = false,
@@ -221,11 +223,12 @@ const Show = ({
             </Box>
 
             {/* Header with status and basic info */}
-            <SummaryCards totals={totals} />
+            <SummaryCards totals={totals} showFinancials={canViewFinancials} />
             <QuickActions
                 acceptance={acceptance}
                 canEdit={canEdit}
                 canPrintBarcode={canPrintBarcode}
+                canViewFinancials={canViewFinancials}
             />
 
             <Divider sx={{ my: 4 }} />
@@ -261,6 +264,7 @@ const Show = ({
                 expanded={expanded.items}
                 onChange={handleAccordionChange('items')}
                 canEditItemPrices={canEditItemPrices}
+                canViewFinancials={canViewFinancials}
                 maxDiscount={maxDiscount}
                 promotingTests={promotingTests}
                 setPromotingTests={setPromotingTests}
@@ -290,18 +294,22 @@ const Show = ({
                 />
             </Box>
 
-            {/* Payment Information */}
-            <Box sx={{ mt: 2 }}>
-                <Payment
-                    patient={patient}
-                    acceptance={acceptance}
-                    acceptanceItems={acceptanceItems}
-                    invoice={invoice}
-                    status={status}
-                    minAllowablePayment={minAllowablePayment}
-                    defaultExpanded={expanded.payment}
-                />
-            </Box>
+            {/* Payment Information — the invoice and its payments are money, so
+                they are only rendered for those allowed to see them. */}
+            {canViewFinancials && (
+                <Box sx={{ mt: 2 }}>
+                    <Payment
+                        patient={patient}
+                        acceptance={acceptance}
+                        acceptanceItems={acceptanceItems}
+                        invoice={invoice}
+                        status={status}
+                        minAllowablePayment={minAllowablePayment}
+                        canCreatePayment={canCreatePayment}
+                        defaultExpanded={expanded.payment}
+                    />
+                </Box>
+            )}
         </Box>
     );
 };

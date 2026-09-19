@@ -247,6 +247,7 @@ const TestRow = ({
     selected = false,
     onSelect,
     showButton = false,
+    showPrices = true,
 }) => {
     const isDeleted = test?.deleted;
     const testName = test?.method_test?.test?.name;
@@ -419,22 +420,26 @@ const TestRow = ({
                 <DetailsCell details={test?.details} />
             </TableCell>
 
-            {/* Discount */}
-            <TableCell>
-                <Typography
-                    variant="body2"
-                    fontWeight="medium"
-                    color={Number(test.discount) > 0 ? 'success.main' : 'text.primary'}
-                    sx={{ textAlign: 'right' }}
-                >
-                    {test.discount}
-                </Typography>
-            </TableCell>
+            {showPrices && (
+                <>
+                    {/* Discount */}
+                    <TableCell>
+                        <Typography
+                            variant="body2"
+                            fontWeight="medium"
+                            color={Number(test.discount) > 0 ? 'success.main' : 'text.primary'}
+                            sx={{ textAlign: 'right' }}
+                        >
+                            {test.discount}
+                        </Typography>
+                    </TableCell>
 
-            {/* Price */}
-            <TableCell>
-                <PriceDisplay price={test.price} discount={test.discount} />
-            </TableCell>
+                    {/* Price */}
+                    <TableCell>
+                        <PriceDisplay price={test.price} discount={test.discount} />
+                    </TableCell>
+                </>
+            )}
 
             {/* Actions */}
             {(onEdit || onDelete || onRestore || onPromote) && (

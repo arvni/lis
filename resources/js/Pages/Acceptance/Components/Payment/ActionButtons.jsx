@@ -7,9 +7,10 @@ const ActionButtons = ({
     invoice,
     onAddPayment,
     onPrintReceipt,
+    canCreatePayment = false,
 }) => (
     <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-        {isPendingPayment && (
+        {isPendingPayment && canCreatePayment && (
             <Button
                 variant="contained"
                 onClick={onAddPayment}
