@@ -21,7 +21,7 @@ const renderDebt = ({ row }) => {
     );
 };
 
-export function buildColumns({ showPatient, deletePatient, canDelete }) {
+export function buildColumns({ showPatient, deletePatient, canDelete, canViewFinancials = false }) {
     return [
         {
             field: 'id',
@@ -99,14 +99,19 @@ export function buildColumns({ showPatient, deletePatient, canDelete }) {
                 </Stack>
             ),
         },
-        {
-            field: 'debt',
-            headerName: 'Debt',
-            sortable: false,
-            flex: 0.3,
-            display: 'flex',
-            renderCell: renderDebt,
-        },
+        // Debt is money: the column exists only for those allowed to see it.
+        ...(canViewFinancials
+            ? [
+                  {
+                      field: 'debt',
+                      headerName: 'Debt',
+                      sortable: false,
+                      flex: 0.3,
+                      display: 'flex',
+                      renderCell: renderDebt,
+                  },
+              ]
+            : []),
         {
             field: 'created_at',
             headerName: 'Register Date',

@@ -33,6 +33,7 @@ const PanelRow = ({
     onEject,
     hasSelectionColumn = false,
     showButton = false,
+    showPrices = true,
 }) => {
     const [collapsed, setCollapsed] = useState(false);
     const acceptanceItems = panel?.acceptanceItems || [];
@@ -244,24 +245,35 @@ const PanelRow = ({
 
                         {isFirstItem && (
                             <>
-                                <TableCell rowSpan={collapsed ? 1 : acceptanceItems.length}>
-                                    <Typography
-                                        variant="body2"
-                                        fontWeight="medium"
-                                        color={
-                                            Number(panel.discount) > 0
-                                                ? 'success.main'
-                                                : 'text.primary'
-                                        }
-                                        sx={{ textAlign: 'right' }}
-                                    >
-                                        {panel.discount}
-                                    </Typography>
-                                </TableCell>
+                                {showPrices && (
+                                    <>
+                                        <TableCell
+                                            rowSpan={collapsed ? 1 : acceptanceItems.length}
+                                        >
+                                            <Typography
+                                                variant="body2"
+                                                fontWeight="medium"
+                                                color={
+                                                    Number(panel.discount) > 0
+                                                        ? 'success.main'
+                                                        : 'text.primary'
+                                                }
+                                                sx={{ textAlign: 'right' }}
+                                            >
+                                                {panel.discount}
+                                            </Typography>
+                                        </TableCell>
 
-                                <TableCell rowSpan={collapsed ? 1 : acceptanceItems.length}>
-                                    <PriceDisplay price={panel.price} discount={panel.discount} />
-                                </TableCell>
+                                        <TableCell
+                                            rowSpan={collapsed ? 1 : acceptanceItems.length}
+                                        >
+                                            <PriceDisplay
+                                                price={panel.price}
+                                                discount={panel.discount}
+                                            />
+                                        </TableCell>
+                                    </>
+                                )}
 
                                 {(onEdit || onDelete || onRestore || onEject) && (
                                     <TableCell

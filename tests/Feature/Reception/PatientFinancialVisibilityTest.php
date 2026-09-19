@@ -18,7 +18,7 @@ use Tests\TestCase;
 /**
  * The patient pages show the same money the acceptance page does: the list
  * derives a Debt column from per-patient sums, and the show page carries the
- * patient's invoices and payments. Both ride on "View Financials", and as on the
+ * patient's invoices and payments. Both ride on "Reception.Financials.View", and as on the
  * acceptance page the amounts must never reach the browser without it.
  */
 class PatientFinancialVisibilityTest extends TestCase
@@ -29,7 +29,7 @@ class PatientFinancialVisibilityTest extends TestCase
 
     private const VIEW = 'Reception.Patients.View Patient';
 
-    private const FINANCIALS = 'Reception.Acceptances.View Financials';
+    private const FINANCIALS = 'Reception.Financials.View';
 
     private User $registrar;
 

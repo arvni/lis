@@ -24,7 +24,7 @@ use Tests\TestCase;
 
 /**
  * The acceptance page carries what a visit costs. Only holders of
- * "View Financials" may see the item prices, the invoice and its payments, and
+ * "Reception.Financials.View" may see the item prices, the invoice and its payments, and
  * the amounts must not merely be hidden in the page — they must never reach the
  * browser at all, since the Inertia payload is readable by anyone who loads it.
  */
@@ -34,7 +34,7 @@ class AcceptanceFinancialVisibilityTest extends TestCase
 
     private const VIEW = 'Reception.Acceptances.View Acceptance';
 
-    private const FINANCIALS = 'Reception.Acceptances.View Financials';
+    private const FINANCIALS = 'Reception.Financials.View';
 
     /**
      * A price distinctive enough that finding it anywhere in the response proves
@@ -53,7 +53,7 @@ class AcceptanceFinancialVisibilityTest extends TestCase
         $this->registrar = User::factory()->create();
         $this->patient = Patient::create([
             'fullName' => 'Money Patient',
-            'idNo' => 'FIN' . Str::random(6),
+            'idNo' => 'FIN'.Str::random(6),
             'nationality' => 'OM',
             'dateOfBirth' => '1990-01-01',
             'gender' => 'male',
@@ -96,6 +96,23 @@ class AcceptanceFinancialVisibilityTest extends TestCase
                 ->where('invoice.id', $invoice->id)
                 ->has('acceptanceItems.0.price')
                 ->has('acceptance.acceptance_items.tests.0.price'));
+    }
+
+    public function test_taking_a_payment_needs_its_own_permission_on_top_of_seeing_the_money(): void
+    {
+        $acceptance = $this->acceptanceWithPricedItem();
+        $this->invoiceFor($acceptance);
+
+        // Sees the money, but is not a cashier.
+        $this->actingAs($this->userWith([self::VIEW, self::FINANCIALS]))
+            ->get(route('acceptances.show', $acceptance->id))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('canCreatePayment', false));
+
+        $this->actingAs($this->userWith([self::VIEW, self::FINANCIALS, 'Billing.Payments.Create Payment']))
+            ->get(route('acceptances.show', $acceptance->id))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('canCreatePayment', true));
     }
 
     public function test_the_printed_receipt_rides_on_the_same_permission(): void
@@ -186,27 +203,26 @@ class AcceptanceFinancialVisibilityTest extends TestCase
             'owner_id' => $this->patient->id,
             'owner_type' => 'patient',
             'status' => InvoiceStatus::WAITING_FOR_PAYMENT->value,
-            'total_price' => self::PRICE,
             'discount' => 0,
         ]);
 
         $acceptance->update(['invoice_id' => $invoice->id]);
 
-        return $acceptance->refresh();
+        return $invoice;
     }
 
     private function methodTestId(): int
     {
         $test = Test::create([
-            'name' => 'Test ' . Str::random(4),
+            'name' => 'Test '.Str::random(4),
             'fullName' => 'Full Test',
-            'code' => 'T' . uniqid(),
+            'code' => 'T'.uniqid(),
             'type' => TestType::TEST,
             'status' => true,
             'can_merge' => false,
         ]);
         $method = Method::create([
-            'name' => 'Method ' . Str::random(4),
+            'name' => 'Method '.Str::random(4),
             'price' => 0,
             'turnaround_time' => 1,
             'status' => true,

@@ -21,6 +21,12 @@ use Inertia\Response;
 
 class PatientController extends Controller
 {
+    /**
+     * The same permission that reveals the money on an acceptance also reveals
+     * it here: the patient pages show the very same prices, invoices and payments.
+     */
+    private const VIEW_FINANCIALS = "Reception.Financials.View";
+
     public function __construct(private readonly PatientService $patientService)
     {
         $this->middleware("indexProvider")->only("index");
@@ -37,7 +43,23 @@ class PatientController extends Controller
         $stats = $this->patientService->getPatientStats();
         $canDelete = Gate::allows('delete', new Patient());
         $canMerge = Gate::allows('merge', Patient::class);
-        return Inertia::render('Patient/Index', compact("patients", "requestInputs", "stats", "canDelete", "canMerge"));
+        $canViewFinancials = Gate::allows(self::VIEW_FINANCIALS);
+
+        // The list carries the sums the Debt column is derived from; dropping the
+        // column alone would still ship every patient's balance to the browser.
+        if (! $canViewFinancials) {
+            $patients->getCollection()->transform(function (Patient $patient): Patient {
+                unset(
+                    $patient->payments_sum_price,
+                    $patient->acceptance_items_sum_price,
+                    $patient->acceptance_items_sum_discount,
+                );
+
+                return $patient;
+            });
+        }
+
+        return Inertia::render('Patient/Index', compact("patients", "requestInputs", "stats", "canDelete", "canMerge", "canViewFinancials"));
     }
 
     /**
@@ -68,12 +90,23 @@ class PatientController extends Controller
     {
         $this->authorize("view", $patient);
         $data = $this->patientService->getPatientDetails($patient);
+        $canViewFinancials = Gate::allows(self::VIEW_FINANCIALS);
+
+        // Invoices carry their totals and payments carry their amounts, so both
+        // leave the server only for those allowed to see them. The tabs reload
+        // through this same action, so a partial reload cannot fetch them either.
+        if (! $canViewFinancials) {
+            unset($data["invoices"], $data["payments"]);
+            unset($data["stats"]["invoices"], $data["stats"]["payments"]);
+        }
+
         return Inertia::render('Patient/Show', [
             ...$data,
             "allowedTags" => UserService::getAllowedDocumentTags(),
             "canEdit" => Gate::allows("update", $patient),
             "canCreateAcceptance" => Gate::allows("create", Acceptance::class),
-            "canCreateConsultation" => Gate::allows("create", Consultation::class)
+            "canCreateConsultation" => Gate::allows("create", Consultation::class),
+            "canViewFinancials" => $canViewFinancials,
         ]);
     }
 

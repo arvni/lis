@@ -28,6 +28,9 @@ class UpdateAcceptanceItemControllerTest extends TestCase
 
     private const PERMISSION = 'Reception.Acceptances.Edit Item Prices';
 
+    // Editing an item's amounts now also requires being allowed to see them.
+    private const FINANCIALS = 'Reception.Financials.View';
+
     private Patient $patient;
     private int $methodTestId;
 
@@ -51,8 +54,10 @@ class UpdateAcceptanceItemControllerTest extends TestCase
     private function userWithPermission(): User
     {
         $user = User::factory()->create();
-        Permission::findOrCreate(self::PERMISSION);
-        $user->givePermissionTo(self::PERMISSION);
+        foreach ([self::PERMISSION, self::FINANCIALS] as $permission) {
+            Permission::findOrCreate($permission);
+            $user->givePermissionTo($permission);
+        }
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         return $user;

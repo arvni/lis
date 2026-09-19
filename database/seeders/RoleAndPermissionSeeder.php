@@ -253,6 +253,11 @@ class RoleAndPermissionSeeder extends Seeder
                     'Edit Item Prices',
                     'Assign Tag',
                 ],
+                // Seeing what a visit costs: item prices, the invoice, the
+                // payments and the printed receipt, wherever reception shows them.
+                'Financials' => [
+                    'View',
+                ],
                 'TAT' => [
                     'View Dashboard',
                 ],

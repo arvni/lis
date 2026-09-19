@@ -4,18 +4,22 @@ import { Link } from '@inertiajs/react';
 import { Print, PlaylistAddCheck, Science } from '@mui/icons-material';
 import { BarcodeIcon } from 'lucide-react';
 
-const QuickActions = ({ acceptance, canEdit, canPrintBarcode }) => (
+const QuickActions = ({ acceptance, canEdit, canPrintBarcode, canViewFinancials = false }) => (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
-        <Tooltip title="Print Receipt">
-            <Button
-                variant="outlined"
-                startIcon={<Print />}
-                href={route('acceptances.print', acceptance.id)}
-                component={Link}
-            >
-                Print Receipt
-            </Button>
-        </Tooltip>
+        {/* The receipt prints prices and payments, so the button follows the
+            same permission the route enforces rather than 403-ing on click. */}
+        {canViewFinancials && (
+            <Tooltip title="Print Receipt">
+                <Button
+                    variant="outlined"
+                    startIcon={<Print />}
+                    href={route('acceptances.print', acceptance.id)}
+                    component={Link}
+                >
+                    Print Receipt
+                </Button>
+            </Tooltip>
+        )}
         {canEdit && (
             <Tooltip title="Edit Acceptance">
                 <Button

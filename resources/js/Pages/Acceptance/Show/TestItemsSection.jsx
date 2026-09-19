@@ -18,6 +18,7 @@ const TestItemsSection = ({
     expanded,
     onChange,
     canEditItemPrices,
+    canViewFinancials = false,
     maxDiscount,
     promotingTests,
     setPromotingTests,
@@ -81,6 +82,7 @@ const TestItemsSection = ({
                 <TestsTable
                     showButton
                     showTotal={false}
+                    showPrices={canViewFinancials}
                     tests={acceptance?.acceptance_items?.tests || []}
                     panels={acceptance?.acceptance_items?.panels || []}
                     onEjectPanel={onEjectPanel}
@@ -121,6 +123,7 @@ const TestItemsSection = ({
                     patient={patient}
                 />
             )}
+            {canViewFinancials && (
             <Box
                 sx={{
                     mt: 3,
@@ -157,6 +160,7 @@ const TestItemsSection = ({
                     </Grid>
                 </Grid>
             </Box>
+            )}
         </AccordionDetails>
     </Accordion>
 );

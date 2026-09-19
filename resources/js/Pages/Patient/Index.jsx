@@ -13,8 +13,16 @@ import { buildColumns } from './Index/columns';
 
 const Index = () => {
     const { post, setData, data, reset, processing } = useForm();
-    const { patients, status, success, requestInputs, stats, canDelete, canMerge } =
-        usePage().props;
+    const {
+        patients,
+        status,
+        success,
+        requestInputs,
+        stats,
+        canDelete,
+        canMerge,
+        canViewFinancials,
+    } = usePage().props;
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const [statsExpanded, setStatsExpanded] = useState(false);
 
@@ -69,8 +77,8 @@ const Index = () => {
     }, []);
 
     const columns = useMemo(
-        () => buildColumns({ showPatient, deletePatient, canDelete }),
-        [showPatient, deletePatient, canDelete],
+        () => buildColumns({ showPatient, deletePatient, canDelete, canViewFinancials }),
+        [showPatient, deletePatient, canDelete, canViewFinancials],
     );
 
     return (
