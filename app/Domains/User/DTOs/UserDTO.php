@@ -21,8 +21,7 @@ class UserDTO
         public array|string|null $stamp,
         public ?string           $title = null,
         public array             $roles = [],
-        public bool              $isActive = true,
-        public ?string           $attendanceNumber = null
+        public bool              $isActive = true
     )
     {
     }
@@ -35,7 +34,6 @@ class UserDTO
         $data = [
             'name' => $this->name,
             'username' => $this->username,
-            'attendance_number' => $this->attendanceNumber,
             'email' => $this->email,
             'mobile' => $this->mobile,
             "title" => $this->title,

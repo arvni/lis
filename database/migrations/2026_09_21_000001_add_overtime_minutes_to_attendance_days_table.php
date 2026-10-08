@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Domains\Attendance\Enums\AttendanceStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Carbon;
@@ -47,7 +46,9 @@ return new class extends Migration
      */
     private function overtimeOf(object $day): int
     {
-        if (in_array($day->status, [AttendanceStatus::HOLIDAY->value, AttendanceStatus::OFF->value], true)) {
+        // Day-off statuses as stored; literal so the migration doesn't depend on app code (the Attendance
+        // domain has since moved to the HR app).
+        if (in_array($day->status, ['HOLIDAY', 'OFF'], true)) {
             return (int) $day->worked_minutes;
         }
         if ($day->scheduled_start === null || $day->scheduled_end === null) {

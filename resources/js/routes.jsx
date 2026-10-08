@@ -51,13 +51,6 @@ import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import RequestPageIcon from '@mui/icons-material/RequestPage';
 import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import FingerprintIcon from '@mui/icons-material/Fingerprint';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import SensorDoorIcon from '@mui/icons-material/SensorDoor';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import BeachAccessIcon from '@mui/icons-material/BeachAccess';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import DataUsageIcon from '@mui/icons-material/DataUsage';
 import {
     PercentDiamond,
     Stethoscope as Doctor,
@@ -531,101 +524,6 @@ const routes = (sections = []) => {
                     route: 'system.failed-jobs',
                     permission: 'System.Failed Jobs.List Failed Jobs',
                     icon: <BugReport fontSize="small" />,
-                },
-            ],
-        },
-        {
-            // No group permission: everyone can reach Leave Requests; other items check their own.
-            title: 'Attendance',
-            icon: <FingerprintIcon />,
-            child: [
-                {
-                    title: 'Daily Attendance',
-                    route: 'attendance.days.index',
-                    permission: 'Attendance.Daily Attendance.List Attendance',
-                    icon: <EventAvailableIcon />,
-                },
-                {
-                    // Everyone sees their own month; the page offers other people to attendance viewers.
-                    title: 'Calendar',
-                    route: 'attendance.calendar.index',
-                    icon: <CalendarMonthIcon />,
-                },
-                {
-                    title: 'Leave Requests',
-                    route: 'attendance.leave-requests.index',
-                    icon: <BeachAccessIcon />,
-                },
-                {
-                    // Everyone sees their own; the page offers other people and all staff to leave managers.
-                    title: 'Leave Usage',
-                    route: 'attendance.leave-usage.index',
-                    icon: <DataUsageIcon />,
-                },
-                {
-                    title: 'Punches',
-                    route: 'attendance.transactions.index',
-                    permission: 'Attendance.Transactions.List Transactions',
-                    icon: <SensorDoorIcon />,
-                },
-                {
-                    title: 'Shifts',
-                    route: 'attendance.shifts.index',
-                    permission: 'Attendance.Shifts.List Shifts',
-                    icon: <ScheduleIcon />,
-                },
-                {
-                    title: 'Holidays',
-                    route: 'attendance.holidays.index',
-                    permission: 'Attendance.Holidays.List Holidays',
-                    icon: <EventBusyIcon />,
-                },
-                {
-                    title: 'Leave Kinds',
-                    route: 'attendance.leave-kinds.index',
-                    permission: 'Attendance.Leave Kinds.List Leave Kinds',
-                    icon: <CategoryIcon />,
-                },
-                {
-                    title: 'Leave Workflows',
-                    route: 'inventory.workflow-templates.index',
-                    permission: 'Inventory.WorkflowTemplates.List Workflow Templates',
-                    icon: <AccountTreeIcon />,
-                },
-            ],
-        },
-        {
-            // Salaries are confidential, so every item here checks its own permission and there is
-            // no self-service view.
-            title: 'Payroll',
-            icon: <Payments />,
-            child: [
-                {
-                    title: 'Contracts',
-                    route: 'payroll.contracts.index',
-                    permission: 'Payroll.Contracts.List Contracts',
-                    icon: <HistoryEduIcon />,
-                },
-                {
-                    // No permission: everyone reaches this to see the slips issued to them. The
-                    // page itself shows other people's only to those who may see them.
-                    title: 'Salary Slips',
-                    route: 'payroll.salary-slips.index',
-                    icon: <ReceiptLongIcon />,
-                },
-                {
-                    // What each person is paid or owes, including loans.
-                    title: 'Staff Allowances',
-                    route: 'payroll.staff-allowances.index',
-                    permission: 'Payroll.Staff Allowances.List Staff Allowances',
-                    icon: <AttachMoney />,
-                },
-                {
-                    // The catalogue the above are picked from.
-                    title: 'Allowances & Deductions',
-                    route: 'payroll.item-types.index',
-                    permission: 'Payroll.Item Types.List Item Types',
-                    icon: <CategoryIcon />,
                 },
             ],
         },

@@ -161,64 +161,6 @@ class RoleAndPermissionSeeder extends Seeder
                     'List Roles',
                 ],
             ],
-            'Attendance' => [
-                'Shifts' => [
-                    'List Shifts',
-                    'Create Shift',
-                    'Edit Shift',
-                    'Delete Shift',
-                ],
-                'Holidays' => [
-                    'List Holidays',
-                    'Create Holiday',
-                    'Edit Holiday',
-                    'Delete Holiday',
-                ],
-                'Shift Assignments' => [
-                    'Manage Shift Assignments',
-                ],
-                'Transactions' => [
-                    'List Transactions',
-                    'Import Transactions',
-                ],
-                'Daily Attendance' => [
-                    'List Attendance',
-                    'Correct Attendance',
-                    'Export Attendance',
-                ],
-                'Leave Requests' => [
-                    'Manage Leave Requests',
-                ],
-                'Leave Kinds' => [
-                    'List Leave Kinds',
-                    'Manage Leave Kinds',
-                ],
-            ],
-            'Payroll' => [
-                'Contracts' => [
-                    'List Contracts',
-                    'Create Contract',
-                    'Edit Contract',
-                    'Delete Contract',
-                ],
-                'Item Types' => [
-                    'List Item Types',
-                    'Manage Item Types',
-                ],
-                // A person's own allowances and deductions, including loans.
-                'Staff Allowances' => [
-                    'List Staff Allowances',
-                    'Manage Staff Allowances',
-                ],
-                // Preparing a slip and releasing it are separate jobs, so a clerk can work up the
-                // month without also deciding it goes out. Seeing your OWN issued slip needs no
-                // permission at all — that is the point of issuing one.
-                'Salary Slips' => [
-                    'Manage Salary Slips',
-                    'Issue Salary Slips',
-                    'View All Salary Slips',
-                ],
-            ],
             'Sample Collection' => [
                 'Samples' => [
                     'View Sample',
