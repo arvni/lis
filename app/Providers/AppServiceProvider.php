@@ -2,20 +2,6 @@
 
 namespace App\Providers;
 
-use App\Domains\Attendance\Models\AttendanceDay;
-use App\Domains\Attendance\Models\AttendanceTransaction;
-use App\Domains\Attendance\Models\Holiday;
-use App\Domains\Attendance\Models\LeaveKind;
-use App\Domains\Attendance\Models\LeaveRequest;
-use App\Domains\Attendance\Models\Shift;
-use App\Domains\Attendance\Models\UserShift;
-use App\Domains\Attendance\Policies\AttendanceDayPolicy;
-use App\Domains\Attendance\Policies\AttendanceTransactionPolicy;
-use App\Domains\Attendance\Policies\HolidayPolicy;
-use App\Domains\Attendance\Policies\LeaveKindPolicy;
-use App\Domains\Attendance\Policies\LeaveRequestPolicy;
-use App\Domains\Attendance\Policies\ShiftPolicy;
-use App\Domains\Attendance\Policies\UserShiftPolicy;
 use App\Domains\Billing\Models\DiscountCard;
 use App\Domains\Billing\Models\DiscountPartner;
 use App\Domains\Billing\Models\Invoice;
@@ -81,14 +67,6 @@ use App\Domains\Laboratory\Services\SectionLookupService;
 use App\Domains\Monitoring\Models\MonitoringNode;
 use App\Domains\Monitoring\Policies\MonitoringNodePolicy;
 use App\Domains\Notification\Policies\NotificationPolicy;
-use App\Domains\Payroll\Models\EmploymentContract;
-use App\Domains\Payroll\Models\PayrollItem;
-use App\Domains\Payroll\Models\PayrollItemType;
-use App\Domains\Payroll\Models\SalarySlip;
-use App\Domains\Payroll\Policies\EmploymentContractPolicy;
-use App\Domains\Payroll\Policies\PayrollItemPolicy;
-use App\Domains\Payroll\Policies\PayrollItemTypePolicy;
-use App\Domains\Payroll\Policies\SalarySlipPolicy;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\AcceptanceItemState;
@@ -187,19 +165,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Report::class, ReportPolicy::class);
         Gate::policy(Patient::class, PatientPolicy::class);
         Gate::policy(TatAlertRule::class, TatAlertRulePolicy::class);
-
-        Gate::policy(Shift::class, ShiftPolicy::class);
-        Gate::policy(Holiday::class, HolidayPolicy::class);
-        Gate::policy(UserShift::class, UserShiftPolicy::class);
-        Gate::policy(AttendanceTransaction::class, AttendanceTransactionPolicy::class);
-        Gate::policy(AttendanceDay::class, AttendanceDayPolicy::class);
-        Gate::policy(LeaveKind::class, LeaveKindPolicy::class);
-        Gate::policy(LeaveRequest::class, LeaveRequestPolicy::class);
-
-        Gate::policy(EmploymentContract::class, EmploymentContractPolicy::class);
-        Gate::policy(PayrollItemType::class, PayrollItemTypePolicy::class);
-        Gate::policy(PayrollItem::class, PayrollItemPolicy::class);
-        Gate::policy(SalarySlip::class, SalarySlipPolicy::class);
 
         Gate::policy(SectionGroup::class, SectionGroupPolicy::class);
         Gate::policy(Section::class, SectionPolicy::class);

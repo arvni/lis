@@ -17,7 +17,6 @@ use Spatie\Permission\Traits\HasRoles;
  * @property int $id
  * @property string $name
  * @property string|null $username
- * @property string|null $attendance_number HikCentral "Employee ID"; door punches arrive keyed by it
  * @property string $mobile
  * @property string|null $title
  * @property string $email
@@ -46,7 +45,6 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'username',
-        'attendance_number',
         'email',
         'password',
         'mobile',
