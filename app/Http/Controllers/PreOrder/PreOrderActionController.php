@@ -1,0 +1,154 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\PreOrder;
+
+use App\Domains\PreOrder\DTOs\Actor;
+use App\Domains\PreOrder\DTOs\RaiseRequestDTO;
+use App\Domains\PreOrder\Enums\ExceptionType;
+use App\Domains\PreOrder\Exceptions\PreOrderRuleException;
+use App\Domains\PreOrder\Models\PreOrder;
+use App\Domains\PreOrder\Requests\AddPreOrderTestRequest;
+use App\Domains\PreOrder\Requests\AssignPreOrderRequest;
+use App\Domains\PreOrder\Requests\ClosePreOrderRequest;
+use App\Domains\PreOrder\Requests\PreOrderNoteRequest;
+use App\Domains\PreOrder\Requests\PreOrderReasonRequest;
+use App\Domains\PreOrder\Requests\RaisePreOrderRequestRequest;
+use App\Domains\PreOrder\Requests\SetPreOrderMainTestRequest;
+use App\Domains\PreOrder\Services\PreOrderWorkflow;
+use App\Domains\User\Models\User;
+use App\Http\Controllers\Controller;
+use Closure;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+
+/**
+ * BION's stage actions on a pre-order. Each one is authorised by its FormRequest (or the policy),
+ * runs through PreOrderWorkflow, and returns to the page with the rule message when refused.
+ */
+class PreOrderActionController extends Controller
+{
+    public function __construct(private readonly PreOrderWorkflow $workflow) {}
+
+    public function openReview(Request $request, PreOrder $preOrder): RedirectResponse
+    {
+        $this->authorize('review', $preOrder);
+
+        return $this->run(fn () => $this->workflow->openReview($preOrder, $this->actor($request)), 'Review opened.');
+    }
+
+    public function assign(AssignPreOrderRequest $request, PreOrder $preOrder): RedirectResponse
+    {
+        $userId = $request->validated('user_id');
+
+        return $this->run(fn () => $this->workflow->assign($preOrder, $userId ? (int) $userId : null, $this->actor($request)), 'Counsellor updated.');
+    }
+
+    public function setMainTest(SetPreOrderMainTestRequest $request, PreOrder $preOrder): RedirectResponse
+    {
+        return $this->run(fn () => $this->workflow->setMainTest(
+            $preOrder,
+            (int) $request->validated('test_id'),
+            $request->validated('reason'),
+            $this->actor($request),
+        ), 'Main test set.');
+    }
+
+    public function addTest(AddPreOrderTestRequest $request, PreOrder $preOrder): RedirectResponse
+    {
+        return $this->run(fn () => $this->workflow->addTest(
+            $preOrder,
+            (int) $request->validated('test_id'),
+            $request->validated('patient_ref'),
+            (int) ($request->validated('qty') ?? 1),
+            $this->actor($request),
+        ), 'Test added.');
+    }
+
+    public function dropItem(PreOrderReasonRequest $request, PreOrder $preOrder, int $item): RedirectResponse
+    {
+        return $this->run(fn () => $this->workflow->dropItem($preOrder, $item, $request->validated('reason'), $this->actor($request)), 'Test removed.');
+    }
+
+    public function raiseRequest(RaisePreOrderRequestRequest $request, PreOrder $preOrder): RedirectResponse
+    {
+        return $this->run(fn () => $this->workflow->raiseRequest($preOrder, RaiseRequestDTO::fromArray($request->validated()), $this->actor($request)), 'Request sent to the center.');
+    }
+
+    public function closeRequest(PreOrderReasonRequest $request, PreOrder $preOrder, int $number): RedirectResponse
+    {
+        return $this->run(fn () => $this->workflow->closeRequest(
+            $preOrder,
+            $number,
+            (bool) $request->validated('declined', false),
+            $request->validated('reason'),
+            $this->actor($request),
+        ), 'Request closed.');
+    }
+
+    public function confirm(Request $request, PreOrder $preOrder): RedirectResponse
+    {
+        $this->authorize('review', $preOrder);
+
+        return $this->run(fn () => $this->workflow->confirmTests($preOrder, $this->actor($request)), 'Tests confirmed and released.');
+    }
+
+    public function note(PreOrderNoteRequest $request, PreOrder $preOrder): RedirectResponse
+    {
+        $internal = (bool) $request->validated('internal', false);
+
+        return $this->run(
+            fn () => $this->workflow->message($preOrder, $request->validated('body'), $this->actor($request), $internal),
+            $internal ? 'Note saved.' : 'Message sent.',
+        );
+    }
+
+    public function hold(PreOrderReasonRequest $request, PreOrder $preOrder): RedirectResponse
+    {
+        return $this->run(fn () => $this->workflow->hold($preOrder, 'bion_hold', $request->validated('reason'), $this->actor($request)), 'Put on hold.');
+    }
+
+    public function resume(Request $request, PreOrder $preOrder): RedirectResponse
+    {
+        $this->authorize('review', $preOrder);
+
+        return $this->run(fn () => $this->workflow->resume($preOrder, $this->actor($request)), 'Resumed.');
+    }
+
+    public function close(ClosePreOrderRequest $request, PreOrder $preOrder): RedirectResponse
+    {
+        $override = (bool) $request->validated('override', false);
+        if ($override) {
+            $this->authorize('override', $preOrder);
+        }
+
+        return $this->run(fn () => $this->workflow->close(
+            $preOrder,
+            ExceptionType::from($request->validated('type')),
+            $request->validated('reason'),
+            $request->validated('comment'),
+            $this->actor($request),
+            $override,
+        ), 'Pre-order closed.');
+    }
+
+    private function actor(Request $request): Actor
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        return Actor::bion($user);
+    }
+
+    private function run(Closure $action, string $done): RedirectResponse
+    {
+        try {
+            $action();
+        } catch (PreOrderRuleException $e) {
+            return back()->withErrors(['action' => $e->getMessage()]);
+        }
+
+        return back()->with(['success' => true, 'status' => $done]);
+    }
+}

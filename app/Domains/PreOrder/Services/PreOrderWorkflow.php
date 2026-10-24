@@ -145,13 +145,15 @@ class PreOrderWorkflow
         });
     }
 
-    public function assign(PreOrder $preOrder, ?int $userId, string $userName, Actor $actor): PreOrder
+    public function assign(PreOrder $preOrder, ?int $userId, Actor $actor): PreOrder
     {
-        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($userId, $userName, $actor) {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($userId, $actor) {
             $this->expectOpen($preOrder);
-            $this->history($preOrder, HistoryType::DECISION, $actor, body: $userId ? "Assigned to $userName" : 'Unassigned', internal: true);
+            $preOrder = $this->preOrders->update($preOrder, ['assigned_to' => $userId]);
+            $name = $preOrder->load('assignee:id,name')->assignee?->name;
+            $this->history($preOrder, HistoryType::DECISION, $actor, body: $name ? "Assigned to $name" : 'Unassigned', internal: true);
 
-            return $this->preOrders->update($preOrder, ['assigned_to' => $userId]);
+            return $preOrder;
         });
     }
 

@@ -6,9 +6,12 @@ namespace Tests\Feature\PreOrder;
 
 use App\Domains\PreOrder\DTOs\Actor;
 use App\Domains\PreOrder\DTOs\CreatePreOrderDTO;
+use App\Domains\PreOrder\Events\PreOrderActionProcessed;
+use App\Domains\PreOrder\Events\PreOrderChanged;
 use App\Domains\PreOrder\Models\Flow;
 use App\Domains\PreOrder\Models\PreOrder;
 use App\Domains\PreOrder\Services\PreOrderWorkflow;
+use App\Domains\Referrer\Events\ReferrerOrderUpdated;
 use App\Domains\User\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -29,8 +32,9 @@ abstract class PreOrderTestCase extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Webhooks and queued listeners are exercised in their own tests.
-        Event::fake();
+        // Webhooks and queued listeners are exercised in their own tests. Only these events are
+        // faked: model events must still fire (spatie's permission cache relies on them).
+        Event::fake([PreOrderChanged::class, PreOrderActionProcessed::class, ReferrerOrderUpdated::class]);
         $this->workflow = app(PreOrderWorkflow::class);
         $this->counsellor = User::factory()->create(['name' => 'Dr Counsellor']);
         $this->referrerId = $this->referrer('Muscat IVF');
@@ -60,7 +64,7 @@ abstract class PreOrderTestCase extends TestCase
             'price' => $price,
             'price_type' => 'Fix',
             'flow_id' => $flowId,
-            'extra' => json_encode(['preorder' => ['can_be_main' => $canBeMain]]),
+            'preorder' => json_encode(['can_be_main' => $canBeMain]),
             'created_at' => now(),
             'updated_at' => now(),
         ]);

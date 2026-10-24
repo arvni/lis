@@ -24,6 +24,8 @@ use Illuminate\Database\Eloquent\Builder;
  * @property int|null $consent_form_id
  * @property int|null $instruction_id
  * @property int|null $request_form_id
+ * @property int|null $flow_id
+ * @property array{can_be_main?: bool}|null $preorder
  * @property string $name
  * @property string $code
  * @property string $fullName
@@ -60,7 +62,9 @@ class Test extends Model
         "consent_form_id",
         "request_form_id",
         "instruction_id",
-        "can_merge"
+        "can_merge",
+        "flow_id",
+        "preorder",
     ];
 
     /** @var list<string> */
@@ -71,6 +75,7 @@ class Test extends Model
     ];
 
     protected $casts = [
+        "preorder" => "array",
         "status" => "boolean",
         "type" => TestType::class,
         "price" => "decimal:3",
