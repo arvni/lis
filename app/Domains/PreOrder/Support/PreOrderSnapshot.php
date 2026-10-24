@@ -100,6 +100,8 @@ class PreOrderSnapshot
                 'note' => $q->note,
                 'center_reference' => $q->center_reference,
                 'created_at' => $q->created_at?->toIso8601String(),
+                // The PDF, once rendered; downloaded like any other file on the pre-order.
+                'pdf' => $preOrder->documents->first(fn (Document $d) => $d->related_type === 'pre_order_quotation' && (int) $d->related_id === $q->id)?->hash,
                 'lines' => $q->items->map(fn (PreOrderItem $i) => [
                     'id' => $i->id,
                     'test_code' => $i->test->code,

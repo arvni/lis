@@ -8,6 +8,7 @@ use App\Domains\PreOrder\DTOs\Actor;
 use App\Domains\PreOrder\DTOs\QuoteDTO;
 use App\Domains\PreOrder\Enums\FinanceReason;
 use App\Domains\PreOrder\Enums\FinanceStatus;
+use App\Domains\PreOrder\Events\QuotationSent;
 use App\Domains\PreOrder\Exceptions\PreOrderRuleException;
 use App\Domains\PreOrder\Models\PreOrder;
 use App\Domains\PreOrder\Models\PreOrderItem;
@@ -16,6 +17,7 @@ use App\Domains\PreOrder\Models\PreOrderRequest;
 use App\Domains\PreOrder\Repositories\PreOrderRepository;
 use App\Domains\PreOrder\Repositories\QuotationRepository;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Prices a set of test lines into a quotation for the center. Called only from PreOrderWorkflow,
@@ -68,6 +70,7 @@ class QuotationService
         foreach ($items as $item) {
             $this->preOrders->updateItem($item, ['quotation_id' => $quotation->id]);
         }
+        DB::afterCommit(fn () => QuotationSent::dispatch($quotation));
 
         return $quotation;
     }

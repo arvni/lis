@@ -46,7 +46,9 @@ use App\Domains\Referrer\Events\CollectRequestEvent;
 use App\Domains\PreOrder\Events\PreOrderActionProcessed;
 use App\Domains\PreOrder\Events\PreOrderChanged;
 use App\Domains\PreOrder\Events\QuotationDecided;
+use App\Domains\PreOrder\Events\QuotationSent;
 use App\Domains\PreOrder\Listeners\NotifyFinanceDesk;
+use App\Domains\PreOrder\Listeners\StoreQuotationPdf;
 use App\Domains\PreOrder\Listeners\SendPreOrderActionResultWebhook;
 use App\Domains\PreOrder\Listeners\SendPreOrderSnapshotWebhook;
 use App\Domains\PreOrder\Listeners\SyncPreOrderFromReferrerOrder;
@@ -150,6 +152,7 @@ class EventServiceProvider extends ServiceProvider
         Event::listen(PreOrderChanged::class, [SendPreOrderSnapshotWebhook::class, 'handle']);
         Event::listen(PreOrderActionProcessed::class, [SendPreOrderActionResultWebhook::class, 'handle']);
         Event::listen(QuotationDecided::class, [NotifyFinanceDesk::class, 'handle']);
+        Event::listen(QuotationSent::class, [StoreQuotationPdf::class, 'handle']);
         Event::listen(ActivityLogged::class, [LogUserActivityListener::class, 'handle']);
     }
 }

@@ -8,6 +8,7 @@ use App\Domains\PreOrder\DTOs\Actor;
 use App\Domains\PreOrder\DTOs\CreatePreOrderDTO;
 use App\Domains\PreOrder\Events\PreOrderActionProcessed;
 use App\Domains\PreOrder\Events\PreOrderChanged;
+use App\Domains\PreOrder\Events\QuotationSent;
 use App\Domains\PreOrder\Models\Flow;
 use App\Domains\PreOrder\Models\PreOrder;
 use App\Domains\PreOrder\Services\PreOrderWorkflow;
@@ -34,7 +35,7 @@ abstract class PreOrderTestCase extends TestCase
         parent::setUp();
         // Webhooks and queued listeners are exercised in their own tests. Only these events are
         // faked: model events must still fire (spatie's permission cache relies on them).
-        Event::fake([PreOrderChanged::class, PreOrderActionProcessed::class, ReferrerOrderUpdated::class]);
+        Event::fake([PreOrderChanged::class, PreOrderActionProcessed::class, ReferrerOrderUpdated::class, QuotationSent::class]);
         $this->workflow = app(PreOrderWorkflow::class);
         $this->counsellor = User::factory()->create(['name' => 'Dr Counsellor']);
         $this->referrerId = $this->referrer('Muscat IVF');
