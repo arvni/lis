@@ -76,9 +76,7 @@ app/Domains/Document/Enums/DocumentTag.php
 app/Domains/Document/Listeners/DocumentUpdateListener.php
 app/Domains/Document/Models/Document.php
 app/Domains/Document/Policies/DocumentPolicy.php
-app/Domains/Document/Requests/StoreDocumentRequest.php
 app/Domains/Document/Requests/UpdateDocumentRequest.php
-app/Domains/Document/Requests/UploadPublicDocumentRequest.php
 app/Domains/Document/Resources/DocumentResource.php
 app/Domains/Inventory/Enums/AdjustReason.php
 app/Domains/Inventory/Enums/ApprovalStatus.php

@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { FilterCenterFocus, ZoomIn, ZoomOut } from '@mui/icons-material';
 import PropTypes from 'prop-types';
+import sanitizeDocxHtml from '@/Components/sanitizeDocxHtml';
 
 const DOCXViewer = ({ fileUrl, fullScreen = false }) => {
     const [content, setContent] = useState('');
@@ -50,7 +51,7 @@ const DOCXViewer = ({ fileUrl, fullScreen = false }) => {
                 });
 
                 if (isMounted) {
-                    setContent(result.value);
+                    setContent(sanitizeDocxHtml(result.value));
                 }
             } catch (err) {
                 console.error('DOCX Load Error:', err);

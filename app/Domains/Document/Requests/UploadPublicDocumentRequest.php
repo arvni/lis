@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Document\Requests;
 
 use App\Domains\Document\Models\Document;
@@ -16,7 +18,9 @@ class UploadPublicDocumentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,svg,webp', 'max:2048'],
+            // No SVG: these land in public/images/icons and are served straight
+            // from the LIS origin, where an SVG's script would run when opened.
+            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp', 'mimetypes:image/jpeg,image/png,image/webp', 'max:2048'],
         ];
     }
 }
