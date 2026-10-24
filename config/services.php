@@ -68,6 +68,16 @@ return [
         'preorder_upsert_webhook_url' => env('PROVIDER_APP_PREORDER_UPSERT_WEBHOOK_URL', '/webhooks/pre-orders/upsert'),
         'preorder_action_result_webhook_url' => env('PROVIDER_APP_PREORDER_ACTION_RESULT_WEBHOOK_URL', '/webhooks/pre-orders/action-result'),
     ],
+    // Files centers attach to pre-orders. api writes them to this folder (the shared document
+    // storage) and the LIS inspects each one before it enters the document store.
+    'preorder_uploads' => [
+        'incoming' => env('PREORDER_UPLOADS_INCOMING', storage_path('app/private/pre-orders/incoming')),
+    ],
+    // Optional virus scanning of those files with a clamd daemon. Empty host = not used.
+    'clamav' => [
+        'host' => env('CLAMAV_HOST', ''),
+        'port' => (int) env('CLAMAV_PORT', 3310),
+    ],
     'whatsapp'=>[
         'callback-server'=>env('WHATSAPP_CALLBACK_SERVER'),
         'callback-url'=>env('WHATSAPP_CALLBACK_URL','/api/whatsapp-messages/callback'),

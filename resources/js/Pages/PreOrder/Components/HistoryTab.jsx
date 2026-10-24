@@ -7,6 +7,7 @@ const describe = (h, labels) => {
         return `${labels[h.from_stage] ?? 'Created'} → ${labels[h.to_stage] ?? h.to_stage}`;
     if (h.type === 'request') return `Request R${h.request}`;
     if (h.type === 'comment') return 'Message';
+    if (h.type === 'document') return h.request ? `File for R${h.request}` : 'File';
     return h.type.charAt(0).toUpperCase() + h.type.slice(1);
 };
 

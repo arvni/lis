@@ -157,6 +157,7 @@ class AppServiceProvider extends ServiceProvider
             'requestform' => RequestForm::class,
             'consentform' => ConsentForm::class,
             'instruction' => Instruction::class,
+            'preorder' => PreOrder::class,
         ]);
 
         Gate::policy(User::class, UserPolicy::class);

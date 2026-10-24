@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\PreOrder\Services;
 
+use App\Domains\Document\Enums\DocumentTag;
+use App\Domains\PreOrder\Adapters\DocumentAdapter;
 use App\Domains\PreOrder\Adapters\LaboratoryAdapter;
 use App\Domains\PreOrder\Adapters\ReferrerAdapter;
 use App\Domains\PreOrder\DTOs\Actor;
@@ -27,6 +29,7 @@ use App\Domains\PreOrder\Models\PreOrderRequest;
 use App\Domains\PreOrder\Repositories\FlowRepository;
 use App\Domains\PreOrder\Repositories\PreOrderRepository;
 use App\Domains\PreOrder\Support\FlowStages;
+use App\Domains\PreOrder\Support\InspectedUpload;
 use App\Domains\PreOrder\Support\LinkedOrder;
 use Closure;
 use Illuminate\Support\Facades\DB;
@@ -48,6 +51,7 @@ class PreOrderWorkflow
         private readonly FlowRepository $flows,
         private readonly LaboratoryAdapter $laboratory,
         private readonly ReferrerAdapter $referrerOrders,
+        private readonly DocumentAdapter $documents,
     ) {}
 
     // ---------------------------------------------------------------- center
@@ -371,6 +375,28 @@ class PreOrderWorkflow
                 throw new PreOrderRuleException('Only BION can write internal notes.');
             }
             $this->history($preOrder, HistoryType::COMMENT, $actor, body: $body, internal: $internal);
+
+            return $this->preOrders->update($preOrder, []);
+        });
+    }
+
+    /**
+     * A file the center attached, already inspected. Optionally tied to an open request, so BION
+     * sees which question it answers; the request itself is answered separately.
+     */
+    public function addDocument(PreOrder $preOrder, InspectedUpload $upload, string $name, DocumentTag $tag, ?int $requestNumber, Actor $actor): PreOrder
+    {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($upload, $name, $tag, $requestNumber, $actor) {
+            $this->expectOpen($preOrder);
+            if ($requestNumber !== null && ! $this->preOrders->openRequests($preOrder)->contains('number', $requestNumber)) {
+                throw new PreOrderRuleException("Request R{$requestNumber} is not open.");
+            }
+            $document = $this->documents->store($preOrder, $upload, $name, $tag);
+            $this->history($preOrder, HistoryType::DOCUMENT, $actor, body: $document->originalName, meta: array_filter([
+                'document' => $document->hash,
+                'tag' => $tag->value,
+                'request' => $requestNumber,
+            ]));
 
             return $this->preOrders->update($preOrder, []);
         });

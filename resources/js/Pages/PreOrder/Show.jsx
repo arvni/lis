@@ -9,6 +9,7 @@ import RequestsTab from './Components/RequestsTab';
 import ThreadTab from './Components/ThreadTab';
 import OrdersTab from './Components/OrdersTab';
 import HistoryTab from './Components/HistoryTab';
+import DocumentsTab from './Components/DocumentsTab';
 
 const Show = () => {
     const { preOrder, errors, status, success } = usePage().props;
@@ -46,6 +47,7 @@ const Show = () => {
                         </Badge>
                     }
                 />
+                <Tab value="documents" label={`Files (${preOrder.documents.length})`} />
                 <Tab value="messages" label="Messages" />
                 <Tab value="notes" label="Internal notes" />
                 <Tab value="orders" label="Orders" />
@@ -55,6 +57,7 @@ const Show = () => {
                 {tab === 'case' && <CaseTab preOrder={preOrder} />}
                 {tab === 'tests' && <TestsTab preOrder={preOrder} />}
                 {tab === 'requests' && <RequestsTab preOrder={preOrder} />}
+                {tab === 'documents' && <DocumentsTab preOrder={preOrder} />}
                 {tab === 'messages' && <ThreadTab preOrder={preOrder} />}
                 {tab === 'notes' && <ThreadTab preOrder={preOrder} internal />}
                 {tab === 'orders' && <OrdersTab preOrder={preOrder} />}

@@ -93,13 +93,13 @@ class PreOrderInboxTest extends PreOrderTestCase
         $this->assertSame(1, $preOrder->refresh()->version, 'failed actions leave the pre-order untouched');
     }
 
-    public function test_uploads_stay_closed_until_the_file_checks_ship(): void
+    public function test_an_upload_naming_anything_but_a_generated_file_is_refused(): void
     {
         $preOrder = $this->draft([$this->test('NIPT', 'nipt')]);
-        $action = $this->process($this->action('upload_document', ['file' => 'x.pdf'], $preOrder->id));
+        $action = $this->process($this->action('upload_document', ['file' => '../../.env', 'name' => 'x.pdf', 'tag' => 'DOCUMENT'], $preOrder->id));
 
         $this->assertSame(ActionStatus::FAILED, $action->status);
-        $this->assertSame('File uploads are not available yet.', $action->error);
+        $this->assertSame(1, $preOrder->refresh()->version);
     }
 
     public function test_cancel_and_hold_from_the_center(): void
