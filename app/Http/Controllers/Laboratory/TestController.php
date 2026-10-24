@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Laboratory;
 
+use App\Domains\Laboratory\Adapters\PreOrderAdapter;
 use App\Domains\Laboratory\DTOs\TestDTO;
 use App\Domains\Laboratory\Models\Test;
 use App\Domains\Laboratory\Requests\StoreTestRequest;
@@ -17,8 +18,10 @@ use Inertia\Response;
 
 class TestController extends Controller
 {
-    public function __construct(private readonly TestService $testService)
-    {
+    public function __construct(
+        private readonly TestService $testService,
+        private readonly PreOrderAdapter $preOrderAdapter,
+    ) {
         $this->middleware("indexProvider")->only("index");
     }
 
@@ -31,7 +34,9 @@ class TestController extends Controller
         $this->authorize("viewAny", Test::class);
         $requestInputs = $request->all();
         $tests = $this->testService->listTests($requestInputs);
-        return Inertia::render('Test/Index', compact("tests", "requestInputs"));
+        // Only users who may switch tests on for pre-orders need the flow list.
+        $flows = $request->user()?->can('PreOrders.Flows.Manage') ? $this->preOrderAdapter->activeFlows() : [];
+        return Inertia::render('Test/Index', compact("tests", "requestInputs", "flows"));
     }
 
     /**

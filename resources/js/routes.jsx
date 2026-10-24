@@ -471,6 +471,12 @@ const routes = (sections = []) => {
             ],
         },
         {
+            title: 'Pre-orders',
+            icon: <AccountTreeIcon />,
+            route: 'pre-orders.index',
+            permission: 'PreOrders.Cases.List',
+        },
+        {
             title: 'Referrers',
             route: 'referrers.index',
             permission: 'Referrer.List Referrers',

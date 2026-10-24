@@ -27,15 +27,13 @@ class LaboratoryAdapter
 
     public function flowIdOf(Test $test): ?int
     {
-        $flowId = $test->getAttribute('flow_id');
-
-        return $flowId === null ? null : (int) $flowId;
+        return $test->flow_id;
     }
 
     /** A test that only rides along (e.g. a parental karyotype) can't set the flow. */
     public function canBeMain(Test $test): bool
     {
-        return (bool) data_get($test->extra, 'preorder.can_be_main', true);
+        return (bool) ($test->preorder['can_be_main'] ?? true);
     }
 
     /**

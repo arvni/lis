@@ -88,6 +88,8 @@ use App\Domains\Referrer\Models\SampleCollector;
 use App\Domains\Referrer\Policies\CollectRequestPolicy;
 use App\Domains\Referrer\Policies\MaterialPolicy;
 use App\Domains\Referrer\Policies\OrderMaterialPolicy;
+use App\Domains\PreOrder\Models\PreOrder;
+use App\Domains\PreOrder\Policies\PreOrderPolicy;
 use App\Domains\Referrer\Policies\ReferrerOrderPolicy;
 use App\Domains\Referrer\Policies\ReferrerPolicy;
 use App\Domains\Referrer\Policies\SampleCollectorPolicy;
@@ -158,6 +160,7 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         Gate::policy(User::class, UserPolicy::class);
+        Gate::policy(PreOrder::class, PreOrderPolicy::class);
         Gate::policy(Role::class, RolePolicy::class);
 
         Gate::policy(Acceptance::class, AcceptancePolicy::class);

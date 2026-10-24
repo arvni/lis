@@ -11,6 +11,9 @@ import { Description as ExcelIcon } from '@mui/icons-material';
 import { Head, router, usePage } from '@inertiajs/react';
 import PageHeader from '@/Components/PageHeader.jsx';
 import AddIcon from '@mui/icons-material/Add';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import { Chip } from '@mui/material';
+import PreOrderSettingsDialog from './Components/PreOrderSettingsDialog';
 
 const TestType = {
     1: 'Test',
@@ -54,6 +57,21 @@ const Index = () => {
             flex: 0.1,
         },
         {
+            field: 'flow_id',
+            headerName: 'Pre-order',
+            sortable: false,
+            flex: 0.25,
+            renderCell: ({ row }) =>
+                row.flow_id ? (
+                    <Chip
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        label={flowNames[row.flow_id] ?? 'On'}
+                    />
+                ) : null,
+        },
+        {
             field: 'acceptance_items_count',
             headerName: 'Acceptance No',
             type: 'number',
@@ -76,6 +94,16 @@ const Index = () => {
                         showInMenu
                     />,
                 ];
+                if (canManagePreOrders)
+                    cols.push(
+                        <GridActionsCellItem
+                            key="PreOrder"
+                            icon={<AccountTreeIcon />}
+                            label="Pre-order settings"
+                            showInMenu
+                            onClick={() => setPreOrderTest(params.row)}
+                        />,
+                    );
                 if (!params.row.acceptance_items_count)
                     cols.push(
                         <GridActionsCellItem
@@ -89,7 +117,10 @@ const Index = () => {
             },
         },
     ];
-    const { tests, status, success, requestInputs } = usePage().props;
+    const { tests, status, success, requestInputs, flows = [], auth } = usePage().props;
+    const canManagePreOrders = auth.permissions.includes('PreOrders.Flows.Manage');
+    const flowNames = Object.fromEntries(flows.map((f) => [f.id, f.name]));
+    const [preOrderTest, setPreOrderTest] = useState(null);
     const [test, setTest] = useState(null);
     const [openDeleteForm, setOpenDeleteForm] = useState(false);
     const editTest = (id) => () => router.visit(route('tests.edit', id));
@@ -160,6 +191,11 @@ const Index = () => {
                     agreeCB={handleDestroy}
                     disAgreeCB={handleCloseDeleteForm}
                     openDelete={openDeleteForm}
+                />
+                <PreOrderSettingsDialog
+                    test={preOrderTest}
+                    flows={flows}
+                    onClose={() => setPreOrderTest(null)}
                 />
             </TableLayout>
         </>

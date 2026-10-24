@@ -217,4 +217,17 @@ readonly class TestService
         if (count($reportTemplates))
             $test->reportTemplates()->sync(Arr::pluck($reportTemplates, "id"));
     }
+
+    /**
+     * Switch a test on for pre-orders with a flow, or off with none. Open pre-orders keep the flow
+     * they copied, so this only affects new ones. Kept apart from updateTest() so a normal test
+     * save never touches these fields.
+     */
+    public function updatePreOrderSettings(Test $test, ?int $flowId, bool $canBeMain): Test
+    {
+        return $this->testRepository->updateTest($test, [
+            'flow_id' => $flowId,
+            'preorder' => [...($test->preorder ?? []), 'can_be_main' => $canBeMain],
+        ]);
+    }
 }

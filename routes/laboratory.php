@@ -30,6 +30,7 @@ use App\Http\Controllers\Laboratory\TestController;
 use App\Http\Controllers\Laboratory\TestGroupController;
 use App\Http\Controllers\Laboratory\ApprovalFlowController;
 use App\Http\Controllers\Laboratory\WorkflowController;
+use App\Http\Controllers\Laboratory\UpdateTestPreOrderSettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(["prefix" => "laboratory"], function () {
@@ -47,6 +48,7 @@ Route::group(["prefix" => "laboratory"], function () {
         ->name("reportTemplates.export-parameters");
     Route::get("tests/export", ExportTestsController::class)->name("tests.export");
     Route::resource("tests", TestController::class)->except("show");
+    Route::put("tests/{test}/pre-order", UpdateTestPreOrderSettingsController::class)->name("tests.pre-order");
     Route::resource("requestForms", RequestFormController::class)->except("edit");
     Route::resource("consentForms", ConsentFormController::class)->except("edit", "show");
     Route::resource("instructions", InstructionController::class)->except("edit", "show");
