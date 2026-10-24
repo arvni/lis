@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\PreOrder;
 
+use App\Domains\PreOrder\Enums\FinanceStatus;
 use App\Domains\PreOrder\Enums\PreOrderStage;
 use App\Domains\PreOrder\Models\PreOrder;
 use App\Domains\PreOrder\Services\PreOrderService;
@@ -35,13 +36,28 @@ class PreOrderController extends Controller
         return Inertia::render('PreOrder/Index', compact('preOrders', 'requestInputs', 'stages'));
     }
 
-    public function show(PreOrder $preOrder): Response
+    public function show(Request $request, PreOrder $preOrder): Response
     {
         $this->authorize('view', $preOrder);
 
         return Inertia::render('PreOrder/Show', [
             'preOrder' => $this->preOrderService->detail($preOrder),
+            'canQuote' => (bool) $request->user()?->can('quote', $preOrder),
         ]);
+    }
+
+    /** The finance desk: every quotation, open ones first. */
+    public function finance(Request $request): Response
+    {
+        $this->authorize('quote', PreOrder::class);
+        $requestInputs = $request->only(['filters', 'page', 'pageSize']);
+        $quotations = $this->preOrderService->financeDesk([
+            ...(array) ($requestInputs['filters'] ?? []),
+            'pageSize' => (int) ($requestInputs['pageSize'] ?? 25),
+        ]);
+        $statuses = array_map(fn (FinanceStatus $s) => ['value' => $s->value, 'label' => $s->label()], FinanceStatus::cases());
+
+        return Inertia::render('PreOrder/Finance', compact('quotations', 'requestInputs', 'statuses'));
     }
 
     public function document(PreOrder $preOrder, string $hash): BinaryFileResponse

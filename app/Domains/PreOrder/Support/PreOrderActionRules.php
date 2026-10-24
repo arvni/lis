@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\PreOrder\Support;
 
 use App\Domains\PreOrder\Adapters\DocumentAdapter;
+use App\Domains\PreOrder\Enums\FinanceDecision;
 use App\Domains\PreOrder\Enums\PreOrderActionType;
 use App\Domains\PreOrder\Enums\StartMode;
 use Illuminate\Validation\Rule;
@@ -36,7 +37,10 @@ final class PreOrderActionRules
                 'tests.*.test_id' => ['required', 'integer'],
                 'tests.*.patient_ref' => ['nullable', 'string', 'max:64'],
                 'tests.*.qty' => ['nullable', 'integer', 'min:1', 'max:20'],
-                'scope' => ['nullable', 'array'],
+                // Answers per test: {test_id: {key: value}}, checked against the test's questions by the finance rules.
+                'scope' => ['nullable', 'array', 'max:30'],
+                'scope.*' => ['array', 'max:10'],
+                'scope.*.*' => ['nullable', 'max:64'],
                 'clinical' => ['nullable', 'array'],
                 'submit' => ['nullable', 'boolean'],
             ],
@@ -59,6 +63,15 @@ final class PreOrderActionRules
                 'name' => ['required', 'string', 'max:255'],
                 'tag' => ['required', Rule::in(DocumentAdapter::centerTagValues())],
                 'request' => ['nullable', 'integer', 'min:1'],
+            ],
+            PreOrderActionType::DECIDE_FINANCE => [
+                'quotation' => ['required', 'string', 'max:32'],
+                'decision' => ['required', Rule::enum(FinanceDecision::class)],
+                // The lines kept on a partial approval; the workflow checks they belong to the quotation.
+                'items' => ['nullable', 'required_if:decision,partial', 'array', 'max:50'],
+                'items.*' => ['integer', 'distinct'],
+                'note' => ['nullable', 'required_if:decision,reject', 'string', 'max:2000'],
+                'center_reference' => ['nullable', 'string', 'max:64'],
             ],
             default => [],
         };

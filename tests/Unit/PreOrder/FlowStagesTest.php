@@ -45,7 +45,7 @@ class FlowStagesTest extends TestCase
 
     /** @param  array<string, mixed>  $flow */
     #[DataProvider('flows')]
-    public function test_in_phase_one_every_flow_runs_the_core_path_only(array $flow): void
+    public function test_until_quoted_and_before_batches_every_flow_runs_the_core_path(array $flow): void
     {
         $preOrder = new PreOrder(['flow_stages' => $flow['stages']]);
 

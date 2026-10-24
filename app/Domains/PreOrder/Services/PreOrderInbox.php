@@ -7,6 +7,7 @@ namespace App\Domains\PreOrder\Services;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\PreOrder\DTOs\Actor;
 use App\Domains\PreOrder\DTOs\CreatePreOrderDTO;
+use App\Domains\PreOrder\DTOs\FinanceDecisionDTO;
 use App\Domains\PreOrder\Enums\ExceptionType;
 use App\Domains\PreOrder\Enums\PreOrderActionType as Type;
 use App\Domains\PreOrder\Events\PreOrderActionProcessed;
@@ -98,7 +99,8 @@ class PreOrderInbox
             Type::RESUME => $this->workflow->resume($preOrder, $actor),
             Type::CANCEL => $this->workflow->close($preOrder, ExceptionType::CANCELLED, $payload['reason'], $payload['comment'] ?? null, $actor),
             Type::UPLOAD_DOCUMENT => $this->upload($preOrder, $payload, $actor),
-            Type::DECIDE_FINANCE, Type::ADD_BATCH, Type::CLOSE_BATCHES => throw new PreOrderRuleException('This action is not available yet.'),
+            Type::DECIDE_FINANCE => $this->workflow->decideFinance($preOrder, FinanceDecisionDTO::fromArray($payload), $actor),
+            Type::ADD_BATCH, Type::CLOSE_BATCHES => throw new PreOrderRuleException('This action is not available yet.'),
         };
     }
 

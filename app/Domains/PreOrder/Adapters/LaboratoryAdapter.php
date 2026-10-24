@@ -37,9 +37,19 @@ class LaboratoryAdapter
     }
 
     /**
+     * The questions a center answers for this test, and which answers raise the price.
+     *
+     * @return list<array{key: string, label: string, type: string, needs_finance: bool, threshold: int|null}>
+     */
+    public function scopeFields(Test $test): array
+    {
+        return array_values($test->preorder['scope'] ?? []);
+    }
+
+    /**
      * The catalogue price for this center: its referrer price when one is set, otherwise the
-     * list price. Only fixed prices are used; formula and conditional prices need the
-     * quotation editor (phase 2), so they stay null here rather than guessed.
+     * list price. Only fixed prices are used; a formula or conditional price stays null here
+     * rather than guessed, and BION's finance team prices that line on the quotation.
      */
     public function unitPrice(Test $test, int $referrerId): ?string
     {

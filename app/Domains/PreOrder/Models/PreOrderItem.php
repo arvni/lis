@@ -13,7 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * One test line. It doubles as the quotation line once finance arrives in phase 2.
+ * One test line. It doubles as the quotation line: quotation_id ties it to the finance record
+ * that priced it.
  *
  * @property int $id
  * @property int $pre_order_id
@@ -24,6 +25,7 @@ use Illuminate\Support\Carbon;
  * @property Side $added_by
  * @property ItemStatus $status
  * @property int|null $request_id
+ * @property int|null $quotation_id
  * @property string|null $release_key
  * @property ReleasePurpose|null $release_purpose
  * @property Carbon|null $created_at
@@ -33,7 +35,7 @@ class PreOrderItem extends Model
 {
     protected $fillable = [
         'pre_order_id', 'test_id', 'patient_ref', 'qty', 'unit_price', 'added_by', 'status',
-        'request_id', 'release_key', 'release_purpose',
+        'request_id', 'quotation_id', 'release_key', 'release_purpose',
     ];
 
     protected $casts = [
@@ -60,5 +62,17 @@ class PreOrderItem extends Model
     public function request(): BelongsTo
     {
         return $this->belongsTo(PreOrderRequest::class, 'request_id');
+    }
+
+    /** @return BelongsTo<PreOrderQuotation, $this> */
+    public function quotation(): BelongsTo
+    {
+        return $this->belongsTo(PreOrderQuotation::class, 'quotation_id');
+    }
+
+    /** qty × unit price; null while the line has no price. */
+    public function lineTotal(): ?string
+    {
+        return $this->unit_price === null ? null : bcmul((string) $this->unit_price, (string) $this->qty, 3);
     }
 }

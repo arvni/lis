@@ -13,6 +13,8 @@ enum ExceptionType: string
 
     case HOLD_CENTER = 'hold_center';
     case HOLD_BION = 'hold_bion';
+    /** The center rejected the quotation, or it expired. BION sends a new one or cancels. */
+    case FINANCE_REJECTED = 'finance_rejected';
     case NOT_ELIGIBLE = 'not_eligible';
     case NOT_PROCEEDING = 'not_proceeding';
     case CANCELLED = 'cancelled';

@@ -32,6 +32,24 @@ class RaisePreOrderRequestRequest extends FormRequest
             'needs.samples.*.count' => ['required', 'integer', 'min:1', 'max:20'],
             'needs.documents' => ['nullable', 'array', 'max:10'],
             'needs.documents.*' => ['string', 'max:64'],
+            // Additional tests, for a request of type test.
+            'tests' => ['nullable', 'required_if:types.*,test', 'array', 'max:10'],
+            'tests.*.test_id' => ['required', 'integer', 'exists:tests,id', 'distinct'],
+            'tests.*.patient_ref' => ['nullable', 'string', 'max:64'],
+            'tests.*.qty' => ['nullable', 'integer', 'min:1', 'max:20'],
+            // Only for a test the catalogue can't price; the workflow refuses it otherwise.
+            'tests.*.unit_price' => ['nullable', 'numeric', 'min:0', 'max:999999', $this->financeOnly()],
+            'retest' => ['boolean'],
+            'discount' => ['nullable', 'numeric', 'min:0', 'max:999999', $this->financeOnly()],
         ];
+    }
+
+    private function financeOnly(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail): void {
+            if ($value !== null && ! $this->user()?->can('quote', $this->route('preOrder'))) {
+                $fail('Only the finance team can set prices or discounts.');
+            }
+        };
     }
 }
