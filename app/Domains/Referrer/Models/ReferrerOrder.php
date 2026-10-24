@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property int|null $acceptance_id
  * @property int|null $patient_id
  * @property int $referrer_id
+ * @property int|null $pre_order_id
  * @property int|null $collect_request_id
  * @property int|null $user_id
  * @property string $order_id
@@ -48,6 +49,7 @@ class ReferrerOrder extends Model
         "received_at",
         "patient_id",
         "acceptance_id",
+        "pre_order_id",
     ];
 
     protected $casts = [
