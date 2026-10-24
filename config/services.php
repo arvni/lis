@@ -65,6 +65,8 @@ return [
         'acceptance_webhook_url' => env('PROVIDER_APP_ACCEPTANCE_WEBHOOK_URL', '/webhooks/orders/import'),
         'acceptance_update_webhook_url' => env('PROVIDER_APP_ACCEPTANCE_UPDATE_WEBHOOK_URL', '/orders/webhook/update'),
         'patient_webhook_url' => env('PROVIDER_APP_PATIENT_WEBHOOK_URL', '/patients/webhook'),
+        'preorder_upsert_webhook_url' => env('PROVIDER_APP_PREORDER_UPSERT_WEBHOOK_URL', '/webhooks/pre-orders/upsert'),
+        'preorder_action_result_webhook_url' => env('PROVIDER_APP_PREORDER_ACTION_RESULT_WEBHOOK_URL', '/webhooks/pre-orders/action-result'),
     ],
     'whatsapp'=>[
         'callback-server'=>env('WHATSAPP_CALLBACK_SERVER'),

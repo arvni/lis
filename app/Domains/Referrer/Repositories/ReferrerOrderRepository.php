@@ -76,4 +76,14 @@ class ReferrerOrderRepository
             }
         }
     }
+
+    /**
+     * The orders a pre-order released, oldest first.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, ReferrerOrder>
+     */
+    public function forPreOrder(int $preOrderId): \Illuminate\Database\Eloquent\Collection
+    {
+        return ReferrerOrder::query()->where('pre_order_id', $preOrderId)->orderBy('id')->get();
+    }
 }

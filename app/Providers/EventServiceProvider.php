@@ -43,6 +43,11 @@ use App\Domains\Reception\Listeners\SampleCollectedListener;
 use App\Domains\Referrer\Events\OrderMaterialCreated;
 use App\Domains\Referrer\Events\OrderMaterialUpdated;
 use App\Domains\Referrer\Events\CollectRequestEvent;
+use App\Domains\PreOrder\Events\PreOrderActionProcessed;
+use App\Domains\PreOrder\Events\PreOrderChanged;
+use App\Domains\PreOrder\Listeners\SendPreOrderActionResultWebhook;
+use App\Domains\PreOrder\Listeners\SendPreOrderSnapshotWebhook;
+use App\Domains\PreOrder\Listeners\SyncPreOrderFromReferrerOrder;
 use App\Domains\Referrer\Events\ReferrerOrderCreated;
 use App\Domains\Referrer\Events\ReferrerOrderUpdated;
 use App\Domains\Referrer\Listeners\SendReferrerOrderUpdateWebhook;
@@ -139,6 +144,9 @@ class EventServiceProvider extends ServiceProvider
         Event::listen(ReferrerOrderPatientCreated::class, [SendPatientToProviderWebhook::class, 'handle']);
         Event::listen(ReferrerOrderCreated::class, [SendReferrerOrderWebhook::class, 'handle']);
         Event::listen(ReferrerOrderUpdated::class, [SendReferrerOrderUpdateWebhook::class, 'handle']);
+        Event::listen(ReferrerOrderUpdated::class, [SyncPreOrderFromReferrerOrder::class, 'handle']);
+        Event::listen(PreOrderChanged::class, [SendPreOrderSnapshotWebhook::class, 'handle']);
+        Event::listen(PreOrderActionProcessed::class, [SendPreOrderActionResultWebhook::class, 'handle']);
         Event::listen(ActivityLogged::class, [LogUserActivityListener::class, 'handle']);
     }
 }

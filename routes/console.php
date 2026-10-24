@@ -51,4 +51,16 @@ Schedule::command('referrerOrder:check')
         Log::error('Scheduled command failed: referrerOrder:check');
     });
 
+// Center actions written by api. Sub-minute so the panel's "Sending…" clears within seconds.
+Schedule::command('pre-orders:process-inbox')
+    ->everyTenSeconds()
+    ->withoutOverlapping();
+
+Schedule::command('pre-orders:reconcile')
+    ->dailyAt('02:30')
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        Log::error('Scheduled command failed: pre-orders:reconcile');
+    });
+
 Schedule::command('telescope:prune --hours=48')->daily();
