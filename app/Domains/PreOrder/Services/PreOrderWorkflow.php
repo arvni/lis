@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\PreOrder\Services;
 
 use App\Domains\Document\Enums\DocumentTag;
+use App\Domains\Laboratory\Models\Test;
 use App\Domains\PreOrder\Adapters\DocumentAdapter;
 use App\Domains\PreOrder\Adapters\LaboratoryAdapter;
 use App\Domains\PreOrder\Adapters\ReferrerAdapter;
@@ -99,7 +100,7 @@ class PreOrderWorkflow
                     'test_id' => $test->id,
                     'patient_ref' => $line['patient_ref'] ?? $dto->mainPatientRef,
                     'qty' => $line['qty'] ?? 1,
-                    'unit_price' => $this->laboratory->unitPrice($test, $referrerId),
+                    ...$this->priced($test, $referrerId),
                     'added_by' => Side::CENTER,
                     'status' => ItemStatus::REQUESTED,
                 ]);
@@ -196,7 +197,7 @@ class PreOrderWorkflow
                     'test_id' => $testId,
                     'patient_ref' => $preOrder->main_patient_ref,
                     'qty' => 1,
-                    'unit_price' => $this->laboratory->unitPrice($test, $preOrder->referrer_id),
+                    ...$this->priced($test, $preOrder->referrer_id),
                     'added_by' => Side::BION,
                     'status' => ItemStatus::RECOMMENDED,
                 ]);
@@ -209,18 +210,21 @@ class PreOrderWorkflow
         });
     }
 
-    /** BION recommends a test. Any catalogue test may ride along; only the main test sets the flow. */
-    public function addTest(PreOrder $preOrder, int $testId, ?string $patientRef, int $qty, Actor $actor): PreOrderItem
+    /**
+     * BION recommends a test. Any catalogue test may ride along; only the main test sets the flow.
+     * A non-panel test is priced by its method: the one given, or the test's only method.
+     */
+    public function addTest(PreOrder $preOrder, int $testId, ?string $patientRef, int $qty, Actor $actor, ?int $methodTestId = null): PreOrderItem
     {
         $item = null;
-        $this->mutate($preOrder, function (PreOrder $preOrder) use ($testId, $patientRef, $qty, $actor, &$item) {
+        $this->mutate($preOrder, function (PreOrder $preOrder) use ($testId, $patientRef, $qty, $actor, $methodTestId, &$item) {
             $this->expectBeforeRelease($preOrder);
             $test = $this->laboratory->findTest($testId) ?? throw new PreOrderRuleException('Test not found.');
             $item = $this->preOrders->addItem($preOrder, [
                 'test_id' => $test->id,
                 'patient_ref' => $patientRef ?? $preOrder->main_patient_ref,
                 'qty' => max(1, $qty),
-                'unit_price' => $this->laboratory->unitPrice($test, $preOrder->referrer_id),
+                ...$this->priced($test, $preOrder->referrer_id, $methodTestId),
                 'added_by' => Side::BION,
                 'status' => ItemStatus::RECOMMENDED,
             ]);
@@ -354,6 +358,7 @@ class PreOrderWorkflow
             if ($items->isEmpty()) {
                 throw new PreOrderRuleException('There are no tests to release.');
             }
+            $this->expectMethodsPicked($items->reject(fn (PreOrderItem $i) => $i->status === ItemStatus::APPROVED));
             if (FlowStages::requiresPreTest($preOrder) && ! $items->contains(fn (PreOrderItem $i) => $i->isPreTest())) {
                 throw new PreOrderRuleException('This flow starts with a pre-test workup: mark the prerequisite tests first.');
             }
@@ -926,6 +931,80 @@ class PreOrderWorkflow
         return $preOrder;
     }
 
+    /**
+     * BION picks how a non-panel test is done, which sets its price for this center. Only on a
+     * line not yet cleared or on a quotation the center is deciding. Internal: the center sees
+     * the test and its price, never the method.
+     */
+    public function setItemMethod(PreOrder $preOrder, int $itemId, int $methodTestId, Actor $actor): PreOrder
+    {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($itemId, $methodTestId, $actor) {
+            $this->expectBeforeRelease($preOrder);
+            /** @var PreOrderItem|null $item */
+            $item = $this->preOrders->activeItems($preOrder)->firstWhere('id', $itemId);
+            if (! $item) {
+                throw new PreOrderRuleException('That test line is not on this pre-order.');
+            }
+            if (! in_array($item->status, [ItemStatus::REQUESTED, ItemStatus::RECOMMENDED], true)) {
+                throw new PreOrderRuleException('This line is already cleared; its method can no longer change.');
+            }
+            if ($item->quotation_id !== null && $preOrder->quotations->contains(fn (PreOrderQuotation $q) => $q->id === $item->quotation_id && $q->status === FinanceStatus::AWAITING_CENTER)) {
+                throw new PreOrderRuleException('The center is deciding on a quotation with this line. Revise the quotation first.');
+            }
+            $test = $item->test;
+            $line = $this->priced($test, $preOrder->referrer_id, $methodTestId);
+            $this->preOrders->updateItem($item, $line);
+            $method = $this->laboratory->methodTestFor($test, $methodTestId)?->method->name;
+            $this->history($preOrder, HistoryType::DECISION, $actor, body: "Method for {$test->name}: {$method}", internal: true, meta: [
+                'item' => $item->id,
+                'method_test_id' => $methodTestId,
+                'unit_price' => $line['unit_price'],
+            ]);
+
+            return $this->preOrders->update($preOrder, []);
+        });
+    }
+
+    /**
+     * A line's method and its price for this center. A non-panel test takes the given method
+     * (which must be one of its own), else its only method; with several and none given it waits
+     * for BION to pick one, unless $required, when it is refused right away. A test with no
+     * methods set up is priced at test level.
+     *
+     * @return array{method_test_id: int|null, unit_price: string|null}
+     */
+    private function priced(Test $test, int $referrerId, ?int $methodTestId = null, bool $required = false): array
+    {
+        $methodTest = null;
+        if ($this->laboratory->needsMethod($test)) {
+            $methodTest = $methodTestId !== null
+                ? ($this->laboratory->methodTestFor($test, $methodTestId) ?? throw new PreOrderRuleException("That method isn't one of {$test->name}'s methods."))
+                : $this->laboratory->defaultMethodTest($test);
+            if ($methodTest === null && $required && $this->laboratory->methodOptions($test) !== []) {
+                throw new PreOrderRuleException("Pick the method for {$test->name}.");
+            }
+        }
+
+        return [
+            'method_test_id' => $methodTest?->id,
+            'unit_price' => $this->laboratory->unitPrice($test, $referrerId, $methodTest),
+        ];
+    }
+
+    /** @param  Collection<int, PreOrderItem>  $items */
+    private function expectMethodsPicked(Collection $items): void
+    {
+        // Only a test that has methods to pick from can be missing one.
+        $options = $this->laboratory->methodOptionsFor($items->pluck('test')->unique('id'));
+        $missing = $items
+            ->filter(fn (PreOrderItem $i) => $i->method_test_id === null && ($options[$i->test_id] ?? []) !== [])
+            ->map(fn (PreOrderItem $i) => $i->test->name)
+            ->unique()->values();
+        if ($missing->isNotEmpty()) {
+            throw new PreOrderRuleException('Pick the method for '.$missing->implode(', ').' first; it sets the price.');
+        }
+    }
+
     /** Release every approved, unreleased line on the main order and move past finance. */
     private function releaseMain(PreOrder $preOrder, Actor $actor, string $note): PreOrder
     {
@@ -1000,7 +1079,7 @@ class PreOrderWorkflow
                 'test_id' => $test->id,
                 'patient_ref' => $line['patient_ref'] ?? $preOrder->main_patient_ref,
                 'qty' => max(1, (int) ($line['qty'] ?? 1)),
-                'unit_price' => $this->laboratory->unitPrice($test, $preOrder->referrer_id),
+                ...$this->priced($test, $preOrder->referrer_id, isset($line['method_test_id']) ? (int) $line['method_test_id'] : null, required: true),
                 'added_by' => Side::BION,
                 'status' => ItemStatus::RECOMMENDED,
                 'request_id' => $request->id,

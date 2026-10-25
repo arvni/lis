@@ -24,6 +24,7 @@ Route::group(['prefix' => 'pre-orders', 'as' => 'pre-orders.'], function () {
     Route::post('{preOrder}/main-test', [Actions::class, 'setMainTest'])->name('main-test');
     Route::post('{preOrder}/items', [Actions::class, 'addTest'])->name('items.store');
     Route::delete('{preOrder}/items/{item}', [Actions::class, 'dropItem'])->whereNumber('item')->name('items.destroy');
+    Route::post('{preOrder}/items/{item}/method', [Actions::class, 'setItemMethod'])->whereNumber('item')->name('items.method');
     Route::post('{preOrder}/items/{item}/pre-test', [Actions::class, 'setPreTest'])->whereNumber('item')->name('items.pre-test');
     Route::post('{preOrder}/requests', [Actions::class, 'raiseRequest'])->name('requests.store');
     Route::post('{preOrder}/requests/{number}/close', [Actions::class, 'closeRequest'])->whereNumber('number')->name('requests.close');

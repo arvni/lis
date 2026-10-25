@@ -6,6 +6,7 @@ namespace App\Domains\PreOrder\Services;
 
 use App\Domains\Document\Models\Document;
 use App\Domains\PreOrder\Adapters\DocumentAdapter;
+use App\Domains\PreOrder\Adapters\LaboratoryAdapter;
 use App\Domains\PreOrder\Enums\ExceptionType;
 use App\Domains\PreOrder\Enums\FinanceReason;
 use App\Domains\PreOrder\Enums\ItemStatus;
@@ -30,6 +31,7 @@ class PreOrderService
         private readonly DocumentAdapter $documents,
         private readonly FinanceRules $finance,
         private readonly QuotationRepository $quotations,
+        private readonly LaboratoryAdapter $laboratory,
     ) {}
 
     /**
@@ -66,8 +68,21 @@ class PreOrderService
         $view = $this->snapshot->build($preOrder);
         $preOrder = $this->preOrders->loadDetail($preOrder);
 
-        $prices = $preOrder->items->mapWithKeys(fn (PreOrderItem $i) => [$i->id => $i->unit_price]);
-        $view['items'] = array_map(fn (array $item) => [...$item, 'unit_price' => $prices[$item['id']] ?? null], $view['items']);
+        // BION-only line details: the price and the method that set it. The center's snapshot
+        // carries neither the method nor its choices.
+        $lines = $preOrder->items->keyBy('id');
+        $methods = $this->laboratory->methodOptionsFor($preOrder->items->pluck('test')->unique('id'));
+        $view['items'] = array_map(function (array $item) use ($lines, $methods) {
+            $line = $lines[$item['id']] ?? null;
+
+            return [
+                ...$item,
+                'unit_price' => $line?->unit_price,
+                'method_test_id' => $line?->method_test_id,
+                'needs_method' => $line !== null && $this->laboratory->needsMethod($line->test),
+                'methods' => $methods[$item['test_id']] ?? [],
+            ];
+        }, $view['items']);
         $view['dropped_items'] = $preOrder->items
             ->filter(fn (PreOrderItem $i) => $i->status === ItemStatus::DROPPED)
             ->map(fn (PreOrderItem $i) => ['id' => $i->id, 'test_name' => $i->test->name, 'patient_ref' => $i->patient_ref])
