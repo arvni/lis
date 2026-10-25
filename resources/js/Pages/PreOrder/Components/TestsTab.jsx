@@ -79,7 +79,15 @@ export default function TestsTab({ preOrder }) {
                 error={item.method_test_id === null}
                 placeholder="Pick a method"
                 sx={{ minWidth: 160 }}
-                SelectProps={{ displayEmpty: true }}
+                SelectProps={{
+                    displayEmpty: true,
+                    renderValue: (v) =>
+                        item.methods.find((m) => m.id === v)?.name ?? (
+                            <Typography variant="body2" color="error">
+                                Pick a method
+                            </Typography>
+                        ),
+                }}
             >
                 <MenuItem value="" disabled>
                     Pick a method
