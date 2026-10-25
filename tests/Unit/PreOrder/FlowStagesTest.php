@@ -45,15 +45,22 @@ class FlowStagesTest extends TestCase
 
     /** @param  array<string, mixed>  $flow */
     #[DataProvider('flows')]
-    public function test_until_quoted_and_before_batches_every_flow_runs_the_core_path(array $flow): void
+    public function test_until_quoted_each_flow_runs_its_own_path(array $flow): void
     {
         $preOrder = new PreOrder(['flow_stages' => $flow['stages']]);
+        $core = ['DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'AWAITING_INFO', 'INFO_REVIEW'];
+        $workup = ['AWAITING_PRE_SAMPLES', 'PRE_RECEIVED', 'PRE_IN_PROGRESS', 'PRE_COMPLETED'];
+        $batches = ['BATCH_OPEN', 'READY_FOR_TESTING'];
+        $lab = ['TESTING', 'TESTING_COMPLETED', 'RESULTS_RELEASED'];
 
-        $this->assertSame(
-            ['DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'AWAITING_INFO', 'INFO_REVIEW', 'AWAITING_SAMPLES', 'TESTING', 'TESTING_COMPLETED', 'RESULTS_RELEASED'],
-            array_map(fn (PreOrderStage $s) => $s->value, FlowStages::used($preOrder)),
-        );
-        $this->assertSame(PreOrderStage::AWAITING_SAMPLES, FlowStages::nextAfter($preOrder, PreOrderStage::INFO_REVIEW));
+        // Familial runs its workup only once BION marks pre-tests, which an unsaved case can't have.
+        $expected = match ($flow['family']) {
+            'nipt', 'familial' => [...$core, 'AWAITING_SAMPLES', ...$lab],
+            'carrier', 'exome', 'pgt_a' => [...$core, 'AWAITING_SAMPLES', ...$batches, ...$lab],
+            'pgt_m' => [...$core, ...$workup, 'AWAITING_SAMPLES', ...$batches, ...$lab],
+        };
+
+        $this->assertSame($expected, array_map(fn (PreOrderStage $s) => $s->value, FlowStages::used($preOrder)));
         $this->assertNull(FlowStages::nextAfter($preOrder, PreOrderStage::RESULTS_RELEASED));
     }
 

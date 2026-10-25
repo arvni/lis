@@ -96,13 +96,13 @@ abstract class PreOrderTestCase extends TestCase
     }
 
     /** A referrer order the center placed from the pre-order's release. */
-    protected function linkedOrder(PreOrder $preOrder, string $status = 'waiting', bool $received = false): int
+    protected function linkedOrder(PreOrder $preOrder, string $status = 'waiting', bool $received = false, string $release = 'M1'): int
     {
         return (int) DB::table('referrer_orders')->insertGetId([
             'referrer_id' => $preOrder->referrer_id,
             'pre_order_id' => $preOrder->id,
             'order_id' => 'ORD-'.uniqid(),
-            'orderInformation' => json_encode(['pre_order_release_key' => $preOrder->code.'-M1']),
+            'orderInformation' => json_encode(['pre_order_release_key' => $preOrder->code.'-'.$release]),
             'status' => $status,
             'acceptance_id' => $received ? $this->acceptance() : null,
             'created_at' => now(),

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Domains\PreOrder\Support;
 
+use App\Domains\PreOrder\Enums\BatchMode;
 use App\Domains\PreOrder\Enums\PreOrderStage;
 use App\Domains\PreOrder\Enums\StageMode;
 use App\Domains\PreOrder\Models\PreOrder;
+use App\Domains\PreOrder\Models\PreOrderItem;
 use App\Domains\PreOrder\Models\PreOrderQuotation;
 
 /**
@@ -15,31 +17,11 @@ use App\Domains\PreOrder\Models\PreOrderQuotation;
  */
 final class FlowStages
 {
-    /**
-     * Stages whose machinery ships in a later phase: the pre-test workup and sample batches
-     * (phase 3). Until then they are skipped even when a flow switches them on, so a seeded
-     * PGT-M flow still runs end to end without them.
-     *
-     * @var list<PreOrderStage>
-     */
-    private const NOT_YET_AVAILABLE = [
-        PreOrderStage::AWAITING_PRE_SAMPLES,
-        PreOrderStage::PRE_RECEIVED,
-        PreOrderStage::PRE_IN_PROGRESS,
-        PreOrderStage::PRE_COMPLETED,
-        PreOrderStage::BATCH_OPEN,
-        PreOrderStage::READY_FOR_TESTING,
-    ];
-
     public static function uses(PreOrder $preOrder, PreOrderStage $stage): bool
     {
         if ($stage->isAlwaysOn()) {
             return true;
         }
-        if (in_array($stage, self::NOT_YET_AVAILABLE, true)) {
-            return false;
-        }
-
         $entry = self::entry($preOrder, $stage);
         $mode = $entry['mode'] ?? StageMode::OFF->value;
         if ($mode === StageMode::RULE->value) {
@@ -55,12 +37,38 @@ final class FlowStages
         return (self::entry($preOrder, PreOrderStage::AWAITING_FINANCE)['mode'] ?? StageMode::OFF->value) !== StageMode::OFF->value;
     }
 
+    /** The flow always starts with a pre-test workup (PGT-M), so BION must mark its tests. */
+    public static function requiresPreTest(PreOrder $preOrder): bool
+    {
+        return (self::entry($preOrder, PreOrderStage::AWAITING_PRE_SAMPLES)['mode'] ?? null) === StageMode::ON->value;
+    }
+
+    /** BION can mark pre-tests: the flow has a pre-test workup, always or when tests are marked. */
+    public static function preTestEnabled(PreOrder $preOrder): bool
+    {
+        return (self::entry($preOrder, PreOrderStage::AWAITING_PRE_SAMPLES)['mode'] ?? StageMode::OFF->value) !== StageMode::OFF->value;
+    }
+
+    /** How later batches reach the lab: their own order, or more samples for the first one. */
+    public static function batchMode(PreOrder $preOrder): BatchMode
+    {
+        return BatchMode::tryFrom((string) (self::entry($preOrder, PreOrderStage::AWAITING_SAMPLES)['batch_mode'] ?? '')) ?? BatchMode::PER_BATCH;
+    }
+
+    /** The center may say "no more batches" itself; otherwise only BION closes them. */
+    public static function centerCanClose(PreOrder $preOrder): bool
+    {
+        return (bool) (self::entry($preOrder, PreOrderStage::AWAITING_SAMPLES)['center_can_close'] ?? false);
+    }
+
     /** An unknown rule keeps its stage off. */
     private static function ruleHolds(PreOrder $preOrder, string $rule): bool
     {
         return match ($rule) {
             // On once the tests BION confirmed went to the center as a quotation.
             'finance_required' => $preOrder->exists && $preOrder->quotations->contains(fn (PreOrderQuotation $q) => $q->request_id === null),
+            // On when BION marked prerequisite tests (e.g. familial variant confirmation).
+            'pre_test_items' => $preOrder->exists && $preOrder->items->contains(fn (PreOrderItem $i) => $i->isPreTest()),
             default => false,
         };
     }

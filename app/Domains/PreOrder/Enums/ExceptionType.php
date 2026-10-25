@@ -15,6 +15,8 @@ enum ExceptionType: string
     case HOLD_BION = 'hold_bion';
     /** The center rejected the quotation, or it expired. BION sends a new one or cancels. */
     case FINANCE_REJECTED = 'finance_rejected';
+    /** One batch's samples can't be used. The center clears it by sending a replacement batch. */
+    case SAMPLE_ISSUE = 'sample_issue';
     case NOT_ELIGIBLE = 'not_eligible';
     case NOT_PROCEEDING = 'not_proceeding';
     case CANCELLED = 'cancelled';

@@ -15,11 +15,16 @@ Route::group(['prefix' => 'pre-orders', 'as' => 'pre-orders.'], function () {
     Route::post('{preOrder}/main-test', [Actions::class, 'setMainTest'])->name('main-test');
     Route::post('{preOrder}/items', [Actions::class, 'addTest'])->name('items.store');
     Route::delete('{preOrder}/items/{item}', [Actions::class, 'dropItem'])->whereNumber('item')->name('items.destroy');
+    Route::post('{preOrder}/items/{item}/pre-test', [Actions::class, 'setPreTest'])->whereNumber('item')->name('items.pre-test');
     Route::post('{preOrder}/requests', [Actions::class, 'raiseRequest'])->name('requests.store');
     Route::post('{preOrder}/requests/{number}/close', [Actions::class, 'closeRequest'])->whereNumber('number')->name('requests.close');
     Route::post('{preOrder}/confirm', [Actions::class, 'confirm'])->name('confirm');
     Route::post('{preOrder}/finance/verify', [Actions::class, 'verifyFinance'])->name('finance.verify');
     Route::post('{preOrder}/finance/revise', [Actions::class, 'reviseQuotation'])->name('finance.revise');
+    Route::post('{preOrder}/next-step', [Actions::class, 'confirmNextStep'])->name('next-step');
+    Route::post('{preOrder}/batches/close', [Actions::class, 'closeBatches'])->name('batches.close');
+    Route::post('{preOrder}/batches/issue', [Actions::class, 'sampleIssue'])->name('batches.issue');
+    Route::post('{preOrder}/testing/start', [Actions::class, 'startTesting'])->name('testing.start');
     Route::post('{preOrder}/notes', [Actions::class, 'note'])->name('notes.store');
     Route::post('{preOrder}/hold', [Actions::class, 'hold'])->name('hold');
     Route::post('{preOrder}/resume', [Actions::class, 'resume'])->name('resume');

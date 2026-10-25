@@ -27,6 +27,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $main_test_id
  * @property int|null $flow_id
  * @property list<array<string, mixed>>|null $flow_stages
+ * @property list<array<string, mixed>>|null $batches
  * @property int|null $flow_version
  * @property PreOrderStage $stage
  * @property ActionOwner $action_owner
@@ -52,11 +53,12 @@ class PreOrder extends Model
         'code', 'referrer_id', 'assigned_to', 'main_test_id', 'flow_id', 'flow_stages', 'flow_version',
         'stage', 'action_owner', 'stage_entered_at', 'exception', 'start_mode', 'start_hint',
         'referral_reason', 'patients', 'main_patient_ref', 'scope', 'clinical', 'created_by',
-        'submitted_at', 'closed_at', 'version',
+        'submitted_at', 'closed_at', 'version', 'batches',
     ];
 
     protected $casts = [
         'flow_stages' => 'array',
+        'batches' => 'array',
         'stage' => PreOrderStage::class,
         'action_owner' => ActionOwner::class,
         'start_mode' => StartMode::class,

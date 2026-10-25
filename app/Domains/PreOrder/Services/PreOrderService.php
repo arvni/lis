@@ -111,6 +111,12 @@ class PreOrderService
             // Additional tests come as a request once the main tests are released.
             'request_test' => $open && $stage->rank() > PreOrderStage::FINANCE_VERIFY->rank(),
             'close' => $open,
+            'set_pre_test' => $beforeRelease && FlowStages::preTestEnabled($preOrder),
+            // The center normally confirms; BION can record it for them (e.g. after a phone call).
+            'confirm_next_step' => $open && $stage === PreOrderStage::PRE_COMPLETED,
+            'close_batches' => $open && $stage === PreOrderStage::BATCH_OPEN,
+            'start_testing' => $open && $stage === PreOrderStage::READY_FOR_TESTING && $exception !== ExceptionType::SAMPLE_ISSUE,
+            'sample_issue' => $open && $preOrder->exception === null && $stage->rank() >= PreOrderStage::AWAITING_PRE_SAMPLES->rank(),
             'stage_is_read_from_orders' => FlowStages::uses($preOrder, $stage) && $stage->isReadFromOrders(),
         ];
     }

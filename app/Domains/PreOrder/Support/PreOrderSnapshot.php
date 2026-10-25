@@ -6,6 +6,7 @@ namespace App\Domains\PreOrder\Support;
 
 use App\Domains\Document\Models\Document;
 use App\Domains\PreOrder\Adapters\ReferrerAdapter;
+use App\Domains\PreOrder\Enums\ExceptionType;
 use App\Domains\PreOrder\Enums\FinanceReason;
 use App\Domains\PreOrder\Enums\ItemStatus;
 use App\Domains\PreOrder\Enums\PreOrderStage;
@@ -35,6 +36,9 @@ class PreOrderSnapshot
     {
         $preOrder = $this->preOrders->loadDetail($preOrder->fresh() ?? $preOrder);
         $used = FlowStages::used($preOrder);
+        $linked = $this->referrerOrders->linkedOrders($preOrder->id);
+        $stage = $preOrder->stage;
+        $open = ! $preOrder->isClosed();
 
         return [
             'id' => $preOrder->id,
@@ -80,6 +84,7 @@ class PreOrderSnapshot
                     'status' => $i->status->value,
                     'added_by' => $i->added_by->value,
                     'release_key' => $i->release_key,
+                    'pre_test' => $i->isPreTest(),
                     'request' => $i->request_id ? $preOrder->requests->firstWhere('id', $i->request_id)?->number : null,
                     'quotation' => $i->quotation_id ? $preOrder->quotations->firstWhere('id', $i->quotation_id)?->number : null,
                 ])->values()->all(),
@@ -128,7 +133,16 @@ class PreOrderSnapshot
                 'closed_at' => $r->closed_at?->toIso8601String(),
             ])->values()->all(),
             'orders_to_place' => $this->ordersToPlace($preOrder),
-            'linked_orders' => array_map(fn (LinkedOrder $o) => $o->toArray(), $this->referrerOrders->linkedOrders($preOrder->id)),
+            'linked_orders' => array_map(fn (LinkedOrder $o) => $o->toArray(), $linked),
+            'batches' => $this->batches($preOrder, $linked),
+            'batch_mode' => FlowStages::batchMode($preOrder)->value,
+            // What the center may do now; the LIS checks again when the action arrives.
+            'center_can' => [
+                'confirm_next_step' => $open && $stage === PreOrderStage::PRE_COMPLETED,
+                'add_batch' => $open && $stage === PreOrderStage::BATCH_OPEN,
+                'close_batches' => $open && $stage === PreOrderStage::BATCH_OPEN && FlowStages::centerCanClose($preOrder),
+                'replace_batch' => $open && ($preOrder->exception['type'] ?? null) === ExceptionType::SAMPLE_ISSUE->value ? ($preOrder->exception['batch'] ?? null) : null,
+            ],
             'documents' => $preOrder->documents->map(fn (Document $d) => [
                 'hash' => $d->hash,
                 'name' => $d->originalName,
@@ -164,17 +178,61 @@ class PreOrderSnapshot
      */
     private function ordersToPlace(PreOrder $preOrder): array
     {
-        return $preOrder->items
+        $groups = $preOrder->items
             ->filter(fn (PreOrderItem $i) => $i->status === ItemStatus::RELEASED && $i->release_key !== null)
-            ->groupBy('release_key')
-            ->map(fn ($items, $key) => [
-                'release_key' => (string) $key,
-                'purpose' => $items->first()?->release_purpose?->value,
-                'items' => $items->map(fn (PreOrderItem $i) => [
-                    'test_id' => $i->test_id,
-                    'patient_ref' => $i->patient_ref,
-                    'qty' => $i->qty,
-                ])->values()->all(),
-            ])->values()->all();
+            ->groupBy('release_key');
+        $line = fn (PreOrderItem $i) => ['test_id' => $i->test_id, 'patient_ref' => $i->patient_ref, 'qty' => $i->qty];
+
+        $orders = $groups->map(fn ($items, $key) => [
+            'release_key' => (string) $key,
+            'purpose' => $items->first()?->release_purpose?->value,
+            'items' => $items->map($line)->values()->all(),
+        ])->values()->all();
+
+        // A later batch in a per-batch flow is its own order with the first batch's tests.
+        foreach ($preOrder->batches ?? [] as $batch) {
+            if (isset($batch['source']) && $batch['order_key'] === $batch['key'] && $groups->has($batch['source'])) {
+                $orders[] = [
+                    'release_key' => $batch['key'],
+                    'purpose' => $batch['purpose'],
+                    'items' => $groups->get($batch['source'])->map($line)->values()->all(),
+                ];
+            }
+        }
+
+        return $orders;
+    }
+
+    /**
+     * Each shipment with the order it opened or joined, as the lab sees it.
+     *
+     * @param  list<LinkedOrder>  $linked
+     * @return list<array<string, mixed>>
+     */
+    private function batches(PreOrder $preOrder, array $linked): array
+    {
+        $exception = $preOrder->exception ?? [];
+        $issue = ($exception['type'] ?? null) === ExceptionType::SAMPLE_ISSUE->value ? ($exception['batch'] ?? null) : null;
+
+        return array_map(function (array $batch) use ($linked, $issue, $exception) {
+            $order = null;
+            foreach ($linked as $o) {
+                if ($o->releaseKey === $batch['order_key']) {
+                    $order = $o;
+                }
+            }
+
+            return [
+                'key' => $batch['key'],
+                'label' => $batch['label'],
+                'purpose' => $batch['purpose'],
+                'order_key' => $batch['order_key'],
+                'replaces' => $batch['replaces'] ?? null,
+                'added_by' => $batch['side'] ?? null,
+                'added_at' => $batch['at'] ?? null,
+                'issue' => $issue === $batch['key'] ? ($exception['comment'] ?? null) : null,
+                'order' => $order?->toArray(),
+            ];
+        }, PreOrderBatches::all($preOrder));
     }
 }

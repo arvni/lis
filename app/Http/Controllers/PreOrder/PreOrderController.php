@@ -43,6 +43,7 @@ class PreOrderController extends Controller
         return Inertia::render('PreOrder/Show', [
             'preOrder' => $this->preOrderService->detail($preOrder),
             'canQuote' => (bool) $request->user()?->can('quote', $preOrder),
+            'canStartTesting' => (bool) $request->user()?->can('startTesting', $preOrder),
         ]);
     }
 
