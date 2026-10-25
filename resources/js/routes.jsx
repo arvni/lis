@@ -52,6 +52,7 @@ import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import RequestPageIcon from '@mui/icons-material/RequestPage';
 import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import SchemaIcon from '@mui/icons-material/Schema';
 import {
     PercentDiamond,
     Stethoscope as Doctor,
@@ -488,6 +489,18 @@ const routes = (sections = []) => {
                     route: 'pre-orders.finance',
                     permission: 'PreOrders.Finance.Quote',
                     icon: <RequestQuoteIcon fontSize="small" />,
+                },
+                {
+                    title: 'Reports',
+                    route: 'pre-orders.reports',
+                    permission: 'PreOrders.Reports.View',
+                    icon: <AssessmentIcon fontSize="small" />,
+                },
+                {
+                    title: 'Flows',
+                    route: 'pre-orders.flows.index',
+                    permission: 'PreOrders.Flows.Manage',
+                    icon: <SchemaIcon fontSize="small" />,
                 },
             ],
         },

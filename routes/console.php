@@ -70,4 +70,11 @@ Schedule::command('pre-orders:expire-quotations')
         Log::error('Scheduled command failed: pre-orders:expire-quotations');
     });
 
+Schedule::command('pre-orders:send-reminders')
+    ->hourly()
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        Log::error('Scheduled command failed: pre-orders:send-reminders');
+    });
+
 Schedule::command('telescope:prune --hours=48')->daily();

@@ -370,9 +370,14 @@ class RoleAndPermissionSeeder extends Seeder
                     'Review',
                     'Start Testing',
                     'Override',
+                    // Team leads: stuck pre-orders are escalated to them.
+                    'Escalations',
                 ],
                 'Finance' => [
                     'Quote',
+                ],
+                'Reports' => [
+                    'View',
                 ],
                 'Samples' => [
                     'Receive',

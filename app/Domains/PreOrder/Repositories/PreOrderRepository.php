@@ -14,6 +14,7 @@ use App\Domains\PreOrder\Models\PreOrderRequest;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\LazyCollection;
 use Illuminate\Support\Str;
 
 class PreOrderRepository
@@ -38,6 +39,22 @@ class PreOrderRepository
     public function lock(PreOrder $preOrder): PreOrder
     {
         return PreOrder::query()->lockForUpdate()->findOrFail($preOrder->id);
+    }
+
+    /**
+     * Open pre-orders with no exception that may still be due a reminder or an escalation.
+     *
+     * @return LazyCollection<int, PreOrder>
+     */
+    public function awaitingReminder(): LazyCollection
+    {
+        return PreOrder::query()
+            ->whereNull('closed_at')
+            ->whereNull('exception')
+            ->whereNotNull('stage_entered_at')
+            ->where('action_owner', '!=', ActionOwner::NONE->value)
+            ->where(fn ($q) => $q->whereNull('reminded_at')->orWhereNull('escalated_at'))
+            ->lazyById(200);
     }
 
     /** @param  array<string, mixed>  $data */

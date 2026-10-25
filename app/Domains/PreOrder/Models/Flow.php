@@ -16,6 +16,8 @@ use Illuminate\Support\Carbon;
  * @property bool $active
  * @property list<array<string, mixed>> $stages
  * @property int $version
+ * @property int|null $tests_count
+ * @property int|null $open_pre_orders_count
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -33,5 +35,11 @@ class Flow extends Model
     public function tests(): HasMany
     {
         return $this->hasMany(Test::class);
+    }
+
+    /** @return HasMany<PreOrder, $this> */
+    public function preOrders(): HasMany
+    {
+        return $this->hasMany(PreOrder::class);
     }
 }

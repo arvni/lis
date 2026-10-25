@@ -51,7 +51,16 @@ class PreOrderSnapshot
                 // A pre-order sent without tests waits in review until BION picks them.
                 'next_action' => $preOrder->main_test_id === null && $preOrder->stage->isReview()
                     ? 'BION is choosing the right test'
-                    : $preOrder->stage->nextAction(),
+                    : FlowStages::nextAction($preOrder, $preOrder->stage),
+                // For Arabic messages; null where the flow gives no Arabic wording.
+                'label_ar' => FlowStages::labelAr($preOrder, $preOrder->stage),
+                'next_action_ar' => FlowStages::nextAction($preOrder, $preOrder->stage, 'ar'),
+                // Files this stage asks for, and which of them the case has.
+                'required_documents' => array_map(fn (string $tag) => [
+                    'tag' => $tag,
+                    'uploaded' => $preOrder->documents->contains(fn (Document $d) => $d->tag === $tag),
+                ], FlowStages::requiredDocuments($preOrder, $preOrder->stage)),
+                'reminded_at' => $preOrder->reminded_at?->toIso8601String(),
                 'owner' => $preOrder->action_owner->value,
                 'entered_at' => $preOrder->stage_entered_at?->toIso8601String(),
             ],

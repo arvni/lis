@@ -37,6 +37,12 @@ class PreOrderPolicy
         return $user->can('PreOrders.Cases.Start Testing');
     }
 
+    /** The management reports and their Excel export. */
+    public function reports(User $user): bool
+    {
+        return $user->can('PreOrders.Reports.View');
+    }
+
     /** Cancel after samples arrived, and other moves outside the normal rules. */
     public function override(User $user, PreOrder $preOrder): bool
     {
