@@ -48,15 +48,21 @@ class DocumentAdapter
 
     public function __construct(private readonly DocumentService $documents) {}
 
-    public function store(PreOrder $preOrder, InspectedUpload $upload, string $name, DocumentTag $tag): Document
+    public function store(PreOrder $preOrder, InspectedUpload $upload, string $name, DocumentTag $tag, ?string $title = null, ?string $description = null): Document
     {
-        return $this->documents->storeDocument('preorder', $preOrder->id, $this->file($upload, $name), $tag->value);
+        return $this->documents->storeDocument('preorder', $preOrder->id, $this->file($upload, $name), $tag->value, title: $title, description: $description);
     }
 
     /** A file BION staff attached; it passed staffFileRule() on upload. */
-    public function storeStaff(PreOrder $preOrder, UploadedFile $file, DocumentTag $tag, bool $shared): Document
+    public function storeStaff(PreOrder $preOrder, UploadedFile $file, DocumentTag $tag, bool $shared, ?string $title = null, ?string $description = null): Document
     {
-        return $this->documents->storeDocument('preorder', $preOrder->id, $file, $tag->value, $shared ? self::STAFF_SHARED : self::STAFF_INTERNAL);
+        return $this->documents->storeDocument('preorder', $preOrder->id, $file, $tag->value, $shared ? self::STAFF_SHARED : self::STAFF_INTERNAL, title: $title, description: $description);
+    }
+
+    /** How a file is shown: the name its uploader gave it, else its file name. */
+    public static function displayName(Document $document): string
+    {
+        return $document->title ?: (string) $document->originalName;
     }
 
     public static function isInternal(Document $document): bool

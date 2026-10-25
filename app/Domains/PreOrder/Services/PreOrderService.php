@@ -98,7 +98,9 @@ class PreOrderService
         // Every file, internal ones included, and whether the center sees it.
         $view['documents'] = $preOrder->documents->map(fn (Document $d) => [
             'hash' => $d->hash,
-            'name' => $d->originalName,
+            'name' => DocumentAdapter::displayName($d),
+            'file_name' => $d->originalName,
+            'description' => $d->description,
             'tag' => $d->tag,
             'ext' => $d->ext,
             'from' => DocumentAdapter::isFromBion($d) ? 'bion' : 'center',

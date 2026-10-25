@@ -7,6 +7,7 @@ namespace App\Domains\PreOrder\Services;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\PreOrder\DTOs\Actor;
 use App\Domains\PreOrder\DTOs\CreatePreOrderDTO;
+use App\Domains\PreOrder\DTOs\DocumentDetails;
 use App\Domains\PreOrder\DTOs\FinanceDecisionDTO;
 use App\Domains\PreOrder\Enums\ExceptionType;
 use App\Domains\PreOrder\Enums\PreOrderActionType as Type;
@@ -120,7 +121,7 @@ class PreOrderInbox
         try {
             $upload = $this->inspector->inspect($incoming, pathinfo($payload['file'], PATHINFO_EXTENSION));
 
-            return $this->workflow->addDocument($preOrder, $upload, self::cleanName($payload['name']), DocumentTag::from($payload['tag']), isset($payload['request']) ? (int) $payload['request'] : null, $actor);
+            return $this->workflow->addDocument($preOrder, $upload, self::cleanName($payload['name']), DocumentTag::from($payload['tag']), isset($payload['request']) ? (int) $payload['request'] : null, $actor, DocumentDetails::fromArray($payload));
         } finally {
             $upload?->discard();
             if (is_file($incoming)) {

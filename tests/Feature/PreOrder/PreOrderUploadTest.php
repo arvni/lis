@@ -79,6 +79,33 @@ class PreOrderUploadTest extends PreOrderTestCase
         $this->assertSame(1, collect($snapshot['history'])->firstWhere('type', 'document')['request']);
     }
 
+    public function test_the_centers_name_and_details_for_a_file_are_kept_as_plain_text(): void
+    {
+        $preOrder = $this->draft([$this->test('NIPT', 'nipt')]);
+
+        $action = $this->upload($preOrder->id, $this->pdf(), 'pdf', [
+            'title' => "  Ultrasound report\x07 ",
+            'description' => "From the 12-week scan.\nNT 1.2 mm",
+        ]);
+
+        $this->assertSame(ActionStatus::DONE, $action->status, (string) $action->error);
+        $document = Document::query()->where('owner_type', 'preorder')->where('owner_id', $preOrder->id)->firstOrFail();
+        $this->assertSame('Ultrasound report', $document->title, 'trimmed, control characters removed');
+        $this->assertSame("From the 12-week scan.\nNT 1.2 mm", $document->description, 'line breaks stay');
+        $shown = app(PreOrderSnapshot::class)->build($preOrder->refresh())['documents'][0];
+        $this->assertSame(['Ultrasound report', 'pedigree.pdf'], [$shown['name'], $shown['file_name']]);
+    }
+
+    public function test_a_file_without_a_name_from_an_older_panel_shows_its_file_name(): void
+    {
+        $preOrder = $this->draft([$this->test('NIPT', 'nipt')]);
+
+        $this->assertSame(ActionStatus::DONE, $this->upload($preOrder->id, $this->pdf(), 'pdf')->status);
+
+        $shown = app(PreOrderSnapshot::class)->build($preOrder->refresh())['documents'][0];
+        $this->assertSame(['pedigree.pdf', null], [$shown['name'], $shown['description']]);
+    }
+
     public function test_a_refused_file_is_reported_to_the_center_and_removed(): void
     {
         $preOrder = $this->draft([$this->test('NIPT', 'nipt')]);

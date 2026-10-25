@@ -11,6 +11,7 @@ use App\Domains\PreOrder\Adapters\LaboratoryAdapter;
 use App\Domains\PreOrder\Adapters\ReferrerAdapter;
 use App\Domains\PreOrder\DTOs\Actor;
 use App\Domains\PreOrder\DTOs\CreatePreOrderDTO;
+use App\Domains\PreOrder\DTOs\DocumentDetails;
 use App\Domains\PreOrder\DTOs\FinanceDecisionDTO;
 use App\Domains\PreOrder\DTOs\QuoteDTO;
 use App\Domains\PreOrder\DTOs\RaiseRequestDTO;
@@ -737,15 +738,15 @@ class PreOrderWorkflow
      * A file the center attached, already inspected. Optionally tied to an open request, so BION
      * sees which question it answers; the request itself is answered separately.
      */
-    public function addDocument(PreOrder $preOrder, InspectedUpload $upload, string $name, DocumentTag $tag, ?int $requestNumber, Actor $actor): PreOrder
+    public function addDocument(PreOrder $preOrder, InspectedUpload $upload, string $name, DocumentTag $tag, ?int $requestNumber, Actor $actor, ?DocumentDetails $details = null): PreOrder
     {
-        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($upload, $name, $tag, $requestNumber, $actor) {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($upload, $name, $tag, $requestNumber, $actor, $details) {
             $this->expectOpen($preOrder);
             if ($requestNumber !== null && ! $this->preOrders->openRequests($preOrder)->contains('number', $requestNumber)) {
                 throw new PreOrderRuleException("Request R{$requestNumber} is not open.");
             }
-            $document = $this->documents->store($preOrder, $upload, $name, $tag);
-            $this->history($preOrder, HistoryType::DOCUMENT, $actor, body: $document->originalName, meta: array_filter([
+            $document = $this->documents->store($preOrder, $upload, $name, $tag, $details?->title, $details?->description);
+            $this->history($preOrder, HistoryType::DOCUMENT, $actor, body: DocumentAdapter::displayName($document), meta: array_filter([
                 'document' => $document->hash,
                 'tag' => $tag->value,
                 'request' => $requestNumber,
@@ -759,14 +760,14 @@ class PreOrderWorkflow
      * A file BION staff attached, shared with the center or kept internal. Allowed on a closed
      * pre-order too, e.g. a letter sent after the results.
      */
-    public function addStaffDocument(PreOrder $preOrder, UploadedFile $file, DocumentTag $tag, bool $shared, Actor $actor): PreOrder
+    public function addStaffDocument(PreOrder $preOrder, UploadedFile $file, DocumentTag $tag, bool $shared, Actor $actor, ?DocumentDetails $details = null): PreOrder
     {
-        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($file, $tag, $shared, $actor) {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($file, $tag, $shared, $actor, $details) {
             if ($actor->side !== Side::BION) {
                 throw new PreOrderRuleException('Only BION staff can attach files here.');
             }
-            $document = $this->documents->storeStaff($preOrder, $file, $tag, $shared);
-            $this->history($preOrder, HistoryType::DOCUMENT, $actor, body: $document->originalName, internal: ! $shared, meta: [
+            $document = $this->documents->storeStaff($preOrder, $file, $tag, $shared, $details?->title, $details?->description);
+            $this->history($preOrder, HistoryType::DOCUMENT, $actor, body: DocumentAdapter::displayName($document), internal: ! $shared, meta: [
                 'document' => $document->hash,
                 'tag' => $tag->value,
             ]);

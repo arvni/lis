@@ -19,6 +19,8 @@ use Illuminate\Database\Eloquent\Builder;
  * @property int|null $owner_id
  * @property \App\Domains\Document\Enums\DocumentTag $tag
  * @property string|null $originalName
+ * @property string|null $title
+ * @property string|null $description
  * @property string|null $path
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -41,6 +43,8 @@ class Document extends Model
         'owner_id',
         'tag',
         'originalName',
+        'title',
+        'description',
         'path',
     ];
 
