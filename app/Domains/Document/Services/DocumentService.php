@@ -19,7 +19,7 @@ class DocumentService
 {
     public function __construct(private readonly DocumentRepository $documentRepository) {}
 
-    public function storeDocument(string $ownerClass, int $id, UploadedFile $file, string $tag, ?string $relatedType = null, int|string|null $relatedId = null): Document
+    public function storeDocument(string $ownerClass, int $id, UploadedFile $file, string $tag, ?string $relatedType = null, int|string|null $relatedId = null, ?string $title = null, ?string $description = null): Document
     {
         $document = new Document([
             'owner_type' => $ownerClass,
@@ -30,6 +30,8 @@ class DocumentService
             'ext' => $file->getClientOriginalExtension(),
             'tag' => $tag,
             'originalName' => $file->getClientOriginalName(),
+            'title' => $title,
+            'description' => $description,
         ]);
         $document->path = $document->address.'/'.$document->file_name;
         $document->save();

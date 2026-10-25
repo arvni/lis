@@ -24,6 +24,8 @@ class StorePreOrderDocumentRequest extends FormRequest
     {
         return [
             'file' => ['required', 'file', 'max:51200', DocumentAdapter::staffFileRule()],
+            'title' => ['required', 'string', 'max:150'],
+            'description' => ['nullable', 'string', 'max:2000'],
             'tag' => ['required', Rule::in(DocumentAdapter::staffTagValues())],
             'shared' => ['boolean'],
         ];

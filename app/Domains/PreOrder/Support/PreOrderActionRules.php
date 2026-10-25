@@ -61,6 +61,9 @@ final class PreOrderActionRules
                 // Only a name api generated: never a path, so nothing can point outside the folder.
                 'file' => ['required', 'string', 'regex:/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(pdf|png|jpg)$/'],
                 'name' => ['required', 'string', 'max:255'],
+                // The name and details the center gave the file; older panels send neither.
+                'title' => ['nullable', 'string', 'max:150'],
+                'description' => ['nullable', 'string', 'max:2000'],
                 'tag' => ['required', Rule::in(DocumentAdapter::centerTagValues())],
                 'request' => ['nullable', 'integer', 'min:1'],
             ],

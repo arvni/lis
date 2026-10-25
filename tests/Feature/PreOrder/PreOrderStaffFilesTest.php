@@ -33,10 +33,25 @@ class PreOrderStaffFilesTest extends PreOrderTestCase
         $this->preOrder = $this->workflow->submit($this->draft([$this->test('NIPT', 'nipt')]), $this->center());
     }
 
-    private function attach(UploadedFile $file, bool $shared = false, string $tag = 'DOCUMENT', ?User $as = null)
+    private function attach(UploadedFile $file, bool $shared = false, string $tag = 'DOCUMENT', ?User $as = null, array $details = [])
     {
         return $this->actingAs($as ?? $this->reviewer)
-            ->post(route('pre-orders.documents.store', $this->preOrder), ['file' => $file, 'tag' => $tag, 'shared' => $shared]);
+            ->post(route('pre-orders.documents.store', $this->preOrder), ['file' => $file, 'tag' => $tag, 'shared' => $shared, 'title' => $file->getClientOriginalName(), ...$details]);
+    }
+
+    public function test_a_staff_file_needs_a_name_and_shows_its_name_and_details_instead_of_the_file_name(): void
+    {
+        $file = fn () => UploadedFile::fake()->createWithContent('scan_0042.pdf', "%PDF-1.4\n%%EOF\n");
+        $this->attach($file(), details: ['title' => ''])->assertSessionHasErrors('title');
+
+        $this->attach($file(), shared: true, details: ['title' => 'Signed consent (mother)', 'description' => "Signed on 24 Oct.\nThe father's copy follows."])
+            ->assertSessionHasNoErrors();
+
+        $shown = app(PreOrderSnapshot::class)->build($this->preOrder->refresh())['documents'][0];
+        $this->assertSame('Signed consent (mother)', $shown['name']);
+        $this->assertSame('scan_0042.pdf', $shown['file_name']);
+        $this->assertSame("Signed on 24 Oct.\nThe father's copy follows.", $shown['description']);
+        $this->assertContains('Signed consent (mother)', array_column(app(PreOrderSnapshot::class)->build($this->preOrder)['history'], 'body'));
     }
 
     /** @return list<string> */

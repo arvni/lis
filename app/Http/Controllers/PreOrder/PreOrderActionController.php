@@ -6,6 +6,7 @@ namespace App\Http\Controllers\PreOrder;
 
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\PreOrder\DTOs\Actor;
+use App\Domains\PreOrder\DTOs\DocumentDetails;
 use App\Domains\PreOrder\DTOs\QuoteDTO;
 use App\Domains\PreOrder\DTOs\RaiseRequestDTO;
 use App\Domains\PreOrder\Enums\ExceptionType;
@@ -166,7 +167,7 @@ class PreOrderActionController extends Controller
         $file = $request->file('file');
 
         return $this->run(
-            fn () => $this->workflow->addStaffDocument($preOrder, $file, DocumentTag::from((string) $request->validated('tag')), $shared, $this->actor($request)),
+            fn () => $this->workflow->addStaffDocument($preOrder, $file, DocumentTag::from((string) $request->validated('tag')), $shared, $this->actor($request), DocumentDetails::fromArray($request->validated())),
             $shared ? 'File attached and shared with the center.' : 'File attached (BION only).',
         );
     }

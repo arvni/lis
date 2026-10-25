@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useForm } from '@inertiajs/react';
 import {
     Alert,
+    Box,
     Button,
     Chip,
     FormControlLabel,
@@ -43,9 +44,20 @@ export default function DocumentsTab({ preOrder, canReview }) {
     const input = useRef(null);
     const { data, setData, post, processing, errors, reset } = useForm({
         file: null,
+        title: '',
+        description: '',
         tag: 'DOCUMENT',
         shared: false,
     });
+
+    // Start the name from the file name; staff usually make it clearer.
+    const pickFile = (file) => {
+        setData((d) => ({
+            ...d,
+            file,
+            title: d.title || (file?.name ?? '').replace(/\.[^.]+$/, '').slice(0, 150),
+        }));
+    };
     const requestOf = Object.fromEntries(
         preOrder.history
             .filter((h) => h.type === 'document' && h.request)
@@ -66,20 +78,49 @@ export default function DocumentsTab({ preOrder, canReview }) {
         <Stack spacing={2}>
             {canReview && (
                 <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
+                        Attach a file
+                    </Typography>
                     <Stack
                         direction={{ xs: 'column', md: 'row' }}
                         spacing={2}
-                        alignItems={{ md: 'center' }}
+                        alignItems={{ md: 'flex-start' }}
                     >
-                        <Button variant="outlined" component="label" startIcon={<UploadFile />}>
-                            {data.file ? data.file.name : 'Choose a file'}
+                        <Button
+                            variant="outlined"
+                            component="label"
+                            startIcon={<UploadFile />}
+                            sx={{ minWidth: 200, justifyContent: 'flex-start' }}
+                        >
+                            <Box
+                                component="span"
+                                sx={{
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    maxWidth: 220,
+                                }}
+                            >
+                                {data.file ? data.file.name : 'Choose a file'}
+                            </Box>
                             <input
                                 ref={input}
                                 hidden
                                 type="file"
-                                onChange={(e) => setData('file', e.target.files?.[0] ?? null)}
+                                onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
                             />
                         </Button>
+                        <TextField
+                            size="small"
+                            label="Name"
+                            required
+                            value={data.title}
+                            onChange={(e) => setData('title', e.target.value)}
+                            error={Boolean(errors.title)}
+                            helperText={errors.title}
+                            inputProps={{ maxLength: 150 }}
+                            sx={{ flex: 1 }}
+                        />
                         <TextField
                             select
                             size="small"
@@ -94,6 +135,28 @@ export default function DocumentsTab({ preOrder, canReview }) {
                                 </MenuItem>
                             ))}
                         </TextField>
+                    </Stack>
+                    <TextField
+                        size="small"
+                        label="Details (optional)"
+                        placeholder="What is this file and why it matters, e.g. the patient's earlier report from another lab"
+                        multiline
+                        minRows={2}
+                        fullWidth
+                        value={data.description}
+                        onChange={(e) => setData('description', e.target.value)}
+                        error={Boolean(errors.description)}
+                        helperText={errors.description}
+                        inputProps={{ maxLength: 2000 }}
+                        sx={{ mt: 2 }}
+                    />
+                    <Stack
+                        direction="row"
+                        spacing={2}
+                        alignItems="center"
+                        justifyContent="space-between"
+                        sx={{ mt: 1 }}
+                    >
                         <FormControlLabel
                             control={
                                 <Switch
@@ -106,7 +169,7 @@ export default function DocumentsTab({ preOrder, canReview }) {
                         <Button
                             variant="contained"
                             onClick={upload}
-                            disabled={processing || !data.file}
+                            disabled={processing || !data.file || !data.title.trim()}
                         >
                             Attach
                         </Button>
@@ -135,7 +198,7 @@ export default function DocumentsTab({ preOrder, canReview }) {
                     <Table size="small">
                         <TableHead>
                             <TableRow>
-                                <TableCell>File</TableCell>
+                                <TableCell sx={{ width: '40%' }}>File</TableCell>
                                 <TableCell>Type</TableCell>
                                 <TableCell>From</TableCell>
                                 <TableCell>For request</TableCell>
@@ -156,6 +219,20 @@ export default function DocumentsTab({ preOrder, canReview }) {
                                         >
                                             {d.name}
                                         </Link>
+                                        {d.description && (
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                sx={{ whiteSpace: 'pre-wrap', mt: 0.25 }}
+                                            >
+                                                {d.description}
+                                            </Typography>
+                                        )}
+                                        {d.file_name && d.file_name !== d.name && (
+                                            <Typography variant="caption" color="text.secondary">
+                                                {d.file_name}
+                                            </Typography>
+                                        )}
                                     </TableCell>
                                     <TableCell>{TAG_LABEL[d.tag] ?? d.tag}</TableCell>
                                     <TableCell>
