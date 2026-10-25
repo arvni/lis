@@ -19,8 +19,8 @@ enum PreOrderActionType: string
     case REQUEST_HOLD = 'request_hold';
     case RESUME = 'resume';
     case CANCEL = 'cancel';
-    // Phase 2 and 3. Recognised so an early panel gets a clear error instead of an unknown type.
     case DECIDE_FINANCE = 'decide_finance';
+    // Phase 3. Recognised so an early panel gets a clear error instead of an unknown type.
     case ADD_BATCH = 'add_batch';
     case CLOSE_BATCHES = 'close_batches';
 }

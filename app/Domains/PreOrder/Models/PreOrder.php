@@ -107,6 +107,12 @@ class PreOrder extends Model
         return $this->hasMany(PreOrderRequest::class);
     }
 
+    /** @return HasMany<PreOrderQuotation, $this> */
+    public function quotations(): HasMany
+    {
+        return $this->hasMany(PreOrderQuotation::class);
+    }
+
     /** @return HasMany<PreOrderHistory, $this> */
     public function histories(): HasMany
     {

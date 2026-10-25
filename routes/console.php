@@ -63,4 +63,11 @@ Schedule::command('pre-orders:reconcile')
         Log::error('Scheduled command failed: pre-orders:reconcile');
     });
 
+Schedule::command('pre-orders:expire-quotations')
+    ->dailyAt('02:15')
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        Log::error('Scheduled command failed: pre-orders:expire-quotations');
+    });
+
 Schedule::command('telescope:prune --hours=48')->daily();

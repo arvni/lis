@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { router, useForm } from '@inertiajs/react';
 import {
@@ -6,6 +6,8 @@ import {
     Button,
     Checkbox,
     Chip,
+    IconButton,
+    MenuItem,
     Divider,
     FormControlLabel,
     FormGroup,
@@ -14,13 +16,26 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
+import { Close } from '@mui/icons-material';
+import SelectSearch from '@/Components/SelectSearch';
+import { patientName } from './stage';
 
 const TYPES = [
     { value: 'information', label: 'Information / document' },
     { value: 'samples', label: 'Additional samples' },
 ];
 
-const STATUS_COLOR = { open: 'warning', answered: 'info', closed: 'success', declined: 'default' };
+// Once the tests are released, an additional test comes as a request with its own quotation.
+const TEST_TYPE = { value: 'test', label: 'Additional test' };
+
+const STATUS_COLOR = {
+    open: 'warning',
+    answered: 'info',
+    awaiting_finance: 'warning',
+    order_created: 'info',
+    closed: 'success',
+    declined: 'default',
+};
 
 const fmt = (iso) => (iso ? new Date(iso).toLocaleDateString() : '—');
 
@@ -32,7 +47,26 @@ export default function RequestsTab({ preOrder }) {
         message: '',
         blocking: false,
         due_at: '',
+        tests: [],
+        retest: false,
     });
+    const [picked, setPicked] = useState(null);
+    const types = preOrder.can.request_test ? [...TYPES, TEST_TYPE] : TYPES;
+    const wantsTests = data.types.includes('test');
+
+    const addTest = (test) => {
+        setPicked(null);
+        if (!test || data.tests.some((t) => t.test_id === test.id)) return;
+        setData('tests', [
+            ...data.tests,
+            { test_id: test.id, name: test.name, patient_ref: preOrder.main_patient_ref, qty: 1 },
+        ]);
+    };
+    const setTestLine = (index, field, value) =>
+        setData(
+            'tests',
+            data.tests.map((t, i) => (i === index ? { ...t, [field]: value } : t)),
+        );
 
     const toggleType = (value, checked) =>
         setData('types', checked ? [...data.types, value] : data.types.filter((t) => t !== value));
@@ -93,7 +127,17 @@ export default function RequestsTab({ preOrder }) {
                                 Center: {r.answer}
                             </Typography>
                         )}
-                        {['open', 'answered'].includes(r.status) && (
+                        {preOrder.items
+                            .filter((i) => i.request === r.number)
+                            .map((i) => (
+                                <Typography key={i.id} variant="body2" sx={{ mt: 0.5 }}>
+                                    + {i.test_name} for {patientName(preOrder, i.patient_ref)}
+                                    {i.quotation ? ` · ${i.quotation}` : ''} · {i.status}
+                                </Typography>
+                            ))}
+                        {['open', 'answered', 'awaiting_finance', 'order_created'].includes(
+                            r.status,
+                        ) && (
                             <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
                                 <Button size="small" onClick={() => close(r.number, false)}>
                                     {r.status === 'answered' ? 'Accept answer & close' : 'Withdraw'}
@@ -117,7 +161,7 @@ export default function RequestsTab({ preOrder }) {
                         Ask the center
                     </Typography>
                     <FormGroup row>
-                        {TYPES.map((t) => (
+                        {types.map((t) => (
                             <FormControlLabel
                                 key={t.value}
                                 control={
@@ -160,6 +204,90 @@ export default function RequestsTab({ preOrder }) {
                             label="Blocking (the lab can't continue)"
                         />
                     </Stack>
+                    {wantsTests && (
+                        <Box sx={{ mt: 1 }}>
+                            <SelectSearch
+                                label="Add a test"
+                                size="small"
+                                url={route('api.tests.list')}
+                                value={picked}
+                                name="test"
+                                sx={{ minWidth: 280 }}
+                                onChange={(e) => addTest(e.target.value)}
+                            />
+                            {data.tests.map((t, index) => (
+                                <Stack
+                                    key={t.test_id}
+                                    direction="row"
+                                    spacing={1}
+                                    alignItems="center"
+                                    sx={{ mt: 1 }}
+                                >
+                                    <Typography variant="body2" sx={{ minWidth: 180 }}>
+                                        {t.name}
+                                    </Typography>
+                                    <TextField
+                                        select
+                                        size="small"
+                                        label="For"
+                                        value={t.patient_ref ?? ''}
+                                        onChange={(e) =>
+                                            setTestLine(index, 'patient_ref', e.target.value)
+                                        }
+                                        sx={{ minWidth: 180 }}
+                                    >
+                                        {preOrder.patients.map((p) => (
+                                            <MenuItem key={p.ref} value={p.ref}>
+                                                {p.fullName}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                    <TextField
+                                        size="small"
+                                        type="number"
+                                        label="Qty"
+                                        value={t.qty}
+                                        onChange={(e) =>
+                                            setTestLine(index, 'qty', Number(e.target.value))
+                                        }
+                                        inputProps={{ min: 1, max: 20 }}
+                                        sx={{ width: 90 }}
+                                    />
+                                    <IconButton
+                                        size="small"
+                                        aria-label="Remove test"
+                                        onClick={() =>
+                                            setData(
+                                                'tests',
+                                                data.tests.filter((_, i) => i !== index),
+                                            )
+                                        }
+                                    >
+                                        <Close fontSize="small" />
+                                    </IconButton>
+                                </Stack>
+                            ))}
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={data.retest}
+                                        onChange={(e) => setData('retest', e.target.checked)}
+                                    />
+                                }
+                                label="Re-test with new work (e.g. another method)"
+                            />
+                            <Typography variant="caption" color="text.secondary" display="block">
+                                Priced from the catalogue and sent to the center as its own
+                                quotation. Approved lines go to the lab on an add-on order; the main
+                                order is not touched.
+                            </Typography>
+                            {errors.tests && (
+                                <Typography variant="caption" color="error">
+                                    {errors.tests}
+                                </Typography>
+                            )}
+                        </Box>
+                    )}
                     <TextField
                         fullWidth
                         multiline
@@ -175,7 +303,9 @@ export default function RequestsTab({ preOrder }) {
                         sx={{ mt: 1 }}
                         variant="contained"
                         onClick={raise}
-                        disabled={processing || !data.types.length}
+                        disabled={
+                            processing || !data.types.length || (wantsTests && !data.tests.length)
+                        }
                     >
                         Send request
                     </Button>

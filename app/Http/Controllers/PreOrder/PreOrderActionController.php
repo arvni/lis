@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\PreOrder;
 
 use App\Domains\PreOrder\DTOs\Actor;
+use App\Domains\PreOrder\DTOs\QuoteDTO;
 use App\Domains\PreOrder\DTOs\RaiseRequestDTO;
 use App\Domains\PreOrder\Enums\ExceptionType;
 use App\Domains\PreOrder\Exceptions\PreOrderRuleException;
@@ -12,6 +13,7 @@ use App\Domains\PreOrder\Models\PreOrder;
 use App\Domains\PreOrder\Requests\AddPreOrderTestRequest;
 use App\Domains\PreOrder\Requests\AssignPreOrderRequest;
 use App\Domains\PreOrder\Requests\ClosePreOrderRequest;
+use App\Domains\PreOrder\Requests\ConfirmPreOrderRequest;
 use App\Domains\PreOrder\Requests\PreOrderNoteRequest;
 use App\Domains\PreOrder\Requests\PreOrderReasonRequest;
 use App\Domains\PreOrder\Requests\RaisePreOrderRequestRequest;
@@ -87,11 +89,21 @@ class PreOrderActionController extends Controller
         ), 'Request closed.');
     }
 
-    public function confirm(Request $request, PreOrder $preOrder): RedirectResponse
+    public function confirm(ConfirmPreOrderRequest $request, PreOrder $preOrder): RedirectResponse
     {
-        $this->authorize('review', $preOrder);
+        return $this->run(fn () => $this->workflow->confirmTests($preOrder, $this->actor($request), QuoteDTO::fromArray($request->validated())), 'Tests confirmed.');
+    }
 
-        return $this->run(fn () => $this->workflow->confirmTests($preOrder, $this->actor($request)), 'Tests confirmed and released.');
+    public function verifyFinance(Request $request, PreOrder $preOrder): RedirectResponse
+    {
+        $this->authorize('quote', $preOrder);
+
+        return $this->run(fn () => $this->workflow->verifyFinance($preOrder, $this->actor($request)), 'Approval checked; tests released.');
+    }
+
+    public function reviseQuotation(PreOrderReasonRequest $request, PreOrder $preOrder): RedirectResponse
+    {
+        return $this->run(fn () => $this->workflow->reviseQuotation($preOrder, $request->validated('reason'), $this->actor($request)), 'Back in review to revise the quotation.');
     }
 
     public function note(PreOrderNoteRequest $request, PreOrder $preOrder): RedirectResponse

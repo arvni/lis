@@ -6,6 +6,7 @@ namespace App\Domains\PreOrder\Repositories;
 
 use App\Domains\PreOrder\Enums\ActionOwner;
 use App\Domains\PreOrder\Enums\PreOrderStage;
+use App\Domains\PreOrder\Enums\RequestStatus;
 use App\Domains\PreOrder\Models\PreOrder;
 use App\Domains\PreOrder\Models\PreOrderHistory;
 use App\Domains\PreOrder\Models\PreOrderItem;
@@ -94,7 +95,7 @@ class PreOrderRepository
     /** @return Collection<int, PreOrderRequest> */
     public function openRequests(PreOrder $preOrder): Collection
     {
-        return $preOrder->requests()->whereIn('status', ['open', 'answered'])->orderBy('number')->get();
+        return $preOrder->requests()->whereIn('status', array_map(fn (RequestStatus $s) => $s->value, array_filter(RequestStatus::cases(), fn (RequestStatus $s) => $s->isOpen())))->orderBy('number')->get();
     }
 
     /** Everything the detail page and the snapshot show, in one round of queries. */
@@ -107,6 +108,8 @@ class PreOrderRepository
             'flow:id,name,family',
             'items.test:id,name,code',
             'requests',
+            'quotations' => fn ($q) => $q->orderBy('id'),
+            'quotations.items.test:id,name,code',
             'histories' => fn ($q) => $q->orderBy('id'),
             'histories.user:id,name',
             'documents',

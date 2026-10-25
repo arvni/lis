@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\PreOrder;
 
+use App\Domains\PreOrder\DTOs\FinanceDecisionDTO;
 use App\Domains\PreOrder\DTOs\RaiseRequestDTO;
 use App\Domains\PreOrder\Enums\ActionOwner;
 use App\Domains\PreOrder\Enums\ExceptionType;
@@ -107,6 +108,11 @@ class PreOrderWorkflowTest extends PreOrderTestCase
         $this->workflow->addTest($preOrder, $karyotype, 'P2', 1, $this->bion());
         $preOrder = $this->workflow->confirmTests($preOrder->refresh(), $this->bion());
 
+        // Every test on a "describe the case" pre-order is BION's choice, so the center approves the cost first.
+        $this->assertSame(PreOrderStage::AWAITING_FINANCE, $preOrder->stage);
+        $number = $preOrder->quotations()->value('number');
+        $preOrder = $this->workflow->decideFinance($preOrder, FinanceDecisionDTO::fromArray(['quotation' => $number, 'decision' => 'approve']), $this->center());
+
         $this->assertSame(PreOrderStage::AWAITING_SAMPLES, $preOrder->stage);
         $this->assertSame(DB::table('flows')->where('family', 'exome')->value('id'), $preOrder->flow_id);
         $this->assertSame(2, $preOrder->items()->where('status', 'released')->count(), 'a ride-along test goes on the same order');
@@ -124,7 +130,7 @@ class PreOrderWorkflowTest extends PreOrderTestCase
         $preOrder = $this->workflow->openReview($preOrder, $this->bion());
         $this->assertRule(fn () => $this->workflow->raiseRequest($preOrder, RaiseRequestDTO::fromArray([
             'types' => ['test'], 'reason' => 'sanger', 'message' => 'Confirm by Sanger',
-        ]), $this->bion()), 'not available yet');
+        ]), $this->bion()), 'Add the test to the pre-order directly');
 
         $preOrder = $this->workflow->confirmTests($preOrder, $this->bion());
         $this->assertRule(fn () => $this->workflow->addTest($preOrder, $nipt, null, 1, $this->bion()), 'already released');

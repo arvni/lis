@@ -25,6 +25,12 @@ class PreOrderPolicy
         return $user->can('PreOrders.Cases.Review');
     }
 
+    /** Give discounts, price lines the catalogue can't, run the optional BION check, see the finance desk. */
+    public function quote(User $user, ?PreOrder $preOrder = null): bool
+    {
+        return $user->can('PreOrders.Finance.Quote');
+    }
+
     /** Cancel after samples arrived, and other moves outside the normal rules. */
     public function override(User $user, PreOrder $preOrder): bool
     {

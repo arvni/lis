@@ -2,6 +2,7 @@ import React from 'react';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import GroupsIcon from '@mui/icons-material/Groups';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import FlipCameraAndroidIcon from '@mui/icons-material/FlipCameraAndroid';
 import ApprovalIcon from '@mui/icons-material/Approval';
 import HorizontalSplitIcon from '@mui/icons-material/HorizontalSplit';
@@ -475,6 +476,20 @@ const routes = (sections = []) => {
             icon: <AccountTreeIcon />,
             route: 'pre-orders.index',
             permission: 'PreOrders.Cases.List',
+            child: [
+                {
+                    title: 'Work queue',
+                    route: 'pre-orders.index',
+                    permission: 'PreOrders.Cases.List',
+                    icon: <AccountTreeIcon fontSize="small" />,
+                },
+                {
+                    title: 'Finance desk',
+                    route: 'pre-orders.finance',
+                    permission: 'PreOrders.Finance.Quote',
+                    icon: <RequestQuoteIcon fontSize="small" />,
+                },
+            ],
         },
         {
             title: 'Referrers',

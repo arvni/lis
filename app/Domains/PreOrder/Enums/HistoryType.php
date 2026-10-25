@@ -16,4 +16,5 @@ enum HistoryType: string
     case COMMENT = 'comment';
     case REQUEST = 'request';
     case DOCUMENT = 'document';
+    case FINANCE = 'finance';
 }

@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Domains\PreOrder\Services;
 
 use App\Domains\PreOrder\Adapters\DocumentAdapter;
+use App\Domains\PreOrder\Enums\ExceptionType;
+use App\Domains\PreOrder\Enums\FinanceReason;
 use App\Domains\PreOrder\Enums\ItemStatus;
 use App\Domains\PreOrder\Enums\PreOrderStage;
 use App\Domains\PreOrder\Models\PreOrder;
 use App\Domains\PreOrder\Models\PreOrderHistory;
 use App\Domains\PreOrder\Models\PreOrderItem;
+use App\Domains\PreOrder\Models\PreOrderQuotation;
 use App\Domains\PreOrder\Repositories\PreOrderRepository;
+use App\Domains\PreOrder\Repositories\QuotationRepository;
 use App\Domains\PreOrder\Support\FlowStages;
 use App\Domains\PreOrder\Support\PreOrderSnapshot;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -23,7 +27,18 @@ class PreOrderService
         private readonly PreOrderRepository $preOrders,
         private readonly PreOrderSnapshot $snapshot,
         private readonly DocumentAdapter $documents,
+        private readonly FinanceRules $finance,
+        private readonly QuotationRepository $quotations,
     ) {}
+
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return LengthAwarePaginator<int, PreOrderQuotation>
+     */
+    public function financeDesk(array $filters): LengthAwarePaginator
+    {
+        return $this->quotations->desk($filters);
+    }
 
     public function download(PreOrder $preOrder, string $hash): BinaryFileResponse
     {
@@ -66,6 +81,11 @@ class PreOrderService
             ])->values()->all();
         $view['referrer'] = $preOrder->referrer?->only(['id', 'fullName']);
         $view['assignee'] = $preOrder->assignee?->only(['id', 'name']);
+        // Whether confirming now sends a quotation, and why, so BION knows before clicking.
+        $pending = $preOrder->items->filter(fn (PreOrderItem $i) => ! in_array($i->status, [ItemStatus::DROPPED, ItemStatus::APPROVED, ItemStatus::RELEASED], true))->values();
+        $view['finance_preview'] = FlowStages::financeEnabled($preOrder) && $preOrder->stage->isReview()
+            ? array_map(fn (FinanceReason $r) => $r->label(), $this->finance->reasons($preOrder, $pending))
+            : [];
         $view['can'] = $this->allowed($preOrder);
 
         return $view;
@@ -76,6 +96,7 @@ class PreOrderService
     {
         $open = ! $preOrder->isClosed();
         $stage = $preOrder->stage;
+        $exception = ExceptionType::tryFrom((string) ($preOrder->exception['type'] ?? ''));
         $beforeRelease = $open && $stage->rank() >= PreOrderStage::SUBMITTED->rank() && $stage->rank() <= PreOrderStage::INFO_REVIEW->rank();
 
         return [
@@ -84,7 +105,11 @@ class PreOrderService
             'raise_request' => $open && $stage->rank() >= PreOrderStage::UNDER_REVIEW->rank(),
             'confirm' => $open && in_array($stage, [PreOrderStage::UNDER_REVIEW, PreOrderStage::INFO_REVIEW], true),
             'hold' => $open && $preOrder->exception === null,
-            'resume' => $open && $preOrder->exception !== null,
+            'resume' => $open && $preOrder->exception !== null && $exception !== ExceptionType::FINANCE_REJECTED,
+            'verify_finance' => $open && $stage === PreOrderStage::FINANCE_VERIFY,
+            'revise_quotation' => $open && $stage === PreOrderStage::AWAITING_FINANCE,
+            // Additional tests come as a request once the main tests are released.
+            'request_test' => $open && $stage->rank() > PreOrderStage::FINANCE_VERIFY->rank(),
             'close' => $open,
             'stage_is_read_from_orders' => FlowStages::uses($preOrder, $stage) && $stage->isReadFromOrders(),
         ];

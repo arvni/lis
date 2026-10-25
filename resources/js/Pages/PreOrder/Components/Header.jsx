@@ -21,9 +21,10 @@ const post = (name, preOrder, data = {}) =>
     router.post(route(name, preOrder.id), data, { preserveScroll: true });
 
 /** Who, what stage, who must act, and the stage actions BION can take now. */
-export default function Header({ preOrder }) {
+export default function Header({ preOrder, onFinance }) {
     const [closing, setClosing] = useState(false);
     const { can, stage, exception } = preOrder;
+    const needsQuotation = (preOrder.finance_preview ?? []).length > 0;
     const days = daysSince(stage.entered_at);
 
     return (
@@ -89,13 +90,18 @@ export default function Header({ preOrder }) {
                                 Open review
                             </Button>
                         )}
-                        {can.confirm && (
+                        {can.confirm && !needsQuotation && (
                             <Button
                                 variant="contained"
                                 color="success"
                                 onClick={() => post('pre-orders.confirm', preOrder)}
                             >
                                 Confirm tests & release
+                            </Button>
+                        )}
+                        {can.confirm && needsQuotation && (
+                            <Button variant="contained" color="success" onClick={onFinance}>
+                                Confirm tests & quote…
                             </Button>
                         )}
                         {can.hold && (
@@ -126,7 +132,12 @@ export default function Header({ preOrder }) {
 
             {exception && (
                 <Alert severity={preOrder.closed_at ? 'error' : 'warning'} sx={{ mt: 2 }}>
-                    {preOrder.closed_at ? 'Closed' : 'On hold'} by {exception.by ?? exception.side}
+                    {preOrder.closed_at
+                        ? 'Closed'
+                        : exception.type === 'finance_rejected'
+                          ? 'Financial approval rejected'
+                          : 'On hold'}{' '}
+                    by {exception.by ?? exception.side}
                     {exception.reason ? ` — ${exception.reason}` : ''}
                     {exception.comment ? `: ${exception.comment}` : ''}
                 </Alert>
@@ -149,4 +160,4 @@ export default function Header({ preOrder }) {
     );
 }
 
-Header.propTypes = { preOrder: PropTypes.object.isRequired };
+Header.propTypes = { preOrder: PropTypes.object.isRequired, onFinance: PropTypes.func };

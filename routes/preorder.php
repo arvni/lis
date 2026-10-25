@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'pre-orders', 'as' => 'pre-orders.'], function () {
     Route::get('/', [PreOrderController::class, 'index'])->name('index');
+    Route::get('finance', [PreOrderController::class, 'finance'])->name('finance');
     Route::get('{preOrder}', [PreOrderController::class, 'show'])->name('show');
     Route::get('{preOrder}/documents/{hash}', [PreOrderController::class, 'document'])->whereUuid('hash')->name('documents.show');
 
@@ -17,6 +18,8 @@ Route::group(['prefix' => 'pre-orders', 'as' => 'pre-orders.'], function () {
     Route::post('{preOrder}/requests', [Actions::class, 'raiseRequest'])->name('requests.store');
     Route::post('{preOrder}/requests/{number}/close', [Actions::class, 'closeRequest'])->whereNumber('number')->name('requests.close');
     Route::post('{preOrder}/confirm', [Actions::class, 'confirm'])->name('confirm');
+    Route::post('{preOrder}/finance/verify', [Actions::class, 'verifyFinance'])->name('finance.verify');
+    Route::post('{preOrder}/finance/revise', [Actions::class, 'reviseQuotation'])->name('finance.revise');
     Route::post('{preOrder}/notes', [Actions::class, 'note'])->name('notes.store');
     Route::post('{preOrder}/hold', [Actions::class, 'hold'])->name('hold');
     Route::post('{preOrder}/resume', [Actions::class, 'resume'])->name('resume');

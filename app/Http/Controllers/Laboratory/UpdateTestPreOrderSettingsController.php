@@ -17,7 +17,12 @@ class UpdateTestPreOrderSettingsController extends Controller
     public function __invoke(UpdateTestPreOrderSettingsRequest $request, Test $test): RedirectResponse
     {
         $flowId = $request->validated('flow_id');
-        $this->testService->updatePreOrderSettings($test, $flowId === null ? null : (int) $flowId, (bool) $request->validated('can_be_main'));
+        $this->testService->updatePreOrderSettings(
+            $test,
+            $flowId === null ? null : (int) $flowId,
+            (bool) $request->validated('can_be_main'),
+            $request->validated('scope') ?? [],
+        );
 
         return back()->with([
             'success' => true,

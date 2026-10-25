@@ -222,12 +222,23 @@ readonly class TestService
      * Switch a test on for pre-orders with a flow, or off with none. Open pre-orders keep the flow
      * they copied, so this only affects new ones. Kept apart from updateTest() so a normal test
      * save never touches these fields.
+     *
+     * @param  list<array<string, mixed>>  $scope
      */
-    public function updatePreOrderSettings(Test $test, ?int $flowId, bool $canBeMain): Test
+    public function updatePreOrderSettings(Test $test, ?int $flowId, bool $canBeMain, array $scope = []): Test
     {
+        $scope = array_map(fn (array $field) => [
+            'key' => $field['key'],
+            'label' => $field['label'],
+            'type' => $field['type'],
+            'needs_finance' => (bool) ($field['needs_finance'] ?? false),
+            // A yes/no answer needs finance when it is yes; a number from the threshold up.
+            'threshold' => $field['type'] === 'number' ? (int) ($field['threshold'] ?? 1) : null,
+        ], array_values($scope));
+
         return $this->testRepository->updateTest($test, [
             'flow_id' => $flowId,
-            'preorder' => [...($test->preorder ?? []), 'can_be_main' => $canBeMain],
+            'preorder' => [...($test->preorder ?? []), 'can_be_main' => $canBeMain, 'scope' => $scope],
         ]);
     }
 }

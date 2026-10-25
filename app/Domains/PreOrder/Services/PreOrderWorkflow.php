@@ -10,9 +10,13 @@ use App\Domains\PreOrder\Adapters\LaboratoryAdapter;
 use App\Domains\PreOrder\Adapters\ReferrerAdapter;
 use App\Domains\PreOrder\DTOs\Actor;
 use App\Domains\PreOrder\DTOs\CreatePreOrderDTO;
+use App\Domains\PreOrder\DTOs\FinanceDecisionDTO;
+use App\Domains\PreOrder\DTOs\QuoteDTO;
 use App\Domains\PreOrder\DTOs\RaiseRequestDTO;
 use App\Domains\PreOrder\Enums\ActionOwner;
 use App\Domains\PreOrder\Enums\ExceptionType;
+use App\Domains\PreOrder\Enums\FinanceDecision;
+use App\Domains\PreOrder\Enums\FinanceStatus;
 use App\Domains\PreOrder\Enums\HistoryType;
 use App\Domains\PreOrder\Enums\ItemStatus;
 use App\Domains\PreOrder\Enums\PreOrderStage;
@@ -22,16 +26,20 @@ use App\Domains\PreOrder\Enums\RequestType;
 use App\Domains\PreOrder\Enums\Side;
 use App\Domains\PreOrder\Enums\StartMode;
 use App\Domains\PreOrder\Events\PreOrderChanged;
+use App\Domains\PreOrder\Events\QuotationDecided;
 use App\Domains\PreOrder\Exceptions\PreOrderRuleException;
 use App\Domains\PreOrder\Models\PreOrder;
 use App\Domains\PreOrder\Models\PreOrderItem;
+use App\Domains\PreOrder\Models\PreOrderQuotation;
 use App\Domains\PreOrder\Models\PreOrderRequest;
 use App\Domains\PreOrder\Repositories\FlowRepository;
 use App\Domains\PreOrder\Repositories\PreOrderRepository;
+use App\Domains\PreOrder\Repositories\QuotationRepository;
 use App\Domains\PreOrder\Support\FlowStages;
 use App\Domains\PreOrder\Support\InspectedUpload;
 use App\Domains\PreOrder\Support\LinkedOrder;
 use Closure;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -52,6 +60,9 @@ class PreOrderWorkflow
         private readonly LaboratoryAdapter $laboratory,
         private readonly ReferrerAdapter $referrerOrders,
         private readonly DocumentAdapter $documents,
+        private readonly FinanceRules $finance,
+        private readonly QuotationService $quotationService,
+        private readonly QuotationRepository $quotations,
     ) {}
 
     // ---------------------------------------------------------------- center
@@ -244,9 +255,13 @@ class PreOrderWorkflow
             if ($preOrder->stage->rank() < PreOrderStage::UNDER_REVIEW->rank()) {
                 throw new PreOrderRuleException('Open the review before asking the center for anything.');
             }
-            if (in_array(RequestType::TEST, $dto->types, true)) {
-                // An additional test brings its own quotation and add-on order (phase 2).
-                throw new PreOrderRuleException('Additional-test requests are not available yet.');
+            $isTest = in_array(RequestType::TEST, $dto->types, true);
+            if ($isTest && $preOrder->stage->rank() <= PreOrderStage::FINANCE_VERIFY->rank()) {
+                // Before the tests are released BION edits the list itself.
+                throw new PreOrderRuleException('Add the test to the pre-order directly; it is not released yet.');
+            }
+            if ($isTest && $dto->tests === []) {
+                throw new PreOrderRuleException('Pick the additional tests.');
             }
 
             $request = $this->preOrders->addRequest($preOrder, [
@@ -260,6 +275,10 @@ class PreOrderWorkflow
                 'raised_by' => $actor->userId,
             ]);
             $this->history($preOrder, HistoryType::REQUEST, $actor, body: $dto->message, meta: ['request' => $request->number, 'event' => 'raised']);
+
+            if ($isTest) {
+                $this->quoteRequestTests($preOrder, $request, $dto, $actor);
+            }
 
             if (in_array($preOrder->stage, [PreOrderStage::UNDER_REVIEW, PreOrderStage::INFO_REVIEW], true)) {
                 return $this->transition($preOrder, PreOrderStage::AWAITING_INFO, $actor, $request->label());
@@ -279,10 +298,7 @@ class PreOrderWorkflow
             if (! $request->status->isOpen()) {
                 throw new PreOrderRuleException("{$request->label()} is already closed.");
             }
-            $this->preOrders->updateRequest($request, [
-                'status' => $declined ? RequestStatus::DECLINED : RequestStatus::CLOSED,
-                'closed_at' => now(),
-            ]);
+            $this->endRequest($preOrder, $request, $declined);
             $this->history($preOrder, HistoryType::REQUEST, $actor, body: $note, meta: ['request' => $request->number, 'event' => $declined ? 'declined' : 'closed']);
 
             return $this->afterRequestChange($preOrder, $actor);
@@ -290,13 +306,14 @@ class PreOrderWorkflow
     }
 
     /**
-     * BION is done reviewing: the tests are fixed and go to the lab. With no finance yet (phase 2)
-     * every remaining line is approved and released on one main order, which the center completes
-     * with sample details in the provider panel, the same way as a direct order.
+     * BION is done reviewing: the tests are fixed. When the finance rules hold for lines the
+     * center hasn't approved yet, they go to the center as a quotation first; otherwise every
+     * line is released on one main order, which the center completes with sample details in the
+     * provider panel, the same way as a direct order.
      */
-    public function confirmTests(PreOrder $preOrder, Actor $actor): PreOrder
+    public function confirmTests(PreOrder $preOrder, Actor $actor, ?QuoteDTO $quote = null): PreOrder
     {
-        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($actor) {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($actor, $quote) {
             $this->expectStage($preOrder, [PreOrderStage::UNDER_REVIEW, PreOrderStage::INFO_REVIEW]);
             if ($preOrder->main_test_id === null || $preOrder->flow_id === null) {
                 throw new PreOrderRuleException('Choose the main test first; it sets the flow.');
@@ -310,24 +327,162 @@ class PreOrderWorkflow
                 throw new PreOrderRuleException('Close or withdraw the open requests first.');
             }
             // Answers BION has read are settled by confirming.
-            foreach ($open as $request) {
+            foreach ($open->filter(fn (PreOrderRequest $r) => $r->status === RequestStatus::ANSWERED) as $request) {
                 $this->preOrders->updateRequest($request, ['status' => RequestStatus::CLOSED, 'closed_at' => now()]);
             }
 
-            $key = $this->nextReleaseKey($preOrder, ReleasePurpose::MAIN);
-            foreach ($items as $item) {
-                $this->preOrders->updateItem($item, [
-                    'status' => ItemStatus::RELEASED,
-                    'release_key' => $key,
-                    'release_purpose' => ReleasePurpose::MAIN,
-                ]);
+            // Lines the center approved on an earlier (partial) quotation are not asked again.
+            $pending = $items->reject(fn (PreOrderItem $i) => $i->status === ItemStatus::APPROVED)->values();
+            $reasons = FlowStages::financeEnabled($preOrder) ? $this->finance->reasons($preOrder, $pending) : [];
+
+            if ($reasons !== [] && $pending->isNotEmpty()) {
+                $quotation = $this->quotationService->open($preOrder, $pending, null, $reasons, $quote ?? new QuoteDTO, $actor);
+                $preOrder->unsetRelation('quotations');
+                $this->history($preOrder, HistoryType::FINANCE, $actor, body: $quote?->reason, meta: ['quotation' => $quotation->number, 'event' => 'sent', 'total' => (string) $quotation->total]);
+
+                return $this->transition($preOrder, PreOrderStage::AWAITING_FINANCE, $actor, $quotation->number);
             }
-            $this->history($preOrder, HistoryType::DECISION, $actor, body: 'Tests confirmed and released to the lab', meta: ['release_key' => $key, 'items' => $items->pluck('id')->all()]);
+            if ($quote?->hasFinanceInput()) {
+                throw new PreOrderRuleException('No quotation is needed, so prices and discounts don\'t apply.');
+            }
 
-            $next = FlowStages::nextAfter($preOrder, PreOrderStage::INFO_REVIEW)
-                ?? throw new PreOrderRuleException('The flow has no stage after review.');
+            foreach ($pending as $item) {
+                $this->preOrders->updateItem($item, ['status' => ItemStatus::APPROVED]);
+            }
 
-            return $this->transition($preOrder, $next, $actor);
+            return $this->releaseMain($preOrder, $actor, 'Tests confirmed and released to the lab');
+        });
+    }
+
+    // ---------------------------------------------------------------- finance
+
+    /**
+     * The center's approver decides on a quotation. Approve releases the lines; partial keeps the
+     * ticked lines and sends the pre-order back to review for the rest; reject raises the
+     * "Financial approval rejected" exception. On an additional-test quotation the request carries
+     * the outcome instead, and the pre-order's stage never moves.
+     */
+    public function decideFinance(PreOrder $preOrder, FinanceDecisionDTO $dto, Actor $actor): PreOrder
+    {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($dto, $actor) {
+            $this->expectOpen($preOrder);
+            $quotation = $this->quotations->findByNumber($preOrder, $dto->quotation)
+                ?? throw new PreOrderRuleException("Quotation {$dto->quotation} was not found.");
+            if (! $quotation->status->isOpen()) {
+                throw new PreOrderRuleException("Quotation {$quotation->number} is {$quotation->status->label()}.");
+            }
+            $lines = $quotation->items->reject(fn (PreOrderItem $i) => $i->status === ItemStatus::DROPPED)->values();
+            $kept = match ($dto->decision) {
+                FinanceDecision::APPROVE => $lines,
+                FinanceDecision::REJECT => new Collection,
+                FinanceDecision::PARTIAL => $lines->filter(fn (PreOrderItem $i) => in_array($i->id, $dto->itemIds, true))->values(),
+            };
+            if ($dto->decision === FinanceDecision::PARTIAL) {
+                if (count(array_unique($dto->itemIds)) !== $kept->count()) {
+                    throw new PreOrderRuleException('Tick only lines from this quotation.');
+                }
+                if ($kept->isEmpty() || $kept->count() === $lines->count()) {
+                    throw new PreOrderRuleException('A partial approval keeps some lines, not none or all.');
+                }
+            }
+            if ($dto->decision === FinanceDecision::REJECT && blank($dto->note)) {
+                throw new PreOrderRuleException('Tell BION why the quotation is rejected.');
+            }
+
+            $status = match ($dto->decision) {
+                FinanceDecision::APPROVE => FinanceStatus::APPROVED,
+                FinanceDecision::PARTIAL => FinanceStatus::PARTIALLY_APPROVED,
+                FinanceDecision::REJECT => FinanceStatus::REJECTED,
+            };
+            $this->quotations->update($quotation, [
+                'status' => $status,
+                'approved_amount' => $dto->decision === FinanceDecision::APPROVE
+                    ? $quotation->total
+                    : $this->quotationService->approvedAmount($quotation, $kept),
+                'decided_by' => $actor->name,
+                'decided_at' => now(),
+                'note' => $dto->note,
+                'center_reference' => $dto->centerReference,
+            ]);
+            foreach ($kept as $item) {
+                $this->preOrders->updateItem($item, ['status' => ItemStatus::APPROVED]);
+            }
+            $this->history($preOrder, HistoryType::FINANCE, $actor, body: $dto->note, meta: array_filter([
+                'quotation' => $quotation->number,
+                'event' => $dto->decision->value,
+                'items' => $kept->pluck('id')->all(),
+                'center_reference' => $dto->centerReference,
+            ]));
+            DB::afterCommit(fn () => QuotationDecided::dispatch($quotation));
+
+            if ($quotation->request_id !== null) {
+                return $this->afterRequestQuotation($preOrder, $quotation, $kept, $lines, $actor);
+            }
+
+            return match ($dto->decision) {
+                FinanceDecision::APPROVE => FlowStages::uses($preOrder, PreOrderStage::FINANCE_VERIFY)
+                    ? $this->transition($preOrder, PreOrderStage::FINANCE_VERIFY, $actor)
+                    : $this->releaseMain($preOrder, $actor, "Quotation {$quotation->number} approved; tests released to the lab"),
+                FinanceDecision::PARTIAL => $this->backToReview($preOrder, $actor, "Quotation {$quotation->number} partly approved"),
+                FinanceDecision::REJECT => $this->raiseFinanceException($preOrder, 'rejected', $dto->note, $actor),
+            };
+        });
+    }
+
+    /** Stage 6, when the flow uses it: BION takes a second look before the samples are released. */
+    public function verifyFinance(PreOrder $preOrder, Actor $actor): PreOrder
+    {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($actor) {
+            $this->expectStage($preOrder, [PreOrderStage::FINANCE_VERIFY]);
+
+            return $this->releaseMain($preOrder, $actor, 'Approval checked; tests released to the lab');
+        });
+    }
+
+    /**
+     * BION pulls the main quotation back, or answers a rejection or expiry, by returning to
+     * review to change the lines and send a new quotation.
+     */
+    public function reviseQuotation(PreOrder $preOrder, ?string $reason, Actor $actor): PreOrder
+    {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($reason, $actor) {
+            $this->expectStage($preOrder, [PreOrderStage::AWAITING_FINANCE]);
+            $open = $this->quotations->openMain($preOrder);
+            if ($open) {
+                $this->quotations->update($open, ['status' => FinanceStatus::REVISION_REQUIRED]);
+            } elseif (($preOrder->exception['type'] ?? null) !== ExceptionType::FINANCE_REJECTED->value) {
+                throw new PreOrderRuleException('There is no quotation to revise.');
+            }
+            $preOrder->exception = null;
+            $this->history($preOrder, HistoryType::FINANCE, $actor, body: $reason, meta: array_filter(['quotation' => $open?->number, 'event' => 'revise']));
+
+            return $this->backToReview($preOrder, $actor, $reason ?? 'Quotation being revised');
+        });
+    }
+
+    /** Daily: a quotation the center didn't decide on in time expires like a rejection. */
+    public function expireQuotation(PreOrderQuotation $quotation): PreOrder
+    {
+        /** @var PreOrder $preOrder */
+        $preOrder = $quotation->preOrder;
+
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($quotation) {
+            $quotation = $this->quotations->findByNumber($preOrder, $quotation->number);
+            if (! $quotation || ! $quotation->status->isOpen() || $preOrder->isClosed()) {
+                return $preOrder;
+            }
+            $actor = Actor::system();
+            $this->quotations->update($quotation, ['status' => FinanceStatus::EXPIRED]);
+            $this->history($preOrder, HistoryType::FINANCE, $actor, body: "Quotation {$quotation->number} expired", meta: ['quotation' => $quotation->number, 'event' => 'expired']);
+            DB::afterCommit(fn () => QuotationDecided::dispatch($quotation));
+
+            if ($quotation->request_id !== null) {
+                $lines = $quotation->items->reject(fn (PreOrderItem $i) => $i->status === ItemStatus::DROPPED)->values();
+
+                return $this->afterRequestQuotation($preOrder, $quotation, new Collection, $lines, $actor);
+            }
+
+            return $this->raiseFinanceException($preOrder, 'expired', null, $actor);
         });
     }
 
@@ -347,6 +502,7 @@ class PreOrderWorkflow
             if ($orders === []) {
                 return $preOrder;
             }
+            $closedRequests = $this->closePlacedRequests($preOrder, $orders);
 
             $all = fn (Closure $test) => array_reduce($orders, fn (bool $carry, LinkedOrder $o) => $carry && $test($o), true);
             $any = fn (Closure $test) => array_reduce($orders, fn (bool $carry, LinkedOrder $o) => $carry || $test($o), false);
@@ -359,7 +515,7 @@ class PreOrderWorkflow
             };
 
             if ($target === null || $target->rank() <= $preOrder->stage->rank()) {
-                return $preOrder;
+                return $closedRequests ? $this->preOrders->update($preOrder, []) : $preOrder;
             }
 
             return $this->transition($preOrder, $target, Actor::system(), meta: ['orders' => array_map(fn (LinkedOrder $o) => $o->toArray(), $orders)]);
@@ -429,6 +585,9 @@ class PreOrderWorkflow
             if ($actor->side === Side::CENTER && $type !== ExceptionType::HOLD_CENTER) {
                 throw new PreOrderRuleException('Only BION can lift this hold.');
             }
+            if ($type === ExceptionType::FINANCE_REJECTED) {
+                throw new PreOrderRuleException('Revise the quotation, or cancel the pre-order.');
+            }
             $preOrder->exception = null;
             $this->history($preOrder, HistoryType::EXCEPTION, $actor, body: 'Resumed', meta: ['exception' => $type->value, 'event' => 'cleared']);
 
@@ -493,10 +652,14 @@ class PreOrderWorkflow
         });
     }
 
-    private function transition(PreOrder $preOrder, PreOrderStage $to, Actor $actor, ?string $comment = null, array $meta = []): PreOrder
+    /** @param  array<string, mixed>  $meta */
+    private function transition(PreOrder $preOrder, PreOrderStage $to, Actor $actor, ?string $comment = null, array $meta = [], bool $back = false): PreOrder
     {
         $from = $preOrder->stage;
-        if ($to->rank() <= $from->rank() && ! ($to === PreOrderStage::AWAITING_INFO && $from === PreOrderStage::INFO_REVIEW)) {
+        // The two ways back: a new request during review, and finance returning to review.
+        $allowedBack = ($to === PreOrderStage::AWAITING_INFO && $from === PreOrderStage::INFO_REVIEW)
+            || ($back && $to === PreOrderStage::UNDER_REVIEW && in_array($from, [PreOrderStage::AWAITING_FINANCE, PreOrderStage::FINANCE_VERIFY], true));
+        if ($to->rank() <= $from->rank() && ! $allowedBack) {
             throw new PreOrderRuleException("A pre-order can't go back from {$from->label()}.");
         }
         if (! FlowStages::uses($preOrder, $to)) {
@@ -511,6 +674,177 @@ class PreOrderWorkflow
         $this->history($preOrder, HistoryType::STAGE, $actor, fromStage: $from, toStage: $to, body: $comment, meta: $meta);
 
         return $this->preOrders->update($preOrder, ['action_owner' => $this->ownerFor($preOrder)]);
+    }
+
+    /** Release every approved, unreleased line on the main order and move past finance. */
+    private function releaseMain(PreOrder $preOrder, Actor $actor, string $note): PreOrder
+    {
+        $items = $this->preOrders->activeItems($preOrder)->filter(fn (PreOrderItem $i) => $i->status === ItemStatus::APPROVED)->values();
+        if ($items->isEmpty()) {
+            throw new PreOrderRuleException('There are no approved tests to release.');
+        }
+        $key = $this->release($preOrder, $items, ReleasePurpose::MAIN);
+        $this->history($preOrder, HistoryType::DECISION, $actor, body: $note, meta: ['release_key' => $key, 'items' => $items->pluck('id')->all()]);
+
+        $next = FlowStages::nextAfter($preOrder, PreOrderStage::FINANCE_VERIFY)
+            ?? throw new PreOrderRuleException('The flow has no stage after review.');
+
+        return $this->transition($preOrder, $next, $actor);
+    }
+
+    /** @param  Collection<int, PreOrderItem>  $items */
+    private function release(PreOrder $preOrder, Collection $items, ReleasePurpose $purpose): string
+    {
+        $key = $this->nextReleaseKey($preOrder, $purpose);
+        foreach ($items as $item) {
+            $this->preOrders->updateItem($item, [
+                'status' => ItemStatus::RELEASED,
+                'release_key' => $key,
+                'release_purpose' => $purpose,
+            ]);
+        }
+
+        return $key;
+    }
+
+    /**
+     * Partial approval and revisions are the one way back: to review, so BION can drop or replace
+     * lines. Approved lines stay approved and are released with the rest.
+     */
+    private function backToReview(PreOrder $preOrder, Actor $actor, string $comment): PreOrder
+    {
+        foreach ($this->preOrders->activeItems($preOrder) as $item) {
+            if ($item->status !== ItemStatus::APPROVED) {
+                $this->preOrders->updateItem($item, ['status' => ItemStatus::RECOMMENDED]);
+            }
+        }
+
+        return $this->transition($preOrder, PreOrderStage::UNDER_REVIEW, $actor, $comment, back: true);
+    }
+
+    private function raiseFinanceException(PreOrder $preOrder, string $reason, ?string $comment, Actor $actor): PreOrder
+    {
+        $preOrder->exception = $this->exceptionRecord(ExceptionType::FINANCE_REJECTED, $reason, $comment, $actor);
+        $this->history($preOrder, HistoryType::EXCEPTION, $actor, body: $comment, meta: ['exception' => ExceptionType::FINANCE_REJECTED->value, 'reason' => $reason]);
+
+        return $this->preOrders->update($preOrder, ['action_owner' => ActionOwner::BION]);
+    }
+
+    /**
+     * An additional-test request gets its lines priced right away. Every line is BION's, so a
+     * quotation is the normal case; the main approval is never edited.
+     */
+    private function quoteRequestTests(PreOrder $preOrder, PreOrderRequest $request, RaiseRequestDTO $dto, Actor $actor): void
+    {
+        $lines = [];
+        foreach ($dto->tests as $line) {
+            $test = $this->laboratory->findTest((int) $line['test_id']) ?? throw new PreOrderRuleException('Test not found.');
+            $item = $this->preOrders->addItem($preOrder, [
+                'test_id' => $test->id,
+                'patient_ref' => $line['patient_ref'] ?? $preOrder->main_patient_ref,
+                'qty' => max(1, (int) ($line['qty'] ?? 1)),
+                'unit_price' => $this->laboratory->unitPrice($test, $preOrder->referrer_id),
+                'added_by' => Side::BION,
+                'status' => ItemStatus::RECOMMENDED,
+                'request_id' => $request->id,
+            ]);
+            $lines[] = $item->setRelation('test', $test);
+        }
+        $items = new Collection($lines);
+
+        $reasons = $this->finance->reasons($preOrder, $items, $dto->retest);
+        $quote = $dto->quote ?? new QuoteDTO;
+        // The quote's prices name tests, as the lines didn't exist yet when BION filled the form.
+        $prices = [];
+        foreach ($quote->prices as $testId => $price) {
+            $item = $items->firstWhere('test_id', $testId) ?? throw new PreOrderRuleException('A price was given for a test that is not on this request.');
+            $prices[$item->id] = $price;
+        }
+        $quote = new QuoteDTO($quote->reason ?? $dto->message, $quote->discount, $prices);
+
+        if ($reasons === [] || ! FlowStages::financeEnabled($preOrder)) {
+            foreach ($items as $item) {
+                $this->preOrders->updateItem($item, ['status' => ItemStatus::APPROVED]);
+            }
+            $key = $this->release($preOrder, $items, ReleasePurpose::ADD_ON);
+            $this->preOrders->updateRequest($request, ['status' => RequestStatus::ORDER_CREATED]);
+            $this->history($preOrder, HistoryType::DECISION, $actor, body: "{$request->label()}: tests released on an add-on order", meta: ['request' => $request->number, 'release_key' => $key]);
+
+            return;
+        }
+
+        $quotation = $this->quotationService->open($preOrder, $items, $request, $reasons, $quote, $actor);
+        $this->preOrders->updateRequest($request, ['status' => RequestStatus::AWAITING_FINANCE]);
+        $this->history($preOrder, HistoryType::FINANCE, $actor, body: $quote->reason, meta: ['quotation' => $quotation->number, 'request' => $request->number, 'event' => 'sent', 'total' => (string) $quotation->total]);
+    }
+
+    /**
+     * The center decided on (or let expire) an additional-test quotation: the kept lines go to the
+     * lab on an add-on order, the rest are dropped, and the request records the outcome.
+     *
+     * @param  Collection<int, PreOrderItem>  $kept
+     * @param  Collection<int, PreOrderItem>  $lines
+     */
+    private function afterRequestQuotation(PreOrder $preOrder, PreOrderQuotation $quotation, Collection $kept, Collection $lines, Actor $actor): PreOrder
+    {
+        /** @var PreOrderRequest $request */
+        $request = $preOrder->requests()->findOrFail($quotation->request_id);
+        foreach ($lines as $line) {
+            if (! $kept->contains('id', $line->id)) {
+                $this->preOrders->updateItem($line, ['status' => ItemStatus::DROPPED]);
+            }
+        }
+
+        if ($kept->isEmpty()) {
+            $this->preOrders->updateRequest($request, ['status' => RequestStatus::DECLINED, 'closed_at' => now()]);
+            $this->history($preOrder, HistoryType::REQUEST, $actor, meta: ['request' => $request->number, 'event' => 'declined']);
+        } else {
+            $key = $this->release($preOrder, $kept, ReleasePurpose::ADD_ON);
+            $this->preOrders->updateRequest($request, ['status' => RequestStatus::ORDER_CREATED]);
+            $this->history($preOrder, HistoryType::DECISION, $actor, body: "{$request->label()}: tests released on an add-on order", meta: ['request' => $request->number, 'release_key' => $key, 'items' => $kept->pluck('id')->all()]);
+        }
+
+        return $this->preOrders->update($preOrder, ['action_owner' => $this->ownerFor($preOrder)]);
+    }
+
+    /** Closing a request withdraws its quotation and drops its tests that never reached the lab. */
+    private function endRequest(PreOrder $preOrder, PreOrderRequest $request, bool $declined): void
+    {
+        $quotation = $this->quotations->openForRequest($preOrder, $request->id);
+        if ($quotation) {
+            $this->quotations->update($quotation, ['status' => FinanceStatus::REVISION_REQUIRED]);
+        }
+        foreach ($request->items()->whereNotIn('status', [ItemStatus::RELEASED->value, ItemStatus::DROPPED->value])->get() as $item) {
+            $this->preOrders->updateItem($item, ['status' => ItemStatus::DROPPED]);
+        }
+        $this->preOrders->updateRequest($request, [
+            'status' => $declined ? RequestStatus::DECLINED : RequestStatus::CLOSED,
+            'closed_at' => now(),
+        ]);
+    }
+
+    /**
+     * An add-on request is done once the center has placed its order.
+     *
+     * @param  list<LinkedOrder>  $orders
+     */
+    private function closePlacedRequests(PreOrder $preOrder, array $orders): bool
+    {
+        $placed = array_filter(array_map(fn (LinkedOrder $o) => $o->releaseKey, $orders));
+        if ($placed === []) {
+            return false;
+        }
+        $closed = false;
+        foreach ($preOrder->requests()->where('status', RequestStatus::ORDER_CREATED->value)->with('items')->get() as $request) {
+            $keys = $request->items->where('status', ItemStatus::RELEASED)->pluck('release_key')->filter()->unique();
+            if ($keys->isNotEmpty() && $keys->every(fn ($k) => in_array($k, $placed, true))) {
+                $this->preOrders->updateRequest($request, ['status' => RequestStatus::CLOSED, 'closed_at' => now()]);
+                $this->history($preOrder, HistoryType::REQUEST, Actor::system(), body: 'Add-on order placed', meta: ['request' => $request->number, 'event' => 'closed']);
+                $closed = true;
+            }
+        }
+
+        return $closed;
     }
 
     /** After a request is answered or closed: leave the review wait once nothing is unanswered. */
@@ -534,7 +868,7 @@ class PreOrderWorkflow
         if ($exception === ExceptionType::HOLD_CENTER) {
             return ActionOwner::CENTER;
         }
-        if ($exception === ExceptionType::HOLD_BION) {
+        if ($exception === ExceptionType::HOLD_BION || $exception === ExceptionType::FINANCE_REJECTED) {
             return ActionOwner::BION;
         }
         if (! $preOrder->stage->isReview()) {

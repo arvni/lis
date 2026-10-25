@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Builder;
  * @property int|null $instruction_id
  * @property int|null $request_form_id
  * @property int|null $flow_id
- * @property array{can_be_main?: bool}|null $preorder
+ * @property array{can_be_main?: bool, scope?: list<array{key: string, label: string, type: string, needs_finance: bool, threshold: int|null}>}|null $preorder
  * @property string $name
  * @property string $code
  * @property string $fullName

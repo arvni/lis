@@ -6,11 +6,13 @@ namespace App\Domains\PreOrder\Support;
 
 use App\Domains\Document\Models\Document;
 use App\Domains\PreOrder\Adapters\ReferrerAdapter;
+use App\Domains\PreOrder\Enums\FinanceReason;
 use App\Domains\PreOrder\Enums\ItemStatus;
 use App\Domains\PreOrder\Enums\PreOrderStage;
 use App\Domains\PreOrder\Models\PreOrder;
 use App\Domains\PreOrder\Models\PreOrderHistory;
 use App\Domains\PreOrder\Models\PreOrderItem;
+use App\Domains\PreOrder\Models\PreOrderQuotation;
 use App\Domains\PreOrder\Models\PreOrderRequest;
 use App\Domains\PreOrder\Repositories\PreOrderRepository;
 
@@ -18,8 +20,8 @@ use App\Domains\PreOrder\Repositories\PreOrderRepository;
  * Everything the center may see about a pre-order, as one document. The provider panel replaces
  * its whole mirror with it, so a missed webhook heals on the next one.
  *
- * Internal notes, BION user names on internal rows and prices (until the quotation, phase 2)
- * never leave the LIS.
+ * Internal notes and BION user names on internal rows never leave the LIS. Prices leave only on
+ * a quotation sent to the center.
  */
 class PreOrderSnapshot
 {
@@ -78,7 +80,37 @@ class PreOrderSnapshot
                     'status' => $i->status->value,
                     'added_by' => $i->added_by->value,
                     'release_key' => $i->release_key,
+                    'request' => $i->request_id ? $preOrder->requests->firstWhere('id', $i->request_id)?->number : null,
+                    'quotation' => $i->quotation_id ? $preOrder->quotations->firstWhere('id', $i->quotation_id)?->number : null,
                 ])->values()->all(),
+            'quotations' => $preOrder->quotations->map(fn (PreOrderQuotation $q) => [
+                'number' => $q->number,
+                'request' => $q->request_id ? $preOrder->requests->firstWhere('id', $q->request_id)?->number : null,
+                'reasons' => array_map(fn (string $r) => FinanceReason::tryFrom($r)?->label() ?? $r, $q->reasons),
+                'reason' => $q->reason,
+                'status' => $q->status->value,
+                'status_label' => $q->status->label(),
+                'subtotal' => (string) $q->subtotal,
+                'discount' => (string) $q->discount,
+                'total' => (string) $q->total,
+                'approved_amount' => $q->approved_amount === null ? null : (string) $q->approved_amount,
+                'expires_at' => $q->expires_at?->toIso8601String(),
+                'decided_by' => $q->decided_by,
+                'decided_at' => $q->decided_at?->toIso8601String(),
+                'note' => $q->note,
+                'center_reference' => $q->center_reference,
+                'created_at' => $q->created_at?->toIso8601String(),
+                'lines' => $q->items->map(fn (PreOrderItem $i) => [
+                    'id' => $i->id,
+                    'test_code' => $i->test->code,
+                    'test_name' => $i->test->name,
+                    'patient_ref' => $i->patient_ref,
+                    'qty' => $i->qty,
+                    'unit_price' => $i->unit_price === null ? null : (string) $i->unit_price,
+                    'line_total' => $i->lineTotal(),
+                    'status' => $i->status->value,
+                ])->values()->all(),
+            ])->values()->all(),
             'requests' => $preOrder->requests->sortBy('number')->map(fn (PreOrderRequest $r) => [
                 'number' => $r->number,
                 'label' => $r->label(),
@@ -112,6 +144,7 @@ class PreOrderSnapshot
                     'side' => $h->side->value,
                     'actor_name' => $h->actor_name,
                     'request' => $h->meta['request'] ?? null,
+                    'quotation' => $h->meta['quotation'] ?? null,
                     'created_at' => $h->created_at?->toIso8601String(),
                 ])->values()->all(),
             'submitted_at' => $preOrder->submitted_at?->toIso8601String(),

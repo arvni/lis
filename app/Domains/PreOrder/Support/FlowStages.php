@@ -7,6 +7,7 @@ namespace App\Domains\PreOrder\Support;
 use App\Domains\PreOrder\Enums\PreOrderStage;
 use App\Domains\PreOrder\Enums\StageMode;
 use App\Domains\PreOrder\Models\PreOrder;
+use App\Domains\PreOrder\Models\PreOrderQuotation;
 
 /**
  * Which library stages a pre-order walks through, read from the flow stages it copied when its
@@ -15,15 +16,13 @@ use App\Domains\PreOrder\Models\PreOrder;
 final class FlowStages
 {
     /**
-     * Stages whose machinery ships in a later phase: finance (phase 2), the pre-test workup and
-     * sample batches (phase 3). Until then they are skipped even when a flow switches them on,
-     * so a seeded PGT-M flow still runs end to end on the phase-1 path.
+     * Stages whose machinery ships in a later phase: the pre-test workup and sample batches
+     * (phase 3). Until then they are skipped even when a flow switches them on, so a seeded
+     * PGT-M flow still runs end to end without them.
      *
      * @var list<PreOrderStage>
      */
     private const NOT_YET_AVAILABLE = [
-        PreOrderStage::AWAITING_FINANCE,
-        PreOrderStage::FINANCE_VERIFY,
         PreOrderStage::AWAITING_PRE_SAMPLES,
         PreOrderStage::PRE_RECEIVED,
         PreOrderStage::PRE_IN_PROGRESS,
@@ -42,9 +41,28 @@ final class FlowStages
         }
 
         $entry = self::entry($preOrder, $stage);
+        $mode = $entry['mode'] ?? StageMode::OFF->value;
+        if ($mode === StageMode::RULE->value) {
+            return self::ruleHolds($preOrder, (string) ($entry['rule'] ?? ''));
+        }
 
-        // Rules arrive with the stages they guard (phase 2/3); an unknown rule keeps the stage off.
-        return ($entry['mode'] ?? StageMode::OFF->value) === StageMode::ON->value;
+        return $mode === StageMode::ON->value;
+    }
+
+    /** Finance runs unless the flow switched it off; whether a case needs it is FinanceRules' call. */
+    public static function financeEnabled(PreOrder $preOrder): bool
+    {
+        return (self::entry($preOrder, PreOrderStage::AWAITING_FINANCE)['mode'] ?? StageMode::OFF->value) !== StageMode::OFF->value;
+    }
+
+    /** An unknown rule keeps its stage off. */
+    private static function ruleHolds(PreOrder $preOrder, string $rule): bool
+    {
+        return match ($rule) {
+            // On once the tests BION confirmed went to the center as a quotation.
+            'finance_required' => $preOrder->exists && $preOrder->quotations->contains(fn (PreOrderQuotation $q) => $q->request_id === null),
+            default => false,
+        };
     }
 
     /** The stages this pre-order uses, in library order. @return list<PreOrderStage> */
