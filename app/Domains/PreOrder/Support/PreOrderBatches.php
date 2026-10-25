@@ -71,7 +71,13 @@ final class PreOrderBatches
         return null;
     }
 
-    /** Every order the pre-order expects back from the center, placed or not. @return list<string> */
+    /**
+     * Every order the pre-order expects back from the center, placed or not.
+
+     *
+
+     * @return list<string>
+     */
     public static function orderKeys(PreOrder $preOrder): array
     {
         return array_values(array_unique(array_column(self::all($preOrder), 'order_key')));

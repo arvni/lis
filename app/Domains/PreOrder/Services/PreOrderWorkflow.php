@@ -26,6 +26,7 @@ use App\Domains\PreOrder\Enums\RequestType;
 use App\Domains\PreOrder\Enums\Side;
 use App\Domains\PreOrder\Enums\StartMode;
 use App\Domains\PreOrder\Events\PreOrderChanged;
+use App\Domains\PreOrder\Events\PreOrderReminderDue;
 use App\Domains\PreOrder\Events\QuotationDecided;
 use App\Domains\PreOrder\Exceptions\PreOrderRuleException;
 use App\Domains\PreOrder\Models\PreOrder;
@@ -544,6 +545,63 @@ class PreOrderWorkflow
         });
     }
 
+    // ---------------------------------------------------------------- reminders
+
+    /**
+     * Hourly: once a pre-order has sat in its stage past the flow's delay, remind whoever must
+     * act, and later escalate to the team leads. Each happens once per stage. The center's
+     * reminder is a history row it sees in the panel; BION's are staff alerts.
+     */
+    public function remindIfDue(PreOrder $preOrder): bool
+    {
+        // Checked before taking the lock, so the hourly sweep doesn't touch cases with nothing due.
+        if ($this->dueReminder($preOrder) === null) {
+            return false;
+        }
+
+        return $this->mutate($preOrder, function (PreOrder $preOrder) {
+            $escalation = $this->dueReminder($preOrder);
+            if ($escalation === null) {
+                return false;
+            }
+            $hours = (int) floor($preOrder->stage_entered_at?->diffInHours(now(), true) ?? 0);
+            $toCenter = ! $escalation && $preOrder->action_owner === ActionOwner::CENTER;
+            $preOrder->reminded_at ??= now();
+            if ($escalation) {
+                $preOrder->escalated_at = now();
+            }
+            $this->history($preOrder, HistoryType::REMINDER, Actor::system(),
+                body: match (true) {
+                    $escalation => 'Escalated to the team leads',
+                    $toCenter => 'Reminder: '.(FlowStages::nextAction($preOrder, $preOrder->stage) ?? FlowStages::label($preOrder, $preOrder->stage)),
+                    default => 'Reminder sent to the counsellor',
+                },
+                internal: ! $toCenter,
+                meta: ['stage' => $preOrder->stage->value, 'escalation' => $escalation, 'hours' => $hours],
+            );
+            DB::afterCommit(fn () => PreOrderReminderDue::dispatch($preOrder, $escalation));
+            $this->preOrders->update($preOrder, []);
+
+            return true;
+        });
+    }
+
+    /** null when nothing is due; otherwise whether it is an escalation (true) or a reminder. */
+    private function dueReminder(PreOrder $preOrder): ?bool
+    {
+        if ($preOrder->isClosed() || $preOrder->exception !== null || $preOrder->stage_entered_at === null || $preOrder->action_owner === ActionOwner::NONE) {
+            return null;
+        }
+        [$remind, $escalate] = FlowStages::reminderHours($preOrder, $preOrder->stage);
+        $hours = $preOrder->stage_entered_at->diffInHours(now(), true);
+
+        return match (true) {
+            $escalate !== null && $hours >= $escalate && $preOrder->escalated_at === null => true,
+            $remind !== null && $hours >= $remind && $preOrder->reminded_at === null => false,
+            default => null,
+        };
+    }
+
     // ---------------------------------------------------------------- pre-test workup and batches
 
     /** Stage 10: the center confirms the next step (e.g. the IVF cycle is planned); the main tests go out. */
@@ -831,6 +889,8 @@ class PreOrderWorkflow
 
         $preOrder->stage = $to;
         $preOrder->stage_entered_at = now();
+        $preOrder->reminded_at = null;
+        $preOrder->escalated_at = null;
         if ($to->isFinal()) {
             $preOrder->closed_at = now();
         }

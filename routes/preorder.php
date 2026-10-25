@@ -1,12 +1,21 @@
 <?php
 
+use App\Http\Controllers\PreOrder\FlowController;
 use App\Http\Controllers\PreOrder\PreOrderActionController as Actions;
 use App\Http\Controllers\PreOrder\PreOrderController;
+use App\Http\Controllers\PreOrder\PreOrderReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'pre-orders', 'as' => 'pre-orders.'], function () {
     Route::get('/', [PreOrderController::class, 'index'])->name('index');
     Route::get('finance', [PreOrderController::class, 'finance'])->name('finance');
+    Route::get('reports', [PreOrderReportController::class, 'index'])->name('reports');
+    Route::get('reports/export', [PreOrderReportController::class, 'export'])->name('reports.export');
+    Route::get('flows', [FlowController::class, 'index'])->name('flows.index');
+    Route::get('flows/{flow}', [FlowController::class, 'edit'])->name('flows.edit');
+    Route::put('flows/{flow}', [FlowController::class, 'update'])->name('flows.update');
+    Route::post('flows/{flow}/copy', [FlowController::class, 'copy'])->name('flows.copy');
+    Route::post('flows/{flow}/active', [FlowController::class, 'setActive'])->name('flows.active');
     Route::get('{preOrder}', [PreOrderController::class, 'show'])->name('show');
     Route::get('{preOrder}/documents/{hash}', [PreOrderController::class, 'document'])->whereUuid('hash')->name('documents.show');
 

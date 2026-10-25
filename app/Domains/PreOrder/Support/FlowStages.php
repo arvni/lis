@@ -73,7 +73,13 @@ final class FlowStages
         };
     }
 
-    /** The stages this pre-order uses, in library order. @return list<PreOrderStage> */
+    /**
+     * The stages this pre-order uses, in library order.
+
+     *
+
+     * @return list<PreOrderStage>
+     */
     public static function used(PreOrder $preOrder): array
     {
         return array_values(array_filter(PreOrderStage::cases(), fn (PreOrderStage $s) => self::uses($preOrder, $s)));
@@ -97,6 +103,49 @@ final class FlowStages
         $label = self::entry($preOrder, $stage)['label_en'] ?? null;
 
         return is_string($label) && $label !== '' ? $label : $stage->label();
+    }
+
+    /** What the center should do next, honouring the flow's wording. */
+    public static function nextAction(PreOrder $preOrder, PreOrderStage $stage, string $locale = 'en'): ?string
+    {
+        $text = self::entry($preOrder, $stage)["action_$locale"] ?? null;
+
+        return is_string($text) && $text !== '' ? $text : ($locale === 'en' ? $stage->nextAction() : null);
+    }
+
+    /** The Arabic label, when the flow gives one. */
+    public static function labelAr(PreOrder $preOrder, PreOrderStage $stage): ?string
+    {
+        $label = self::entry($preOrder, $stage)['label_ar'] ?? null;
+
+        return is_string($label) && $label !== '' ? $label : null;
+    }
+
+    /**
+     * Document tags the center is asked for at this stage.
+
+     *
+
+     * @return list<string>
+     */
+    public static function requiredDocuments(PreOrder $preOrder, PreOrderStage $stage): array
+    {
+        return array_values(array_map('strval', (array) (self::entry($preOrder, $stage)['required_documents'] ?? [])));
+    }
+
+    /**
+     * Hours in the stage before a reminder, and before escalating to the team leads.
+
+     *
+
+     * @return array{0: int|null, 1: int|null}
+     */
+    public static function reminderHours(PreOrder $preOrder, PreOrderStage $stage): array
+    {
+        $entry = self::entry($preOrder, $stage);
+        $hours = fn (string $key) => isset($entry[$key]) ? max(1, (int) $entry[$key]) : null;
+
+        return [$hours('remind_after_hours'), $hours('escalate_after_hours')];
     }
 
     /** @return array<string, mixed> */
