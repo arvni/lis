@@ -103,6 +103,7 @@ class PreOrderInbox
             Type::CONFIRM_NEXT_STEP => $this->workflow->confirmNextStep($preOrder, $payload['note'] ?? null, $actor),
             Type::ADD_BATCH => $this->workflow->addBatch($preOrder, $payload['label'] ?? null, $payload['replaces'] ?? null, $actor),
             Type::CLOSE_BATCHES => $this->workflow->closeBatches($preOrder, $actor),
+            Type::RESYNC => $this->workflow->resend($preOrder),
         };
     }
 

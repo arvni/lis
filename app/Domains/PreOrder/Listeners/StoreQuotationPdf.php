@@ -11,6 +11,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 /** Renders the quotation PDF off the request path and files it on the pre-order. */
 class StoreQuotationPdf implements ShouldQueue
 {
+    public function viaQueue(): string
+    {
+        return (string) config('services.preorder_queue');
+    }
+
     public int $tries = 3;
 
     public function __construct(private readonly PreOrderWorkflow $workflow) {}

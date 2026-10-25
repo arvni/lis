@@ -877,14 +877,9 @@ class PreOrderWorkflow
     private function transition(PreOrder $preOrder, PreOrderStage $to, Actor $actor, ?string $comment = null, array $meta = [], bool $back = false): PreOrder
     {
         $from = $preOrder->stage;
-        // The two ways back: a new request during review, and finance returning to review.
-        $allowedBack = ($to === PreOrderStage::AWAITING_INFO && $from === PreOrderStage::INFO_REVIEW)
-            || ($back && $to === PreOrderStage::UNDER_REVIEW && in_array($from, [PreOrderStage::AWAITING_FINANCE, PreOrderStage::FINANCE_VERIFY], true));
-        if ($to->rank() <= $from->rank() && ! $allowedBack) {
-            throw new PreOrderRuleException("A pre-order can't go back from {$from->label()}.");
-        }
-        if (! FlowStages::uses($preOrder, $to)) {
-            throw new PreOrderRuleException("This flow doesn't use {$to->label()}.");
+        $refusal = FlowStages::moveRefusal($preOrder, $from, $to, $back);
+        if ($refusal !== null) {
+            throw new PreOrderRuleException($refusal);
         }
 
         $preOrder->stage = $to;
@@ -897,6 +892,17 @@ class PreOrderWorkflow
         $this->history($preOrder, HistoryType::STAGE, $actor, fromStage: $from, toStage: $to, body: $comment, meta: $meta);
 
         return $this->preOrders->update($preOrder, ['action_owner' => $this->ownerFor($preOrder)]);
+    }
+
+    /**
+     * The center's mirror asked for the current state again (its nightly sync found it behind).
+     * Nothing changes; the snapshot is simply sent once more.
+     */
+    public function resend(PreOrder $preOrder): PreOrder
+    {
+        DB::afterCommit(fn () => PreOrderChanged::dispatch($preOrder));
+
+        return $preOrder;
     }
 
     /** Release every approved, unreleased line on the main order and move past finance. */

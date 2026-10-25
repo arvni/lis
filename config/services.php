@@ -43,7 +43,7 @@ return [
             'welcome_message' => env('TWILIO_WELCOME_MESSAGE_TEMPLATE'),
             'acceptance_report_published' => env('REPORT_PUBLISHED_TEMPLATE'),
             'send_report_file' => env('REPORT_PUBLISHED_FILE_TEMPLATE'),
-        ]
+        ],
     ],
     'omantel' => [
         'api_url' => env('OMANTEL_API_URL', 'https://ismart.omantel.om/smsgw/sms/api'),
@@ -55,7 +55,7 @@ return [
         'url' => env('PATIENT_PORTAL_URL', 'http://localhost:8002'),
     ],
     'provider_app' => [
-        'webhook_domain' => env('PROVIDER_APP_WEBHOOK_DOMAIN',"http://localhost:8003"),
+        'webhook_domain' => env('PROVIDER_APP_WEBHOOK_DOMAIN', 'http://localhost:8003'),
         'webhook_secret' => env('PROVIDER_APP_WEBHOOK_SECRET'),
         'order_material_webhook_url' => env('PROVIDER_APP_ORDER_MATERIAL_WEBHOOK_URL', '/order-materials/'),
         'request_form_webhook_url' => env('PROVIDER_APP_REQUEST_FORM_WEBHOOK_URL', '/request-forms/'),
@@ -70,6 +70,9 @@ return [
     ],
     // Files centers attach to pre-orders. api writes them to this folder (the shared document
     // storage) and the LIS inspects each one before it enters the document store.
+    // Pre-order jobs (webhooks to the provider panel, alerts, PDFs) run on their own queue, so a
+    // backed-up default queue never leaves a center's button on "Sending…".
+    'preorder_queue' => env('PREORDER_QUEUE', 'preorders'),
     'preorder_uploads' => [
         'incoming' => env('PREORDER_UPLOADS_INCOMING', storage_path('app/private/pre-orders/incoming')),
     ],
@@ -78,9 +81,9 @@ return [
         'host' => env('CLAMAV_HOST', ''),
         'port' => (int) env('CLAMAV_PORT', 3310),
     ],
-    'whatsapp'=>[
-        'callback-server'=>env('WHATSAPP_CALLBACK_SERVER'),
-        'callback-url'=>env('WHATSAPP_CALLBACK_URL','/api/whatsapp-messages/callback'),
+    'whatsapp' => [
+        'callback-server' => env('WHATSAPP_CALLBACK_SERVER'),
+        'callback-url' => env('WHATSAPP_CALLBACK_URL', '/api/whatsapp-messages/callback'),
     ],
     'logistics_app' => [
         'webhook_domain' => env('LOGISTICS_APP_WEBHOOK_DOMAIN', 'http://localhost:8004'),

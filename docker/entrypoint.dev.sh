@@ -56,7 +56,7 @@ case "$role" in
         ;;
 
     queue)
-        exec php artisan queue:listen --tries=3 --timeout=90
+        exec php artisan queue:listen --queue="${PREORDER_QUEUE:-preorders},default" --tries=3 --timeout=90
         ;;
 
     scheduler)

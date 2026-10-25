@@ -15,6 +15,11 @@ use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 /** Tells the finance desk and the case's counsellor how the center decided. */
 class NotifyFinanceDesk implements ShouldQueue
 {
+    public function viaQueue(): string
+    {
+        return (string) config('services.preorder_queue');
+    }
+
     public function handle(QuotationDecided $event): void
     {
         $quotation = $event->quotation->load('preOrder:id,code,assigned_to');
