@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\PreOrder\Models;
 
+use App\Domains\Laboratory\Models\MethodTest;
 use App\Domains\Laboratory\Models\Test;
 use App\Domains\PreOrder\Enums\ItemStatus;
 use App\Domains\PreOrder\Enums\ReleasePurpose;
@@ -19,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $pre_order_id
  * @property int $test_id
+ * @property int|null $method_test_id
  * @property string|null $patient_ref
  * @property int $qty
  * @property numeric|null $unit_price
@@ -34,7 +36,7 @@ use Illuminate\Support\Carbon;
 class PreOrderItem extends Model
 {
     protected $fillable = [
-        'pre_order_id', 'test_id', 'patient_ref', 'qty', 'unit_price', 'added_by', 'status',
+        'pre_order_id', 'test_id', 'method_test_id', 'patient_ref', 'qty', 'unit_price', 'added_by', 'status',
         'request_id', 'quotation_id', 'release_key', 'release_purpose',
     ];
 
@@ -56,6 +58,12 @@ class PreOrderItem extends Model
     public function test(): BelongsTo
     {
         return $this->belongsTo(Test::class);
+    }
+
+    /** @return BelongsTo<MethodTest, $this> */
+    public function methodTest(): BelongsTo
+    {
+        return $this->belongsTo(MethodTest::class);
     }
 
     /** @return BelongsTo<PreOrderRequest, $this> */

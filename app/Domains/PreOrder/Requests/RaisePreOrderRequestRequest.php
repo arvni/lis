@@ -35,6 +35,7 @@ class RaisePreOrderRequestRequest extends FormRequest
             // Additional tests, for a request of type test.
             'tests' => ['nullable', 'required_if:types.*,test', 'array', 'max:10'],
             'tests.*.test_id' => ['required', 'integer', 'exists:tests,id', 'distinct'],
+            'tests.*.method_test_id' => ['nullable', 'integer', 'exists:method_tests,id'],
             'tests.*.patient_ref' => ['nullable', 'string', 'max:64'],
             'tests.*.qty' => ['nullable', 'integer', 'min:1', 'max:20'],
             // Only for a test the catalogue can't price; the workflow refuses it otherwise.

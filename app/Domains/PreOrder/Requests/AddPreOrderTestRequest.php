@@ -18,6 +18,7 @@ class AddPreOrderTestRequest extends FormRequest
     {
         return [
             'test_id' => ['required', 'integer', 'exists:tests,id'],
+            'method_test_id' => ['nullable', 'integer', 'exists:method_tests,id'],
             'patient_ref' => ['nullable', 'string', 'max:64'],
             'qty' => ['nullable', 'integer', 'min:1', 'max:20'],
         ];

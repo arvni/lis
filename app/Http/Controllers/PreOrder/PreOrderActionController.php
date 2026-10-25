@@ -19,6 +19,7 @@ use App\Domains\PreOrder\Requests\PreOrderNoteRequest;
 use App\Domains\PreOrder\Requests\PreOrderReasonRequest;
 use App\Domains\PreOrder\Requests\PreOrderSampleIssueRequest;
 use App\Domains\PreOrder\Requests\RaisePreOrderRequestRequest;
+use App\Domains\PreOrder\Requests\SetPreOrderItemMethodRequest;
 use App\Domains\PreOrder\Requests\SetPreOrderMainTestRequest;
 use App\Domains\PreOrder\Requests\SetPreOrderPreTestRequest;
 use App\Domains\PreOrder\Requests\StorePreOrderDocumentRequest;
@@ -70,7 +71,13 @@ class PreOrderActionController extends Controller
             $request->validated('patient_ref'),
             (int) ($request->validated('qty') ?? 1),
             $this->actor($request),
+            $request->validated('method_test_id') !== null ? (int) $request->validated('method_test_id') : null,
         ), 'Test added.');
+    }
+
+    public function setItemMethod(SetPreOrderItemMethodRequest $request, PreOrder $preOrder, int $item): RedirectResponse
+    {
+        return $this->run(fn () => $this->workflow->setItemMethod($preOrder, $item, (int) $request->validated('method_test_id'), $this->actor($request)), 'Method set.');
     }
 
     public function dropItem(PreOrderReasonRequest $request, PreOrder $preOrder, int $item): RedirectResponse

@@ -2,8 +2,8 @@
 
 namespace App\Domains\Laboratory\Repositories;
 
-use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Laboratory\Models\MethodTest;
+use App\Domains\Shared\Traits\LogsUserActivity;
 use Illuminate\Database\Eloquent\Collection;
 
 class MethodTestRepository
@@ -12,8 +12,9 @@ class MethodTestRepository
 
     public function createMethodTest(array $methodTestData): MethodTest
     {
-        $methodTest= MethodTest::create($methodTestData);
+        $methodTest = MethodTest::create($methodTestData);
         $this->logCreated($methodTest);
+
         return $methodTest;
     }
 
@@ -24,6 +25,7 @@ class MethodTestRepository
             $methodTest->save();
             $this->logUpdated($methodTest);
         }
+
         return $methodTest;
     }
 
@@ -62,4 +64,30 @@ class MethodTestRepository
             ->get();
     }
 
+    /**
+     * The methods a test can be done by, active ones only, with their method loaded.
+     *
+     * @return Collection<int, MethodTest>
+     */
+    public function activeForTest(int $testId): Collection
+    {
+        return $this->activeForTests([$testId]);
+    }
+
+    /**
+     * The active methods of several tests at once, in one query.
+     *
+     * @param  array<int, int>  $testIds
+     * @return Collection<int, MethodTest>
+     */
+    public function activeForTests(array $testIds): Collection
+    {
+        return MethodTest::query()
+            ->with('method')
+            ->whereIn('test_id', $testIds)
+            ->where('status', true)
+            ->whereHas('method', fn ($q) => $q->where('status', true))
+            ->orderBy('id')
+            ->get();
+    }
 }

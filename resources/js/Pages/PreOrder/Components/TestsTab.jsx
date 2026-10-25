@@ -54,6 +54,45 @@ export default function TestsTab({ preOrder }) {
             { preserveScroll: true },
         );
 
+    // Internal to BION: the method sets the line's price; the center only sees the test.
+    const setMethod = (item, methodTestId) =>
+        router.post(
+            route('pre-orders.items.method', [preOrder.id, item.id]),
+            { method_test_id: methodTestId },
+            { preserveScroll: true },
+        );
+
+    const methodCell = (item) => {
+        if (!item.needs_method) return <Typography variant="caption">Panel</Typography>;
+        const current = item.methods.find((m) => m.id === item.method_test_id);
+        const changeable =
+            editable &&
+            ['requested', 'recommended'].includes(item.status) &&
+            item.methods.length > 0;
+        if (!changeable) return current?.name ?? <Typography variant="caption">—</Typography>;
+        return (
+            <TextField
+                select
+                size="small"
+                value={item.method_test_id ?? ''}
+                onChange={(e) => setMethod(item, Number(e.target.value))}
+                error={item.method_test_id === null}
+                placeholder="Pick a method"
+                sx={{ minWidth: 160 }}
+                SelectProps={{ displayEmpty: true }}
+            >
+                <MenuItem value="" disabled>
+                    Pick a method
+                </MenuItem>
+                {item.methods.map((m) => (
+                    <MenuItem key={m.id} value={m.id}>
+                        {m.name}
+                    </MenuItem>
+                ))}
+            </TextField>
+        );
+    };
+
     const togglePreTest = (item) =>
         router.post(
             route('pre-orders.items.pre-test', [preOrder.id, item.id]),
@@ -79,6 +118,11 @@ export default function TestsTab({ preOrder }) {
                         <TableCell padding="checkbox" />
                         <TableCell>Test</TableCell>
                         <TableCell>Patient</TableCell>
+                        <TableCell>
+                            <Tooltip title="Only BION sees the method. It sets the price.">
+                                <span>Method</span>
+                            </Tooltip>
+                        </TableCell>
                         <TableCell align="right">Qty</TableCell>
                         <TableCell align="right">Unit price</TableCell>
                         <TableCell>Added by</TableCell>
@@ -115,6 +159,7 @@ export default function TestsTab({ preOrder }) {
                                     </Typography>
                                 </TableCell>
                                 <TableCell>{patientName(preOrder, item.patient_ref)}</TableCell>
+                                <TableCell>{methodCell(item)}</TableCell>
                                 <TableCell align="right">{item.qty}</TableCell>
                                 <TableCell align="right">{item.unit_price ?? '—'}</TableCell>
                                 <TableCell>
