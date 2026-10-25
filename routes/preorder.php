@@ -35,6 +35,7 @@ Route::group(['prefix' => 'pre-orders', 'as' => 'pre-orders.'], function () {
     Route::post('{preOrder}/batches/issue', [Actions::class, 'sampleIssue'])->name('batches.issue');
     Route::post('{preOrder}/testing/start', [Actions::class, 'startTesting'])->name('testing.start');
     Route::post('{preOrder}/notes', [Actions::class, 'note'])->name('notes.store');
+    Route::post('{preOrder}/documents', [Actions::class, 'document'])->name('documents.store');
     Route::post('{preOrder}/hold', [Actions::class, 'hold'])->name('hold');
     Route::post('{preOrder}/resume', [Actions::class, 'resume'])->name('resume');
     Route::post('{preOrder}/close', [Actions::class, 'close'])->name('close');

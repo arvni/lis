@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\PreOrder;
 
+use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\PreOrder\DTOs\Actor;
 use App\Domains\PreOrder\DTOs\QuoteDTO;
 use App\Domains\PreOrder\DTOs\RaiseRequestDTO;
@@ -20,12 +21,14 @@ use App\Domains\PreOrder\Requests\PreOrderSampleIssueRequest;
 use App\Domains\PreOrder\Requests\RaisePreOrderRequestRequest;
 use App\Domains\PreOrder\Requests\SetPreOrderMainTestRequest;
 use App\Domains\PreOrder\Requests\SetPreOrderPreTestRequest;
+use App\Domains\PreOrder\Requests\StorePreOrderDocumentRequest;
 use App\Domains\PreOrder\Services\PreOrderWorkflow;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 
 /**
  * BION's stage actions on a pre-order. Each one is authorised by its FormRequest (or the policy),
@@ -146,6 +149,18 @@ class PreOrderActionController extends Controller
         return $this->run(
             fn () => $this->workflow->message($preOrder, $request->validated('body'), $this->actor($request), $internal),
             $internal ? 'Note saved.' : 'Message sent.',
+        );
+    }
+
+    public function document(StorePreOrderDocumentRequest $request, PreOrder $preOrder): RedirectResponse
+    {
+        $shared = (bool) $request->validated('shared', false);
+        /** @var UploadedFile $file */
+        $file = $request->file('file');
+
+        return $this->run(
+            fn () => $this->workflow->addStaffDocument($preOrder, $file, DocumentTag::from((string) $request->validated('tag')), $shared, $this->actor($request)),
+            $shared ? 'File attached and shared with the center.' : 'File attached (BION only).',
         );
     }
 

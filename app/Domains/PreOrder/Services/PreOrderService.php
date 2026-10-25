@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\PreOrder\Services;
 
+use App\Domains\Document\Models\Document;
 use App\Domains\PreOrder\Adapters\DocumentAdapter;
 use App\Domains\PreOrder\Enums\ExceptionType;
 use App\Domains\PreOrder\Enums\FinanceReason;
@@ -79,6 +80,17 @@ class PreOrderService
                 'actor_name' => $h->actor_name,
                 'created_at' => $h->created_at?->toIso8601String(),
             ])->values()->all();
+        // Every file, internal ones included, and whether the center sees it.
+        $view['documents'] = $preOrder->documents->map(fn (Document $d) => [
+            'hash' => $d->hash,
+            'name' => $d->originalName,
+            'tag' => $d->tag,
+            'ext' => $d->ext,
+            'from' => DocumentAdapter::isFromBion($d) ? 'bion' : 'center',
+            'shared' => ! DocumentAdapter::isInternal($d),
+            'created_at' => $d->created_at?->toIso8601String(),
+        ])->values()->all();
+        $view['document_tags'] = DocumentAdapter::staffTagValues();
         $view['referrer'] = $preOrder->referrer?->only(['id', 'fullName']);
         $view['assignee'] = $preOrder->assignee?->only(['id', 'name']);
         // Whether confirming now sends a quotation, and why, so BION knows before clicking.

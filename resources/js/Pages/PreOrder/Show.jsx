@@ -15,7 +15,8 @@ import FinanceTab from './Components/FinanceTab';
 const OPEN_REQUEST = ['open', 'answered', 'awaiting_finance', 'order_created'];
 
 const Show = () => {
-    const { preOrder, canQuote, canStartTesting, errors, status, success } = usePage().props;
+    const { preOrder, canQuote, canStartTesting, canReview, errors, status, success } =
+        usePage().props;
     const [tab, setTab] = useState('tests');
     const openRequests = preOrder.requests.filter((r) => OPEN_REQUEST.includes(r.status)).length;
     const openQuotations = preOrder.quotations.filter((q) => q.status === 'awaiting_center').length;
@@ -83,7 +84,7 @@ const Show = () => {
                 {tab === 'tests' && <TestsTab preOrder={preOrder} />}
                 {tab === 'requests' && <RequestsTab preOrder={preOrder} />}
                 {tab === 'finance' && <FinanceTab preOrder={preOrder} canQuote={canQuote} />}
-                {tab === 'documents' && <DocumentsTab preOrder={preOrder} />}
+                {tab === 'documents' && <DocumentsTab preOrder={preOrder} canReview={canReview} />}
                 {tab === 'messages' && <ThreadTab preOrder={preOrder} />}
                 {tab === 'notes' && <ThreadTab preOrder={preOrder} internal />}
                 {tab === 'orders' && (
