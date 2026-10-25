@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\PreOrder\Services;
 
+use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\PreOrder\DTOs\Actor;
 use App\Domains\PreOrder\DTOs\CreatePreOrderDTO;
 use App\Domains\PreOrder\Enums\ExceptionType;
@@ -15,6 +16,7 @@ use App\Domains\PreOrder\Models\PreOrderAction;
 use App\Domains\PreOrder\Repositories\PreOrderActionRepository;
 use App\Domains\PreOrder\Repositories\PreOrderRepository;
 use App\Domains\PreOrder\Support\PreOrderActionRules;
+use App\Domains\PreOrder\Support\UploadInspector;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -30,6 +32,7 @@ class PreOrderInbox
         private readonly PreOrderActionRepository $actions,
         private readonly PreOrderRepository $preOrders,
         private readonly PreOrderWorkflow $workflow,
+        private readonly UploadInspector $inspector,
     ) {}
 
     /** @return int how many actions were handled */
@@ -94,10 +97,41 @@ class PreOrderInbox
             Type::REQUEST_HOLD => $this->workflow->hold($preOrder, $payload['reason'], $payload['comment'] ?? null, $actor),
             Type::RESUME => $this->workflow->resume($preOrder, $actor),
             Type::CANCEL => $this->workflow->close($preOrder, ExceptionType::CANCELLED, $payload['reason'], $payload['comment'] ?? null, $actor),
-            // Uploads stay closed until the file checks (type sniffing, re-encoding, PDF inspection, virus scan) ship.
-            Type::UPLOAD_DOCUMENT => throw new PreOrderRuleException('File uploads are not available yet.'),
+            Type::UPLOAD_DOCUMENT => $this->upload($preOrder, $payload, $actor),
             Type::DECIDE_FINANCE, Type::ADD_BATCH, Type::CLOSE_BATCHES => throw new PreOrderRuleException('This action is not available yet.'),
         };
+    }
+
+    /**
+     * The file api left in the incoming folder is inspected, stored as a clean copy and always
+     * removed from the folder, accepted or not.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    private function upload(PreOrder $preOrder, array $payload, Actor $actor): PreOrder
+    {
+        $incoming = rtrim((string) config('services.preorder_uploads.incoming'), '/').'/'.$payload['file'];
+        $upload = null;
+        try {
+            $upload = $this->inspector->inspect($incoming, pathinfo($payload['file'], PATHINFO_EXTENSION));
+
+            return $this->workflow->addDocument($preOrder, $upload, self::cleanName($payload['name']), DocumentTag::from($payload['tag']), isset($payload['request']) ? (int) $payload['request'] : null, $actor);
+        } finally {
+            $upload?->discard();
+            if (is_file($incoming)) {
+                @unlink($incoming);
+            }
+        }
+    }
+
+    /** A display name only: no path parts, control characters or markup-looking characters. */
+    private static function cleanName(string $name): string
+    {
+        $name = basename(str_replace('\\', '/', $name));
+        $name = (string) preg_replace('/[\x00-\x1F\x7F<>:"|?*]+/u', '', $name);
+        $name = trim(mb_substr($name, 0, 120));
+
+        return $name !== '' ? $name : 'document';
     }
 
     private function fail(int $actionId, string $error): ?PreOrderAction

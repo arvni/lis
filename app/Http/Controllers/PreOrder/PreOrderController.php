@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PreOrderController extends Controller
 {
@@ -41,5 +42,12 @@ class PreOrderController extends Controller
         return Inertia::render('PreOrder/Show', [
             'preOrder' => $this->preOrderService->detail($preOrder),
         ]);
+    }
+
+    public function document(PreOrder $preOrder, string $hash): BinaryFileResponse
+    {
+        $this->authorize('view', $preOrder);
+
+        return $this->preOrderService->download($preOrder, $hash);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\PreOrder\Services;
 
+use App\Domains\PreOrder\Adapters\DocumentAdapter;
 use App\Domains\PreOrder\Enums\ItemStatus;
 use App\Domains\PreOrder\Enums\PreOrderStage;
 use App\Domains\PreOrder\Models\PreOrder;
@@ -13,6 +14,7 @@ use App\Domains\PreOrder\Repositories\PreOrderRepository;
 use App\Domains\PreOrder\Support\FlowStages;
 use App\Domains\PreOrder\Support\PreOrderSnapshot;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /** Read side of the BION screens. Changes go through PreOrderWorkflow. */
 class PreOrderService
@@ -20,7 +22,13 @@ class PreOrderService
     public function __construct(
         private readonly PreOrderRepository $preOrders,
         private readonly PreOrderSnapshot $snapshot,
+        private readonly DocumentAdapter $documents,
     ) {}
+
+    public function download(PreOrder $preOrder, string $hash): BinaryFileResponse
+    {
+        return $this->documents->download($preOrder, $hash);
+    }
 
     /**
      * @param  array<string, mixed>  $filters

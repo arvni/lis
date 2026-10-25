@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'pre-orders', 'as' => 'pre-orders.'], function () {
     Route::get('/', [PreOrderController::class, 'index'])->name('index');
     Route::get('{preOrder}', [PreOrderController::class, 'show'])->name('show');
+    Route::get('{preOrder}/documents/{hash}', [PreOrderController::class, 'document'])->whereUuid('hash')->name('documents.show');
 
     Route::post('{preOrder}/open-review', [Actions::class, 'openReview'])->name('open-review');
     Route::post('{preOrder}/assign', [Actions::class, 'assign'])->name('assign');

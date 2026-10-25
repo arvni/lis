@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\PreOrder\Support;
 
+use App\Domains\PreOrder\Adapters\DocumentAdapter;
 use App\Domains\PreOrder\Enums\PreOrderActionType;
 use App\Domains\PreOrder\Enums\StartMode;
 use Illuminate\Validation\Rule;
@@ -52,6 +53,13 @@ final class PreOrderActionRules
                 'comment' => ['nullable', 'string', 'max:2000'],
             ],
             PreOrderActionType::RESUME => [],
+            PreOrderActionType::UPLOAD_DOCUMENT => [
+                // Only a name api generated: never a path, so nothing can point outside the folder.
+                'file' => ['required', 'string', 'regex:/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(pdf|png|jpg)$/'],
+                'name' => ['required', 'string', 'max:255'],
+                'tag' => ['required', Rule::in(DocumentAdapter::centerTagValues())],
+                'request' => ['nullable', 'integer', 'min:1'],
+            ],
             default => [],
         };
     }

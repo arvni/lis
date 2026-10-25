@@ -15,4 +15,5 @@ enum HistoryType: string
     case DECISION = 'decision';
     case COMMENT = 'comment';
     case REQUEST = 'request';
+    case DOCUMENT = 'document';
 }
