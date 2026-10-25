@@ -100,7 +100,9 @@ class PreOrderInbox
             Type::CANCEL => $this->workflow->close($preOrder, ExceptionType::CANCELLED, $payload['reason'], $payload['comment'] ?? null, $actor),
             Type::UPLOAD_DOCUMENT => $this->upload($preOrder, $payload, $actor),
             Type::DECIDE_FINANCE => $this->workflow->decideFinance($preOrder, FinanceDecisionDTO::fromArray($payload), $actor),
-            Type::ADD_BATCH, Type::CLOSE_BATCHES => throw new PreOrderRuleException('This action is not available yet.'),
+            Type::CONFIRM_NEXT_STEP => $this->workflow->confirmNextStep($preOrder, $payload['note'] ?? null, $actor),
+            Type::ADD_BATCH => $this->workflow->addBatch($preOrder, $payload['label'] ?? null, $payload['replaces'] ?? null, $actor),
+            Type::CLOSE_BATCHES => $this->workflow->closeBatches($preOrder, $actor),
         };
     }
 

@@ -47,9 +47,9 @@ class PreOrderFinanceTest extends PreOrderTestCase
         parent::setUp();
         // Re-faking replaces the base case's list, so it is repeated here with the finance event.
         Event::fake([PreOrderChanged::class, PreOrderActionProcessed::class, ReferrerOrderUpdated::class, QuotationDecided::class, QuotationSent::class]);
-        $this->pgtm = $this->test('PGTM', 'pgt_m', price: 900);
+        $this->pgtm = $this->test('PGTM', 'nipt', price: 900);
         // A ride-along test the center may order with PGT-M, but that can't lead the case.
-        $this->karyotype = $this->test('KARYO', 'pgt_m', canBeMain: false, price: 50);
+        $this->karyotype = $this->test('KARYO', 'nipt', canBeMain: false, price: 50);
         // PGT-M asks how many genes; two or more raises the price.
         DB::table('tests')->where('id', $this->pgtm)->update(['preorder' => json_encode([
             'can_be_main' => true,
@@ -169,7 +169,7 @@ class PreOrderFinanceTest extends PreOrderTestCase
 
     public function test_a_flow_with_the_bion_check_waits_for_finance_before_releasing(): void
     {
-        $flow = Flow::query()->where('family', 'pgt_m')->firstOrFail();
+        $flow = Flow::query()->where('family', 'nipt')->firstOrFail();
         $flow->stages = array_map(fn (array $s) => $s['stage'] === 'FINANCE_VERIFY' ? [...$s, 'mode' => 'on'] : $s, $flow->stages);
         $flow->save();
         $preOrder = $this->workflow->confirmTests($this->inReview(genes: 2), $this->bion());

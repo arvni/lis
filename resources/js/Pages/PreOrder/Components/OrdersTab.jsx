@@ -11,14 +11,16 @@ import {
     Typography,
 } from '@mui/material';
 import { patientName } from './stage';
+import BatchesSection from './BatchesSection';
 
 /** Released lines waiting for the center to place them, and the orders that came back. */
-export default function OrdersTab({ preOrder }) {
+export default function OrdersTab({ preOrder, canStartTesting }) {
     const placed = new Set(preOrder.linked_orders.map((o) => o.release_key));
     const testName = Object.fromEntries(preOrder.items.map((i) => [i.test_id, i.test_name]));
 
     return (
         <Paper variant="outlined" sx={{ p: 2 }}>
+            <BatchesSection preOrder={preOrder} canStartTesting={canStartTesting} />
             <Typography variant="subtitle2">Released to the center</Typography>
             {preOrder.orders_to_place.length === 0 ? (
                 <Typography variant="body2" color="text.secondary">
@@ -91,4 +93,7 @@ export default function OrdersTab({ preOrder }) {
     );
 }
 
-OrdersTab.propTypes = { preOrder: PropTypes.object.isRequired };
+OrdersTab.propTypes = {
+    preOrder: PropTypes.object.isRequired,
+    canStartTesting: PropTypes.bool,
+};

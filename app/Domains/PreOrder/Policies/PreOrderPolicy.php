@@ -31,6 +31,12 @@ class PreOrderPolicy
         return $user->can('PreOrders.Finance.Quote');
     }
 
+    /** Check the sample list once the batches are closed and start testing. */
+    public function startTesting(User $user, PreOrder $preOrder): bool
+    {
+        return $user->can('PreOrders.Cases.Start Testing');
+    }
+
     /** Cancel after samples arrived, and other moves outside the normal rules. */
     public function override(User $user, PreOrder $preOrder): bool
     {

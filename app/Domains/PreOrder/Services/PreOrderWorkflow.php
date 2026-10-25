@@ -38,6 +38,7 @@ use App\Domains\PreOrder\Repositories\QuotationRepository;
 use App\Domains\PreOrder\Support\FlowStages;
 use App\Domains\PreOrder\Support\InspectedUpload;
 use App\Domains\PreOrder\Support\LinkedOrder;
+use App\Domains\PreOrder\Support\PreOrderBatches;
 use App\Domains\PreOrder\Support\QuotationPdf;
 use Closure;
 use Illuminate\Support\Collection;
@@ -249,6 +250,33 @@ class PreOrderWorkflow
         });
     }
 
+    /**
+     * Mark a line as a prerequisite test (e.g. familial variant confirmation). In flows with a
+     * pre-test workup these go to the lab first; the main tests wait for the center's next step.
+     */
+    public function setPreTest(PreOrder $preOrder, int $itemId, bool $preTest, Actor $actor): PreOrder
+    {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($itemId, $preTest, $actor) {
+            $this->expectBeforeRelease($preOrder);
+            if (! FlowStages::preTestEnabled($preOrder)) {
+                throw new PreOrderRuleException('This flow has no pre-test workup.');
+            }
+            /** @var PreOrderItem|null $item */
+            $item = $preOrder->items()->with('test')->find($itemId);
+            if (! $item || $item->status === ItemStatus::DROPPED) {
+                throw new PreOrderRuleException('That test line is not on this pre-order.');
+            }
+            if ($preTest && $item->test_id === $preOrder->main_test_id) {
+                throw new PreOrderRuleException('The main test can\'t be a pre-test.');
+            }
+            $this->preOrders->updateItem($item, ['release_purpose' => $preTest ? ReleasePurpose::PRE_TEST : null]);
+            $preOrder->unsetRelation('items');
+            $this->history($preOrder, HistoryType::DECISION, $actor, body: $preTest ? "{$item->test->name} goes first, as a pre-test" : "{$item->test->name} is no longer a pre-test", meta: ['item' => $item->id]);
+
+            return $this->preOrders->update($preOrder, []);
+        });
+    }
+
     public function raiseRequest(PreOrder $preOrder, RaiseRequestDTO $dto, Actor $actor): PreOrderRequest
     {
         $request = null;
@@ -323,6 +351,9 @@ class PreOrderWorkflow
             $items = $this->preOrders->activeItems($preOrder);
             if ($items->isEmpty()) {
                 throw new PreOrderRuleException('There are no tests to release.');
+            }
+            if (FlowStages::requiresPreTest($preOrder) && ! $items->contains(fn (PreOrderItem $i) => $i->isPreTest())) {
+                throw new PreOrderRuleException('This flow starts with a pre-test workup: mark the prerequisite tests first.');
             }
             $open = $this->preOrders->openRequests($preOrder);
             if ($open->contains(fn (PreOrderRequest $r) => $r->status === RequestStatus::OPEN)) {
@@ -492,12 +523,13 @@ class PreOrderWorkflow
 
     /**
      * Read the stage from the released orders. These stages are never set by hand, so the
-     * pre-order and the lab can't disagree: it moves only when the orders do.
+     * pre-order and the lab can't disagree: it moves only when the orders do. Pre-test orders
+     * drive the workup stages; every other order drives the main path.
      */
     public function syncFromOrders(PreOrder $preOrder): PreOrder
     {
         return $this->mutate($preOrder, function (PreOrder $preOrder) {
-            if ($preOrder->isClosed() || $preOrder->stage->rank() < PreOrderStage::AWAITING_SAMPLES->rank()) {
+            if ($preOrder->isClosed() || $preOrder->stage->rank() < PreOrderStage::AWAITING_PRE_SAMPLES->rank()) {
                 return $preOrder;
             }
             $orders = $this->referrerOrders->linkedOrders($preOrder->id);
@@ -506,21 +538,120 @@ class PreOrderWorkflow
             }
             $closedRequests = $this->closePlacedRequests($preOrder, $orders);
 
-            $all = fn (Closure $test) => array_reduce($orders, fn (bool $carry, LinkedOrder $o) => $carry && $test($o), true);
-            $any = fn (Closure $test) => array_reduce($orders, fn (bool $carry, LinkedOrder $o) => $carry || $test($o), false);
+            $advanced = $this->advanceFromOrders($preOrder, $orders);
 
-            $target = match (true) {
-                $all(fn (LinkedOrder $o) => $o->isReported()) => PreOrderStage::RESULTS_RELEASED,
-                $all(fn (LinkedOrder $o) => $o->isReportReady()) => PreOrderStage::TESTING_COMPLETED,
-                $any(fn (LinkedOrder $o) => $o->received) => PreOrderStage::TESTING,
-                default => null,
-            };
+            return $advanced ?? ($closedRequests ? $this->preOrders->update($preOrder, []) : $preOrder);
+        });
+    }
 
-            if ($target === null || $target->rank() <= $preOrder->stage->rank()) {
-                return $closedRequests ? $this->preOrders->update($preOrder, []) : $preOrder;
+    // ---------------------------------------------------------------- pre-test workup and batches
+
+    /** Stage 10: the center confirms the next step (e.g. the IVF cycle is planned); the main tests go out. */
+    public function confirmNextStep(PreOrder $preOrder, ?string $note, Actor $actor): PreOrder
+    {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($note, $actor) {
+            $this->expectStage($preOrder, [PreOrderStage::PRE_COMPLETED]);
+            $items = $this->preOrders->activeItems($preOrder)->filter(fn (PreOrderItem $i) => $i->status === ItemStatus::APPROVED)->values();
+            if ($items->isEmpty()) {
+                throw new PreOrderRuleException('There are no main tests left to release.');
+            }
+            $key = $this->release($preOrder, $items, ReleasePurpose::MAIN);
+            $preOrder->unsetRelation('items');
+            $this->history($preOrder, HistoryType::DECISION, $actor, body: $note ?: 'Next step confirmed; main tests released', meta: ['release_key' => $key, 'items' => $items->pluck('id')->all()]);
+
+            $next = FlowStages::nextAfter($preOrder, PreOrderStage::PRE_COMPLETED)
+                ?? throw new PreOrderRuleException('The flow has no stage after the pre-test workup.');
+
+            return $this->transition($preOrder, $next, $actor);
+        });
+    }
+
+    /**
+     * Another shipment: a new embryo cycle, a family member who follows later, or the replacement
+     * for a batch with a sample issue. In a per-batch flow a new batch is its own order with the
+     * first batch's tests; otherwise, and for a replacement, it adds samples to an existing order.
+     */
+    public function addBatch(PreOrder $preOrder, ?string $label, ?string $replaces, Actor $actor): PreOrder
+    {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($label, $replaces, $actor) {
+            $this->expectOpen($preOrder);
+            if ($replaces !== null) {
+                $exception = $preOrder->exception ?? [];
+                if (($exception['type'] ?? null) !== ExceptionType::SAMPLE_ISSUE->value || ($exception['batch'] ?? null) !== $replaces) {
+                    throw new PreOrderRuleException('There is no sample issue on that batch.');
+                }
+                $original = PreOrderBatches::find($preOrder, $replaces) ?? throw new PreOrderRuleException('That batch is not on this pre-order.');
+                // Re-draws are free (spec v1), so a replacement never opens a quotation.
+                $batch = [
+                    'key' => $this->nextKey($preOrder, 'R'),
+                    'label' => $label ?: "Replacement for {$original['label']}",
+                    'purpose' => ReleasePurpose::REPLACEMENT->value,
+                    'order_key' => $original['order_key'],
+                    'replaces' => $replaces,
+                ];
+                $preOrder->exception = null;
+                $this->history($preOrder, HistoryType::EXCEPTION, $actor, body: 'Replacement batch on its way', meta: ['exception' => ExceptionType::SAMPLE_ISSUE->value, 'event' => 'cleared', 'batch' => $replaces]);
+            } else {
+                $this->expectStage($preOrder, [PreOrderStage::BATCH_OPEN]);
+                $first = PreOrderBatches::firstMainKey($preOrder) ?? throw new PreOrderRuleException('No main order has been released yet.');
+                $label = $label ?: 'Batch '.PreOrderBatches::nextMainNumber($preOrder);
+                $batch = FlowStages::batchMode($preOrder)->opensOrder()
+                    ? ['key' => $key = $this->nextKey($preOrder, 'M'), 'label' => $label, 'purpose' => ReleasePurpose::MAIN->value, 'order_key' => $key, 'source' => $first]
+                    : ['key' => $this->nextKey($preOrder, 'B'), 'label' => $label, 'purpose' => ReleasePurpose::MAIN->value, 'order_key' => $first];
             }
 
-            return $this->transition($preOrder, $target, Actor::system(), meta: ['orders' => array_map(fn (LinkedOrder $o) => $o->toArray(), $orders)]);
+            $batch += ['side' => $actor->side->value, 'by' => $actor->name, 'at' => now()->toIso8601String()];
+            $preOrder->batches = [...($preOrder->batches ?? []), $batch];
+            $this->history($preOrder, HistoryType::DECISION, $actor, body: "Batch added: {$batch['label']}", meta: ['batch' => $batch['key'], 'order_key' => $batch['order_key']]);
+
+            return $this->preOrders->update($preOrder, ['action_owner' => $this->ownerFor($preOrder)]);
+        });
+    }
+
+    /** "No more batches – proceed": the center (when the flow lets it) or BION closes the batches. */
+    public function closeBatches(PreOrder $preOrder, Actor $actor): PreOrder
+    {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($actor) {
+            $this->expectStage($preOrder, [PreOrderStage::BATCH_OPEN]);
+            if ($actor->side === Side::CENTER && ! FlowStages::centerCanClose($preOrder)) {
+                throw new PreOrderRuleException('BION closes the batches for this test. Send them a message when the last batch is out.');
+            }
+            $this->history($preOrder, HistoryType::DECISION, $actor, body: 'No more batches', meta: ['batches' => count(PreOrderBatches::all($preOrder))]);
+            $next = FlowStages::nextAfter($preOrder, PreOrderStage::BATCH_OPEN)
+                ?? throw new PreOrderRuleException('The flow has no stage after the batches.');
+
+            return $this->transition($preOrder, $next, $actor);
+        });
+    }
+
+    /** Only BION moves a pre-order from "ready for testing" to testing, after checking the sample list. */
+    public function startTesting(PreOrder $preOrder, Actor $actor): PreOrder
+    {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($actor) {
+            $this->expectStage($preOrder, [PreOrderStage::READY_FOR_TESTING]);
+            if (($preOrder->exception['type'] ?? null) === ExceptionType::SAMPLE_ISSUE->value) {
+                throw new PreOrderRuleException('A batch has a sample issue. Wait for its replacement first.');
+            }
+            $preOrder = $this->transition($preOrder, PreOrderStage::TESTING, $actor, 'Sample list checked; testing started');
+
+            // Orders that already moved on in the lab carry the stage further straight away.
+            return $this->advanceFromOrders($preOrder, $this->referrerOrders->linkedOrders($preOrder->id)) ?? $preOrder;
+        });
+    }
+
+    /** BION found a batch's samples unusable: an exception on that batch until its replacement arrives. */
+    public function raiseSampleIssue(PreOrder $preOrder, string $batchKey, string $reason, Actor $actor): PreOrder
+    {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($batchKey, $reason, $actor) {
+            $this->expectOpen($preOrder);
+            $batch = PreOrderBatches::find($preOrder, $batchKey) ?? throw new PreOrderRuleException('That batch is not on this pre-order.');
+            if ($preOrder->exception !== null) {
+                throw new PreOrderRuleException('Clear the current exception first.');
+            }
+            $preOrder->exception = [...$this->exceptionRecord(ExceptionType::SAMPLE_ISSUE, 'sample_issue', $reason, $actor), 'batch' => $batchKey];
+            $this->history($preOrder, HistoryType::EXCEPTION, $actor, body: "{$batch['label']}: $reason", meta: ['exception' => ExceptionType::SAMPLE_ISSUE->value, 'batch' => $batchKey]);
+
+            return $this->preOrders->update($preOrder, ['action_owner' => $this->ownerFor($preOrder)]);
         });
     }
 
@@ -715,11 +846,18 @@ class PreOrderWorkflow
         if ($items->isEmpty()) {
             throw new PreOrderRuleException('There are no approved tests to release.');
         }
-        $key = $this->release($preOrder, $items, ReleasePurpose::MAIN);
-        $this->history($preOrder, HistoryType::DECISION, $actor, body: $note, meta: ['release_key' => $key, 'items' => $items->pluck('id')->all()]);
-
         $next = FlowStages::nextAfter($preOrder, PreOrderStage::FINANCE_VERIFY)
             ?? throw new PreOrderRuleException('The flow has no stage after review.');
+
+        // A pre-test workup sends only the prerequisite tests now; the rest wait for the center.
+        $preTest = $next === PreOrderStage::AWAITING_PRE_SAMPLES;
+        if ($preTest) {
+            $items = $items->filter(fn (PreOrderItem $i) => $i->isPreTest())->values();
+            $note = "$note (pre-test workup first)";
+        }
+        $key = $this->release($preOrder, $items, $preTest ? ReleasePurpose::PRE_TEST : ReleasePurpose::MAIN);
+        $preOrder->unsetRelation('items');
+        $this->history($preOrder, HistoryType::DECISION, $actor, body: $note, meta: ['release_key' => $key, 'items' => $items->pluck('id')->all()]);
 
         return $this->transition($preOrder, $next, $actor);
     }
@@ -879,6 +1017,50 @@ class PreOrderWorkflow
         return $closed;
     }
 
+    /**
+     * Move the stage to where the orders are, or return null when it stays. During the workup
+     * only pre-test orders count; after it, only the others. Batches wait for the center to
+     * close them and testing waits for BION, so those two stages never move on their own.
+     *
+     * @param  list<LinkedOrder>  $orders
+     */
+    private function advanceFromOrders(PreOrder $preOrder, array $orders): ?PreOrder
+    {
+        $preKeys = $preOrder->items()->where('release_purpose', ReleasePurpose::PRE_TEST->value)->whereNotNull('release_key')->pluck('release_key')->all();
+        $inWorkup = $preOrder->stage->rank() < PreOrderStage::AWAITING_SAMPLES->rank();
+        $orders = array_values(array_filter($orders, fn (LinkedOrder $o) => in_array($o->releaseKey, $preKeys, true) === $inWorkup));
+        if ($orders === []) {
+            return null;
+        }
+        // "Every order is reported" only counts once every released order has been placed.
+        $expected = array_filter(PreOrderBatches::orderKeys($preOrder), fn (string $k) => in_array($k, $preKeys, true) === $inWorkup);
+        $allPlaced = array_diff($expected, array_map(fn (LinkedOrder $o) => $o->releaseKey, $orders)) === [];
+        $all = fn (Closure $test) => $allPlaced && array_reduce($orders, fn (bool $carry, LinkedOrder $o) => $carry && $test($o), true);
+        $any = fn (Closure $test) => array_reduce($orders, fn (bool $carry, LinkedOrder $o) => $carry || $test($o), false);
+        $stage = $preOrder->stage;
+
+        $target = match (true) {
+            $inWorkup => match (true) {
+                $all(fn (LinkedOrder $o) => $o->isReportReady()) => PreOrderStage::PRE_COMPLETED,
+                $all(fn (LinkedOrder $o) => $o->received) => PreOrderStage::PRE_IN_PROGRESS,
+                $any(fn (LinkedOrder $o) => $o->received) => PreOrderStage::PRE_RECEIVED,
+                default => null,
+            },
+            $stage === PreOrderStage::AWAITING_SAMPLES && FlowStages::uses($preOrder, PreOrderStage::BATCH_OPEN) => $any(fn (LinkedOrder $o) => $o->received) ? PreOrderStage::BATCH_OPEN : null,
+            in_array($stage, [PreOrderStage::BATCH_OPEN, PreOrderStage::READY_FOR_TESTING], true) => null,
+            $all(fn (LinkedOrder $o) => $o->isReported()) => PreOrderStage::RESULTS_RELEASED,
+            $all(fn (LinkedOrder $o) => $o->isReportReady()) => PreOrderStage::TESTING_COMPLETED,
+            $any(fn (LinkedOrder $o) => $o->received) => PreOrderStage::TESTING,
+            default => null,
+        };
+
+        if ($target === null || $target->rank() <= $stage->rank() || ! FlowStages::uses($preOrder, $target)) {
+            return null;
+        }
+
+        return $this->transition($preOrder, $target, Actor::system(), meta: ['orders' => array_map(fn (LinkedOrder $o) => $o->toArray(), $orders)]);
+    }
+
     /** After a request is answered or closed: leave the review wait once nothing is unanswered. */
     private function afterRequestChange(PreOrder $preOrder, Actor $actor): PreOrder
     {
@@ -897,7 +1079,7 @@ class PreOrderWorkflow
             return ActionOwner::NONE;
         }
         $exception = ExceptionType::tryFrom((string) ($preOrder->exception['type'] ?? ''));
-        if ($exception === ExceptionType::HOLD_CENTER) {
+        if ($exception === ExceptionType::HOLD_CENTER || $exception === ExceptionType::SAMPLE_ISSUE) {
             return ActionOwner::CENTER;
         }
         if ($exception === ExceptionType::HOLD_BION || $exception === ExceptionType::FINANCE_REJECTED) {
@@ -932,13 +1114,18 @@ class PreOrderWorkflow
 
     private function nextReleaseKey(PreOrder $preOrder, ReleasePurpose $purpose): string
     {
-        $count = $preOrder->items()->whereNotNull('release_key')->distinct()->count('release_key');
-        $letter = match ($purpose) {
+        return $this->nextKey($preOrder, match ($purpose) {
             ReleasePurpose::PRE_TEST => 'P',
             ReleasePurpose::MAIN => 'M',
             ReleasePurpose::ADD_ON => 'A',
             ReleasePurpose::REPLACEMENT => 'R',
-        };
+        });
+    }
+
+    /** Release keys and batch keys share one counter, so no two are ever the same. */
+    private function nextKey(PreOrder $preOrder, string $letter): string
+    {
+        $count = $preOrder->items()->whereNotNull('release_key')->distinct()->count('release_key') + count($preOrder->batches ?? []);
 
         return $preOrder->code.'-'.$letter.($count + 1);
     }

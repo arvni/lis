@@ -70,6 +70,12 @@ class PreOrderItem extends Model
         return $this->belongsTo(PreOrderQuotation::class, 'quotation_id');
     }
 
+    /** A prerequisite test, sent to the lab before the main tests. */
+    public function isPreTest(): bool
+    {
+        return $this->release_purpose === ReleasePurpose::PRE_TEST && $this->status !== ItemStatus::DROPPED;
+    }
+
     /** qty × unit price; null while the line has no price. */
     public function lineTotal(): ?string
     {

@@ -16,8 +16,10 @@ use App\Domains\PreOrder\Requests\ClosePreOrderRequest;
 use App\Domains\PreOrder\Requests\ConfirmPreOrderRequest;
 use App\Domains\PreOrder\Requests\PreOrderNoteRequest;
 use App\Domains\PreOrder\Requests\PreOrderReasonRequest;
+use App\Domains\PreOrder\Requests\PreOrderSampleIssueRequest;
 use App\Domains\PreOrder\Requests\RaisePreOrderRequestRequest;
 use App\Domains\PreOrder\Requests\SetPreOrderMainTestRequest;
+use App\Domains\PreOrder\Requests\SetPreOrderPreTestRequest;
 use App\Domains\PreOrder\Services\PreOrderWorkflow;
 use App\Domains\User\Models\User;
 use App\Http\Controllers\Controller;
@@ -73,6 +75,13 @@ class PreOrderActionController extends Controller
         return $this->run(fn () => $this->workflow->dropItem($preOrder, $item, $request->validated('reason'), $this->actor($request)), 'Test removed.');
     }
 
+    public function setPreTest(SetPreOrderPreTestRequest $request, PreOrder $preOrder, int $item): RedirectResponse
+    {
+        $preTest = (bool) $request->validated('pre_test');
+
+        return $this->run(fn () => $this->workflow->setPreTest($preOrder, $item, $preTest, $this->actor($request)), $preTest ? 'Marked as a pre-test.' : 'No longer a pre-test.');
+    }
+
     public function raiseRequest(RaisePreOrderRequestRequest $request, PreOrder $preOrder): RedirectResponse
     {
         return $this->run(fn () => $this->workflow->raiseRequest($preOrder, RaiseRequestDTO::fromArray($request->validated()), $this->actor($request)), 'Request sent to the center.');
@@ -104,6 +113,30 @@ class PreOrderActionController extends Controller
     public function reviseQuotation(PreOrderReasonRequest $request, PreOrder $preOrder): RedirectResponse
     {
         return $this->run(fn () => $this->workflow->reviseQuotation($preOrder, $request->validated('reason'), $this->actor($request)), 'Back in review to revise the quotation.');
+    }
+
+    public function confirmNextStep(PreOrderReasonRequest $request, PreOrder $preOrder): RedirectResponse
+    {
+        return $this->run(fn () => $this->workflow->confirmNextStep($preOrder, $request->validated('reason'), $this->actor($request)), 'Next step confirmed; main tests released.');
+    }
+
+    public function closeBatches(Request $request, PreOrder $preOrder): RedirectResponse
+    {
+        $this->authorize('review', $preOrder);
+
+        return $this->run(fn () => $this->workflow->closeBatches($preOrder, $this->actor($request)), 'Batches closed.');
+    }
+
+    public function startTesting(Request $request, PreOrder $preOrder): RedirectResponse
+    {
+        $this->authorize('startTesting', $preOrder);
+
+        return $this->run(fn () => $this->workflow->startTesting($preOrder, $this->actor($request)), 'Testing started.');
+    }
+
+    public function sampleIssue(PreOrderSampleIssueRequest $request, PreOrder $preOrder): RedirectResponse
+    {
+        return $this->run(fn () => $this->workflow->raiseSampleIssue($preOrder, $request->validated('batch'), $request->validated('reason'), $this->actor($request)), 'Sample issue sent to the center.');
     }
 
     public function note(PreOrderNoteRequest $request, PreOrder $preOrder): RedirectResponse

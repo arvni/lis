@@ -73,7 +73,16 @@ final class PreOrderActionRules
                 'note' => ['nullable', 'required_if:decision,reject', 'string', 'max:2000'],
                 'center_reference' => ['nullable', 'string', 'max:64'],
             ],
-            default => [],
+            PreOrderActionType::CONFIRM_NEXT_STEP => [
+                'note' => ['nullable', 'string', 'max:2000'],
+            ],
+            PreOrderActionType::ADD_BATCH => [
+                // e.g. "Embryo cycle 2", "Father blood"
+                'label' => ['nullable', 'string', 'max:64'],
+                // The batch key with the sample issue this replaces.
+                'replaces' => ['nullable', 'string', 'max:32'],
+            ],
+            PreOrderActionType::CLOSE_BATCHES => [],
         };
     }
 }

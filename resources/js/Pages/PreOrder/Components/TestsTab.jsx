@@ -54,6 +54,13 @@ export default function TestsTab({ preOrder }) {
             { preserveScroll: true },
         );
 
+    const togglePreTest = (item) =>
+        router.post(
+            route('pre-orders.items.pre-test', [preOrder.id, item.id]),
+            { pre_test: !item.pre_test },
+            { preserveScroll: true },
+        );
+
     const drop = (itemId) =>
         router.delete(route('pre-orders.items.destroy', [preOrder.id, itemId]), {
             preserveScroll: true,
@@ -119,6 +126,27 @@ export default function TestsTab({ preOrder }) {
                                         color={STATUS_COLOR[item.status] ?? 'default'}
                                         label={item.status}
                                     />
+                                    {preOrder.can.set_pre_test && !isMain ? (
+                                        <Tooltip title="Pre-tests go to the lab first, before the main tests">
+                                            <Chip
+                                                size="small"
+                                                sx={{ ml: 1 }}
+                                                variant={item.pre_test ? 'filled' : 'outlined'}
+                                                color={item.pre_test ? 'secondary' : 'default'}
+                                                label={item.pre_test ? 'Pre-test' : 'Mark pre-test'}
+                                                onClick={() => togglePreTest(item)}
+                                            />
+                                        </Tooltip>
+                                    ) : (
+                                        item.pre_test && (
+                                            <Chip
+                                                size="small"
+                                                sx={{ ml: 1 }}
+                                                color="secondary"
+                                                label="Pre-test"
+                                            />
+                                        )
+                                    )}
                                     {item.release_key && (
                                         <Typography variant="caption" sx={{ ml: 1 }}>
                                             {item.release_key}

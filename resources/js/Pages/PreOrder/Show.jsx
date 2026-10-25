@@ -15,7 +15,7 @@ import FinanceTab from './Components/FinanceTab';
 const OPEN_REQUEST = ['open', 'answered', 'awaiting_finance', 'order_created'];
 
 const Show = () => {
-    const { preOrder, canQuote, errors, status, success } = usePage().props;
+    const { preOrder, canQuote, canStartTesting, errors, status, success } = usePage().props;
     const [tab, setTab] = useState('tests');
     const openRequests = preOrder.requests.filter((r) => OPEN_REQUEST.includes(r.status)).length;
     const openQuotations = preOrder.quotations.filter((q) => q.status === 'awaiting_center').length;
@@ -64,7 +64,18 @@ const Show = () => {
                 <Tab value="documents" label={`Files (${preOrder.documents.length})`} />
                 <Tab value="messages" label="Messages" />
                 <Tab value="notes" label="Internal notes" />
-                <Tab value="orders" label="Orders" />
+                <Tab
+                    value="orders"
+                    label={
+                        <Badge
+                            color="error"
+                            variant="dot"
+                            invisible={preOrder.exception?.type !== 'sample_issue'}
+                        >
+                            Samples &amp; orders
+                        </Badge>
+                    }
+                />
                 <Tab value="history" label="History" />
             </Tabs>
             <Box>
@@ -75,7 +86,9 @@ const Show = () => {
                 {tab === 'documents' && <DocumentsTab preOrder={preOrder} />}
                 {tab === 'messages' && <ThreadTab preOrder={preOrder} />}
                 {tab === 'notes' && <ThreadTab preOrder={preOrder} internal />}
-                {tab === 'orders' && <OrdersTab preOrder={preOrder} />}
+                {tab === 'orders' && (
+                    <OrdersTab preOrder={preOrder} canStartTesting={canStartTesting} />
+                )}
                 {tab === 'history' && <HistoryTab preOrder={preOrder} />}
             </Box>
         </>
