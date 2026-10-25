@@ -42,6 +42,7 @@ use App\Domains\PreOrder\Support\LinkedOrder;
 use App\Domains\PreOrder\Support\PreOrderBatches;
 use App\Domains\PreOrder\Support\QuotationPdf;
 use Closure;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -744,6 +745,26 @@ class PreOrderWorkflow
                 'tag' => $tag->value,
                 'request' => $requestNumber,
             ]));
+
+            return $this->preOrders->update($preOrder, []);
+        });
+    }
+
+    /**
+     * A file BION staff attached, shared with the center or kept internal. Allowed on a closed
+     * pre-order too, e.g. a letter sent after the results.
+     */
+    public function addStaffDocument(PreOrder $preOrder, UploadedFile $file, DocumentTag $tag, bool $shared, Actor $actor): PreOrder
+    {
+        return $this->mutate($preOrder, function (PreOrder $preOrder) use ($file, $tag, $shared, $actor) {
+            if ($actor->side !== Side::BION) {
+                throw new PreOrderRuleException('Only BION staff can attach files here.');
+            }
+            $document = $this->documents->storeStaff($preOrder, $file, $tag, $shared);
+            $this->history($preOrder, HistoryType::DOCUMENT, $actor, body: $document->originalName, internal: ! $shared, meta: [
+                'document' => $document->hash,
+                'tag' => $tag->value,
+            ]);
 
             return $this->preOrders->update($preOrder, []);
         });

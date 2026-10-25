@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\PreOrder\Support;
 
 use App\Domains\Document\Models\Document;
+use App\Domains\PreOrder\Adapters\DocumentAdapter;
 use App\Domains\PreOrder\Adapters\ReferrerAdapter;
 use App\Domains\PreOrder\Enums\ExceptionType;
 use App\Domains\PreOrder\Enums\FinanceReason;
@@ -58,7 +59,7 @@ class PreOrderSnapshot
                 // Files this stage asks for, and which of them the case has.
                 'required_documents' => array_map(fn (string $tag) => [
                     'tag' => $tag,
-                    'uploaded' => $preOrder->documents->contains(fn (Document $d) => $d->tag === $tag),
+                    'uploaded' => $preOrder->documents->contains(fn (Document $d) => $d->tag === $tag && ! DocumentAdapter::isFromBion($d)),
                 ], FlowStages::requiredDocuments($preOrder, $preOrder->stage)),
                 'reminded_at' => $preOrder->reminded_at?->toIso8601String(),
                 'owner' => $preOrder->action_owner->value,
@@ -152,11 +153,13 @@ class PreOrderSnapshot
                 'close_batches' => $open && $stage === PreOrderStage::BATCH_OPEN && FlowStages::centerCanClose($preOrder),
                 'replace_batch' => $open && ($preOrder->exception['type'] ?? null) === ExceptionType::SAMPLE_ISSUE->value ? ($preOrder->exception['batch'] ?? null) : null,
             ],
-            'documents' => $preOrder->documents->map(fn (Document $d) => [
+            // BION's internal files never reach the center.
+            'documents' => $preOrder->documents->reject(fn (Document $d) => DocumentAdapter::isInternal($d))->map(fn (Document $d) => [
                 'hash' => $d->hash,
                 'name' => $d->originalName,
                 'tag' => $d->tag,
                 'ext' => $d->ext,
+                'from' => DocumentAdapter::isFromBion($d) ? 'bion' : 'center',
                 'created_at' => $d->created_at?->toIso8601String(),
             ])->values()->all(),
             'history' => $preOrder->histories

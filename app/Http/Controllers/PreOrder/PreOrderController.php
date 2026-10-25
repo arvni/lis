@@ -44,6 +44,7 @@ class PreOrderController extends Controller
             'preOrder' => $this->preOrderService->detail($preOrder),
             'canQuote' => (bool) $request->user()?->can('quote', $preOrder),
             'canStartTesting' => (bool) $request->user()?->can('startTesting', $preOrder),
+            'canReview' => (bool) $request->user()?->can('review', $preOrder),
         ]);
     }
 
