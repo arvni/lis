@@ -154,6 +154,16 @@ export default function FinanceTab({ preOrder, canQuote }) {
                             {q.request && (
                                 <Chip size="small" variant="outlined" label={`R${q.request}`} />
                             )}
+                            {q.pdf && (
+                                <Button
+                                    size="small"
+                                    href={route('pre-orders.documents.show', [preOrder.id, q.pdf])}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    PDF
+                                </Button>
+                            )}
                             <Typography variant="caption" color="text.secondary">
                                 {q.reasons.join(' · ')} · sent {fmt(q.created_at)} · valid until{' '}
                                 {fmt(q.expires_at)}

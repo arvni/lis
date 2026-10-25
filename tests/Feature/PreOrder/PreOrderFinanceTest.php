@@ -18,7 +18,7 @@ use App\Domains\PreOrder\Enums\RequestStatus;
 use App\Domains\PreOrder\Events\PreOrderActionProcessed;
 use App\Domains\PreOrder\Events\PreOrderChanged;
 use App\Domains\PreOrder\Events\QuotationDecided;
-use App\Domains\Referrer\Events\ReferrerOrderUpdated;
+use App\Domains\PreOrder\Events\QuotationSent;
 use App\Domains\PreOrder\Exceptions\PreOrderRuleException;
 use App\Domains\PreOrder\Models\Flow;
 use App\Domains\PreOrder\Models\PreOrder;
@@ -26,9 +26,12 @@ use App\Domains\PreOrder\Models\PreOrderAction;
 use App\Domains\PreOrder\Models\PreOrderQuotation;
 use App\Domains\PreOrder\Services\PreOrderInbox;
 use App\Domains\PreOrder\Support\PreOrderSnapshot;
+use App\Domains\PreOrder\Support\QuotationPdf;
+use App\Domains\Referrer\Events\ReferrerOrderUpdated;
 use App\Domains\User\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Permission;
@@ -43,7 +46,7 @@ class PreOrderFinanceTest extends PreOrderTestCase
     {
         parent::setUp();
         // Re-faking replaces the base case's list, so it is repeated here with the finance event.
-        Event::fake([PreOrderChanged::class, PreOrderActionProcessed::class, ReferrerOrderUpdated::class, QuotationDecided::class]);
+        Event::fake([PreOrderChanged::class, PreOrderActionProcessed::class, ReferrerOrderUpdated::class, QuotationDecided::class, QuotationSent::class]);
         $this->pgtm = $this->test('PGTM', 'pgt_m', price: 900);
         // A ride-along test the center may order with PGT-M, but that can't lead the case.
         $this->karyotype = $this->test('KARYO', 'pgt_m', canBeMain: false, price: 50);
@@ -354,6 +357,41 @@ class PreOrderFinanceTest extends PreOrderTestCase
         $this->assertSame(FinanceStatus::EXPIRED, $this->quotation($preOrder)->status);
         $this->assertSame(ExceptionType::FINANCE_REJECTED->value, $preOrder->exception['type']);
         $this->assertSame('expired', $preOrder->exception['reason']);
+    }
+
+    public function test_a_sent_quotation_gets_its_pdf_filed_on_the_pre_order_once(): void
+    {
+        Storage::fake('local');
+        $preOrder = $this->workflow->confirmTests($this->inReview(genes: 2), $this->bion());
+        $quotation = $this->quotation($preOrder);
+        Event::assertDispatched(QuotationSent::class, fn (QuotationSent $e) => $e->quotation->is($quotation));
+        $version = $preOrder->refresh()->version;
+
+        $this->workflow->attachQuotationPdf($quotation);
+        $this->assertNull($this->workflow->attachQuotationPdf($quotation), 'a retried job files nothing twice');
+
+        $document = $preOrder->documents()->where('tag', 'QUOTATION')->sole();
+        $this->assertSame('pdf', $document->ext);
+        $this->assertSame((string) $quotation->id, (string) $document->related_id);
+        $this->assertStringStartsWith('%PDF-', Storage::disk('local')->get($document->path));
+        $this->assertGreaterThan($version, $preOrder->refresh()->version, 'the panel takes the snapshot that lists the file');
+        $snapshot = app(PreOrderSnapshot::class)->build($preOrder);
+        $this->assertSame($document->hash, $snapshot['quotations'][0]['pdf']);
+        $this->assertContains($document->hash, array_column($snapshot['documents'], 'hash'));
+    }
+
+    public function test_the_quotation_pdf_escapes_what_centers_and_bion_typed(): void
+    {
+        $preOrder = $this->workflow->confirmTests($this->inReview(genes: 2), $this->bion(), new QuoteDTO('<img src="file:///etc/passwd"> & more'));
+        $preOrder->update(['patients' => [['ref' => 'P1', 'fullName' => 'فاطمة <b>Al</b>'], ['ref' => 'P2', 'fullName' => 'Father']]]);
+        $quotation = $this->quotation($preOrder)->load('items.test');
+
+        $html = app(QuotationPdf::class)->html($preOrder->refresh()->load('referrer'), $quotation);
+
+        $this->assertStringNotContainsString('<img', $html);
+        $this->assertStringContainsString('&lt;img src=&quot;file:///etc/passwd&quot;&gt; &amp; more', $html);
+        $this->assertStringContainsString('فاطمة &lt;b&gt;Al&lt;/b&gt;', $html);
+        $this->assertStringContainsString('900.000 OMR', $html);
     }
 
     public function test_the_center_decides_through_the_inbox_only_on_its_own_pre_order(): void

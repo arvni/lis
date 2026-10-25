@@ -29,6 +29,7 @@ enum DocumentTag: string
     case REQUEST_FORM = "REQUEST_FORM";
     case PURCHASE_ORDER = "PURCHASE_ORDER";
     case PAYMENT_RECEIPT = "PAYMENT_RECEIPT";
+    case QUOTATION = "QUOTATION";
 
 
     public function label(): string
@@ -57,6 +58,7 @@ enum DocumentTag: string
             self::APPROVED => 'Approved',
             self::PURCHASE_ORDER => 'Purchase Order',
             self::PAYMENT_RECEIPT => 'Payment Receipt',
+            self::QUOTATION => 'Quotation',
         };
     }
 

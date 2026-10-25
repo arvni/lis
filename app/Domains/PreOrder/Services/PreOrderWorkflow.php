@@ -38,6 +38,7 @@ use App\Domains\PreOrder\Repositories\QuotationRepository;
 use App\Domains\PreOrder\Support\FlowStages;
 use App\Domains\PreOrder\Support\InspectedUpload;
 use App\Domains\PreOrder\Support\LinkedOrder;
+use App\Domains\PreOrder\Support\QuotationPdf;
 use Closure;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -63,6 +64,7 @@ class PreOrderWorkflow
         private readonly FinanceRules $finance,
         private readonly QuotationService $quotationService,
         private readonly QuotationRepository $quotations,
+        private readonly QuotationPdf $quotationPdf,
     ) {}
 
     // ---------------------------------------------------------------- center
@@ -556,6 +558,36 @@ class PreOrderWorkflow
 
             return $this->preOrders->update($preOrder, []);
         });
+    }
+
+    /**
+     * File the quotation's PDF on the pre-order. Rendered before the row lock is taken, so a slow
+     * render never holds up the case; a repeat for the same quotation is ignored.
+     */
+    public function attachQuotationPdf(PreOrderQuotation $quotation): ?PreOrder
+    {
+        /** @var PreOrder $preOrder */
+        $preOrder = $quotation->preOrder()->with('referrer:id,fullName')->firstOrFail();
+        if ($preOrder->documents()->where('related_type', 'pre_order_quotation')->where('related_id', $quotation->id)->exists()) {
+            return null;
+        }
+        $pdf = $this->quotationPdf->render($preOrder, $quotation->load('items.test:id,name,code'));
+
+        try {
+            return $this->mutate($preOrder, function (PreOrder $preOrder) use ($quotation, $pdf) {
+                $document = $this->documents->storeQuotation($preOrder, $quotation, $pdf);
+                $this->history($preOrder, HistoryType::DOCUMENT, Actor::system(), body: $document->originalName, meta: [
+                    'document' => $document->hash,
+                    'tag' => DocumentTag::QUOTATION->value,
+                    'quotation' => $quotation->number,
+                ]);
+
+                // The new version makes the panel take the snapshot that lists the file.
+                return $this->preOrders->update($preOrder, []);
+            });
+        } finally {
+            $pdf->discard();
+        }
     }
 
     public function hold(PreOrder $preOrder, string $reason, ?string $comment, Actor $actor): PreOrder
