@@ -23,4 +23,6 @@ enum PreOrderActionType: string
     case CONFIRM_NEXT_STEP = 'confirm_next_step';
     case ADD_BATCH = 'add_batch';
     case CLOSE_BATCHES = 'close_batches';
+    // The panel's nightly sync found its mirror behind: send the snapshot again.
+    case RESYNC = 'resync';
 }

@@ -7,10 +7,14 @@ namespace Tests\Feature\PreOrder;
 use App\Domains\PreOrder\Enums\ActionStatus;
 use App\Domains\PreOrder\Enums\PreOrderStage;
 use App\Domains\PreOrder\Events\PreOrderActionProcessed;
+use App\Domains\PreOrder\Events\PreOrderChanged;
+use App\Domains\PreOrder\Listeners\SendPreOrderSnapshotWebhook;
 use App\Domains\PreOrder\Models\PreOrder;
 use App\Domains\PreOrder\Models\PreOrderAction;
 use App\Domains\PreOrder\Services\PreOrderInbox;
+use Illuminate\Events\CallQueuedListener;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 
 class PreOrderInboxTest extends PreOrderTestCase
@@ -51,6 +55,35 @@ class PreOrderInboxTest extends PreOrderTestCase
         $this->assertSame($this->referrerId, $preOrder->referrer_id);
         $this->assertSame('Center nurse', $preOrder->histories()->first()?->actor_name);
         Event::assertDispatched(PreOrderActionProcessed::class, fn ($e) => $e->action->is($action));
+    }
+
+    public function test_a_resync_resends_the_snapshot_without_changing_the_pre_order(): void
+    {
+        $preOrder = $this->draft([$this->test('NIPT', 'nipt')]);
+        $version = $preOrder->version;
+        Event::fake([PreOrderChanged::class, PreOrderActionProcessed::class]);
+
+        $action = $this->process($this->action('resync', [], $preOrder->id));
+
+        $this->assertSame(ActionStatus::DONE, $action->status);
+        $this->assertSame($version, $preOrder->refresh()->version);
+        Event::assertDispatchedTimes(PreOrderChanged::class, 1);
+
+        // Still only for the center's own pre-orders.
+        $theirs = $this->draft([$this->test('NIPT2', 'nipt')], $this->referrer('Other Hospital'));
+        $this->assertSame(ActionStatus::FAILED, $this->process($this->action('resync', [], $theirs->id))->status);
+    }
+
+    public function test_pre_order_jobs_go_to_their_own_queue(): void
+    {
+        // The real dispatcher, so listeners are queued as in production.
+        Event::swap(Event::getFacadeRoot()->dispatcher);
+        Queue::fake();
+        $preOrder = $this->draft([$this->test('NIPT', 'nipt')]);
+
+        PreOrderChanged::dispatch($preOrder);
+
+        Queue::assertPushedOn('preorders', CallQueuedListener::class, fn (CallQueuedListener $job) => $job->class === SendPreOrderSnapshotWebhook::class);
     }
 
     public function test_a_center_cannot_act_on_another_centers_pre_order(): void

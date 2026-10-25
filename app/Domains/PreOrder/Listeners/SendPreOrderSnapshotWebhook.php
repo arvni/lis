@@ -17,6 +17,11 @@ use Illuminate\Queue\InteractsWithQueue;
  */
 class SendPreOrderSnapshotWebhook implements ShouldQueue
 {
+    public function viaQueue(): string
+    {
+        return (string) config('services.preorder_queue');
+    }
+
     use InteractsWithQueue;
 
     public int $tries = 3;

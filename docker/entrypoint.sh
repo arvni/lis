@@ -121,11 +121,25 @@ case "$role" in
     queue)
         wait_for_migrations
         echo "⚙️ Starting queue worker..."
+        # Pre-order jobs first, so a center's action never waits behind a long default queue.
         exec php artisan queue:work \
+            --queue="${PREORDER_QUEUE:-preorders},default" \
             --tries=3 \
             --timeout=90 \
             --memory=512 \
             --sleep=3 \
+            --max-jobs=1000
+        ;;
+
+    queue-preorders)
+        wait_for_migrations
+        echo "⚙️ Starting pre-order queue worker..."
+        exec php artisan queue:work \
+            --queue="${PREORDER_QUEUE:-preorders}" \
+            --tries=3 \
+            --timeout=90 \
+            --memory=256 \
+            --sleep=1 \
             --max-jobs=1000
         ;;
 

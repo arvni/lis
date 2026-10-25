@@ -13,6 +13,11 @@ use Illuminate\Queue\InteractsWithQueue;
 /** Tells the panel an action it sent was applied or refused, so it can clear "Sending…". */
 class SendPreOrderActionResultWebhook implements ShouldQueue
 {
+    public function viaQueue(): string
+    {
+        return (string) config('services.preorder_queue');
+    }
+
     use InteractsWithQueue;
 
     public int $tries = 3;

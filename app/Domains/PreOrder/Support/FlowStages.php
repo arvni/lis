@@ -75,14 +75,31 @@ final class FlowStages
 
     /**
      * The stages this pre-order uses, in library order.
-
      *
-
      * @return list<PreOrderStage>
      */
     public static function used(PreOrder $preOrder): array
     {
         return array_values(array_filter(PreOrderStage::cases(), fn (PreOrderStage $s) => self::uses($preOrder, $s)));
+    }
+
+    /**
+     * Why the pre-order can't move from one stage to another, or null when it can. Stages only go
+     * forward, onto a stage the flow uses. The two ways back: a new request while BION reviews
+     * the center's answers, and finance returning the case to review ($back).
+     */
+    public static function moveRefusal(PreOrder $preOrder, PreOrderStage $from, PreOrderStage $to, bool $back = false): ?string
+    {
+        $allowedBack = ($to === PreOrderStage::AWAITING_INFO && $from === PreOrderStage::INFO_REVIEW)
+            || ($back && $to === PreOrderStage::UNDER_REVIEW && in_array($from, [PreOrderStage::AWAITING_FINANCE, PreOrderStage::FINANCE_VERIFY], true));
+        if ($to->rank() <= $from->rank() && ! $allowedBack) {
+            return "A pre-order can't go back from {$from->label()}.";
+        }
+        if (! self::uses($preOrder, $to)) {
+            return "This flow doesn't use {$to->label()}.";
+        }
+
+        return null;
     }
 
     /** The first used stage after $from, or null at the end. */
@@ -123,9 +140,7 @@ final class FlowStages
 
     /**
      * Document tags the center is asked for at this stage.
-
      *
-
      * @return list<string>
      */
     public static function requiredDocuments(PreOrder $preOrder, PreOrderStage $stage): array
@@ -135,9 +150,7 @@ final class FlowStages
 
     /**
      * Hours in the stage before a reminder, and before escalating to the team leads.
-
      *
-
      * @return array{0: int|null, 1: int|null}
      */
     public static function reminderHours(PreOrder $preOrder, PreOrderStage $stage): array

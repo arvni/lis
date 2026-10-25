@@ -13,6 +13,11 @@ use Illuminate\Queue\InteractsWithQueue;
 /** An order released from a pre-order changed in the lab: let the pre-order catch up. */
 class SyncPreOrderFromReferrerOrder implements ShouldQueue
 {
+    public function viaQueue(): string
+    {
+        return (string) config('services.preorder_queue');
+    }
+
     use InteractsWithQueue;
 
     public int $tries = 3;

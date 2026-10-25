@@ -20,6 +20,11 @@ use Spatie\Permission\Exceptions\PermissionDoesNotExist;
  */
 class NotifyPreOrderReminder implements ShouldQueue
 {
+    public function viaQueue(): string
+    {
+        return (string) config('services.preorder_queue');
+    }
+
     public function handle(PreOrderReminderDue $event): void
     {
         $preOrder = $event->preOrder;

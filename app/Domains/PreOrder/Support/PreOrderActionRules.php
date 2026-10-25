@@ -82,7 +82,7 @@ final class PreOrderActionRules
                 // The batch key with the sample issue this replaces.
                 'replaces' => ['nullable', 'string', 'max:32'],
             ],
-            PreOrderActionType::CLOSE_BATCHES => [],
+            PreOrderActionType::CLOSE_BATCHES, PreOrderActionType::RESYNC => [],
         };
     }
 }
