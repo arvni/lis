@@ -86,6 +86,39 @@ class AcceptanceRepositoryTest extends TestCase
         $this->assertEqualsWithDelta(25, (float) $invoice->payments_sum_price, 0.0001);
     }
 
+    // The list's "Tests / Panels / Services" filter keeps acceptances with an item
+    // running that test or service, or ordered under that panel.
+    public function test_the_list_filters_by_test_panel_or_service(): void
+    {
+        $withTest = $this->makeAcceptance();
+        $test = $this->addItem($withTest, price: 10, discount: 0)->methodTest->test_id;
+
+        $withPanel = $this->makeAcceptance();
+        $panel = Test::create(['name' => 'P', 'fullName' => 'P', 'code' => 'P'.uniqid(), 'type' => TestType::PANEL, 'status' => true, 'can_merge' => false]);
+        $this->addItem($withPanel, price: 10, discount: 0)->update(['panel_id' => $panel->id]);
+
+        $withService = $this->makeAcceptance();
+        $serviceItem = $this->addItem($withService, price: 10, discount: 0);
+        $service = $serviceItem->methodTest->test_id;
+        Test::whereKey($service)->update(['type' => TestType::SERVICE]);
+
+        $withDeletedItem = $this->makeAcceptance();
+        $deleted = $this->addItem($withDeletedItem, price: 10, discount: 0);
+        $deleted->methodTest->update(['test_id' => $test]);
+        $deleted->delete();
+
+        $listed = fn(array $tests): array => collect(
+            $this->repository->listAcceptances(['filters' => ['tests' => $tests]])->items()
+        )->pluck('id')->sort()->values()->all();
+
+        $this->assertSame([$withTest->id], $listed([['id' => $test, 'name' => 'R']]));
+        $this->assertSame([$withPanel->id], $listed([['id' => $panel->id]]));
+        $this->assertSame([$withService->id], $listed([(string) $service]));
+        $this->assertSame([$withTest->id, $withPanel->id], $listed([['id' => $test], ['id' => $panel->id]]));
+        $this->assertSame([], $listed([['id' => 999999]]));
+        $this->assertCount(4, $listed([]));
+    }
+
     private function makeAcceptance(): Acceptance
     {
         $patient = Patient::create([

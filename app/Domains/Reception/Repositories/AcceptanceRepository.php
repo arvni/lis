@@ -434,6 +434,16 @@ class AcceptanceRepository
             $query->whereHas('tags', fn($tagQuery) => $tagQuery->whereIn('tags.id', $tagIds));
         }
 
+        // A test, panel or service: a panel is matched by the items ordered under it
+        // (panel_id), a test or service by the test its items run.
+        $testIds = $this->extractTestFilterIds($filters);
+        if ($testIds) {
+            $query->whereHas('acceptanceItems', fn(Builder $itemQuery) => $itemQuery->where(
+                fn(Builder $q) => $q->whereIn('acceptance_items.panel_id', $testIds)
+                    ->orWhereHas('methodTest', fn(Builder $mt) => $mt->whereIn('method_tests.test_id', $testIds))
+            ));
+        }
+
         if (!empty($filters['waiting_for_pooling'])) {
             $query->where('acceptances.waiting_for_pooling', true);
         }
@@ -480,6 +490,22 @@ class AcceptanceRepository
                 $query->whereRaw("$publishedSubSql <= ?", [$to]);
             }
         }
+    }
+
+    /**
+     * The picker sends selected tests as {id, name} objects; plain ids are accepted too.
+     *
+     * @return list<int>
+     */
+    private function extractTestFilterIds(array $filters): array
+    {
+        return collect((array) ($filters['tests'] ?? []))
+            ->map(fn($test) => is_array($test) ? ($test['id'] ?? null) : $test)
+            ->filter(fn($id) => is_numeric($id))
+            ->map(fn($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
     }
 
     public function getPendingAcceptance(Patient $patient): ?Acceptance
