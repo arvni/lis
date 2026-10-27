@@ -1144,8 +1144,8 @@ class AcceptanceServiceTest extends TestCase
             'patient_id'       => $this->patient->id,
         ]);
 
-        // Nothing to sample or report, and the referrer is billed by the invoice
-        // → no finance gate: the acceptance is reported outright.
+        // Nothing to sample or report, and the referrer is billed by the invoice:
+        // it still stops at the finance gate, and is reported once finance approves.
         $this->createNothingToReportItem($acceptance);
 
         $invoice = $this->createPatientInvoice();
@@ -1153,6 +1153,14 @@ class AcceptanceServiceTest extends TestCase
         /** @var AcceptanceService $service */
         $service = app(AcceptanceService::class);
         $service->updateAcceptanceInvoice($acceptance, $invoice->id);
+
+        $acceptance->refresh();
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $acceptance->status);
+        $referrerOrder->refresh();
+        $this->assertEquals(ReferrerOrderStatus::WAITING_FOR_FINANCIAL_APPROVAL->value, $referrerOrder->status);
+
+        $this->pay($invoice, 40);
+        $service->approveFinancial($acceptance->fresh(), (int) auth()->id());
 
         $acceptance->refresh();
         $this->assertSame(AcceptanceStatus::REPORTED, $acceptance->status);
@@ -1164,9 +1172,9 @@ class AcceptanceServiceTest extends TestCase
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // R-07g: an acceptance with nothing to report skips finance once it is
-    //        billed — an invoice for a referred one, a paid invoice for a
-    //        walk-in. Unbilled, it still waits for finance.
+    // R-07g: an acceptance with nothing to report still goes through finance.
+    //        Being billed (an invoice for a referred one, a paid invoice for a
+    //        walk-in) only clears the payment gate; REPORTED needs approval.
     // ─────────────────────────────────────────────────────────────────────────
 
     public function test_check_status_keeps_uninvoiced_acceptance_with_nothing_to_report_at_finance(): void
@@ -1179,7 +1187,7 @@ class AcceptanceServiceTest extends TestCase
         $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $acceptance->fresh()->status);
     }
 
-    public function test_check_status_reports_paid_walk_in_with_nothing_to_report(): void
+    public function test_check_status_keeps_paid_walk_in_with_nothing_to_report_at_finance(): void
     {
         $this->useMinimumPayment(100);
         $invoice = $this->createPatientInvoice();
@@ -1192,9 +1200,29 @@ class AcceptanceServiceTest extends TestCase
 
         app(AcceptanceService::class)->checkAcceptanceStatus($acceptance->fresh());
 
-        $acceptance->refresh();
-        $this->assertSame(AcceptanceStatus::REPORTED, $acceptance->status);
-        $this->assertFalse((bool) $acceptance->financial_approved);
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $acceptance->fresh()->status);
+    }
+
+    public function test_a_referred_billed_acceptance_with_nothing_to_report_waits_for_finance_then_is_reported(): void
+    {
+        // Acceptance 2827: an item made reportless, the referrer's invoice paid, and
+        // "Check status" pressed — it must not be reported without finance.
+        $invoice = $this->createPatientInvoice();
+        $acceptance = $this->createAcceptance([
+            'status'      => AcceptanceStatus::PROCESSING,
+            'referrer_id' => $this->createReferrer('90000013')->id,
+            'referred'    => true,
+            'invoice_id'  => $invoice->id,
+        ]);
+        $this->createNothingToReportItem($acceptance, ['price' => 40]);
+        $this->pay($invoice, 40);
+        $service = app(AcceptanceService::class);
+
+        $service->checkAndUpdateAcceptanceStatus($acceptance->fresh());
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $acceptance->fresh()->status);
+
+        $service->approveFinancial($acceptance->fresh(), (int) auth()->id());
+        $this->assertSame(AcceptanceStatus::REPORTED, $acceptance->fresh()->status);
     }
 
     public function test_check_status_keeps_unpaid_walk_in_waiting_for_payment(): void
@@ -1212,7 +1240,7 @@ class AcceptanceServiceTest extends TestCase
         $this->assertSame(AcceptanceStatus::WAITING_FOR_PAYMENT, $acceptance->fresh()->status);
     }
 
-    public function test_payment_reports_walk_in_with_nothing_to_sample(): void
+    public function test_payment_sends_walk_in_with_nothing_to_sample_to_finance(): void
     {
         $this->useMinimumPayment(100);
         $invoice = $this->createPatientInvoice();
@@ -1225,7 +1253,7 @@ class AcceptanceServiceTest extends TestCase
         // PaymentsAddedEvent → AcceptancePaymentListener, end to end.
         $this->pay($invoice, 40);
 
-        $this->assertSame(AcceptanceStatus::REPORTED, $acceptance->fresh()->status);
+        $this->assertSame(AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL, $acceptance->fresh()->status);
     }
 
     public function test_payment_moves_walk_in_with_samplable_items_to_sampling(): void

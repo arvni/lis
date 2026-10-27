@@ -8,6 +8,7 @@ namespace App\Domains\Reception\Services;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\DTOs\AcceptanceItemDTO;
 use App\Domains\Reception\Events\AcceptanceItemsChangedEvent;
+use App\Domains\Reception\Exceptions\AcceptanceItemInProgressException;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Repositories\AcceptanceItemRepository;
@@ -530,6 +531,29 @@ class AcceptanceItemService
             $timeline = json_decode($timeline ?? "[]", true) ?? [];
         $timeline[now()->format("Y-m-d H:i:s")] = $message;
         return $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, ["timeline" => $timeline]);
+    }
+
+    /**
+     * Switch whether an item expects a report. An item still in the lab workflow
+     * cannot be made reportless: the acceptance would then have nothing left to
+     * report and could finish while the work goes on. Each switch is kept on the
+     * item's timeline.
+     *
+     * @throws AcceptanceItemInProgressException
+     */
+    public function toggleReportless(AcceptanceItem $acceptanceItem, string $userName): AcceptanceItem
+    {
+        $reportless = ! $acceptanceItem->reportless;
+        if ($reportless && $this->acceptanceItemRepository->hasWorkInProgress($acceptanceItem)) {
+            throw new AcceptanceItemInProgressException($acceptanceItem->id);
+        }
+
+        $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, ['reportless' => $reportless]);
+
+        return $this->updateAcceptanceItemTimeline(
+            $acceptanceItem,
+            ($reportless ? 'Marked reportless by ' : 'Marked as needing a report by ').$userName
+        );
     }
 
     public function findAcceptanceItemById(int|string|null $id): ?AcceptanceItem

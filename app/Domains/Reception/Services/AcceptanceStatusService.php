@@ -133,10 +133,10 @@ class AcceptanceStatusService
     }
 
     /**
-     * Terminal step for an acceptance with nothing to report. There is no
-     * report for finance to hold back, so once it is billed it is REPORTED
-     * outright. Unbilled, it falls back to the finance gate — except an
-     * invoiced walk-in, which keeps waiting for its payment like any other.
+     * Terminal step for an acceptance with nothing to report. Finance still
+     * signs off on every acceptance, so it waits at the finance gate until it
+     * is approved and is REPORTED only then — being billed is not enough. An
+     * invoiced walk-in first keeps waiting for its payment like any other.
      */
     private function finalizeWithoutReports(Acceptance $acceptance): void
     {
@@ -149,10 +149,8 @@ class AcceptanceStatusService
             return;
         }
 
-        $billed = $this->canSkipFinancialApproval($acceptance);
-
         if ($acceptance->status === AcceptanceStatus::WAITING_FOR_PAYMENT && $acceptance->invoice_id) {
-            if (! $billed) {
+            if (! $this->hasClearedPaymentGate($acceptance)) {
                 return;
             }
 
@@ -164,7 +162,7 @@ class AcceptanceStatusService
             }
         }
 
-        if (! $billed && ! $acceptance->financial_approved) {
+        if (! $acceptance->financial_approved) {
             $this->setStatusIfChanged($acceptance, AcceptanceStatus::WAITING_FOR_FINANCIAL_APPROVAL);
 
             return;
@@ -177,11 +175,11 @@ class AcceptanceStatusService
     }
 
     /**
-     * Billed enough to skip finance: a referred acceptance needs only its
-     * invoice (the referrer is billed), a walk-in's invoice must also have
-     * cleared the minimum payment.
+     * Past the payment gate: a referred acceptance needs only its invoice (the
+     * referrer is billed), a walk-in's invoice must also have cleared the
+     * minimum payment. It never stands in for finance approval.
      */
-    private function canSkipFinancialApproval(Acceptance $acceptance): bool
+    private function hasClearedPaymentGate(Acceptance $acceptance): bool
     {
         if (! $acceptance->invoice_id) {
             return false;
