@@ -635,9 +635,10 @@ class AcceptanceService
     }
 
     /**
-     * An acceptance with nothing to report stops waiting on finance once it is
-     * billed. Re-check whenever an invoice or a finalized status may have just
-     * unlocked that.
+     * An acceptance with nothing to report moves on once it is billed: out of the
+     * payment gate, then to the finance gate (REPORTED only after finance has
+     * approved). Re-check whenever an invoice or a finalized status may have
+     * just unlocked that.
      */
     private function releaseIfBilledWithNothingToReport(Acceptance $acceptance): void
     {

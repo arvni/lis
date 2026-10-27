@@ -5,6 +5,7 @@ namespace App\Domains\Reception\Repositories;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Laboratory\Enums\TestType;
+use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
@@ -150,6 +151,14 @@ class AcceptanceItemRepository
         }
         $this->logCreated($acceptanceItem);
         return $acceptanceItem;
+    }
+
+    /** The item is waiting at, or being worked on in, a lab section. */
+    public function hasWorkInProgress(AcceptanceItem $acceptanceItem): bool
+    {
+        return $acceptanceItem->acceptanceItemStates()
+            ->whereIn('status', [AcceptanceItemStateStatus::WAITING, AcceptanceItemStateStatus::PROCESSING])
+            ->exists();
     }
 
     public function updateAcceptanceItem(AcceptanceItem $acceptanceItem, array $acceptanceItemData): AcceptanceItem
