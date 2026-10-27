@@ -83,6 +83,10 @@ const Filter = ({ defaultFilter, onFilter }) => {
         setFilter((prevState) => ({ ...prevState, tags: [] }));
     }, []);
 
+    const handleClearTests = useCallback(() => {
+        setFilter((prevState) => ({ ...prevState, tests: [] }));
+    }, []);
+
     const handleClearHowFoundUs = useCallback(() => {
         setFilter((prevState) => ({ ...prevState, how_found_us: [] }));
     }, []);
@@ -140,6 +144,7 @@ const Filter = ({ defaultFilter, onFilter }) => {
                     onClearStatus={handleClearStatus}
                     onClearPriority={handleClearPriority}
                     onClearTags={handleClearTags}
+                    onClearTests={handleClearTests}
                     onClearHowFoundUs={handleClearHowFoundUs}
                     onClearWaitingPooling={() =>
                         setFilter((p) => ({ ...p, waiting_for_pooling: false }))
@@ -254,6 +259,19 @@ const Filter = ({ defaultFilter, onFilter }) => {
                             fullWidth
                             name="tags"
                             url={route('api.tags.list')}
+                        />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                        <SelectSearch
+                            multiple
+                            filterSelectedOptions
+                            value={filter?.tests || []}
+                            onChange={handleChange}
+                            label="Tests / Panels / Services"
+                            fullWidth
+                            name="tests"
+                            url={route('api.tests.list')}
                         />
                     </Grid>
 

@@ -10,6 +10,7 @@ const ActiveFilterChips = ({
     onClearStatus,
     onClearPriority,
     onClearTags,
+    onClearTests,
     onClearHowFoundUs,
     onClearWaitingPooling,
     onClearOutPatient,
@@ -55,6 +56,14 @@ const ActiveFilterChips = ({
                 label={`Tags: ${filter.tags.length} selected`}
                 size="small"
                 onDelete={onClearTags}
+                variant="outlined"
+            />
+        )}
+        {filter?.tests && filter.tests.length > 0 && (
+            <Chip
+                label={`Tests: ${filter.tests.map((test) => test?.name ?? test).join(', ')}`}
+                size="small"
+                onDelete={onClearTests}
                 variant="outlined"
             />
         )}
