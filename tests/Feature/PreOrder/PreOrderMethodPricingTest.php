@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\PreOrder;
 
+use App\Domains\PreOrder\Adapters\LaboratoryAdapter;
+use App\Domains\PreOrder\DTOs\RaiseRequestDTO;
 use App\Domains\PreOrder\Enums\HistoryType;
+use App\Domains\PreOrder\Enums\ItemStatus;
 use App\Domains\PreOrder\Exceptions\PreOrderRuleException;
 use App\Domains\PreOrder\Models\PreOrder;
 use App\Domains\PreOrder\Models\PreOrderItem;
@@ -140,6 +143,61 @@ class PreOrderMethodPricingTest extends PreOrderTestCase
 
         $this->assertNull($line->method_test_id);
         $this->assertEquals(700, $line->unit_price);
+    }
+
+    public function test_a_panel_with_several_methods_confirms_without_a_method(): void
+    {
+        $panel = $this->unpricedTest('PANEL2', 'PANEL');
+        DB::table('tests')->where('id', $panel)->update(['referrer_price' => 700, 'referrer_price_type' => 'Fix']);
+        $this->attach($panel, $this->method('NGS', price: 300));
+        $this->attach($panel, $this->method('Sanger', price: 200));
+        $preOrder = $this->workflow->setMainTest($this->inReview($panel), $panel, null, $this->bion());
+
+        $preOrder = $this->workflow->confirmTests($preOrder, $this->bion());
+
+        $line = $this->line($preOrder);
+        $this->assertNull($line->method_test_id);
+        $this->assertEquals(700, $line->unit_price);
+        $this->assertNotSame(ItemStatus::REQUESTED, $line->status);
+    }
+
+    public function test_an_additional_panel_needs_no_method_on_a_request(): void
+    {
+        $main = $this->unpricedTest('MAIN1');
+        $this->attach($main, $this->method('qPCR', price: 100));
+        $panel = $this->unpricedTest('PANEL4', 'PANEL');
+        DB::table('tests')->where('id', $panel)->update(['referrer_price' => 700, 'referrer_price_type' => 'Fix']);
+        $this->attach($panel, $this->method('NGS', price: 300));
+        $this->attach($panel, $this->method('Sanger', price: 200));
+        $preOrder = $this->workflow->setMainTest($this->inReview($main), $main, null, $this->bion());
+        $preOrder = $this->workflow->confirmTests($preOrder, $this->bion());
+
+        $this->workflow->raiseRequest($preOrder, RaiseRequestDTO::fromArray([
+            'types' => ['test'], 'reason' => 'confirmation', 'message' => 'Add the panel', 'tests' => [['test_id' => $panel]],
+        ]), $this->bion());
+
+        $line = $preOrder->items()->where('test_id', $panel)->firstOrFail();
+        $this->assertNull($line->method_test_id);
+        $this->assertEquals(700, $line->unit_price);
+    }
+
+    public function test_a_panel_offers_no_methods_and_refuses_one(): void
+    {
+        $panel = $this->unpricedTest('PANEL3', 'PANEL');
+        DB::table('tests')->where('id', $panel)->update(['referrer_price' => 700, 'referrer_price_type' => 'Fix']);
+        $ngsMt = $this->attach($panel, $this->method('NGS', price: 300));
+        $this->attach($panel, $this->method('Sanger', price: 200));
+        $preOrder = $this->inReview($panel);
+
+        $this->assertSame([], app(LaboratoryAdapter::class)->methodOptions($this->line($preOrder)->test));
+
+        try {
+            $this->workflow->setItemMethod($preOrder, $this->line($preOrder)->id, $ngsMt, $this->bion());
+            $this->fail('Picking a method for a panel should be refused.');
+        } catch (PreOrderRuleException $e) {
+            $this->assertStringContainsString('is a panel', $e->getMessage());
+        }
+        $this->assertNull($this->line($preOrder)->method_test_id);
     }
 
     public function test_only_the_tests_own_methods_can_be_picked(): void

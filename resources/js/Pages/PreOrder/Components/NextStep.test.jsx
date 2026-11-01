@@ -40,6 +40,28 @@ describe('NextStep', () => {
         expect(screen.getByRole('button', { name: 'Confirm tests & release' })).toBeDisabled();
     });
 
+    it('does not ask for a method on a panel', () => {
+        const preOrder = {
+            ...base,
+            can: { confirm: true },
+            main_test: { id: 1, name: 'Carrier panel' },
+            assignee: { id: 1, name: 'Dr C' },
+            items: [
+                {
+                    id: 1,
+                    test_name: 'Carrier panel',
+                    needs_method: false,
+                    methods: [],
+                    method_test_id: null,
+                },
+            ],
+        };
+        render(<NextStep preOrder={preOrder} onTab={vi.fn()} />);
+
+        expect(screen.queryByText(/Pick the method/)).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Confirm tests & release' })).toBeEnabled();
+    });
+
     it('sends BION to finance when the tests need a quotation', () => {
         const onTab = vi.fn();
         const preOrder = {
