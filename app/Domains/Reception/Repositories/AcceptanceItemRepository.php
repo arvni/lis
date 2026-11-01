@@ -5,7 +5,6 @@ namespace App\Domains\Reception\Repositories;
 use App\Domains\Shared\Traits\LogsUserActivity;
 use App\Domains\Document\Enums\DocumentTag;
 use App\Domains\Laboratory\Enums\TestType;
-use App\Domains\Reception\Enums\AcceptanceItemStateStatus;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
@@ -153,12 +152,10 @@ class AcceptanceItemRepository
         return $acceptanceItem;
     }
 
-    /** The item is waiting at, or being worked on in, a lab section. */
-    public function hasWorkInProgress(AcceptanceItem $acceptanceItem): bool
+    /** The item has a current report; a rejected or replaced one doesn't count. */
+    public function hasReport(AcceptanceItem $acceptanceItem): bool
     {
-        return $acceptanceItem->acceptanceItemStates()
-            ->whereIn('status', [AcceptanceItemStateStatus::WAITING, AcceptanceItemStateStatus::PROCESSING])
-            ->exists();
+        return $acceptanceItem->report()->exists();
     }
 
     public function updateAcceptanceItem(AcceptanceItem $acceptanceItem, array $acceptanceItemData): AcceptanceItem
