@@ -953,6 +953,9 @@ class PreOrderWorkflow
                 throw new PreOrderRuleException('The center is deciding on a quotation with this line. Revise the quotation first.');
             }
             $test = $item->test;
+            if (! $this->laboratory->needsMethod($test)) {
+                throw new PreOrderRuleException("{$test->name} is a panel; it has no method to pick.");
+            }
             $line = $this->priced($test, $preOrder->referrer_id, $methodTestId);
             $this->preOrders->updateItem($item, $line);
             $method = $this->laboratory->methodTestFor($test, $methodTestId)?->method->name;
