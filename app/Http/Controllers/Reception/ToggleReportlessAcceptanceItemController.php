@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Reception;
 
-use App\Domains\Reception\Exceptions\AcceptanceItemInProgressException;
+use App\Domains\Reception\Exceptions\AcceptanceItemAlreadyReportedException;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Services\AcceptanceItemService;
@@ -21,7 +21,7 @@ class ToggleReportlessAcceptanceItemController extends Controller
 
         try {
             $this->acceptanceItemService->toggleReportless($acceptanceItem, (string) $request->user()?->name);
-        } catch (AcceptanceItemInProgressException $e) {
+        } catch (AcceptanceItemAlreadyReportedException $e) {
             return back()->withErrors(['message' => $e->getMessage()]);
         }
 

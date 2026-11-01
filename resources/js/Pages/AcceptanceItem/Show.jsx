@@ -85,6 +85,7 @@ const Show = ({
                             <Switch
                                 checked={acceptanceItem.reportless}
                                 onChange={handleToggleReportless}
+                                disabled={!acceptanceItem.reportless && !!acceptanceItem.report}
                                 color="primary"
                             />
                         }

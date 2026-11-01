@@ -8,7 +8,7 @@ namespace App\Domains\Reception\Services;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\DTOs\AcceptanceItemDTO;
 use App\Domains\Reception\Events\AcceptanceItemsChangedEvent;
-use App\Domains\Reception\Exceptions\AcceptanceItemInProgressException;
+use App\Domains\Reception\Exceptions\AcceptanceItemAlreadyReportedException;
 use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Repositories\AcceptanceItemRepository;
@@ -534,18 +534,17 @@ class AcceptanceItemService
     }
 
     /**
-     * Switch whether an item expects a report. An item still in the lab workflow
-     * cannot be made reportless: the acceptance would then have nothing left to
-     * report and could finish while the work goes on. Each switch is kept on the
-     * item's timeline.
+     * Switch whether an item expects a report. Only an item that already has a
+     * report can't be made reportless; where it is in the lab doesn't matter. Each
+     * switch is kept on the item's timeline.
      *
-     * @throws AcceptanceItemInProgressException
+     * @throws AcceptanceItemAlreadyReportedException
      */
     public function toggleReportless(AcceptanceItem $acceptanceItem, string $userName): AcceptanceItem
     {
         $reportless = ! $acceptanceItem->reportless;
-        if ($reportless && $this->acceptanceItemRepository->hasWorkInProgress($acceptanceItem)) {
-            throw new AcceptanceItemInProgressException($acceptanceItem->id);
+        if ($reportless && $this->acceptanceItemRepository->hasReport($acceptanceItem)) {
+            throw new AcceptanceItemAlreadyReportedException($acceptanceItem->id);
         }
 
         $this->acceptanceItemRepository->updateAcceptanceItem($acceptanceItem, ['reportless' => $reportless]);

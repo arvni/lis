@@ -16,6 +16,7 @@ use App\Domains\Reception\Models\Acceptance;
 use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Models\AcceptanceItemState;
 use App\Domains\Reception\Models\Patient;
+use App\Domains\Reception\Models\Report;
 use App\Domains\User\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -23,10 +24,7 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
-/**
- * Making an item reportless can leave its acceptance with nothing to report, so it
- * is refused while the lab is still working on the item (acceptance 2827).
- */
+/** An item can be made reportless at any lab stage, until it has a report. */
 class ToggleReportlessAcceptanceItemControllerTest extends TestCase
 {
     use RefreshDatabase;
@@ -73,10 +71,22 @@ class ToggleReportlessAcceptanceItemControllerTest extends TestCase
         $this->assertFalse($item->fresh()->reportless);
     }
 
-    public function test_an_item_still_in_the_lab_cannot_be_made_reportless_but_can_be_made_reportable(): void
+    public function test_an_item_at_any_lab_stage_can_be_made_reportless(): void
+    {
+        foreach ([AcceptanceItemStateStatus::WAITING, AcceptanceItemStateStatus::PROCESSING, AcceptanceItemStateStatus::FINISHED] as $status) {
+            [$acceptance, $item] = $this->acceptanceWithItem();
+            $this->stateFor($item, $status);
+
+            $this->put(route('acceptanceItems.toggleReportless', [$acceptance, $item]))->assertSessionHasNoErrors();
+
+            $this->assertTrue($item->fresh()->reportless, $status->value);
+        }
+    }
+
+    public function test_a_reported_item_cannot_be_made_reportless_but_can_be_made_reportable(): void
     {
         [$acceptance, $item] = $this->acceptanceWithItem();
-        $this->stateFor($item, AcceptanceItemStateStatus::PROCESSING);
+        $this->reportFor($item);
 
         $this->put(route('acceptanceItems.toggleReportless', [$acceptance, $item]))->assertSessionHasErrors('message');
         $this->assertFalse($item->fresh()->reportless);
@@ -87,10 +97,10 @@ class ToggleReportlessAcceptanceItemControllerTest extends TestCase
         $this->assertFalse($item->fresh()->reportless);
     }
 
-    public function test_an_item_whose_lab_work_is_finished_can_be_made_reportless(): void
+    public function test_an_item_whose_only_report_is_inactive_can_be_made_reportless(): void
     {
         [$acceptance, $item] = $this->acceptanceWithItem();
-        $this->stateFor($item, AcceptanceItemStateStatus::FINISHED);
+        $this->reportFor($item, active: false);
 
         $this->put(route('acceptanceItems.toggleReportless', [$acceptance, $item]))->assertSessionHasNoErrors();
 
@@ -140,6 +150,16 @@ class ToggleReportlessAcceptanceItemControllerTest extends TestCase
         ]);
 
         return [$acceptance, $item];
+    }
+
+    private function reportFor(AcceptanceItem $item, bool $active = true): void
+    {
+        Report::create([
+            'acceptance_item_id' => $item->id,
+            'reporter_id' => auth()->id(),
+            'status' => $active,
+            'reported_at' => now(),
+        ]);
     }
 
     private function stateFor(AcceptanceItem $item, AcceptanceItemStateStatus $status): void
