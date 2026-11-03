@@ -13,7 +13,7 @@ class StoreMaterialRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("create", Material::class);
+        return Gate::allows('create', Material::class);
     }
 
     /**
@@ -29,8 +29,9 @@ class StoreMaterialRequest extends FormRequest
             'tubes' => 'required|array|min:1',
             'tubes.*.tube_barcode' => 'nullable|string|unique:materials,tube_barcode',
             'tubes.*.tube_series' => 'nullable|string',
-            'tubes.*.expire_date' => 'nullable|date|after:today',
-            'tubes.*.manufactured_date' => 'nullable|date|before_or_equal:today',
+            // Bounded so a mistyped year (e.g. 0206 for 2026) is a form error, not a database 500.
+            'tubes.*.expire_date' => 'nullable|date|after:today|before:2100-01-01',
+            'tubes.*.manufactured_date' => 'nullable|date|after_or_equal:2000-01-01|before_or_equal:today',
         ];
     }
 }

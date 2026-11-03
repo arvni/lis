@@ -77,6 +77,10 @@ const TubeCard = ({ tube, index, canDelete, errors, onTubeChange, onDeleteTube }
                     slotProps={{
                         ...startAdornment(<CalendarToday fontSize="small" />),
                         inputLabel: { shrink: true },
+                        htmlInput: {
+                            min: '2000-01-01',
+                            max: new Date().toISOString().slice(0, 10),
+                        },
                     }}
                 />
             </Grid>
@@ -94,6 +98,10 @@ const TubeCard = ({ tube, index, canDelete, errors, onTubeChange, onDeleteTube }
                     slotProps={{
                         ...startAdornment(<CalendarToday fontSize="small" />),
                         inputLabel: { shrink: true },
+                        htmlInput: {
+                            min: new Date().toISOString().slice(0, 10),
+                            max: '2099-12-31',
+                        },
                     }}
                 />
             </Grid>
