@@ -2,6 +2,7 @@
 
 namespace App\Domains\Referrer\Requests;
 
+use App\Domains\Referrer\Models\Material;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -13,7 +14,7 @@ class UpdateMaterialRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows("update", $this->routeMaterialModel());
+        return Gate::allows('update', $this->routeMaterialModel());
     }
 
     /**
@@ -32,9 +33,10 @@ class UpdateMaterialRequest extends FormRequest
             'tube_series' => ['nullable', 'string', 'max:255'],
             'barcode' => ['required', 'string', 'max:255', Rule::unique('materials', 'barcode')->ignore($materialId)],
             'tube_barcode' => ['nullable', 'string', 'max:255', Rule::unique('materials', 'tube_barcode')->ignore($materialId)],
-            'manufactured_date' => ['nullable', 'date'],
-            'expire_date' => ['nullable', 'date'],
-            'assigned_at' => ['nullable', 'date'],
+            // Bounded so a mistyped year (e.g. 0206 for 2026) is a form error, not a database 500.
+            'manufactured_date' => ['nullable', 'date', 'after_or_equal:2000-01-01', 'before_or_equal:today'],
+            'expire_date' => ['nullable', 'date', 'after_or_equal:2000-01-01', 'before:2100-01-01'],
+            'assigned_at' => ['nullable', 'date', 'after_or_equal:2000-01-01', 'before:2100-01-01'],
             'referrer' => ['nullable', 'array'],
             'referrer.id' => ['nullable', 'exists:referrers,id'],
         ];
@@ -50,9 +52,9 @@ class UpdateMaterialRequest extends FormRequest
         ];
     }
 
-    private function routeMaterialModel(): ?\App\Domains\Referrer\Models\Material
+    private function routeMaterialModel(): ?Material
     {
-        /** @var ?\App\Domains\Referrer\Models\Material $model */
+        /** @var ?Material $model */
         $model = $this->route('material');
 
         return $model;
