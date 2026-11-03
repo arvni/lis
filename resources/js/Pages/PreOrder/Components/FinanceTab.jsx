@@ -105,43 +105,89 @@ export default function FinanceTab({ preOrder, canQuote }) {
                         {ruled.map((item) => {
                             const price = rulePrice(item.price_rule, data.params[item.id]);
                             return (
-                                <Stack
+                                <Box
                                     key={item.id}
-                                    direction="row"
-                                    spacing={1}
-                                    alignItems="center"
-                                    flexWrap="wrap"
-                                    useFlexGap
+                                    sx={{
+                                        border: 1,
+                                        borderColor: 'divider',
+                                        borderRadius: 1,
+                                        p: 1.5,
+                                    }}
                                 >
-                                    {item.price_rule.parameters.map((name) => (
-                                        <TextField
-                                            key={name}
-                                            size="small"
-                                            type="number"
-                                            label={`${name} · ${item.test_name}`}
-                                            value={data.params[item.id]?.[name] ?? ''}
-                                            onChange={(e) =>
-                                                setData('params', {
-                                                    ...data.params,
-                                                    [item.id]: {
-                                                        ...data.params[item.id],
-                                                        [name]: e.target.value,
-                                                    },
-                                                })
-                                            }
-                                            inputProps={{ min: 0, step: 1 }}
-                                            sx={{ maxWidth: 260 }}
-                                        />
-                                    ))}
+                                    <Typography variant="subtitle2">{item.test_name}</Typography>
                                     <Typography
                                         variant="body2"
-                                        color={price === null ? 'text.secondary' : 'text.primary'}
+                                        color="text.secondary"
+                                        sx={{ mb: 1 }}
                                     >
-                                        {price === null
-                                            ? 'Enter the values to price this test'
-                                            : `Unit price ${price.toFixed(3)} (catalogue)`}
+                                        Its price for this center depends on{' '}
+                                        {item.price_rule.parameters.join(', ')}. Enter it to price
+                                        the test, the same way reception would.
                                     </Typography>
-                                </Stack>
+                                    <Stack
+                                        direction="row"
+                                        spacing={2}
+                                        alignItems="center"
+                                        flexWrap="wrap"
+                                        useFlexGap
+                                    >
+                                        {item.price_rule.parameters.map((name) => (
+                                            <TextField
+                                                key={name}
+                                                size="small"
+                                                type="number"
+                                                label={name}
+                                                required
+                                                value={data.params[item.id]?.[name] ?? ''}
+                                                onChange={(e) =>
+                                                    setData('params', {
+                                                        ...data.params,
+                                                        [item.id]: {
+                                                            ...data.params[item.id],
+                                                            [name]: e.target.value,
+                                                        },
+                                                    })
+                                                }
+                                                inputProps={{ min: 0, step: 1 }}
+                                                sx={{ width: 180 }}
+                                            />
+                                        ))}
+                                        <Typography
+                                            variant="body2"
+                                            fontWeight={price === null ? 400 : 600}
+                                            color={
+                                                price === null ? 'text.secondary' : 'text.primary'
+                                            }
+                                        >
+                                            {price === null
+                                                ? 'Unit price: —'
+                                                : `Unit price: ${price.toFixed(3)}`}
+                                        </Typography>
+                                    </Stack>
+                                    {item.price_rule.conditions.length > 0 && (
+                                        <Typography
+                                            variant="caption"
+                                            color="text.secondary"
+                                            component="div"
+                                            sx={{ mt: 1 }}
+                                        >
+                                            Price list:{' '}
+                                            {item.price_rule.conditions
+                                                .map((c) => `${c.condition} → ${c.value}`)
+                                                .join(' · ')}
+                                        </Typography>
+                                    )}
+                                    {item.price_rule.formula && (
+                                        <Typography
+                                            variant="caption"
+                                            color="text.secondary"
+                                            component="div"
+                                            sx={{ mt: 1 }}
+                                        >
+                                            Formula: {item.price_rule.formula}
+                                        </Typography>
+                                    )}
+                                </Box>
                             );
                         })}
                         {canQuote &&
