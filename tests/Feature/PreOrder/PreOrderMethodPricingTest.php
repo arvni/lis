@@ -252,4 +252,25 @@ class PreOrderMethodPricingTest extends PreOrderTestCase
                 ->where('preOrder.items.0.needs_method', true)
                 ->has('preOrder.items.0.methods', 2));
     }
+
+    public function test_the_pre_order_screen_asks_no_method_for_a_panel(): void
+    {
+        $panel = $this->unpricedTest('PANEL5', 'PANEL');
+        DB::table('tests')->where('id', $panel)->update(['referrer_price' => 700, 'referrer_price_type' => 'Fix']);
+        $this->attach($panel, $this->method('NGS', price: 300));
+        $this->attach($panel, $this->method('Sanger', price: 200));
+        $preOrder = $this->inReview($panel);
+        $reviewer = User::factory()->create();
+        foreach (['PreOrders.Cases.View', 'PreOrders.Cases.Review'] as $permission) {
+            Permission::findOrCreate($permission);
+            $reviewer->givePermissionTo($permission);
+        }
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        $this->actingAs($reviewer)
+            ->get(route('pre-orders.show', $preOrder->id))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('preOrder.items.0.needs_method', false)
+                ->has('preOrder.items.0.methods', 0));
+    }
 }

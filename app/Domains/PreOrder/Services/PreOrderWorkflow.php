@@ -787,7 +787,7 @@ class PreOrderWorkflow
         if ($preOrder->documents()->where('related_type', 'pre_order_quotation')->where('related_id', $quotation->id)->exists()) {
             return null;
         }
-        $pdf = $this->quotationPdf->render($preOrder, $quotation->load('items.test:id,name,code'));
+        $pdf = $this->quotationPdf->render($preOrder, $quotation->load('items.test:id,name,code,type'));
 
         try {
             return $this->mutate($preOrder, function (PreOrder $preOrder) use ($quotation, $pdf) {
