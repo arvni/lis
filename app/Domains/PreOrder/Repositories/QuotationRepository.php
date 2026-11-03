@@ -33,7 +33,7 @@ class QuotationRepository
 
     public function findByNumber(PreOrder $preOrder, string $number): ?PreOrderQuotation
     {
-        return $preOrder->quotations()->with('items.test:id,name,code')->where('number', $number)->first();
+        return $preOrder->quotations()->with('items.test:id,name,code,type')->where('number', $number)->first();
     }
 
     /** The quotation for the tests BION confirmed (not an additional-test request) still waiting on the center. */
