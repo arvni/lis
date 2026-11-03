@@ -169,7 +169,12 @@ export default function TestsTab({ preOrder }) {
                                 <TableCell>{patientName(preOrder, item.patient_ref)}</TableCell>
                                 <TableCell>{methodCell(item)}</TableCell>
                                 <TableCell align="right">{item.qty}</TableCell>
-                                <TableCell align="right">{item.unit_price ?? '—'}</TableCell>
+                                <TableCell align="right">
+                                    {item.unit_price ??
+                                        (item.price_rule
+                                            ? `By ${item.price_rule.parameters.join(', ')}`
+                                            : '—')}
+                                </TableCell>
                                 <TableCell>
                                     {item.added_by === 'bion' ? 'BION' : 'Center'}
                                 </TableCell>

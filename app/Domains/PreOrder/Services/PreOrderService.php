@@ -72,8 +72,9 @@ class PreOrderService
         // carries neither the method nor its choices.
         $lines = $preOrder->items->keyBy('id');
         $methods = $this->laboratory->methodOptionsFor($preOrder->items->pluck('test')->unique('id'));
-        $view['items'] = array_map(function (array $item) use ($lines, $methods) {
+        $view['items'] = array_map(function (array $item) use ($lines, $methods, $preOrder) {
             $line = $lines[$item['id']] ?? null;
+            $open = $line !== null && in_array($line->status, [ItemStatus::REQUESTED, ItemStatus::RECOMMENDED], true);
 
             return [
                 ...$item,
@@ -81,6 +82,9 @@ class PreOrderService
                 'method_test_id' => $line?->method_test_id,
                 'needs_method' => $line !== null && $this->laboratory->needsMethod($line->test),
                 'methods' => $methods[$item['test_id']] ?? [],
+                // A formula or conditional catalogue price: the values to enter on the quotation.
+                'price_rule' => $open ? $this->laboratory->priceRule($line->test, $preOrder->referrer_id, $line->methodTest) : null,
+                'price_params' => $line?->price_params,
             ];
         }, $view['items']);
         $view['dropped_items'] = $preOrder->items

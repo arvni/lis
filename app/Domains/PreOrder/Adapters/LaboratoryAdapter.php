@@ -11,6 +11,7 @@ use App\Domains\Laboratory\Models\Test;
 use App\Domains\Laboratory\Repositories\MethodTestRepository;
 use App\Domains\Laboratory\Repositories\TestRepository;
 use App\Domains\Referrer\Repositories\ReferrerTestRepository;
+use App\Domains\Shared\Helpers\PriceFormula;
 
 /**
  * The PreOrder domain's view of the test catalogue: which tests take pre-orders, their flow,
@@ -123,11 +124,58 @@ class LaboratoryAdapter
      *   5. the test's list price, then 6. the method's list price
      * The center's own prices apply only to the methods it lists (or to all, when it lists none).
      *
-     * Only fixed prices are used here. A formula or conditional price needs the values reception
-     * enters, so the line stays unpriced and BION's finance team prices it on the quotation.
-     * With no method picked yet, only the test-level prices apply; picking one reprices the line.
+     * A formula or conditional price needs values such as the number of embryos: without them the
+     * line stays unpriced until BION enters them on the quotation (see priceRule()). With no
+     * method picked yet, only the test-level prices apply; picking one reprices the line.
+     *
+     * @param  array<string, mixed>  $values  parameter name => value, for a formula or conditions
      */
-    public function unitPrice(Test $test, int $referrerId, ?MethodTest $methodTest = null): ?string
+    public function unitPrice(Test $test, int $referrerId, ?MethodTest $methodTest = null, array $values = []): ?string
+    {
+        $tier = $this->decisiveTier($test, $referrerId, $methodTest);
+        if ($tier === null) {
+            return null;
+        }
+        if ($tier['parameters'] === null) {
+            return $tier['price'];
+        }
+        // A rule with no inputs (a constant formula) needs nothing entered.
+        if ($values === [] && $tier['parameters'] !== []) {
+            return null;
+        }
+        $price = PriceFormula::resolve($tier['type'], 0, $tier['extra'], $values);
+
+        return $price > 0 ? number_format($price, 3, '.', '') : null;
+    }
+
+    /**
+     * How a line is priced when the catalogue sets it by a formula or conditions: the values BION
+     * enters and the rule they feed, for the quotation form. Null for a fixed price, or none.
+     *
+     * @return array{type: string, parameters: list<string>, formula: string|null, conditions: list<array<string, mixed>>}|null
+     */
+    public function priceRule(Test $test, int $referrerId, ?MethodTest $methodTest = null): ?array
+    {
+        $tier = $this->decisiveTier($test, $referrerId, $methodTest);
+        if ($tier === null || $tier['parameters'] === null) {
+            return null;
+        }
+
+        return [
+            'type' => $tier['type'],
+            'parameters' => $tier['parameters'],
+            'formula' => isset($tier['extra']['formula']) ? (string) $tier['extra']['formula'] : null,
+            'conditions' => array_values(array_filter((array) ($tier['extra']['conditions'] ?? []), 'is_array')),
+        ];
+    }
+
+    /**
+     * The first price setting in the cascade that decides the line: a fixed price above zero, or a
+     * formula or conditions (whose price depends on values entered later).
+     *
+     * @return array{type: string, price: string|null, extra: array<string, mixed>, parameters: list<string>|null}|null
+     */
+    private function decisiveTier(Test $test, int $referrerId, ?MethodTest $methodTest): ?array
     {
         $method = $methodTest?->method;
 
@@ -158,15 +206,15 @@ class LaboratoryAdapter
             $type = $type instanceof MethodPriceType ? $type : MethodPriceType::tryFrom((string) $type);
             if ($type === null || $type === MethodPriceType::FIX) {
                 if ((float) $price > 0) {
-                    return (string) $price;
+                    return ['type' => MethodPriceType::FIX->value, 'price' => (string) $price, 'extra' => [], 'parameters' => null];
                 }
 
                 continue;
             }
-            // Set up as a formula or conditions: that is this line's price, but not one to guess.
+            // Set up as a formula or conditions: that is this line's price, worked out from values.
             $extra = is_array($extra) ? $extra : [];
             if (! empty($extra['formula']) || ! empty($extra['conditions'])) {
-                return null;
+                return ['type' => $type->value, 'price' => null, 'extra' => $extra, 'parameters' => PriceFormula::parameters($extra)];
             }
         }
 

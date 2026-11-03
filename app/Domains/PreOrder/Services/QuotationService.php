@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\PreOrder\Services;
 
+use App\Domains\PreOrder\Adapters\LaboratoryAdapter;
 use App\Domains\PreOrder\DTOs\Actor;
 use App\Domains\PreOrder\DTOs\QuoteDTO;
 use App\Domains\PreOrder\Enums\FinanceReason;
@@ -30,6 +31,7 @@ class QuotationService
     public function __construct(
         private readonly QuotationRepository $quotations,
         private readonly PreOrderRepository $preOrders,
+        private readonly LaboratoryAdapter $laboratory,
     ) {}
 
     /**
@@ -38,12 +40,34 @@ class QuotationService
      */
     public function open(PreOrder $preOrder, Collection $items, ?PreOrderRequest $request, array $reasons, QuoteDTO $quote, Actor $actor): PreOrderQuotation
     {
+        // A formula or conditional price, worked out from the values entered (e.g. embryos). A line
+        // priced this way before can be re-priced with new values on a revised quotation.
+        foreach ($quote->params as $itemId => $values) {
+            $item = $items->firstWhere('id', $itemId) ?? throw new PreOrderRuleException('Price values were given for a line that is not on this quotation.');
+            $item->loadMissing('methodTest.method');
+            $rule = $this->laboratory->priceRule($item->test, $preOrder->referrer_id, $item->methodTest);
+            if ($rule === null) {
+                throw new PreOrderRuleException("{$item->test->name} has a fixed catalogue price; it takes no values.");
+            }
+            $missing = array_diff($rule['parameters'], array_keys($values));
+            if ($missing !== []) {
+                throw new PreOrderRuleException("Enter {$this->list($missing)} for {$item->test->name}.");
+            }
+            $values = array_intersect_key($values, array_flip($rule['parameters']));
+            $price = $this->laboratory->unitPrice($item->test, $preOrder->referrer_id, $item->methodTest, $values)
+                ?? throw new PreOrderRuleException("No catalogue price for {$item->test->name} matches those values. Check them, or ask the finance team to price it.");
+            $this->preOrders->updateItem($item, ['unit_price' => $price, 'price_params' => $values]);
+        }
+
         foreach ($quote->prices as $itemId => $price) {
             $item = $items->firstWhere('id', $itemId) ?? throw new PreOrderRuleException('A price was given for a line that is not on this quotation.');
-            if ($item->unit_price !== null) {
+            if (isset($quote->params[$itemId])) {
+                throw new PreOrderRuleException("{$item->test->name} is priced from the values entered; it can't also take a typed price.");
+            }
+            if ($item->unit_price !== null && $item->price_params === null) {
                 throw new PreOrderRuleException("{$item->test->name} has a catalogue price, which can't be changed.");
             }
-            $this->preOrders->updateItem($item, ['unit_price' => $price]);
+            $this->preOrders->updateItem($item, ['unit_price' => $price, 'price_params' => null]);
         }
 
         $subtotal = '0';
@@ -99,5 +123,11 @@ class QuotationService
         $count = $this->quotations->count($preOrder);
 
         return $count === 0 ? $root : $root.'-'.($count + 1);
+    }
+
+    /** @param  array<int, string>  $names */
+    private function list(array $names): string
+    {
+        return implode(', ', array_values($names));
     }
 }
