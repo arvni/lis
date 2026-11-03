@@ -24,12 +24,17 @@ import {
 } from '@mui/icons-material';
 import { router } from '@inertiajs/react';
 import { useRef } from 'react';
+import { createPortal } from 'react-dom';
 import generatePDF, { Resolution, Margin } from 'react-to-pdf';
 
 const COMPANY_NAME = 'Muscat Medical Center';
 const COMPANY_ADDRESS = 'Muscat, Sultanate of Oman';
 const COMPANY_PHONE = '+968 2207 3671';
 const CURRENCY = 'OMR';
+const LOGO = '/images/logo.png';
+
+// Column widths (%) shared by screen, print and PDF so all ten columns fit an A4 landscape page.
+const COLUMN_WIDTHS = [3, 9, 9, 15, 11, 23, 7.5, 7.5, 7.5, 7.5];
 
 const fmt = (num) => parseFloat(num || 0).toFixed(3);
 
@@ -55,7 +60,18 @@ const StatementShow = () => {
       xmlns:x="urn:schemas-microsoft-com:office:excel"
       xmlns="http://www.w3.org/TR/REC-html40">
 <head><meta charset="UTF-8"/>
+<!--[if gte mso 9]><xml>
+<x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+<x:Name>Statement</x:Name>
+<x:WorksheetOptions>
+  <x:FitToPage/>
+  <x:Print><x:ValidPrinterInfo/><x:PaperSizeIndex>9</x:PaperSizeIndex><x:FitWidth>1</x:FitWidth><x:FitHeight>0</x:FitHeight></x:Print>
+  <x:PageSetup><x:Layout x:Orientation="Landscape"/></x:PageSetup>
+</x:WorksheetOptions>
+</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook>
+</xml><![endif]-->
 <style>
+  @page { size: A4 landscape; mso-page-orientation: landscape; margin: 0.4in; }
   body { font-family: Arial, sans-serif; font-size: 11pt; }
   h2   { color: #2E5090; text-align: center; margin: 4px 0; }
   .center { text-align: center; color: #555; }
@@ -75,11 +91,14 @@ const StatementShow = () => {
 </style>
 </head>
 <body>
-  <h2>MONTHLY BILLING STATEMENT</h2>
-  <p class="center"><strong>${COMPANY_NAME}</strong></p>
-  <p class="center">${COMPANY_ADDRESS} | Tel: ${COMPANY_PHONE}</p>
-  <hr/>
   <table>
+    <!-- Title (centred) | logo (top right) -->
+    <tr class="meta">
+      <td colspan="9" style="text-align:center"><h2>MONTHLY BILLING STATEMENT</h2></td>
+      <td rowspan="3" style="text-align:right;vertical-align:top"><img src="${window.location.origin}${LOGO}" height="70" alt="logo"/></td>
+    </tr>
+    <tr class="meta"><td colspan="9" class="center"><strong>${COMPANY_NAME}</strong></td></tr>
+    <tr class="meta"><td colspan="9" class="center">${COMPANY_ADDRESS} | Tel: ${COMPANY_PHONE}</td></tr>
     <!-- Meta row 1: Customer Name (left) | Statement Date (last col) -->
     <tr class="meta">
       <td colspan="2"><strong>Customer Name:</strong> ${statement.customer_name || ''}</td>
@@ -162,20 +181,29 @@ const StatementShow = () => {
 
     const handlePrint = () => window.print();
 
+    // The layout clips overflowing content, so printing uses a copy of the statement placed
+    // directly under <body> (see the portal below) and hides everything else.
     const printStyles = `
+        #statement-print-root { display: none; }
         @media print {
-            @page { size: A4 landscape; margin: 10mm; }
-            body * { visibility: hidden !important; }
-            #statement-print-area,
-            #statement-print-area * { visibility: visible !important; }
-            #statement-print-area {
-                position: fixed;
-                inset: 0;
-                font-size: 14pt;
-                background: #fff;
-                padding: 10mm;
-                box-shadow: none;
+            @page { size: A4 landscape; margin: 8mm; }
+            body > *:not(#statement-print-root) { display: none !important; }
+            #statement-print-root {
+                display: block !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
+            #statement-print-root .MuiTableContainer-root { overflow: visible !important; }
+            #statement-print-root table { table-layout: fixed; width: 100%; }
+            #statement-print-root th,
+            #statement-print-root td {
+                font-size: 8pt !important;
+                padding: 3px 4px !important;
+                white-space: normal !important;
+                overflow-wrap: anywhere;
+            }
+            #statement-print-root thead { display: table-header-group; }
+            #statement-print-root tr { break-inside: avoid; }
         }
     `;
 
@@ -251,196 +279,198 @@ const StatementShow = () => {
                 </Box>
             </Box>
 
-            {/* ── Printable / PDF content ── */}
-            <Paper
-                ref={pdfRef}
-                id="statement-print-area"
-                elevation={2}
-                sx={{ p: { xs: 2, md: 4 } }}
-            >
-                {/* ── Company header ── */}
-                <Box sx={{ textAlign: 'center', mb: 3 }}>
-                    <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        sx={{ color: '#2E5090', letterSpacing: 1 }}
-                    >
-                        MONTHLY BILLING STATEMENT
-                    </Typography>
-                    <Typography variant="subtitle1" fontWeight="medium" sx={{ mt: 0.5 }}>
-                        {COMPANY_NAME}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        {COMPANY_ADDRESS} &nbsp;|&nbsp; Tel: {COMPANY_PHONE}
-                    </Typography>
-                </Box>
-
-                <Divider sx={{ mb: 3 }} />
-
-                {/* ── Statement meta ── */}
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid size={{ xs: 12, sm: 6 }}>
-                        <MetaRow label="Customer Name" value={statement.customer_name} bold />
-                        <MetaRow label="Statement Number" value={statement.no} />
-                    </Grid>
-                    <Grid
-                        size={{ xs: 12, sm: 6 }}
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: { sm: 'flex-end' },
-                        }}
-                    >
-                        <MetaRow label="Statement Date" value={statement.issue_date} />
-                        <MetaRow label="Total Samples" value={statement.total_samples} />
-                    </Grid>
-                </Grid>
-
-                <Divider sx={{ mb: 2 }} />
-
-                {/* ── Data table ── */}
-                <TableContainer component={Paper} variant="outlined" sx={{ mb: 4 }}>
-                    <Table size="small" stickyHeader>
-                        <TableHead>
-                            <TableRow
-                                sx={{
-                                    '& th': {
-                                        bgcolor: '#2E5090',
-                                        color: '#fff',
-                                        fontWeight: 'bold',
-                                        whiteSpace: 'nowrap',
-                                    },
-                                }}
-                            >
-                                <TableCell>#</TableCell>
-                                <TableCell>Invoice No.</TableCell>
-                                <TableCell>Registration Date</TableCell>
-                                <TableCell>Patient Name</TableCell>
-                                <TableCell>Test Codes</TableCell>
-                                <TableCell>Test Names</TableCell>
-                                <TableCell align="right">Gross ({CURRENCY})</TableCell>
-                                <TableCell align="right">Discounts ({CURRENCY})</TableCell>
-                                <TableCell align="right">Net ({CURRENCY})</TableCell>
-                                <TableCell>Report Date</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {invoices.map((row, idx) => (
-                                <TableRow
-                                    key={idx}
-                                    sx={{ bgcolor: idx % 2 === 0 ? '#fff' : '#F8F9FA' }}
-                                >
-                                    <TableCell sx={{ color: 'text.secondary' }}>
-                                        {idx + 1}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Typography
-                                            variant="body2"
-                                            fontWeight="medium"
-                                            sx={{ color: '#2E5090' }}
-                                        >
-                                            {row.invoice_no || '—'}
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                                        {row.acceptance_date}
-                                    </TableCell>
-                                    <TableCell>{row.patient_name}</TableCell>
-                                    <TableCell>
-                                        <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
-                                            {row.test_codes}
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
-                                            {row.test_names}
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell
-                                        align="right"
-                                        sx={{ fontVariantNumeric: 'tabular-nums' }}
-                                    >
-                                        {fmt(row.gross_amount)}
-                                    </TableCell>
-                                    <TableCell
-                                        align="right"
-                                        sx={{
-                                            fontVariantNumeric: 'tabular-nums',
-                                            color: 'error.main',
-                                        }}
-                                    >
-                                        {fmt(row.item_discounts + row.invoice_discount)}
-                                    </TableCell>
-                                    <TableCell
-                                        align="right"
-                                        sx={{
-                                            fontVariantNumeric: 'tabular-nums',
-                                            fontWeight: 'bold',
-                                        }}
-                                    >
-                                        {fmt(row.net_amount)}
-                                    </TableCell>
-                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                                        <Chip
-                                            label={row.reported_at}
-                                            size="small"
-                                            color={
-                                                row.reported_at === 'Pending'
-                                                    ? 'warning'
-                                                    : 'success'
-                                            }
-                                            variant="outlined"
-                                            sx={{ fontSize: '0.7rem' }}
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-
-                {/* ── Summary ── */}
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Paper
-                        variant="outlined"
-                        sx={{ p: 2, minWidth: 300, borderColor: '#2E5090', borderWidth: 2 }}
-                    >
-                        <Typography
-                            variant="subtitle1"
-                            fontWeight="bold"
-                            sx={{
-                                color: '#2E5090',
-                                bgcolor: '#E8F0FE',
-                                px: 1,
-                                py: 0.5,
-                                borderRadius: 1,
-                                mb: 1.5,
-                            }}
-                        >
-                            BILLING SUMMARY
-                        </Typography>
-                        <SummaryRow label="Total Gross Amount" value={fmt(totals.gross_amount)} />
-                        <SummaryRow
-                            label="Total Discounts"
-                            value={fmt(totals.discounts)}
-                            color="error.main"
-                        />
-                        <Divider sx={{ my: 0.5 }} />
-                        <SummaryRow label="Total Net Amount" value={fmt(totals.net_amount)} bold />
-                    </Paper>
-                </Box>
-
-                {/* ── Footer ── */}
-                <Box sx={{ mt: 4, textAlign: 'center' }}>
-                    <Typography variant="caption" color="text.disabled">
-                        Generated on: {statement.generated_at} &nbsp;|&nbsp; Statement:{' '}
-                        {statement.no}
-                    </Typography>
-                </Box>
+            {/* ── PDF content (captured as shown on screen) ── */}
+            <Paper ref={pdfRef} elevation={2} sx={{ p: { xs: 2, md: 4 } }}>
+                <StatementDocument statement={statement} invoices={invoices} totals={totals} />
             </Paper>
+
+            {/* ── Print copy, outside the layout so long statements flow onto every page ── */}
+            {createPortal(
+                <div id="statement-print-root">
+                    <StatementDocument statement={statement} invoices={invoices} totals={totals} />
+                </div>,
+                document.body,
+            )}
         </Box>
     );
 };
+
+const StatementDocument = ({ statement, invoices, totals }) => (
+    <>
+        {/* ── Company header ── */}
+        <Box sx={{ position: 'relative', textAlign: 'center', mb: 3, minHeight: 80, px: 12 }}>
+            <Box
+                component="img"
+                src={LOGO}
+                alt="logo"
+                sx={{ position: 'absolute', top: 0, right: 0, height: 80 }}
+            />
+            <Typography variant="h4" fontWeight="bold" sx={{ color: '#2E5090', letterSpacing: 1 }}>
+                MONTHLY BILLING STATEMENT
+            </Typography>
+            <Typography variant="subtitle1" fontWeight="medium" sx={{ mt: 0.5 }}>
+                {COMPANY_NAME}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+                {COMPANY_ADDRESS} &nbsp;|&nbsp; Tel: {COMPANY_PHONE}
+            </Typography>
+        </Box>
+
+        <Divider sx={{ mb: 3 }} />
+
+        {/* ── Statement meta ── */}
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+                <MetaRow label="Customer Name" value={statement.customer_name} bold />
+                <MetaRow label="Statement Number" value={statement.no} />
+            </Grid>
+            <Grid
+                size={{ xs: 12, sm: 6 }}
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: { sm: 'flex-end' },
+                }}
+            >
+                <MetaRow label="Statement Date" value={statement.issue_date} />
+                <MetaRow label="Total Samples" value={statement.total_samples} />
+            </Grid>
+        </Grid>
+
+        <Divider sx={{ mb: 2 }} />
+
+        {/* ── Data table ── */}
+        <TableContainer component={Paper} variant="outlined" sx={{ mb: 4 }}>
+            <Table size="small">
+                <colgroup>
+                    {COLUMN_WIDTHS.map((width, i) => (
+                        <col key={i} style={{ width: `${width}%` }} />
+                    ))}
+                </colgroup>
+                <TableHead>
+                    <TableRow
+                        sx={{
+                            '& th': {
+                                bgcolor: '#2E5090',
+                                color: '#fff',
+                                fontWeight: 'bold',
+                            },
+                        }}
+                    >
+                        <TableCell>#</TableCell>
+                        <TableCell>Invoice No.</TableCell>
+                        <TableCell>Registration Date</TableCell>
+                        <TableCell>Patient Name</TableCell>
+                        <TableCell>Test Codes</TableCell>
+                        <TableCell>Test Names</TableCell>
+                        <TableCell align="right">Gross ({CURRENCY})</TableCell>
+                        <TableCell align="right">Discounts ({CURRENCY})</TableCell>
+                        <TableCell align="right">Net ({CURRENCY})</TableCell>
+                        <TableCell>Report Date</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {invoices.map((row, idx) => (
+                        <TableRow key={idx} sx={{ bgcolor: idx % 2 === 0 ? '#fff' : '#F8F9FA' }}>
+                            <TableCell sx={{ color: 'text.secondary' }}>{idx + 1}</TableCell>
+                            <TableCell>
+                                <Typography
+                                    variant="body2"
+                                    fontWeight="medium"
+                                    sx={{ color: '#2E5090' }}
+                                >
+                                    {row.invoice_no || '—'}
+                                </Typography>
+                            </TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                                {row.acceptance_date}
+                            </TableCell>
+                            <TableCell>{row.patient_name}</TableCell>
+                            <TableCell>
+                                <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+                                    {row.test_codes}
+                                </Typography>
+                            </TableCell>
+                            <TableCell>
+                                <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+                                    {row.test_names}
+                                </Typography>
+                            </TableCell>
+                            <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                                {fmt(row.gross_amount)}
+                            </TableCell>
+                            <TableCell
+                                align="right"
+                                sx={{
+                                    fontVariantNumeric: 'tabular-nums',
+                                    color: 'error.main',
+                                }}
+                            >
+                                {fmt(row.item_discounts + row.invoice_discount)}
+                            </TableCell>
+                            <TableCell
+                                align="right"
+                                sx={{
+                                    fontVariantNumeric: 'tabular-nums',
+                                    fontWeight: 'bold',
+                                }}
+                            >
+                                {fmt(row.net_amount)}
+                            </TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                                <Chip
+                                    label={row.reported_at}
+                                    size="small"
+                                    color={row.reported_at === 'Pending' ? 'warning' : 'success'}
+                                    variant="outlined"
+                                    sx={{ fontSize: '0.7rem' }}
+                                />
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </TableContainer>
+
+        {/* ── Summary ── */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Paper
+                variant="outlined"
+                sx={{ p: 2, minWidth: 300, borderColor: '#2E5090', borderWidth: 2 }}
+            >
+                <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    sx={{
+                        color: '#2E5090',
+                        bgcolor: '#E8F0FE',
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 1,
+                        mb: 1.5,
+                    }}
+                >
+                    BILLING SUMMARY
+                </Typography>
+                <SummaryRow label="Total Gross Amount" value={fmt(totals.gross_amount)} />
+                <SummaryRow
+                    label="Total Discounts"
+                    value={fmt(totals.discounts)}
+                    color="error.main"
+                />
+                <Divider sx={{ my: 0.5 }} />
+                <SummaryRow label="Total Net Amount" value={fmt(totals.net_amount)} bold />
+            </Paper>
+        </Box>
+
+        {/* ── Footer ── */}
+        <Box sx={{ mt: 4, textAlign: 'center' }}>
+            <Typography variant="caption" color="text.disabled">
+                Generated on: {statement.generated_at} &nbsp;|&nbsp; Statement: {statement.no}
+            </Typography>
+        </Box>
+    </>
+);
 
 const MetaRow = ({ label, value, bold }) => (
     <Box sx={{ display: 'flex', gap: 1, mb: 0.5 }}>

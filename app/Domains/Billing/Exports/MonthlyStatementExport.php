@@ -14,35 +14,44 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class MonthlyStatementExport implements
-    FromCollection,
-    WithHeadings,
-    WithStyles,
-    WithColumnFormatting,
-    WithEvents,
-    ShouldAutoSize
+class MonthlyStatementExport implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithEvents, WithHeadings, WithStyles
 {
     protected Collection $data;
+
     protected array $options;
+
     protected array $headers;
 
     // Configuration constants - FIXED for proper Laravel Excel flow
     private const HEADER_ROW = 8;      // Headers will be at row 8
+
     private const DATA_START_ROW = 9;  // Data starts at row 9
+
     private const CURRENCY = 'OMR';
 
     // Column indices for easier maintenance
     private const COL_INVOICE_NO = 0;
+
     private const COL_ACCEPTANCE_DATE = 1;
+
     private const COL_PATIENT_NAME = 2;
+
     private const COL_TEST_CODES = 3;
+
     private const COL_TEST_NAMES = 4;
+
     private const COL_GROSS_AMOUNT = 5;
+
     private const COL_DISCOUNTS = 6;
+
     private const COL_NET_AMOUNT = 7;
+
     private const COL_CURRENCY = 8;
+
     private const COL_REPORTED_DATE = 9;
 
     public function __construct(Collection $data, array $options = [])
@@ -64,7 +73,7 @@ class MonthlyStatementExport implements
             'total_samples' => 0,
             'total_amount' => 0,
             'generated_at' => now()->format('M d, Y H:i'),
-            'company_name' => "Muscat Medical Center",
+            'company_name' => 'Muscat Medical Center',
             'company_address' => config('company.address', 'Muscat, Sultanate of Oman'),
             'company_phone' => config('company.phone', '+968 2207 3671'),
             'currency' => self::CURRENCY,
@@ -82,11 +91,11 @@ class MonthlyStatementExport implements
             'Patient Name',
             'Test Codes',
             'Test Names',
-            'Gross Amount (' . $this->options['currency'] . ')',
-            'Discounts (' . $this->options['currency'] . ')',
-            'Net Amount (' . $this->options['currency'] . ')',
+            'Gross Amount ('.$this->options['currency'].')',
+            'Discounts ('.$this->options['currency'].')',
+            'Net Amount ('.$this->options['currency'].')',
             'Currency',
-            'Report Date'
+            'Report Date',
         ];
     }
 
@@ -96,7 +105,8 @@ class MonthlyStatementExport implements
     private function generateStatementNumber(): string
     {
         $now = now();
-        return 'STMT-' . $now->format('Ym') . '-' . str_pad($now->format('His'), 6, '0', STR_PAD_LEFT);
+
+        return 'STMT-'.$now->format('Ym').'-'.str_pad($now->format('His'), 6, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -151,19 +161,19 @@ class MonthlyStatementExport implements
             // Main title style - more professional
             1 => [
                 'font' => ['bold' => true, 'size' => 18, 'color' => ['rgb' => '2E5090']],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER]
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
             ],
 
             // Company info style - better readability
             '2:3' => [
                 'font' => ['size' => 10, 'color' => ['rgb' => '555555']],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
             ],
 
             // Statement info labels - consistent styling
             '5:7' => [
                 'font' => ['size' => 10, 'bold' => true, 'color' => ['rgb' => '333333']],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT]
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT],
             ],
 
             // Table headers - improved contrast
@@ -171,19 +181,19 @@ class MonthlyStatementExport implements
                 'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 10],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '2E5090']
+                    'startColor' => ['rgb' => '2E5090'],
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER
+                    'vertical' => Alignment::VERTICAL_CENTER,
                 ],
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
-                        'color' => ['rgb' => '000000']
-                    ]
-                ]
-            ]
+                        'color' => ['rgb' => '000000'],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -218,6 +228,45 @@ class MonthlyStatementExport implements
         $this->applyDataBorders($sheet, $highestRow, $lastColumn);
         $this->adjustColumnWidths($sheet);
         $this->addFooter($sheet, $highestRow);
+        $this->addLogo($sheet);
+        $this->setupPrinting($sheet, $highestRow, $lastColumn);
+    }
+
+    /**
+     * Company logo in the top-right corner, over the title rows
+     */
+    private function addLogo(Worksheet $sheet): void
+    {
+        $path = public_path('images/logo.png');
+        if (! is_file($path)) {
+            return;
+        }
+
+        $logo = new Drawing;
+        $logo->setName('Logo');
+        $logo->setPath($path);
+        $logo->setHeight(75);
+        $logo->setCoordinates($this->getColumnLetter(count($this->headers) - 1).'1');
+        $logo->setOffsetX(40);
+        $logo->setOffsetY(2);
+        $logo->setWorksheet($sheet);
+    }
+
+    /**
+     * Print on A4 landscape with every column on one page width; the table header repeats on each page
+     */
+    private function setupPrinting(Worksheet $sheet, int $highestRow, string $lastColumn): void
+    {
+        $sheet->getPageSetup()
+            ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+            ->setPaperSize(PageSetup::PAPERSIZE_A4)
+            ->setFitToWidth(1)
+            ->setFitToHeight(0)
+            ->setHorizontalCentered(true)
+            ->setPrintArea('A1:'.$lastColumn.($highestRow + 8))
+            ->setRowsToRepeatAtTopByStartAndEnd(self::HEADER_ROW, self::HEADER_ROW);
+
+        $sheet->getPageMargins()->setTop(0.4)->setBottom(0.4)->setLeft(0.3)->setRight(0.3);
     }
 
     /**
@@ -236,12 +285,12 @@ class MonthlyStatementExport implements
         for ($row = 1; $row <= $highestRow; $row++) {
             $rowData = [];
             for ($col = 'A'; $col <= $highestCol; $col = str_increment($col)) {
-                $cellValue = $sheet->getCell($col . $row)->getValue();
+                $cellValue = $sheet->getCell($col.$row)->getValue();
                 if ($cellValue !== null) {
                     $rowData[$col] = $cellValue;
                 }
             }
-            if (!empty($rowData)) {
+            if (! empty($rowData)) {
                 $originalData[$row] = $rowData;
             }
         }
@@ -252,7 +301,7 @@ class MonthlyStatementExport implements
         // Place headers at correct position
         foreach ($this->headers as $index => $header) {
             $column = $this->getColumnLetter($index);
-            $sheet->setCellValue($column . self::HEADER_ROW, $header);
+            $sheet->setCellValue($column.self::HEADER_ROW, $header);
         }
 
         // Place data at correct position
@@ -270,7 +319,7 @@ class MonthlyStatementExport implements
             foreach ($values as $index => $cellValue) {
                 if ($index < count($this->headers)) {
                     $column = $this->getColumnLetter($index);
-                    $sheet->setCellValue($column . $dataRow, $cellValue);
+                    $sheet->setCellValue($column.$dataRow, $cellValue);
                 }
             }
             $dataRow++;
@@ -290,17 +339,17 @@ class MonthlyStatementExport implements
         $sheet->getRowDimension(1)->setRowHeight(25);
 
         // Company information
-        if (!empty($this->options['company_name'])) {
+        if (! empty($this->options['company_name'])) {
             $sheet->setCellValue('A2', $this->options['company_name']);
             $sheet->mergeCells("A2:{$lastCol}2");
 
-            if (!empty($this->options['company_address']) || !empty($this->options['company_phone'])) {
+            if (! empty($this->options['company_address']) || ! empty($this->options['company_phone'])) {
                 $companyDetails = [];
-                if (!empty($this->options['company_address'])) {
+                if (! empty($this->options['company_address'])) {
                     $companyDetails[] = $this->options['company_address'];
                 }
-                if (!empty($this->options['company_phone'])) {
-                    $companyDetails[] = 'Tel: ' . $this->options['company_phone'];
+                if (! empty($this->options['company_phone'])) {
+                    $companyDetails[] = 'Tel: '.$this->options['company_phone'];
                 }
                 $sheet->setCellValue('A3', implode(' | ', $companyDetails));
                 $sheet->mergeCells("A3:{$lastCol}3");
@@ -323,13 +372,13 @@ class MonthlyStatementExport implements
         $rightCol = $this->getColumnLetter(count($this->headers) - 2);
         $valueCol = $this->getColumnLetter(count($this->headers) - 1);
 
-        $sheet->setCellValue($rightCol . '5', 'Statement Date:');
-        $sheet->setCellValue($valueCol . '5', $this->options['statement_date']);
-        $sheet->getStyle($valueCol . '5')->getFont()->setBold(true);
+        $sheet->setCellValue($rightCol.'5', 'Statement Date:');
+        $sheet->setCellValue($valueCol.'5', $this->options['statement_date']);
+        $sheet->getStyle($valueCol.'5')->getFont()->setBold(true);
 
-        $sheet->setCellValue($rightCol . '6', 'Total Samples:');
-        $sheet->setCellValue($valueCol . '6', number_format($this->options['total_samples']));
-        $sheet->getStyle($valueCol . '6')->getFont()->setBold(true);
+        $sheet->setCellValue($rightCol.'6', 'Total Samples:');
+        $sheet->setCellValue($valueCol.'6', number_format($this->options['total_samples']));
+        $sheet->getStyle($valueCol.'6')->getFont()->setBold(true);
 
         // Add space before table
         $sheet->getRowDimension(7)->setRowHeight(10);
@@ -364,7 +413,7 @@ class MonthlyStatementExport implements
             self::COL_INVOICE_NO,
             self::COL_CURRENCY,
             self::COL_ACCEPTANCE_DATE,
-            self::COL_REPORTED_DATE
+            self::COL_REPORTED_DATE,
         ];
 
         foreach ($centerAlignCols as $colIndex) {
@@ -379,7 +428,7 @@ class MonthlyStatementExport implements
         $amountCols = [
             self::COL_GROSS_AMOUNT,
             self::COL_DISCOUNTS,
-            self::COL_NET_AMOUNT
+            self::COL_NET_AMOUNT,
         ];
 
         foreach ($amountCols as $colIndex) {
@@ -417,41 +466,41 @@ class MonthlyStatementExport implements
         $currencyCol = $this->getColumnLetter(count($this->headers) - 1);
 
         // Summary header
-        $sheet->setCellValue($labelCol . $summaryStartRow, 'BILLING SUMMARY');
-        $sheet->mergeCells($labelCol . $summaryStartRow . ':' . $currencyCol . $summaryStartRow);
-        $sheet->getStyle($labelCol . $summaryStartRow)
+        $sheet->setCellValue($labelCol.$summaryStartRow, 'BILLING SUMMARY');
+        $sheet->mergeCells($labelCol.$summaryStartRow.':'.$currencyCol.$summaryStartRow);
+        $sheet->getStyle($labelCol.$summaryStartRow)
             ->getFont()->setBold(true)->setSize(12);
-        $sheet->getStyle($labelCol . $summaryStartRow)
+        $sheet->getStyle($labelCol.$summaryStartRow)
             ->getFont()->getColor()->setRGB('2E5090');
-        $sheet->getStyle($labelCol . $summaryStartRow)
+        $sheet->getStyle($labelCol.$summaryStartRow)
             ->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('E8F0FE');
 
         // Summary items
         $summaryItems = [
             'Total Gross Amount:' => $totals['gross_amount'],
             'Total Discounts:' => $totals['discounts'],
-            'Total Net Amount:' => $totals['net_amount']
+            'Total Net Amount:' => $totals['net_amount'],
         ];
 
         $currentRow = $summaryStartRow + 1;
         foreach ($summaryItems as $label => $value) {
-            $sheet->setCellValue($labelCol . $currentRow, $label);
-            $sheet->setCellValue($valueCol . $currentRow, $value);
-            $sheet->setCellValue($currencyCol . $currentRow, $this->options['currency']);
+            $sheet->setCellValue($labelCol.$currentRow, $label);
+            $sheet->setCellValue($valueCol.$currentRow, $value);
+            $sheet->setCellValue($currencyCol.$currentRow, $this->options['currency']);
 
-            $sheet->getStyle($labelCol . $currentRow)->getFont()->setBold(true);
-            $sheet->getStyle($valueCol . $currentRow)->getNumberFormat()->setFormatCode('#,##0.000');
-            $sheet->getStyle($valueCol . $currentRow)->getFont()->setBold(true);
+            $sheet->getStyle($labelCol.$currentRow)->getFont()->setBold(true);
+            $sheet->getStyle($valueCol.$currentRow)->getNumberFormat()->setFormatCode('#,##0.000');
+            $sheet->getStyle($valueCol.$currentRow)->getFont()->setBold(true);
 
             $currentRow++;
         }
 
         // Border around summary
-        $sheet->getStyle($labelCol . $summaryStartRow . ':' . $currencyCol . ($currentRow - 1))
+        $sheet->getStyle($labelCol.$summaryStartRow.':'.$currencyCol.($currentRow - 1))
             ->getBorders()
             ->getOutline()
             ->setBorderStyle(Border::BORDER_MEDIUM);
-        $sheet->getStyle($labelCol . $summaryStartRow . ':' . $currencyCol . ($currentRow - 1))
+        $sheet->getStyle($labelCol.$summaryStartRow.':'.$currencyCol.($currentRow - 1))
             ->getBorders()
             ->getOutline()
             ->getColor()
@@ -464,9 +513,15 @@ class MonthlyStatementExport implements
     private function calculateTotals(): array
     {
         return [
-            'gross_amount' => $this->data->sum(function($row) { return (float)($row[self::COL_GROSS_AMOUNT] ?? 0); }),
-            'discounts' => $this->data->sum(function($row) { return (float)($row[self::COL_DISCOUNTS] ?? 0); }),
-            'net_amount' => $this->data->sum(function($row) { return (float)($row[self::COL_NET_AMOUNT] ?? 0); })
+            'gross_amount' => $this->data->sum(function ($row) {
+                return (float) ($row[self::COL_GROSS_AMOUNT] ?? 0);
+            }),
+            'discounts' => $this->data->sum(function ($row) {
+                return (float) ($row[self::COL_DISCOUNTS] ?? 0);
+            }),
+            'net_amount' => $this->data->sum(function ($row) {
+                return (float) ($row[self::COL_NET_AMOUNT] ?? 0);
+            }),
         ];
     }
 
@@ -475,7 +530,7 @@ class MonthlyStatementExport implements
      */
     private function applyDataBorders(Worksheet $sheet, int $highestRow, string $lastColumn): void
     {
-        $dataRange = "A" . self::HEADER_ROW . ":{$lastColumn}{$highestRow}";
+        $dataRange = 'A'.self::HEADER_ROW.":{$lastColumn}{$highestRow}";
 
         // Light borders for data area
         $sheet->getStyle($dataRange)
@@ -489,11 +544,11 @@ class MonthlyStatementExport implements
             ->setRGB('DDDDDD');
 
         // Header border
-        $sheet->getStyle("A" . self::HEADER_ROW . ":{$lastColumn}" . self::HEADER_ROW)
+        $sheet->getStyle('A'.self::HEADER_ROW.":{$lastColumn}".self::HEADER_ROW)
             ->getBorders()
             ->getAllBorders()
             ->setBorderStyle(Border::BORDER_MEDIUM);
-        $sheet->getStyle("A" . self::HEADER_ROW . ":{$lastColumn}" . self::HEADER_ROW)
+        $sheet->getStyle('A'.self::HEADER_ROW.":{$lastColumn}".self::HEADER_ROW)
             ->getBorders()
             ->getAllBorders()
             ->getColor()
@@ -543,13 +598,13 @@ class MonthlyStatementExport implements
         $footerRow = $highestRow + 8;
         $lastCol = $this->getColumnLetter(count($this->headers) - 1);
 
-        $footerText = 'Generated on: ' . $this->options['generated_at'] . ' | Statement: ' . $this->options['statement_number'];
-        $sheet->setCellValue('A' . $footerRow, $footerText);
+        $footerText = 'Generated on: '.$this->options['generated_at'].' | Statement: '.$this->options['statement_number'];
+        $sheet->setCellValue('A'.$footerRow, $footerText);
         $sheet->mergeCells("A{$footerRow}:{$lastCol}{$footerRow}");
 
-        $sheet->getStyle('A' . $footerRow)->getFont()->setSize(8)->setItalic(true);
-        $sheet->getStyle('A' . $footerRow)->getFont()->getColor()->setRGB('888888');
-        $sheet->getStyle('A' . $footerRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A'.$footerRow)->getFont()->setSize(8)->setItalic(true);
+        $sheet->getStyle('A'.$footerRow)->getFont()->getColor()->setRGB('888888');
+        $sheet->getStyle('A'.$footerRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
     }
 
     /**
