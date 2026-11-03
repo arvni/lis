@@ -24,6 +24,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $patient_ref
  * @property int $qty
  * @property numeric|null $unit_price
+ * @property array<string, float>|null $price_params values a formula or conditional price was worked out from
  * @property Side $added_by
  * @property ItemStatus $status
  * @property int|null $request_id
@@ -36,13 +37,14 @@ use Illuminate\Support\Carbon;
 class PreOrderItem extends Model
 {
     protected $fillable = [
-        'pre_order_id', 'test_id', 'method_test_id', 'patient_ref', 'qty', 'unit_price', 'added_by', 'status',
+        'pre_order_id', 'test_id', 'method_test_id', 'patient_ref', 'qty', 'unit_price', 'price_params', 'added_by', 'status',
         'request_id', 'quotation_id', 'release_key', 'release_purpose',
     ];
 
     protected $casts = [
         'qty' => 'integer',
         'unit_price' => 'decimal:3',
+        'price_params' => 'array',
         'added_by' => Side::class,
         'status' => ItemStatus::class,
         'release_purpose' => ReleasePurpose::class,

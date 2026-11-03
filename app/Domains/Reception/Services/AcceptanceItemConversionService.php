@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domains\Reception\Services;
 
-use App\Domains\Laboratory\Enums\MethodPriceType;
 use App\Domains\Laboratory\Models\MethodTest;
 use App\Domains\Reception\Adapters\LaboratoryAdapter;
 use App\Domains\Reception\Adapters\ReferrerAdapter;
@@ -12,6 +11,7 @@ use App\Domains\Reception\Models\AcceptanceItem;
 use App\Domains\Reception\Repositories\AcceptanceItemConversionRepository;
 use App\Domains\Reception\Repositories\AcceptanceItemRepository;
 use App\Domains\Shared\Helpers\AmountDistributor;
+use App\Domains\Shared\Helpers\PriceFormula;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -413,116 +413,7 @@ class AcceptanceItemConversionService
      */
     private function resolvePrice(mixed $priceType, mixed $staticPrice, array $extra, array $paramValues): float
     {
-        $type = $priceType instanceof MethodPriceType
-            ? $priceType
-            : MethodPriceType::tryFrom((string) $priceType);
-
-        return match ($type) {
-            MethodPriceType::FIX => (float) $staticPrice,
-            MethodPriceType::FORMULATE => $this->evalFormula(
-                $extra['formula'] ?? '',
-                $extra['parameters'] ?? [],
-                $paramValues
-            ),
-            MethodPriceType::CONDITIONAL => $this->evalConditional(
-                $extra['conditions'] ?? [],
-                $extra['parameters'] ?? [],
-                $paramValues
-            ),
-            default => (float) $staticPrice,
-        };
-    }
-
-    /**
-     * Evaluate a math formula by substituting parameter names with their values.
-     * Parameters schema: [{value: 'weight', ...}, ...]
-     * paramValues: ['weight' => 75, ...]
-     */
-    private function evalFormula(string $formula, array $paramSchema, array $paramValues): float
-    {
-        if (blank($formula)) {
-            return 0.0;
-        }
-
-        $expression = $this->substituteParams($formula, $paramSchema, $paramValues);
-
-        if (! $this->isSafeExpression($expression)) {
-            return 0.0;
-        }
-
-        try {
-            $result = eval("return (float)({$expression});");
-
-            return is_numeric($result) ? (float) $result : 0.0;
-        } catch (\Throwable) {
-            return 0.0;
-        }
-    }
-
-    /**
-     * Evaluate conditional pricing: iterate conditions until one matches, then evaluate its value expression.
-     */
-    private function evalConditional(array $conditions, array $paramSchema, array $paramValues): float
-    {
-        foreach ($conditions as $condition) {
-            $condExpr = $this->substituteParams($condition['condition'] ?? '', $paramSchema, $paramValues);
-            $valueExpr = $this->substituteParams($condition['value'] ?? '', $paramSchema, $paramValues);
-
-            if (! $this->isSafeCondition($condExpr) || ! $this->isSafeExpression($valueExpr)) {
-                continue;
-            }
-
-            try {
-                $matches = eval("return (bool)({$condExpr});");
-                if ($matches) {
-                    $result = eval("return (float)({$valueExpr});");
-
-                    return is_numeric($result) ? (float) $result : 0.0;
-                }
-            } catch (\Throwable) {
-                continue;
-            }
-        }
-
-        return 0.0;
-    }
-
-    /**
-     * Replace each parameter name in an expression with its numeric value.
-     * Sorted by name length descending to avoid partial replacements.
-     */
-    private function substituteParams(string $expression, array $paramSchema, array $paramValues): string
-    {
-        // Sort longest names first to prevent shorter names replacing substrings of longer ones
-        usort($paramSchema, fn ($a, $b) => strlen((string) ($b['value'] ?? '')) - strlen((string) ($a['value'] ?? '')));
-
-        foreach ($paramSchema as $param) {
-            $name = (string) ($param['value'] ?? '');
-            if ($name === '') {
-                continue;
-            }
-            $value = (float) ($paramValues[$name] ?? 0);
-            $expression = preg_replace(
-                '/\b'.preg_quote($name, '/').'\b/',
-                (string) $value,
-                $expression
-            );
-        }
-
-        return trim($expression);
-    }
-
-    /** Allow only numeric math expressions (no function calls, no strings). */
-    private function isSafeExpression(string $expr): bool
-    {
-        return (bool) preg_match('/^[\d\s+\-*\/().]+$/', $expr);
-    }
-
-    /** Allow numeric + comparison + logical operators for condition strings. */
-    private function isSafeCondition(string $expr): bool
-    {
-        // Allow: digits, spaces, arithmetic, comparison (< > <= >= == !=), logical (&& ||), parens
-        return (bool) preg_match('/^[\d\s+\-*\/().&|<>=!]+$/', $expr);
+        return PriceFormula::resolve($priceType, $staticPrice, $extra, $paramValues);
     }
 
     /**

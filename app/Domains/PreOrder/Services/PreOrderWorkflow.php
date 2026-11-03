@@ -975,7 +975,7 @@ class PreOrderWorkflow
      * for BION to pick one, unless $required, when it is refused right away. A test with no
      * methods set up is priced at test level.
      *
-     * @return array{method_test_id: int|null, unit_price: string|null}
+     * @return array{method_test_id: int|null, unit_price: string|null, price_params: null}
      */
     private function priced(Test $test, int $referrerId, ?int $methodTestId = null, bool $required = false): array
     {
@@ -992,6 +992,8 @@ class PreOrderWorkflow
         return [
             'method_test_id' => $methodTest?->id,
             'unit_price' => $this->laboratory->unitPrice($test, $referrerId, $methodTest),
+            // Values for a formula or conditional price are entered on the quotation, per method.
+            'price_params' => null,
         ];
     }
 

@@ -35,6 +35,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class PreOrderFinanceTest extends PreOrderTestCase
 {
@@ -247,6 +248,77 @@ class PreOrderFinanceTest extends PreOrderTestCase
         $quotation = $this->quotation($preOrder);
         $this->assertSame('1070.000', (string) $quotation->total);
         $this->assertEqualsCanonicalizing(['bion_added', 'scope'], $quotation->reasons);
+    }
+
+    /** A test priced by embryo count for every center, the way PGT A+PGT M is set up. */
+    private function embryoPricedTest(): int
+    {
+        $test = $this->test('PGTA', null, canBeMain: false);
+        $extra = json_encode([
+            'parameters' => [['id' => 'p1', 'name' => null, 'value' => 'noEmbryos']],
+            'conditions' => [
+                ['id' => 'c1', 'condition' => 'noEmbryos<=1', 'value' => '190*noEmbryos'],
+                ['id' => 'c2', 'condition' => 'noEmbryos<=2', 'value' => '360'],
+                ['id' => 'c3', 'condition' => 'noEmbryos<=3', 'value' => '530'],
+                ['id' => 'c4', 'condition' => 'noEmbryos>=6 && noEmbryos<=12', 'value' => '865'],
+            ],
+        ]);
+        DB::table('tests')->where('id', $test)->update([
+            'referrer_price_type' => 'Conditional', 'referrer_price' => 190, 'referrer_extra' => $extra,
+            'price_type' => 'Conditional', 'price' => 190, 'extra' => $extra,
+        ]);
+
+        return $test;
+    }
+
+    public function test_a_conditional_price_is_worked_out_from_the_values_entered(): void
+    {
+        $pgta = $this->embryoPricedTest();
+        $preOrder = $this->inReview(genes: 2);
+        $this->workflow->addTest($preOrder, $pgta, 'P1', 1, $this->bion());
+        $line = $preOrder->items()->where('test_id', $pgta)->firstOrFail();
+        $this->assertNull($line->unit_price);
+
+        $this->assertRule(fn () => $this->workflow->confirmTests($preOrder->refresh(), $this->bion()), 'Set a price for PGTA');
+        $this->assertRule(fn () => $this->workflow->confirmTests($preOrder->refresh(), $this->bion(), new QuoteDTO(params: [$line->id => ['embryos' => 3]])), 'Enter noEmbryos');
+        $this->assertRule(fn () => $this->workflow->confirmTests($preOrder->refresh(), $this->bion(), new QuoteDTO(params: [$line->id => ['noEmbryos' => 4]])), 'No catalogue price for PGTA matches');
+
+        $preOrder = $this->workflow->confirmTests($preOrder->refresh(), $this->bion(), new QuoteDTO(params: [$line->id => ['noEmbryos' => 3]]));
+
+        $this->assertSame('1480.000', (string) $this->quotation($preOrder)->total);
+        $line->refresh();
+        $this->assertEquals(530, $line->unit_price);
+        $this->assertEquals(['noEmbryos' => 3], $line->price_params);
+    }
+
+    public function test_a_reviewer_without_the_finance_role_can_enter_the_values(): void
+    {
+        $pgta = $this->embryoPricedTest();
+        $preOrder = $this->inReview(genes: 2);
+        $this->workflow->addTest($preOrder, $pgta, 'P1', 1, $this->bion());
+        $line = $preOrder->items()->where('test_id', $pgta)->firstOrFail();
+        $reviewer = User::factory()->create();
+        foreach (['PreOrders.Cases.View', 'PreOrders.Cases.Review'] as $permission) {
+            Permission::findOrCreate($permission);
+            $reviewer->givePermissionTo($permission);
+        }
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        $this->actingAs($reviewer)
+            ->get(route('pre-orders.show', $preOrder->id))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('preOrder.items', function ($items) use ($line) {
+                    $rule = collect($items)->firstWhere('id', $line->id)['price_rule'] ?? null;
+
+                    return $rule !== null && $rule['type'] === 'Conditional' && $rule['parameters'] === ['noEmbryos'];
+                }));
+
+        $this->actingAs($reviewer)
+            ->post(route('pre-orders.confirm', $preOrder->id), ['params' => [['item_id' => $line->id, 'values' => ['noEmbryos' => 2]]]])
+            ->assertSessionHasNoErrors();
+
+        $this->assertEquals(360, $line->refresh()->unit_price);
+        $this->assertSame(PreOrderStage::AWAITING_FINANCE, $preOrder->refresh()->stage);
     }
 
     public function test_without_a_quotation_prices_and_discounts_are_refused(): void

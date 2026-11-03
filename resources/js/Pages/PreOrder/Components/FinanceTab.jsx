@@ -18,6 +18,7 @@ import {
     Typography,
 } from '@mui/material';
 import { patientName } from './stage';
+import { calcPrice } from '@/Services/pricing-utils';
 
 export const FINANCE_COLOR = {
     awaiting_center: 'warning',
@@ -32,20 +33,48 @@ const LINE_COLOR = { approved: 'success', released: 'success', dropped: 'default
 
 const fmt = (iso) => (iso ? new Date(iso).toLocaleDateString() : '—');
 
+const OPEN_LINE = (i) => !['approved', 'released', 'dropped'].includes(i.status);
+
+// The price a formula or conditional catalogue price gives for the values entered so far, as the
+// server will work it out; null until every value is filled in or when no condition matches.
+const rulePrice = (rule, values) => {
+    if (rule.parameters.some((name) => values?.[name] === '' || values?.[name] === undefined)) {
+        return null;
+    }
+    const price = calcPrice(
+        rule.formula ?? '',
+        rule.parameters.map((value) => ({ value })),
+        Object.fromEntries(rule.parameters.map((name) => [name, Number(values[name])])),
+        rule.conditions,
+    );
+    return Number.isFinite(price) && price > 0 ? price : null;
+};
+
 /**
  * The center's financial approval: every quotation on the case with its lines and decision, and
- * BION's quotation form when confirming the tests needs one. Prices come from the catalogue; only
- * the finance team can price a line the catalogue can't, or give a discount.
+ * BION's quotation form when confirming the tests needs one. Prices come from the catalogue: a
+ * formula or conditional price is worked out from the values BION enters (e.g. the number of
+ * embryos), as reception would. Only the finance team can price a line the catalogue can't, or
+ * give a discount.
  */
 export default function FinanceTab({ preOrder, canQuote }) {
     const { can, finance_preview: reasons = [] } = preOrder;
+    const ruled = preOrder.items.filter((i) => i.price_rule && OPEN_LINE(i));
     const unpriced = preOrder.items.filter(
-        (i) => i.unit_price === null && !['approved', 'released'].includes(i.status),
+        (i) => i.unit_price === null && !i.price_rule && OPEN_LINE(i),
     );
     const { data, setData, post, processing, errors, transform } = useForm({
         reason: '',
         discount: '',
         prices: Object.fromEntries(unpriced.map((i) => [i.id, ''])),
+        params: Object.fromEntries(
+            ruled.map((i) => [
+                i.id,
+                Object.fromEntries(
+                    i.price_rule.parameters.map((name) => [name, i.price_params?.[name] ?? '']),
+                ),
+            ]),
+        ),
     });
     const { data: revise, setData: setRevise } = useForm({ reason: '' });
 
@@ -57,6 +86,9 @@ export default function FinanceTab({ preOrder, canQuote }) {
                   .filter(([, price]) => price !== '')
                   .map(([itemId, price]) => ({ item_id: Number(itemId), unit_price: price }))
             : null,
+        params: Object.entries(form.params)
+            .filter(([, values]) => Object.values(values).every((v) => v !== ''))
+            .map(([itemId, values]) => ({ item_id: Number(itemId), values })),
     }));
 
     const send = () => post(route('pre-orders.confirm', preOrder.id), { preserveScroll: true });
@@ -70,6 +102,48 @@ export default function FinanceTab({ preOrder, canQuote }) {
                         Nothing goes to the lab until their approver accepts it.
                     </Alert>
                     <Stack spacing={1}>
+                        {ruled.map((item) => {
+                            const price = rulePrice(item.price_rule, data.params[item.id]);
+                            return (
+                                <Stack
+                                    key={item.id}
+                                    direction="row"
+                                    spacing={1}
+                                    alignItems="center"
+                                    flexWrap="wrap"
+                                    useFlexGap
+                                >
+                                    {item.price_rule.parameters.map((name) => (
+                                        <TextField
+                                            key={name}
+                                            size="small"
+                                            type="number"
+                                            label={`${name} · ${item.test_name}`}
+                                            value={data.params[item.id]?.[name] ?? ''}
+                                            onChange={(e) =>
+                                                setData('params', {
+                                                    ...data.params,
+                                                    [item.id]: {
+                                                        ...data.params[item.id],
+                                                        [name]: e.target.value,
+                                                    },
+                                                })
+                                            }
+                                            inputProps={{ min: 0, step: 1 }}
+                                            sx={{ maxWidth: 260 }}
+                                        />
+                                    ))}
+                                    <Typography
+                                        variant="body2"
+                                        color={price === null ? 'text.secondary' : 'text.primary'}
+                                    >
+                                        {price === null
+                                            ? 'Enter the values to price this test'
+                                            : `Unit price ${price.toFixed(3)} (catalogue)`}
+                                    </Typography>
+                                </Stack>
+                            );
+                        })}
                         {canQuote &&
                             unpriced.map((item) => (
                                 <TextField
