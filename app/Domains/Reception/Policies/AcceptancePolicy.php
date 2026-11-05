@@ -140,4 +140,18 @@ class AcceptancePolicy
     {
         return $authUser->can("Reception.Acceptances.Check Status");
     }
+
+    /**
+     * Re-send a referred acceptance to its provider. Only an acceptance with a
+     * referrer and at least one reportable item has anything to send.
+     */
+    public function syncWithProvider(User $authUser, Acceptance $acceptance): bool
+    {
+        if (! $authUser->can("Reception.Acceptances.Sync With Provider")) {
+            return false;
+        }
+
+        return $acceptance->referrer_id !== null
+            && $acceptance->acceptanceItems()->where('reportless', false)->exists();
+    }
 }

@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Box, Divider } from '@mui/material';
-import { Sync } from '@mui/icons-material';
+import { CloudSync, Sync } from '@mui/icons-material';
 import React, { useMemo, useState } from 'react';
 import PatientInfo from '@/Pages/Patient/Components/PatientInfo';
 import Prescription from './Components/Prescription';
@@ -28,6 +28,7 @@ const Show = ({
     status,
     canPrintBarcode,
     canCheckStatus,
+    canSyncWithProvider = false,
     canUpdatePriority,
     canEditItemPrices,
     canViewFinancials = false,
@@ -53,6 +54,22 @@ const Show = ({
     const [promoteErrors, setPromoteErrors] = useState(null); // server validation errors
     const [editingPrices, setEditingPrices] = useState(false);
     const [editItem, setEditItem] = useState({ open: false, mode: null, test: null, panel: null });
+    const [syncing, setSyncing] = useState(false);
+
+    const handleSyncWithProvider = () => {
+        router.post(
+            route('acceptances.syncWithProvider', acceptance.id),
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+                only: ['success', 'status', 'errors'],
+                onStart: () => setSyncing(true),
+                onFinish: () => setSyncing(false),
+                onError: reportErrors,
+            },
+        );
+    };
 
     const handleEditTest = (id) => {
         const test = (acceptance?.acceptance_items?.tests || []).find((t) => t.id === id);
@@ -209,6 +226,17 @@ const Show = ({
                             }}
                         >
                             Check Status
+                        </Button>
+                    ),
+                    canSyncWithProvider && (
+                        <Button
+                            key="sync-provider"
+                            variant="outlined"
+                            startIcon={<CloudSync />}
+                            disabled={syncing}
+                            onClick={handleSyncWithProvider}
+                        >
+                            {syncing ? 'Syncing…' : 'Sync with Provider'}
                         </Button>
                     ),
                 ]}
