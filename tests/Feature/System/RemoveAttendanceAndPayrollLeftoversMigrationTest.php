@@ -22,6 +22,8 @@ class RemoveAttendanceAndPayrollLeftoversMigrationTest extends TestCase
         DB::table('workflow_steps')->insert(['workflow_template_id' => $leaveId, 'name' => 'Manager', 'sort_order' => 0]);
         $purchase = WorkflowTemplate::create(['name' => 'Purchases', 'request_type' => 'PURCHASE']);
 
+        // Later migrations seed permissions of their own; only the ones made here are checked.
+        $seeded = Permission::pluck('name')->all();
         $role = Role::findOrCreate('Supervisor', 'web');
         foreach (['Attendance', 'Attendance.Shifts.List Shifts', 'Payroll.Salary Slips.Issue Salary Slips', 'Inventory.Items.List Items'] as $name) {
             $role->givePermissionTo(Permission::findOrCreate($name, 'web'));
@@ -34,7 +36,7 @@ class RemoveAttendanceAndPayrollLeftoversMigrationTest extends TestCase
         $this->assertDatabaseMissing('workflow_templates', ['id' => $leaveId]);
         $this->assertDatabaseMissing('workflow_steps', ['workflow_template_id' => $leaveId]);
         $this->assertModelExists($purchase);
-        $this->assertSame(['Inventory.Items.List Items'], Permission::pluck('name')->all());
+        $this->assertSame(['Inventory.Items.List Items'], Permission::whereNotIn('name', $seeded)->pluck('name')->all());
         $this->assertSame(['Inventory.Items.List Items'], $role->fresh()->permissions->pluck('name')->all());
         $this->assertCount(0, $user->fresh()->permissions);
     }
