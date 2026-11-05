@@ -80,4 +80,15 @@ class ReferrerAdapter
     {
         $this->referrerOrderService->syncReportedAcceptance($acceptance);
     }
+
+    /**
+     * Send an acceptance to its provider again: re-send its referrer orders, or create one
+     * when it has none.
+     *
+     * @return array{action: string, count: int, reason?: string}
+     */
+    public function syncOrCreateForAcceptance(Acceptance $acceptance): array
+    {
+        return $this->referrerOrderService->syncOrCreateForAcceptance($acceptance);
+    }
 }

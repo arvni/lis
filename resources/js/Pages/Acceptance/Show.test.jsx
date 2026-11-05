@@ -1,13 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { router } from '@inertiajs/react';
 import { useSnackbar } from 'notistack';
 import Show from '@/Pages/Acceptance/Show';
 import TestItemsSection from '@/Pages/Acceptance/Show/TestItemsSection';
 import Payment from '@/Pages/Acceptance/Components/Payment';
+import PageHeader from '@/Components/PageHeader.jsx';
 
 vi.mock('@inertiajs/react', () => ({
-    router: { put: vi.fn() },
+    router: { put: vi.fn(), post: vi.fn() },
     Head: () => null,
 }));
 
@@ -19,7 +20,10 @@ vi.mock('@/Layouts/AuthenticatedLayout', () => ({ default: () => null }));
 vi.mock('@/Pages/Patient/Components/PatientInfo', () => ({ default: () => null }));
 vi.mock('@/Pages/Acceptance/Components/Prescription', () => ({ default: () => null }));
 vi.mock('@/Pages/Acceptance/Components/Payment', () => ({ default: vi.fn(() => null) }));
-vi.mock('@/Components/PageHeader.jsx', () => ({ default: () => null }));
+// Render only the header's actions, so its buttons can be clicked.
+vi.mock('@/Components/PageHeader.jsx', () => ({
+    default: vi.fn(({ actions }) => <div>{actions}</div>),
+}));
 vi.mock('@/Components/InlineTagManager', () => ({ default: () => null }));
 vi.mock('@/Pages/Acceptance/Show/StatusChip', () => ({ default: () => null }));
 vi.mock('@/Pages/Acceptance/Show/PriorityChanger', () => ({ default: () => null }));
@@ -120,5 +124,29 @@ describe('Acceptance/Show eject panel', () => {
         renderShow().onEjectPanel({ acceptanceItems: [] });
 
         expect(router.put).not.toHaveBeenCalled();
+    });
+});
+
+describe('Acceptance/Show sync with provider', () => {
+    it('is hidden unless the acceptance can be synced', () => {
+        renderShow();
+
+        expect(screen.queryByText('Sync with Provider')).toBeNull();
+        expect(PageHeader).toHaveBeenCalled();
+    });
+
+    it('posts to the sync endpoint and reports why nothing was sent', () => {
+        renderShow({ canSyncWithProvider: true });
+
+        fireEvent.click(screen.getByText('Sync with Provider'));
+
+        const [url, data, options] = vi.mocked(router.post).mock.calls[0];
+        expect(url).toBe('/acceptances.syncWithProvider/5');
+        expect(data).toEqual({});
+        options.onError({ sync: 'Nothing on this acceptance is ready to send yet.' });
+        expect(enqueueSnackbar).toHaveBeenCalledWith(
+            'Nothing on this acceptance is ready to send yet.',
+            { variant: 'error' },
+        );
     });
 });

@@ -747,6 +747,16 @@ class AcceptanceService
         return $acceptance->fresh();
     }
 
+    /**
+     * Send a referred acceptance to its provider again, from the acceptance page.
+     *
+     * @return array{action: string, count: int, reason?: string}
+     */
+    public function syncWithProvider(Acceptance $acceptance): array
+    {
+        return $this->referrerAdapter->syncOrCreateForAcceptance($acceptance);
+    }
+
     public function checkAndUpdateAcceptanceStatus(Acceptance $acceptance): void
     {
         $this->statusService->checkAndUpdateAcceptanceStatus($acceptance);

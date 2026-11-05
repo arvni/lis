@@ -190,6 +190,7 @@ class RoleAndPermissionSeeder extends Seeder
                     'Toggle Reportless Acceptance Item',
                     'Toggle Sampleless Acceptance Item',
                     'Check Status',
+                    'Sync With Provider',
                     'Update Priority',
                     'Edit Invoiced Acceptance',
                     'Edit Item Prices',

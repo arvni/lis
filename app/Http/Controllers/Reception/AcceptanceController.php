@@ -177,6 +177,7 @@ class AcceptanceController extends Controller
             "canEdit" => Gate::allows("update", $acceptance),
             "canPrintBarcode" => $acceptance->status === AcceptanceStatus::PROCESSING || $acceptance->status === AcceptanceStatus::REPORTED || $acceptance->status === AcceptanceStatus::WAITING_FOR_ENTERING || $acceptance->status === AcceptanceStatus::POOLING,
             "canCheckStatus" => Gate::allows("checkStatus", $acceptance),
+            "canSyncWithProvider" => Gate::allows("syncWithProvider", $acceptance),
             "canUpdatePriority" => Gate::allows("Reception.Acceptances.Update Priority"),
             // Editing prices you are not allowed to see makes no sense, so the
             // editor is offered only alongside the amounts themselves. The

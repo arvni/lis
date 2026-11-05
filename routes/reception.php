@@ -57,6 +57,7 @@ use App\Http\Controllers\Reception\UpdateAcceptanceItemController;
 use App\Http\Controllers\Reception\UpdateAcceptanceItemPricesController;
 use App\Http\Controllers\Reception\UpdateAcceptancePriorityController;
 use App\Http\Controllers\Reception\UpdatePatientMetaController;
+use App\Http\Controllers\Reception\SyncAcceptanceWithProviderController;
 use App\Http\Controllers\Reception\WaitingForPublishController;
 use App\Http\Controllers\ShowSectionController;
 use Illuminate\Support\Facades\Route;
@@ -90,6 +91,7 @@ Route::group(["prefix" => "reception"], function () {
     Route::resource("tat-alert-rules", TatAlertRuleController::class)->except("create", "edit", "show");
     Route::post("acceptances/{acceptance}/pooling", AddPoolingController::class)->name("acceptances.addPooling");
     Route::put("acceptances/{acceptance}/check-status", CheckAcceptanceStatusController::class)->name("acceptances.checkStatus");
+    Route::post("acceptances/{acceptance}/sync-provider", SyncAcceptanceWithProviderController::class)->name("acceptances.syncWithProvider");
     Route::post("acceptances/{acceptance}/prescription", AcceptancePrescriptionController::class)
         ->name("acceptances.prescription");
     Route::get("patients/{patient}/acceptances/create", [AcceptanceController::class, "create"])->name("acceptances.create");
