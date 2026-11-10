@@ -257,19 +257,7 @@ const TransactionEdit = () => {
                 />
 
                 <Card sx={{ mb: 3 }}>
-                    <CardHeader
-                        title="Line Items"
-                        action={
-                            <Button
-                                startIcon={<AddIcon />}
-                                size="small"
-                                variant="outlined"
-                                onClick={addLine}
-                            >
-                                Add Line
-                            </Button>
-                        }
-                    />
+                    <CardHeader title="Line Items" />
                     <CardContent sx={{ p: lineItems.length ? 0 : undefined, overflowX: 'auto' }}>
                         <LineItemsTable
                             lineItems={lineItems}
@@ -290,6 +278,16 @@ const TransactionEdit = () => {
                             onRemove={removeLine}
                         />
                     </CardContent>
+                    <Box sx={{ p: 2 }}>
+                        <Button
+                            startIcon={<AddIcon />}
+                            size="small"
+                            variant="outlined"
+                            onClick={addLine}
+                        >
+                            Add Line
+                        </Button>
+                    </Box>
                 </Card>
 
                 <Box sx={{ display: 'flex', gap: 2 }}>

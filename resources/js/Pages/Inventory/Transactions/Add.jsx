@@ -260,19 +260,7 @@ const TransactionAdd = () => {
                 />
 
                 <Card sx={{ mb: 3 }}>
-                    <CardHeader
-                        title="Line Items"
-                        action={
-                            <Button
-                                startIcon={<AddIcon />}
-                                size="small"
-                                variant="outlined"
-                                onClick={addLine}
-                            >
-                                Add Line
-                            </Button>
-                        }
-                    />
+                    <CardHeader title="Line Items" />
                     <CardContent>
                         {lineItems.length === 0 ? (
                             <Alert severity="info">
@@ -314,6 +302,16 @@ const TransactionAdd = () => {
                             </Alert>
                         )}
                     </CardContent>
+                    <Box sx={{ px: 2, pb: 2 }}>
+                        <Button
+                            startIcon={<AddIcon />}
+                            size="small"
+                            variant="outlined"
+                            onClick={addLine}
+                        >
+                            Add Line
+                        </Button>
+                    </Box>
                 </Card>
 
                 <Box sx={{ display: 'flex', gap: 2 }}>

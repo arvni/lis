@@ -46,6 +46,7 @@ readonly class StockCardService
                 'location' => $line->location?->label,
                 'lot_number' => $line->lot_number,
                 'brand' => $line->brand,
+                'cat_no' => $line->cat_no,
                 'quantity' => $line->quantity,
                 'unit' => $line->unit->name,
                 'base_units' => abs($delta),

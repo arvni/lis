@@ -210,6 +210,7 @@ const StockCard = () => {
                                         <TableCell>Location</TableCell>
                                         <TableCell>Lot #</TableCell>
                                         <TableCell>Brand</TableCell>
+                                        <TableCell>Cat No</TableCell>
                                         <TableCell align="right">Qty (base)</TableCell>
                                         <TableCell align="right">Balance</TableCell>
                                     </TableRow>
@@ -283,6 +284,14 @@ const StockCard = () => {
                                                 </Typography>
                                             </TableCell>
                                             <TableCell>{e.brand || '—'}</TableCell>
+                                            <TableCell>
+                                                <Typography
+                                                    variant="body2"
+                                                    sx={{ fontFamily: 'monospace' }}
+                                                >
+                                                    {e.cat_no || '—'}
+                                                </Typography>
+                                            </TableCell>
                                             <TableCell align="right">
                                                 <Typography
                                                     variant="body2"
@@ -306,7 +315,7 @@ const StockCard = () => {
                                     ))}
                                     {entries.length === 0 && (
                                         <TableRow>
-                                            <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
+                                            <TableCell colSpan={11} align="center" sx={{ py: 4 }}>
                                                 <Typography color="text.secondary">
                                                     No approved transactions found.
                                                 </Typography>

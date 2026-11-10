@@ -98,6 +98,18 @@ class StockCardServiceTest extends TestCase
         $this->assertEqualsWithDelta(70.0, (float) $card['total_base'], 0.001);
     }
 
+    public function test_get_stock_card_shows_each_lines_catalog_number(): void
+    {
+        $item = $this->makeItem();
+        $this->makeTxLine($item, TransactionType::ENTRY, 10);
+        $this->makeTxLine($item, TransactionType::ENTRY, 5);
+        StockTransactionLine::query()->where('item_id', $item->id)->orderBy('id')->first()->update(['cat_no' => 'CAT-123']);
+
+        $entries = $this->service->getStockCard($item->id)['entries'];
+
+        $this->assertSame(['CAT-123', null], array_column($entries, 'cat_no'));
+    }
+
     public function test_get_stock_card_empty_without_approved_transactions(): void
     {
         $item = $this->makeItem();
