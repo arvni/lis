@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Paper, useMediaQuery, useTheme } from '@mui/material';
+import { Alert, Box, Link, Paper, useMediaQuery, useTheme } from '@mui/material';
 import PageHeader from '@/Components/PageHeader.jsx';
 import { STEPS, TYPE_META } from './Form/constants';
 import Sidebar from './Form/Sidebar';
@@ -11,6 +11,7 @@ import SamplesStep from './Form/SamplesStep';
 import PricingStep from './Form/PricingStep';
 import MethodsStep from './Form/MethodsStep';
 import DescriptionStep from './Form/DescriptionStep';
+import { firstErrorStep as findErrorStep, listErrors, stepErrorKeys } from './Form/errors';
 
 export default function TestForm({
     data = {},
@@ -39,7 +40,8 @@ export default function TestForm({
     const onField = (e) =>
         set(e.target.name, e.target.type === 'checkbox' ? e.target.checked : e.target.value);
 
-    const stepHasError = (s) => (s.errorFields || []).some((f) => Boolean(errors?.[f]));
+    const stepHasError = (s) => stepErrorKeys(s, errors).length > 0;
+    const errorList = listErrors(steps, errors);
 
     // ── type change ────────────────────────────────────────────────────────
     const handleTypeChange = (_, v) => {
@@ -85,7 +87,13 @@ export default function TestForm({
             setStep(firstErrorStep);
             return;
         }
-        submit();
+        // The server may reject a field on another step (e.g. test groups): show that step.
+        submit({
+            onError: (serverErrors) => {
+                const index = findErrorStep(steps, serverErrors);
+                if (index >= 0) setStep(index);
+            },
+        });
     };
 
     const nav = (
@@ -169,6 +177,29 @@ export default function TestForm({
 
                     <Paper elevation={0} variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
                         <StepHeader meta={meta} current={current} step={step} steps={steps} />
+                        {errorList.length > 0 && (
+                            <Alert severity="error" sx={{ mb: 2 }}>
+                                Not saved. Please fix:
+                                <Box component="ul" sx={{ m: 0, pl: 2.5 }}>
+                                    {errorList.map(({ key, message, stepIndex }) => (
+                                        <li key={key}>
+                                            {stepIndex >= 0 && stepIndex !== step ? (
+                                                <Link
+                                                    component="button"
+                                                    type="button"
+                                                    color="inherit"
+                                                    onClick={() => setStep(stepIndex)}
+                                                >
+                                                    {steps[stepIndex].label}
+                                                </Link>
+                                            ) : null}
+                                            {stepIndex >= 0 && stepIndex !== step ? ': ' : ''}
+                                            {message}
+                                        </li>
+                                    ))}
+                                </Box>
+                            </Alert>
+                        )}
                         {renderContent()}
                     </Paper>
                 </Box>

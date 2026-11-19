@@ -10,6 +10,20 @@ import {
 } from '@mui/icons-material';
 
 // ─── step config per type ─────────────────────────────────────────────────────
+// errorFields: every request field a step edits, so a server error lands on its step.
+
+const BASIC_FIELDS = [
+    'fullName',
+    'name',
+    'code',
+    'type',
+    'status',
+    'can_merge',
+    'test_groups',
+    'request_form',
+    'consent_form',
+    'instruction',
+];
 
 export const STEPS = {
     TEST: [
@@ -17,7 +31,7 @@ export const STEPS = {
             key: 'basic',
             label: 'Basic Info',
             icon: <Assignment fontSize="small" />,
-            errorFields: ['fullName', 'name', 'code', 'report_templates'],
+            errorFields: [...BASIC_FIELDS, 'report_templates'],
         },
         {
             key: 'samples',
@@ -35,7 +49,7 @@ export const STEPS = {
             key: 'description',
             label: 'Description',
             icon: <Description fontSize="small" />,
-            errorFields: [],
+            errorFields: ['description'],
         },
     ],
     SERVICE: [
@@ -43,7 +57,7 @@ export const STEPS = {
             key: 'basic',
             label: 'Basic Info',
             icon: <Assignment fontSize="small" />,
-            errorFields: ['fullName', 'name', 'code'],
+            errorFields: BASIC_FIELDS,
         },
         {
             key: 'methods',
@@ -55,7 +69,7 @@ export const STEPS = {
             key: 'description',
             label: 'Description',
             icon: <Description fontSize="small" />,
-            errorFields: [],
+            errorFields: ['description'],
         },
     ],
     PANEL: [
@@ -63,13 +77,20 @@ export const STEPS = {
             key: 'basic',
             label: 'Basic Info',
             icon: <Assignment fontSize="small" />,
-            errorFields: ['fullName', 'name', 'code'],
+            errorFields: BASIC_FIELDS,
         },
         {
             key: 'pricing',
             label: 'Pricing',
             icon: <Money fontSize="small" />,
-            errorFields: ['price', 'referrer_price'],
+            errorFields: [
+                'price',
+                'referrer_price',
+                'price_type',
+                'referrer_price_type',
+                'extra',
+                'referrer_extra',
+            ],
         },
         {
             key: 'methods',
@@ -81,7 +102,7 @@ export const STEPS = {
             key: 'description',
             label: 'Description',
             icon: <Description fontSize="small" />,
-            errorFields: [],
+            errorFields: ['description'],
         },
     ],
 };

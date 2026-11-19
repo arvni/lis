@@ -183,7 +183,7 @@ const PublishingQueue = () => {
                             type: 'whatsapp',
                             icon: <WhatsApp />,
                             color: '#25D366',
-                            value: howReport.whatsappNumber,
+                            value: howReport.whatsappNumber || row.patient?.phone || 'WhatsApp',
                         });
                     }
                     if (howReport?.email) {

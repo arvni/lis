@@ -2,6 +2,7 @@
 
 namespace App\Domains\Reception\Requests;
 
+use App\Domains\Reception\Traits\ValidatesReportDelivery;
 use App\Domains\Laboratory\Enums\TestType;
 use App\Domains\Reception\Enums\AcceptanceStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -12,6 +13,8 @@ use Illuminate\Validation\Validator;
 
 class UpdateAcceptanceRequest extends FormRequest
 {
+    use ValidatesReportDelivery;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -201,52 +204,8 @@ class UpdateAcceptanceRequest extends FormRequest
                 // Report Information
                 $rules['referred'] = 'boolean';
 
-                // Ensure at least one delivery method is selected when not referred
-                $rules['howReport'] = [
-                    $this->checkIstthereAnyTestOnRequest() ? 'nullable' : 'required_if:referred,false',
-                    function ($attribute, $value, $fail) {
-                        if ($this->input('referred') === false &&
-                            (!isset($value['print']) && !isset($value['email']) && !isset($value['whatsapp']))) {
-                            $fail('Please select at least one report delivery method.');
-                        }
-                    },
-                ];
-
-                // Print report validation
-                $rules['howReport.print'] = 'boolean';
-                $rules['howReport.printReceiver'] = [
-                    'required_if:howReport.print,true',
-                    'string',
-                    'max:255',
-                ];
-
-                // Email report validation
-                $rules['howReport.email'] = 'boolean';
-                $rules['howReport.emailAddress'] = [
-                    'required_if:howReport.email,true',
-                    'email:rfc,dns',
-                    'max:255',
-                ];
-
-                // WhatsApp report validation
-                $rules['howReport.whatsapp'] = 'boolean';
-                $rules['howReport.whatsappNumber'] = [
-                    'required_if:howReport.whatsapp,true',
-                    'string',
-                    'max:20',
-                    'regex:/^[+\d\s\-()]{7,20}$/',
-                ];
-
-                // Send to referrer option
-                $rules['howReport.sendToReferrer'] = [
-                    'boolean',
-                    'nullable',
-                    function ($attribute, $value, $fail) {
-                        if ($value === true && $this->input('referred') === false) {
-                            $fail('Cannot send to referrer when not referred.');
-                        }
-                    },
-                ];
+                // How to Notify: at least one ticked method when not referred
+                $rules = array_merge($rules, $this->reportDeliveryRules([$this->checkIstthereAnyTestOnRequest() ? 'nullable' : 'required_if:referred,false']));
                 break;
 
             case 5: // Review & Submit (Full validation)
@@ -260,53 +219,8 @@ class UpdateAcceptanceRequest extends FormRequest
                 // Report Information
                 $rules['referred'] = 'boolean';
 
-                // Ensure at least one delivery method is selected when not referred
-                $rules['howReport'] = [
-                    Rule::excludeIf(fn() => $this->checkIstthereAnyTestOnRequest()),
-                    'required_if:referred,false',
-                    function ($attribute, $value, $fail) {
-                        if ($this->input('referred') === false &&
-                            (!isset($value['print']) && !isset($value['email']) && !isset($value['whatsapp']))) {
-                            $fail('Please select at least one report delivery method.');
-                        }
-                    },
-                ];
-
-                // Print report validation
-                $rules['howReport.print'] = 'boolean';
-                $rules['howReport.printReceiver'] = [
-                    'required_if:howReport.print,true',
-                    'string',
-                    'max:255',
-                ];
-
-                // Email report validation
-                $rules['howReport.email'] = 'boolean';
-                $rules['howReport.emailAddress'] = [
-                    'required_if:howReport.email,true',
-                    'email:rfc,dns',
-                    'max:255',
-                ];
-
-                // WhatsApp report validation
-                $rules['howReport.whatsapp'] = 'boolean';
-                $rules['howReport.whatsappNumber'] = [
-                    'required_if:howReport.whatsapp,true',
-                    'string',
-                    'max:20',
-                    'regex:/^[+\d\s\-()]{7,20}$/',
-                ];
-
-                // Send to referrer option
-                $rules['howReport.sendToReferrer'] = [
-                    'boolean',
-                    'nullable',
-                    function ($attribute, $value, $fail) {
-                        if ($value === true && $this->input('referred') === false) {
-                            $fail('Cannot send to referrer when not referred.');
-                        }
-                    },
-                ];
+                // How to Notify: at least one ticked method when not referred
+                $rules = array_merge($rules, $this->reportDeliveryRules([Rule::excludeIf(fn() => $this->checkIstthereAnyTestOnRequest()), 'required_if:referred,false']));
 
 
                 // Referral Information

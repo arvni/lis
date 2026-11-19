@@ -7,7 +7,7 @@ const Edit = ({ test }) => {
         ...test,
         _method: 'put',
     });
-    const handleSubmit = () => post(route('tests.update', test.id));
+    const handleSubmit = (options) => post(route('tests.update', test.id), options);
     const handleCancel = () => router.visit(route('tests.index'));
     return (
         <>
