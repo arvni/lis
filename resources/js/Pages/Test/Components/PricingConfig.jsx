@@ -20,6 +20,7 @@ import {
 import { Add, Delete, PlayArrow } from '@mui/icons-material';
 import * as mathjs from 'mathjs';
 import { makeId } from '@/Services/helper.js';
+import CombineOnInvoiceSwitch from '@/Components/CombineOnInvoiceSwitch';
 
 export default function PricingConfig({
     priceType = 'Fix',
@@ -37,6 +38,7 @@ export default function PricingConfig({
     const parameters = useMemo(() => extra?.parameters ?? [], [extra?.parameters]);
     const formula = useMemo(() => extra?.formula ?? '', [extra?.formula]);
     const conditions = useMemo(() => extra?.conditions ?? [], [extra?.conditions]);
+    const combineOnInvoice = Boolean(extra?.combine_on_invoice);
     const paramNames = useMemo(
         () => parameters.map((p) => p.value?.trim()).filter(Boolean),
         [parameters],
@@ -184,6 +186,14 @@ export default function PricingConfig({
         </Box>
     );
 
+    const renderCombineOnInvoice = () =>
+        paramNames.length > 0 && (
+            <CombineOnInvoiceSwitch
+                checked={combineOnInvoice}
+                onChange={(on) => patch({ combine_on_invoice: on })}
+            />
+        );
+
     const renderTester = () => {
         if (!paramNames.length) return null;
         return (
@@ -280,6 +290,7 @@ export default function PricingConfig({
             {priceType === 'Formulate' && (
                 <Stack gap={2.5}>
                     {renderParams()}
+                    {renderCombineOnInvoice()}
 
                     {paramNames.length > 0 && (
                         <Box
@@ -328,6 +339,7 @@ export default function PricingConfig({
             {priceType === 'Conditional' && (
                 <Stack gap={2.5}>
                     {renderParams()}
+                    {renderCombineOnInvoice()}
 
                     <Box>
                         <Box

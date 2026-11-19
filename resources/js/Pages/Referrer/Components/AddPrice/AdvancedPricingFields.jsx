@@ -2,6 +2,7 @@ import { Alert, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import ParametersField from '@/Components/ParametersField';
 import ConditionsField from '@/Components/ConditionsField';
+import CombineOnInvoiceSwitch from '@/Components/CombineOnInvoiceSwitch';
 
 // Shared advanced (Formulate / Conditional) pricing configuration block
 const AdvancedPricingFields = ({
@@ -10,10 +11,16 @@ const AdvancedPricingFields = ({
     formula,
     conditions,
     formulaError,
+    combineOnInvoice,
     onParametersChange,
     onFormulaChange,
     onConditionsChange,
+    onCombineOnInvoiceChange,
 }) => {
+    const parameterNames = [
+        ...new Set((parameters || []).map((p) => p?.value?.trim()).filter(Boolean)),
+    ];
+
     return (
         <>
             <Grid size={12}>
@@ -31,6 +38,15 @@ const AdvancedPricingFields = ({
                     name="parameters"
                 />
             </Grid>
+
+            {parameterNames.length > 0 && (
+                <Grid size={12}>
+                    <CombineOnInvoiceSwitch
+                        checked={combineOnInvoice}
+                        onChange={onCombineOnInvoiceChange}
+                    />
+                </Grid>
+            )}
 
             {priceType === 'Formulate' ? (
                 <Grid size={12}>

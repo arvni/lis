@@ -62,6 +62,20 @@ class ReferrerTestRepository
         return ReferrerTest::where('referrer_id', $referrerId)->where('test_id', $testId)->first();
     }
 
+    /**
+     * One referrer's price list rows for the given tests, in a single query.
+     *
+     * @param  list<int>  $testIds
+     * @return Collection<int, ReferrerTest>
+     */
+    public function forReferrerAndTests(int $referrerId, array $testIds): Collection
+    {
+        return ReferrerTest::query()
+            ->where('referrer_id', $referrerId)
+            ->whereIn('test_id', $testIds)
+            ->get();
+    }
+
     public function store(array $data): ReferrerTest
     {
         $referrerTest = ReferrerTest::create($data);

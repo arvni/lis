@@ -98,6 +98,10 @@ class UpdateReferrerTestRequest extends FormRequest
                 'nullable',
                 'string'
             ],
+            'methods.*.extra.combine_on_invoice' => [
+                'nullable',
+                'boolean'
+            ],
         ];
     }
 

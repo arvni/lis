@@ -52,6 +52,19 @@ final class PriceFormula
     }
 
     /**
+     * Whether a setting is switched to "combine on invoice": every time the test or panel is
+     * added goes on one invoice line (qty 1) with its parameters summed, e.g. "No Embryos=9".
+     * Opt-in per test or panel, and only meaningful for a price that has parameters.
+     *
+     * @param  array<string, mixed>  $extra
+     */
+    public static function combinesOnInvoice(array $extra): bool
+    {
+        return in_array($extra['combine_on_invoice'] ?? false, [true, 1, '1', 'true'], true)
+            && self::parameters($extra) !== [];
+    }
+
+    /**
      * @param  array<int, mixed>  $paramSchema
      * @param  array<string, mixed>  $values
      */

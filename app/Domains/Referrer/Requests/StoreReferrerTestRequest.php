@@ -61,6 +61,7 @@ class StoreReferrerTestRequest extends FormRequest
             'methods.*.extra.conditions.*.value' => ['nullable', 'string'],
             // Without a rule, validated() drops the key, so a method formula never saved on create.
             'methods.*.extra.formula' => ['nullable', 'string'],
+            'methods.*.extra.combine_on_invoice' => ['nullable', 'boolean'],
         ];
     }
 

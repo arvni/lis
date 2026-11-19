@@ -178,4 +178,33 @@ class PriceFormulaTest extends TestCase
         $this->assertSame(0.0, PriceFormula::resolve('Conditional', 190, $extra, ['noEmbryos' => 13]));
         $this->assertSame(['noEmbryos'], PriceFormula::parameters($extra));
     }
+
+    // ---------------------------------------------------------------------
+    // combinesOnInvoice — opt-in per setting, only for a price with parameters.
+    // ---------------------------------------------------------------------
+
+    public function test_combines_on_invoice_is_off_unless_switched_on(): void
+    {
+        $this->assertFalse(PriceFormula::combinesOnInvoice(['parameters' => [['value' => 'noEmbryos']]]));
+        $this->assertFalse(PriceFormula::combinesOnInvoice([]));
+        $this->assertFalse(PriceFormula::combinesOnInvoice([
+            'parameters' => [['value' => 'noEmbryos']],
+            'combine_on_invoice' => false,
+        ]));
+    }
+
+    public function test_combines_on_invoice_when_switched_on(): void
+    {
+        foreach ([true, 1, '1', 'true'] as $on) {
+            $this->assertTrue(PriceFormula::combinesOnInvoice([
+                'parameters' => [['value' => 'noEmbryos']],
+                'combine_on_invoice' => $on,
+            ]), var_export($on, true));
+        }
+    }
+
+    public function test_combines_on_invoice_needs_parameters_to_sum(): void
+    {
+        $this->assertFalse(PriceFormula::combinesOnInvoice(['parameters' => [], 'combine_on_invoice' => true]));
+    }
 }

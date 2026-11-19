@@ -46,6 +46,8 @@ export default function TestForm({
         setData((p) => ({
             ...p,
             type: v,
+            // Panels merge on the invoice only when switched on deliberately.
+            ...(v === 'PANEL' ? { can_merge: false } : {}),
             test_groups: [],
             report_templates: [],
             parameters: [],
