@@ -22,7 +22,7 @@ const Add = () => {
         referrer_extra: {},
         can_merge: true,
     });
-    const handleSubmit = () => post(route('tests.store'));
+    const handleSubmit = (options) => post(route('tests.store'), options);
     const handleCancel = () => router.visit(route('tests.index'));
     return (
         <>
