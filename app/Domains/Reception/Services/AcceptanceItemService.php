@@ -279,6 +279,11 @@ class AcceptanceItemService
     /**
      * Build the grouped pooling-items payload (tests + panels) for an acceptance.
      *
+     * Only items that carry samples can be pooled. Every earlier pooling round
+     * leaves sampleless copies (a panel copy under its own panel_id), so those
+     * are skipped — otherwise the same test/panel is offered once per round and
+     * picking a copy bumps nothing on the original.
+     *
      * @return array<int, array<string, mixed>>
      */
     public function buildPoolingItems(Acceptance $acceptance): array
@@ -307,6 +312,12 @@ class AcceptanceItemService
                 }
 
                 $panelItems = $items->where('panel_id', $panelId);
+                // A group with no sampled item is an earlier round's pooling
+                // copy. The price below still sums the whole group, so a
+                // sampleless member of a real panel keeps its share.
+                if ($panelItems->every(fn (AcceptanceItem $sub) => (bool) $sub->sampleless)) {
+                    continue;
+                }
 
                 $panels[$panelId] = [
                     'type'      => 'panel',
@@ -336,6 +347,10 @@ class AcceptanceItemService
                     ],
                 ];
             } else {
+                if ($item->sampleless) {
+                    continue;
+                }
+
                 $testId = $test->id;
                 if (isset($tests[$testId])) {
                     continue;

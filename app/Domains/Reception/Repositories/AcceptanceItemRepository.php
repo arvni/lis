@@ -195,6 +195,10 @@ class AcceptanceItemRepository
     /**
      * The original (non-pooling) acceptance items for an acceptance, by id.
      *
+     * Pooling copies are always sampleless, and a referred acceptance's copies
+     * lose their is_pooling flag once the referrer order is refreshed — so the
+     * sampleless check is what reliably keeps a copy from being picked up here.
+     *
      * @param  array<int, int|string>  $ids
      * @return Collection<int, AcceptanceItem>
      */
@@ -203,11 +207,13 @@ class AcceptanceItemRepository
         return AcceptanceItem::whereIn('id', $ids)
             ->where('acceptance_id', $acceptance->id)
             ->where('is_pooling', false)
+            ->where('sampleless', false)
             ->get();
     }
 
     /**
-     * An acceptance's items with method/test relations loaded, for building the
+     * An acceptance's items with method/test relations loaded, in creation
+     * order (originals before their pooling copies), for building the
      * pooling-items payload.
      *
      * @return Collection<int, AcceptanceItem>
@@ -216,6 +222,7 @@ class AcceptanceItemRepository
     {
         return AcceptanceItem::where('acceptance_id', $acceptance->id)
             ->with(['methodTest.test', 'methodTest.method'])
+            ->orderBy('id')
             ->get();
     }
 
