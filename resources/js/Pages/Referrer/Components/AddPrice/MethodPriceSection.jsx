@@ -79,7 +79,9 @@ const MethodPriceSection = ({
                         <Grid size={6}>
                             <PriceTypeSelect
                                 value={methodData.price_type}
-                                onChange={(e) => onMethodChange(index, 'price_type', e.target.value)}
+                                onChange={(e) =>
+                                    onMethodChange(index, 'price_type', e.target.value)
+                                }
                                 labelId={`price-type-select-label-${index}`}
                                 id={`price-type-select-${index}`}
                             />
@@ -102,6 +104,7 @@ const MethodPriceSection = ({
                                 formula={methodData.extra?.formula}
                                 conditions={methodData.extra?.conditions}
                                 formulaError={errors[`methods.${index}.extra.formula`]}
+                                combineOnInvoice={methodData.extra?.combine_on_invoice}
                                 onParametersChange={(e) =>
                                     onMethodExtraChange(index, 'parameters', e.target.value)
                                 }
@@ -110,6 +113,9 @@ const MethodPriceSection = ({
                                 }
                                 onConditionsChange={(e) =>
                                     onMethodExtraChange(index, 'conditions', e.target.value)
+                                }
+                                onCombineOnInvoiceChange={(on) =>
+                                    onMethodExtraChange(index, 'combine_on_invoice', on)
                                 }
                             />
                         )}

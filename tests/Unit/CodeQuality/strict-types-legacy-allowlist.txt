@@ -42,7 +42,6 @@ app/Domains/Billing/Requests/StorePaymentRequest.php
 app/Domains/Billing/Requests/UpdateInvoiceRequest.php
 app/Domains/Billing/Requests/UpdatePaymentRequest.php
 app/Domains/Billing/Services/BillingDashboardService.php
-app/Domains/Billing/Services/InvoiceComposer.php
 app/Domains/Billing/Services/InvoiceItemSyncService.php
 app/Domains/Billing/Services/InvoiceService.php
 app/Domains/Billing/Services/PaymentService.php

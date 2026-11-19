@@ -9,10 +9,7 @@ import AdvancedPricingFields from './AdvancedPricingFields.jsx';
 const PanelPricingSection = ({ data, errors, onChange, onExtraChange }) => {
     return (
         <Paper elevation={1} sx={{ p: 3 }}>
-            <Typography
-                variant="h6"
-                sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}
-            >
+            <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
                 <MoneyIcon color="primary" />
                 Panel Pricing Configuration
             </Typography>
@@ -44,9 +41,13 @@ const PanelPricingSection = ({ data, errors, onChange, onExtraChange }) => {
                         formula={data.extra?.formula}
                         conditions={data.extra?.conditions}
                         formulaError={errors['extra.formula']}
+                        combineOnInvoice={data.extra?.combine_on_invoice}
                         onParametersChange={onExtraChange}
                         onFormulaChange={onExtraChange}
                         onConditionsChange={onExtraChange}
+                        onCombineOnInvoiceChange={(on) =>
+                            onExtraChange({ target: { name: 'combine_on_invoice', value: on } })
+                        }
                     />
                 )}
             </Grid>

@@ -41,6 +41,14 @@ class InvoiceComposerTest extends TestCase
         return $ref->invoke($this->composer, ...$args);
     }
 
+    /** Call a private method that takes its first argument by reference. */
+    private function invokeRef(string $method, array &$first, mixed ...$rest): void
+    {
+        $ref = new ReflectionMethod(InvoiceComposer::class, $method);
+        $ref->setAccessible(true);
+        $ref->invokeArgs($this->composer, [&$first, ...$rest]);
+    }
+
     // ---------------------------------------------------------------------
     // isLocked — statemented or settled invoices are not recomposed.
     // ---------------------------------------------------------------------
@@ -246,6 +254,79 @@ class InvoiceComposerTest extends TestCase
         ]));
 
         $this->assertSame('Blood Volume=5, Age In Years=30', $payload['description']);
+    }
+
+    public function test_payload_for_combined_line_is_qty_one_with_summed_parameters(): void
+    {
+        $payload = $this->invoke('payloadFor', $this->bucket([
+            'combined' => true,
+            'qty' => 2,
+            'unit_price' => 950.0,
+            'price_sum' => 1710.0,
+            'customParameters' => ['price' => ['noEmbryos' => 9]],
+        ]));
+
+        $this->assertSame(1, $payload['qty']);
+        $this->assertSame(1710.0, $payload['unit_price']);
+        $this->assertSame(1710.0, $payload['price']);
+        $this->assertSame('No Embryos=9', $payload['description']);
+        // Marker so a later recompose matches the row back to the combined line.
+        $this->assertTrue($payload['customParameters']['combined']);
+    }
+
+    // ---------------------------------------------------------------------
+    // addParameters — combined lines add up each addition's parameters.
+    // ---------------------------------------------------------------------
+
+    public function test_add_parameters_sums_numbers_and_keeps_other_values(): void
+    {
+        $bucket = $this->bucket([
+            'combined' => true,
+            'customParameters' => ['price' => ['noEmbryos' => '5', 'note' => 'a']],
+            'summed_units' => ['item:1'],
+        ]);
+        $second = new AcceptanceItem;
+        $second->id = 2;
+        $second->customParameters = ['price' => ['noEmbryos' => '4', 'note' => 'b', 'extra' => 1]];
+
+        $this->invokeRef('addParameters', $bucket, $second);
+
+        $this->assertSame(['noEmbryos' => 9, 'note' => 'a', 'extra' => 1], $bucket['customParameters']['price']);
+    }
+
+    public function test_add_parameters_counts_each_panel_addition_once(): void
+    {
+        $bucket = $this->bucket([
+            'kind' => InvoiceItemKind::PANEL,
+            'combined' => true,
+            'customParameters' => ['price' => ['noEmbryos' => 4]],
+            'summed_units' => ['panel:A'],
+        ]);
+        $sameChild = new AcceptanceItem;
+        $sameChild->id = 2;
+        $sameChild->panel_id = 'A';
+        $sameChild->customParameters = ['price' => ['noEmbryos' => 4]];
+        $otherPanel = new AcceptanceItem;
+        $otherPanel->id = 3;
+        $otherPanel->panel_id = 'B';
+        $otherPanel->customParameters = ['price' => ['noEmbryos' => 3]];
+
+        $this->invokeRef('addParameters', $bucket, $sameChild);
+        $this->invokeRef('addParameters', $bucket, $otherPanel);
+
+        $this->assertSame(7, $bucket['customParameters']['price']['noEmbryos']);
+    }
+
+    public function test_key_for_combined_invoice_item(): void
+    {
+        $item = new InvoiceItem;
+        $item->kind = InvoiceItemKind::PANEL;
+        $item->acceptance_id = 3;
+        $item->test_id = 5;
+        $item->panel_id = 'A';
+        $item->customParameters = ['combined' => true];
+
+        $this->assertSame('combined:3:5', $this->invoke('keyFor', $item));
     }
 
     // ---------------------------------------------------------------------
