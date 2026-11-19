@@ -80,11 +80,12 @@ const PublishForm = ({ open, onCancel, acceptance }) => {
         let recipients = [];
         const howReport = acceptance?.howReport;
 
-        if (howReport?.whatsapp && howReport?.whatsappNumber) {
+        const whatsappNumber = howReport?.whatsappNumber || acceptance?.patient?.phone;
+        if (howReport?.whatsapp && whatsappNumber) {
             recipients.push({
                 type: 'whatsapp',
                 label: 'WhatsApp',
-                value: howReport.whatsappNumber,
+                value: whatsappNumber,
                 icon: <WhatsApp />,
             });
         }

@@ -95,7 +95,8 @@ class WelcomeNotification extends Notification implements ShouldQueue
         // The template name should be the Content SID from your Twilio Console
         return [
             'name' => config('services.twilio.templates.welcome_message'),
-            'to' => $this->acceptance->howReport["whatsappNumber"],
+            // Reception doesn't ask for a separate WhatsApp number: use the patient's phone.
+            'to' => ($this->acceptance->howReport["whatsappNumber"] ?? null) ?: $notifiable->phone,
             'parameters' => [
                 "1" => $notifiable->fullName,                      // {{1}} - Customer name
 //                "2" => $this->getEstimatedCompletionDateAttribute()->format("d/m/Y")// {{2}} -
